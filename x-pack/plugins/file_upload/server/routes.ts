@@ -59,7 +59,7 @@ export function fileUploadRoutes(router: IRouter) {
           accepts: ['text/*', 'application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
-        tags: ['access:fileUpload:import'],
+        tags: ['access:fileUpload:analyzeFile'],
       },
     },
     async (context, request, response) => {
