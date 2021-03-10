@@ -110,6 +110,7 @@ export async function cleanKibanaIndices({
     const resp = await client.deleteByQuery(
       {
         index: `.kibana,.kibana_task_manager`,
+        refresh: true,
         body: {
           query: {
             bool: {
@@ -127,7 +128,6 @@ export async function cleanKibanaIndices({
         headers: ES_CLIENT_HEADERS,
       }
     );
-
     if (resp.body.total !== resp.body.deleted) {
       log.warning(
         'delete by query deleted %d of %d total documents, trying again',
