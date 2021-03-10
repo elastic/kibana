@@ -226,7 +226,7 @@ export const reindexServiceFactory = (
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
       await esClient.indices.putSettings({
         index: reindexOp.attributes.indexName,
-        body: { index: { blocks: { write: true } } }
+        body: { index: { blocks: { write: true } } },
       });
     }
 
@@ -290,7 +290,7 @@ export const reindexServiceFactory = (
     const { indexName } = reindexOp.attributes;
     const { body: putReadonly } = await esClient.indices.putSettings({
       index: indexName,
-      body: { index: { blocks: { write: true } } }
+      body: { index: { blocks: { write: true } } },
     });
 
     if (!putReadonly.acknowledged) {
@@ -389,11 +389,11 @@ export const reindexServiceFactory = (
 
     if (!taskResponse.completed) {
       // Updated the percent complete
-      const perc = taskResponse.task.status.created / taskResponse.task.status.total;
+      const perc = taskResponse.task.status!.created / taskResponse.task.status!.total;
       return actions.updateReindexOp(reindexOp, {
         reindexTaskPercComplete: perc,
       });
-    } else if (taskResponse.task.status.canceled === 'by user request') {
+    } else if (taskResponse.task.status?.canceled === 'by user request') {
       // Set the status to cancelled
       reindexOp = await actions.updateReindexOp(reindexOp, {
         status: ReindexStatus.cancelled,
@@ -403,9 +403,11 @@ export const reindexServiceFactory = (
       reindexOp = await cleanupChanges(reindexOp);
     } else {
       // Check that it reindexed all documents
-      const { body: { count } } = await esClient.count({ index: reindexOp.attributes.indexName });
+      const {
+        body: { count },
+      } = await esClient.count({ index: reindexOp.attributes.indexName });
 
-      if (taskResponse.task.status.created < count) {
+      if (taskResponse.task.status!.created < count) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
         throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
