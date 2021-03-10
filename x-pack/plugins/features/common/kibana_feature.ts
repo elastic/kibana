@@ -188,6 +188,10 @@ export class KibanaFeature {
     return this.config.alerting;
   }
 
+  public get cases() {
+    return this.config.cases;
+  }
+
   public get excludeFromBasePrivileges() {
     return this.config.excludeFromBasePrivileges ?? false;
   }
