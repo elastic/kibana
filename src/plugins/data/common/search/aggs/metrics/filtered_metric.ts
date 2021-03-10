@@ -23,7 +23,7 @@ const filteredMetricLabel = i18n.translate('data.search.aggs.metrics.filteredMet
   defaultMessage: 'filtered',
 });
 
-const filteredMetricTitle = i18n.translate('data.search.aggs.metrics.filteredMetricLabel', {
+const filteredMetricTitle = i18n.translate('data.search.aggs.metrics.filteredMetricTitle', {
   defaultMessage: 'Filtered metric',
 });
 

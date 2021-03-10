@@ -158,6 +158,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
       .filter((type) => fieldByOperation[type]?.size || operationWithoutField.has(type));
   }, [fieldByOperation, operationWithoutField]);
 
+  const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
+
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
   const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
@@ -485,21 +487,25 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 }),
                 dataTestSubj: 'indexPattern-filter-by-enable',
                 onClick: () => {
+                  setFilterByOpenInitally(true);
                   setStateWrapper(setFilter(columnId, state.layers[layerId], defaultFilter));
                 },
                 showInPopover: Boolean(
                   operationDefinitionMap[selectedColumn.operationType].filterable &&
                     !selectedColumn.filter
                 ),
-                inlineElement: (
-                  <Filtering
-                    indexPattern={currentIndexPattern}
-                    selectedColumn={selectedColumn}
-                    columnId={columnId}
-                    layer={state.layers[layerId]}
-                    updateLayer={setStateWrapper}
-                  />
-                ),
+                inlineElement:
+                  operationDefinitionMap[selectedColumn.operationType].filterable &&
+                  selectedColumn.filter ? (
+                    <Filtering
+                      indexPattern={currentIndexPattern}
+                      selectedColumn={selectedColumn}
+                      columnId={columnId}
+                      layer={state.layers[layerId]}
+                      updateLayer={setStateWrapper}
+                      isInitiallyOpen={filterByOpenInitially}
+                    />
+                  ) : null,
               },
             ]}
           />

@@ -6,7 +6,7 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import React, { ChangeEvent, MouseEvent } from 'react';
+import React, { ChangeEvent, MouseEvent, ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import {
   EuiComboBox,
@@ -15,6 +15,7 @@ import {
   EuiRange,
   EuiSelect,
   EuiButtonIcon,
+  EuiPopover,
 } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 import {
@@ -33,6 +34,7 @@ import { getFieldByNameFactory } from '../pure_helpers';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
 import { QueryInput } from '../query_input';
+import { Filtering } from './filtering';
 
 jest.mock('../loader');
 jest.mock('../query_input', () => ({
@@ -1317,7 +1319,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
           {...getProps({ filter: { language: 'kuery', query: 'a: b' } })}
         />
       );
-      expect(wrapper.find(QueryInput).prop('value')).toEqual({ language: 'kuery', query: 'a: b' });
+      expect(
+        (wrapper.find(Filtering).find(EuiPopover).prop('children') as ReactElement).props.value
+      ).toEqual({ language: 'kuery', query: 'a: b' });
     });
 
     it('should allow to set filter initially', () => {
@@ -1387,7 +1391,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         filter: { language: 'kuery', query: 'a: b' },
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper.find(QueryInput).prop('onChange')!({
+      (wrapper.find(Filtering).find(EuiPopover).prop('children') as ReactElement).props.onChange({
         language: 'kuery',
         query: 'c: d',
       });

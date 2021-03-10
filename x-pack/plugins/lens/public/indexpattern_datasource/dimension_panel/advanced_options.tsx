@@ -15,14 +15,14 @@ export function AdvancedOptions(props: {
     dataTestSubj: string;
     onClick: () => void;
     showInPopover: boolean;
-    inlineElement: React.ReactElement;
+    inlineElement: React.ReactElement | null;
   }>;
 }) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const popoverOptions = props.options.filter((option) => option.showInPopover);
   const inlineOptions = props.options
     .filter((option) => option.inlineElement)
-    .map((option) => React.cloneElement(option.inlineElement, { key: option.dataTestSubj }));
+    .map((option) => React.cloneElement(option.inlineElement!, { key: option.dataTestSubj }));
 
   return (
     <>

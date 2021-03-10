@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiLink, EuiPanel, EuiPopover } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { Query } from 'src/plugins/data/public';
 import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import { isQueryValid } from '../operations/definitions/filters';
 import { QueryInput } from '../query_input';
 import { IndexPattern, IndexPatternLayer } from '../types';
 
@@ -39,17 +40,22 @@ export function Filtering({
   layer,
   updateLayer,
   indexPattern,
+  isInitiallyOpen,
 }: {
   selectedColumn: IndexPatternColumn;
   indexPattern: IndexPattern;
   columnId: string;
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
+  isInitiallyOpen: boolean;
 }) {
+  const [filterPopoverOpen, setFilterPopoverOpen] = useState(isInitiallyOpen);
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
   if (!selectedOperation.filterable || !selectedColumn.filter) {
     return null;
   }
+
+  const isInvalid = !isQueryValid(selectedColumn.filter, indexPattern);
 
   return (
     <EuiFormRow
@@ -61,17 +67,50 @@ export function Filtering({
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
-          <QueryInput
-            indexPattern={indexPattern}
-            data-test-subj="indexPattern-time-scaling-unit"
-            value={selectedColumn.filter || defaultFilter}
-            onChange={(newQuery) => {
-              updateLayer(setFilter(columnId, layer, newQuery));
+          <EuiPopover
+            isOpen={filterPopoverOpen}
+            closePopover={() => {
+              setFilterPopoverOpen(false);
             }}
-            isInvalid={false}
-            onSubmit={() => {}}
-            disableAutoFocus={true}
-          />
+            anchorClassName="eui-fullWidth"
+            panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
+            button={
+              <EuiPanel paddingSize="none">
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      className="lnsFiltersOperation__popoverButton"
+                      data-test-subj="indexPattern-filters-existingFilterTrigger"
+                      onClick={() => {
+                        setFilterPopoverOpen(!filterPopoverOpen);
+                      }}
+                      color={isInvalid ? 'danger' : 'text'}
+                      title={i18n.translate('xpack.lens.indexPattern.filterBy.clickToEdit', {
+                        defaultMessage: 'Click to edit',
+                      })}
+                    >
+                      {selectedColumn.filter.query ||
+                        i18n.translate('xpack.lens.indexPattern.filterBy.emptyFilterQuery', {
+                          defaultMessage: '(empty)',
+                        })}
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            }
+          >
+            <QueryInput
+              indexPattern={indexPattern}
+              data-test-subj="indexPattern-filter-by-input"
+              value={selectedColumn.filter || defaultFilter}
+              onChange={(newQuery) => {
+                updateLayer(setFilter(columnId, layer, newQuery));
+              }}
+              isInvalid={false}
+              onSubmit={() => {}}
+            />
+          </EuiPopover>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
