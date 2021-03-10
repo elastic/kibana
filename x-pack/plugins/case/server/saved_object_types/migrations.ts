@@ -64,6 +64,17 @@ interface SanitizedCaseConsumer {
   consumer: string;
 }
 
+const addConsumerToSO = <T = Record<string, unknown>>(
+  doc: SavedObjectUnsanitizedDoc<T>
+): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => ({
+  ...doc,
+  attributes: {
+    ...doc.attributes,
+    consumer: SECURITY_SOLUTION_CONSUMER,
+  },
+  references: doc.references || [],
+});
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
@@ -121,14 +132,7 @@ export const caseMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        consumer: SECURITY_SOLUTION_CONSUMER,
-      },
-      references: doc.references || [],
-    };
+    return addConsumerToSO(doc);
   },
 };
 
@@ -208,14 +212,7 @@ export const userActionsMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        consumer: SECURITY_SOLUTION_CONSUMER,
-      },
-      references: doc.references || [],
-    };
+    return addConsumerToSO(doc);
   },
 };
 
@@ -270,14 +267,7 @@ export const commentsMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        consumer: SECURITY_SOLUTION_CONSUMER,
-      },
-      references: doc.references || [],
-    };
+    return addConsumerToSO(doc);
   },
 };
 
@@ -285,14 +275,7 @@ export const connectorMappingsMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        consumer: SECURITY_SOLUTION_CONSUMER,
-      },
-      references: doc.references || [],
-    };
+    return addConsumerToSO(doc);
   },
 };
 
@@ -300,13 +283,6 @@ export const subCasesMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        consumer: SECURITY_SOLUTION_CONSUMER,
-      },
-      references: doc.references || [],
-    };
+    return addConsumerToSO(doc);
   },
 };
