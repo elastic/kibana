@@ -1966,7 +1966,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
 
 // @public
 export interface RouteConfigOptions<Method extends RouteMethod> {
-    authRequired?: boolean | 'optional';
+    authRequired?: boolean | 'optional' | 'try';
     body?: Method extends 'get' | 'options' ? undefined : RouteConfigOptionsBody;
     tags?: readonly string[];
     timeout?: {
