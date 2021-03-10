@@ -99,6 +99,10 @@ export class StepTerms extends Component {
               selectedFields={terms}
               onSelectField={this.onSelectField}
               dataTestSubj="rollupJobTermsFieldChooser"
+              includeFieldTypes={{
+                keyword: true,
+                numeric: true,
+              }}
             />
           }
           dataTestSubj="rollupJobTermsFieldList"

@@ -25,7 +25,6 @@ import {
 import { FieldList } from '../components';
 import { StepFields } from '../rollup_wizard';
 
-// @ts-ignore
 import { FieldChooser, StepError } from './components';
 
 export const METRICS_CONFIG = [
@@ -412,6 +411,10 @@ export class StepMetrics extends Component<Props, State> {
                   selectedFields={metrics}
                   onSelectField={this.onSelectField}
                   dataTestSubj="rollupJobMetricsFieldChooser"
+                  includeFieldTypes={{
+                    date: true,
+                    numeric: true,
+                  }}
                 />
               </EuiFlexItem>
               <EuiFlexItem>{this.getMetricsSelectAllMenu()}</EuiFlexItem>

@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
+import { identity } from 'fp-ts/lib/function';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import React, { Component, Fragment } from 'react';
@@ -89,6 +91,11 @@ export interface Props {
   currentTab: Tab;
   onCurrentTabChange: (tab: Tab) => void;
   customFieldForm: FormHook<CustomFieldForm>;
+  includeFieldTypes?: {
+    date?: true;
+    keyword?: true;
+    numeric?: true;
+  };
   prompt?: string;
   dataTestSubj?: string;
 }
@@ -147,7 +154,7 @@ export class FieldChooser extends Component<Props, State> {
   updateFields = debounce(
     () => {
       const updateFieldsResult = async () => {
-        const { indexPattern } = this.props;
+        const { indexPattern, includeFieldTypes } = this.props;
         if (indexPattern == null || indexPattern === '') {
           this.setState({ isLoadingFields: false, fields: [] });
           return;
@@ -157,7 +164,13 @@ export class FieldChooser extends Component<Props, State> {
           const { fields } = await checkIndexPatternResults({ indexPattern });
           this.setState({
             isLoadingFields: false,
-            fields: fields.sort(sortFields),
+            fields: fields
+              .filter(
+                includeFieldTypes
+                  ? ({ type }) => type !== 'unknown' && includeFieldTypes[type]
+                  : identity
+              )
+              .sort(sortFields),
           });
         } catch (e) {
           this.setState({ isLoadingFields: false, fields: [], loadingError: e });

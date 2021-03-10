@@ -112,6 +112,9 @@ export class StepHistogram extends Component {
               selectedFields={histogram}
               onSelectField={this.onSelectField}
               dataTestSubj="rollupJobHistogramFieldChooser"
+              includeFieldTypes={{
+                numeric: true,
+              }}
             />
           }
           dataTestSubj="rollupJobHistogramFieldList"

@@ -37,9 +37,10 @@ export interface ListSnapshotReposResponse {
   repositories: string[];
 }
 
+export type CheckIndexPatternFieldResponseFieldType = 'date' | 'keyword' | 'numeric';
 export interface CheckIndexPatternFieldResponse {
   name: string;
-  type: 'date' | 'keyword' | 'numeric' | 'unknown';
+  type: CheckIndexPatternFieldResponseFieldType | 'unknown';
 }
 
 export type CheckIndexPatternFieldsResponse = CheckIndexPatternFieldResponse[];
