@@ -7,7 +7,7 @@
 
 import './expression.scss';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import {
   Chart,
