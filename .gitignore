@@ -1,6 +1,5 @@
 .aws-config.json
 .signing-config.json
-/api_docs
 .ackrc
 /.es
 /.chromium

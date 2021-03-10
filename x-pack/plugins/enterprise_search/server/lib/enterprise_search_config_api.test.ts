@@ -108,12 +108,12 @@ describe('callEnterpriseSearchConfigAPI', () => {
     });
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
+      ...DEFAULT_INITIAL_APP_DATA,
       access: {
         hasAppSearchAccess: true,
         hasWorkplaceSearchAccess: false,
       },
       publicUrl: 'http://some.vanity.url',
-      ...DEFAULT_INITIAL_APP_DATA,
     });
   });
 

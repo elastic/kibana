@@ -17,12 +17,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
+
 import { InstallStatus } from '../../../../../types';
 import { useLink, useUrlPagination } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import { LinkAndRevision, LinkAndRevisionProps } from '../../../../../components';
 import { LinkedAgentCount } from '../../../../../components/linked_agent_count';
 import { useGetPackageInstallStatus } from '../../../hooks';
+
 import {
   PackagePolicyAndAgentPolicy,
   usePackagePoliciesWithAgentPolicy,
@@ -104,18 +106,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         },
       },
       {
-        field: 'packagePolicy.description',
-        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.description', {
-          defaultMessage: 'Description',
+        field: 'packagePolicy.package.version',
+        name: i18n.translate('xpack.fleet.epm.packageDetails.integrationList.version', {
+          defaultMessage: 'Version',
         }),
-        truncateText: true,
-        render(description) {
-          return (
-            <span className="eui-textTruncate" title={description}>
-              {description}
-            </span>
-          );
-        },
       },
       {
         field: 'packagePolicy.policy_id',

@@ -56,7 +56,7 @@ export function getServiceMapServiceNodeInfo({
   searchAggregatedTransactions,
 }: Options & { serviceName: string }) {
   return withApmSpan('get_service_map_node_stats', async () => {
-    const { start, end, uiFilters } = setup;
+    const { start, end } = setup;
 
     const filter: ESFilter[] = [
       { term: { [SERVICE_NAME]: serviceName } },
@@ -66,7 +66,7 @@ export function getServiceMapServiceNodeInfo({
 
     const minutes = Math.abs((end - start) / (1000 * 60));
     const taskParams = {
-      environment: uiFilters.environment,
+      environment,
       filter,
       searchAggregatedTransactions,
       minutes,

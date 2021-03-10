@@ -6,15 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'src/core/server';
 
 import { isAgentUpgradeable } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
+import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
-import { savedObjectToAgent } from './saved_objects';
 import { appContextService } from '../../services';
-import { esKuery, KueryNode } from '../../../../../../src/plugins/data/server';
+import { esKuery } from '../../../../../../src/plugins/data/server';
+import type { KueryNode } from '../../../../../../src/plugins/data/server';
+
+import { savedObjectToAgent } from './saved_objects';
 
 const ACTIVE_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`;
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
@@ -74,29 +76,42 @@ export async function listAgents(
   if (showInactive === false) {
     filters.push(ACTIVE_AGENT_CONDITION);
   }
-  let { saved_objects: agentSOs, total } = await soClient.find<AgentSOAttributes>({
-    type: AGENT_SAVED_OBJECT_TYPE,
-    filter: _joinFilters(filters) || '',
-    sortField,
-    sortOrder,
-    page,
-    perPage,
-  });
-  // filtering for a range on the version string will not work,
-  // nor does filtering on a flattened field (local_metadata), so filter here
-  if (showUpgradeable) {
-    agentSOs = agentSOs.filter((agent) =>
-      isAgentUpgradeable(savedObjectToAgent(agent), appContextService.getKibanaVersion())
-    );
-    total = agentSOs.length;
-  }
+  try {
+    let { saved_objects: agentSOs, total } = await soClient.find<AgentSOAttributes>({
+      type: AGENT_SAVED_OBJECT_TYPE,
+      filter: _joinFilters(filters) || '',
+      sortField,
+      sortOrder,
+      page,
+      perPage,
+    });
+    // filtering for a range on the version string will not work,
+    // nor does filtering on a flattened field (local_metadata), so filter here
+    if (showUpgradeable) {
+      agentSOs = agentSOs.filter((agent) =>
+        isAgentUpgradeable(savedObjectToAgent(agent), appContextService.getKibanaVersion())
+      );
+      total = agentSOs.length;
+    }
 
-  return {
-    agents: agentSOs.map(savedObjectToAgent),
-    total,
-    page,
-    perPage,
-  };
+    return {
+      agents: agentSOs.map(savedObjectToAgent),
+      total,
+      page,
+      perPage,
+    };
+  } catch (e) {
+    if (e.output?.payload?.message?.startsWith('The key is empty')) {
+      return {
+        agents: [],
+        total: 0,
+        page: 0,
+        perPage: 0,
+      };
+    } else {
+      throw e;
+    }
+  }
 }
 
 export async function listAllAgents(

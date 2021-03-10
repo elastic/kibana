@@ -217,9 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it.skip('anomaly detection Anomaly Explorer page', async () => {
-          // Skip test until the dots used in the Elastic chart legend no longer have duplicate ids
-          // see https://github.com/elastic/elastic-charts/issues/970
+        it('anomaly detection Anomaly Explorer page', async () => {
           await ml.singleMetricViewer.openAnomalyExplorer();
           await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
           await a11y.testAppSnapshot();
@@ -235,9 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          // EuiDataGrid does not have row roles
-          // https://github.com/elastic/eui/issues/4471
-          // await a11y.testAppSnapshot();
+          await a11y.testAppSnapshot();
         });
 
         it('data frame analytics create job select index pattern modal', async () => {
@@ -253,9 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.jobSourceSelection.selectSourceForAnalyticsJob(ihpIndexPattern);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
-          // EuiDataGrid does not have row roles
-          // https://github.com/elastic/eui/issues/4471
-          // await a11y.testAppSnapshot();
+          await a11y.testAppSnapshot();
         });
 
         it('data frame analytics create job configuration step for outlier job', async () => {
@@ -268,9 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
-          // EuiDataGrid does not have row roles
-          // https://github.com/elastic/eui/issues/4471
-          // await a11y.testAppSnapshot();
+          await a11y.testAppSnapshot();
         });
 
         it('data frame analytics create job additional options step for outlier job', async () => {
@@ -281,6 +273,11 @@ export default function ({ getService }: FtrProviderContext) {
         it('data frame analytics create job additional options step for outlier job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
           await ml.dataFrameAnalyticsCreation.setJobId(dfaJobId);
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job validation step for outlier job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
           await a11y.testAppSnapshot();
         });
 
