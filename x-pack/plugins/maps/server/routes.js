@@ -35,7 +35,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
-import { indexDataProvider } from './index_data';
+import { indexDataProvider } from './create_index_source';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {

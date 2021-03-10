@@ -23,7 +23,12 @@ export function indexDataProvider(
   async function indexData(index: string, mappings: Mappings): Promise<CreateResponse> {
     try {
       await createIndex(index, mappings);
-      await createIndexPattern(index);
+      await indexPatternsService.createAndSave(
+        {
+          title: index,
+        },
+        true
+      );
 
       return {
         success: true,
@@ -46,15 +51,6 @@ export function indexDataProvider(
     };
 
     await asCurrentUser.indices.create({ index: indexName, body });
-  }
-
-  async function createIndexPattern(indexPatternName: string) {
-    await indexPatternsService.createAndSave(
-      {
-        title: indexPatternName,
-      },
-      true
-    );
   }
 
   return {
