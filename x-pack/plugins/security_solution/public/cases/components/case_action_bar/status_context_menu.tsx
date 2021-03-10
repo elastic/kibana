@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { memoize } from 'lodash/fp';
 import { EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { caseStatuses, CaseStatuses } from '../../../../../case/common/api';
+import { caseStatuses, CaseStatuses } from '../../../../../cases/common/api';
 import { Status } from '../status';
 
 interface Props {
