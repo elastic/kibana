@@ -7,10 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter, IScopedClusterClient } from 'kibana/server';
-import { MAX_FILE_SIZE_BYTES, IngestPipelineWrapper, Mappings, Settings } from '../common';
+import {
+  MAX_FILE_SIZE_BYTES,
+  IngestPipelineWrapper,
+  InputData,
+  Mappings,
+  Settings,
+} from '../common';
 import { wrapError } from './error_wrapper';
 import { analyzeFile } from './analyze_file';
-import { InputData, importDataProvider } from './import_data';
+import { importDataProvider } from './import_data';
 
 import { updateTelemetry } from './telemetry';
 import { analyzeFileQuerySchema, importFileBodySchema, importFileQuerySchema } from './schemas';

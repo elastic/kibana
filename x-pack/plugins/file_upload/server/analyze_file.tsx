@@ -9,6 +9,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import {
   AnalysisResult,
   FormattedOverrides,
+  InputData,
   InputOverrides,
   FindFileStructureResponse,
 } from '../common';
@@ -38,8 +39,8 @@ function formatOverrides(overrides: InputOverrides) {
   let hasOverrides = false;
 
   const reducedOverrides: FormattedOverrides = Object.keys(overrides).reduce((acc, overrideKey) => {
-    const overrideValue: string = overrides[overrideKey];
-    if (overrideValue !== '') {
+    const overrideValue: string | undefined = overrides[overrideKey];
+    if (overrideValue !== undefined && overrideValue !== '') {
       if (overrideKey === 'column_names') {
         acc.column_names = overrideValue.split(',');
       } else if (overrideKey === 'has_header_row') {

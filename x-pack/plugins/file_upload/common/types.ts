@@ -8,7 +8,7 @@
 import { ES_FIELD_TYPES } from '../../../../src/plugins/data/common';
 
 export interface InputOverrides {
-  [key: string]: string;
+  [key: string]: string | undefined;
 }
 
 export type FormattedOverrides = InputOverrides & {
@@ -69,6 +69,8 @@ export interface FindFileStructureResponse {
   timestamp_field?: string;
   should_trim_fields?: boolean;
 }
+
+export type InputData = any[];
 
 export interface ImportResponse {
   success: boolean;
