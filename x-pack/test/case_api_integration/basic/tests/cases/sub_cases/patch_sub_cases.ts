@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   CASES_URL,
   SUB_CASES_PATCH_DEL_URL,
-} from '../../../../../../plugins/case/common/constants';
+} from '../../../../../../plugins/cases/common/constants';
 import {
   createCaseAction,
   createSubCase,
@@ -19,13 +19,13 @@ import {
   getSignalsWithES,
   setStatus,
 } from '../../../../common/lib/utils';
-import { getSubCaseDetailsUrl } from '../../../../../../plugins/case/common/api/helpers';
+import { getSubCaseDetailsUrl } from '../../../../../../plugins/cases/common/api/helpers';
 import {
   CaseStatuses,
   CommentType,
   SubCaseResponse,
-} from '../../../../../../plugins/case/common/api';
-import { createAlertsString } from '../../../../../../plugins/case/server/connectors';
+} from '../../../../../../plugins/cases/common/api';
+import { createAlertsString } from '../../../../../../plugins/cases/server/connectors';
 import { postCaseReq, postCollectionReq } from '../../../../common/lib/mock';
 
 const defaultSignalsIndex = '.siem-signals-default-000001';

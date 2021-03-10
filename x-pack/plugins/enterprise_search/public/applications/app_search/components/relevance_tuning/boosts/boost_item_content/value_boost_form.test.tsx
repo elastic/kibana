@@ -13,12 +13,14 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 
-import { Boost, BoostType } from '../../types';
+import { ValueBoost, BoostType } from '../../types';
 
 import { ValueBoostForm } from './value_boost_form';
 
 describe('ValueBoostForm', () => {
-  const boost: Boost = {
+  const boost: ValueBoost = {
+    operation: undefined,
+    function: undefined,
     factor: 2,
     type: 'value' as BoostType,
     value: ['bar', '', 'baz'],

@@ -28,7 +28,7 @@ import {
   CaseUserActionsResponseRt,
   CommentType,
   CasePatchRequest,
-} from '../../../../case/common/api';
+} from '../../../../cases/common/api';
 import { AppToast, ToasterError } from '../../common/components/toasters';
 import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';

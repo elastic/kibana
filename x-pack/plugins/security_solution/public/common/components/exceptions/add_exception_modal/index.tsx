@@ -33,7 +33,6 @@ import {
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
-import { osTypeArray, OsTypeArray } from '../../../../../common/shared_imports';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { ExceptionBuilderComponent } from '../builder';
@@ -50,6 +49,7 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
+  retrieveAlertOsTypes,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
@@ -291,18 +291,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
-  const retrieveAlertOsTypes = useCallback((): OsTypeArray => {
-    const osDefaults: OsTypeArray = ['windows', 'macos'];
-    if (alertData != null) {
-      const osTypes = alertData.host && alertData.host.os && alertData.host.os.family;
-      if (osTypeArray.is(osTypes) && osTypes != null && osTypes.length > 0) {
-        return osTypes;
-      }
-      return osDefaults;
-    }
-    return osDefaults;
-  }, [alertData]);
-
   const enrichExceptionItems = useCallback((): Array<
     ExceptionListItemSchema | CreateExceptionListItemSchema
   > => {
@@ -312,11 +300,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichNewExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = retrieveAlertOsTypes();
+      const osTypes = retrieveAlertOsTypes(alertData);
       enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
-  }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
+  }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
 
   const onAddExceptionConfirm = useCallback((): void => {
     if (addOrUpdateExceptionItems != null) {

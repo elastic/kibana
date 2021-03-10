@@ -44,7 +44,7 @@ export function IconPopover({
       ownFocus={false}
       button={
         <EuiButtonEmpty onClick={onClick} data-test-subj={`popover_${title}`}>
-          <EuiIcon type={icon} size="l" color="black" />
+          <EuiIcon type={icon} size="l" color="text" />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
