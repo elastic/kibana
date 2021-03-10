@@ -23,13 +23,17 @@ describe('configuration deprecations', () => {
     }
   });
 
-  it('should not log deprecation warnings for default configuration', async () => {
+  it('should not log deprecation warnings for default configuration that is not one of `logging.verbose`, `logging.quiet` or `logging.silent`', async () => {
     root = kbnTestServer.createRoot();
 
     await root.setup();
 
     const logs = loggingSystemMock.collect(mockLoggingSystem);
-    expect(logs.warn.flat()).toMatchInlineSnapshot(`Array []`);
+    expect(logs.warn.flat()).toMatchInlineSnapshot(`
+      Array [
+        "\\"logging.quiet\\", \\"logging.silent\\" and \\"logging.verbose\\" have been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level\\" in your logging configuration. Levels \\"error\\", \\"off\\" and \\"all\\" are equivalent to \\"quiet\\", \\"silent\\" and \\"verbose\\". For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+      ]
+    `);
   });
 
   it('should log deprecation warnings for core deprecations', async () => {
@@ -47,6 +51,7 @@ describe('configuration deprecations', () => {
       Array [
         "optimize.lazy is deprecated and is no longer used",
         "optimize.lazyPort is deprecated and is no longer used",
+        "\\"logging.quiet\\", \\"logging.silent\\" and \\"logging.verbose\\" have been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level\\" in your logging configuration. Levels \\"error\\", \\"off\\" and \\"all\\" are equivalent to \\"quiet\\", \\"silent\\" and \\"verbose\\". For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
       ]
     `);
   });
