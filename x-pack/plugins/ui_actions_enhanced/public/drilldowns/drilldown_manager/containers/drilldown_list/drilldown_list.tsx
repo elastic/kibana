@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { ListManageDrilldowns } from '../../components/list_manage_drilldowns';
+import { DrilldownTable } from '../../components/drilldown_table';
 import { useDrilldownManager } from '../context';
 
 export const DrilldownList: React.FC = ({}) => {
@@ -14,7 +14,7 @@ export const DrilldownList: React.FC = ({}) => {
   const events = drilldowns.useEvents();
 
   return (
-    <ListManageDrilldowns
+    <DrilldownTable
       items={events}
       onDelete={drilldowns.onDelete}
       onEdit={(id) => {

@@ -8,12 +8,12 @@
 import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { ListManageDrilldowns } from './list_manage_drilldowns';
+import { DrilldownTable } from './drilldown_table';
 import { FlyoutFrame } from '../flyout_frame';
 
 storiesOf('components/ListManageDrilldowns', module)
   .add('Default', () => (
-    <ListManageDrilldowns
+    <DrilldownTable
       items={[
         {
           id: '1',
@@ -42,7 +42,7 @@ storiesOf('components/ListManageDrilldowns', module)
     />
   ))
   .add('Empty list', () => (
-    <ListManageDrilldowns
+    <DrilldownTable
       items={[]}
       onCreate={action('onCreate')}
       onDelete={action('onDelete')}
@@ -50,7 +50,7 @@ storiesOf('components/ListManageDrilldowns', module)
     />
   ))
   .add('A single drilldown', () => (
-    <ListManageDrilldowns
+    <DrilldownTable
       items={[
         {
           id: '1',
@@ -67,7 +67,7 @@ storiesOf('components/ListManageDrilldowns', module)
   ))
   .add('Inside a flyout frame', () => (
     <FlyoutFrame title={'Some Title'} onClose={action('onClose')} banner={null}>
-      <ListManageDrilldowns
+      <DrilldownTable
         items={[
           { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },
           { id: '2', actionName: 'Dashboard', drilldownName: 'Drilldown 2' },

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './list_manage_drilldowns';
+export * from './drilldown_table';

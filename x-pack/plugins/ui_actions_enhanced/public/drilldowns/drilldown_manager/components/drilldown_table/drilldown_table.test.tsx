@@ -7,26 +7,22 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import {
-  DrilldownListItem,
-  ListManageDrilldowns,
-  TEST_SUBJ_DRILLDOWN_ITEM,
-} from './list_manage_drilldowns';
+import { DrilldownTable, DrilldownTableItem, TEST_SUBJ_DRILLDOWN_ITEM } from './drilldown_table';
 
-const drilldowns: DrilldownListItem[] = [
+const drilldowns: DrilldownTableItem[] = [
   { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },
   { id: '2', actionName: 'Dashboard', drilldownName: 'Drilldown 2' },
   { id: '3', actionName: 'Dashboard', drilldownName: 'Drilldown 3', error: 'an error' },
 ];
 
 test('Render list of drilldowns', () => {
-  const screen = render(<ListManageDrilldowns items={drilldowns} />);
+  const screen = render(<DrilldownTable items={drilldowns} />);
   expect(screen.getAllByTestId(TEST_SUBJ_DRILLDOWN_ITEM)).toHaveLength(drilldowns.length);
 });
 
 test('Emit onEdit() when clicking on edit drilldown', () => {
   const fn = jest.fn();
-  const screen = render(<ListManageDrilldowns items={drilldowns} onEdit={fn} />);
+  const screen = render(<DrilldownTable items={drilldowns} onEdit={fn} />);
 
   const editButtons = screen.getAllByText('Edit');
   expect(editButtons).toHaveLength(drilldowns.length);
@@ -36,21 +32,21 @@ test('Emit onEdit() when clicking on edit drilldown', () => {
 
 test('Emit onCreate() when clicking on create drilldown', () => {
   const fn = jest.fn();
-  const screen = render(<ListManageDrilldowns items={drilldowns} onCreate={fn} />);
+  const screen = render(<DrilldownTable items={drilldowns} onCreate={fn} />);
   fireEvent.click(screen.getByText('Create new'));
   expect(fn).toBeCalled();
 });
 
 test('Delete button is not visible when non is selected', () => {
   const fn = jest.fn();
-  const screen = render(<ListManageDrilldowns items={drilldowns} onCreate={fn} />);
+  const screen = render(<DrilldownTable items={drilldowns} onCreate={fn} />);
   expect(screen.queryByText(/Delete/i)).not.toBeInTheDocument();
   expect(screen.queryByText(/Create/i)).toBeInTheDocument();
 });
 
 test('Can delete drilldowns', () => {
   const fn = jest.fn();
-  const screen = render(<ListManageDrilldowns items={drilldowns} onDelete={fn} />);
+  const screen = render(<DrilldownTable items={drilldowns} onDelete={fn} />);
 
   const checkboxes = screen.getAllByLabelText(/Select this drilldown/i);
   expect(checkboxes).toHaveLength(3);
@@ -66,6 +62,6 @@ test('Can delete drilldowns', () => {
 });
 
 test('Error is displayed', () => {
-  const screen = render(<ListManageDrilldowns items={drilldowns} />);
+  const screen = render(<DrilldownTable items={drilldowns} />);
   expect(screen.getByLabelText('an error')).toBeInTheDocument();
 });

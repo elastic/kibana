@@ -23,9 +23,12 @@ import {
   txtDeleteDrilldowns,
   txtEditDrilldown,
   txtSelectDrilldown,
+  txtName,
+  txtAction,
+  txtTrigger,
 } from './i18n';
 
-export interface DrilldownListItem {
+export interface DrilldownTableItem {
   id: string;
   actionName: string;
   drilldownName: string;
@@ -39,28 +42,28 @@ interface Trigger {
   description?: string;
 }
 
-export interface ListManageDrilldownsProps {
-  items: DrilldownListItem[];
+export const TEST_SUBJ_DRILLDOWN_ITEM = 'listManageDrilldownsItem';
+
+export interface DrilldownTableProps {
+  items: DrilldownTableItem[];
   onCreate?: () => void;
   onDelete?: (ids: string[]) => void;
   onEdit?: (id: string) => void;
 }
 
-export const TEST_SUBJ_DRILLDOWN_ITEM = 'listManageDrilldownsItem';
-
-export function ListManageDrilldowns({
+export const DrilldownTable: React.FC<DrilldownTableProps> = ({
   items: drilldowns,
   onCreate,
   onDelete,
   onEdit,
-}: ListManageDrilldownsProps) {
+}) => {
   const [selectedDrilldowns, setSelectedDrilldowns] = useState<string[]>([]);
 
-  const columns: Array<EuiBasicTableColumn<DrilldownListItem>> = [
+  const columns: Array<EuiBasicTableColumn<DrilldownTableItem>> = [
     {
-      name: 'Name',
+      name: txtName,
       'data-test-subj': 'drilldownListItemName',
-      render: (drilldown: DrilldownListItem) => (
+      render: (drilldown: DrilldownTableItem) => (
         <div>
           {drilldown.drilldownName}{' '}
           {drilldown.error && (
@@ -79,8 +82,8 @@ export function ListManageDrilldowns({
       ),
     },
     {
-      name: 'Action',
-      render: (drilldown: DrilldownListItem) => (
+      name: txtAction,
+      render: (drilldown: DrilldownTableItem) => (
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
           {drilldown.icon && (
             <EuiFlexItem grow={false}>
@@ -94,9 +97,9 @@ export function ListManageDrilldowns({
       ),
     },
     {
-      name: 'Trigger',
+      name: txtTrigger,
       textOnly: true,
-      render: (drilldown: DrilldownListItem) =>
+      render: (drilldown: DrilldownTableItem) =>
         drilldown.triggers?.map((trigger, idx) =>
           trigger.description ? (
             <EuiToolTip content={trigger.description} key={idx}>
@@ -112,7 +115,7 @@ export function ListManageDrilldowns({
     {
       align: 'right',
       width: '64px',
-      render: (drilldown: DrilldownListItem) =>
+      render: (drilldown: DrilldownTableItem) =>
         !!onEdit ? (
           <EuiButtonEmpty
             size="xs"
@@ -123,7 +126,7 @@ export function ListManageDrilldowns({
           </EuiButtonEmpty>
         ) : null,
     },
-  ].filter(Boolean) as Array<EuiBasicTableColumn<DrilldownListItem>>;
+  ].filter(Boolean) as Array<EuiBasicTableColumn<DrilldownTableItem>>;
 
   return (
     <>
@@ -162,4 +165,4 @@ export function ListManageDrilldowns({
       )}
     </>
   );
-}
+};
