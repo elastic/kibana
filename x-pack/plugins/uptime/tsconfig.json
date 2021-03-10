@@ -17,7 +17,7 @@
   ],
   "references": [
     {
-      "path": "../alerts/tsconfig.json"
+      "path": "../alerting/tsconfig.json"
     },
     {
       "path": "../ml/tsconfig.json"
