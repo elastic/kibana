@@ -1,8 +1,10 @@
 steps:
   - command: |
       export DOCKER_BUILDKIT=1 && \
-      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain && \
-      docker push gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT
+      docker buildx build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain \
+        --output type=image,name=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT,push=true \
+        --cache-to type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache \
+        --cache-from type=registry,ref=gcr.io/elastic-kibana-184716/buildkite/ci/base:cache
     agents:
       queue: ci-group
   - wait
