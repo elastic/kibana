@@ -35,6 +35,7 @@ export class CoreApp {
   private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter('');
+    const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get({ path: '/', validate: false }, async (context, req, res) => {
       const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
@@ -47,6 +48,7 @@ export class CoreApp {
         },
       });
     });
+
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
@@ -58,8 +60,21 @@ export class CoreApp {
       serverBasePath: coreSetup.http.basePath.serverBasePath,
     });
 
+    resources.register(
+      {
+        path: '/app/{id}/{any*}',
+        validate: false,
+        options: {
+          authRequired: true,
+        },
+      },
+      async (context, request, response) => {
+        return response.renderCoreApp();
+      }
+    );
+
     const anonymousStatusPage = coreSetup.status.isStatusPageAnonymous();
-    coreSetup.httpResources.createRegistrar(router).register(
+    resources.register(
       {
         path: '/status',
         validate: false,

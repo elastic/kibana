@@ -17,7 +17,6 @@ import { coreMixin } from './core';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
 import configCompleteMixin from './config/complete';
-import { uiMixin } from '../ui';
 
 /**
  * @typedef {import('./kbn_server').KibanaConfig} KibanaConfig
@@ -69,9 +68,7 @@ export default class KbnServer {
         warningsMixin,
 
         // tell the config we are done loading plugins
-        configCompleteMixin,
-
-        uiMixin
+        configCompleteMixin
       )
     );
 
