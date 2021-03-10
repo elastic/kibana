@@ -94,4 +94,28 @@ describe('useSendCurrentRequestToES', () => {
       title: 'Unknown Request Error',
     });
   });
+
+  it('notifies the user about save to history errors once only', async () => {
+    // Set up mocks
+    (sendRequestToES as jest.Mock).mockReturnValue(
+      [{ request: {} }, { request: {} }] /* two responses to save history */
+    );
+    (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({});
+    (mockContextValue.services.history.addToHistory as jest.Mock).mockImplementation(() => {
+      // Mock throwing
+      throw new Error('cannot save!');
+    });
+    (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
+      getRequestsInRange: () => ['test', 'test'],
+    }));
+
+    const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
+    await act(() => result.current());
+
+    expect(dispatch).toHaveBeenCalledTimes(2);
+
+    expect(mockContextValue.services.history.addToHistory).toHaveBeenCalledTimes(2);
+    // It only called notification once
+    expect(mockContextValue.services.notifications.toasts.addError).toHaveBeenCalledTimes(1);
+  });
 });
