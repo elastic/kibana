@@ -125,8 +125,17 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.transform.transformNodes.noTransformNodesMessage"
-                defaultMessage="There are no transform nodes available. {learnMoreLink}"
+                id="xpack.transform.transformNodes.noTransformNodesCallOutTitle"
+                defaultMessage="There are no transform nodes available."
+              />
+            }
+            color="warning"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.transform.transformNodes.noTransformNodesCallOutBody"
+                defaultMessage="You will not be able to create or run transforms. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
                     <EuiLink href={esNodeRoles} target="_blank">
@@ -138,10 +147,8 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
                   ),
                 }}
               />
-            }
-            color="warning"
-            iconType="alert"
-          />
+            </p>
+          </EuiCallOut>
         </>
       )}
     </>
