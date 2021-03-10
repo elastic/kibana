@@ -276,7 +276,6 @@ Object {
       "type": "image/svg+xml",
     },
   ],
-  "latestVersion": "0.3.3",
   "license": "basic",
   "name": "apache",
   "owner": Object {
