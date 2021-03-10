@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PackagePolicy, PackagePolicyInput } from '../types';
+import type { PackagePolicy, PackagePolicyInput } from '../types';
+
 import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
 
 describe('Fleet - storedPackagePoliciesToAgentInputs', () => {

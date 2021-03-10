@@ -17,7 +17,7 @@ export function isPrivate(node: ParameterDeclaration | ClassMemberTypes): boolea
 /**
  * Change the absolute path into a relative one.
  */
-function getRelativePath(fullPath: string): string {
+export function getRelativePath(fullPath: string): string {
   return Path.relative(REPO_ROOT, fullPath);
 }
 

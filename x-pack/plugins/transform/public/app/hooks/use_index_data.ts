@@ -150,7 +150,8 @@ export const useIndexData = (
           fieldName: cT.id,
           type: getFieldType(cT.schema),
         })),
-      isDefaultQuery(query) ? matchAllQuery : query
+      isDefaultQuery(query) ? matchAllQuery : query,
+      combinedRuntimeMappings
     );
 
     if (!isFieldHistogramsResponseSchema(columnChartsData)) {
