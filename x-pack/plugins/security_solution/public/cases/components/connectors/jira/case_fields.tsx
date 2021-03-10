@@ -10,7 +10,7 @@ import { map } from 'lodash/fp';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import * as i18n from './translations';
 
-import { ConnectorTypes, JiraFieldsType } from '../../../../../../cases/common/api/connectors';
+import { ConnectorTypes, JiraFieldsType } from '../../../../../../cases/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';

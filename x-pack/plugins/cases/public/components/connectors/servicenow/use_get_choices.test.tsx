@@ -7,14 +7,14 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useKibana } from '../../../common/kibana';
+import { useKibana } from '../../../common/lib/kibana_react';
 import { ActionConnector } from '../../../containers/types';
 import { choices } from '../mock';
 import { useGetChoices, UseGetChoices, UseGetChoicesProps } from './use_get_choices';
 import * as api from './api';
 
 jest.mock('./api');
-jest.mock('../../../common/kibana');
+jest.mock('../../../common/lib/kibana_react');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const onSuccess = jest.fn();

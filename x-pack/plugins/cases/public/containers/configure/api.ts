@@ -13,7 +13,7 @@ import {
   CasesConfigureResponse,
   CasesConfigureRequest,
 } from '../../../common/api';
-import { KibanaServices } from '../../common/kibana';
+import { KibanaServices } from '../../common/lib/kibana_react';
 
 import {
   CASE_CONFIGURE_CONNECTORS_URL,

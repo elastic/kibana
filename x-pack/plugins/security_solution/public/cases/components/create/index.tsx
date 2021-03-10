@@ -28,17 +28,17 @@ const Container = styled.div`
     margin-top: ${theme.eui.euiSize};
   `}
 `;
-
-const InsertTimeline = () => {
-  const { setFieldValue, getFormData } = useFormContext();
-  const formData = getFormData();
-  const onTimelineAttached = useCallback(
-    (newValue: string) => setFieldValue(descriptionFieldName, newValue),
-    [setFieldValue]
-  );
-  useInsertTimeline(formData[descriptionFieldName] ?? '', onTimelineAttached);
-  return null;
-};
+//
+// const InsertTimeline = () => {
+//   const { setFieldValue, getFormData } = useFormContext();
+//   const formData = getFormData();
+//   const onTimelineAttached = useCallback(
+//     (newValue: string) => setFieldValue(descriptionFieldName, newValue),
+//     [setFieldValue]
+//   );
+//   useInsertTimeline(formData[descriptionFieldName] ?? '', onTimelineAttached);
+//   return null;
+// };
 
 export const Create = React.memo(() => {
   const { cases } = useKibana().services;
@@ -94,7 +94,7 @@ export const Create = React.memo(() => {
           </Container>
         </FormContext>
       )}
-      <InsertTimeline />
+      {/* <InsertTimeline />*/}
     </EuiPanel>
   );
 });

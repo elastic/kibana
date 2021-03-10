@@ -11,7 +11,7 @@ import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@el
 import * as i18n from './translations';
 
 import { ConnectorTypes, JiraFieldsType } from '../../../../common/api/connectors';
-import { useKibana } from '../../../common/kibana';
+import { useKibana } from '../../../common/lib/kibana_react';
 import { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';

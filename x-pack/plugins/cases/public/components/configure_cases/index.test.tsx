@@ -20,7 +20,7 @@ import {
 } from '../../../../triggers_actions_ui/public';
 import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 
-import { useKibana } from '../../common/kibana';
+import { useKibana } from '../../common/lib/kibana_react';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useActionTypes } from '../../containers/configure/use_action_types';

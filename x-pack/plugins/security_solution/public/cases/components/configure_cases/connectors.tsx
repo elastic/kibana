@@ -21,7 +21,7 @@ import * as i18n from './translations';
 
 import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
+import { ConnectorTypes } from '../../../../../cases/common';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {

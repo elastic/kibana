@@ -7,12 +7,12 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useKibana } from '../../../common/kibana';
+import { useKibana } from '../../../common/lib/kibana_react';
 import { connector } from '../mock';
 import { useGetSeverity, UseGetSeverity } from './use_get_severity';
 import * as api from './api';
 
-jest.mock('../../../common/kibana');
+jest.mock('../../../common/lib/kibana_react');
 jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

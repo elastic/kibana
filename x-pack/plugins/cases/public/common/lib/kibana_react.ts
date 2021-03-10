@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useKibana } from '../../../../../src/plugins/kibana_react/public/context';
-import { StartServices } from '../types';
-import { CoreStart } from '../../../../../src/core/public';
+import { CoreStart } from 'kibana/public';
+import {
+  KibanaContextProvider,
+  useKibana,
+} from '../../../../../../src/plugins/kibana_react/public';
+import { StartServices } from '../../types';
 
 const useTypedKibana = () => useKibana<StartServices>();
 
-export { useTypedKibana as useKibana };
+export { KibanaContextProvider, useTypedKibana as useKibana };
 
 type GlobalServices = Pick<CoreStart, 'http'>; // | 'uiSettings' & Pick<StartPlugins, 'data'>; not sure if we need this
 

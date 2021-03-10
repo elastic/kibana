@@ -18,7 +18,7 @@ import { useGetSingleIssue } from './use_get_single_issue';
 import { useGetIssues } from './use_get_issues';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-jest.mock('../../../common/kibana');
+jest.mock('../../../common/lib/kibana_react');
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');
 jest.mock('./use_get_single_issue');

@@ -32,16 +32,13 @@ import {
   CASES_URL,
   SUB_CASE_DETAILS_URL,
   SUB_CASES_PATCH_DEL_URL,
-} from '../../../../cases/common/constants';
-
-import {
   getCaseCommentsUrl,
   getCasePushUrl,
   getCaseDetailsUrl,
   getCaseUserActionUrl,
   getSubCaseDetailsUrl,
   getSubCaseUserActionUrl,
-} from '../../../../cases/common/api/helpers';
+} from '../../../../cases/common';
 
 import { KibanaServices } from '../../common/lib/kibana';
 import { StatusAll } from '../components/status';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
-
+// import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
+const DEFAULT_MAX_SIGNALS = 100;
 export const APP_ID = 'cases';
 
 /**

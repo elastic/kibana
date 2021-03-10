@@ -6,9 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
+// import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
 import { UseField } from '../../common/shared_imports';
-
+const MarkdownEditorForm = () => <>{'formyform'}</>;
 interface Props {
   isLoading: boolean;
 }

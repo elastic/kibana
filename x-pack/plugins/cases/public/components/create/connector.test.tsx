@@ -20,7 +20,7 @@ import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
 import { schema, FormProps } from './schema';
 
-jest.mock('../../common/kibana', () => {
+jest.mock('../../common/lib/kibana_react', () => {
   return {
     useKibana: () => ({
       services: {
