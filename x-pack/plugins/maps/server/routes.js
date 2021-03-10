@@ -24,7 +24,7 @@ import {
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
   API_ROOT_PATH,
-  CREATE_INDEX_API_PATH,
+  INDEX_SOURCE_API_PATH,
   MAX_DRAWING_SIZE_BYTES,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
@@ -591,26 +591,24 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
     }
   );
 
-  async function indexData(core, index, mappings, data) {
+  async function indexData(core, index, mappings) {
     const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
       core.savedObjects.client,
       core.elasticsearch.client.asCurrentUser
     );
     const { indexData: _indexData } = indexDataProvider(
       core.elasticsearch.client,
-      indexPatternsService,
-      logger
+      indexPatternsService
     );
-    return _indexData(index, mappings, data);
+    return _indexData(index, mappings);
   }
 
   router.post(
     {
-      path: `/${CREATE_INDEX_API_PATH}`,
+      path: `/${INDEX_SOURCE_API_PATH}`,
       validate: {
         body: schema.object({
           index: schema.string(),
-          data: schema.arrayOf(schema.any(), { minSize: 1 }),
           mappings: schema.any(),
         }),
       },
@@ -622,14 +620,14 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
       },
     },
     async (context, request, response) => {
-      try {
-        const { index, data, mappings } = request.body;
-        const result = await indexData(context.core, index, mappings, data);
+      const { index, mappings } = request.body;
+      const result = await indexData(context.core, index, mappings);
+      if (result.success) {
         return response.ok({ body: result });
-      } catch (error) {
-        logger.error(error.message);
+      } else {
+        logger.error(result.error);
         return response.custom({
-          body: error.message,
+          body: result.error.message,
           statusCode: 500,
         });
       }

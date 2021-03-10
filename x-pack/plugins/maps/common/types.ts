@@ -5,33 +5,9 @@
  * 2.0.
  */
 
-export interface ImportResponse {
+export interface CreateResponse {
   success: boolean;
-  index?: string;
-  pipelineId?: string;
-  docCount: number;
-  failures: ImportFailure[];
-  error?: any;
-  ingestError?: boolean;
-}
-
-export interface ImportFailure {
-  item: number;
-  reason: string;
-  doc: ImportDoc;
-}
-
-export interface Doc {
-  message: string;
-}
-
-export type ImportDoc = Doc | string | object;
-
-export interface Settings {
-  pipeline?: string;
-  index: string;
-  body: any[];
-  [key: string]: any;
+  error?: Error;
 }
 
 export interface Mappings {
@@ -43,12 +19,6 @@ export interface Mappings {
   };
 }
 
-export interface IngestPipelineWrapper {
-  id: string;
-  pipeline: IngestPipeline;
-}
-
-export interface IngestPipeline {
-  description: string;
-  processors: any[];
+export interface BodySettings {
+  [key: string]: any;
 }
