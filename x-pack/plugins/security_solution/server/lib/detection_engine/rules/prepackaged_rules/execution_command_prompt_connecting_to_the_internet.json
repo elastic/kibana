@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Command Prompt Network Connection",
   "query": "sequence by process.entity_id\n  [process where process.name : \"cmd.exe\" and event.type == \"start\"]\n  [network where process.name : \"cmd.exe\" and\n     not cidrmatch(destination.ip, \"10.0.0.0/8\", \"172.16.0.0/12\", \"192.168.0.0/16\")]\n",
   "risk_score": 21,

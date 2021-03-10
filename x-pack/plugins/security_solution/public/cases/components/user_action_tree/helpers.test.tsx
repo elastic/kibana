@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common/api';
 import { basicPush, getUserAction } from '../../containers/mock';
 import { getLabelTitle, getPushedServiceLabelTitle, getConnectorLabelTitle } from './helpers';
 import { connectorsMock } from '../../containers/configure/mock';
