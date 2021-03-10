@@ -206,3 +206,10 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+/*
+  Feature Flag for Cases RAC UI
+  DO NOT MERGE to master as true, dev only
+*/
+
+export const USE_RAC_CASES_UI = true;
