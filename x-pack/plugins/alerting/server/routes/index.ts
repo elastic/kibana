@@ -19,6 +19,7 @@ import { disableRuleRoute } from './disable_rule';
 import { enableRuleRoute } from './enable_rule';
 import { findRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
+import { getRuleStateRoute } from './get_rule_state';
 
 export function defineRoutes(
   router: IRouter<AlertingRequestHandlerContext>,
