@@ -56,6 +56,6 @@ export async function agentPolicyUpdateEventHandler(
 
   if (action === 'deleted') {
     await unenrollForAgentPolicyId(soClient, esClient, agentPolicyId);
-    await deleteEnrollmentApiKeyForAgentPolicyId(soClient, agentPolicyId);
+    await deleteEnrollmentApiKeyForAgentPolicyId(soClient, esClient, agentPolicyId);
   }
 }

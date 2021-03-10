@@ -7,15 +7,14 @@
  */
 
 import { DefaultSearchCapabilities } from './default_search_capabilities';
-import type { ReqFacade } from '../strategies/abstract_search_strategy';
-import type { VisPayload } from '../../../../common/types';
+import { VisTypeTimeseriesRequest } from '../../../types';
 
 describe('DefaultSearchCapabilities', () => {
   let defaultSearchCapabilities: DefaultSearchCapabilities;
-  let req: ReqFacade<VisPayload>;
+  let req: VisTypeTimeseriesRequest;
 
   beforeEach(() => {
-    req = {} as ReqFacade<VisPayload>;
+    req = {} as VisTypeTimeseriesRequest;
     defaultSearchCapabilities = new DefaultSearchCapabilities(req);
   });
 
@@ -38,12 +37,12 @@ describe('DefaultSearchCapabilities', () => {
 
   test('should return Search Timezone', () => {
     defaultSearchCapabilities.request = ({
-      payload: {
+      body: {
         timerange: {
           timezone: 'UTC',
         },
       },
-    } as unknown) as ReqFacade<VisPayload>;
+    } as unknown) as VisTypeTimeseriesRequest;
 
     expect(defaultSearchCapabilities.searchTimezone).toEqual('UTC');
   });

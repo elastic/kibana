@@ -107,7 +107,7 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         // Set defaults
         severity: ANOMALY_THRESHOLD.CRITICAL,
         resultType: ANOMALY_RESULT_TYPE.BUCKET,
-        includeInterim: true,
+        includeInterim: false,
         // Preserve job selection
         jobSelection,
       });
