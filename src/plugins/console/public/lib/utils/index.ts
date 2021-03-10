@@ -55,7 +55,7 @@ export function extractDeprecationMessages(warnings: string) {
   return _.map(splitOnUnquotedCommaSpace(warnings), (warning) => {
     const match = re.exec(warning);
     // extract the actual warning if there was a match
-    return '#! Deprecation: ' + (match !== null ? unescape(match[1]) : warning);
+    return '#! ' + (match !== null ? unescape(match[1]) : warning);
   });
 }
 
