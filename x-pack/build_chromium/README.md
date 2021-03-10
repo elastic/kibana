@@ -56,14 +56,13 @@ the Chromium repo to be cloned successfully. If checking out the Chromium fails
 with "early EOF" errors, the instance could be low on memory or disk space.
 
 ## Getting the Commit Hash
-If you need to bump the version of Puppeteer, you need to get a new git commit hash for Chromium.
+If you need to bump the version of Puppeteer, you need to get a new git commit hash for Chromium that corresponds to the Puppeteer version.
 ```
 node x-pack/dev-tools/chromium_version.js [PuppeteerVersion]
 ```
 
-The `.chromium-commit` file has the commit hash for the current Chromium build
-in Kibana. When bumping the Puppeteer version, make sure you also update this
-file so an automated build process (coming soon!) will find it.
+When bumping the Puppeteer version, make sure you also update the `.chromium-commit` file with the commit hash
+for the current Chromium build, so we'll be able to construct a build pipeline for each OS (coming soon!).
 
 ## Build args
 
