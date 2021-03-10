@@ -204,6 +204,15 @@ We are sending a more complex query to Elasticsearch for any find request which 
 Since we are only requesting saved objects that the user is authorized to see, there is no additional overhead for Kibana once Elasticsearch has returned the results of the query.
 
 
+### `addToNamespaces` / `deleteFromNamespaces`
+
+The security wrapper will ensure that the user is authorized to share/unshare all existing `private` objects.
+#### Performance considerations
+Similar to the "create / override" scenario above, the security wrapper must first retrieve all of the existing `private` objects to ensure that the user is authorized. This requires another round-trip to `get`/`bulk-get` all `private` objects so we can authorize the operation.
+
+This overhead does not impact sharing/unsharing "public" objects. We only need to retrieve objects that are registered as `private`. As such, we do not expect any meaningful performance hit initially, but this will grow over time as the feature is used.
+
+
 ## 3.3 Behavior with various plugin configurations
 Kibana can run with and without security enabled. When security is disabled,
 `private` saved objects will be accessible to all users.
