@@ -8,10 +8,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 
 import {
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiButton,
   EuiFieldSearch,
   EuiFlyout,
@@ -26,19 +26,31 @@ import {
   EuiTabs,
   EuiTab,
   EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
-import { indexPatterns } from '../../../../../../../../../../../src/plugins/data/public';
+import { indexPatterns } from '../../../../../../../../../../../../src/plugins/data/public';
 
-import { checkIndexPatternResults } from '../../../../../../services/api';
+import { checkIndexPatternResults } from '../../../../../../../services/api';
 
-import { Form, UseField, TextField, fieldValidators } from '../../../../../../../shared_imports';
+import {
+  Form,
+  FormHook,
+  UseField,
+  TextField,
+  fieldValidators,
+} from '../../../../../../../../shared_imports';
+
+import { Tab } from '../../../field_chooser_context';
+
+import { CustomFieldForm } from './types';
 
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
 const { emptyField } = fieldValidators;
 
-const tabs = [
+const tabs: Array<{ id: Tab; name: string }> = [
   {
     id: 'search',
     name: i18n.translate('xpack.indexLifecycleMgmt.rollup.create.fieldChooser.searchTabLabel', {
@@ -53,7 +65,7 @@ const tabs = [
   },
 ];
 
-function sortFields(a, b) {
+function sortFields(a: { name: string }, b: { name: string }): number {
   const nameA = a.name.toUpperCase();
   const nameB = b.name.toUpperCase();
 
@@ -68,21 +80,32 @@ function sortFields(a, b) {
   return 0;
 }
 
-export class FieldChooser extends Component {
-  static propTypes = {
-    buttonLabel: PropTypes.node.isRequired,
-    columns: PropTypes.array.isRequired,
-    selectedFields: PropTypes.array.isRequired,
-    onSelectField: PropTypes.func.isRequired,
-    indexPattern: PropTypes.string.isRequired,
-    onIndexPatternChange: PropTypes.func.isRequired,
-    currentTab: PropTypes.string.isRequired,
-    onCurrentTabChange: PropTypes.func.isRequired,
-    customFieldForm: PropTypes.object.isRequired,
-    prompt: PropTypes.string,
-    dataTestSubj: PropTypes.string,
-  };
+interface Props {
+  buttonLabel: React.ReactNode;
+  columns: Array<EuiBasicTableColumn<{ name: string; type: string }>>;
+  selectedFields: Array<{ name: string }>;
+  onSelectField: (field: { name: string }) => void;
+  indexPattern: string;
+  onIndexPatternChange: (indexPattern: string) => void;
+  currentTab: Tab;
+  onCurrentTabChange: (tab: Tab) => void;
+  customFieldForm: FormHook<CustomFieldForm>;
+  prompt?: string;
+  dataTestSubj?: string;
+}
 
+interface State {
+  isOpen: boolean;
+  isLoadingFields: boolean;
+  loadingError?: Error;
+  fields: Array<{ name: string; type: string }>;
+  /**
+   * The search value for filtering the results in the table
+   */
+  searchValue: string;
+}
+
+export class FieldChooser extends Component<Props, State> {
   static defaultProps = {
     prompt: i18n.translate(
       'xpack.indexLifecycleMgmt.rollup.create.fieldChooser.filterFieldPlaceholder',
@@ -91,12 +114,12 @@ export class FieldChooser extends Component {
     dataTestSubj: 'rollupFieldChooser',
   };
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
       isOpen: false,
-      isLoading: false,
+      isLoadingFields: false,
       fields: [],
       searchValue: '',
     };
@@ -104,7 +127,7 @@ export class FieldChooser extends Component {
     this.updateFields();
   }
 
-  onSearch = (e) => {
+  onSearch = (e: { target: { value: string } }) => {
     this.setState({
       searchValue: e.target.value,
     });
@@ -127,18 +150,18 @@ export class FieldChooser extends Component {
       const updateFieldsResult = async () => {
         const { indexPattern } = this.props;
         if (indexPattern == null || indexPattern === '') {
-          this.setState({ isLoading: false, fields: [] });
+          this.setState({ isLoadingFields: false, fields: [] });
           return;
         }
-        this.setState({ isLoading: true, fields: [] });
+        this.setState({ isLoadingFields: true, fields: [] });
         try {
           const { fields } = await checkIndexPatternResults({ indexPattern });
           this.setState({
-            isLoading: false,
-            fields: fields.map(({ name }) => ({ name })).sort(sortFields),
+            isLoadingFields: false,
+            fields: fields.sort(sortFields),
           });
         } catch (e) {
-          this.setState({ isLoading: false, fields: [], error: e });
+          this.setState({ isLoadingFields: false, fields: [], loadingError: e });
         }
       };
       updateFieldsResult();
@@ -147,7 +170,7 @@ export class FieldChooser extends Component {
     { trailing: true }
   );
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: Props) {
     if (prevProps.indexPattern !== this.props.indexPattern) {
       this.updateFields();
     }
@@ -156,7 +179,7 @@ export class FieldChooser extends Component {
   renderSearchTabContent() {
     const { columns, selectedFields, prompt, onSelectField, dataTestSubj } = this.props;
 
-    const getRowProps = (item) => {
+    const getRowProps = (item: { name: string }) => {
       return {
         onClick: () => {
           onSelectField(item);
@@ -180,7 +203,67 @@ export class FieldChooser extends Component {
 
     const { indexPattern, onIndexPatternChange } = this.props;
 
-    const { isLoading } = this.state;
+    const { isLoadingFields } = this.state;
+
+    const renderResultsSection = () => {
+      if (isLoadingFields) {
+        return (
+          <div style={{ textAlign: 'center' }}>
+            <EuiLoadingSpinner />
+          </div>
+        );
+      }
+
+      if (!indexPattern) {
+        return <div />;
+      }
+
+      if (!searchedItems.length) {
+        return (
+          <p>
+            {i18n.translate(
+              'xpack.indexLifecycleMgmt.rollup.create.fieldChooser.noFieldsFoundDescription',
+              { defaultMessage: 'No fields found' }
+            )}
+          </p>
+        );
+      }
+
+      return (
+        <>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate(
+                    'xpack.indexLifecycleMgmt.rollup.create.fieldChooser.resultSectionTitle',
+                    { defaultMessage: 'Results' }
+                  )}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{isLoadingFields && <EuiLoadingSpinner />}</EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="s" />
+
+          <EuiFieldSearch
+            placeholder={prompt}
+            value={searchValue}
+            onChange={this.onSearch}
+            aria-label={prompt}
+            fullWidth
+          />
+          <EuiBasicTable
+            items={searchedItems}
+            columns={columns}
+            rowProps={getRowProps}
+            responsive={false}
+            data-test-subj={`${dataTestSubj}-table`}
+          />
+        </>
+      );
+    };
 
     return (
       <>
@@ -214,32 +297,14 @@ export class FieldChooser extends Component {
           <EuiFieldText
             value={indexPattern}
             onChange={(e) => onIndexPatternChange(e.target.value)}
-            isLoading={isLoading}
+            placeholder="my-index-*"
+            isLoading={isLoadingFields}
           />
         </EuiFormRow>
 
-        <EuiHorizontalRule />
+        <EuiSpacer />
 
-        <EuiFieldSearch
-          placeholder={prompt}
-          value={searchValue}
-          onChange={this.onSearch}
-          aria-label={prompt}
-          fullWidth
-        />
-        {isLoading ? (
-          <div style={{ textAlign: 'center' }}>
-            <EuiLoadingSpinner />
-          </div>
-        ) : (
-          <EuiBasicTable
-            items={searchedItems}
-            columns={columns}
-            rowProps={getRowProps}
-            responsive={false}
-            data-test-subj={`${dataTestSubj}-table`}
-          />
-        )}
+        {renderResultsSection()}
       </>
     );
   }
@@ -248,7 +313,7 @@ export class FieldChooser extends Component {
     const { selectedFields, onSelectField, customFieldForm } = this.props;
     return (
       <Form form={customFieldForm}>
-        <UseField
+        <UseField<string>
           path="field"
           form={customFieldForm}
           component={TextField}
@@ -334,7 +399,7 @@ export class FieldChooser extends Component {
     const { buttonLabel, dataTestSubj, currentTab } = this.props;
     const { isOpen } = this.state;
 
-    let content;
+    let content: React.ReactNode;
 
     switch (currentTab) {
       case 'custom':

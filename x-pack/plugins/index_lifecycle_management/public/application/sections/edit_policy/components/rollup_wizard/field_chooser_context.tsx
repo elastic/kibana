@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, createContext, useContext, useState } from 'react';
 
-type Tab = 'search' | 'custom';
+export type Tab = 'search' | 'custom';
 
 interface ContextValue {
   indexPattern: string;

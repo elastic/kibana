@@ -6,4 +6,3 @@
  */
 
 export { FieldChooser } from './field_chooser.container';
-export { StepError } from './step_error';
