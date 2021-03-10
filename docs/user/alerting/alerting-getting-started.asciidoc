@@ -210,6 +210,6 @@ If an alert requires certain privileges to run such as index privileges, keep in
 [[alerting-restricting-actions]]
 === Restricting actions
 
-For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and whitelist the hostnames that {kib} can connect with. 
+For security reasons you may wish to limit the extent to which {kib} can connect to external services. <<action-settings>> allows you to disable certain <<action-types>> and allowlist the hostnames that {kib} can connect with. 
 
 --
