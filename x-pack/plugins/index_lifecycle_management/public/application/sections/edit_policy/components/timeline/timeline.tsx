@@ -62,6 +62,9 @@ const i18nTexts = {
   coldPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.coldPhaseSectionTitle', {
     defaultMessage: 'Cold phase',
   }),
+  frozenPhase: i18n.translate('xpack.indexLifecycleMgmt.timeline.frozenPhaseSectionTitle', {
+    defaultMessage: 'Frozen phase',
+  }),
   deleteIcon: {
     toolTipContent: i18n.translate('xpack.indexLifecycleMgmt.timeline.deleteIconToolTipContent', {
       defaultMessage: 'Policy deletes the index after lifecycle phases complete.',
@@ -84,12 +87,17 @@ const calculateWidths = (inputs: PhaseAgeInMilliseconds) => {
     inputs.phases.cold != null
       ? msTimeToOverallPercent(inputs.phases.cold, inputs.total) + SCORE_BUFFER_AMOUNT
       : 0;
+  const frozenScore =
+    inputs.phases.frozen != null
+      ? msTimeToOverallPercent(inputs.phases.frozen, inputs.total) + SCORE_BUFFER_AMOUNT
+      : 0;
 
-  const totalScore = hotScore + warmScore + coldScore;
+  const totalScore = hotScore + warmScore + coldScore + frozenScore;
   return {
     hot: `${toPercent(hotScore, totalScore)}%`,
     warm: `${toPercent(warmScore, totalScore)}%`,
     cold: `${toPercent(coldScore, totalScore)}%`,
+    frozen: `${toPercent(frozenScore, totalScore)}%`,
   };
 };
 
@@ -102,6 +110,7 @@ interface Props {
   isUsingRollover: boolean;
   warmPhaseMinAge?: string;
   coldPhaseMinAge?: string;
+  frozenPhaseMinAge?: string;
   deletePhaseMinAge?: string;
 }
 
@@ -115,6 +124,9 @@ export const Timeline: FunctionComponent<Props> = memo(
       hot: { min_age: phasesMinAge.hotPhaseMinAge },
       warm: phasesMinAge.warmPhaseMinAge ? { min_age: phasesMinAge.warmPhaseMinAge } : undefined,
       cold: phasesMinAge.coldPhaseMinAge ? { min_age: phasesMinAge.coldPhaseMinAge } : undefined,
+      frozen: phasesMinAge.frozenPhaseMinAge
+        ? { min_age: phasesMinAge.frozenPhaseMinAge }
+        : undefined,
       delete: phasesMinAge.deletePhaseMinAge
         ? { min_age: phasesMinAge.deletePhaseMinAge }
         : undefined,
@@ -157,6 +169,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                 el.style.setProperty('--ilm-timeline-hot-phase-width', widths.hot);
                 el.style.setProperty('--ilm-timeline-warm-phase-width', widths.warm ?? null);
                 el.style.setProperty('--ilm-timeline-cold-phase-width', widths.cold ?? null);
+                el.style.setProperty('--ilm-timeline-frozen-phase-width', widths.frozen ?? null);
               }
             }}
           >
@@ -195,6 +208,18 @@ export const Timeline: FunctionComponent<Props> = memo(
                       <TimelinePhaseText
                         phaseName={i18nTexts.coldPhase}
                         durationInPhase={getDurationInPhaseContent('cold')}
+                      />
+                    </div>
+                  )}
+                  {exists(phaseAgeInMilliseconds.phases.frozen) && (
+                    <div
+                      data-test-subj="ilmTimelineFrozenPhase"
+                      className="ilmTimeline__phasesContainer__phase ilmTimeline__frozenPhase"
+                    >
+                      <div className="ilmTimeline__colorBar ilmTimeline__frozenPhase__colorBar" />
+                      <TimelinePhaseText
+                        phaseName={i18nTexts.frozenPhase}
+                        durationInPhase={getDurationInPhaseContent('frozen')}
                       />
                     </div>
                   )}

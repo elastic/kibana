@@ -20,7 +20,7 @@ export const registerBootstrapRoute = ({
     {
       path: '/bootstrap.js',
       options: {
-        authRequired: 'try',
+        authRequired: 'optional',
         tags: ['api'],
       },
       validate: false,
