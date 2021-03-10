@@ -5,23 +5,8 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-
-interface ErrorWithApiResponseMeta extends Error {
-  meta: ResponseError['meta'];
-}
-
-/**
- * type assertion.
- * Checks to see if an error looks to have a `meta` property that holds an `ApiResponse`
- * @param error
- */
-export const isErrorWithMeta = (
-  error: Error & { meta?: any }
-): error is ErrorWithApiResponseMeta => {
-  return error.meta && error.meta.statusCode && error.meta.body;
-};
+import { isESClientError } from '../../errors';
 
 export const isElasticsearchItemNotFoundError = (error: Error): boolean => {
-  return isErrorWithMeta(error) && error.meta.statusCode === 404 && error.meta.body.found === false;
+  return isESClientError(error) && error.meta.statusCode === 404 && error.meta.body.found === false;
 };
