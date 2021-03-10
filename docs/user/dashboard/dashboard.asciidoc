@@ -70,7 +70,7 @@ Choose the type of panel you want to create, then save the panel to the dashboar
 
 .. Click *Save and return*.
 
-TIP: To access your saved panels, open the main menu, then click *Visualize*.
+TIP: To access your saved panels, open the main menu, then click *Visualize Library*.
 
 [[tsvb]]
 
@@ -154,7 +154,7 @@ dashboard.
 [role="screenshot"]
 image:images/clone_panel.gif[clone panel]
 +
-{kib} automatically saves the cloned panel in *Visualize*. To access the cloned panel, open the main menu, then click *Visualize*.
+To access the cloned panel, open the main menu, then click *Visualize Library*.
 
 [float]
 [[explore-the-underlying-data]]

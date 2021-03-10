@@ -17,8 +17,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts#L12"
+              "lineNumber": 12
             }
           }
         ],
@@ -61,8 +60,7 @@
         "label": "isEnhancedEmbeddable",
         "source": {
           "path": "x-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/embeddables/is_enhanced_embeddable.ts#L11"
+          "lineNumber": 11
         },
         "tags": [],
         "returnComment": [],
@@ -70,120 +68,6 @@
       }
     ],
     "interfaces": [
-      {
-        "id": "def-public.SetupDependencies",
-        "type": "Interface",
-        "label": "SetupDependencies",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SetupDependencies.embeddable",
-            "type": "Object",
-            "label": "embeddable",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/plugin.ts#L36"
-            },
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableSetup",
-                "text": "EmbeddableSetup"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.SetupDependencies.uiActionsEnhanced",
-            "type": "Object",
-            "label": "uiActionsEnhanced",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/plugin.ts#L37"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.SetupContract",
-                "text": "SetupContract"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-          "lineNumber": 35,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/plugin.ts#L35"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.StartDependencies",
-        "type": "Interface",
-        "label": "StartDependencies",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.StartDependencies.embeddable",
-            "type": "Object",
-            "label": "embeddable",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/plugin.ts#L41"
-            },
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableStart",
-                "text": "EmbeddableStart"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.StartDependencies.uiActionsEnhanced",
-            "type": "Object",
-            "label": "uiActionsEnhanced",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/plugin.ts#L42"
-            },
-            "signature": [
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.StartContract",
-                "text": "StartContract"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-          "lineNumber": 40,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/plugin.ts#L40"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.EnhancedEmbeddableContext",
         "type": "Interface",
@@ -199,8 +83,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/types.ts#L21"
+              "lineNumber": 21
             },
             "signature": [
               {
@@ -240,30 +123,121 @@
         ],
         "source": {
           "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/types.ts#L20"
+          "lineNumber": 20
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SetupDependencies",
+        "type": "Interface",
+        "label": "SetupDependencies",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.SetupDependencies.embeddable",
+            "type": "Object",
+            "label": "embeddable",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableSetup",
+                "text": "EmbeddableSetup"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.SetupDependencies.uiActionsEnhanced",
+            "type": "Object",
+            "label": "uiActionsEnhanced",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 37
+            },
+            "signature": [
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "public",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-public.SetupContract",
+                "text": "SetupContract"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+          "lineNumber": 35
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.StartDependencies",
+        "type": "Interface",
+        "label": "StartDependencies",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.StartDependencies.embeddable",
+            "type": "Object",
+            "label": "embeddable",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 41
+            },
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddableStart",
+                "text": "EmbeddableStart"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.StartDependencies.uiActionsEnhanced",
+            "type": "Object",
+            "label": "uiActionsEnhanced",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+              "lineNumber": 42
+            },
+            "signature": [
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "public",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-public.StartContract",
+                "text": "StartContract"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
+          "lineNumber": 40
         },
         "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
-      {
-        "id": "def-public.EnhancedEmbeddable",
-        "type": "Type",
-        "label": "EnhancedEmbeddable",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/types.ts#L11"
-        },
-        "signature": [
-          "E & { enhancements: {    dynamicActions: DynamicActionManager;}; }"
-        ],
-        "initialIsOpen": false
-      },
       {
         "tags": [],
         "id": "def-public.drilldownGrouping",
@@ -272,8 +246,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/actions/drilldown_grouping.ts#L12"
+          "lineNumber": 12
         },
         "signature": [
           {
@@ -310,6 +283,21 @@
           "> | undefined; }>"
         ],
         "initialIsOpen": false
+      },
+      {
+        "id": "def-public.EnhancedEmbeddable",
+        "type": "Type",
+        "label": "EnhancedEmbeddable",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/embeddable_enhanced/public/types.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "E & { enhancements: {    dynamicActions: DynamicActionManager;}; }"
+        ],
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -322,8 +310,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-        "lineNumber": 46,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/plugin.ts#L46"
+        "lineNumber": 46
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -337,8 +324,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/embeddable_enhanced/public/plugin.ts",
-        "lineNumber": 49,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/embeddable_enhanced/public/plugin.ts#L49"
+        "lineNumber": 49
       },
       "lifecycle": "start",
       "initialIsOpen": true

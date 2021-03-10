@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Attempt to Unload Elastic Endpoint Security Kernel Extension",
   "query": "event.category:process and event.type:(start or process_started) and process.name:kextunload and process.args:(\"/System/Library/Extensions/EndpointSecurity.kext\" or \"EndpointSecurity.kext\")",
   "risk_score": 73,

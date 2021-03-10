@@ -13,7 +13,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "IRC (Internet Relay Chat) Protocol Activity to the Internet",
   "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:(6667 or 6697) or event.dataset:zeek.irc) and source.ip:( 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 ) and not destination.ip:( 10.0.0.0/8 or 127.0.0.0/8 or 169.254.0.0/16 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.0/4 or \"::1\" or \"FE80::/10\" or \"FF00::/8\" )",
   "risk_score": 47,
