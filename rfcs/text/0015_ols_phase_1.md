@@ -110,7 +110,7 @@ There are two primary changes to this wrapper:
 #### Attaching ACLs
 
 This wrapper will be responsible for attaching an ACL to all private objects before they are created.
-It will also allow users to provide their own ACL in order to support the import/export use cases.
+It will also allow users to provide their own ACL in order to support the import/create use cases.
 
 Similar to the way we treat `namespaces`, it will not be possible to change an ACL via the `update`/`bulk_update` functions in this first phase. We may consider adding a dedicated function to update the ACL, similar to what we've done for sharing to spaces.
 
@@ -253,7 +253,6 @@ We have historically used the `Saved Objects Management` feature for these admin
 
 ## 8.3 Behavior when security is disabled
 When security is disabled, should `private` saved objects still be accessible via the Saved Objects Client?
-
 
 
 
