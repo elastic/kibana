@@ -53,7 +53,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
                 {
                   multi_match: {
                     query: escape(query),
-                    type: 'phrase_prefix',
+                    type: 'phrase_prefix' as const,
                     fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
                   },
                 },
@@ -68,7 +68,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
         date_histogram: {
           field: '@timestamp',
           fixed_interval: bucketSize || minInterval + 'ms',
-          missing: 0,
+          missing: '0',
         },
         aggs: {
           down: {

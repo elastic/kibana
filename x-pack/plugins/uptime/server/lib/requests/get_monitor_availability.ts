@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { asMutableArray } from '../../../../apm/common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { GetMonitorAvailabilityParams, Ping } from '../../../common/runtime_types';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { AfterKey } from './get_monitor_status';
 
 export interface AvailabilityKey {

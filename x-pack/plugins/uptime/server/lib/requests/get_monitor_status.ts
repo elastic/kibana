@@ -7,7 +7,7 @@
 
 import { JsonObject } from 'src/plugins/kibana_utils/public';
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
-import { asMutableArray } from '../../../../apm/common/utils/as_mutable_array';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { Ping } from '../../../common/runtime_types/ping';
 
