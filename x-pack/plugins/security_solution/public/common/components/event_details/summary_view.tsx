@@ -25,6 +25,9 @@ import {
   ALERTS_HEADERS_RISK_SCORE,
   ALERTS_HEADERS_RULE,
   ALERTS_HEADERS_SEVERITY,
+  ALERTS_HEADERS_THRESHOLD_COUNT,
+  ALERTS_HEADERS_THRESHOLD_TERMS,
+  ALERTS_HEADERS_THRESHOLD_CARDINALITY,
 } from '../../../detections/components/alerts_table/translations';
 import {
   IP_FIELD_TYPE,
@@ -61,6 +64,9 @@ const fields = [
   { id: 'user.name' },
   { id: SOURCE_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
   { id: DESTINATION_IP_FIELD_NAME, fieldType: IP_FIELD_TYPE },
+  { id: 'signal.threshold_result.count', label: ALERTS_HEADERS_THRESHOLD_COUNT },
+  { id: 'signal.threshold_result.terms', label: ALERTS_HEADERS_THRESHOLD_TERMS },
+  { id: 'signal.threshold_result.cardinality', label: ALERTS_HEADERS_THRESHOLD_CARDINALITY },
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,6 +140,45 @@ const getSummary = ({
           fieldType: item.fieldType ?? fieldType,
           linkValue: linkValue ?? undefined,
         };
+
+        if (item.id === 'signal.threshold_result.terms') {
+          try {
+            const terms = getOr(null, 'originalValue', field);
+            const parsedValue = terms.map((term: string) => JSON.parse(term));
+            const thresholdTerms = (parsedValue ?? []).map(
+              (entry: { field: string; value: string }) => {
+                return {
+                  title: entry.field,
+                  description: {
+                    ...description,
+                    value: entry.value,
+                  },
+                };
+              }
+            );
+            return [...acc, ...thresholdTerms];
+          } catch (err) {
+            return acc;
+          }
+        }
+
+        if (item.id === 'signal.threshold_result.cardinality') {
+          const parsedValue = JSON.parse(value);
+          try {
+            return [
+              ...acc,
+              {
+                title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
+                description: {
+                  ...description,
+                  value: `count(${parsedValue.field}) == ${parsedValue.value}`,
+                },
+              },
+            ];
+          } catch (err) {
+            return acc;
+          }
+        }
 
         return [
           ...acc,
