@@ -19,6 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { LoadingOverlay } from '../../../shared/loading';
+
 import './data_panel.scss';
 
 interface Props {
@@ -27,6 +29,7 @@ interface Props {
   iconType?: string;
   action?: React.ReactNode;
   filled?: boolean;
+  isLoading?: boolean;
   className?: string;
 }
 
@@ -36,6 +39,7 @@ export const DataPanel: React.FC<Props> = ({
   iconType,
   action,
   filled,
+  isLoading,
   className,
   children,
   ...props // e.g., data-test-subj
@@ -45,29 +49,36 @@ export const DataPanel: React.FC<Props> = ({
   });
 
   return (
-    <EuiPanel {...props} color={filled ? 'subdued' : 'plain'} className={classes} hasShadow={false}>
+    <EuiPanel
+      {...props}
+      color={filled ? 'subdued' : 'plain'}
+      className={classes}
+      hasShadow={false}
+      aria-busy={isLoading}
+    >
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem>
-          <EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             {iconType && (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiIcon type={iconType} />
               </EuiFlexItem>
             )}
             <EuiFlexItem>
               <EuiTitle size="xs">{title}</EuiTitle>
-              {subtitle && (
-                <EuiText size="s" color="subdued">
-                  <p>{subtitle}</p>
-                </EuiText>
-              )}
             </EuiFlexItem>
           </EuiFlexGroup>
+          {subtitle && (
+            <EuiText size="s" color="subdued">
+              <p>{subtitle}</p>
+            </EuiText>
+          )}
         </EuiFlexItem>
         {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
       </EuiFlexGroup>
       <EuiSpacer />
       {children}
+      {isLoading && <LoadingOverlay />}
     </EuiPanel>
   );
 };

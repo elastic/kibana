@@ -143,7 +143,7 @@ The more cores the better, as the build makes effective use of each. For Linux, 
 
 ## Initializing each VM / environment
 
-In a VM, you'll want to use the init scripts to to initialize each environment.
+In a VM, you'll want to use the init scripts to initialize each environment.
 On Mac OS you'll need to install XCode and accept the license agreement.
 
 Create the build folder:

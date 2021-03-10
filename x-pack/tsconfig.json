@@ -4,9 +4,9 @@
     "mocks.ts",
     "typings/**/*",
     "tasks/**/*",
-    "plugins/case/**/*",
+    "plugins/cases/**/*",
     "plugins/lists/**/*",
-    "plugins/security_solution/**/*",
+    "plugins/security_solution/**/*"
   ],
   "exclude": [
     "test/**/*",
