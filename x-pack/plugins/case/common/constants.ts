@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
+import {
+  DEFAULT_MAX_SIGNALS,
+  APP_ID as SECURITY_SOLUTION_PLUGIN_APP_ID,
+} from '../../security_solution/common/constants';
 
 export const APP_ID = 'case';
 
@@ -56,5 +59,4 @@ export const SUPPORTED_CONNECTORS = [
 export const MAX_ALERTS_PER_SUB_CASE = 5000;
 export const MAX_GENERATED_ALERTS_PER_SUB_CASE = MAX_ALERTS_PER_SUB_CASE / DEFAULT_MAX_SIGNALS;
 
-// TODO: figure out what the value will actually be when a security solution case is created
-export const SECURITY_SOLUTION_PLUGIN = 'security-solution';
+export const SECURITY_SOLUTION_CONSUMER = SECURITY_SOLUTION_PLUGIN_APP_ID;

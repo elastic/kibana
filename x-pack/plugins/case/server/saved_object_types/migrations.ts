@@ -15,7 +15,7 @@ import {
   AssociationType,
   ESConnectorFields,
 } from '../../common/api';
-import { SECURITY_SOLUTION_PLUGIN } from '../../common/constants';
+import { SECURITY_SOLUTION_CONSUMER } from '../../common/constants';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -125,8 +125,7 @@ export const caseMigrations = {
       ...doc,
       attributes: {
         ...doc.attributes,
-        // TODO: figure out what to default this to
-        consumer: SECURITY_SOLUTION_PLUGIN,
+        consumer: SECURITY_SOLUTION_CONSUMER,
       },
       references: doc.references || [],
     };
@@ -160,8 +159,7 @@ export const configureMigrations = {
       ...doc,
       attributes: {
         ...doc.attributes,
-        // TODO: figure out what to default this to
-        consumer: SECURITY_SOLUTION_PLUGIN,
+        consumer: SECURITY_SOLUTION_CONSUMER,
       },
       references: doc.references || [],
     };
@@ -214,8 +212,7 @@ export const userActionsMigrations = {
       ...doc,
       attributes: {
         ...doc.attributes,
-        // TODO: figure out what to default this to
-        consumer: SECURITY_SOLUTION_PLUGIN,
+        consumer: SECURITY_SOLUTION_CONSUMER,
       },
       references: doc.references || [],
     };
@@ -277,8 +274,7 @@ export const commentsMigrations = {
       ...doc,
       attributes: {
         ...doc.attributes,
-        // TODO: figure out what to default this to
-        consumer: SECURITY_SOLUTION_PLUGIN,
+        consumer: SECURITY_SOLUTION_CONSUMER,
       },
       references: doc.references || [],
     };
@@ -293,8 +289,7 @@ export const connectorMappingsMigrations = {
       ...doc,
       attributes: {
         ...doc.attributes,
-        // TODO: figure out what to default this to
-        consumer: SECURITY_SOLUTION_PLUGIN,
+        consumer: SECURITY_SOLUTION_CONSUMER,
       },
       references: doc.references || [],
     };
@@ -309,8 +304,7 @@ export const subCasesMigrations = {
       ...doc,
       attributes: {
         ...doc.attributes,
-        // TODO: figure out what to default this to
-        consumer: SECURITY_SOLUTION_PLUGIN,
+        consumer: SECURITY_SOLUTION_CONSUMER,
       },
       references: doc.references || [],
     };
