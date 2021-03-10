@@ -229,8 +229,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canManageEngineResultSettings && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_RESULT_SETTINGS_PATH))}
+          to={generateEnginePath(ENGINE_RESULT_SETTINGS_PATH)}
           data-test-subj="EngineResultSettingsLink"
         >
           {RESULT_SETTINGS_TITLE}
