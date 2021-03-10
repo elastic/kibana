@@ -63,9 +63,8 @@ export const createFleetSetupHandler: RequestHandler<
   try {
     const soClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-    await setupIngestManager(soClient, esClient, callCluster);
-    await setupFleet(soClient, esClient, callCluster, {
+    await setupIngestManager(soClient, esClient);
+    await setupFleet(soClient, esClient, {
       forceRecreate: request.body?.forceRecreate ?? false,
     });
 
@@ -80,11 +79,10 @@ export const createFleetSetupHandler: RequestHandler<
 export const FleetSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
 
   try {
     const body: PostIngestSetupResponse = { isInitialized: true };
-    await setupIngestManager(soClient, esClient, callCluster);
+    await setupIngestManager(soClient, esClient);
     return response.ok({
       body,
     });

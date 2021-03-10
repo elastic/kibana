@@ -71,7 +71,12 @@ export function getPivotDropdownOptions(
   const indexPatternFields = indexPattern.fields
     .filter(
       (field) =>
-        field.aggregatable === true && !ignoreFieldNames.includes(field.name) && !field.runtimeField
+        field.aggregatable === true &&
+        !ignoreFieldNames.includes(field.name) &&
+        !field.runtimeField &&
+        // runtime fix, we experienced Kibana index patterns with `undefined` type for fields
+        // even when the TS interface is a non-optional `string`.
+        typeof field.type !== 'undefined'
     )
     .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 

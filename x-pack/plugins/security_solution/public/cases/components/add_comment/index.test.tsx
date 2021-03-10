@@ -13,7 +13,7 @@ import { noop } from 'lodash/fp';
 import { TestProviders } from '../../../common/mock';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
-import { CommentRequest, CommentType } from '../../../../../case/common/api';
+import { CommentRequest, CommentType } from '../../../../../cases/common/api';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
 import { AddComment, AddCommentRefObject } from '.';
