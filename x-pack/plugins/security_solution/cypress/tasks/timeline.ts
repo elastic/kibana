@@ -162,7 +162,6 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
-  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(CREATE_NEW_TIMELINE).click();
 };
 
