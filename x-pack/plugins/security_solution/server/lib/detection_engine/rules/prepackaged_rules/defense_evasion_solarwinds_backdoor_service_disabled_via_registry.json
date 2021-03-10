@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "SolarWinds Process Disabling Services via Registry",
   "query": "registry where registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\*\\\\Start\" and registry.data.strings == \"4\" and\n process.name : (\n     \"SolarWinds.BusinessLayerHost*.exe\", \n     \"ConfigurationWizard*.exe\", \n     \"NetflowDatabaseMaintenance*.exe\", \n     \"NetFlowService*.exe\", \n     \"SolarWinds.Administration*.exe\", \n     \"SolarWinds.Collector.Service*.exe\" , \n     \"SolarwindsDiagnostics*.exe\")\n",
   "references": [

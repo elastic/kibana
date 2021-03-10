@@ -54,7 +54,6 @@ afterAll(() => fakeTimer.restore());
 
 const services = {
   log: jest.fn(),
-  callCluster: jest.fn(),
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 const actionExecutorInitializerParams = {

@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Privilege Escalation via Root Crontab File Modification",
   "query": "event.category:file and not event.type:deletion and file.path:/private/var/at/tabs/root and not process.executable:/usr/bin/crontab",
   "references": [
