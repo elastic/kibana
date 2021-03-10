@@ -21,6 +21,10 @@ export const ROOT_FIELDS = [
   'originId',
 ];
 
+export function getRootFields() {
+  return [...ROOT_FIELDS];
+}
+
 /**
  * Provides an array of paths for ES source filtering
  */

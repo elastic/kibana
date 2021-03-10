@@ -1351,6 +1351,10 @@ describe('#removeReferencesTo', () => {
   });
 });
 
+describe('#collectMultiNamespaceReferences', () => {
+  // TODO: add unit tests
+});
+
 describe('other', () => {
   test(`assigns errors from constructor to .errors`, () => {
     expect(client.errors).toBe(clientOpts.errors);

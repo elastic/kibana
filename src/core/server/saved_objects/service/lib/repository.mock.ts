@@ -29,6 +29,7 @@ const create = () => {
     deleteByNamespace: jest.fn(),
     incrementCounter: jest.fn(),
     removeReferencesTo: jest.fn(),
+    collectMultiNamespaceReferences: jest.fn(),
   };
 
   mock.createPointInTimeFinder = savedObjectsPointInTimeFinderMock.create({

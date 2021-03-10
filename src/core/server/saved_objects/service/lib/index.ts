@@ -27,3 +27,9 @@ export type {
 export { SavedObjectsErrorHelpers } from './errors';
 
 export { SavedObjectsUtils } from './utils';
+
+export type {
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+} from './collect_multi_namespace_references';

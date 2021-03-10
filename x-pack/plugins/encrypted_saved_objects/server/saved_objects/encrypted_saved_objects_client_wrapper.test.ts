@@ -1819,6 +1819,38 @@ describe('#closePointInTime', () => {
 
     expect(mockBaseClient.closePointInTime).toHaveBeenCalledTimes(1);
   });
+
+  describe('#collectMultiNamespaceReferences', () => {
+    it('redirects request to underlying base client', async () => {
+      const objects = [{ type: 'foo', id: 'bar' }];
+      await wrapper.collectMultiNamespaceReferences(objects);
+
+      expect(mockBaseClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+      expect(mockBaseClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects);
+    });
+
+    it('returns response from underlying client', async () => {
+      const returnValue = { objects: [] };
+      mockBaseClient.collectMultiNamespaceReferences.mockResolvedValue(returnValue);
+
+      const objects = [{ type: 'foo', id: 'bar' }];
+      const result = await wrapper.collectMultiNamespaceReferences(objects);
+
+      expect(result).toBe(returnValue);
+    });
+
+    it('fails if base client fails', async () => {
+      const failureReason = new Error('Something bad happened...');
+      mockBaseClient.collectMultiNamespaceReferences.mockRejectedValue(failureReason);
+
+      const objects = [{ type: 'foo', id: 'bar' }];
+      await expect(wrapper.collectMultiNamespaceReferences(objects)).rejects.toThrowError(
+        failureReason
+      );
+
+      expect(mockBaseClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 
 describe('#createPointInTimeFinder', () => {

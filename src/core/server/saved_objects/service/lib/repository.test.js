@@ -7,6 +7,7 @@
  */
 
 import { pointInTimeFinderMock } from './repository.test.mock';
+import { mockCollectMultiNamespaceReferences } from './__mocks__/collect_multi_namespace_references';
 
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
@@ -4719,6 +4720,35 @@ describe('SavedObjectsRepository', () => {
           ...dependencies,
           logger,
         })
+      );
+    });
+  });
+
+  describe('#collectMultiNamespaceReferences', () => {
+    afterEach(() => {
+      mockCollectMultiNamespaceReferences.mockReset();
+    });
+
+    it('passes arguments to the collectMultiNamespaceReferences module and returns the result', async () => {
+      const objects = Symbol();
+      const expectedResult = Symbol();
+      mockCollectMultiNamespaceReferences.mockResolvedValue(expectedResult);
+
+      await expect(
+        savedObjectsRepository.collectMultiNamespaceReferences(objects)
+      ).resolves.toEqual(expectedResult);
+      expect(mockCollectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+      expect(mockCollectMultiNamespaceReferences).toHaveBeenCalledWith(
+        expect.objectContaining({ objects })
+      );
+    });
+
+    it('returns an error from the collectMultiNamespaceReferences module', async () => {
+      const expectedResult = new Error('Oh no!');
+      mockCollectMultiNamespaceReferences.mockRejectedValue(expectedResult);
+
+      await expect(savedObjectsRepository.collectMultiNamespaceReferences([])).rejects.toEqual(
+        expectedResult
       );
     });
   });

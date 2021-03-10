@@ -64,15 +64,20 @@ import {
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
-import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
+import { getSavedObjectFromSource } from './internal_utils';
 import {
   ALL_NAMESPACES_STRING,
   FIND_DEFAULT_PAGE,
   FIND_DEFAULT_PER_PAGE,
   SavedObjectsUtils,
 } from './utils';
+import {
+  collectMultiNamespaceReferences,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+} from './collect_multi_namespace_references';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -95,7 +100,7 @@ export interface SavedObjectsRepositoryOptions {
   index: string;
   mappings: IndexMapping;
   client: ElasticsearchClient;
-  typeRegistry: SavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistry;
   serializer: SavedObjectsSerializer;
   migrator: IKibanaMigrator;
   allowedTypes: string[];
@@ -160,7 +165,7 @@ export class SavedObjectsRepository {
   private _migrator: IKibanaMigrator;
   private _index: string;
   private _mappings: IndexMapping;
-  private _registry: SavedObjectTypeRegistry;
+  private _registry: ISavedObjectTypeRegistry;
   private _allowedTypes: string[];
   private readonly client: RepositoryEsClient;
   private _serializer: SavedObjectsSerializer;
@@ -176,7 +181,7 @@ export class SavedObjectsRepository {
    */
   public static createRepository(
     migrator: IKibanaMigrator,
-    typeRegistry: SavedObjectTypeRegistry,
+    typeRegistry: ISavedObjectTypeRegistry,
     indexName: string,
     client: ElasticsearchClient,
     logger: Logger,
@@ -1263,6 +1268,25 @@ export class SavedObjectsRepository {
   }
 
   /**
+   * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
+   * type.
+   *
+   * @param objects The objects to get the references for.
+   */
+  async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+  ) {
+    return collectMultiNamespaceReferences({
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType,
+      objects,
+    });
+  }
+
+  /**
    * Adds one or more namespaces to a given multi-namespace saved object. This method and
    * [`deleteFromNamespaces`]{@link SavedObjectsRepository.deleteFromNamespaces} are the only ways to change which Spaces a multi-namespace
    * saved object is shared to.
@@ -2209,27 +2233,7 @@ export class SavedObjectsRepository {
     id: string,
     doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
   ): SavedObject<T> {
-    const { originId, updated_at: updatedAt } = doc._source;
-
-    let namespaces: string[] = [];
-    if (!this._registry.isNamespaceAgnostic(type)) {
-      namespaces = doc._source.namespaces ?? [
-        SavedObjectsUtils.namespaceIdToString(doc._source.namespace),
-      ];
-    }
-
-    return {
-      id,
-      type,
-      namespaces,
-      ...(originId && { originId }),
-      ...(updatedAt && { updated_at: updatedAt }),
-      version: encodeHitVersion(doc),
-      attributes: doc._source[type],
-      references: doc._source.references || [],
-      migrationVersion: doc._source.migrationVersion,
-      coreMigrationVersion: doc._source.coreMigrationVersion,
-    };
+    return getSavedObjectFromSource(this._registry, type, id, doc);
   }
 
   private async resolveExactMatch<T>(

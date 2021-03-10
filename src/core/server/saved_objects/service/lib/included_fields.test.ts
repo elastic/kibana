@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { includedFields, ROOT_FIELDS } from './included_fields';
+import { getRootFields, includedFields, ROOT_FIELDS } from './included_fields';
+
+describe('getRootFields', () => {
+  it('returns copy of root fields', () => {
+    const fields = getRootFields();
+    expect(fields).toEqual(ROOT_FIELDS);
+    expect(fields).not.toBe(ROOT_FIELDS);
+  });
+});
 
 describe('includedFields', () => {
   it('returns undefined if fields are not provided', () => {

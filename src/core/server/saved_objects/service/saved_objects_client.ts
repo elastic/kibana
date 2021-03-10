@@ -11,6 +11,8 @@ import type {
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './lib';
 import {
   SavedObject,
@@ -674,5 +676,16 @@ export class SavedObjectsClient {
       // Include dependencies last so that SO client wrappers have their settings applied.
       ...dependencies,
     });
+  }
+
+  /**
+   * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
+   *
+   * @param objects
+   */
+  async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    return await this._repository.collectMultiNamespaceReferences(objects);
   }
 }

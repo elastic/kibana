@@ -17,6 +17,9 @@ export type {
   SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './lib';
 
 export * from './saved_objects_client';

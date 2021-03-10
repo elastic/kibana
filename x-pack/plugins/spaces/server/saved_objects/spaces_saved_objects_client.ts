@@ -17,6 +17,8 @@ import type {
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
@@ -383,6 +385,18 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });
+  }
+
+  /**
+   * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
+   *
+   * @param objects
+   */
+  public async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    // This function is not scoped to the current space
+    return await this.client.collectMultiNamespaceReferences(objects);
   }
 
   /**

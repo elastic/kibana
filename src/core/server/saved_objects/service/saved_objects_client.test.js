@@ -286,3 +286,17 @@ test(`#removeReferencesTo`, async () => {
   expect(mockRepository.removeReferencesTo).toHaveBeenCalledWith(type, id, options);
   expect(result).toBe(returnValue);
 });
+
+test(`#collectMultiNamespaceReferences`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    collectMultiNamespaceReferences: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const objects = Symbol();
+  const result = await client.collectMultiNamespaceReferences(objects);
+
+  expect(mockRepository.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects);
+  expect(result).toBe(returnValue);
+});

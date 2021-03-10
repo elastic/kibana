@@ -15,6 +15,8 @@ import type {
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
@@ -630,6 +632,13 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,
     });
+  }
+
+  public async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    // TODO: authZ
+    return await this.baseClient.collectMultiNamespaceReferences(objects);
   }
 
   private async checkPrivileges(

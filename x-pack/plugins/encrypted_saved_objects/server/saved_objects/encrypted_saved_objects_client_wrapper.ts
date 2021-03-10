@@ -18,6 +18,8 @@ import type {
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
@@ -274,6 +276,12 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,
     });
+  }
+
+  public async collectMultiNamespaceReferences(
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+  ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+    return await this.options.baseClient.collectMultiNamespaceReferences(objects);
   }
 
   /**
