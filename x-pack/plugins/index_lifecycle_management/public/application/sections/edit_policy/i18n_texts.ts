@@ -218,7 +218,7 @@ export const i18nTexts = {
         'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription',
         {
           defaultMessage:
-            'Archive data in the frozen tier, which is optimized for maximum cost savings. Data in the frozen tier is rarely accessed and never updated.',
+            'Archive data as searchable snapshots in the frozen tier. The frozen tier is optimized for maximum cost savings. Data in the frozen tier is rarely accessed and never updated.',
         }
       ),
       delete: i18n.translate(
