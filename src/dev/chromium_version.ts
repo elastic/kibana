@@ -9,7 +9,6 @@
 import { run, REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import cheerio from 'cheerio';
-import dedent from 'dedent';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
@@ -127,13 +126,13 @@ run(
     }
   },
   {
-    description: dedent(chalk`
+    description: chalk`
       Display the Chromium git commit that correlates to a given Puppeteer release.
 
-       -  node x-pack/dev-tools/chromium_version 5.5.0  {dim # gets the Chromium commit for Puppeteer v5.5.0}
-       -  node x-pack/dev-tools/chromium_version       {dim  # gets the Chromium commit for the Kibana dependency version of Puppeteer}
+      -  node x-pack/dev-tools/chromium_version 5.5.0  {dim # gets the Chromium commit for Puppeteer v5.5.0}
+      -  node x-pack/dev-tools/chromium_version       {dim  # gets the Chromium commit for the Kibana dependency version of Puppeteer}
 
       You can use https://omahaproxy.appspot.com/ to look up the Chromium release that first shipped with that commit.
-    `),
+    `,
   }
 );
