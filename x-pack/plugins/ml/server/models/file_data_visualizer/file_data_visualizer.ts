@@ -21,6 +21,7 @@ export function fileDataVisualizerProvider(client: IScopedClusterClient) {
     const {
       body,
     } = await client.asInternalUser.textStructure.findStructure<FindFileStructureResponse>({
+      // @ts-expect-error
       body: data,
       ...overrides,
     });
@@ -29,6 +30,7 @@ export function fileDataVisualizerProvider(client: IScopedClusterClient) {
 
     return {
       ...(hasOverrides && { overrides: reducedOverrides }),
+      // @ts-expect-error
       results: body,
     };
   }
