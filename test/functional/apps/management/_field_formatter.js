@@ -19,15 +19,13 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await esArchiver.load('discover');
-      // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
     });
 
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.removeLogstashIndexPatternIfExist();
+      await esArchiver.emptyKibanaIndex();
     });
 
     describe('set and change field formatter', function describeIndexTests() {
