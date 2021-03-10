@@ -21,7 +21,6 @@ import {
   EuiTitle,
   EuiFormRow,
   EuiFieldText,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiTabs,
   EuiTab,
@@ -376,7 +375,10 @@ export class FieldChooser extends Component<Props, State> {
             onSelectField({ name: data.field });
           }}
         >
-          Add field
+          {i18n.translate(
+            'xpack.indexLifecycleMgmt.rollup.create.fieldChooser.customField.addFieldButtonLabel',
+            { defaultMessage: 'Add field' }
+          )}
         </EuiButton>
       </Form>
     );
