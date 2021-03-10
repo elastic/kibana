@@ -24,6 +24,7 @@ import {
   VerticalAlignment,
   HorizontalAlignment,
 } from '@elastic/charts';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { renderEndzoneTooltip } from '../../../charts/public';
 
@@ -61,7 +62,7 @@ type XYSettingsProps = Pick<
   legendPosition: Position;
 };
 
-const KBN_HEADER_OFFSET = 98;
+const KBN_HEADER_OFFSET = parseFloat(euiLightVars.euiHeaderHeightCompensation) * 2;
 
 function getValueLabelsStyling(isHorizontal: boolean) {
   const VALUE_LABELS_MAX_FONTSIZE = 15;
@@ -162,7 +163,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
         customTooltip: tooltip.detailedTooltip(headerFormatter),
         headerFormatter: undefined,
       }
-    : { ...tooltip, ...boudaryProps, headerFormatter  };
+    : { ...tooltip, ...boudaryProps, headerFormatter };
 
   return (
     <Settings
