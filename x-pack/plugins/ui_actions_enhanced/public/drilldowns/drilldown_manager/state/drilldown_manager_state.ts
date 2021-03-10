@@ -21,7 +21,7 @@ import {
   toastDrilldownsDeleted,
   toastDrilldownEdited,
 } from './i18n';
-import { DrilldownListItem } from '../components/list_manage_drilldowns';
+import { DrilldownTableItem } from '../components/drilldown_table';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
@@ -74,7 +74,7 @@ export class DrilldownManagerState {
    */
   public readonly actionFactory$: BehaviorSubject<undefined | ActionFactory>;
 
-  private readonly mapEventToDrilldownItem = (event: SerializedEvent): DrilldownListItem => {
+  private readonly mapEventToDrilldownItem = (event: SerializedEvent): DrilldownTableItem => {
     const actionFactory = this.deps.actionFactories.find(
       (factory) => factory.id === event.action.factoryId
     );
@@ -95,7 +95,7 @@ export class DrilldownManagerState {
       triggers: event.triggers.map((trigger) => this.deps.getTrigger(trigger as string)),
     };
   };
-  public readonly events$ = new BehaviorSubject<DrilldownListItem[]>(
+  public readonly events$ = new BehaviorSubject<DrilldownTableItem[]>(
     this.deps.dynamicActionManager.state.get().events.map(this.mapEventToDrilldownItem)
   );
 
