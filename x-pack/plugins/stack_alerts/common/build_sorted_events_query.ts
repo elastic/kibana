@@ -32,7 +32,7 @@ export const buildSortedEventsQuery = ({
   timeField,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   track_total_hits,
-}: BuildSortedEventsQuery) => {
+}: BuildSortedEventsQuery): ESSearchRequest => {
   const sortField = timeField;
   const docFields = [timeField].map((tstamp) => ({
     field: tstamp,
@@ -71,9 +71,13 @@ export const buildSortedEventsQuery = ({
         },
       },
       ...(aggs ? { aggs } : {}),
-    },
-    sort: {
-      [sortField]: sortOrder ?? 'asc',
+      sort: [
+        {
+          [sortField]: {
+            order: sortOrder ?? 'asc',
+          },
+        },
+      ],
     },
   };
 
@@ -84,7 +88,7 @@ export const buildSortedEventsQuery = ({
         ...searchQuery.body,
         search_after: [searchAfterSortId],
       },
-    };
+    } as ESSearchRequest;
   }
-  return searchQuery;
+  return searchQuery as ESSearchRequest;
 };

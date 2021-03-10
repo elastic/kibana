@@ -62,13 +62,9 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-            },
-          },
-        ],
+      },
+      sort: {
+        '@timestamp': 'asc',
       },
     });
   });
@@ -126,13 +122,9 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-            },
-          },
-        ],
+      },
+      sort: {
+        '@timestamp': 'asc',
       },
     });
   });
@@ -191,14 +183,10 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-            },
-          },
-        ],
         search_after: [fakeSortId],
+      },
+      sort: {
+        '@timestamp': 'asc',
       },
     });
   });
@@ -257,14 +245,10 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-            },
-          },
-        ],
         search_after: [fakeSortIdNumber],
+      },
+      sort: {
+        '@timestamp': 'asc',
       },
     });
   });
@@ -322,13 +306,9 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-            },
-          },
-        ],
+      },
+      sort: {
+        '@timestamp': 'asc',
       },
     });
   });
@@ -396,13 +376,9 @@ describe('create_signals', () => {
             },
           },
         },
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-            },
-          },
-        ],
+      },
+      sort: {
+        '@timestamp': 'asc',
       },
     });
   });

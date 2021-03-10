@@ -63,9 +63,13 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-      },
-      sort: {
-        timefield: 'asc',
+        sort: [
+          {
+            timefield: {
+              order: 'asc',
+            },
+          },
+        ],
       },
     });
   });
@@ -110,9 +114,13 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-      },
-      sort: {
-        timefield: 'asc',
+        sort: [
+          {
+            timefield: {
+              order: 'asc',
+            },
+          },
+        ],
       },
     });
   });
@@ -158,10 +166,14 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
+        sort: [
+          {
+            timefield: {
+              order: 'asc',
+            },
+          },
+        ],
         search_after: [sortId],
-      },
-      sort: {
-        timefield: 'asc',
       },
     });
   });
@@ -207,10 +219,14 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
+        sort: [
+          {
+            timefield: {
+              order: 'asc',
+            },
+          },
+        ],
         search_after: [sortId],
-      },
-      sort: {
-        timefield: 'asc',
       },
     });
   });
@@ -268,9 +284,13 @@ describe('buildSortedEventsQuery', () => {
             },
           },
         },
-      },
-      sort: {
-        timefield: 'asc',
+        sort: [
+          {
+            timefield: {
+              order: 'asc',
+            },
+          },
+        ],
       },
     });
   });
@@ -315,9 +335,13 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-      },
-      sort: {
-        timefield: 'desc',
+        sort: [
+          {
+            timefield: {
+              order: 'desc',
+            },
+          },
+        ],
       },
     });
   });
@@ -362,9 +386,13 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-      },
-      sort: {
-        timefield: 'asc',
+        sort: [
+          {
+            timefield: {
+              order: 'asc',
+            },
+          },
+        ],
       },
     });
   });
