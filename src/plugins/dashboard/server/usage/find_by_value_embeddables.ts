@@ -12,7 +12,12 @@ import { SavedDashboardPanel730ToLatest } from '../../common';
 export const findByValueEmbeddables = async (
   savedObjectClient: Pick<ISavedObjectsRepository, 'find'>,
   embeddableType: string
-) => {
+): Promise<
+  Array<{
+    embeddable: { [key: string]: unknown };
+    dashboardInfo: { updated_at?: string; id?: string };
+  }>
+> => {
   const dashboards = await savedObjectClient.find<SavedObjectAttributes>({
     type: 'dashboard',
   });
@@ -20,15 +25,21 @@ export const findByValueEmbeddables = async (
   return dashboards.saved_objects
     .map((dashboard) => {
       try {
-        return (JSON.parse(
+        return ((JSON.parse(
           dashboard.attributes.panelsJSON as string
-        ) as unknown) as SavedDashboardPanel730ToLatest[];
+        ) as unknown) as SavedDashboardPanel730ToLatest[]).map((panel) => ({
+          panel,
+          dashboardInfo: { id: dashboard.id, updated_at: dashboard.updated_at },
+        }));
       } catch (exception) {
         return [];
       }
     })
     .flat()
-    .filter((panel) => (panel as Record<string, any>).panelRefName === undefined)
-    .filter((panel) => panel.type === embeddableType)
-    .map((panel) => panel.embeddableConfig);
+    .filter((item) => (item.panel as Record<string, unknown>).panelRefName === undefined)
+    .filter((item) => item.panel.type === embeddableType)
+    .map((item) => ({
+      embeddable: item.panel.embeddableConfig,
+      dashboardInfo: item.dashboardInfo,
+    }));
 };
