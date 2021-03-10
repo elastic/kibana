@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { FleetArtifactsClient } from './client';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from './errors';
+
+import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
+
+import { FleetArtifactsClient } from './client';
 import {
   generateArtifactEsGetSingleHitMock,
   generateArtifactEsSearchResultHitsMock,

@@ -6,6 +6,8 @@
  */
 
 /* eslint-disable max-classes-per-file */
+import { isErrorWithMeta } from '../services/artifacts/utils';
+
 export {
   defaultIngestErrorHandler,
   ingestErrorToResponseOptions,
@@ -42,3 +44,34 @@ export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
 export class AgentUnenrollmentError extends IngestManagerError {}
 export class AgentPolicyDeletionError extends IngestManagerError {}
+
+export class ArtifactsClientError extends IngestManagerError {}
+export class ArtifactsClientAccessDeniedError extends IngestManagerError {
+  constructor(deniedPackageName: string, allowedPackageName: string) {
+    super(
+      `Access denied. Artifact package name (${deniedPackageName}) does not match ${allowedPackageName}`
+    );
+  }
+}
+export class ArtifactsElasticsearchError extends IngestManagerError {
+  readonly requestDetails: string;
+
+  constructor(public readonly meta: Error) {
+    super(
+      `${
+        isErrorWithMeta(meta) && meta.meta.body?.error?.reason
+          ? meta.meta.body?.error?.reason
+          : `Elasticsearch error while working with artifacts: ${meta.message}`
+      }`
+    );
+
+    if (isErrorWithMeta(meta)) {
+      const { method, path, querystring = '', body = '' } = meta.meta.meta.request.params;
+      this.requestDetails = `${method} ${path}${querystring ? `?${querystring}` : ''}${
+        body ? `\n${body}` : ''
+      }`;
+    } else {
+      this.requestDetails = 'unable to determine request details';
+    }
+  }
+}

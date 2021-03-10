@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import { deflate } from 'zlib';
 import { promisify } from 'util';
-import uuid from 'uuid';
+
 import { createHash } from 'crypto';
+
+import uuid from 'uuid';
+import { ElasticsearchClient } from 'kibana/server';
+
+import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
+import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
+
+import { ArtifactsElasticsearchError } from '../../errors';
+
+import { isElasticsearchItemNotFoundError } from './utils';
 import {
   Artifact,
   ArtifactElasticsearchProperties,
@@ -18,11 +27,7 @@ import {
   ListArtifactsProps,
   NewArtifact,
 } from './types';
-import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
-import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { esSearchHitToArtifact } from './mappings';
-import { isElasticsearchItemNotFoundError } from './utils';
-import { ArtifactsElasticsearchError } from './errors';
 
 const deflateAsync = promisify(deflate);
 

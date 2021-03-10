@@ -6,6 +6,13 @@
  */
 
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+
+import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
+
+import { ArtifactsElasticsearchError } from '../../errors';
+
 import {
   generateArtifactEsGetSingleHitMock,
   generateArtifactEsSearchResultHitsMock,
@@ -21,9 +28,7 @@ import {
   getArtifact,
   listArtifacts,
 } from './artifacts';
-import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { ArtifactsElasticsearchError } from './errors';
+
 import { NewArtifact } from './types';
 
 describe('When using the artifacts services', () => {
