@@ -8,7 +8,7 @@ Object {
         50,
       ],
       "script": Object {
-        "lang": "painless",
+        "lang": undefined,
         "source": "return 456",
       },
     },
