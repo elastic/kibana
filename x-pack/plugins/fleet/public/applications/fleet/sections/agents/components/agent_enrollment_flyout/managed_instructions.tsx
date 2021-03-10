@@ -56,6 +56,7 @@ export const ManagedInstructions = React.memo<Props>(({ agentPolicies }) => {
           apiKey={apiKey.data.item}
           kibanaUrl={kibanaUrl}
           kibanaCASha256={kibanaCASha256}
+          fleetServerUrls={settings.data?.item?.fleet_server_urls || []}
         />
       ),
     },

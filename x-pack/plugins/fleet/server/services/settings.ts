@@ -81,9 +81,12 @@ export function createDefaultSettings(): BaseSettings {
     pathname: basePath.serverBasePath,
   });
 
+  const fleetServerUrls = appContextService.getConfig()?.agents?.fleetServerUrls || [];
+
   return {
     agent_auto_upgrade: true,
     package_auto_upgrade: true,
     kibana_urls: [cloudUrl || flagsUrl || defaultUrl].flat(),
+    fleet_server_urls: fleetServerUrls,
   };
 }

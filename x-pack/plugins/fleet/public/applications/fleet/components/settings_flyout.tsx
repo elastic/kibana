@@ -70,6 +70,30 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
       ];
     }
   });
+  const fleetServerUrlsInput = useComboInput([], (value) => {
+    if (value.length === 0) {
+      return [
+        i18n.translate('xpack.fleet.settings.fleetServerUrlsEmptyError', {
+          defaultMessage: 'At least one URL is required',
+        }),
+      ];
+    }
+    if (value.some((v) => !v.match(URL_REGEX))) {
+      return [
+        i18n.translate('xpack.fleet.settings.fleetServerUrlsError', {
+          defaultMessage: 'Invalid URL',
+        }),
+      ];
+    }
+    if (isDiffPathProtocol(value)) {
+      return [
+        i18n.translate('xpack.fleet.settings.fleetServerUrlsDifferentPathOrProtocolError', {
+          defaultMessage: 'Protocol and path must be the same for each URL',
+        }),
+      ];
+    }
+  });
+
   const elasticsearchUrlInput = useComboInput([], (value) => {
     if (value.some((v) => !v.match(URL_REGEX))) {
       return [
@@ -98,6 +122,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     onSubmit: async () => {
       if (
         !kibanaUrlsInput.validate() ||
+        !fleetServerUrlsInput.validate() ||
         !elasticsearchUrlInput.validate() ||
         !additionalYamlConfigInput.validate()
       ) {
@@ -118,6 +143,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
         }
         const settingsResponse = await sendPutSettings({
           kibana_urls: kibanaUrlsInput.value,
+          fleet_server_urls: fleetServerUrlsInput.value,
         });
         if (settingsResponse.error) {
           throw settingsResponse.error;
@@ -137,6 +163,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
       }
     },
     inputs: {
+      fleetServerUrls: fleetServerUrlsInput,
       kibanaUrls: kibanaUrlsInput,
       elasticsearchUrl: elasticsearchUrlInput,
       additionalYamlConfig: additionalYamlConfigInput,
@@ -165,6 +192,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   useEffect(() => {
     if (settings) {
       inputs.kibanaUrls.setValue(settings.kibana_urls);
+      inputs.fleetServerUrls.setValue(settings.fleet_server_urls);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -254,6 +282,18 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         />
       </EuiText>
       <EuiSpacer size="m" />
+      <EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.fleet.settings.fleetServerUrlsLabel', {
+            defaultMessage: 'Fleet Server URL',
+          })}
+          {...inputs.fleetServerUrls.formRowProps}
+        >
+          <EuiComboBox noSuggestions {...inputs.fleetServerUrls.props} />
+        </EuiFormRow>
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      {/* // TODO remove as part of https://github.com/elastic/kibana/issues/94303 */}
       <EuiFormRow>
         <EuiFormRow
           label={i18n.translate('xpack.fleet.settings.kibanaUrlLabel', {

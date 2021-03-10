@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EnrollmentAPIKey } from '../../../types';
 
 interface Props {
+  fleetServerUrls: string[];
   kibanaUrl: string;
   apiKey: EnrollmentAPIKey;
   kibanaCASha256?: string;
@@ -23,14 +24,32 @@ const CommandCode = styled.pre({
   overflow: 'scroll',
 });
 
+function getFleetServerUrlsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerUrls: string[]) {
+  return `--fleet-server-url=${fleetServerUrls[0]} --enrollment-token=${apiKey.api_key}`;
+}
+
+function getKibanaUrlEnrollArgs(
+  apiKey: EnrollmentAPIKey,
+  kibanaUrl: string,
+  kibanaCASha256?: string
+) {
+  return `--kibana-url=${kibanaUrl} --enrollment-token=${apiKey.api_key}${
+    kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
+  }`;
+}
+
 export const ManualInstructions: React.FunctionComponent<Props> = ({
   kibanaUrl,
   apiKey,
   kibanaCASha256,
+  fleetServerUrls,
 }) => {
-  const enrollArgs = `--kibana-url=${kibanaUrl} --enrollment-token=${apiKey.api_key}${
-    kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
-  }`;
+  const fleetServerUrlsNotEmpty = fleetServerUrls.length > 0;
+
+  const enrollArgs = fleetServerUrlsNotEmpty
+    ? getFleetServerUrlsEnrollArgs(apiKey, fleetServerUrls)
+    : // TODO remove as part of https://github.com/elastic/kibana/issues/94303
+      getKibanaUrlEnrollArgs(apiKey, kibanaUrl, kibanaCASha256);
 
   const linuxMacCommand = `./elastic-agent install -f ${enrollArgs}`;
 

@@ -25,6 +25,7 @@ export interface FleetConfigType {
       host?: string;
       ca_sha256?: string;
     };
+    fleetServerUrls?: string[];
     agentPolicyRolloutRateLimitIntervalMs: number;
     agentPolicyRolloutRateLimitRequestPerInterval: number;
   };

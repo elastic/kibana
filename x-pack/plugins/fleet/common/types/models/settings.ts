@@ -10,9 +10,11 @@ import type { SavedObjectAttributes } from 'src/core/public';
 export interface BaseSettings {
   agent_auto_upgrade: boolean;
   package_auto_upgrade: boolean;
+  has_seen_add_data_notice?: boolean;
+  fleet_server_urls: string[];
+  // TODO remove as part of https://github.com/elastic/kibana/issues/94303
   kibana_urls: string[];
   kibana_ca_sha256?: string;
-  has_seen_add_data_notice?: boolean;
 }
 
 export interface Settings extends BaseSettings {
