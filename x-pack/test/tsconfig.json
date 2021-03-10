@@ -43,7 +43,6 @@
     { "path": "../plugins/banners/tsconfig.json" },
     { "path": "../plugins/beats_management/tsconfig.json" },
     { "path": "../plugins/cloud/tsconfig.json" },
-    { "path": "../plugins/code/tsconfig.json" },
     { "path": "../plugins/console_extensions/tsconfig.json" },
     { "path": "../plugins/dashboard_mode/tsconfig.json" },
     { "path": "../plugins/enterprise_search/tsconfig.json" },

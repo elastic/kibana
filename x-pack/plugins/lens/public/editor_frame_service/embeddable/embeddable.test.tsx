@@ -146,6 +146,46 @@ describe('embeddable', () => {
 | expression`);
   });
 
+  it('should render once even if reload is called before embeddable is fully initialized', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      {
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      } as LensEmbeddableInput
+    );
+    await embeddable.reload();
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
+    embeddable.render(mountpoint);
+    expect(expressionRenderer).toHaveBeenCalledTimes(0);
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+  });
+
   it('should not render the visualization if any error arises', async () => {
     const embeddable = new Embeddable(
       {
@@ -265,6 +305,45 @@ describe('embeddable', () => {
       filters,
       searchSessionId: 'searchSessionId',
     });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+  });
+
+  it('should re-render once if session id changes and ', async () => {
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      { id: '123' } as LensEmbeddableInput
+    );
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      searchSessionId: 'newSession',
+    });
+    embeddable.reload();
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 

@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
+import { ANOMALY_RESULT_TYPE } from '../../../common/constants/anomalies';
 
 export const mlAnomalyDetectionAlertParams = schema.object({
   jobSelection: schema.object(
@@ -26,7 +27,11 @@ export const mlAnomalyDetectionAlertParams = schema.object({
     }
   ),
   severity: schema.number(),
-  resultType: schema.string(),
+  resultType: schema.oneOf([
+    schema.literal(ANOMALY_RESULT_TYPE.RECORD),
+    schema.literal(ANOMALY_RESULT_TYPE.BUCKET),
+    schema.literal(ANOMALY_RESULT_TYPE.INFLUENCER),
+  ]),
   includeInterim: schema.boolean({ defaultValue: true }),
 });
 

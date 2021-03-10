@@ -11,7 +11,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "User Added to Privileged Group in Active Directory",
   "query": "event.category:iam and event.action:\"added-member-to-group\" and group.name:(Administrators or \"Local Administrators\" or \"Domain Admins\" or \"Enterprise Admins\" or \"Backup Admins\" or \"Schema Admins\" or \"DnsAdmins\")",
   "references": [
