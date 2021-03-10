@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { identity } from 'fp-ts/lib/function';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { debounce } from 'lodash';
 import React, { Component, Fragment } from 'react';
@@ -91,6 +90,7 @@ export interface Props {
   currentTab: Tab;
   onCurrentTabChange: (tab: Tab) => void;
   customFieldForm: FormHook<CustomFieldForm>;
+  excludeFields?: string[];
   includeFieldTypes?: {
     date?: true;
     keyword?: true;
@@ -154,23 +154,27 @@ export class FieldChooser extends Component<Props, State> {
   updateFields = debounce(
     () => {
       const updateFieldsResult = async () => {
-        const { indexPattern, includeFieldTypes } = this.props;
+        const { indexPattern, includeFieldTypes, excludeFields } = this.props;
         if (indexPattern == null || indexPattern === '') {
           this.setState({ isLoadingFields: false, fields: [] });
           return;
         }
         this.setState({ isLoadingFields: true, fields: [] });
         try {
-          const { fields } = await checkIndexPatternResults({ indexPattern });
+          let { fields } = await checkIndexPatternResults({ indexPattern });
+          if (excludeFields) {
+            fields = fields.filter(
+              ({ name }) => !excludeFields.some((fieldName) => fieldName === name)
+            );
+          }
+          if (includeFieldTypes) {
+            fields = fields.filter(({ type }) =>
+              Boolean(type !== 'unknown' && includeFieldTypes[type])
+            );
+          }
           this.setState({
             isLoadingFields: false,
-            fields: fields
-              .filter(
-                includeFieldTypes
-                  ? ({ type }) => type !== 'unknown' && includeFieldTypes[type]
-                  : identity
-              )
-              .sort(sortFields),
+            fields: fields.sort(sortFields),
           });
         } catch (e) {
           this.setState({ isLoadingFields: false, fields: [], loadingError: e });

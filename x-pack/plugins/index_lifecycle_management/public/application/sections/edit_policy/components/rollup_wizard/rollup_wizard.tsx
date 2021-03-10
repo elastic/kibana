@@ -260,7 +260,7 @@ export class RollupWizard extends Component<Props, State> {
       const stepFields = newStepsFields[stepId];
       const fieldsValidator = stepIdToStepConfigMap[stepId].fieldsValidator;
       stepsFieldErrors[stepId] =
-        typeof fieldsValidator === `function` ? fieldsValidator(stepFields) : {};
+        typeof fieldsValidator === `function` ? fieldsValidator(stepFields, newStepsFields) : {};
       return stepsFieldErrors;
     }, {});
   }
@@ -394,6 +394,7 @@ export class RollupWizard extends Component<Props, State> {
       case STEP_METRICS:
         return (
           <StepMetrics
+            dateHistogramField={stepsFields.STEP_DATE_HISTOGRAM.dateHistogramField}
             fields={currentStepFields}
             onFieldsChange={this.onFieldsChange}
             fieldErrors={currentStepFieldErrors}

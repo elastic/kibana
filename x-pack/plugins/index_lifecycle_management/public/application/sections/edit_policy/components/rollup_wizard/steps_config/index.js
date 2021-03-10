@@ -85,11 +85,12 @@ export const stepIdToStepConfigMap = {
         ...pick(overrides, ['metrics']),
       };
     },
-    fieldsValidator: (fields) => {
-      const { metrics } = fields;
+    fieldsValidator: (stepFields, allFields) => {
+      const { dateHistogramField } = allFields.STEP_DATE_HISTOGRAM;
+      const { metrics } = stepFields;
 
       return {
-        metrics: validateMetrics(metrics),
+        metrics: validateMetrics(metrics, dateHistogramField),
       };
     },
   },

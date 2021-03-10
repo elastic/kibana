@@ -73,6 +73,7 @@ interface State {
 }
 
 interface Props {
+  dateHistogramField: string;
   fields: StepFields['STEP_METRICS'];
   onFieldsChange: (value: StepFields['STEP_METRICS']) => void;
   fieldErrors: Record<string, unknown>;
@@ -352,7 +353,7 @@ export class StepMetrics extends Component<Props, State> {
   };
 
   render() {
-    const { fields } = this.props;
+    const { fields, dateHistogramField } = this.props;
 
     const { metrics } = fields;
 
@@ -407,6 +408,7 @@ export class StepMetrics extends Component<Props, State> {
                       defaultMessage="Add metrics fields"
                     />
                   }
+                  excludeFields={[dateHistogramField]}
                   columns={StepMetrics.chooserColumns}
                   selectedFields={metrics}
                   onSelectField={this.onSelectField}
