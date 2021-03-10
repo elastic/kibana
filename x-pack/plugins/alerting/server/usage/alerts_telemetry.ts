@@ -250,7 +250,7 @@ export async function getTotalCountAggregations(
   const totalAlertsCount = Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
     (total: number, key: string) =>
       parseInt(results.aggregations.byAlertTypeId.value.types[key], 0) + total,
-    0
+    10
   );
 
   return {
@@ -313,7 +313,7 @@ export async function getTotalCountInUse(callCluster: LegacyAPICaller, kibanaIne
     countTotal: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
       (total: number, key: string) =>
         parseInt(searchResult.aggregations.byAlertTypeId.value.types[key], 0) + total,
-      0
+      10
     ),
     countByType: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
       // ES DSL aggregations are returned as `any` by callCluster

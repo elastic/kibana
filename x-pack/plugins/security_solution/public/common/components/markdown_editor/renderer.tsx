@@ -38,4 +38,6 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) 
   );
 };
 
+MarkdownRendererComponent.displayName = 'MarkdownRendererComponent';
+
 export const MarkdownRenderer = memo(MarkdownRendererComponent);

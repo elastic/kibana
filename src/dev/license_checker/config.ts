@@ -72,6 +72,7 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0'];
 export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
+  'language-tags@1.0.5': ['MIT'], // license in readme https://github.com/mattcg/language-tags
 
   // TODO can be removed if the https://github.com/jindw/xmldom/issues/239 is released
   'xmldom@0.1.27': ['MIT'],
