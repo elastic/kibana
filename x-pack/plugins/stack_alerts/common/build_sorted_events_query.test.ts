@@ -26,10 +26,10 @@ describe('buildSortedEventsQuery', () => {
 
   test('it builds a filter with given date range', () => {
     expect(buildSortedEventsQuery(query)).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['index-name'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       track_total_hits: false,
       body: {
         docvalue_fields: [
@@ -63,13 +63,9 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-        sort: [
-          {
-            timefield: {
-              order: 'asc',
-            },
-          },
-        ],
+      },
+      sort: {
+        timefield: 'asc',
       },
     });
   });
@@ -77,10 +73,10 @@ describe('buildSortedEventsQuery', () => {
   test('it does not include searchAfterSortId if it is an empty string', () => {
     query.searchAfterSortId = '';
     expect(buildSortedEventsQuery(query)).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['index-name'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       track_total_hits: false,
       body: {
         docvalue_fields: [
@@ -114,13 +110,9 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-        sort: [
-          {
-            timefield: {
-              order: 'asc',
-            },
-          },
-        ],
+      },
+      sort: {
+        timefield: 'asc',
       },
     });
   });
@@ -129,10 +121,10 @@ describe('buildSortedEventsQuery', () => {
     const sortId = '123456789012';
     query.searchAfterSortId = sortId;
     expect(buildSortedEventsQuery(query)).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['index-name'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       track_total_hits: false,
       body: {
         docvalue_fields: [
@@ -166,14 +158,10 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-        sort: [
-          {
-            timefield: {
-              order: 'asc',
-            },
-          },
-        ],
         search_after: [sortId],
+      },
+      sort: {
+        timefield: 'asc',
       },
     });
   });
@@ -182,10 +170,10 @@ describe('buildSortedEventsQuery', () => {
     const sortId = 123456789012;
     query.searchAfterSortId = sortId;
     expect(buildSortedEventsQuery(query)).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['index-name'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       track_total_hits: false,
       body: {
         docvalue_fields: [
@@ -219,14 +207,10 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-        sort: [
-          {
-            timefield: {
-              order: 'asc',
-            },
-          },
-        ],
         search_after: [sortId],
+      },
+      sort: {
+        timefield: 'asc',
       },
     });
   });
@@ -240,10 +224,10 @@ describe('buildSortedEventsQuery', () => {
       },
     };
     expect(buildSortedEventsQuery(query)).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['index-name'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       track_total_hits: false,
       body: {
         docvalue_fields: [
@@ -284,13 +268,9 @@ describe('buildSortedEventsQuery', () => {
             },
           },
         },
-        sort: [
-          {
-            timefield: {
-              order: 'asc',
-            },
-          },
-        ],
+      },
+      sort: {
+        timefield: 'asc',
       },
     });
   });
@@ -298,10 +278,10 @@ describe('buildSortedEventsQuery', () => {
   test('it uses sortOrder if specified', () => {
     query.sortOrder = 'desc';
     expect(buildSortedEventsQuery(query)).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['index-name'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       track_total_hits: false,
       body: {
         docvalue_fields: [
@@ -335,13 +315,9 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-        sort: [
-          {
-            timefield: {
-              order: 'desc',
-            },
-          },
-        ],
+      },
+      sort: {
+        timefield: 'desc',
       },
     });
   });
@@ -349,10 +325,10 @@ describe('buildSortedEventsQuery', () => {
   test('it uses track_total_hits if specified', () => {
     query.track_total_hits = true;
     expect(buildSortedEventsQuery(query)).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['index-name'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       track_total_hits: true,
       body: {
         docvalue_fields: [
@@ -386,13 +362,9 @@ describe('buildSortedEventsQuery', () => {
             ],
           },
         },
-        sort: [
-          {
-            timefield: {
-              order: 'asc',
-            },
-          },
-        ],
+      },
+      sort: {
+        timefield: 'asc',
       },
     });
   });

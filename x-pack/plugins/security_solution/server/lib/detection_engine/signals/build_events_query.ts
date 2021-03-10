@@ -96,13 +96,9 @@ export const buildEventsSearchQuery = ({
         },
       ],
       ...(aggregations ? { aggregations } : {}),
-      sort: [
-        {
-          [sortField]: {
-            order: sortOrder ?? 'asc',
-          },
-        },
-      ],
+    },
+    sort: {
+      [sortField]: sortOrder ?? 'asc',
     },
   };
 
