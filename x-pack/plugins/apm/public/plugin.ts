@@ -27,7 +27,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerts/public';
+} from '../../alerting/public';
 import { FeaturesPluginSetup } from '../../features/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import {
@@ -45,7 +45,7 @@ export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
-  alerts?: AlertingPluginPublicSetup;
+  alerting?: AlertingPluginPublicSetup;
   ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
@@ -56,7 +56,7 @@ export interface ApmPluginSetupDeps {
 }
 
 export interface ApmPluginStartDeps {
-  alerts?: AlertingPluginPublicStart;
+  alerting?: AlertingPluginPublicStart;
   ml?: MlPluginStart;
   data: DataPublicPluginStart;
   home: void;
