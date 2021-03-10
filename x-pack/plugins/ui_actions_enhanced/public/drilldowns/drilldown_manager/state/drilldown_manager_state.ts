@@ -267,6 +267,7 @@ export class DrilldownManagerState {
       toastService.addError(error, {
         title: toastDrilldownsCRUDError,
       });
+      throw error;
     }
   }
 
@@ -277,19 +278,26 @@ export class DrilldownManagerState {
    */
   public readonly onDelete = (ids: string[]) => {
     (async () => {
-      await this.deps.dynamicActionManager.deleteEvents(ids);
-      this.deps.toastService.addSuccess(
-        ids.length === 1
-          ? {
-              title: toastDrilldownDeleted.title,
-              text: toastDrilldownDeleted.text,
-            }
-          : {
-              title: toastDrilldownsDeleted.title(ids.length),
-              text: toastDrilldownsDeleted.text,
-            }
-      );
-    })();
+      const { dynamicActionManager, toastService } = this.deps;
+      try {
+        await dynamicActionManager.deleteEvents(ids);
+        this.deps.toastService.addSuccess(
+          ids.length === 1
+            ? {
+                title: toastDrilldownDeleted.title,
+                text: toastDrilldownDeleted.text,
+              }
+            : {
+                title: toastDrilldownsDeleted.title(ids.length),
+                text: toastDrilldownsDeleted.text,
+              }
+        );
+      } catch (error) {
+        toastService.addError(error, {
+          title: toastDrilldownsCRUDError,
+        });
+      }
+    })().catch(console.error); // eslint-disable-line
   };
 
   /**
@@ -327,14 +335,19 @@ export class DrilldownManagerState {
     const { dynamicActionManager, toastService } = this.deps;
     const action = drilldownState.serialize();
 
-    await dynamicActionManager.updateEvent(eventId, action, drilldownState.triggers$.getValue());
-
-    toastService.addSuccess({
-      title: toastDrilldownEdited.title(action.name),
-      text: toastDrilldownEdited.text,
-    });
-
-    this.setRoute(['manage']);
+    try {
+      await dynamicActionManager.updateEvent(eventId, action, drilldownState.triggers$.getValue());
+      toastService.addSuccess({
+        title: toastDrilldownEdited.title(action.name),
+        text: toastDrilldownEdited.text,
+      });
+      this.setRoute(['manage']);
+    } catch (error) {
+      toastService.addError(error, {
+        title: toastDrilldownsCRUDError,
+      });
+      throw error;
+    }
   }
 
   // Below are convenience React hooks for consuming observables in connected
