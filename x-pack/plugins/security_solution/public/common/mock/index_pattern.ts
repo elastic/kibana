@@ -93,6 +93,18 @@ export const mockIndexPattern: IIndexPattern = {
       type: 'string',
       aggregatable: true,
     },
+    {
+      name: 'nestedField.firstAttributes',
+      searchable: true,
+      type: 'string',
+      aggregatable: false,
+    },
+    {
+      name: 'nestedField.secondAttributes',
+      searchable: true,
+      type: 'string',
+      aggregatable: false,
+    },
   ],
   title: 'filebeat-*,auditbeat-*,packetbeat-*',
 };
