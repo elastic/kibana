@@ -78,8 +78,7 @@ export const useWaffleViewState = () => {
         region: newState.region,
         legend: newState.legend,
       });
-      // if this is the "Default View" view, don't update the time range to the view's time range,
-      // this way it will use the global Kibana time or the default time already set
+
       if (newState.time) {
         setWaffleTimeState({
           currentTime: newState.time,
