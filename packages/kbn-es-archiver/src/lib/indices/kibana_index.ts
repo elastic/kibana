@@ -91,21 +91,12 @@ export async function cleanKibanaIndices({
   client,
   stats,
   log,
-  kibanaPluginIds,
 }: {
   client: Client;
   stats: Stats;
   log: ToolingLog;
   kibanaPluginIds: string[];
 }) {
-  if (!kibanaPluginIds.includes('spaces')) {
-    return await deleteKibanaIndices({
-      client,
-      stats,
-      log,
-    });
-  }
-
   while (true) {
     const resp = await client.deleteByQuery(
       {
@@ -145,8 +136,6 @@ export async function cleanKibanaIndices({
     `since spaces are enabled, all objects other than the default space were deleted from ` +
       `.kibana rather than deleting the whole index`
   );
-
-  stats.deletedIndex('.kibana');
 }
 
 export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
