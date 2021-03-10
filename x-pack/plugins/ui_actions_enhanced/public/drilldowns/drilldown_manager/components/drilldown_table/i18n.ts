@@ -53,6 +53,6 @@ export const txtAction = i18n.translate(
 export const txtTrigger = i18n.translate(
   'xpack.uiActionsEnhanced.components.DrilldownTable.triggerColumnTitle',
   {
-    defaultMessage: 'Action',
+    defaultMessage: 'Trigger',
   }
 );
