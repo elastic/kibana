@@ -116,7 +116,11 @@ export function ListManageDrilldowns({
       width: '64px',
       render: (drilldown: DrilldownListItem) =>
         !!onEdit ? (
-          <EuiButtonEmpty size="xs" onClick={() => onEdit(drilldown.id)}>
+          <EuiButtonEmpty
+            size="xs"
+            disabled={!!selectedDrilldowns.length}
+            onClick={() => onEdit(drilldown.id)}
+          >
             {txtEditDrilldown}
           </EuiButtonEmpty>
         ) : null,
