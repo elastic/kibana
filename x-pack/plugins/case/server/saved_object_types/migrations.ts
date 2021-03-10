@@ -60,17 +60,17 @@ interface SanitizedCaseType {
   type: string;
 }
 
-interface SanitizedCaseConsumer {
-  consumer: string;
+interface SanitizedCaseClass {
+  class: string;
 }
 
-const addConsumerToSO = <T = Record<string, unknown>>(
+const addClassToSO = <T = Record<string, unknown>>(
   doc: SavedObjectUnsanitizedDoc<T>
-): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => ({
+): SavedObjectSanitizedDoc<SanitizedCaseClass> => ({
   ...doc,
   attributes: {
     ...doc.attributes,
-    consumer: SECURITY_SOLUTION_CONSUMER,
+    class: SECURITY_SOLUTION_CONSUMER,
   },
   references: doc.references || [],
 });
@@ -131,8 +131,8 @@ export const caseMigrations = {
   },
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return addConsumerToSO(doc);
+  ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
+    return addClassToSO(doc);
   },
 };
 
@@ -158,15 +158,8 @@ export const configureMigrations = {
   },
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        consumer: SECURITY_SOLUTION_CONSUMER,
-      },
-      references: doc.references || [],
-    };
+  ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
+    return addClassToSO(doc);
   },
 };
 
@@ -211,8 +204,8 @@ export const userActionsMigrations = {
   },
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return addConsumerToSO(doc);
+  ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
+    return addClassToSO(doc);
   },
 };
 
@@ -266,23 +259,23 @@ export const commentsMigrations = {
   },
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return addConsumerToSO(doc);
+  ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
+    return addClassToSO(doc);
   },
 };
 
 export const connectorMappingsMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return addConsumerToSO(doc);
+  ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
+    return addClassToSO(doc);
   },
 };
 
 export const subCasesMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseConsumer> => {
-    return addConsumerToSO(doc);
+  ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
+    return addClassToSO(doc);
   },
 };

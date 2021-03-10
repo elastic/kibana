@@ -15,7 +15,7 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
   namespaceType: 'single',
   mappings: {
     properties: {
-      consumer: {
+      class: {
         type: 'keyword',
       },
       created_at: {

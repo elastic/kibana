@@ -104,6 +104,34 @@ export interface FeatureKibanaPrivileges {
      */
     read?: readonly string[];
   };
+
+  /**
+   * If your feature requires access to specific types of cases, then specify your access needs here. The values here should
+   * be a unique identifier for the type of case you want access to.
+   */
+  cases?: {
+    /**
+     * List of case types which users should have full read/write access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    all: ['securitySolution']
+     *  }
+     * ```
+     */
+    all?: readonly string[];
+    /**
+     * List of case types which users should have read-only access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    read: ['securitySolution']
+     *  }
+     * ```
+     */
+    read?: readonly string[];
+  };
+
   /**
    * If your feature requires access to specific saved objects, then specify your access needs here.
    */

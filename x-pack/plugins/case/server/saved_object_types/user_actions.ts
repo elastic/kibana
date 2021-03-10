@@ -37,7 +37,7 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      consumer: {
+      class: {
         type: 'keyword',
       },
       new_value: {

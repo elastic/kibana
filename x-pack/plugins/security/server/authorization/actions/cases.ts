@@ -14,15 +14,15 @@ export class CasesActions {
     this.prefix = `cases:${versionNumber}:`;
   }
 
-  public get(consumer: string, operation: string): string {
+  public get(className: string, operation: string): string {
     if (!operation || !isString(operation)) {
       throw new Error('operation is required and must be a string');
     }
 
-    if (!consumer || !isString(consumer)) {
-      throw new Error('consumer is required and must be a string');
+    if (!className || !isString(className)) {
+      throw new Error('class is required and must be a string');
     }
 
-    return `${this.prefix}${consumer}/${operation}`;
+    return `${this.prefix}${className}/${operation}`;
   }
 }

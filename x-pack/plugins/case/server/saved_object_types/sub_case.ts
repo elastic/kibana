@@ -31,7 +31,7 @@ export const subCaseSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      consumer: {
+      class: {
         type: 'keyword',
       },
       created_at: {

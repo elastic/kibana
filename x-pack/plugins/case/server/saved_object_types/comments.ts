@@ -21,7 +21,7 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
       comment: {
         type: 'text',
       },
-      consumer: {
+      class: {
         type: 'keyword',
       },
       type: {

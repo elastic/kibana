@@ -99,6 +99,11 @@ export interface KibanaFeatureConfig {
   alerting?: readonly string[];
 
   /**
+   * If your feature grants access to specific case types, you can specify them here to control visibility based on the current space.
+   */
+  cases?: readonly string[];
+
+  /**
    * Feature privilege definition.
    *
    * @example

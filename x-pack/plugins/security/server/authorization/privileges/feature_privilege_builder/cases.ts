@@ -19,18 +19,15 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
     privilegeDefinition: FeatureKibanaPrivileges,
     feature: KibanaFeature
   ): string[] {
-    const getCasesPrivilege = (operations: string[], consumer: string) =>
-      operations.map((operation) => this.actions.cases.get(consumer, operation));
+    const getCasesPrivilege = (operations: string[], classes: readonly string[]) => {
+      return classes.flatMap((className) =>
+        operations.map((operation) => this.actions.cases.get(className, operation))
+      );
+    };
 
-    // TODO: make sure we don't need to add a cases array or flag? to the FeatureKibanaPrivileges
-    // I think we'd only need to do that if we wanted a plugin to be able to get permissions for cases from other plugins?
-    // I think we only want the plugin to get access to the cases that are created through itself and not allow it to have
-    // access to other plugins
-
-    // It may make sense to add a cases field as a flag so plugins have to opt in to getting access to cases
     return uniq([
-      ...getCasesPrivilege(allOperations, feature.id),
-      ...getCasesPrivilege(readOperations, feature.id),
+      ...getCasesPrivilege(allOperations, privilegeDefinition.cases?.all ?? []),
+      ...getCasesPrivilege(readOperations, privilegeDefinition.cases?.read ?? []),
     ]);
   }
 }

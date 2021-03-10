@@ -216,8 +216,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
+      cases: ['securitySolution'],
       privileges: {
         all: {
+          cases: {
+            all: ['securitySolution'],
+          },
           app: [...securitySubPlugins, 'kibana'],
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-all', 'lists-read'],
@@ -241,6 +245,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         read: {
           app: [...securitySubPlugins, 'kibana'],
+          cases: {
+            read: ['securitySolution'],
+          },
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {

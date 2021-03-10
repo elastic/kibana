@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_MAX_SIGNALS,
-  APP_ID as SECURITY_SOLUTION_PLUGIN_APP_ID,
-} from '../../security_solution/common/constants';
+import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
 
 export const APP_ID = 'case';
 
@@ -75,4 +72,8 @@ export const SUPPORTED_CONNECTORS = [
 export const MAX_ALERTS_PER_SUB_CASE = 5000;
 export const MAX_GENERATED_ALERTS_PER_SUB_CASE = MAX_ALERTS_PER_SUB_CASE / DEFAULT_MAX_SIGNALS;
 
-export const SECURITY_SOLUTION_CONSUMER = SECURITY_SOLUTION_PLUGIN_APP_ID;
+/**
+ * This must be the same value that the security solution plugin uses to define the case kind when it registers the
+ * feature for the 7.13 migration only.
+ */
+export const SECURITY_SOLUTION_CONSUMER = 'securitySolution';
