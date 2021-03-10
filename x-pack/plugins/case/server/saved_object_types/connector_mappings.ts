@@ -18,9 +18,6 @@ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
     properties: {
       mappings: {
         properties: {
-          consumer: {
-            type: 'keyword',
-          },
           source: {
             type: 'keyword',
           },
@@ -31,6 +28,9 @@ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
         },
+      },
+      consumer: {
+        type: 'keyword',
       },
     },
   },
