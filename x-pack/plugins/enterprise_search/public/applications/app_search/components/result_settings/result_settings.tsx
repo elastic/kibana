@@ -28,13 +28,7 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, RESULT_SETTINGS_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{RESULT_SETTINGS_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+      <EuiPageHeader pageTitle={RESULT_SETTINGS_TITLE} />
       <EuiPageContent>
         <EuiPageContentBody>
           <FlashMessages />
