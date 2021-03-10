@@ -6,3 +6,4 @@
  */
 
 export { RESULT_SETTINGS_TITLE } from './constants';
+export { ResultSettingsLogic } from './logic';

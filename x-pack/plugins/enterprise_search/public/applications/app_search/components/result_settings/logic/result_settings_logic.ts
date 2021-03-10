@@ -7,12 +7,50 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-interface ResultSettingsActions {}
+import { FieldResultSettingObject, ServerFieldResultSettingObject } from '../types';
 
-interface ResultSettingsValues {}
+import { clearAllFields, clearAllServerFields } from './helpers';
+
+interface ResultSettingsActions {
+  clearAllFields(): void;
+}
+
+interface ResultSettingsValues {
+  nonTextResultFields: FieldResultSettingObject;
+  textResultFields: FieldResultSettingObject;
+  resultFields: FieldResultSettingObject;
+  serverResultFields: ServerFieldResultSettingObject;
+}
 
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
   path: ['enterprise_search', 'app_search', 'result_settings_logic'],
-  actions: () => ({}),
-  reducers: () => ({}),
+  actions: () => ({
+    clearAllFields: () => true,
+  }),
+  reducers: () => ({
+    nonTextResultFields: [
+      {},
+      {
+        clearAllFields: (nonTextResultFields) => clearAllFields(nonTextResultFields),
+      },
+    ],
+    textResultFields: [
+      {},
+      {
+        clearAllFields: (textResultFields) => clearAllFields(textResultFields),
+      },
+    ],
+    resultFields: [
+      {},
+      {
+        clearAllFields: (resultFields) => clearAllFields(resultFields),
+      },
+    ],
+    serverResultFields: [
+      {},
+      {
+        clearAllFields: (serverResultFields) => clearAllServerFields(serverResultFields),
+      },
+    ],
+  }),
 });
