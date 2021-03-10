@@ -29,6 +29,7 @@ import {
   HttpResourcesRequestHandler,
   HttpResourcesServiceToolkit,
 } from './types';
+import { getApmConfig } from './get_apm_config';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -37,6 +38,7 @@ export interface SetupDeps {
 
 export class HttpResourcesService implements CoreService<InternalHttpResourcesSetup> {
   private readonly logger: Logger;
+
   constructor(core: CoreContext) {
     this.logger = core.logger.get('http-resources');
   }
@@ -49,6 +51,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
   }
 
   start() {}
+
   stop() {}
 
   private createRegistrar(deps: SetupDeps, router: IRouter): HttpResources {
@@ -76,8 +79,12 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     const cspHeader = deps.http.csp.header;
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
+        const apmConfig = getApmConfig(request.url.pathname);
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
           includeUserSettings: true,
+          vars: {
+            apmConfig,
+          },
         });
 
         return response.ok({
@@ -86,8 +93,12 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
+        const apmConfig = getApmConfig(request.url.pathname);
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
           includeUserSettings: false,
+          vars: {
+            apmConfig,
+          },
         });
 
         return response.ok({
