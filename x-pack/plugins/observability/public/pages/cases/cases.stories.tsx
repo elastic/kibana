@@ -7,6 +7,7 @@
 
 import React, { ComponentType } from 'react';
 import { CasesPage } from '.';
+import { RouteParams } from '../../routes';
 
 export default {
   title: 'app/Cases',
@@ -19,5 +20,5 @@ export default {
 };
 
 export function EmptyState() {
-  return <CasesPage />;
+  return <CasesPage routeParams={{} as RouteParams<'/cases'>} />;
 }

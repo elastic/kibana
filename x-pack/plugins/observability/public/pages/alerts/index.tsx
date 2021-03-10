@@ -5,55 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageHeader,
-  EuiSearchBar,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SearchBar, TimeHistory } from '../../../../../../src/plugins/data/public';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { RouteParams } from '../../routes';
+import { AlertsSearchBar } from './alerts_search_bar';
 import { AlertItem, AlertsTable } from './alerts_table';
-
-/**
- * This is just a placeholder for a working search bar.
- */
-// function SearchBar() {
-//   return (
-//     <EuiSearchBar
-//       box={{
-//         placeholder: '"domain": "ecommerce" AND ("service.name": "ProductCatalogService" …)',
-//       }}
-//       filters={[
-//         {
-//           type: 'field_value_toggle_group',
-//           field: 'status',
-//           items: [
-//             {
-//               value: 'open',
-//               name: 'Open',
-//             },
-//             {
-//               value: 'inProgress',
-//               name: 'In progress',
-//             },
-//             {
-//               value: 'closed',
-//               name: 'Closed',
-//             },
-//           ],
-//         },
-//       ]}
-//     />
-//   );
-// }
 
 interface AlertsPageProps {
   items?: AlertItem[];
@@ -88,12 +47,7 @@ export function AlertsPage({ items = [] }: AlertsPageProps) {
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <SearchBar
-              indexPatterns={[]}
-              placeholder='"domain": "ecommerce" AND ("service.name": "ProductCatalogService" …)'
-              query={{ query: '', language: 'kuery' }}
-              timeHistory={new TimeHistory(new Storage(localStorage))}
-            />
+            <AlertsSearchBar />
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertsTable items={items} />

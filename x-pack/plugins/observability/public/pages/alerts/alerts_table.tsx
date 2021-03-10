@@ -13,10 +13,11 @@ import {
   EuiTableSelectionType,
   EuiLink,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
+import { AlertsFlyout } from './alerts_flyout';
 
 export interface AlertItem {
-  '@timestamp': string;
+  '@timestamp': number;
   reason: string;
   severity: string;
 }
@@ -26,48 +27,56 @@ type AlertsTableProps = Omit<
   'columns' | 'isSelectable' | 'pagination' | 'selection'
 >;
 
-const actions: Array<DefaultItemAction<AlertItem>> = [
-  {
-    name: 'Alert details',
-    description: 'Alert details',
-    onClick: () => {},
-    isPrimary: true,
-  },
-];
-
-const columns: Array<EuiBasicTableColumn<AlertItem>> = [
-  {
-    field: '@timestamp',
-    name: 'Triggered',
-    dataType: 'date',
-  },
-  {
-    field: 'duration',
-    name: 'Duration',
-  },
-  {
-    field: 'severity',
-    name: 'Severity',
-  },
-  {
-    field: 'reason',
-    name: 'Reason',
-    render: (text: string) => <EuiLink>{text}</EuiLink>,
-  },
-  {
-    actions,
-    name: 'Actions',
-  },
-];
-
 export function AlertsTable(props: AlertsTableProps) {
+  const [flyoutAlert, setFlyoutAlert] = useState<AlertItem | undefined>(undefined);
+  const handleFlyoutClose = () => setFlyoutAlert(undefined);
+
+  const actions: Array<DefaultItemAction<AlertItem>> = [
+    {
+      name: 'Alert details',
+      description: 'Alert details',
+      onClick: (item) => {
+        setFlyoutAlert(item);
+      },
+      isPrimary: true,
+    },
+  ];
+
+  const columns: Array<EuiBasicTableColumn<AlertItem>> = [
+    {
+      field: '@timestamp',
+      name: 'Triggered',
+      dataType: 'date',
+    },
+    {
+      field: 'duration',
+      name: 'Duration',
+    },
+    {
+      field: 'severity',
+      name: 'Severity',
+    },
+    {
+      field: 'reason',
+      name: 'Reason',
+      render: (text: string) => <EuiLink>{text}</EuiLink>,
+    },
+    {
+      actions,
+      name: 'Actions',
+    },
+  ];
+
   return (
-    <EuiBasicTable<AlertItem>
-      {...props}
-      isSelectable={true}
-      selection={{} as EuiTableSelectionType<AlertItem>}
-      columns={columns}
-      pagination={{ pageIndex: 0, pageSize: 0, totalItemCount: 0 }}
-    />
+    <>
+      {flyoutAlert && <AlertsFlyout {...flyoutAlert} onClose={handleFlyoutClose} />}
+      <EuiBasicTable<AlertItem>
+        {...props}
+        isSelectable={true}
+        selection={{} as EuiTableSelectionType<AlertItem>}
+        columns={columns}
+        pagination={{ pageIndex: 0, pageSize: 0, totalItemCount: 0 }}
+      />
+    </>
   );
 }

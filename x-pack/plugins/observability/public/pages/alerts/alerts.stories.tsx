@@ -9,6 +9,9 @@ import React, { ComponentType } from 'react';
 import { IntlProvider } from 'react-intl';
 import { AlertsPage } from '.';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import { PluginContext, PluginContextValue } from '../../context/plugin_context';
+import { AlertItem } from './alerts_table';
+import { eventLogPocData, wireframeData } from './example_data';
 
 export default {
   title: 'app/Alerts',
@@ -21,6 +24,7 @@ export default {
             services={{
               data: { query: {} },
               docLinks: { links: { query: {} } },
+              storage: { get: () => {} },
               uiSettings: {
                 get: (setting: string) => {
                   if (setting === 'dateFormat') {
@@ -30,10 +34,19 @@ export default {
                   }
                 },
               },
-              storage: { get: () => {} },
             }}
           >
-            <Story />
+            <PluginContext.Provider
+              value={
+                ({
+                  core: {
+                    http: { basePath: { prepend: (_: string) => '' } },
+                  },
+                } as unknown) as PluginContextValue
+              }
+            >
+              <Story />
+            </PluginContext.Provider>
           </KibanaContextProvider>
         </IntlProvider>
       );
@@ -42,10 +55,11 @@ export default {
 };
 
 export function Example() {
-  const items = [
-    { '@timestamp': new Date().toISOString(), severity: 'critical', reason: 'Some reason' },
-  ];
-  return <AlertsPage items={items} routeParams={{ query: {} }} />;
+  return <AlertsPage items={wireframeData} routeParams={{ query: {} }} />;
+}
+
+export function EventLog() {
+  return <AlertsPage items={eventLogPocData as AlertItem[]} routeParams={{ query: {} }} />;
 }
 
 export function EmptyState() {
