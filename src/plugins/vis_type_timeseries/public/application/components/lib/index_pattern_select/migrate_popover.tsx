@@ -21,20 +21,20 @@ import { i18n } from '@kbn/i18n';
 import { getCoreStart } from '../../../../services';
 import { PopoverProps } from './types';
 
-const availabilityForMigration = i18n.translate(
-  'visTypeTimeseries.indexPatternSelect.migrationPopover.availabilityForMigration',
+const switchModeLabel = i18n.translate(
+  'visTypeTimeseries.indexPatternSelect.migrationPopover.switchMode',
   {
-    defaultMessage: 'Availability for migration',
+    defaultMessage: 'Switch mode',
   }
 );
 
-const getReadyToMigrateCallOut = (value: PopoverProps['value'], onModeChange: () => void) => (
+const getReadyToSwitchCallOut = (value: PopoverProps['value'], onModeChange: () => void) => (
   <>
     <EuiText size="s" style={{ width: 300 }}>
       <p>
         <FormattedMessage
-          id="visTypeTimeseries.indexPatternSelect.migrationPopover.readyToMigrateText"
-          defaultMessage="We found that you already have '{index}' index on your instance."
+          id="visTypeTimeseries.indexPatternSelect.migrationPopover.readyToSwitchText"
+          defaultMessage="{index}' is already on your instance."
           values={{
             index: <EuiTextColor color="secondary">{value}</EuiTextColor>,
           }}
@@ -60,7 +60,7 @@ const getNoMatchedIndicesCallOut = (
       <p>
         <FormattedMessage
           id="visTypeTimeseries.indexPatternSelect.migrationPopover.noMatchedIndicesCallOutText"
-          defaultMessage="Before switching mode you should create a Kibana index pattern for '{index}'."
+          defaultMessage="Before switching mode, create an index pattern pattern for '{index}'."
           values={{
             index: <EuiTextColor color="secondary">{value}</EuiTextColor>,
           }}
@@ -97,14 +97,14 @@ export const MigrationPopover = ({ value, onModeChange, matchedIndex }: PopoverP
       ownFocus
       button={
         <EuiLink onClick={onButtonClick}>
-          <EuiText size="xs">{availabilityForMigration}</EuiText>
+          <EuiText size="xs">{switchModeLabel}</EuiText>
         </EuiLink>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <EuiPopoverTitle> {availabilityForMigration} </EuiPopoverTitle>
-      {matchedIndex && getReadyToMigrateCallOut(value, switchMode)}
+      <EuiPopoverTitle> {switchModeLabel} </EuiPopoverTitle>
+      {matchedIndex && getReadyToSwitchCallOut(value, switchMode)}
       {!matchedIndex && getNoMatchedIndicesCallOut(value, navigateToCreateIndexPatterns)}
     </EuiPopover>
   );

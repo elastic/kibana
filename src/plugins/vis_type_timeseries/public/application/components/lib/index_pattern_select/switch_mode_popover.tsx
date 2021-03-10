@@ -57,8 +57,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           <FormattedMessage
             id="visTypeTimeseries.indexPatternSelect.switchModePopover.text"
             defaultMessage="An index pattern identifies one or more Elasticsearch indices that you want to explore.
-            There are currently two selection modes available: Elasticsearch indices and Kibana
-            indices (recommended way)."
+            You can use Elasticsearch indices or Kibana index patterns (recommended)."
           />
         </EuiText>
         <EuiSpacer />
@@ -67,7 +66,7 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
           label={i18n.translate(
             'visTypeTimeseries.indexPatternSelect.switchModePopover.useKibanaIndices',
             {
-              defaultMessage: 'Use Kibana indices?',
+              defaultMessage: 'Use only Kibana index patterns',
             }
           )}
           onChange={switchMode}
