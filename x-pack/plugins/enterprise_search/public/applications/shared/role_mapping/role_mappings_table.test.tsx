@@ -81,7 +81,7 @@ describe('RoleMappingsTable', () => {
   });
 
   it('handles display when no items present', () => {
-    const noItemsRoleMapping = { ...asRoleMapping };
+    const noItemsRoleMapping = { ...asRoleMapping, engines: [] };
     noItemsRoleMapping.accessAllEngines = false;
 
     const wrapper = shallow(
