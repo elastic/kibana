@@ -30,10 +30,10 @@ export default ({ getService }: FtrProviderContext) => {
     expect(body.count).to.eql(expected.apiTransformTransformsNodes.count);
   }
 
-  describe('/api/transform/transforms/nodes', function () {
+  describe('/api/transform/transforms/_nodes', function () {
     it('should return the number of available transform nodes', async () => {
       const { body } = await supertest
-        .get('/api/transform/transforms/nodes')
+        .get('/api/transform/transforms/_nodes')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)

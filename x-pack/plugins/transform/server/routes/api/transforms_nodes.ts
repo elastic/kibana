@@ -17,13 +17,13 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
   /**
    * @apiGroup Transform Nodes
    *
-   * @api {get} /api/transforms/nodes Transform Nodes
+   * @api {get} /api/transforms/_nodes Transform Nodes
    * @apiName GetTransformNodes
    * @apiDescription Get transform nodes
    */
   router.get<undefined, undefined, undefined>(
     {
-      path: addBasePath('transforms/nodes'),
+      path: addBasePath('transforms/_nodes'),
       validate: false,
     },
     license.guardApiRoute<undefined, undefined, undefined>(async (ctx, req, res) => {

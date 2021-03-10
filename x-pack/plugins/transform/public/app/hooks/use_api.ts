@@ -69,7 +69,7 @@ export const useApi = () => {
     () => ({
       async getTransformNodes(): Promise<GetTransformNodesResponseSchema | HttpFetchError> {
         try {
-          return await http.get(`${API_BASE_PATH}transforms/nodes`);
+          return await http.get(`${API_BASE_PATH}transforms/_nodes`);
         } catch (e) {
           return e;
         }
