@@ -416,7 +416,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           },
           api: ['copySavedObjectsToSpaces'],
           savedObject: {
-            all: [...savedObjectTypes],
+            all: [...savedObjectTypes, 'alert'],
             read: [],
           },
           ui: ['read', 'edit', 'delete', 'copyIntoSpace', 'shareIntoSpace'],
@@ -430,7 +430,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           api: ['copySavedObjectsToSpaces'],
           savedObject: {
             all: [],
-            read: [...savedObjectTypes],
+            read: [...savedObjectTypes, 'alert'],
           },
           ui: ['read'],
         },
