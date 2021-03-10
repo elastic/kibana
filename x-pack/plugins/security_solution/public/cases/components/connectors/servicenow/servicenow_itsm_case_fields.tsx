@@ -13,7 +13,7 @@ import { ConnectorFieldsProps } from '../types';
 import {
   ConnectorTypes,
   ServiceNowITSMFieldsType,
-} from '../../../../../../case/common/api/connectors';
+} from '../../../../../../cases/common/api/connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
