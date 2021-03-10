@@ -62,6 +62,7 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
     fetch: jest.fn(),
     fetchCounter: 0,
     fetchError: undefined,
+    fetchStatus: 'loading',
     fieldCounts: calcFieldCounts({}, esHits, indexPattern),
     hits: esHits.length,
     indexPattern,
