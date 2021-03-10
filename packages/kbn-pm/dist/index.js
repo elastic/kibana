@@ -14759,7 +14759,7 @@ var isWin32 = __webpack_require__(121).platform() === 'win32';
 
 var slash = '/';
 var backslash = /\\/g;
-var enclosure = /[\{\[].*[\/]*.*[\}\]]$/;
+var enclosure = /[\{\[].*[\}\]]$/;
 var globby = /(^|[^\\])([\{\[]|\([^\)]+$)/;
 var escaped = /\\([\!\*\?\|\[\]\(\)\{\}])/g;
 
@@ -14767,6 +14767,7 @@ var escaped = /\\([\!\*\?\|\[\]\(\)\{\}])/g;
  * @param {string} str
  * @param {Object} opts
  * @param {boolean} [opts.flipBackslashes=true]
+ * @returns {string}
  */
 module.exports = function globParent(str, opts) {
   var options = Object.assign({ flipBackslashes: true }, opts);
