@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import { useLocation } from 'react-router-dom';
-import React, { createContext, ReactChild, useContext, useMemo, useEffect } from 'react';
-import qs from 'query-string';
+import React, { createContext, ReactChild, useContext } from 'react';
 import { ApplicationStart } from 'kibana/public';
 
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
-
-import { useKibana } from '../../../shared_imports';
-
-import { getPolicyEditPath, getPolicyCreatePath } from '../../services/navigation';
-
-type PolicyView = { id: 'policy' } | { id: 'rollupAction'; phase: 'hot' | 'cold' };
 
 export interface EditPolicyContextValue {
   isNewPolicy: boolean;
@@ -29,11 +21,7 @@ export interface EditPolicyContextValue {
   policyName?: string;
 }
 
-interface InternalEditPolicyContextValue extends EditPolicyContextValue {
-  currentView: PolicyView;
-}
-
-const EditPolicyContext = createContext<InternalEditPolicyContextValue>(null as any);
+const EditPolicyContext = createContext<EditPolicyContextValue>(null as any);
 
 export const EditPolicyContextProvider = ({
   value,
@@ -42,52 +30,10 @@ export const EditPolicyContextProvider = ({
   value: EditPolicyContextValue;
   children: ReactChild;
 }) => {
-  const { search } = useLocation();
-  const {
-    services: { breadcrumbService },
-  } = useKibana();
-
-  const { policyName } = value;
-
-  const currentView = useMemo<PolicyView>(() => {
-    const { rollup } = qs.parse(search) as { rollup: 'hot' | 'cold' };
-    if (rollup) {
-      return { id: 'rollupAction', phase: rollup };
-    }
-    return { id: 'policy' };
-  }, [search]);
-
-  const { id: currentViewId } = currentView;
-
-  useEffect(() => {
-    switch (currentViewId) {
-      case 'policy':
-        breadcrumbService.setBreadcrumbs({ type: 'editPolicy' });
-        break;
-      case 'rollupAction':
-        breadcrumbService.setBreadcrumbs({
-          type: 'configurePolicyRollup',
-          payload: {
-            editPolicyPath: policyName ? getPolicyEditPath(policyName) : getPolicyCreatePath(),
-          },
-        });
-        break;
-    }
-  }, [breadcrumbService, search, currentViewId, policyName]);
-
-  return (
-    <EditPolicyContext.Provider
-      value={{
-        ...value,
-        currentView,
-      }}
-    >
-      {children}
-    </EditPolicyContext.Provider>
-  );
+  return <EditPolicyContext.Provider value={value}>{children}</EditPolicyContext.Provider>;
 };
 
-export const useEditPolicyContext = (): InternalEditPolicyContextValue => {
+export const useEditPolicyContext = (): EditPolicyContextValue => {
   const ctx = useContext(EditPolicyContext);
   if (!ctx) {
     throw new Error('useEditPolicyContext can only be called inside of EditPolicyContext!');

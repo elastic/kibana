@@ -19,6 +19,7 @@ import { defaultPolicy } from '../../constants';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
 import { EditPolicyContextProvider } from './edit_policy_context';
+import { NavigationContextProvider } from './navigation';
 
 interface RouterProps {
   policyName: string;
@@ -105,7 +106,9 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
         },
       }}
     >
-      <PresentationComponent history={history} />
+      <NavigationContextProvider>
+        <PresentationComponent history={history} />
+      </NavigationContextProvider>
     </EditPolicyContextProvider>
   );
 };

@@ -54,6 +54,7 @@ import {
 import { createPolicyNameValidations, createSerializer, deserializer, Form, schema } from './form';
 
 import { useEditPolicyContext } from './edit_policy_context';
+import { useNavigationContext } from './navigation';
 
 import { FormInternal } from './types';
 
@@ -70,8 +71,9 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     policy: originalPolicy,
     existingPolicies,
     policyName,
-    currentView,
   } = useEditPolicyContext();
+
+  const { currentView, goToPolicyView } = useNavigationContext();
 
   const [currentPolicy, setCurrentPolicy] = useState(() => cloneDeep(originalPolicy));
 
@@ -147,14 +149,9 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
   useEffect(() => {
     if (!hasCurrentRollupField) {
-      const { search } = history.location;
-      const newQueryParams = qs.parse(search);
-      delete newQueryParams.rollup;
-      history.push({
-        search: qs.stringify(newQueryParams),
-      });
+      goToPolicyView();
     }
-  }, [hasCurrentRollupField, history]);
+  }, [hasCurrentRollupField, goToPolicyView]);
 
   return (
     <EuiPage>
@@ -350,13 +347,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               phase={currentView.phase}
               onCancel={() => {
                 const { phase } = currentView;
-                const { search } = history.location;
-                const newQueryParams = qs.parse(search);
-                delete newQueryParams.rollup;
-                history.push({
-                  search: qs.stringify(newQueryParams),
-                  hash: `#${phase}-rollup`,
-                });
+                goToPolicyView(`#${phase}-rollup`);
               }}
               onDone={(rollupAction) => {
                 const { phase } = currentView;
@@ -371,13 +362,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                 setCurrentPolicy(newCurrentPolicy);
                 rollupField.setValue(rollupAction);
 
-                const { search } = history.location;
-                const newQueryParams = qs.parse(search);
-                delete newQueryParams.rollup;
-                history.push({
-                  search: qs.stringify(newQueryParams),
-                  hash: `#${phase}-rollup`,
-                });
+                goToPolicyView(`#${phase}-rollup`);
               }}
             />
           )}
