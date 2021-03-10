@@ -216,6 +216,7 @@ describe('<EditPolicy /> node allocation', () => {
 
     test('shows view node attributes link when attribute selected and shows flyout when clicked', async () => {
       const { actions, component } = testBed;
+
       await actions.cold.enable(true);
 
       expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
@@ -250,23 +251,37 @@ describe('<EditPolicy /> node allocation', () => {
       expect(actions.cold.hasDefaultAllocationWarning()).toBeTruthy();
     });
 
-    test('shows default allocation notice when warm or hot tiers exists, but not cold tier', async () => {
-      httpRequestsMockHelpers.setListNodes({
-        nodesByAttributes: {},
+    [
+      {
+        nodesByRoles: { data_hot: ['test'] },
+        previousActiveRole: 'hot',
+      },
+      {
         nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
-        isUsingDeprecatedDataRoleConfig: false,
+        previousActiveRole: 'warm',
+      },
+    ].forEach(({ nodesByRoles, previousActiveRole }) => {
+      test(`shows default allocation notice when ${previousActiveRole} tiers exists, but not cold tier`, async () => {
+        httpRequestsMockHelpers.setListNodes({
+          nodesByAttributes: {},
+          nodesByRoles,
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+        const { actions, component, find } = testBed;
+
+        component.update();
+        await actions.cold.enable(true);
+
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        expect(actions.cold.hasDefaultAllocationNotice()).toBeTruthy();
+        expect(find('defaultAllocationNotice').text()).toContain(
+          `This policy will move data in the cold phase to ${previousActiveRole} tier nodes`
+        );
       });
-
-      await act(async () => {
-        testBed = await setup();
-      });
-      const { actions, component } = testBed;
-
-      component.update();
-      await actions.cold.enable(true);
-
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      expect(actions.cold.hasDefaultAllocationNotice()).toBeTruthy();
     });
 
     test(`doesn't show default allocation notice when node with "data" role exists`, async () => {
@@ -366,7 +381,7 @@ describe('<EditPolicy /> node allocation', () => {
         expect(find('cloudDataTierCallout').exists()).toBeFalsy();
       });
 
-      test('shows cloud notice when cold tier nodes do not exist', async () => {
+      test(`shows cloud notice when cold tier nodes do not exist`, async () => {
         httpRequestsMockHelpers.setListNodes({
           nodesByAttributes: {},
           nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
@@ -375,13 +390,17 @@ describe('<EditPolicy /> node allocation', () => {
         await act(async () => {
           testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
         });
-        const { actions, component, exists } = testBed;
+        const { actions, component, exists, find } = testBed;
 
         component.update();
         await actions.cold.enable(true);
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
-        expect(exists('cloudMissingColdTierCallout')).toBeTruthy();
+        expect(exists('cloudMissingTierCallout')).toBeTruthy();
+        expect(find('cloudMissingTierCallout').text()).toContain(
+          `Edit your Elastic Cloud deployment to set up a cold tier`
+        );
+
         // Assert that other notices are not showing
         expect(actions.cold.hasDefaultAllocationNotice()).toBeFalsy();
         expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
@@ -480,6 +499,7 @@ describe('<EditPolicy /> node allocation', () => {
         const { find } = testBed;
         expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toBe('Custom');
       });
+
       test('detecting use of the "off" allocation type', () => {
         const { find } = testBed;
         expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');

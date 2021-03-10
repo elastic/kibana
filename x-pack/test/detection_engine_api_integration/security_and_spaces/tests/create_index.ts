@@ -21,7 +21,8 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('create_index', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/94367
+  describe.skip('create_index', () => {
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
     });

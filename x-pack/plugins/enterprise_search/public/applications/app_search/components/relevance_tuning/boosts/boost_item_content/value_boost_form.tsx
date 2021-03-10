@@ -20,10 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { RelevanceTuningLogic } from '../..';
-import { Boost } from '../../types';
+import { ValueBoost } from '../../types';
 
 interface Props {
-  boost: Boost;
+  boost: ValueBoost;
   index: number;
   name: string;
 }

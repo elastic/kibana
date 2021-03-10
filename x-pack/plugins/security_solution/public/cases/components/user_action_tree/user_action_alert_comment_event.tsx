@@ -15,7 +15,7 @@ import { getRuleDetailsUrl, useFormatUrl } from '../../../common/components/link
 import { SecurityPageName } from '../../../app/types';
 
 import * as i18n from './translations';
-import { CommentType } from '../../../../../case/common/api';
+import { CommentType } from '../../../../../cases/common/api';
 import { LinkAnchor } from '../../../common/components/links';
 
 interface Props {
