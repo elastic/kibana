@@ -197,6 +197,17 @@ export const ActionTypeForm = ({
             <EuiFlexItem grow={true}>
               <EuiFormControlLayout
                 fullWidth
+                label={
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.actionIdLabel"
+                    defaultMessage="{connectorInstance} connector"
+                    values={{
+                      connectorInstance: actionTypesIndex
+                        ? actionTypesIndex[actionConnector.actionTypeId].name
+                        : actionConnector.actionTypeId,
+                    }}
+                  />
+                }
                 prepend={
                   <EuiFormLabel
                     htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
