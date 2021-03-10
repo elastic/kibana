@@ -78,22 +78,6 @@ export const getPolicyPayload = (name) => ({
     frozen: {
       min_age: '20d',
       actions: {
-        set_priority: {
-          priority: 0,
-        },
-        unfollow: {},
-        allocate: {
-          number_of_replicas: 2,
-          include: {
-            a: 'a',
-          },
-          exclude: {
-            b: 'b',
-          },
-          require: {
-            c: 'c',
-          },
-        },
         searchable_snapshot: {
           snapshot_repository: 'backing_repo',
         },
