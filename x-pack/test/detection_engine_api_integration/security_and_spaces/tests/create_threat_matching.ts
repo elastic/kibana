@@ -33,7 +33,7 @@ const format = (value: unknown): string => JSON.stringify(value, null, 2);
 // Asserts that each expected value is included in the subject, independent of
 // ordering. Uses _.isEqual for value comparison.
 const assertContains = (subject: unknown[], expected: unknown[]) =>
-  expected.map((expectedValue) =>
+  expected.forEach((expectedValue) =>
     expect(subject.some((value) => isEqual(value, expectedValue))).to.eql(
       true,
       `expected ${format(subject)} to contain ${format(expectedValue)}`
