@@ -20,7 +20,7 @@ image::images/canvas-autoplay-interval.png[Element autoplay interval]
 [role="screenshot"]
 image::images/canvas-fullscreen.png[Image showing how to enter fullscreen mode from view dropdown]
 
-. When you are ready to exit fullscreen mode, press the Esc (Escape) key.
+. When you are ready to exit fullscreen mode, press Esc.
 
 [float]
 [[zoom-in-out]]
@@ -48,4 +48,4 @@ Change how often the data refreshes on your workpad.
 [role="screenshot"]
 image::images/canvas-refresh-interval.png[Element data refresh interval]
 +
-To manually refresh the data, click image:canvas/images/canvas-refresh-data.png[].
+To manually refresh the data, click image:canvas/images/canvas-refresh-data.png[Canvas refresh data button].

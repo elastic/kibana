@@ -5,31 +5,52 @@
 [partintro]
 --
 
-Canvas is a data visualization and presentation tool that sits within {kib}. With Canvas, you can pull live data directly from {es}, and combine the data with colors, images, text, and your imagination to create dynamic, multi-page, pixel-perfect displays. If you are a little bit creative, a little bit technical, and a whole lot curious, then Canvas is for you.
+*Canvas* is a data visualization and presentation tool that allows you to pull live data from {es}, 
+then combine the data with colors, images, text, and your imagination to create dynamic, multi-page, pixel-perfect displays. 
+If you are a little bit creative, a little bit technical, and a whole lot curious, then *Canvas* is for you.
 
-With Canvas, you can:
+With *Canvas*, you can:
 
 * Create and personalize your work space with backgrounds, borders, colors, fonts, and more.
 
 * Customize your workpad with your own visualizations, such as images and text.
 
-* Pull your data directly from Elasticsearch, then show it off with charts, graphs, progress monitors, and more.
+* Pull your data directly from {es}, then show it off with charts, graphs, progress monitors, and more.
 
 * Focus the data you want to display with filters.
 
-To begin, open the main menu, then click *Canvas*.
-
-[role="screenshot"]
-image::images/canvas-gs-example.png[Getting started example]
-
-For a quick overview of Canvas, watch link:https://www.youtube.com/watch?v=ZqvF_5-1xjQ[Stand out with Canvas].
+++++
+<iframe width="560" height="315" 
+src="https://www.youtube.com/embed/ZqvF_5-1xjQ" 
+frameborder="0" 
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+allowfullscreen></iframe>
+</br>
+++++
 
 [float]
 [[create-workpads]]
 == Create workpads
 
-A _workpad_ provides you with a space where you can build presentations of your live data. With Canvas, 
-you can create a workpad from scratch, start with a preconfigured workpad, import an existing workpad, or use a sample data workpad.
+A _workpad_ provides you with a space where you can build presentations of your live data. You can create a workpad from scratch, start with a preconfigured workpad, 
+import an existing workpad, or use a sample data workpad.
+
+[float]
+[[canvas-minimum-requirements]]
+=== Minimum requirements
+
+To create workpads, you must meet the minimum requirements. 
+
+* If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
+
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and an <<index-patterns,index pattern>>.
+
+* Have an understanding of {ref}/documents-indices.html[{es} documents and indices].
+
+* Make sure you have sufficient privileges to create and save workpads. When the read-only indicator appears, you have insufficient privileges,
+and the options to create and save workpads are unavailable. For more information, refer to <<xpack-security-authorization,Granting access to {kib}>>.
+
+To open *Canvas*, open the main menu, then click *Canvas*.
 
 [float]
 [[start-with-a-blank-workpad]]
@@ -54,7 +75,7 @@ image::images/canvas-background-color-picker.png[Canvas color picker]
 [[create-workpads-from-templates]]
 === Create workpads from templates
 
-If you're unsure about where to start, you can use one of the preconfigured templates that come with Canvas.
+If you're unsure about where to start, you can use one of the preconfigured templates that come with *Canvas*.
 
 . On the *Canvas workpads* page, select *Templates*.
 
@@ -90,55 +111,60 @@ Create a story about your data by adding elements to your workpad that include i
 [[create-elements]]
 === Create elements
 
-Choose the type of element you want to use, then use the preconfigured demo data to familiarize yourself with the element. When you're ready, connect the element to your own data. By default, most of the elements you create use 
-demo data until you change the data source. The demo data includes a small data set that you can use to experiment with your element.
+Choose the type of element you want to use, then use the preconfigured demo data to familiarize yourself with the element. When you're ready, connect the element to your own data. 
+By default, most of the elements you create use the demo data until you change the data source. The demo data includes a small data set that you can use to experiment with your element.
 
-To begin, click *Add element*, then select the element you want to use.
-
+. Click *Add element*, then select the element you want to use.
++
 [role="screenshot"]
 image::images/canvas-element-select.gif[Canvas elements]
 
-When you're ready to connect the element to your data, select *Data*, then select one of the following data sources:
+. To connect the element to your data, select *Data*, then select one of the following data sources:
 
 * *{es} SQL* &mdash; Access your data in {es} using {ref}/sql-spec.html[SQL syntax].
 
-* *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select an index and fields, and optionally enter a query using the <<lucene-query,Lucene Query Syntax>>. Use the *{es} documents* data source when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
+* *{es} documents* &mdash; Access your data in {es} without using aggregations. To use, select an index and fields, and optionally enter a query using the <<lucene-query,Lucene Query Syntax>>. 
+Use the *{es} documents* data source when you have low volume datasets, to view raw documents, or to plot exact, non-aggregated values on a chart.
 
-* *Timelion* &mdash; Access your time series data using <<create-panels-with-timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
-
+* *Timelion* &mdash; Access your time series data using <<create-panels-with-timelion,*Timelion*>> queries. To use *Timelion* queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
++
 Each element can display a different data source, and pages and workpads often contain multiple data sources.
 
-When you're ready to save your element, select the element, then click *Edit > Save as new element*.
+. To save, use the following options:
 
+* To save a single element, select the element, then click *Edit > Save as new element*.
++
 [role="screenshot"]
 image::images/canvas_save_element.png[]
 
-To save a group of elements, press and hold Shift, select the elements you want to save, then click *Edit > Save as new element*.
+* To save a group of elements, press and hold Shift, select the elements you want to save, then click *Edit > Save as new element*.
 
-Elements are saved in *Add element > My elements*.
+To access your saved elements, click *Add element > My elements*.
 
 [float]
-[[add-saved-objects]]
-=== Add saved objects
+[[add-kibana-visualizations]]
+=== Add {kib} elements
 
-Add <<managing-saved-objects,saved objects>> to your workpad, such as maps and visualizations.
+Add a panel that you saved in *Visualize Library* to your workpad. 
 
 . Click *Add element > Add from {kib}*.
 
-. Select the saved object you want to add.
+. Select the panel you want to add.
 +
 [role="screenshot"]
 image::images/canvas-map-embed.gif[]
 
-. To use the customization options, click the panel menu, then select one of the following options:
+. To use the customization options, open the panel menu, then select one of the following options:
 
-* *Edit map* &mdash; Opens <<maps,Maps>> or a visualization builder so that you can edit the original saved object.
+* *Edit map* &mdash; Opens <<maps,Maps>> so that you can edit the panel.
 
-* *Edit panel title* &mdash; Adds a title to the saved object.
+* *Edit visualization* &mdash; Opens the visualization editor so that you can edit the panel.
 
-* *Customize time range* &mdash; Exposes a time filter dedicated to the saved object.
+* *Edit panel title* &mdash; Allows you to change the panel title.
 
-* *Inspect* &mdash; Allows you to drill down into the element data.
+* *Customize time range* &mdash; Allows you to change the time filter dedicated to the panel.
+
+* *Inspect* &mdash; Allows you to drill down into the panel data.
 
 [float]
 [[add-your-own-images]]
