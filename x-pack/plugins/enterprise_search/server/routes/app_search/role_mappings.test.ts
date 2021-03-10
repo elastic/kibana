@@ -14,6 +14,14 @@ import {
   registerResetRoleMappingRoute,
 } from './role_mappings';
 
+const roleMappingBaseSchema = {
+  rules: { username: 'user' },
+  roleType: 'owner',
+  engines: ['e1', 'e2'],
+  accessAllEngines: false,
+  authProvider: ['*'],
+};
+
 describe('role mappings routes', () => {
   describe('GET /api/app_search/role_mappings', () => {
     let mockRouter: MockRouter;
@@ -57,6 +65,18 @@ describe('role mappings routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/role_mappings',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: roleMappingBaseSchema };
+        mockRouter.shouldValidate(request);
+      });
+
+      it('missing required fields', () => {
+        const request = { body: {} };
+        mockRouter.shouldThrow(request);
       });
     });
   });
@@ -103,6 +123,23 @@ describe('role mappings routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/role_mappings/:id',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            ...roleMappingBaseSchema,
+            id: '123',
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+
+      it('missing required fields', () => {
+        const request = { body: {} };
+        mockRouter.shouldThrow(request);
       });
     });
   });
