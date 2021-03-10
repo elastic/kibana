@@ -62,7 +62,7 @@ const ActionsTableComponent = () => {
     () => ({ rowIndex, columnId }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
-      const value = data[rowIndex].fields[columnId];
+      const value = data[rowIndex].fields![columnId];
 
       if (columnId === 'action_id') {
         // eslint-disable-next-line react-hooks/rules-of-hooks

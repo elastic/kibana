@@ -36,6 +36,7 @@ export const allActions: OsqueryFactory<OsqueryQueries.actions> = {
       ...response,
       inspect,
       edges: response.rawResponse.hits.hits,
+      // @ts-expect-error doesn't handle case when total TotalHits
       totalCount: response.rawResponse.hits.total,
       pageInfo: {
         activePage: activePage ?? 0,

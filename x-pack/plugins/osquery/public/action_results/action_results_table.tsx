@@ -107,7 +107,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       if (columnId === 'status') {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const linkProps = useRouterNavigate(
-          `/live_query/${actionId}/results/${value.fields.agent_id[0]}`
+          `/live_query/${actionId}/results/${value.fields?.agent_id[0]}`
         );
 
         return (
@@ -122,7 +122,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const { data: allResultsData } = useAllResults({
           actionId,
-          agentId: value.fields.agent_id[0],
+          agentId: value.fields?.agent_id[0],
           activePage: pagination.pageIndex,
           limit: pagination.pageSize,
           direction: Direction.asc,
@@ -133,7 +133,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       }
 
       if (columnId === 'agent_status') {
-        const agentIdValue = value.fields.agent_id[0];
+        const agentIdValue = value.fields?.agent_id[0];
         // @ts-expect-error update types
         const agent = find(['_id', agentIdValue], agentsData?.agents);
         const online = agent?.active;
@@ -143,7 +143,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       }
 
       if (columnId === 'agent') {
-        const agentIdValue = value.fields.agent_id[0];
+        const agentIdValue = value.fields?.agent_id[0];
         // @ts-expect-error update types
         const agent = find(['_id', agentIdValue], agentsData?.agents);
         const agentName = agent?.local_metadata.host.name;
@@ -156,7 +156,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       }
 
       if (columnId === '@timestamp') {
-        return value.fields['@timestamp'];
+        return value.fields!['@timestamp'];
       }
 
       return '-';
