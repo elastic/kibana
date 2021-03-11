@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
