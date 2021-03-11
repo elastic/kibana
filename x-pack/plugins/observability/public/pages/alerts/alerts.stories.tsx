@@ -10,6 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { AlertsPage } from '.';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
+import { AlertsFlyout } from './alerts_flyout';
 import { AlertItem } from './alerts_table';
 import { eventLogPocData, wireframeData } from './example_data';
 
@@ -63,5 +64,9 @@ export function EventLog() {
 }
 
 export function EmptyState() {
-  return <AlertsPage routeParams={{ query: {} }} />;
+  return <AlertsPage items={[]} routeParams={{ query: {} }} />;
+}
+
+export function Flyout() {
+  return <AlertsFlyout {...wireframeData[0]} onClose={() => {}} />;
 }

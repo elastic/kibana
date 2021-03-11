@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiPageHeader,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
@@ -35,12 +28,19 @@ export function CasesPage(props: CasesProps) {
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <EuiCallOut title="Coming soon" color="danger" iconType="alert">
-              <p>This is the future home of cases.</p>
+            <EuiCallOut
+              title={i18n.translate('xpack.observability.casesDisclaimerTitle', {
+                defaultMessage: 'Coming soon',
+              })}
+              color="warning"
+              iconType="beaker"
+            >
+              <p>
+                {i18n.translate('xpack.observability.casesDisclaimerText', {
+                  defaultMessage: 'This is the future home of cases.',
+                })}
+              </p>
             </EuiCallOut>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiBasicTable columns={[]} items={[]} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageHeader>

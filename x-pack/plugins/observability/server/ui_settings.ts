@@ -11,7 +11,7 @@ import { UiSettingsParams } from '../../../../src/core/types';
 import { enableAlertingExperience } from '../common/ui_settings_keys';
 
 /**
- * uiSettings definitions for APM.
+ * uiSettings definitions for Observability.
  */
 export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
   [enableAlertingExperience]: {
@@ -20,10 +20,13 @@ export const uiSettings: Record<string, UiSettingsParams<boolean>> = {
       defaultMessage: 'Observability alerting experience',
     }),
     value: false,
-    description: i18n.translate('xpack.apm.enableAlertingExperienceExperimentDescription', {
-      defaultMessage:
-        'Enable the experimental alerting experience for Observability. Adds the Alerts and Cases pages.',
-    }),
+    description: i18n.translate(
+      'xpack.observability.enableAlertingExperienceExperimentDescription',
+      {
+        defaultMessage:
+          'Enable the experimental alerting experience for Observability. Adds the Alerts and Cases pages.',
+      }
+    ),
     schema: schema.boolean(),
   },
 };

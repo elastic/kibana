@@ -15,6 +15,16 @@ export const wireframeData = [
     severity: '-',
     reason: 'Error count is greater than 100 (current value is 135) on shippingService',
     service: { name: 'opbeans-go' },
+    affectedEntity: 'opbeans-go service',
+    status: 'Active',
+    expectedValue: '< 100',
+    actualValue: '135',
+    severityLog: [
+      { '@timestamp': 1615392661000, severity: 'critical', message: 'Load is 3.5' },
+      { '@timestamp': 1615392600000, severity: 'warning', message: 'Load is 2.5' },
+      { '@timestamp': 1615392552000, severity: 'critical', message: 'Load is 3.5' },
+    ],
+    type: 'APM Error count',
   },
   {
     '@timestamp': 1615392600000,
@@ -22,6 +32,7 @@ export const wireframeData = [
     severity: '-',
     reason: 'Latency is greater than 1500ms (current value is 1700ms) on frontend',
     service: { name: 'opbeans-go' },
+    severityLog: [],
   },
   {
     '@timestamp': 1615392552000,
@@ -29,6 +40,7 @@ export const wireframeData = [
     severity: 'critical',
     reason: 'Latency anomaly score is 84 on checkoutService',
     service: { name: 'opbeans-go' },
+    severityLog: [],
   },
   {
     '@timestamp': 1615392391000,
@@ -36,7 +48,8 @@ export const wireframeData = [
     severity: '-',
     reason:
       'CPU is greater than a threshold of 75% (current value is 83%) on gke-eden-3-prod-pool-2-395ef018-06xg',
-    pod: 'aff50718-31f0-4296-b502-3b7f3ea20be8',
+    pod: 'gke-dev-oblt-dev-oblt-pool-30f1ba48-skw',
+    severityLog: [],
   },
   {
     '@timestamp': 1615392363000,
@@ -45,13 +58,15 @@ export const wireframeData = [
     reason:
       "Log count with 'Log.level.error' and 'service.name; frontend' is greater than 75 (current value 122)",
     log: true,
+    severityLog: [],
   },
   {
     '@timestamp': 1615392361000,
     duration: '10 min 2 s',
     severity: 'critical',
     reason: 'Load is greater than 2 (current value is 3.5) on gke-eden-3-prod-pool-2-395ef018-06xg',
-    pod: 'aff50718-31f0-4296-b502-3b7f3ea20be8',
+    pod: 'gke-dev-oblt-dev-oblt-pool-30f1ba48-skw',
+    severityLog: [],
   },
 ];
 
