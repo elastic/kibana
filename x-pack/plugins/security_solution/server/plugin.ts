@@ -162,18 +162,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
-    initUsageCollectors({
-      core,
-      kibanaIndex: globalConfig.kibana.index,
-      ml: plugins.ml,
-      usageCollection: plugins.usageCollection,
-    });
-
     const endpointContext: EndpointAppContext = {
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(config),
     };
+
+    initUsageCollectors({
+      core,
+      endpointAppContext: endpointContext,
+      kibanaIndex: globalConfig.kibana.index,
+      ml: plugins.ml,
+      usageCollection: plugins.usageCollection,
+    });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(

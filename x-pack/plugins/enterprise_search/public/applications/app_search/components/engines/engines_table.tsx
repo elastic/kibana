@@ -54,7 +54,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
   const { navigateToUrl } = useValues(KibanaLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const generteEncodedEnginePath = (engineName: string) =>
+  const generateEncodedEnginePath = (engineName: string) =>
     generateEncodedPath(ENGINE_PATH, { engineName });
   const sendEngineTableLinkClickTelemetry = () =>
     sendAppSearchTelemetry({
@@ -71,7 +71,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       render: (name: string) => (
         <EuiLinkTo
           data-test-subj="EngineNameLink"
-          to={generteEncodedEnginePath(name)}
+          to={generateEncodedEnginePath(name)}
           onClick={sendEngineTableLinkClickTelemetry}
         >
           {name}
@@ -159,7 +159,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         icon: 'eye',
         onClick: (engineDetails) => {
           sendEngineTableLinkClickTelemetry();
-          navigateToUrl(generteEncodedEnginePath(engineDetails.name));
+          navigateToUrl(generateEncodedEnginePath(engineDetails.name));
         },
       },
       {
