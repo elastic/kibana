@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ApiResponse } from '@elastic/elasticsearch';
 import { tap } from 'rxjs/operators';
 import type { IScopedClusterClient, Logger } from 'kibana/server';
 import type { ISearchStrategy } from '../../../../../src/plugins/data/server';
@@ -51,14 +51,13 @@ export const eqlSearchStrategyProvider = (
               ...request.params,
             };
         const promise = id
-          ? client.get<EqlSearchResponse>({ ...params, id }, request.options)
-          : client.search<EqlSearchResponse>(
+          ? client.get({ ...params, id }, request.options)
+          : client.search(
               params as EqlSearchStrategyRequest['params'],
               request.options
             );
         const response = await shimAbortSignal(promise, options.abortSignal);
-        // @ts-expect-error eql API missing from types
-        return toEqlKibanaSearchResponse(response);
+        return toEqlKibanaSearchResponse(response as ApiResponse<EqlSearchResponse>);
       };
 
       const cancel = async () => {

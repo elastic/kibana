@@ -68,7 +68,7 @@ export const enhancedEsSearchStrategyProvider = (
       const promise = id ? client.get({ id, body: params }) : client.submit({ body: params });
       const { body } = await shimAbortSignal(promise, options.abortSignal);
       const response = shimHitsTotal(body.response, options);
-      // @ts-expect-error AsyncSearchGetResponse currently missing all properties
+      // @ts-expect-error @elastic/elasticsearch AsyncSearchGetResponse currently missing all properties
       return toAsyncKibanaSearchResponse({ ...body, response });
     };
 
