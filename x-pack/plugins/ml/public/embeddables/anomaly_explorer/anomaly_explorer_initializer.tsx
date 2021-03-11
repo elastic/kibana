@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AnomalyExplorerEmbeddableInput } from '..';
+import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 
 const MAX_SERIES_ALLOWED = 48;
 export interface AnomalyExplorerInitializerProps {
@@ -36,7 +37,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
   onCancel,
 }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
-  const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(6);
+  const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
 
   const isPanelTitleValid = panelTitle.length > 0;
 

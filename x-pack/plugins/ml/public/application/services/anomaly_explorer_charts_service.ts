@@ -105,6 +105,7 @@ interface ChartRange {
   max: number;
 }
 
+export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
 /**
  * Service for retrieving anomaly explorer charts data.
  */
@@ -376,7 +377,7 @@ export class AnomalyExplorerChartsService {
     selectedLatestMs: number,
     timefilter: TimefilterContract,
     severity = 0,
-    maxSeries = 6
+    maxSeries = DEFAULT_MAX_SERIES_TO_PLOT
   ): Promise<void | ExplorerChartsData> {
     const data = this.getDefaultChartsData();
 
