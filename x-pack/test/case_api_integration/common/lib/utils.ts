@@ -10,7 +10,7 @@ import { Client } from '@elastic/elasticsearch';
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Explanation, SearchResponse } from 'elasticsearch';
-import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/case/common/constants';
+import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/cases/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
@@ -22,10 +22,10 @@ import {
   CaseStatuses,
   SubCasesResponse,
   CasesResponse,
-} from '../../../../plugins/case/common/api';
+} from '../../../../plugins/cases/common/api';
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getSubCasesUrl } from '../../../../plugins/case/common/api/helpers';
-import { ContextTypeGeneratedAlertType } from '../../../../plugins/case/server/connectors';
+import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
+import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 
 interface Hit<T> {
@@ -54,11 +54,11 @@ export const getSignalsWithES = async ({
   es: Client;
   indices: string | string[];
   ids: string | string[];
-}): Promise<Map<string, Hit<SignalHit>>> => {
+}): Promise<Map<string, Map<string, Hit<SignalHit>>>> => {
   const signals = await es.search<SearchResponse<SignalHit>>({
     index: indices,
     body: {
-      size: ids.length,
+      size: 10000,
       query: {
         bool: {
           filter: [
@@ -72,10 +72,17 @@ export const getSignalsWithES = async ({
       },
     },
   });
+
   return signals.body.hits.hits.reduce((acc, hit) => {
-    acc.set(hit._id, hit);
+    let indexMap = acc.get(hit._index);
+    if (indexMap === undefined) {
+      indexMap = new Map<string, Hit<SignalHit>>([[hit._id, hit]]);
+    } else {
+      indexMap.set(hit._id, hit);
+    }
+    acc.set(hit._index, indexMap);
     return acc;
-  }, new Map<string, Hit<SignalHit>>());
+  }, new Map<string, Map<string, Hit<SignalHit>>>());
 };
 
 interface SetStatusCasesParams {

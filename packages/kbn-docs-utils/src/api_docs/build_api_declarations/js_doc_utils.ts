@@ -55,8 +55,19 @@ export function getJSDocParamComment(node: Node | JSDoc[], name: string): TextWi
 }
 
 export function getJSDocTagNames(node: Node | JSDoc[]): string[] {
+  const tagsToIgnore = [
+    'param',
+    'returns',
+    'link',
+    'remark',
+    'internalRemarks',
+    'typeParam',
+    'remarks',
+    'example',
+    'kbn',
+  ];
   return getJSDocTags(node).reduce((tags, tag) => {
-    if (tag.getTagName() !== 'param' && tag.getTagName() !== 'returns') {
+    if (tags.indexOf(tag.getTagName()) < 0 && tagsToIgnore.indexOf(tag.getTagName()) < 0) {
       tags.push(tag.getTagName());
     }
     return tags;

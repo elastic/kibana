@@ -34,7 +34,7 @@ import {
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
-import { ES_GEO_FIELD_TYPE, FieldFormatter } from '../../../../common/constants';
+import { FieldFormatter } from '../../../../common/constants';
 import {
   Adapters,
   RequestResponder,
@@ -236,13 +236,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof searchFilters.geogridPrecision === 'number'
           ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
           : searchFilters.buffer;
-      const extentFilter = createExtentFilter(
-        buffer,
-        geoField.name,
-        geoField.type as ES_GEO_FIELD_TYPE
-      );
+      const extentFilter = createExtentFilter(buffer, geoField.name);
 
-      // @ts-expect-error
       allFilters.push(extentFilter);
     }
     if (searchFilters.applyGlobalTime && (await this.isTimeAware())) {

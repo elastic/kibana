@@ -27,18 +27,20 @@ start
 
 OrQuery
   = &{ return errorOnLuceneSyntax; } LuceneQuery
-  / left:AndQuery Or right:OrQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
+  / head:AndQuery tail:(Or query:AndQuery { return query; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildFunctionNode('or', [left, right]);
+    return buildFunctionNode('or', nodes);
   }
   / AndQuery
 
 AndQuery
-  = left:NotQuery And right:AndQuery {
-    const cursor = [left, right].find(node => node.type === 'cursor');
+  = head:NotQuery tail:(And query:NotQuery { return query; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) return cursor;
-    return buildFunctionNode('and', [left, right]);
+    return buildFunctionNode('and', nodes);
   }
   / NotQuery
 
@@ -139,28 +141,30 @@ ListOfValues
   / Value
 
 OrListOfValues
-  = partialLeft:AndListOfValues Or partialRight:OrListOfValues {
-    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+  = head:AndListOfValues tail:(Or partial:AndListOfValues { return partial; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return (field) => buildFunctionNode('or', [partialLeft(field), partialRight(field)]);
+    return (field) => buildFunctionNode('or', nodes.map(partial => partial(field)));
   }
   / AndListOfValues
 
 AndListOfValues
-  = partialLeft:NotListOfValues And partialRight:AndListOfValues {
-    const cursor = [partialLeft, partialRight].find(node => node.type === 'cursor');
+  = head:NotListOfValues tail:(And partial:NotListOfValues { return partial; })+ {
+    const nodes = [head, ...tail];
+    const cursor = parseCursor && nodes.find(node => node.type === 'cursor');
     if (cursor) {
       return {
         ...cursor,
         suggestionTypes: ['value']
       };
     }
-    return (field) => buildFunctionNode('and', [partialLeft(field), partialRight(field)]);
+    return (field) => buildFunctionNode('and', nodes.map(partial => partial(field)));
   }
   / NotListOfValues
 
@@ -209,7 +213,7 @@ Literal "literal"
   = QuotedString / UnquotedLiteral
 
 QuotedString
-  = '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
+  = &{ return parseCursor; } '"' prefix:QuotedCharacter* cursor:Cursor suffix:QuotedCharacter* '"' {
     const { start, end } = location();
     return {
       type: 'cursor',
@@ -230,7 +234,7 @@ QuotedCharacter
   / !Cursor char:[^"] { return char; }
 
 UnquotedLiteral
-  = prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
+  = &{ return parseCursor; } prefix:UnquotedCharacter* cursor:Cursor suffix:UnquotedCharacter* {
     const { start, end } = location();
     return {
       type: 'cursor',
@@ -247,8 +251,7 @@ UnquotedLiteral
     if (sequence === 'true') return buildLiteralNode(true);
     if (sequence === 'false') return buildLiteralNode(false);
     if (chars.includes(wildcardSymbol)) return buildWildcardNode(sequence);
-    const isNumberPattern = /^(-?[1-9]+\d*([.]\d+)?)$|^(-?0[.]\d*[1-9]+)$|^0$|^0.0$|^[.]\d{1,}$/
-    return buildLiteralNode(isNumberPattern.test(sequence) ? Number(sequence) : sequence);
+    return buildLiteralNode(sequence);
   }
 
 UnquotedCharacter
@@ -262,7 +265,7 @@ Wildcard
   = '*' { return wildcardSymbol; }
 
 OptionalSpace
-  = prefix:Space* cursor:Cursor suffix:Space* {
+  = &{ return parseCursor; } prefix:Space* cursor:Cursor suffix:Space* {
     const { start, end } = location();
     return {
       type: 'cursor',

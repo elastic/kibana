@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { InitialAppData } from '../../../common/types';
@@ -25,6 +25,7 @@ import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
 import { Library } from './components/library';
+import { MetaEngineCreation } from './components/meta_engine_creation';
 import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
@@ -38,11 +39,16 @@ import {
   ENGINES_PATH,
   ENGINE_PATH,
   LIBRARY_PATH,
+  META_ENGINE_CREATION_PATH,
 } from './routes';
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  return !config.host ? <AppSearchUnconfigured /> : <AppSearchConfigured {...props} />;
+  return !config.host ? (
+    <AppSearchUnconfigured />
+  ) : (
+    <AppSearchConfigured {...(props as Required<InitialAppData>)} />
+  );
 };
 
 export const AppSearchUnconfigured: React.FC = () => (
@@ -56,17 +62,11 @@ export const AppSearchUnconfigured: React.FC = () => (
   </Switch>
 );
 
-export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
-  const { initializeAppData } = useActions(AppLogic);
+export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
-    hasInitialized,
-    myRole: { canManageEngines },
-  } = useValues(AppLogic);
+    myRole: { canManageEngines, canManageMetaEngines },
+  } = useValues(AppLogic(props));
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
-
-  useEffect(() => {
-    if (!hasInitialized) initializeAppData(props);
-  }, [hasInitialized]);
 
   return (
     <Switch>
@@ -104,6 +104,11 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
               {canManageEngines && (
                 <Route exact path={ENGINE_CREATION_PATH}>
                   <EngineCreation />
+                </Route>
+              )}
+              {canManageMetaEngines && (
+                <Route exact path={META_ENGINE_CREATION_PATH}>
+                  <MetaEngineCreation />
                 </Route>
               )}
               <Route>

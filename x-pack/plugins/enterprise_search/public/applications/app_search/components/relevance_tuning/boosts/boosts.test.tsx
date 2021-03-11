@@ -64,6 +64,38 @@ describe('Boosts', () => {
     expect(select.prop('options').map((o: any) => o.value)).toEqual(['add-boost', 'value']);
   });
 
+  it('will not render functional or value options if "type" prop is "geolocation"', () => {
+    const wrapper = shallow(
+      <Boosts
+        {...{
+          ...props,
+          type: 'geolocation' as SchemaTypes,
+        }}
+      />
+    );
+
+    const select = wrapper.find(EuiSuperSelect);
+    expect(select.prop('options').map((o: any) => o.value)).toEqual(['add-boost', 'proximity']);
+  });
+
+  it('will not render functional option if "type" prop is "date"', () => {
+    const wrapper = shallow(
+      <Boosts
+        {...{
+          ...props,
+          type: 'date' as SchemaTypes,
+        }}
+      />
+    );
+
+    const select = wrapper.find(EuiSuperSelect);
+    expect(select.prop('options').map((o: any) => o.value)).toEqual([
+      'add-boost',
+      'proximity',
+      'value',
+    ]);
+  });
+
   it('will add a boost of the selected type when a selection is made', () => {
     const wrapper = shallow(<Boosts {...props} />);
 

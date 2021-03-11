@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ArchiveEntry } from './index';
-import { ArchivePackage, RegistryPackage } from '../../../../common';
+import type { ArchivePackage, RegistryPackage } from '../../../../common';
+import { appContextService } from '../../';
+
+import type { ArchiveEntry } from './index';
 
 const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
 export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);
@@ -25,8 +27,16 @@ const archiveFilelistCache: Map<SharedKeyString, string[]> = new Map();
 export const getArchiveFilelist = (keyArgs: SharedKey) =>
   archiveFilelistCache.get(sharedKey(keyArgs));
 
-export const setArchiveFilelist = (keyArgs: SharedKey, paths: string[]) =>
-  archiveFilelistCache.set(sharedKey(keyArgs), paths);
+export const setArchiveFilelist = (keyArgs: SharedKey, paths: string[]) => {
+  appContextService
+    .getLogger()
+    .debug(
+      `setting file list to the cache for ${keyArgs.name}-${keyArgs.version}:\n${JSON.stringify(
+        paths
+      )}`
+    );
+  return archiveFilelistCache.set(sharedKey(keyArgs), paths);
+};
 
 export const deleteArchiveFilelist = (keyArgs: SharedKey) =>
   archiveFilelistCache.delete(sharedKey(keyArgs));
@@ -54,6 +64,11 @@ export const setPackageInfo = ({
   packageInfo,
 }: SharedKey & { packageInfo: ArchivePackage | RegistryPackage }) => {
   const key = sharedKey({ name, version });
+  appContextService
+    .getLogger()
+    .debug(
+      `setting package info to the cache for ${name}-${version}:\n${JSON.stringify(packageInfo)}`
+    );
   return packageInfoCache.set(key, packageInfo);
 };
 

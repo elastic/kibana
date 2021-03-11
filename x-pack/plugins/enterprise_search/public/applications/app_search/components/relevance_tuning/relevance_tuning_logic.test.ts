@@ -6,16 +6,13 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import { mockEngineValues, mockEngineActions } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
 import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
 import { RelevanceTuningLogic } from './';
-
-jest.mock('../engine', () => ({
-  EngineLogic: { values: { engineName: 'test-engine' } },
-}));
 
 describe('RelevanceTuningLogic', () => {
   const { mount } = new LogicMounter(RelevanceTuningLogic);
@@ -64,7 +61,6 @@ describe('RelevanceTuningLogic', () => {
     query: '',
     resultsLoading: false,
     searchResults: null,
-    showSchemaConflictCallout: true,
     engineHasSchemaFields: false,
     schemaFields: [],
     schemaFieldsWithConflicts: [],
@@ -74,6 +70,9 @@ describe('RelevanceTuningLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockEngineValues.engineName = 'test-engine';
+    mockEngineValues.engine.invalidBoosts = false;
+    mockEngineValues.engine.unsearchedUnconfirmedFields = false;
   });
 
   it('has expected default values', () => {
@@ -203,20 +202,6 @@ describe('RelevanceTuningLogic', () => {
         expect(RelevanceTuningLogic.values).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: true,
-        });
-      });
-    });
-
-    describe('dismissSchemaConflictCallout', () => {
-      it('should set showSchemaConflictCallout to false', () => {
-        mount({
-          showSchemaConflictCallout: true,
-        });
-        RelevanceTuningLogic.actions.dismissSchemaConflictCallout();
-
-        expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          showSchemaConflictCallout: false,
         });
       });
     });
@@ -545,6 +530,28 @@ describe('RelevanceTuningLogic', () => {
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
         expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
       });
+
+      it('will re-fetch the current engine after settings are updated if there were invalid boosts', async () => {
+        mockEngineValues.engine.invalidBoosts = true;
+        mount({});
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
+
+        RelevanceTuningLogic.actions.updateSearchSettings();
+        await nextTick();
+
+        expect(mockEngineActions.initializeEngine).toHaveBeenCalled();
+      });
+
+      it('will re-fetch the current engine after settings are updated if there were unconfirmed search fields', async () => {
+        mockEngineValues.engine.unsearchedUnconfirmedFields = true;
+        mount({});
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
+
+        RelevanceTuningLogic.actions.updateSearchSettings();
+        await nextTick();
+
+        expect(mockEngineActions.initializeEngine).toHaveBeenCalled();
+      });
     });
 
     describe('resetSearchSettings', () => {
@@ -712,6 +719,9 @@ describe('RelevanceTuningLogic', () => {
                 factor: 1,
                 newBoost: true,
                 type: BoostType.Functional,
+                function: 'logarithmic',
+                operation: 'multiply',
+                value: undefined,
               },
             ],
           },
@@ -737,6 +747,9 @@ describe('RelevanceTuningLogic', () => {
                 factor: 1,
                 newBoost: true,
                 type: BoostType.Functional,
+                function: 'logarithmic',
+                operation: 'multiply',
+                value: undefined,
               },
             ],
           },

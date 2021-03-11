@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../../plugins/case/common/constants';
+import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../../plugins/cases/common/constants';
 import { postCaseReq, postCommentUserReq, findCasesResp } from '../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -18,7 +18,7 @@ import {
   createCaseAction,
   deleteCaseAction,
 } from '../../../common/lib/utils';
-import { CasesFindResponse, CaseStatuses, CaseType } from '../../../../../plugins/case/common/api';
+import { CasesFindResponse, CaseStatuses, CaseType } from '../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -304,7 +304,9 @@ export default ({ getService }: FtrProviderContext): void => {
           .get(`${CASES_URL}/_find?sortOrder=asc&status=open`)
           .expect(200);
 
-        expect(body.total).to.eql(2);
+        // since we're filtering on status and the collection only has an in-progress case, it should only return the
+        // individual case that has the open status and no collections
+        expect(body.total).to.eql(1);
         expect(body.count_closed_cases).to.eql(1);
         expect(body.count_open_cases).to.eql(1);
         expect(body.count_in_progress_cases).to.eql(1);
@@ -353,7 +355,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.count_in_progress_cases).to.eql(0);
       });
 
-      it('correctly counts stats including a collection without sub cases', async () => {
+      it('correctly counts stats including a collection without sub cases when not filtering on status', async () => {
         // delete the sub case on the collection so that it doesn't have any sub cases
         await supertest
           .delete(`${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`)
@@ -365,7 +367,58 @@ export default ({ getService }: FtrProviderContext): void => {
           .get(`${CASES_URL}/_find?sortOrder=asc`)
           .expect(200);
 
+        // it should include the collection without sub cases because we did not pass in a filter on status
         expect(body.total).to.eql(3);
+        expect(body.count_closed_cases).to.eql(1);
+        expect(body.count_open_cases).to.eql(1);
+        expect(body.count_in_progress_cases).to.eql(0);
+      });
+
+      it('correctly counts stats including a collection without sub cases when filtering on tags', async () => {
+        // delete the sub case on the collection so that it doesn't have any sub cases
+        await supertest
+          .delete(`${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(204);
+
+        const { body }: { body: CasesFindResponse } = await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc&tags=defacement`)
+          .expect(200);
+
+        // it should include the collection without sub cases because we did not pass in a filter on status
+        expect(body.total).to.eql(3);
+        expect(body.count_closed_cases).to.eql(1);
+        expect(body.count_open_cases).to.eql(1);
+        expect(body.count_in_progress_cases).to.eql(0);
+      });
+
+      it('does not return collections without sub cases matching the requested status', async () => {
+        const { body }: { body: CasesFindResponse } = await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc&status=closed`)
+          .expect(200);
+
+        // it should not include the collection that has a sub case as in-progress
+        expect(body.total).to.eql(1);
+        expect(body.count_closed_cases).to.eql(1);
+        expect(body.count_open_cases).to.eql(1);
+        expect(body.count_in_progress_cases).to.eql(1);
+      });
+
+      it('does not return empty collections when filtering on status', async () => {
+        // delete the sub case on the collection so that it doesn't have any sub cases
+        await supertest
+          .delete(`${SUB_CASES_PATCH_DEL_URL}?ids=["${collection.newSubCaseInfo.subCases![0].id}"]`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(204);
+
+        const { body }: { body: CasesFindResponse } = await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc&status=closed`)
+          .expect(200);
+
+        // it should not include the collection that has a sub case as in-progress
+        expect(body.total).to.eql(1);
         expect(body.count_closed_cases).to.eql(1);
         expect(body.count_open_cases).to.eql(1);
         expect(body.count_in_progress_cases).to.eql(0);

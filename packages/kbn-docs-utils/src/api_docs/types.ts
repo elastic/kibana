@@ -178,7 +178,6 @@ export interface ApiDeclaration {
 export interface SourceLink {
   path: string;
   lineNumber: number;
-  link: string;
 }
 
 /**

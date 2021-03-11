@@ -22,7 +22,7 @@ import styled, { css } from 'styled-components';
 import classnames from 'classnames';
 
 import * as i18n from './translations';
-import { CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../cases/common/api';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase, SubCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
@@ -54,7 +54,9 @@ import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 import { Stats } from '../status';
+import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../translations';
 import { getExpandedRowMap } from './expanded_row';
+import { isSelectedCasesIncludeCollections } from './helpers';
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -165,6 +167,7 @@ export const AllCases = React.memo<AllCasesProps>(
     const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
       title: '',
       id: '',
+      type: null,
     });
     const [deleteBulk, setDeleteBulk] = useState<DeleteCase[]>([]);
     const filterRefetch = useRef<() => void>();
@@ -228,10 +231,10 @@ export const AllCases = React.memo<AllCasesProps>(
     );
 
     const toggleBulkDeleteModal = useCallback(
-      (caseIds: string[]) => {
+      (cases: Case[]) => {
         handleToggleModal();
-        if (caseIds.length === 1) {
-          const singleCase = selectedCases.find((theCase) => theCase.id === caseIds[0]);
+        if (cases.length === 1) {
+          const singleCase = cases[0];
           if (singleCase) {
             return setDeleteThisCase({
               id: singleCase.id,
@@ -240,10 +243,14 @@ export const AllCases = React.memo<AllCasesProps>(
             });
           }
         }
-        const convertToDeleteCases: DeleteCase[] = caseIds.map((id) => ({ id }));
+        const convertToDeleteCases: DeleteCase[] = cases.map(({ id, title, type }) => ({
+          id,
+          title,
+          type,
+        }));
         setDeleteBulk(convertToDeleteCases);
       },
-      [selectedCases, setDeleteBulk, handleToggleModal]
+      [setDeleteBulk, handleToggleModal]
     );
 
     const handleUpdateCaseStatus = useCallback(
@@ -251,11 +258,6 @@ export const AllCases = React.memo<AllCasesProps>(
         updateBulkStatus(selectedCases, status);
       },
       [selectedCases, updateBulkStatus]
-    );
-
-    const selectedCaseIds = useMemo(
-      (): string[] => selectedCases.map((caseObj: Case) => caseObj.id),
-      [selectedCases]
     );
 
     const getBulkItemsPopoverContent = useCallback(
@@ -266,12 +268,13 @@ export const AllCases = React.memo<AllCasesProps>(
             caseStatus: filterOptions.status,
             closePopover,
             deleteCasesAction: toggleBulkDeleteModal,
-            selectedCaseIds,
+            selectedCases,
             updateCaseStatus: handleUpdateCaseStatus,
+            includeCollections: isSelectedCasesIncludeCollections(selectedCases),
           })}
         />
       ),
-      [selectedCaseIds, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
+      [selectedCases, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
     );
     const handleDispatchUpdate = useCallback(
       (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
@@ -379,9 +382,8 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({
-        selectable: (theCase) => isEmpty(theCase.subCases),
         onSelectionChange: setSelectedCases,
-        selectableMessage: (selectable) => (!selectable ? i18n.SELECTABLE_MESSAGE_COLLECTIONS : ''),
+        selectableMessage: (selectable) => (!selectable ? SELECTABLE_MESSAGE_COLLECTIONS : ''),
       }),
       [setSelectedCases]
     );
@@ -409,6 +411,8 @@ export const AllCases = React.memo<AllCasesProps>(
       },
       [isModal, onRowClick]
     );
+
+    const enableBuckActions = userCanCrud && !isModal;
 
     return (
       <>
@@ -506,10 +510,12 @@ export const AllCases = React.memo<AllCasesProps>(
                   </UtilityBarGroup>
                   {!isModal && (
                     <UtilityBarGroup data-test-subj="case-table-utility-bar-actions">
-                      <UtilityBarText data-test-subj="case-table-selected-case-count">
-                        {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
-                      </UtilityBarText>
-                      {userCanCrud && (
+                      {enableBuckActions && (
+                        <UtilityBarText data-test-subj="case-table-selected-case-count">
+                          {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
+                        </UtilityBarText>
+                      )}
+                      {enableBuckActions && (
                         <UtilityBarAction
                           data-test-subj="case-table-bulk-actions"
                           iconSide="right"
@@ -529,7 +535,7 @@ export const AllCases = React.memo<AllCasesProps>(
               <BasicTable
                 columns={memoizedGetCasesColumns}
                 data-test-subj="cases-table"
-                isSelectable={userCanCrud && !isModal}
+                isSelectable={enableBuckActions}
                 itemId="id"
                 items={data.cases}
                 itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -556,7 +562,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 onChange={tableOnChangeCallback}
                 pagination={memoizedPagination}
                 rowProps={tableRowProps}
-                selection={userCanCrud && !isModal ? euiBasicTableSelectionProps : undefined}
+                selection={enableBuckActions ? euiBasicTableSelectionProps : undefined}
                 sorting={sorting}
                 className={classnames({ isModal })}
               />

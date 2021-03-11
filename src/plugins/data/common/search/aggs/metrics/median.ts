@@ -27,6 +27,7 @@ export const getMedianMetricAgg = () => {
     expressionName: aggMedianFnName,
     dslName: 'percentiles',
     title: medianTitle,
+    valueType: 'number',
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.metrics.medianLabel', {
         defaultMessage: 'Median {field}',
