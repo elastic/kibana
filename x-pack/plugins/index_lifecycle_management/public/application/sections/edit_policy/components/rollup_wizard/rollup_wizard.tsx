@@ -52,7 +52,7 @@ import {
 
 // TODO: fix anys in this file!
 
-const stepIdToTitleMap = {
+const stepIdToTitleMap: Record<string, string> = {
   [STEP_DATE_HISTOGRAM]: i18n.translate(
     'xpack.indexLifecycleMgmt.rollupJob.create.steps.stepDateHistogramTitle',
     {
@@ -110,12 +110,14 @@ export interface StepFields {
   STEP_REVIEW: {};
 }
 
+type StepField = keyof StepFields;
+
 interface State {
-  checkpointStepId: string;
   isNewRollup: boolean;
-  currentStepId: keyof StepFields;
-  nextStepId: keyof StepFields;
-  previousStepId?: keyof StepFields;
+  checkpointStepId: StepField;
+  currentStepId: StepField;
+  nextStepId: StepField;
+  previousStepId?: StepField;
   stepsFieldErrors: Record<string, Record<string, string | undefined>>;
   areStepErrorsVisible: boolean;
   stepsFields: StepFields;
@@ -189,7 +191,7 @@ export class RollupWizard extends Component<Props, State> {
     const { currentStepId, checkpointStepId } = this.state;
     const indexOfCurrentStep = stepIds.indexOf(currentStepId);
 
-    return stepIds.map((stepId: any, index: number) => ({
+    return stepIds.map((stepId: StepField, index: number) => ({
       title: stepIdToTitleMap[stepId],
       isComplete: index < indexOfCurrentStep,
       isSelected: index === indexOfCurrentStep,
@@ -208,10 +210,10 @@ export class RollupWizard extends Component<Props, State> {
   };
 
   goToPreviousStep = () => {
-    this.goToStep(this.state.previousStepId);
+    this.goToStep(this.state.previousStepId || 'STEP_DATE_HISTOGRAM');
   };
 
-  goToStep(stepId: any) {
+  goToStep(stepId: StepField) {
     // Instead of disabling the Next button while the step is invalid, we
     // instead allow the user to click the Next button, prevent them leaving
     // this step, and render a global error message to clearly convey the
@@ -237,35 +239,41 @@ export class RollupWizard extends Component<Props, State> {
     }
   }
 
-  canGoToStep(stepId: any) {
+  canGoToStep(stepId: StepField) {
     const indexOfStep = stepIds.indexOf(stepId);
 
     // Check every step before this one and see if it's been completed.
     const prerequisiteSteps = stepIds.slice(0, indexOfStep);
 
     return prerequisiteSteps.every(
-      (prerequisiteStepId: any) => !this.hasStepErrors(prerequisiteStepId)
+      (prerequisiteStepId: StepField) => !this.hasStepErrors(prerequisiteStepId)
     );
   }
 
-  hasStepErrors(stepId: any) {
+  hasStepErrors(stepId: StepField) {
     const { stepsFieldErrors } = this.state;
 
     const stepFieldErrors = stepsFieldErrors[stepId];
     return Object.values(stepFieldErrors).some((error) => error != null);
   }
 
-  getStepsFieldsErrors(newStepsFields: any) {
-    return Object.keys(newStepsFields).reduce((stepsFieldErrors: any, stepId) => {
-      const stepFields = newStepsFields[stepId];
-      const fieldsValidator = stepIdToStepConfigMap[stepId].fieldsValidator;
-      stepsFieldErrors[stepId] =
-        typeof fieldsValidator === `function` ? fieldsValidator(stepFields, newStepsFields) : {};
-      return stepsFieldErrors;
-    }, {});
+  getStepsFieldsErrors(newStepsFields: StepFields) {
+    return Object.keys(newStepsFields).reduce(
+      (stepsFieldErrors: Record<string, Record<string, string>>, stepId) => {
+        const stepFields = newStepsFields[stepId as StepField];
+        const fieldsValidator = stepIdToStepConfigMap[stepId].fieldsValidator;
+        stepsFieldErrors[stepId] =
+          typeof fieldsValidator === `function` ? fieldsValidator(stepFields, newStepsFields) : {};
+        return stepsFieldErrors;
+      },
+      {}
+    );
   }
 
-  onFieldsChange = (fields: any, currentStepId = this.state.currentStepId) => {
+  onFieldsChange = <T extends StepField>(
+    fields: StepFields[T],
+    currentStepId = this.state.currentStepId
+  ) => {
     const { stepsFields } = this.state;
     const prevFields = stepsFields[currentStepId];
 
