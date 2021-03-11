@@ -42,7 +42,7 @@ export function AgentConfigurations() {
       <EuiTitle size="l">
         <h1>
           {i18n.translate('xpack.apm.agentConfig.titleText', {
-            defaultMessage: 'Agent remote configuration',
+            defaultMessage: 'Agent central configuration',
           })}
         </h1>
       </EuiTitle>
