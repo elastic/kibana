@@ -7,8 +7,8 @@
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
-import { Inspect, Maybe, TimerangeInput } from '../../../common';
-import { HostItem, HostsFields, Direction } from '../common';
+import { Direction, Inspect, Maybe, TimerangeInput } from '../../../common';
+import { HostItem, HostsFields } from '../common';
 import { RequestOptionsPaginated } from '../..';
 
 export interface HostDetailsStrategyResponse extends IEsSearchResponse {

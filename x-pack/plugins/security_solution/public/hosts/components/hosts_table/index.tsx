@@ -80,7 +80,6 @@ export const HostsTable: React.FC<HostsTableProps> = ({
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
   );
-
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(

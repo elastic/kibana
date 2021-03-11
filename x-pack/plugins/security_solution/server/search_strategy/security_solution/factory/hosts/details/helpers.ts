@@ -8,6 +8,7 @@
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
+import { Direction } from '../../../../../../common/search_strategy/common';
 import {
   AggregationRequest,
   HostAggEsItem,
@@ -59,7 +60,7 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
           },
           size: 10,
           order: {
-            timestamp: 'desc',
+            timestamp: Direction.desc,
           },
         },
         aggs: {
@@ -79,7 +80,7 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
         field,
         size: 10,
         order: {
-          timestamp: 'desc',
+          timestamp: Direction.desc,
         },
       },
       aggs: {

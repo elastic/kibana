@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostItem } from '../../../../graphql/types';
+import { HostItem } from '../../../../../common/search_strategy/security_solution/hosts';
 import { InfluencerInput } from '../types';
 import { hostToInfluencers } from './host_to_influencers';
 

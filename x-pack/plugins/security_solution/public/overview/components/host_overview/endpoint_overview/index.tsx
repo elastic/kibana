@@ -12,10 +12,12 @@ import React, { useCallback, useMemo } from 'react';
 import { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
-import { EndpointFields, HostPolicyResponseActionStatus } from '../../../../graphql/types';
-import { DescriptionListStyled } from '../../../../common/components/page';
 
 import * as i18n from './translations';
+import {
+  EndpointFields,
+  HostPolicyResponseActionStatus,
+} from '../../../../../common/search_strategy/security_solution/hosts';
 
 interface Props {
   data: EndpointFields | null;

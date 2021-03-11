@@ -12,6 +12,10 @@ import {
   mockSearchStrategyResponse,
   formattedSearchStrategyResponse,
 } from './__mocks__';
+import {
+  Direction,
+  HostFirstLastSeenRequestOptions,
+} from '../../../../../../common/search_strategy';
 
 describe('firstLastSeenHost search strategy', () => {
   const buildFirstLastSeenHostQuery = jest.spyOn(buildQuery, 'buildFirstLastSeenHostQuery');
@@ -20,17 +24,30 @@ describe('firstLastSeenHost search strategy', () => {
     buildFirstLastSeenHostQuery.mockClear();
   });
 
-  describe('buildDsl', () => {
-    test('should build dsl query', () => {
-      firstLastSeenHost.buildDsl(mockOptions);
-      expect(buildFirstLastSeenHostQuery).toHaveBeenCalledWith(mockOptions);
+  describe('last seen search strategy', () => {
+    const buildFirstLastSeenHostQuery = jest.spyOn(buildQuery, 'buildFirstOrLastSeenHostQuery');
+
+    afterEach(() => {
+      buildFirstLastSeenHostQuery.mockClear();
+    });
+
+    describe('buildDsl', () => {
+      test('should build dsl query', () => {
+        const options: HostFirstLastSeenRequestOptions = { ...mockOptions, order: Direction.desc };
+        firstOrLastSeenHost.buildDsl(options);
+        expect(buildFirstLastSeenHostQuery).toHaveBeenCalledWith(options);
+      });
     });
   });
 
-  describe('parse', () => {
-    test('should parse data correctly', async () => {
-      const result = await firstLastSeenHost.parse(mockOptions, mockSearchStrategyResponse);
-      expect(result).toMatchObject(formattedSearchStrategyResponse);
+    describe('parse', () => {
+      test('should parse data correctly', async () => {
+        const result = await firstOrLastSeenHost.parse(
+          { ...mockOptions, order: Direction.desc },
+          mockSearchStrategyLastSeenResponse
+        );
+        expect(result).toMatchObject(formattedSearchStrategyLastResponse);
+      });
     });
   });
 });
