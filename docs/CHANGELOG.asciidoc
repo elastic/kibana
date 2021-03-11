@@ -184,7 +184,8 @@ logging:
 [[known-issues-v7.12.0]]
 === Known issue
 
-When you create aggregation-based area, bar, and line charts in *Visualize Library*, then split the charts by column, the time filter is applied incorrectly.
+There is a known issue when you create aggregation-based area, bar, and line charts in *Visualize Library*. When you create the chart, split the chart by column, 
+then click and drag your cursor across the chart to zoom in on the data, the time filter is incorrectly applied.
 
 To resolve this issue, use the legacy charts library.
 
