@@ -4,7 +4,7 @@
 
 ## SavedObjectsImportActionRequiredWarning.actionPath property
 
-The path (without the basePath) that the user should be redirect to to address this warning.
+The path (without the basePath) that the user should be redirect to address this warning.
 
 <b>Signature:</b>
 

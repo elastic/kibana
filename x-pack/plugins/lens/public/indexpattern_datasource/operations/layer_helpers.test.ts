@@ -104,6 +104,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'missing' as OperationType,
           columnId: 'none',
+          visualizationGroups: [],
         });
       }).toThrow();
     });
@@ -130,6 +131,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col2',
           op: 'filters',
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col2', 'col1'] }));
     });
@@ -157,6 +159,7 @@ describe('state_helpers', () => {
           columnId: 'col2',
           op: 'date_histogram',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col2', 'col1'] }));
     });
@@ -187,6 +190,7 @@ describe('state_helpers', () => {
           columnId: 'col2',
           op: 'count',
           field: documentField,
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
@@ -225,6 +229,7 @@ describe('state_helpers', () => {
           columnId: 'col2',
           op: 'count',
           field: documentField,
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
@@ -263,6 +268,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col2',
           op: 'filters',
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
@@ -275,6 +281,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'terms',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({
@@ -310,6 +317,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'terms',
           field: indexPattern.fields[2],
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col2', 'col1'] }));
     });
@@ -339,6 +347,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'date_histogram',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
@@ -374,6 +383,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'sum',
           field: indexPattern.fields[2],
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
@@ -395,6 +405,7 @@ describe('state_helpers', () => {
             indexPattern,
             columnId: 'col2',
             op: 'testReference' as OperationType,
+            visualizationGroups: [],
           });
         }).toThrow();
       });
@@ -406,6 +417,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col2',
           op: 'testReference' as OperationType,
+          visualizationGroups: [],
         });
 
         expect(operationDefinitionMap.testReference.buildColumn).toHaveBeenCalledWith(
@@ -470,6 +482,7 @@ describe('state_helpers', () => {
             columnId: 'ref1',
             op: 'count',
             field: documentField,
+            visualizationGroups: [],
           })
         ).toEqual(
           expect.objectContaining({
@@ -492,6 +505,7 @@ describe('state_helpers', () => {
           op: 'count',
           field: documentField,
           columnId: 'none',
+          visualizationGroups: [],
         });
       }).toThrow();
     });
@@ -503,6 +517,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'missing' as OperationType,
           columnId: 'none',
+          visualizationGroups: [],
         });
       }).toThrow();
     });
@@ -539,6 +554,7 @@ describe('state_helpers', () => {
           columnId: 'col2',
           op: 'date_histogram',
           field: indexPattern.fields[0], // date
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({
@@ -572,6 +588,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'date_histogram',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         });
       }).toThrow();
     });
@@ -600,6 +617,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           indexPattern,
           op: 'terms',
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({
@@ -636,6 +654,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'date_histogram',
           field: indexPattern.fields[1],
+          visualizationGroups: [],
         }).columns.col1
       ).toEqual(
         expect.objectContaining({
@@ -671,6 +690,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col1',
           op: 'filters',
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({
@@ -706,6 +726,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           op: 'date_histogram',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         }).columns.col1
       ).toEqual(
         expect.objectContaining({
@@ -740,6 +761,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           op: 'date_histogram',
           field: indexPattern.fields[1],
+          visualizationGroups: [],
         }).columns.col1
       ).toEqual(
         expect.objectContaining({
@@ -775,6 +797,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           op: 'terms',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         }).columns.col1
       ).toEqual(
         expect.objectContaining({
@@ -819,6 +842,7 @@ describe('state_helpers', () => {
         columnId: 'col2',
         op: 'avg',
         field: indexPattern.fields[2], // bytes field
+        visualizationGroups: [],
       });
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
@@ -876,6 +900,7 @@ describe('state_helpers', () => {
         indexPattern,
         columnId: 'willBeReference',
         op: 'cumulative_sum',
+        visualizationGroups: [],
       });
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
@@ -925,6 +950,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col1',
           op: 'testReference' as OperationType,
+          visualizationGroups: [],
         });
 
         expect(operationDefinitionMap.testReference.buildColumn).toHaveBeenCalledWith(
@@ -1333,6 +1359,7 @@ describe('state_helpers', () => {
             indexPattern,
             columnId: 'col2',
             op: 'filters',
+            visualizationGroups: [],
           })
         ).toEqual(
           expect.objectContaining({
@@ -1376,6 +1403,7 @@ describe('state_helpers', () => {
             columnId: 'col2',
             op: 'count',
             field: documentField,
+            visualizationGroups: [],
           })
         ).toEqual(
           expect.objectContaining({
@@ -1414,6 +1442,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'ref',
           op: 'sum',
+          visualizationGroups: [],
         });
 
         expect(result.columnOrder).toEqual(['ref']);
@@ -1466,6 +1495,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           op: 'count',
           field: documentField,
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({

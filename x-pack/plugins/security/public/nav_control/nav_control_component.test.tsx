@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHeaderSectionItemButton, EuiPopover } from '@elastic/eui';
+import { EuiContextMenuItem, EuiHeaderSectionItemButton, EuiPopover } from '@elastic/eui';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
@@ -180,5 +180,59 @@ describe('SecurityNavControl', () => {
     expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
 
     expect(findTestSubject(wrapper, 'logoutLink').text()).toBe('Log in');
+  });
+
+  it('properly renders without a custom profile link.', async () => {
+    const props = {
+      user: Promise.resolve(mockAuthenticatedUser({ full_name: 'foo' })),
+      editProfileUrl: '',
+      logoutUrl: '',
+      userMenuLinks$: new BehaviorSubject([
+        { label: 'link1', href: 'path-to-link-1', iconType: 'empty', order: 1 },
+        { label: 'link2', href: 'path-to-link-2', iconType: 'empty', order: 2 },
+      ]),
+    };
+
+    const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
+    await nextTick();
+    wrapper.update();
+
+    expect(wrapper.find(EuiContextMenuItem).map((node) => node.text())).toEqual([]);
+
+    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+
+    expect(wrapper.find(EuiContextMenuItem).map((node) => node.text())).toEqual([
+      'Profile',
+      'link1',
+      'link2',
+      'Log out',
+    ]);
+  });
+
+  it('properly renders with a custom profile link.', async () => {
+    const props = {
+      user: Promise.resolve(mockAuthenticatedUser({ full_name: 'foo' })),
+      editProfileUrl: '',
+      logoutUrl: '',
+      userMenuLinks$: new BehaviorSubject([
+        { label: 'link1', href: 'path-to-link-1', iconType: 'empty', order: 1 },
+        { label: 'link2', href: 'path-to-link-2', iconType: 'empty', order: 2, setAsProfile: true },
+      ]),
+    };
+
+    const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
+    await nextTick();
+    wrapper.update();
+
+    expect(wrapper.find(EuiContextMenuItem).map((node) => node.text())).toEqual([]);
+
+    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+
+    expect(wrapper.find(EuiContextMenuItem).map((node) => node.text())).toEqual([
+      'link1',
+      'link2',
+      'Preferences',
+      'Log out',
+    ]);
   });
 });

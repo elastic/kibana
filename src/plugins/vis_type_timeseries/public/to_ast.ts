@@ -8,7 +8,8 @@
 
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import { Vis } from '../../visualizations/public';
-import { TimeseriesExpressionFunctionDefinition, TimeseriesVisParams } from './metrics_fn';
+import { TimeseriesExpressionFunctionDefinition } from './metrics_fn';
+import { TimeseriesVisParams } from './types';
 
 export const toExpressionAst = (vis: Vis<TimeseriesVisParams>) => {
   const timeseries = buildExpressionFunction<TimeseriesExpressionFunctionDefinition>('tsvb', {

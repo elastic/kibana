@@ -9,15 +9,10 @@
 import { format } from 'url';
 import Boom from '@hapi/boom';
 
-import { registerHapiPlugins } from './register_hapi_plugins';
-import { setupBasePathProvider } from './setup_base_path_provider';
-
 export default async function (kbnServer, server) {
   server = kbnServer.server;
 
-  setupBasePathProvider(kbnServer);
-
-  await registerHapiPlugins(server);
+  const getBasePath = (request) => kbnServer.newPlatform.setup.core.http.basePath.get(request);
 
   server.route({
     method: 'GET',
@@ -27,8 +22,8 @@ export default async function (kbnServer, server) {
       if (path === '/' || path.charAt(path.length - 1) !== '/') {
         throw Boom.notFound();
       }
-
-      const pathPrefix = req.getBasePath() ? `${req.getBasePath()}/` : '';
+      const basePath = getBasePath(req);
+      const pathPrefix = basePath ? `${basePath}/` : '';
       return h
         .redirect(
           format({

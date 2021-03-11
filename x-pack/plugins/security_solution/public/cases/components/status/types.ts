@@ -6,7 +6,7 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common/api';
 
 export const StatusAll = 'all' as const;
 type StatusAllType = typeof StatusAll;

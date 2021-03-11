@@ -9,19 +9,20 @@ import moment from 'moment';
 import { Coordinate } from '../../typings/timeseries';
 
 export function offsetPreviousPeriodCoordinates({
-  currentPeriodStart,
-  previousPeriodStart,
+  currentPeriodTimeseries,
   previousPeriodTimeseries,
 }: {
-  currentPeriodStart: number;
-  previousPeriodStart: number;
+  currentPeriodTimeseries?: Coordinate[];
   previousPeriodTimeseries?: Coordinate[];
 }) {
-  if (!previousPeriodTimeseries) {
+  if (!previousPeriodTimeseries?.length) {
     return [];
   }
+  const currentPeriodStart = currentPeriodTimeseries?.length
+    ? currentPeriodTimeseries[0].x
+    : 0;
 
-  const dateDiff = currentPeriodStart - previousPeriodStart;
+  const dateDiff = currentPeriodStart - previousPeriodTimeseries[0].x;
 
   return previousPeriodTimeseries.map(({ x, y }) => {
     const offsetX = moment(x).add(dateDiff).valueOf();

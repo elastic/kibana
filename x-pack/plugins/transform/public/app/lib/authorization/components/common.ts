@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { Privileges } from '../../../../../common/types/privileges';
+import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 
 export interface Capabilities {
   canGetTransform: boolean;
@@ -19,10 +20,9 @@ export interface Capabilities {
 
 export type Privilege = [string, string];
 
-function isPrivileges(arg: any): arg is Privileges {
+function isPrivileges(arg: unknown): arg is Privileges {
   return (
-    typeof arg === 'object' &&
-    arg !== null &&
+    isPopulatedObject(arg) &&
     arg.hasOwnProperty('hasAllPrivileges') &&
     typeof arg.hasAllPrivileges === 'boolean' &&
     arg.hasOwnProperty('missingPrivileges') &&
