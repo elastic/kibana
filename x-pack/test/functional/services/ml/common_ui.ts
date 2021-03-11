@@ -170,10 +170,10 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
     async setSliderValue(testDataSubj: string, value: number) {
       const slider = await testSubjects.find(testDataSubj);
 
-      let currentValue = await slider.getAttribute('value');
-      let currentDiff = +currentValue - +value;
-
       await retry.tryForTime(60 * 1000, async () => {
+        const currentValue = await slider.getAttribute('value');
+        const currentDiff = +currentValue - +value;
+
         if (currentDiff === 0) {
           return true;
         } else {
@@ -192,20 +192,13 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
           }
           await retry.tryForTime(1000, async () => {
             const newValue = await slider.getAttribute('value');
-            if (newValue !== currentValue) {
-              currentValue = newValue;
-              currentDiff = +currentValue - +value;
-              return true;
-            } else {
+            if (newValue === currentValue) {
               throw new Error(`slider value should have changed, but is still ${currentValue}`);
             }
           });
-
-          throw new Error(`slider value should be '${value}' (got '${currentValue}')`);
+          await this.assertSliderValue(testDataSubj, value);
         }
       });
-
-      await this.assertSliderValue(testDataSubj, value);
     },
 
     async assertSliderValue(testDataSubj: string, expectedValue: number) {
