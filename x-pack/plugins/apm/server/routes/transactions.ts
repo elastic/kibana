@@ -19,14 +19,14 @@ import { getServiceTransactionGroupComparisonStatisticsPeriods } from '../lib/se
 import { getTransactionBreakdown } from '../lib/transactions/breakdown';
 import { getTransactionDistribution } from '../lib/transactions/distribution';
 import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
-import { getLatencyTimeseries } from '../lib/transactions/get_latency_charts';
+import { getLatencyPeriods } from '../lib/transactions/get_latency_charts';
 import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
 import { createRoute } from './create_route';
 import {
-  environmentRt,
   comparisonRangeRt,
+  environmentRt,
   rangeRt,
   kueryRt,
 } from './default_api_types';
@@ -179,16 +179,12 @@ export const transactionLatencyChartsRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.partial({
-        transactionName: t.string,
-      }),
       t.type({
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
       }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
+      t.partial({ transactionName: t.string }),
+      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -202,6 +198,8 @@ export const transactionLatencyChartsRoute = createRoute({
       transactionType,
       transactionName,
       latencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
     } = context.params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
@@ -219,10 +217,15 @@ export const transactionLatencyChartsRoute = createRoute({
       logger,
     };
 
-    const [latencyData, anomalyTimeseries] = await Promise.all([
-      getLatencyTimeseries({
+    const [
+      { currentPeriod, previousPeriod },
+      anomalyTimeseries,
+    ] = await Promise.all([
+      getLatencyPeriods({
         ...options,
         latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+        comparisonStart,
+        comparisonEnd,
       }),
       getAnomalySeries(options).catch((error) => {
         logger.warn(`Unable to retrieve anomalies for latency charts.`);
@@ -231,11 +234,9 @@ export const transactionLatencyChartsRoute = createRoute({
       }),
     ]);
 
-    const { latencyTimeseries, overallAvgDuration } = latencyData;
-
     return {
-      latencyTimeseries,
-      overallAvgDuration,
+      currentPeriod,
+      previousPeriod,
       anomalyTimeseries,
     };
   },

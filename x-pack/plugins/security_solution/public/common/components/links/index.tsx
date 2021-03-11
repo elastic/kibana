@@ -39,7 +39,6 @@ import {
 } from '../../../../common/search_strategy/security_solution/network';
 import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
-import { ExternalLinkIcon } from '../external_link_icon';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
@@ -53,6 +52,13 @@ export const LinkButton: React.FC<
 export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
+
+export const PortContainer = styled.div`
+  & svg {
+    position: relative;
+    top: -1px;
+  }
+`;
 
 // Internal Links
 const HostDetailsLinkComponent: React.FC<{
@@ -112,11 +118,12 @@ export const ExternalLink = React.memo<{
     const inAllowlist = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
     return url && inAllowlist && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
-        <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
-          {children}
-          <ExternalLinkIcon data-test-subj="externalLinkIcon" />
+        <>
+          <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
+            {children}
+          </EuiLink>
           {!isNil(idx) && idx < lastIndexToShow && <Comma data-test-subj="externalLinkComma" />}
-        </EuiLink>
+        </>
       </EuiToolTip>
     ) : null;
   }
@@ -229,15 +236,17 @@ export const PortOrServiceNameLink = React.memo<{
   children?: React.ReactNode;
   portOrServiceName: number | string;
 }>(({ children, portOrServiceName }) => (
-  <EuiLink
-    data-test-subj="port-or-service-name-link"
-    href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
-      String(portOrServiceName)
-    )}`}
-    target="_blank"
-  >
-    {children ? children : portOrServiceName}
-  </EuiLink>
+  <PortContainer>
+    <EuiLink
+      data-test-subj="port-or-service-name-link"
+      href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
+        String(portOrServiceName)
+      )}`}
+      target="_blank"
+    >
+      {children ? children : portOrServiceName}
+    </EuiLink>
+  </PortContainer>
 ));
 
 PortOrServiceNameLink.displayName = 'PortOrServiceNameLink';

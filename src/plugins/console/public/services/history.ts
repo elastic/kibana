@@ -9,6 +9,10 @@
 import { BehaviorSubject } from 'rxjs';
 import { Storage } from './index';
 
+const MAX_NUMBER_OF_HISTORY_ITEMS = 100;
+
+export const isQuotaExceededError = (e: Error): boolean => e.name === 'QuotaExceededError';
+
 export class History {
   constructor(private readonly storage: Storage) {}
 
@@ -38,7 +42,7 @@ export class History {
 
   addToHistory(endpoint: string, method: string, data: any) {
     const keys = this.getHistoryKeys();
-    keys.splice(0, 500); // only maintain most recent X;
+    keys.splice(0, MAX_NUMBER_OF_HISTORY_ITEMS); // only maintain most recent X;
     keys.forEach((key) => {
       this.storage.delete(key);
     });
