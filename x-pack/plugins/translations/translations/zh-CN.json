@@ -11994,7 +11994,6 @@
     "xpack.lens.configure.invalidConfigTooltipClick": "单击了解更多详情。",
     "xpack.lens.customBucketContainer.dragToReorder": "拖动以重新排序",
     "xpack.lens.dataPanelWrapper.switchDatasource": "切换到数据源",
-    "xpack.lens.datatable.breakdown": "细分方式",
     "xpack.lens.datatable.conjunctionSign": " &amp; ",
     "xpack.lens.datatable.expressionHelpLabel": "数据表呈现器",
     "xpack.lens.datatable.label": "数据表",

@@ -11838,7 +11838,6 @@
     "xpack.lens.configure.invalidConfigTooltipClick": "詳細はクリックしてください。",
     "xpack.lens.customBucketContainer.dragToReorder": "ドラッグして並べ替え",
     "xpack.lens.dataPanelWrapper.switchDatasource": "データソースに切り替える",
-    "xpack.lens.datatable.breakdown": "内訳の基準",
     "xpack.lens.datatable.conjunctionSign": " &amp; ",
     "xpack.lens.datatable.expressionHelpLabel": "データベースレンダー",
     "xpack.lens.datatable.label": "データテーブル",
