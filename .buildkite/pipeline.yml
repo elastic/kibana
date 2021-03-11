@@ -1,4 +1,5 @@
 steps:
+  # https://cloud.google.com/blog/products/devops-sre/artifact-registry-is-ga
   # - command: |
   #     export DOCKER_BUILDKIT=1 && \
   #     docker buildx create --use && \
@@ -22,8 +23,10 @@ steps:
           image: 'gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT'
           propagate-environment: true
           mount-checkout: false
-          shell: [-e", '-c']
+          entrypoint: /bin/bash
+          shell: [-e, '-c']
     parallelism: 2
+    timeout_in_minutes: 120
   # - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'
   #   label: 'Default CI Group 1'
   #   agents:
