@@ -90,6 +90,9 @@ export class Authorization {
 
   public async ensureAuthorized(classes: string[], operation: ReadOperations | WriteOperations) {
     const { securityAuth } = this;
+    const areAllClassAvailable = classes.every((className) =>
+      this.featureCaseClasses.has(className)
+    );
     // TODO: throw if the request is not authorized
     if (securityAuth && this.shouldCheckAuthorization()) {
       // TODO: implement ensure logic
@@ -102,6 +105,16 @@ export class Authorization {
         kibana: requiredPrivileges,
       });
 
+      if (!areAllClassAvailable) {
+        // TODO: throw if any of the class are not available
+        /**
+         * Under most circumstances this would have been caught by `checkPrivileges` as
+         * a user can't have Privileges to an unknown class, but super users
+         * don't actually get "privilege checked" so the made up class *will* return
+         * as Privileged.
+         * This check will ensure we don't accidentally let these through
+         */
+      }
     }
   }
 }
