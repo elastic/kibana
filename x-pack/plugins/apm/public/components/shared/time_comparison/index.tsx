@@ -182,15 +182,18 @@ export function TimeComparison() {
               defaultMessage: 'Comparison',
             })}
             checked={comparisonEnabled}
-            onChange={(e) => {
-              if (e.target.checked === false) {
+            onChange={() => {
+              const nextComparisonEnabledValue = !comparisonEnabled;
+              if (nextComparisonEnabledValue === false) {
                 trackApmEvent({
                   metric: 'time_comparison_disabled',
                 });
               }
               urlHelpers.push(history, {
                 query: {
-                  comparisonEnabled: Boolean(e.target.checked).toString(),
+                  comparisonEnabled: Boolean(
+                    nextComparisonEnabledValue
+                  ).toString(),
                 },
               });
             }}
