@@ -383,13 +383,7 @@ xpack.security.authc.providers:
 
 One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it. If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
 
-If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding dashboards and visualizations, then toggle *Public URL* in the *Share > Embed code* menu in  *Dashboard* or *Visualize*.
-
-You can also use the *Public URL* toggle when you're generating permanent links to dashboards, visualizations, and saved searches.
-
-NOTE:  The *Public URL* toggle is only available if anonymous access is properly configured and your anonymous service account has privileges to access what you want to embed or share.
-
-For more information, refer to <<embedding, Embed {kib} content in a web page>>.
+If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding, then you will need to manually modify the {kib} URL in the iframe code. For more information, refer to <<embedding, Embed {kib} content in a web page>>.
 
 [[http-authentication]]
 ==== HTTP authentication
