@@ -20,13 +20,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      // FIXME: should also use reporting/ecommerce_kibana
-      // reporting/ecommerce needs to have the kibana object cleared out
-      await esArchiver.loadIfNeeded('reporting/ecommerce');
+      await esArchiver.load('reporting/ecommerce');
+      await esArchiver.load('reporting/ecommerce_kibana');
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
       await esArchiver.unload('reporting/ecommerce');
+      await esArchiver.unload('reporting/ecommerce_kibana');
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
