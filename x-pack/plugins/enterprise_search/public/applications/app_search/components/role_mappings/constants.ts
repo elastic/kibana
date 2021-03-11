@@ -7,9 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ROLE_MAPPINGS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMappings.title',
-  { defaultMessage: 'Role Mappings' }
+export const EMPTY_ROLE_MAPPINGS_BODY = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMapping.emptyRoleMappingsBody',
+  {
+    defaultMessage:
+      'All users who successfully authenticate will be assigned the Owner role and have access to all engines. Add a new role to override the default.',
+  }
 );
 
 export const DELETE_ROLE_MAPPING_MESSAGE = i18n.translate(
@@ -38,5 +41,40 @@ export const ROLE_MAPPING_UPDATED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingUpdatedMessage',
   {
     defaultMessage: 'Role mapping successfully updated.',
+  }
+);
+
+export const ROLE_MAPPINGS_ENGINE_ACCESS_HEADING = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMappingsEngineAccessHeading',
+  {
+    defaultMessage: 'Engine access',
+  }
+);
+
+export const ROLE_MAPPINGS_RESET_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMappingsResetButton',
+  {
+    defaultMessage: 'Reset mappings',
+  }
+);
+
+export const ROLE_MAPPINGS_RESET_CONFIRM_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMappingsResetConfirmTitle',
+  {
+    defaultMessage: 'Are you sure you want to reset role mappings?',
+  }
+);
+
+export const ROLE_MAPPINGS_RESET_CONFIRM_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMappingsResetConfirmButton',
+  {
+    defaultMessage: 'Reset role mappings',
+  }
+);
+
+export const ROLE_MAPPINGS_RESET_CANCEL_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMappingsResetCancelButton',
+  {
+    defaultMessage: 'Cancel',
   }
 );
