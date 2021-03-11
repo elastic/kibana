@@ -26,12 +26,31 @@ describe('ResultSettingsLogic', () => {
     jest.clearAllMocks();
   });
 
+  const itShouldCloseOpenModals = (callback: () => void) => {
+    mount({
+      openModal: OpenModal.ConfirmSaveModal,
+    });
+
+    callback();
+
+    expect(ResultSettingsLogic.values).toEqual({
+      ...DEFAULT_VALUES,
+      openModal: OpenModal.None,
+    });
+  };
+
   it('has expected default values', () => {
     mount();
     expect(ResultSettingsLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
+    describe('closeModals', () => {
+      itShouldCloseOpenModals(() => {
+        ResultSettingsLogic.actions.closeModals();
+      });
+    });
+
     describe('clearAllFields', () => {
       it('should remove all settings that have been set for each field', () => {
         mount({
@@ -122,15 +141,8 @@ describe('ResultSettingsLogic', () => {
       });
 
       it('should close any open modal', () => {
-        mount({
-          openModal: OpenModal.ConfirmSaveModal,
-        });
-
-        ResultSettingsLogic.actions.resetAllFields();
-
-        expect(ResultSettingsLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          openModal: OpenModal.None,
+        itShouldCloseOpenModals(() => {
+          ResultSettingsLogic.actions.resetAllFields();
         });
       });
     });

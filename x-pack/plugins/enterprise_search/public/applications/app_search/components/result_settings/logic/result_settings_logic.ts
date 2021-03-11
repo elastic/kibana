@@ -11,7 +11,6 @@ import {
   FieldResultSetting,
   FieldResultSettingObject,
   OpenModal,
-  ServerFieldResultSetting,
   ServerFieldResultSettingObject,
 } from '../types';
 
@@ -24,6 +23,7 @@ import {
 } from './helpers';
 
 interface ResultSettingsActions {
+  closeModals(): void;
   clearAllFields(): void;
   resetAllFields(): void;
   updateField(
@@ -43,6 +43,7 @@ interface ResultSettingsValues {
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
   path: ['enterprise_search', 'app_search', 'result_settings_logic'],
   actions: () => ({
+    closeModals: () => true,
     clearAllFields: () => true,
     resetAllFields: () => true,
     updateField: (fieldName, settings) => ({ fieldName, settings }),
@@ -51,6 +52,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     openModal: [
       OpenModal.None,
       {
+        closeModals: () => OpenModal.None,
         resetAllFields: () => OpenModal.None,
       },
     ],
