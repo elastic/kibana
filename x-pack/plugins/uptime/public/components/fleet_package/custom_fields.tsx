@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -25,14 +25,16 @@ import { ComboBox } from './combo_box';
 import { OptionalLabel } from './optional_label';
 import { HTTPAdvancedFields } from './http_advanced_fields';
 import { TCPAdvancedFields } from './tcp_advanced_fields';
+import { ScheduleField } from './schedule_field';
 
 interface Props {
   defaultValues: ICustomFields;
   onChange: (fields: ICustomFields) => void;
 }
 
-export const CustomFields = ({ defaultValues, onChange }: Props) => {
+export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
   const [fields, setFields] = useState<ICustomFields>(defaultValues);
+  const { type } = fields;
 
   const isHTTP = fields[ConfigKeys.MONITOR_TYPE] === DataStream.HTTP;
   const isTCP = fields[ConfigKeys.MONITOR_TYPE] === DataStream.TCP;
@@ -43,10 +45,9 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
     setFields((prevFields) => ({
       ...prevFields,
       [ConfigKeys.HOSTS]: defaultValues[ConfigKeys.HOSTS],
-      [ConfigKeys.PORTS]: defaultValues[ConfigKeys.PORTS],
       [ConfigKeys.URLS]: defaultValues[ConfigKeys.URLS],
     }));
-  }, [defaultValues, fields.type]);
+  }, [defaultValues, type]);
 
   useDebounce(
     () => {
@@ -54,39 +55,30 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
       onChange(fields);
     },
     250,
-    [fields]
+    [onChange, fields]
   );
 
-  useEffect(() => {
-    // urls and schedule is managed by us, name is managed by fleet
-    setFields(defaultValues);
-  }, [defaultValues]);
+  const handleInputChange = ({
+    event,
+    configKey,
+  }: {
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>;
+    configKey: ConfigKeys;
+  }) => {
+    const value = event.target.value;
+    setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+  };
 
-  const handleInputChange = useCallback(
-    ({
-      event,
-      configKey,
-    }: {
-      event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>;
-      configKey: ConfigKeys;
-    }) => {
-      setFields({ ...fields, [configKey]: event.target.value });
-    },
-    [fields]
-  );
-
-  const handleCheckboxChange = useCallback(
-    ({
-      event,
-      configKey,
-    }: {
-      event: React.ChangeEvent<HTMLInputElement>;
-      configKey: ConfigKeys;
-    }) => {
-      setFields({ ...fields, [configKey]: event.target.checked });
-    },
-    [fields]
-  );
+  const handleCheckboxChange = ({
+    event,
+    configKey,
+  }: {
+    event: React.ChangeEvent<HTMLInputElement>;
+    configKey: ConfigKeys;
+  }) => {
+    const checked = event.target.checked;
+    setFields((prevFields) => ({ ...prevFields, [configKey]: checked }));
+  };
 
   return (
     <EuiForm>
@@ -159,27 +151,30 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
                   />
                 </EuiFormRow>
               )}
-              {isTCP && (
-                <EuiFormRow label="Port" labelAppend={<OptionalLabel />}>
+              {(isHTTP || isTCP) && (
+                <EuiFormRow label="Proxy URL" labelAppend={<OptionalLabel />}>
                   <EuiFieldText
-                    value={fields[ConfigKeys.PORTS]}
-                    onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.PORTS })}
+                    value={fields[ConfigKeys.PROXY_URL]}
+                    onChange={(event) =>
+                      handleInputChange({ event, configKey: ConfigKeys.PROXY_URL })
+                    }
                   />
                 </EuiFormRow>
               )}
               <EuiFormRow
                 label="Monitor interval in seconds"
-                isInvalid={!fields[ConfigKeys.SCHEDULE] || fields[ConfigKeys.SCHEDULE] < 1}
+                isInvalid={!fields[ConfigKeys.SCHEDULE] || fields[ConfigKeys.SCHEDULE].number < 1}
                 error={
-                  !fields[ConfigKeys.SCHEDULE] || fields[ConfigKeys.SCHEDULE] < 1
+                  !fields[ConfigKeys.SCHEDULE] || fields[ConfigKeys.SCHEDULE].number < 1
                     ? ['Schedule is required']
                     : undefined
                 }
               >
-                <EuiFieldNumber
-                  min={1}
-                  value={fields[ConfigKeys.SCHEDULE]}
-                  onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.SCHEDULE })}
+                <ScheduleField
+                  configKey={ConfigKeys.SCHEDULE}
+                  setFields={setFields}
+                  number={fields[ConfigKeys.SCHEDULE].number}
+                  unit={fields[ConfigKeys.SCHEDULE].unit}
                 />
               </EuiFormRow>
               {isICMP && (
@@ -200,7 +195,7 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
                   />
                 </EuiFormRow>
               )}
-              <EuiFormRow label="APM Service Name" labelAppend={<OptionalLabel />}>
+              <EuiFormRow label="APM service name" labelAppend={<OptionalLabel />}>
                 <EuiFieldText
                   value={fields[ConfigKeys.SERVICE_NAME]}
                   onChange={(event) =>
@@ -217,16 +212,6 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
                   }
                 />
               </EuiFormRow>
-              {isHTTP && isTCP && (
-                <EuiFormRow label="Proxy URL" labelAppend={<OptionalLabel />}>
-                  <EuiFieldText
-                    value={fields[ConfigKeys.PROXY_URL]}
-                    onChange={(event) =>
-                      handleInputChange({ event, configKey: ConfigKeys.PROXY_URL })
-                    }
-                  />
-                </EuiFormRow>
-              )}
               {isTCP && !!fields[ConfigKeys.PROXY_URL] && (
                 <EuiFormRow>
                   <EuiCheckbox
@@ -262,9 +247,19 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
       </EuiDescribedFormGroup>
       {isHTTP && (
         <HTTPAdvancedFields
-          fields={fields}
-          onCheckboxChange={handleCheckboxChange}
-          onInputChange={handleInputChange}
+          defaultValues={{
+            [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]:
+              defaultValues[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE],
+            [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]:
+              defaultValues[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE],
+            [ConfigKeys.RESPONSE_BODY_INDEX]: defaultValues[ConfigKeys.RESPONSE_BODY_INDEX],
+            [ConfigKeys.RESPONSE_HEADERS_CHECK]: defaultValues[ConfigKeys.RESPONSE_HEADERS_CHECK],
+            [ConfigKeys.RESPONSE_HEADERS_INDEX]: defaultValues[ConfigKeys.RESPONSE_HEADERS_INDEX],
+            [ConfigKeys.RESPONSE_STATUS_CHECK]: defaultValues[ConfigKeys.RESPONSE_STATUS_CHECK],
+            [ConfigKeys.REQUEST_BODY_CHECK]: defaultValues[ConfigKeys.REQUEST_BODY_CHECK],
+            [ConfigKeys.REQUEST_HEADERS_CHECK]: defaultValues[ConfigKeys.RESPONSE_HEADERS_CHECK],
+            [ConfigKeys.REQUEST_METHOD_CHECK]: defaultValues[ConfigKeys.REQUEST_METHOD_CHECK],
+          }}
           setFields={setFields}
         />
       )}
@@ -278,7 +273,7 @@ export const CustomFields = ({ defaultValues, onChange }: Props) => {
       )}
     </EuiForm>
   );
-};
+});
 
 const dataStreamOptions = [
   { value: DataStream.HTTP, text: 'HTTP' },

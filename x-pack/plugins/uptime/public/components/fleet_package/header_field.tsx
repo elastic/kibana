@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {
   EuiFieldText,
@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiFormRow,
 } from '@elastic/eui';
-import { ConfigKeys, ContentType, ICustomFields } from './types';
+import { ConfigKeys, ContentType, Mode, IHTTPAdvancedFields } from './types';
 
 const StyledFieldset = styled(EuiFormFieldset)`
   &&& {
@@ -32,18 +32,23 @@ const StyledFieldset = styled(EuiFormFieldset)`
     }
     .euiFlexItem {
       margin-left: 0;
+      padding-left: 12px;
     }
   }
+`;
+
+const StyledField = styled(EuiFieldText)`
+  text-align: left;
 `;
 
 interface Props {
   configKey: ConfigKeys;
   label: string | React.ReactElement;
-  contentType?: ContentType;
-  setFields: React.Dispatch<React.SetStateAction<ICustomFields>>;
+  contentMode?: Mode;
+  setFields: React.Dispatch<React.SetStateAction<IHTTPAdvancedFields>>;
 }
 
-export const HeaderField = ({ configKey, contentType, label, setFields }: Props) => {
+export const HeaderField = ({ configKey, contentMode, label, setFields }: Props) => {
   const [headers, setHeaders] = useState<Array<[string, string, boolean]>>([['', '', false]]);
   const handleOnCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const checked = event.target.checked;
@@ -55,29 +60,28 @@ export const HeaderField = ({ configKey, contentType, label, setFields }: Props)
     });
   };
 
-  const handleOnChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    index: number,
-    isKey: boolean
-  ) => {
-    const targetValue = event.target.value;
+  const handleOnChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>, index: number, isKey: boolean) => {
+      const targetValue = event.target.value;
 
-    setHeaders((prevHeaders) => {
-      const newHeaders = [...prevHeaders];
-      const [prevKey, prevValue, prevChecked] = prevHeaders[index];
-      const checked = !prevKey ? true : prevChecked;
-      newHeaders[index] = isKey
-        ? [targetValue, prevValue, checked]
-        : [prevKey, targetValue, checked];
-      const isLastRow = prevHeaders.length - 1 === index;
+      setHeaders((prevHeaders) => {
+        const newHeaders = [...prevHeaders];
+        const [prevKey, prevValue, prevChecked] = prevHeaders[index];
+        const checked = !prevKey ? true : prevChecked;
+        newHeaders[index] = isKey
+          ? [targetValue, prevValue, checked]
+          : [prevKey, targetValue, checked];
+        const isLastRow = prevHeaders.length - 1 === index;
 
-      // automatically add a new row if the current is the last row and previously did not contain a key
-      if (isLastRow && !prevHeaders[index][0]) {
-        newHeaders.push(['', '', false]);
-      }
-      return newHeaders;
-    });
-  };
+        // automatically add a new row if the current is the last row and previously did not contain a key
+        if (isLastRow && !prevHeaders[index][0]) {
+          newHeaders.push(['', '', false]);
+        }
+        return newHeaders;
+      });
+    },
+    [setHeaders]
+  );
 
   useEffect(() => {
     setFields((prevFields) => {
@@ -91,10 +95,10 @@ export const HeaderField = ({ configKey, contentType, label, setFields }: Props)
         }
         return acc;
       }, {});
-      if (contentType) {
+      if (contentMode) {
         return {
           ...prevFields,
-          [configKey]: { 'Content-Type': contentType, ...formattedHeaders },
+          [configKey]: { 'Content-Type': contentTypes[contentMode], ...formattedHeaders },
         };
       } else {
         return {
@@ -103,7 +107,7 @@ export const HeaderField = ({ configKey, contentType, label, setFields }: Props)
         };
       }
     });
-  }, [configKey, contentType, headers, setFields]);
+  }, [configKey, contentMode, headers, setFields]);
 
   return (
     <EuiFormRow fullWidth label={label}>
@@ -136,13 +140,13 @@ export const HeaderField = ({ configKey, contentType, label, setFields }: Props)
                   </EuiFormLabel>
                 }
                 startControl={
-                  <EuiFieldText
+                  <StyledField
                     value={key}
                     onChange={(event) => handleOnChange(event, index, true)}
                   />
                 }
                 endControl={
-                  <EuiFieldText
+                  <StyledField
                     value={value}
                     onChange={(event) => handleOnChange(event, index, false)}
                   />
@@ -155,4 +159,10 @@ export const HeaderField = ({ configKey, contentType, label, setFields }: Props)
       </>
     </EuiFormRow>
   );
+};
+
+export const contentTypes: Record<Mode, ContentType> = {
+  [Mode.JSON]: ContentType.JSON,
+  [Mode.TEXT]: ContentType.TEXT,
+  [Mode.XML]: ContentType.XML,
 };

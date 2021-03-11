@@ -36,9 +36,19 @@ export enum ContentType {
   FORM = 'multipart/form-data',
 }
 
+export enum ScheduleUnit {
+  MINUTES = 'm',
+  SECONDS = 's',
+}
+
+export enum Mode {
+  JSON = 'json',
+  TEXT = 'text',
+  XML = 'xml',
+}
+
 // values must match keys in the integration package
 export enum ConfigKeys {
-  PORTS = 'ports',
   HOSTS = 'hosts',
   MAX_REDIRECTS = 'max_redirects',
   MONITOR_TYPE = 'type',
@@ -64,31 +74,35 @@ export enum ConfigKeys {
   WAIT = 'wait',
 }
 
-export interface ICustomFields {
-  [ConfigKeys.PORTS]: string;
+export interface ISimpleFields {
   [ConfigKeys.HOSTS]: string;
   [ConfigKeys.MAX_REDIRECTS]: number;
   [ConfigKeys.MONITOR_TYPE]: DataStream;
   [ConfigKeys.PROXY_URL]: string;
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: boolean;
-  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: string[];
-  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: string[];
-  [ConfigKeys.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy;
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: Record<string, string>;
-  [ConfigKeys.RESPONSE_HEADERS_INDEX]: boolean;
-  [ConfigKeys.RESPONSE_STATUS_CHECK]: string[];
   [ConfigKeys.RESPONSE_RECEIVE_CHECK]: string[];
-  [ConfigKeys.REQUEST_BODY_CHECK]: { value: string; type: ContentType };
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: Record<string, string>;
-  [ConfigKeys.REQUEST_METHOD_CHECK]: string;
   [ConfigKeys.REQUEST_SEND_CHECK]: string;
-  [ConfigKeys.SCHEDULE]: number;
+  [ConfigKeys.SCHEDULE]: { number: number; unit: string };
   [ConfigKeys.SERVICE_NAME]: string;
   [ConfigKeys.TIMEOUT]: number;
   [ConfigKeys.URLS]: string;
   [ConfigKeys.TAGS]: string[];
   [ConfigKeys.WAIT]: number;
 }
+
+export interface IHTTPAdvancedFields {
+  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: string[];
+  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: string[];
+  [ConfigKeys.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy;
+  [ConfigKeys.RESPONSE_HEADERS_CHECK]: Record<string, string>;
+  [ConfigKeys.RESPONSE_HEADERS_INDEX]: boolean;
+  [ConfigKeys.RESPONSE_STATUS_CHECK]: string[];
+  [ConfigKeys.REQUEST_BODY_CHECK]: { value: string; type: Mode };
+  [ConfigKeys.REQUEST_HEADERS_CHECK]: Record<string, string>;
+  [ConfigKeys.REQUEST_METHOD_CHECK]: string;
+}
+
+export type ICustomFields = ISimpleFields & IHTTPAdvancedFields;
 
 export type Config = {
   [ConfigKeys.NAME]: string;

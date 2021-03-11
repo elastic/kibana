@@ -10,11 +10,12 @@ import { PackagePolicyCreateExtensionComponentProps } from '../../../../fleet/pu
 import {
   Config,
   ConfigKeys,
-  ContentType,
   DataStream,
-  ICustomFields,
   HTTPMethod,
+  ICustomFields,
+  Mode,
   ResponseBodyIndexPolicy,
+  ScheduleUnit,
 } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
@@ -54,7 +55,6 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
 SyntheticsPolicyCreateExtension.displayName = 'SyntheticsPolicyCreateExtension';
 
 const defaultValues = {
-  [ConfigKeys.PORTS]: '',
   [ConfigKeys.HOSTS]: '',
   [ConfigKeys.MAX_REDIRECTS]: 0,
   [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
@@ -69,12 +69,15 @@ const defaultValues = {
   [ConfigKeys.RESPONSE_STATUS_CHECK]: [], // may need to make sure that this field is not applied when length is 0
   [ConfigKeys.REQUEST_BODY_CHECK]: {
     value: '',
-    type: ContentType.TEXT,
+    type: Mode.TEXT,
   },
   [ConfigKeys.REQUEST_HEADERS_CHECK]: {},
   [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
   [ConfigKeys.REQUEST_SEND_CHECK]: '',
-  [ConfigKeys.SCHEDULE]: 5,
+  [ConfigKeys.SCHEDULE]: {
+    number: 5,
+    unit: ScheduleUnit.SECONDS,
+  },
   [ConfigKeys.SERVICE_NAME]: '',
   [ConfigKeys.TAGS]: [],
   [ConfigKeys.TIMEOUT]: 1600,

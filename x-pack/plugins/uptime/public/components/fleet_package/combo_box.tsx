@@ -17,15 +17,13 @@ type ComboBoxKeys =
   | ConfigKeys.RESPONSE_STATUS_CHECK
   | ConfigKeys.RESPONSE_RECEIVE_CHECK;
 
-export const ComboBox = ({
-  configKey,
-  setFields,
-  selectedOptions,
-}: {
+export interface Props {
   configKey: ComboBoxKeys;
   setFields: React.Dispatch<React.SetStateAction<ICustomFields>>;
   selectedOptions: string[];
-}) => {
+}
+
+export const ComboBox = ({ configKey, setFields, selectedOptions }: Props) => {
   const [formattedSelectedOptions, setSelectedOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >(selectedOptions.map((option) => ({ label: option, key: option })));

@@ -47,7 +47,7 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
         if (configItem) {
           switch (key) {
             case ConfigKeys.SCHEDULE:
-              configItem.value = JSON.stringify(`@every ${config[key]}s`); // convert to cron
+              configItem.value = JSON.stringify(`@every ${config[key].number}${config[key].unit}`); // convert to cron
               break;
             case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
             case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
