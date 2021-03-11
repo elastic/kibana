@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from 'kibana/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 
 import type { AgentStatus, Agent, EsAssetReference } from '../types';
 
-import { getAgent, listAgents } from './agents';
-import { agentPolicyService } from './agent_policy';
+import type { getAgent, listAgents } from './agents';
+import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';

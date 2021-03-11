@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import Boom, { isBoom } from '@hapi/boom';
-import { KibanaRequest } from 'src/core/server';
+import type Boom from '@hapi/boom';
+import { isBoom } from '@hapi/boom';
+import type { KibanaRequest } from 'src/core/server';
 import type {
   RequestHandlerContext,
   IKibanaResponse,
