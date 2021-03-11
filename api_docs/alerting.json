@@ -198,56 +198,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-server.ActionVariable",
-        "type": "Interface",
-        "label": "ActionVariable",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.ActionVariable.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 106
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ActionVariable.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 107
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-server.ActionVariable.useWithTripleBracesInTemplates",
-            "type": "CompoundType",
-            "label": "useWithTripleBracesInTemplates",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 108
-            },
-            "signature": [
-              "boolean | undefined"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 105
-        },
-        "initialIsOpen": false
-      },
-      {
         "id": "def-server.AlertExecutorOptions",
         "type": "Interface",
         "label": "AlertExecutorOptions",
@@ -272,7 +222,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 91
+              "lineNumber": 92
             }
           },
           {
@@ -283,7 +233,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 92
+              "lineNumber": 93
             },
             "signature": [
               "Date"
@@ -297,7 +247,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 93
+              "lineNumber": 94
             },
             "signature": [
               "Date | null"
@@ -311,7 +261,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 94
+              "lineNumber": 95
             },
             "signature": [
               {
@@ -332,7 +282,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 95
+              "lineNumber": 96
             },
             "signature": [
               "Params"
@@ -346,7 +296,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "signature": [
               "State"
@@ -360,7 +310,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 97
+              "lineNumber": 98
             }
           },
           {
@@ -371,7 +321,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 98
+              "lineNumber": 99
             },
             "signature": [
               "string | undefined"
@@ -385,7 +335,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 99
+              "lineNumber": 100
             }
           },
           {
@@ -396,7 +346,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 100
+              "lineNumber": 101
             },
             "signature": [
               "string[]"
@@ -410,7 +360,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 101
+              "lineNumber": 102
             },
             "signature": [
               "string | null"
@@ -424,7 +374,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 102
+              "lineNumber": 103
             },
             "signature": [
               "string | null"
@@ -433,7 +383,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 84
+          "lineNumber": 85
         },
         "initialIsOpen": false
       },
@@ -454,7 +404,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             },
             "signature": [
               "() => ",
@@ -475,7 +425,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             },
             "signature": [
               "() => Set<",
@@ -497,7 +447,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "signature": [
               "() => Promise<",
@@ -514,7 +464,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 46
+          "lineNumber": 47
         },
         "initialIsOpen": false
       },
@@ -533,7 +483,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 231
+              "lineNumber": 226
             },
             "signature": [
               {
@@ -553,7 +503,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 232
+              "lineNumber": 227
             },
             "signature": [
               {
@@ -568,7 +518,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 230
+          "lineNumber": 225
         },
         "initialIsOpen": false
       },
@@ -598,7 +548,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 79
+              "lineNumber": 80
             },
             "signature": [
               "(id: string) => Pick<",
@@ -615,7 +565,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 74
+          "lineNumber": 75
         },
         "initialIsOpen": false
       },
@@ -644,7 +594,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 132
+              "lineNumber": 127
             }
           },
           {
@@ -655,7 +605,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 133
+              "lineNumber": 128
             }
           },
           {
@@ -666,7 +616,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 134
+              "lineNumber": 129
             },
             "signature": [
               "{ params?: ",
@@ -688,7 +638,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 137
+              "lineNumber": 132
             },
             "signature": [
               {
@@ -709,7 +659,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 138
+              "lineNumber": 133
             },
             "signature": [
               "ActionGroupIds"
@@ -723,7 +673,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 139
+              "lineNumber": 134
             },
             "signature": [
               {
@@ -744,7 +694,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 140
+              "lineNumber": 135
             },
             "signature": [
               {
@@ -773,7 +723,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 151
+              "lineNumber": 146
             }
           },
           {
@@ -784,31 +734,31 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 152
+              "lineNumber": 147
             },
             "signature": [
               "{ context?: ",
               {
                 "pluginId": "alerting",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.ActionVariable",
+                "section": "def-common.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; state?: ",
               {
                 "pluginId": "alerting",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.ActionVariable",
+                "section": "def-common.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; params?: ",
               {
                 "pluginId": "alerting",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.ActionVariable",
+                "section": "def-common.ActionVariable",
                 "text": "ActionVariable"
               },
               "[] | undefined; } | undefined"
@@ -822,7 +772,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/types.ts",
-              "lineNumber": 157
+              "lineNumber": 152
             },
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
@@ -831,7 +781,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 124
+          "lineNumber": 119
         },
         "initialIsOpen": false
       },
@@ -1227,7 +1177,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/server/types.ts",
-          "lineNumber": 190
+          "lineNumber": 185
         },
         "signature": [
           "Pick<Alert<Params>, \"id\"> & Partial<Pick<Alert<Params>, \"enabled\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"apiKey\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>"
@@ -1564,6 +1514,70 @@
         "source": {
           "path": "x-pack/plugins/alerting/common/alert_type.ts",
           "lineNumber": 25
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ActionVariable",
+        "type": "Interface",
+        "label": "ActionVariable",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.ActionVariable.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/common/alert.ts",
+              "lineNumber": 102
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionVariable.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/common/alert.ts",
+              "lineNumber": 103
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionVariable.deprecated",
+            "type": "CompoundType",
+            "label": "deprecated",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/common/alert.ts",
+              "lineNumber": 104
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.ActionVariable.useWithTripleBracesInTemplates",
+            "type": "CompoundType",
+            "label": "useWithTripleBracesInTemplates",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/alerting/common/alert.ts",
+              "lineNumber": 105
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/alerting/common/alert.ts",
+          "lineNumber": 101
         },
         "initialIsOpen": false
       },

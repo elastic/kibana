@@ -460,11 +460,9 @@ export default function ({ getService }: FtrProviderContext) {
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...indexedRecord._source.state.callClusterError,
-                  statusCode: 403,
                 },
                 callScopedClusterError: {
                   ...indexedRecord._source.state.callScopedClusterError,
-                  statusCode: 403,
                 },
                 savedObjectsClientError: {
                   ...indexedRecord._source.state.savedObjectsClientError,

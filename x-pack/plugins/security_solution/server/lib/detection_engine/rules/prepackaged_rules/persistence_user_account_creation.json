@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "User Account Creation",
   "query": "event.category:process and event.type:(start or process_started) and process.name:(net.exe or net1.exe) and not process.parent.name:net.exe and process.args:(user and (/ad or /add))",
   "risk_score": 21,
