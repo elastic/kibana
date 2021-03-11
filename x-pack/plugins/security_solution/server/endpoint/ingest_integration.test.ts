@@ -130,7 +130,7 @@ describe('ingest_integration tests ', () => {
     });
 
     test('default manifest is taken when there is none and there are errors pushing artifacts', async () => {
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       const manifestManager = buildManifestManagerMock();
@@ -152,7 +152,7 @@ describe('ingest_integration tests ', () => {
     });
 
     test('default manifest is taken when there is none and there are errors commiting manifest', async () => {
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       const manifestManager = buildManifestManagerMock();
@@ -175,7 +175,7 @@ describe('ingest_integration tests ', () => {
     });
 
     test('manifest is created successfuly when there is none', async () => {
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 

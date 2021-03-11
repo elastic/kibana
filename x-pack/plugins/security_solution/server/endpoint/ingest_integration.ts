@@ -58,7 +58,7 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
     logger.error(err);
   }
 
-  return manifest ?? Manifest.getDefault();
+  return manifest ?? ManifestManager.createDefaultManifest();
 };
 
 /**

@@ -300,13 +300,21 @@ export class ManifestManager {
   }
 
   /**
+   * creates a new default Manifest
+   * @param schemaVersion
+   */
+  public static createDefaultManifest(schemaVersion?: ManifestSchemaVersion): Manifest {
+    return Manifest.getDefault(schemaVersion);
+  }
+
+  /**
    * Builds a new manifest based on the current user exception list.
    *
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
    * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
   public async buildNewManifest(
-    baselineManifest: Manifest = Manifest.getDefault(this.schemaVersion)
+    baselineManifest: Manifest = ManifestManager.createDefaultManifest(this.schemaVersion)
   ): Promise<Manifest> {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(),
