@@ -65,7 +65,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     try {
       const promise = esClient.asCurrentUser.msearch(
         {
-          // @ts-expect-error client types don't support plain string bodies
+          // @ts-expect-error @elastic/elasticsearch client types don't support plain string bodies
           body: convertRequestBody(params.body, timeout),
         },
         {

@@ -16,7 +16,7 @@ export interface NodeAggregation {
 // we set aggregations as an optional type because it was only added in v7.8.0
 export interface NodeObj {
   node_id?: string;
-  timestamp: number;
+  timestamp: number | string;
   since: number;
   rest_actions: {
     [key: string]: number;
@@ -46,7 +46,7 @@ export type NodesUsageGetter = (
 export async function fetchNodesUsage(
   esClient: ElasticsearchClient
 ): Promise<NodesFeatureUsageResponse> {
-  const { body } = await esClient.nodes.usage<NodesFeatureUsageResponse>({
+  const { body } = await esClient.nodes.usage({
     timeout: TIMEOUT,
   });
   // @ts-expect-error TODO: Does the client parse `timestamp` to a Date object? Expected a number
