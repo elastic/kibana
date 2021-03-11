@@ -24,7 +24,7 @@ import { ConnectorTypes } from '../../../common/api/connectors';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../common/lib/kibana');
 
 const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
