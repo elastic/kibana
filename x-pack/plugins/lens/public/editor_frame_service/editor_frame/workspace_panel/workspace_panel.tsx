@@ -19,7 +19,7 @@ import {
   EuiLink,
   EuiPageContentBody,
 } from '@elastic/eui';
-import { CoreStart, CoreSetup, ApplicationStart } from 'kibana/public';
+import { CoreStart, ApplicationStart } from 'kibana/public';
 import {
   DataPublicPluginStart,
   ExecutionContextSearch,
@@ -71,7 +71,7 @@ export interface WorkspacePanelProps {
   framePublicAPI: FramePublicAPI;
   dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
-  core: CoreStart | CoreSetup;
+  core: CoreStart;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
@@ -330,7 +330,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError, missingRefsErrors }}
         ExpressionRendererComponent={ExpressionRendererComponent}
-        application={core.application as ApplicationStart}
+        application={core.application}
       />
     );
   };
@@ -477,13 +477,16 @@ export const InnerVisualizationWrapper = ({
   }
 
   if (localState.missingRefsErrors?.length) {
+    // Check for access to both Management app && specific indexPattern section
     const { management: isManagementEnabled } = application.capabilities.navLinks;
+    const isIndexPatternManagementEnabled =
+      application.capabilities.management.kibana.indexPatterns;
     return (
       <EuiFlexGroup data-test-subj="configuration-failure">
         <EuiFlexItem>
           <EuiEmptyPrompt
             actions={
-              isManagementEnabled ? (
+              isManagementEnabled && isIndexPatternManagementEnabled ? (
                 <EuiButtonEmpty
                   onClick={() =>
                     application.navigateToApp('management', {
