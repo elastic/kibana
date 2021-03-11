@@ -145,7 +145,6 @@
 # Operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
-/src/optimize/ @elastic/kibana-operations
 /packages/*eslint*/ @elastic/kibana-operations
 /packages/*babel*/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
