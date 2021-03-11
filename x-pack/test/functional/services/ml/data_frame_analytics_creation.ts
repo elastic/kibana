@@ -266,27 +266,10 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.scrollIntoView(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded'
       );
-      await mlCommonUI.assertCanvasElement(
+      await mlCommonUI.assertColorsInCanvasElement(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
         expectedValue,
-        ['#000000'],
-        6
-      );
-    },
-
-    async assertOutlierScatterplotMatrix(expectedColor: string) {
-      await testSubjects.existOrFail(
-        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded',
-        {
-          timeout: 5000,
-        }
-      );
-      await testSubjects.scrollIntoView(
-        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded'
-      );
-      await mlCommonUI.assertColorInCanvasElement(
-        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
-        expectedColor
+        ['#000000']
       );
     },
 

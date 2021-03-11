@@ -15,20 +15,6 @@ interface ColorStat {
 
 type ColorStats = ColorStat[];
 
-/**
- * Returns if a given value is within the tolerated range of an expected value
- *
- * @param actualValue
- * @param expectedValue
- * @param toleranceRange
- * @returns if actualValue is within the tolerance of expectedValue
- */
-function isValueWithinTolerance(actualValue: number, expectedValue: number, toleranceRange = 10) {
-  const lower = expectedValue - toleranceRange / 2;
-  const upper = expectedValue + toleranceRange / 2;
-  return lower <= actualValue && upper >= actualValue;
-}
-
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export async function CanvasElementProvider({ getService }: FtrProviderContext) {
@@ -107,9 +93,8 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
         if (exclude === undefined || !exclude.includes(color)) colors.push(color);
       }
 
-      // Percentage rounded to 4 decimal points.
       function getPixelPercentage(pixelsNum: number): number {
-        return Math.round((pixelsNum / colors.length) * 1000000) / 10000;
+        return (pixelsNum / colors.length) * 100;
       }
 
       // - d3's nest/key/entries methods will group the array of hex values so we can count
@@ -131,7 +116,11 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
             ...(expectedColorStats !== undefined
               ? {
                   withinTolerance:
-                    isValueWithinTolerance(value, expectedColorStats[i]?.value, valueTolerance) &&
+                    this.isValueWithinTolerance(
+                      value,
+                      expectedColorStats[i]?.value,
+                      valueTolerance
+                    ) &&
                     this.isColorWithinTolerance(
                       s.key,
                       expectedColorStats[i]?.key,
@@ -141,6 +130,44 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
               : {}),
           };
         });
+    }
+
+    /**
+     * Same as getColorStats() but also checks if each supplied
+     * expected color lies within channelTolerance.
+     */
+    public async getColorStatsWithColorTolerance(
+      selector: string,
+      expectedColorStats: ColorStats,
+      exclude?: string[],
+      percentageThreshold = 0,
+      channelTolerance = 10,
+      valueTolerance = 10
+    ) {
+      const actualColorStats = await this.getColorStats(
+        selector,
+        undefined,
+        exclude,
+        percentageThreshold,
+        channelTolerance,
+        valueTolerance
+      );
+
+      return expectedColorStats.map((expectedColor) => {
+        const colorPercentageWithinTolerance = actualColorStats
+          .filter((d) => this.isColorWithinTolerance(d.key, expectedColor.key, channelTolerance))
+          .reduce((sum, x) => sum + x.value, 0);
+
+        return {
+          key: expectedColor.key,
+          value: colorPercentageWithinTolerance,
+          withinTolerance: this.isValueWithinTolerance(
+            colorPercentageWithinTolerance,
+            expectedColor.value,
+            valueTolerance
+          ),
+        };
+      });
     }
 
     /**
@@ -170,6 +197,20 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
         lowerB <= actualRGB.b &&
         upperB >= actualRGB.b
       );
+    }
+
+    /**
+     * Returns if a given value is within the tolerated range of an expected value
+     *
+     * @param actualValue
+     * @param expectedValue
+     * @param toleranceRange
+     * @returns if actualValue is within the tolerance of expectedValue
+     */
+    public isValueWithinTolerance(actualValue: number, expectedValue: number, toleranceRange = 10) {
+      const lower = expectedValue - toleranceRange / 2;
+      const upper = expectedValue + toleranceRange / 2;
+      return actualValue > 0 && lower <= actualValue && upper >= actualValue;
     }
   })();
 }

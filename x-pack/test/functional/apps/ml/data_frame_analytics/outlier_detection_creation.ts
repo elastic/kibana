@@ -50,19 +50,21 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'Exterior2nd', legend: '3 categories' },
             { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
           ],
-          scatterplotMatrixColorsWizard: {
-            boilerplateColor: '#6A717D',
-            markerColor: '#54B39A',
-          },
+          scatterplotMatrixColorsWizard: [
+            { key: '#6A717D', value: 25 },
+            { key: '#54B39A', value: 25 },
+          ],
           scatterplotMatrixColorStatsResults: [
+            // red markers
+            { key: '#B47775', value: 1 },
             // tick/grid/axis, grey markers
-            // the red outlier color is not above the 5% threshold.
-            { key: '#6A717D', value: 21 },
-            { key: '#D3DAE6', value: 7 },
-            { key: '#98A1B3', value: 6 },
-            { key: '#98A2B3', value: 7 },
+            { key: '#6A717D', value: 25 },
+            { key: '#D3DAE6', value: 8 },
+            { key: '#98A1B3', value: 25 },
             // anti-aliasing
-            { key: '#F5F7FA', value: 26 },
+            { key: '#F5F7FA', value: 30 },
+
+            // [{"key":"#CD8475","value":0,"withinTolerance":false},{"key":"#6A717D","value":25.1336,"withinTolerance":false},{"key":"#D3DAE6","value":8.307700000000002,"withinTolerance":false},{"key":"#98A1B3","value":25.111200000000014,"withinTolerance":false},{"key":"#F5F7FA","value":29.509800000000002,"withinTolerance":false}]
           ],
           row: {
             type: 'outlier_detection',
@@ -125,11 +127,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCreation.assertOutlierScatterplotMatrix(
-            testData.expected.scatterplotMatrixColorsWizard.boilerplateColor
-          );
-          await ml.dataFrameAnalyticsCreation.assertOutlierScatterplotMatrix(
-            testData.expected.scatterplotMatrixColorsWizard.markerColor
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorsWizard
           );
 
           await ml.testExecution.logTestStep('continues to the additional options step');

@@ -15,6 +15,8 @@ interface SetValueOptions {
   typeCharByChar?: boolean;
 }
 
+// key: color hex code, e.g. #FF3344
+// value: the expected percentage of the color to be present in the canvas element
 export type CanvasElementColorStats = Array<{
   key: string;
   value: number;
@@ -220,70 +222,25 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
       await canvasElement.resetAntiAliasing();
     },
 
-    async assertCanvasElement(
+    async assertColorsInCanvasElement(
       dataTestSubj: string,
       expectedColorStats: CanvasElementColorStats,
-      exclude?: string[],
-      percentageThreshold = 1
+      exclude?: string[]
     ) {
-      await retry.tryForTime(30000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail(dataTestSubj);
 
-        const sortedExpectedColorStats = [...expectedColorStats].sort((a, b) =>
-          a.key.localeCompare(b.key)
+        const actualColorStatsWithTolerance = await canvasElement.getColorStatsWithColorTolerance(
+          `[data-test-subj="${dataTestSubj}"] canvas`,
+          expectedColorStats,
+          exclude
         );
 
-        const actualColorStats = await canvasElement.getColorStats(
-          `[data-test-subj="${dataTestSubj}"] canvas`,
-          sortedExpectedColorStats,
-          exclude,
-          percentageThreshold
-        );
-        expect(actualColorStats.length).to.eql(
-          sortedExpectedColorStats.length,
-          `Expected and actual color stats for '${dataTestSubj}' should have the same amount of elements. Expected: ${
-            sortedExpectedColorStats.length
-          } ${JSON.stringify(sortedExpectedColorStats)} (got ${
-            actualColorStats.length
-          } ${JSON.stringify(actualColorStats)})`
-        );
-        expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
+        expect(actualColorStatsWithTolerance.every((d) => d.withinTolerance)).to.eql(
           true,
           `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
-            sortedExpectedColorStats
-          )}' (got '${JSON.stringify(actualColorStats)}')`
-        );
-      });
-    },
-
-    // In case where `assertCanvasElement` turns out to be flaky across systems,
-    // e.g. because of different anti-aliasing resulting in non-matching color stats,
-    // `assertColorInCanvasElement` can be used to reduce the check to just find out
-    // if a certain color is present in the canvas element.
-    async assertColorInCanvasElement(dataTestSubj: string, expectedColor: string) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await testSubjects.existOrFail(dataTestSubj);
-
-        const actualColorStats = await canvasElement.getColorStats(
-          `[data-test-subj="${dataTestSubj}"] canvas`,
-          undefined,
-          undefined,
-          0.0001
-        );
-        const colorsWithinTolerance = actualColorStats.filter((d) =>
-          canvasElement.isColorWithinTolerance(d.key, expectedColor)
-        );
-        // debugging, can be removed once we passed flaky test runner
-        log.debug(
-          `==== colorsWithinTolerance ARRAY  ==== ${JSON.stringify(colorsWithinTolerance)}`
-        );
-        log.debug(`==== colorsWithinTolerance LENGTH ==== ${colorsWithinTolerance.length}`);
-
-        expect(colorsWithinTolerance.length > 0).to.eql(
-          true,
-          `Expected color '${expectedColor}' to be present within tolerance of colors (${JSON.stringify(
-            actualColorStats
-          )}) in canvas element '${dataTestSubj}'. Expected: 'true' (got 'false')`
+            expectedColorStats
+          )}' (got '${JSON.stringify(actualColorStatsWithTolerance)}')`
         );
       });
     },

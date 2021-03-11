@@ -89,12 +89,9 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
         timeout: 5000,
       });
       await testSubjects.scrollIntoView('mlDFExpandableSection-splom > mlScatterplotMatrix loaded');
-      await mlCommonUI.assertCanvasElement(
-        'mlDFExpandableSection-splom',
-        expectedValue,
-        ['#000000'],
-        5
-      );
+      await mlCommonUI.assertColorsInCanvasElement('mlDFExpandableSection-splom', expectedValue, [
+        '#000000',
+      ]);
     },
 
     async assertFeatureImportanceDecisionPathChartElementsExists() {

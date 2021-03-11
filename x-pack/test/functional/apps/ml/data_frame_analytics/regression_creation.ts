@@ -41,14 +41,13 @@ export default function ({ getService }: FtrProviderContext) {
         createIndexPattern: true,
         expected: {
           scatterplotMatrixColorStats: [
-            // background
-            { key: '#000000', value: 80 },
+            // some marker colors of the continuous color scale
+            { key: '#72ADA2', value: 2 },
+            { key: '#CBDFDA', value: 2 },
             // tick/grid/axis
-            { key: '#6A717D', value: 1 },
-            { key: '#F5F7FA', value: 2 },
-            { key: '#D3DAE6', value: 1 },
-            // because a continuous color scale is used for the scatterplot circles,
-            // none of the generated colors is above the 1% threshold.
+            { key: '#6A717D', value: 10 },
+            { key: '#F5F7FA', value: 12 },
+            { key: '#D3DAE6', value: 3 },
           ],
           row: {
             type: 'regression',
@@ -101,8 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.commonUI.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
 
@@ -231,8 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.commonUI.assertCanvasElement(
-            'mlDFExpandableSection-splom',
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
         });

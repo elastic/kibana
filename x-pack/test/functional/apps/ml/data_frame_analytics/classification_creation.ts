@@ -45,20 +45,21 @@ export default function ({ getService }: FtrProviderContext) {
             // tick/grid/axis
             { key: '#DDDDDD', value: 48 },
             // lines
-            { key: '#98A2B3', value: 22 },
-            { key: '#6092C0', value: 9 },
+            { key: '#98A2B3', value: 32 },
+            { key: '#6092C0', value: 10 },
             { key: '#54B399', value: 6 },
           ],
           scatterplotMatrixColorStats: [
-            // background
-            { key: '#000000', value: 94 },
+            // marker colors
+            { key: '#7FC6B3', value: 1 },
+            { key: '#88ADD0', value: 0.03 },
             // tick/grid/axis
-            { key: '#DDDDDD', value: 1 },
-            { key: '#D3DAE6', value: 1 },
-            { key: '#F5F7FA', value: 1 },
+            { key: '#DDDDDD', value: 8 },
+            { key: '#D3DAE6', value: 8 },
+            { key: '#F5F7FA', value: 20 },
             // scatterplot circles
-            { key: '#6A717D', value: 1 },
-            { key: '#54B39A', value: 1 },
+            { key: '#6A717D', value: 28 },
+            { key: '#54B39A', value: 25 },
           ],
           row: {
             type: 'classification',
@@ -110,8 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.commonUI.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
 
@@ -236,18 +236,16 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
           await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
-          await ml.commonUI.assertCanvasElement(
+          await ml.commonUI.assertColorsInCanvasElement(
             'mlDFAnalyticsClassificationExplorationRocCurveChart',
             testData.expected.rocCurveColorState,
-            ['#000000'],
-            5
+            ['#000000']
           );
           await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.commonUI.assertCanvasElement(
-            'mlDFExpandableSection-splom',
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
         });
