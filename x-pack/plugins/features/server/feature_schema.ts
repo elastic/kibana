@@ -33,6 +33,7 @@ const managementSchema = Joi.object().pattern(
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 const alertingSchema = Joi.array().items(Joi.string());
+const casesSchema = Joi.array().items(Joi.string());
 
 const appCategorySchema = Joi.object({
   id: Joi.string().required(),
@@ -52,6 +53,10 @@ const kibanaPrivilegeSchema = Joi.object({
     all: alertingSchema,
     read: alertingSchema,
   }),
+  cases: Joi.object({
+    all: casesSchema,
+    read: casesSchema,
+  }),
   savedObject: Joi.object({
     all: Joi.array().items(Joi.string()).required(),
     read: Joi.array().items(Joi.string()).required(),
@@ -69,6 +74,10 @@ const kibanaIndependentSubFeaturePrivilegeSchema = Joi.object({
   alerting: Joi.object({
     all: alertingSchema,
     read: alertingSchema,
+  }),
+  cases: Joi.object({
+    all: casesSchema,
+    read: casesSchema,
   }),
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
@@ -113,6 +122,7 @@ const kibanaFeatureSchema = Joi.object({
   management: managementSchema,
   catalogue: catalogueSchema,
   alerting: alertingSchema,
+  cases: casesSchema,
   privileges: Joi.object({
     all: kibanaPrivilegeSchema,
     read: kibanaPrivilegeSchema,

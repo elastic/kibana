@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import Boom from '@hapi/boom';
 import { Space } from '../../../spaces/server';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
@@ -34,6 +35,7 @@ export class Authorization {
   private readonly request: KibanaRequest;
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
   private readonly featureCaseClasses: Set<string>;
+  private readonly isAuthEnabled: boolean;
   // TODO: create this
   // private readonly auditLogger: AuthorizationAuditLogger;
 
@@ -41,14 +43,17 @@ export class Authorization {
     request,
     securityAuth,
     caseClasses,
+    isAuthEnabled,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     caseClasses: Set<string>;
+    isAuthEnabled: boolean;
   }) {
     this.request = request;
     this.securityAuth = securityAuth;
     this.featureCaseClasses = caseClasses;
+    this.isAuthEnabled = isAuthEnabled;
   }
 
   /**
@@ -59,11 +64,13 @@ export class Authorization {
     securityAuth,
     getSpace,
     features,
+    isAuthEnabled,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     getSpace: GetSpaceFn;
     features: FeaturesPluginStart;
+    isAuthEnabled: boolean;
   }): Promise<Authorization> {
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseClasses: Set<string>;
@@ -81,31 +88,27 @@ export class Authorization {
       caseClasses = new Set<string>();
     }
 
-    return new Authorization({ request, securityAuth, caseClasses });
+    return new Authorization({ request, securityAuth, caseClasses, isAuthEnabled });
   }
 
   private shouldCheckAuthorization(): boolean {
     return this.securityAuth?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async ensureAuthorized(classes: string[], operation: ReadOperations | WriteOperations) {
+  public async ensureAuthorized(className: string, operation: ReadOperations | WriteOperations) {
     const { securityAuth } = this;
-    const areAllClassAvailable = classes.every((className) =>
-      this.featureCaseClasses.has(className)
-    );
+    const isAvailableClass = this.featureCaseClasses.has(className);
     // TODO: throw if the request is not authorized
     if (securityAuth && this.shouldCheckAuthorization()) {
       // TODO: implement ensure logic
-      const requiredPrivileges: string[] = classes.map((className) =>
-        securityAuth.actions.cases.get(className, operation)
-      );
+      const requiredPrivileges: string[] = [securityAuth.actions.cases.get(className, operation)];
 
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username, privileges } = await checkPrivileges({
         kibana: requiredPrivileges,
       });
 
-      if (!areAllClassAvailable) {
+      if (!isAvailableClass) {
         // TODO: throw if any of the class are not available
         /**
          * Under most circumstances this would have been caught by `checkPrivileges` as
@@ -114,6 +117,7 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
+        throw Boom.forbidden('User does not have permissions for this class');
       }
 
       if (hasAllRequested) {
@@ -130,10 +134,13 @@ export class Authorization {
           (privilege) => !authorizedPrivileges.includes(privilege)
         );
 
+        // TODO: audit log
         // TODO: User unauthorized. throw an error. authorizedPrivileges & unauthorizedPrivilages are needed for logging.
+        throw Boom.forbidden('Not authorized for this class');
       }
-    } else if (!areAllClassAvailable) {
+    } else {
       // TODO: throw an error
+      throw Boom.forbidden('Security is disabled');
     }
   }
 }
