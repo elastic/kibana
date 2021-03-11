@@ -10,7 +10,6 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { DraggableBadge } from '../../../common/components/draggables';
-import { ExternalLinkIcon } from '../../../common/components/external_link_icon';
 import { CertificateFingerprintLink } from '../../../common/components/links';
 
 import * as i18n from './translations';
@@ -61,7 +60,6 @@ export const CertificateFingerprint = React.memo<{
         {certificateType === 'client' ? i18n.CLIENT_CERT : i18n.SERVER_CERT}
       </FingerprintLabel>
       <CertificateFingerprintLink certificateFingerprint={value || ''} />
-      <ExternalLinkIcon />
     </DraggableBadge>
   );
 });
