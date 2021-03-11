@@ -1,5 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`discover Discover Generate CSV: Fields From Source limitation With using fieldsFromSource, it generates a report that does not have GEOIP data 1`] = `"FIXME"`;
+
+exports[`discover Discover Generate CSV: Fields From Source limitation Without using fieldsFromSource, it generates a report with GEOIP data 1`] = `"FIXME"`;
+
 exports[`discover Discover Generate CSV: archived search generates a report with data 1`] = `
 "\\"order_date\\",category,currency,\\"customer_id\\",\\"order_id\\",\\"day_of_week_i\\",\\"order_date\\",\\"products.created_on\\",sku
 \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,19,716724,5,\\"Jul 12, 2019 @ 00:00:00.000\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\"
