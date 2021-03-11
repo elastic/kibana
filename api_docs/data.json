@@ -11290,7 +11290,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/kbn_field_types/types.ts",
-          "lineNumber": 57
+          "lineNumber": 64
         },
         "initialIsOpen": false
       },
@@ -20312,7 +20312,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/kbn_field_types/types.ts",
-          "lineNumber": 57
+          "lineNumber": 64
         },
         "initialIsOpen": false
       },
@@ -26902,7 +26902,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/kbn_field_types/types.ts",
-          "lineNumber": 57
+          "lineNumber": 64
         },
         "initialIsOpen": false
       }

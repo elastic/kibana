@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { EqlSearchResponse, EqlSequence } from '../../../../common/detection_engine/types';
@@ -46,7 +47,7 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
         },
       },
       query: options.filterQuery,
-      ...(options.tiebreakerField != null
+      ...(!isEmpty(options.tiebreakerField)
         ? {
             tiebreaker_field: options.tiebreakerField,
           }

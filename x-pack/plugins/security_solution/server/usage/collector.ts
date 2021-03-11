@@ -31,6 +31,7 @@ export async function getInternalSavedObjectsClient(core: CoreSetup) {
 
 export const registerCollector: RegisterCollector = ({
   core,
+  endpointAppContext,
   kibanaIndex,
   ml,
   usageCollection,
@@ -138,7 +139,7 @@ export const registerCollector: RegisterCollector = ({
       const [detections, detectionMetrics, endpoints] = await Promise.allSettled([
         fetchDetectionsUsage(kibanaIndex, esClient, ml, savedObjectsClient),
         fetchDetectionsMetrics(ml, savedObjectsClient),
-        getEndpointTelemetryFromFleet(internalSavedObjectsClient),
+        getEndpointTelemetryFromFleet(savedObjectsClient, endpointAppContext, esClient),
       ]);
 
       return {

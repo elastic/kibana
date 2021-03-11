@@ -64,6 +64,35 @@ const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => 
   return false;
 };
 
+const convertNestedFieldToQuery = (
+  field: string,
+  value: string | number,
+  browserFields: BrowserFields
+) => {
+  const pathBrowserField = getBrowserFieldPath(field, browserFields);
+  const browserField = get(pathBrowserField, browserFields);
+  const nestedPath = browserField.subType.nested.path;
+  const key = field.replace(`${nestedPath}.`, '');
+  return `${nestedPath}: { ${key}: ${browserField.type === 'date' ? `"${value}"` : value} }`;
+};
+
+const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFields) => {
+  const pathBrowserField = getBrowserFieldPath(field, browserFields);
+  const browserField = get(pathBrowserField, browserFields);
+  const nestedPath = browserField.subType.nested.path;
+  const key = field.replace(`${nestedPath}.`, '');
+  return `${nestedPath}: { ${key}: * }`;
+};
+
+const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) => {
+  const pathBrowserField = getBrowserFieldPath(field, browserFields);
+  const browserField = get(pathBrowserField, browserFields);
+  if (browserField != null && browserField.subType && browserField.subType.nested) {
+    return true;
+  }
+  return false;
+};
+
 const buildQueryMatch = (
   dataProvider: DataProvider | DataProvidersAnd,
   browserFields: BrowserFields
@@ -71,13 +100,21 @@ const buildQueryMatch = (
   `${dataProvider.excluded ? 'NOT ' : ''}${
     dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
     dataProvider.type !== DataProviderType.template
-      ? checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
+      ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
+        ? convertNestedFieldToQuery(
+            dataProvider.queryMatch.field,
+            dataProvider.queryMatch.value,
+            browserFields
+          )
+        : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
             isNumber(dataProvider.queryMatch.value)
               ? dataProvider.queryMatch.value
               : escapeQueryValue(dataProvider.queryMatch.value)
           }`
+      : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
+      ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
       : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
   }`.trim();
 

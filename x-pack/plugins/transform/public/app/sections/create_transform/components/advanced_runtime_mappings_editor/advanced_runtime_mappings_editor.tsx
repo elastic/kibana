@@ -26,7 +26,7 @@ export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappin
   }) => {
     return (
       <EuiCodeEditor
-        data-test-subj="transformAdvancedPivotEditor"
+        data-test-subj="transformAdvancedRuntimeMappingsEditor"
         style={{ border: '1px solid #e3e6ef' }}
         height="250px"
         width="100%"
