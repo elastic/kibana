@@ -15,7 +15,7 @@ export function CustomizeUI() {
     <>
       <EuiTitle size="l">
         <h1>
-          {i18n.translate('xpack.apm.settings.customizeApp', {
+          {i18n.translate('xpack.apm.settings.customizeApp.title', {
             defaultMessage: 'Customize app',
           })}
         </h1>
