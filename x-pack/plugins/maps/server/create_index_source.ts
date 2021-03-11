@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { INDEX_META_DATA_CREATED_BY, CreateIndexSourceResp, IndexSourceMappings, BodySettings } from '../common';
+import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
+import {
+  INDEX_META_DATA_CREATED_BY,
+  CreateIndexSourceResp,
+  IndexSourceMappings,
+  BodySettings,
+} from '../common';
 import { IndexPatternsService } from '../../../../src/plugins/data/common';
 
 const DEFAULT_SETTINGS = { number_of_shards: 1 };
@@ -23,7 +28,7 @@ export async function createIndexSource(
   indexPatternsService: IndexPatternsService
 ): Promise<CreateIndexSourceResp> {
   try {
-    await createIndex(index, mappings);
+    await createIndex(index, mappings, asCurrentUser);
     await indexPatternsService.createAndSave(
       {
         title: index,
@@ -42,7 +47,11 @@ export async function createIndexSource(
   }
 }
 
-async function createIndex(indexName: string, mappings: Mappings) {
+async function createIndex(
+  indexName: string,
+  mappings: IndexSourceMappings,
+  asCurrentUser: ElasticsearchClient
+) {
   const body: { mappings: IndexSourceMappings; settings: BodySettings } = {
     mappings: {
       ...DEFAULT_MAPPINGS,

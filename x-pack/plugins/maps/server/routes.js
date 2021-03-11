@@ -618,13 +618,13 @@ export async function initRoutes(
       async (context, request, response) => {
         const { index, mappings } = request.body;
         const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
-          core.savedObjects.client,
-          core.elasticsearch.client.asCurrentUser
+          context.core.savedObjects.client,
+          context.core.elasticsearch.client.asCurrentUser
         );
         const result = await createIndexSource(
           index,
           mappings,
-          core.elasticsearch.client,
+          context.core.elasticsearch.client,
           indexPatternsService
         );
         if (result.success) {
