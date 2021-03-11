@@ -29,3 +29,33 @@
 { "type": "doc", "value": { "id": "visualization:1bba55f0-507e-11eb-9c0d-97106882b997", "index": ".kibana_1", "source": { "migrationVersion": { "visualization": "7.12.0" }, "references": [ { "id": "6091ead0-1c6d-11ea-a100-8589bb9d7c6b", "name": "search_0", "type": "search" } ], "type": "visualization", "updated_at": "2021-01-07T00:23:04.624Z", "visualization": { "description": "", "kibanaSavedObjectMeta": { "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}" }, "savedSearchRefName": "search_0", "title": "Tag Cloud of Names", "uiStateJSON": "{}", "version": 1, "visState": "{\"title\":\"Tag Cloud of Names\",\"type\":\"tagcloud\",\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"customer_first_name.keyword\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":10,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\"},\"schema\":\"segment\"}],\"params\":{\"scale\":\"linear\",\"orientation\":\"single\",\"minFontSize\":18,\"maxFontSize\":72,\"showLabel\":true}}" } } } }
 
 { "type": "doc", "value": { "id": "ui-counter:DashboardPanelVersionInUrl:06012021:loaded:8.0.0", "index": ".kibana_1", "source": { "type": "ui-counter", "ui-counter": { "count": 85 }, "updated_at": "2021-01-07T00:23:25.741Z" } } }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "search:357825a0-8290-11eb-b8f1-15ed8d3eeaaf",
+    "index": ".kibana_1",
+    "source": {
+      "references": [
+        {
+          "id": "5193f870-d861-11e9-a311-0fa548c5f953",
+          "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+          "type": "index-pattern"
+        }
+      ],
+      "search": {
+        "columns": [ "_id", "order_id", "geoip" ],
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+        },
+        "sort": [ [ "order_date", "desc" ] ],
+        "title": "ECommerce - GEOIP Data",
+        "version": 1
+      },
+      "type": "search",
+      "updated_at": "2021-03-11T17:35:44.894Z"
+    }
+  }
+}
