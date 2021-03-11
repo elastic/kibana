@@ -173,7 +173,7 @@ export function getAlertType(
     // of the alert, the latestTimestamp will be used to gate the query in order to
     // avoid counting a document multiple times.
 
-    let timestamp: string | undefined = previousTimestamp;
+    let timestamp: string | undefined = tryToParseAsDate(previousTimestamp);
     const filter = timestamp
       ? {
           bool: {
@@ -187,7 +187,7 @@ export function getAlertType(
                         filter: [
                           {
                             range: {
-                              [params.timeField]: { lte: new Date(timestamp).toISOString() },
+                              [params.timeField]: { lte: timestamp },
                             },
                           },
                         ],
@@ -266,12 +266,18 @@ export function getAlertType(
   }
 }
 
-function getValidTimefieldSort(sortValues: Array<string | number> = []): void | string {
+function getValidTimefieldSort(sortValues: Array<string | number> = []): undefined | string {
   for (const sortValue of sortValues) {
-    const sortDate = typeof sortValue === 'string' ? Date.parse(sortValue) : sortValue;
-    if (!isNaN(sortDate)) {
-      return new Date(sortDate).toISOString();
+    const sortDate = tryToParseAsDate(sortValue);
+    if (sortDate) {
+      return sortDate;
     }
+  }
+}
+function tryToParseAsDate(sortValue?: string | number): undefined | string {
+  const sortDate = typeof sortValue === 'string' ? Date.parse(sortValue) : sortValue;
+  if (sortDate && !isNaN(sortDate)) {
+    return new Date(sortDate).toISOString();
   }
 }
 

@@ -224,6 +224,126 @@ describe('alertType', () => {
     });
   });
 
+  it('alert executor correctly handles numeric time fields that were stored by legacy rules prior to v7.12.1', async () => {
+    const params: EsQueryAlertParams = {
+      index: ['index-name'],
+      timeField: 'time-field',
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '>',
+      threshold: [0],
+    };
+    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+    const previousTimestamp = Date.now();
+    const newestDocumentTimestamp = previousTimestamp + 1000;
+
+    alertServices.callCluster.mockResolvedValueOnce(
+      generateResults([
+        {
+          'time-field': newestDocumentTimestamp,
+        },
+      ])
+    );
+
+    const executorOptions = {
+      alertId: uuid.v4(),
+      startedAt: new Date(),
+      previousStartedAt: new Date(),
+      services: (alertServices as unknown) as AlertServices<
+        EsQueryAlertState,
+        ActionContext,
+        typeof ActionGroupId
+      >,
+      params,
+      spaceId: uuid.v4(),
+      name: uuid.v4(),
+      tags: [],
+      createdBy: null,
+      updatedBy: null,
+    };
+    const result = await alertType.executor({
+      ...executorOptions,
+      state: {
+        // @ts-expect-error previousTimestamp is numeric, but should be string (this was a bug prior to v7.12.1)
+        latestTimestamp: previousTimestamp,
+      },
+    });
+
+    const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
+    expect(instance.replaceState).toHaveBeenCalledWith({
+      // ensure the invalid "latestTimestamp" in the state is stored as an ISO string going forward
+      latestTimestamp: new Date(previousTimestamp).toISOString(),
+      dateStart: expect.any(String),
+      dateEnd: expect.any(String),
+    });
+
+    expect(result).toMatchObject({
+      latestTimestamp: new Date(newestDocumentTimestamp).toISOString(),
+    });
+  });
+
+  it('alert executor ignores previous invalid latestTimestamp values stored by legacy rules prior to v7.12.1', async () => {
+    const params: EsQueryAlertParams = {
+      index: ['index-name'],
+      timeField: 'time-field',
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '>',
+      threshold: [0],
+    };
+    const alertServices: AlertServicesMock = alertsMock.createAlertServices();
+
+    const oldestDocumentTimestamp = Date.now();
+
+    alertServices.callCluster.mockResolvedValueOnce(
+      generateResults([
+        {
+          'time-field': oldestDocumentTimestamp,
+        },
+        {
+          'time-field': oldestDocumentTimestamp - 1000,
+        },
+      ])
+    );
+
+    const result = await alertType.executor({
+      alertId: uuid.v4(),
+      startedAt: new Date(),
+      previousStartedAt: new Date(),
+      services: (alertServices as unknown) as AlertServices<
+        EsQueryAlertState,
+        ActionContext,
+        typeof ActionGroupId
+      >,
+      params,
+      state: {
+        // inaalid legacy `latestTimestamp`
+        latestTimestamp: 'FaslK3QBySSL_rrj9zM5',
+      },
+      spaceId: uuid.v4(),
+      name: uuid.v4(),
+      tags: [],
+      createdBy: null,
+      updatedBy: null,
+    });
+
+    const instance: AlertInstanceMock = alertServices.alertInstanceFactory.mock.results[0].value;
+    expect(instance.replaceState).toHaveBeenCalledWith({
+      latestTimestamp: undefined,
+      dateStart: expect.any(String),
+      dateEnd: expect.any(String),
+    });
+
+    expect(result).toMatchObject({
+      latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
+    });
+  });
+
   it('alert executor carries over the queried latestTimestamp in the alert state', async () => {
     const params: EsQueryAlertParams = {
       index: ['index-name'],
