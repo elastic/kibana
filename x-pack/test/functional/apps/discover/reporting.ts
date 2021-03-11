@@ -20,6 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
+      // FIXME: should also use reporting/ecommerce_kibana
+      // reporting/ecommerce needs to have the kibana object cleared out
       await esArchiver.loadIfNeeded('reporting/ecommerce');
       await browser.setWindowSize(1600, 850);
     });
@@ -169,25 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('With using fieldsFromSource, it generates a report that does not have GEOIP data', async () => {
         await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': true });
-        await PageObjects.discover.loadSavedSearch('ECommerce - GEOIP Data');
-        const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
-        const toTime = 'Aug 23, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-
-        await PageObjects.reporting.openCsvReportingPanel();
-        await PageObjects.reporting.clickGenerateReportButton();
-
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
-
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
-        expectSnapshot(res.text).toMatch();
-      });
-
-      it('Without using fieldsFromSource, it generates a report with GEOIP data', async () => {
-        await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': false });
-        await PageObjects.discover.loadSavedSearch('ECommerce - GEOIP Data');
+        await PageObjects.discover.loadSavedSearch('ECommerce Data');
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
