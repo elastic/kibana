@@ -25,7 +25,7 @@ const CommandCode = styled.pre({
 });
 
 function getFleetServerUrlsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerUrls: string[]) {
-  return `--fleet-server-url=${fleetServerUrls[0]} --enrollment-token=${apiKey.api_key}`;
+  return `--url=${fleetServerUrls[0]} --enrollment-token=${apiKey.api_key}`;
 }
 
 function getKibanaUrlEnrollArgs(

@@ -27,6 +27,7 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
   return {
     id: settingsSo.id,
     ...settingsSo.attributes,
+    fleet_server_urls: settingsSo.attributes.fleet_server_urls || [],
   };
 }
 
