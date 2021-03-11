@@ -16,10 +16,10 @@ import {
   CasePatchRequest,
   CaseType,
   AssociationType,
-} from '../../common/api';
+} from '../../common';
 import { CaseStatusWithAllStatus } from '../components/status';
 
-export { CaseConnector, ActionConnector, CaseStatuses } from '../../common/api';
+export { CaseConnector, ActionConnector, CaseStatuses } from '../../common';
 
 export type Comment = CommentRequest & {
   associationType: AssociationType;

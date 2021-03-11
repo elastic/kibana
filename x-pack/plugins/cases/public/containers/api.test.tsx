@@ -7,8 +7,8 @@
 
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
-import { CASES_URL } from '../../common/constants';
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../common';
+import { CASES_URL } from '../../common';
 
 import {
   deleteCases,

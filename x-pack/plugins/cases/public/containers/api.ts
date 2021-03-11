@@ -22,7 +22,7 @@ import {
   SubCaseResponse,
   SubCasesResponse,
   User,
-} from '../../common/api';
+} from '../../common';
 
 import {
   ACTION_TYPES_URL,
@@ -32,7 +32,7 @@ import {
   CASES_URL,
   SUB_CASE_DETAILS_URL,
   SUB_CASES_PATCH_DEL_URL,
-} from '../../common/constants';
+} from '../../common';
 
 import {
   getCaseCommentsUrl,
@@ -41,7 +41,7 @@ import {
   getCaseUserActionUrl,
   getSubCaseDetailsUrl,
   getSubCaseUserActionUrl,
-} from '../../common/api/helpers';
+} from '../../common';
 
 import { KibanaServices } from '../common/lib/kibana';
 import { StatusAll } from '../components/status';

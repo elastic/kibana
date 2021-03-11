@@ -8,21 +8,21 @@
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import {
-  CommentResponse,
+  AssociationType,
+  CaseResponse,
+  CasesFindResponse,
+  CasesResponse,
+  CasesStatusResponse,
   CaseStatuses,
+  CaseType,
+  CaseUserActionsResponse,
+  CommentResponse,
+  CommentType,
+  ConnectorTypes,
   UserAction,
   UserActionField,
-  CaseResponse,
-  CasesStatusResponse,
-  CaseUserActionsResponse,
-  CasesResponse,
-  CasesFindResponse,
-  CommentType,
-  AssociationType,
-  CaseType,
-} from '../../common/api';
+} from '../../common';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
-import { ConnectorTypes } from '../../common/api/connectors';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';

@@ -8,7 +8,7 @@
 import { lazy } from 'react';
 
 import { CaseConnector } from '../types';
-import { JiraFieldsType } from '../../../../common/api/connectors';
+import { JiraFieldsType } from '../../../../common';
 import * as i18n from './translations';
 
 export * from './types';

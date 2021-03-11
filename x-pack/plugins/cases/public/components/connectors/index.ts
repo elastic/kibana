@@ -15,7 +15,7 @@ import {
   ServiceNowITSMFieldsType,
   ServiceNowSIRFieldsType,
   ResilientFieldsType,
-} from '../../../common/api';
+} from '../../../common';
 
 export { getActionType as getCaseConnectorUI } from './case';
 

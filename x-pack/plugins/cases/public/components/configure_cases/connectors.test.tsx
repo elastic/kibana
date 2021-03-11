@@ -12,7 +12,7 @@ import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors } from './__mock__';
-import { ConnectorTypes } from '../../../common/api/connectors';
+import { ConnectorTypes } from '../../../common';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;

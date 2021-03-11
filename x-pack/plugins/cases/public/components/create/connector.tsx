@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common';
 import { UseField, useFormData, FieldHook, useFormContext } from '../../common/shared_imports';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';

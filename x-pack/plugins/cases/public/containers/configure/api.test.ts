@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { KibanaServices } from '../../common/lib/kibana';
 import {
   fetchConnectors,
   getCaseConfigure,
@@ -20,7 +19,8 @@ import {
   caseConfigurationResposeMock,
   caseConfigurationCamelCaseResponseMock,
 } from './mock';
-import { ConnectorTypes } from '../../../common/api/connectors';
+import { ConnectorTypes } from '../../../common';
+import { KibanaServices } from '../../common/lib/kibana';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;

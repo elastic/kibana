@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 import { CaseActionConnector, ConnectorFieldsProps } from './types';
 import { getCaseConnectors } from '.';
-import { ConnectorTypeFields } from '../../../common/api/connectors';
+import { ConnectorTypeFields } from '../../../common';
 
 interface Props extends Omit<ConnectorFieldsProps<ConnectorTypeFields['fields']>, 'connector'> {
   connector: CaseActionConnector | null;

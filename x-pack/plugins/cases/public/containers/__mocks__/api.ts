@@ -33,7 +33,7 @@ import {
   CommentRequest,
   User,
   CaseStatuses,
-} from '../../../common/api';
+} from '../../../common';
 
 export const getCase = async (
   caseId: string,

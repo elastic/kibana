@@ -6,7 +6,7 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CaseConnector } from '../../common/api';
+import { CaseConnector } from '../../common';
 import { errorToToaster, useStateToaster, displaySuccessToast } from '../components/toasters';
 
 import { pushCase } from './api';

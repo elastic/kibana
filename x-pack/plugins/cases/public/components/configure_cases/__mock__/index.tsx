@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common';
 import { ActionConnector } from '../../../containers/configure/types';
 import { UseConnectorsResponse } from '../../../containers/configure/use_connectors';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';

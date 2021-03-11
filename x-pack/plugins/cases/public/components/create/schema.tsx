@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
+import { CasePostRequest, ConnectorTypeFields } from '../../../common';
 import { FIELD_TYPES, fieldValidators, FormSchema } from '../../common/shared_imports';
 import * as i18n from './translations';
 

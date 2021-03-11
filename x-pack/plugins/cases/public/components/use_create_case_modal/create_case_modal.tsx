@@ -14,7 +14,7 @@ import { CreateCaseForm } from '../create/form';
 import { SubmitCaseButton } from '../create/submit_button';
 import { Case } from '../../containers/types';
 import * as i18n from '../../common/translations';
-import { CaseType } from '../../../common/api';
+import { CaseType } from '../../../common';
 
 export interface CreateCaseModalProps {
   isModalOpen: boolean;

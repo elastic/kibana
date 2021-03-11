@@ -11,7 +11,7 @@ import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 import { useStateToaster, errorToToaster, displaySuccessToast } from '../../components/toasters';
 import * as i18n from './translations';
 import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
-import { ConnectorTypes } from '../../../common/api/connectors';
+import { ConnectorTypes } from '../../../common';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];

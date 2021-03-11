@@ -32,7 +32,7 @@ import {
   useConnectorsResponse,
   useActionTypesResponse,
 } from './__mock__';
-import { ConnectorTypes } from '../../../common/api/connectors';
+import { ConnectorTypes } from '../../../common';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');

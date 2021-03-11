@@ -20,7 +20,7 @@ import {
   CommentAttributes,
   CommentRequestUserType,
   CommentRequestAlertType,
-} from '../../../common/api';
+} from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
