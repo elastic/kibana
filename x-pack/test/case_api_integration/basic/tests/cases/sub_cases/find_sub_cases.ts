@@ -16,13 +16,13 @@ import {
   deleteCaseAction,
   setStatus,
 } from '../../../../common/lib/utils';
-import { getSubCasesUrl } from '../../../../../../plugins/case/common/api/helpers';
+import { getSubCasesUrl } from '../../../../../../plugins/cases/common/api/helpers';
 import {
   CaseResponse,
   CaseStatuses,
   SubCasesFindResponse,
-} from '../../../../../../plugins/case/common/api';
-import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+} from '../../../../../../plugins/cases/common/api';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

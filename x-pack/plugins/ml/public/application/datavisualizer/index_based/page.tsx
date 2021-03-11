@@ -750,7 +750,7 @@ export const Page: FC = () => {
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <EuiPanel>
-                  {documentCountStats && overallStats?.totalCount !== undefined && (
+                  {overallStats?.totalCount !== undefined && (
                     <EuiFlexItem grow={true}>
                       <DocumentCountContent
                         config={documentCountStats}
