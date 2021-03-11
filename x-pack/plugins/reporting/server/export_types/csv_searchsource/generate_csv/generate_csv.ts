@@ -354,6 +354,8 @@ export class CsvGenerator {
           })
         );
       }
+    } catch (err) {
+      this.logger.error(err);
     } finally {
       // clear scrollID
       if (scrollId) {
