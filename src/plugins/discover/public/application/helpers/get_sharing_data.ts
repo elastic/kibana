@@ -23,6 +23,10 @@ export async function getSharingData(
 ) {
   const searchSource = currentSearchSource.createCopy();
   const index = searchSource.getField('index')!;
+  const fields = {
+    fields: searchSource.getField('fields'),
+    fieldsFromSource: searchSource.getField('fieldsFromSource'),
+  };
 
   searchSource.setField(
     'sort',
@@ -33,14 +37,13 @@ export async function getSharingData(
   searchSource.removeField('aggs');
   searchSource.removeField('size');
 
-  // Set the fields of the search source to match the saved search columns
+  // fields get re-set to match the saved search columns
   searchSource.removeField('fields');
   searchSource.removeField('fieldsFromSource');
-
   let columns = state.columns || [];
 
-  // NOTE: A newly saved search with no columns selected has a bug(?) where the
-  // column array is a single '_source' value which is invalid for CSV export
+  // NOTE: A newly saved search with no columns selected will return a
+  // column array as a single '_source' value which is invalid for CSV export
   if (columns && columns.length === 1 && /^_source$/.test(columns.join())) {
     columns = [];
   }
@@ -56,11 +59,10 @@ export async function getSharingData(
     columns = [timeFieldName, ...columns];
   }
 
-  if (columns.length === 0) {
-    searchSource.setField('fields', ['*']);
-  } else {
-    searchSource.setField('fields', columns);
-  }
+  // if search source uses fieldsFromSource, set that
+  const fieldsKey = fields.fieldsFromSource ? 'fieldsFromSource' : 'fields';
+  const fieldsValue = columns.length > 0 ? columns : ['*'];
+  searchSource.setField(fieldsKey, fieldsValue);
 
   return {
     searchSource: searchSource.getSerializedFields(true),

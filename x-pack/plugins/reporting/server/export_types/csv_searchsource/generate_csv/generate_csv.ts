@@ -143,6 +143,23 @@ export class CsvGenerator {
     };
   }
 
+  private getFieldsFromSearchSource(searchSource: ISearchSource): SearchFieldValue[] {
+    let fields: string | boolean | SearchFieldValue[] | undefined =
+      searchSource.getField('fields') || searchSource.getField('fieldsFromSource');
+
+    if (fields === true || typeof fields === 'string') {
+      fields = [fields.toString()];
+    }
+    if (fields == null) {
+      fields = ['undefined'];
+    }
+    if (!fields) {
+      fields = ['false'];
+    }
+
+    return fields;
+  }
+
   private getColumnName(fields: SearchFieldValue[] | undefined, table: Datatable) {
     return (columnIndex: number, position: number) => {
       let cell: string;
@@ -264,8 +281,6 @@ export class CsvGenerator {
       throw new Error(`The search must have a revference to an index pattern!`);
     }
 
-    const fields = searchSource.getField('fields');
-
     const { maxSizeBytes, bom, escapeFormulaValues, scroll: scrollSettings } = settings;
 
     const builder = new MaxSizeStringBuilder(byteSizeValueToNumber(maxSizeBytes), bom);
@@ -330,6 +345,8 @@ export class CsvGenerator {
 
         // write the header and initialize formatters / column orderings
         // depends on the table to know what order to place the columns
+        const fields = this.getFieldsFromSearchSource(searchSource);
+
         if (first) {
           first = false;
           this.generateHeader(fields, table, builder, settings);
