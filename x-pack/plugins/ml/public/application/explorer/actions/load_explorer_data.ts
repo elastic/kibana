@@ -34,7 +34,7 @@ import { mlResultsServiceProvider } from '../../services/results_service';
 import { isViewBySwimLaneData } from '../swimlane_container';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
-import { AnomalyExplorerService } from '../../services/anomaly_explorer_service';
+import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { mlJobService } from '../../services/job_service';
 
@@ -54,7 +54,6 @@ const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
   return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual);
 };
 
-// const memoizedAnomalyDataChange = memoize<typeof anomalyDataChange>(anomalyDataChange);
 const memoizedLoadAnnotationsTableData = memoize<typeof loadAnnotationsTableData>(
   loadAnnotationsTableData
 );
@@ -95,7 +94,7 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
  */
 const loadExplorerDataProvider = (
   anomalyTimelineService: AnomalyTimelineService,
-  anomalyExplorerService: AnomalyExplorerService,
+  anomalyExplorerService: AnomalyExplorerChartsService,
   timefilter: TimefilterContract
 ) => {
   const memoizedLoadOverallData = memoize(
@@ -315,7 +314,10 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
       uiSettings,
       mlResultsServices
     );
-    const anomalyExplorerService = new AnomalyExplorerService(mlApiServices, mlResultsServices);
+    const anomalyExplorerService = new AnomalyExplorerChartsService(
+      mlApiServices,
+      mlResultsServices
+    );
     return loadExplorerDataProvider(anomalyTimelineService, anomalyExplorerService, timefilter);
   }, []);
 

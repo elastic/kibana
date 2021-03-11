@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+/*
+ * Service for the container for the anomaly charts in the
+ * Machine Learning Explorer dashboard.
+ * The service processes the data required to draw each of the charts
+ * and manages the layout of the charts in the containing div.
+ */
+
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 
 export interface ExplorerChartSeriesErrorMessages {
@@ -18,12 +25,13 @@ export declare interface ExplorerChartsData {
   errorMessages: ExplorerChartSeriesErrorMessages | undefined;
 }
 
-export declare const getDefaultChartsData: () => ExplorerChartsData;
-
-export declare const anomalyDataChange: (
-  chartsContainerWidth: number,
-  anomalyRecords: any[],
-  earliestMs: number,
-  latestMs: number,
-  severity?: number
-) => void;
+export function getDefaultChartsData(): ExplorerChartsData {
+  return {
+    chartsPerRow: 1,
+    errorMessages: undefined,
+    seriesToPlot: [],
+    // default values, will update on every re-render
+    tooManyBuckets: false,
+    timeFieldName: 'timestamp',
+  };
+}

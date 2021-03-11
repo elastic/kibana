@@ -23,7 +23,7 @@ import type { AnomalyDetectorService } from '../application/services/anomaly_det
 import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
 import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
-import { AnomalyExplorerService } from '../application/services/anomaly_explorer_service';
+import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
 import { EntityField } from '../../common/util/anomaly_utils';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
@@ -91,7 +91,7 @@ export type AnomalyExplorerEmbeddableInput = EmbeddableInput & AnomalyExplorerEm
 export interface AnomalyExplorerServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyTimelineService: AnomalyTimelineService;
-  anomalyExplorerService: AnomalyExplorerService;
+  anomalyExplorerService: AnomalyExplorerChartsService;
 }
 
 export type AnomalyExplorerEmbeddableServices = [
