@@ -86,6 +86,7 @@ export const HeaderComponent: React.FC<Props> = ({
     getManageTimelineById,
     timelineId,
   ]);
+  const showSortingCapability = !isEqlOn && !(header.subType && header.subType.nested);
 
   return (
     <>
@@ -94,7 +95,7 @@ export const HeaderComponent: React.FC<Props> = ({
         isLoading={isLoading}
         isResizing={false}
         onClick={onColumnSort}
-        showSortingCapability={!isEqlOn}
+        showSortingCapability={showSortingCapability}
         sort={sort}
       >
         <Actions

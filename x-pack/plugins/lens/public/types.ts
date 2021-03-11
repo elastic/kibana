@@ -190,7 +190,10 @@ export interface Datasource<T = unknown, P = unknown> {
   renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
   renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
   getDropProps: (
-    props: DatasourceDimensionDropProps<T> & { groupId: string }
+    props: DatasourceDimensionDropProps<T> & {
+      groupId: string;
+      dragging: DragContextState['dragging'];
+    }
   ) => { dropType: DropType; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   updateStateOnCloseDimension?: (props: {
@@ -261,6 +264,7 @@ interface SharedDimensionProps {
 export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   layerId: string;
   columnId: string;
+  groupId: string;
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
@@ -278,9 +282,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
-export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
-  dragDropContext: DragContextState;
-};
+export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T>;
 
 export interface DatasourceLayerPanelProps<T> {
   layerId: string;
@@ -307,10 +309,11 @@ export function isDraggedOperation(
 
 export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   layerId: string;
+  groupId: string;
   columnId: string;
   state: T;
   setState: StateSetter<T>;
-  dragDropContext: DragContextState;
+  dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
@@ -388,6 +391,7 @@ export interface AccessorConfig {
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
+  groupTooltip?: string;
 
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
@@ -402,6 +406,10 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
    * will render the extra tab for the dimension editor
    */
   enableDimensionEditor?: boolean;
+  // if the visual order of dimension groups diverges from the intended nesting order, this property specifies the position of
+  // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
+  // orders are always higher in the hierarchy than non-specified ones.
+  nestingOrder?: number;
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -516,6 +524,10 @@ export interface VisualizationType {
    * Optional label used in chart type search if chart switcher is expanded and for tooltips
    */
   fullLabel?: string;
+  /**
+   * The group the visualization belongs to
+   */
+  groupLabel: string;
 }
 
 export interface Visualization<T = unknown> {
@@ -588,7 +600,9 @@ export interface Visualization<T = unknown> {
    * The frame is telling the visualization to update or set a dimension based on user interaction
    * groupId is coming from the groupId provided in getConfiguration
    */
-  setDimension: (props: VisualizationDimensionChangeProps<T> & { groupId: string }) => T;
+  setDimension: (
+    props: VisualizationDimensionChangeProps<T> & { groupId: string; previousColumn?: string }
+  ) => T;
   /**
    * The frame is telling the visualization to remove a dimension. The visualization needs to
    * look at its internal state to determine which dimension is being affected.
@@ -632,7 +646,10 @@ export interface Visualization<T = unknown> {
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
    */
-  getErrorMessages: (state: T) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+  getErrorMessages: (
+    state: T,
+    datasourceLayers?: Record<string, DatasourcePublicAPI>
+  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
 
   /**
    * The frame calls this function to display warnings about visualization

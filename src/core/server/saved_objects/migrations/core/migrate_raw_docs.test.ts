@@ -58,12 +58,12 @@ describe('migrateRawDocs', () => {
     expect(transform).toHaveBeenNthCalledWith(2, obj2);
   });
 
-  test('passes invalid docs through untouched and logs error', async () => {
+  test('throws when encountering a corrupt saved object document', async () => {
     const logger = createSavedObjectsMigrationLoggerMock();
     const transform = jest.fn<any, any>((doc: any) => [
       set(_.cloneDeep(doc), 'attributes.name', 'TADA'),
     ]);
-    const result = await migrateRawDocs(
+    const result = migrateRawDocs(
       new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
       transform,
       [
@@ -73,25 +73,11 @@ describe('migrateRawDocs', () => {
       logger
     );
 
-    expect(result).toEqual([
-      { _id: 'foo:b', _source: { type: 'a', a: { name: 'AAA' } } },
-      {
-        _id: 'c:d',
-        _source: { type: 'c', c: { name: 'TADA' }, migrationVersion: {}, references: [] },
-      },
-    ]);
+    expect(result).rejects.toMatchInlineSnapshot(
+      `[Error: Unable to migrate the corrupt saved object document with _id: 'foo:b'.]`
+    );
 
-    const obj2 = {
-      id: 'd',
-      type: 'c',
-      attributes: { name: 'DDD' },
-      migrationVersion: {},
-      references: [],
-    };
-    expect(transform).toHaveBeenCalledTimes(1);
-    expect(transform).toHaveBeenCalledWith(obj2);
-
-    expect(logger.error).toBeCalledTimes(1);
+    expect(transform).toHaveBeenCalledTimes(0);
   });
 
   test('handles when one document is transformed into multiple documents', async () => {

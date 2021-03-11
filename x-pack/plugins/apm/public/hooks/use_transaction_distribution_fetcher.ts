@@ -23,16 +23,18 @@ const INITIAL_DATA = {
 
 export function useTransactionDistributionFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams, uiFilters } = useUrlParams();
   const {
-    environment,
-    start,
-    end,
-    transactionType,
-    transactionId,
-    traceId,
-    transactionName,
-  } = urlParams;
+    urlParams: {
+      environment,
+      kuery,
+      start,
+      end,
+      transactionType,
+      transactionId,
+      traceId,
+      transactionName,
+    },
+  } = useUrlParams();
 
   const history = useHistory();
   const { data = INITIAL_DATA, status, error } = useFetcher(
@@ -47,13 +49,13 @@ export function useTransactionDistributionFetcher() {
             },
             query: {
               environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
               transactionId,
               traceId,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
@@ -96,12 +98,12 @@ export function useTransactionDistributionFetcher() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionType,
       transactionName,
-      uiFilters,
     ]
   );
 

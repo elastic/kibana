@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes } from '../../../../../case/common/api';
+import { ConnectorTypes } from '../../../../../cases/common/api';
 import { TestProviders } from '../../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -98,6 +98,7 @@ const fillForm = (wrapper: ReactWrapper) => {
 describe('Create case', () => {
   const fetchTags = jest.fn();
   const onFormSubmitSuccess = jest.fn();
+  const afterCaseCreated = jest.fn();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -592,5 +593,90 @@ describe('Create case', () => {
         });
       });
     });
+  });
+
+  it(`it should call afterCaseCreated`, async () => {
+    useConnectorsMock.mockReturnValue({
+      ...sampleConnectorData,
+      connectors: connectorsMock,
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
+          <CreateCaseForm />
+          <SubmitCaseButton />
+        </FormContext>
+      </TestProviders>
+    );
+
+    fillForm(wrapper);
+    expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeTruthy();
+    });
+
+    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    await waitFor(() => {
+      expect(afterCaseCreated).toHaveBeenCalledWith({
+        id: sampleId,
+        ...sampleData,
+      });
+    });
+  });
+
+  it(`it should call callbacks in correct order`, async () => {
+    useConnectorsMock.mockReturnValue({
+      ...sampleConnectorData,
+      connectors: connectorsMock,
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <FormContext onSuccess={onFormSubmitSuccess} afterCaseCreated={afterCaseCreated}>
+          <CreateCaseForm />
+          <SubmitCaseButton />
+        </FormContext>
+      </TestProviders>
+    );
+
+    fillForm(wrapper);
+    expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeFalsy();
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find(`[data-test-subj="connector-fields-jira"]`).exists()).toBeTruthy();
+    });
+
+    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+    await waitFor(() => {
+      expect(postCase).toHaveBeenCalled();
+      expect(afterCaseCreated).toHaveBeenCalled();
+      expect(pushCaseToExternalService).toHaveBeenCalled();
+      expect(onFormSubmitSuccess).toHaveBeenCalled();
+    });
+
+    const postCaseOrder = postCase.mock.invocationCallOrder[0];
+    const afterCaseOrder = afterCaseCreated.mock.invocationCallOrder[0];
+    const pushCaseToExternalServiceOrder = pushCaseToExternalService.mock.invocationCallOrder[0];
+    const onFormSubmitSuccessOrder = onFormSubmitSuccess.mock.invocationCallOrder[0];
+
+    expect(
+      postCaseOrder < afterCaseOrder &&
+        postCaseOrder < pushCaseToExternalServiceOrder &&
+        postCaseOrder < onFormSubmitSuccessOrder
+    ).toBe(true);
+
+    expect(
+      afterCaseOrder < pushCaseToExternalServiceOrder && afterCaseOrder < onFormSubmitSuccessOrder
+    ).toBe(true);
+
+    expect(pushCaseToExternalServiceOrder < onFormSubmitSuccessOrder).toBe(true);
   });
 });

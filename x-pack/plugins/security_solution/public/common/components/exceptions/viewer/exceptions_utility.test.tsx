@@ -8,14 +8,26 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from '@kbn/test/jest';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionsViewerUtility } from './exceptions_utility';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiBreakpoints: {
+      l: '1200px',
+    },
+    paddingSizes: {
+      m: '10px',
+    },
+    euiBorderThin: '1px solid #ece',
+  },
+});
 
 describe('ExceptionsViewerUtility', () => {
   it('it renders correct pluralized text when more than one exception exists', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerUtility
           pagination={{
             pageIndex: 0,
@@ -38,7 +50,7 @@ describe('ExceptionsViewerUtility', () => {
 
   it('it renders correct singular text when less than two exceptions exists', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerUtility
           pagination={{
             pageIndex: 0,
@@ -62,7 +74,7 @@ describe('ExceptionsViewerUtility', () => {
   it('it invokes "onRefreshClick" when refresh button clicked', () => {
     const mockOnRefreshClick = jest.fn();
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerUtility
           pagination={{
             pageIndex: 0,
@@ -85,7 +97,7 @@ describe('ExceptionsViewerUtility', () => {
 
   it('it does not render any messages when "showEndpointList" and "showDetectionsList" are "false"', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerUtility
           pagination={{
             pageIndex: 0,
@@ -107,7 +119,7 @@ describe('ExceptionsViewerUtility', () => {
 
   it('it does render detections messages when "showDetectionsList" is "true"', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerUtility
           pagination={{
             pageIndex: 0,
@@ -129,7 +141,7 @@ describe('ExceptionsViewerUtility', () => {
 
   it('it does render endpoint messages when "showEndpointList" is "true"', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerUtility
           pagination={{
             pageIndex: 0,

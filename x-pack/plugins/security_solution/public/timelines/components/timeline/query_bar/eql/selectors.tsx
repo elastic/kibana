@@ -16,7 +16,7 @@ export const getEqlOptions = () =>
         eventCategoryField: [{ label: 'event.category' }],
         tiebreakerField: [
           {
-            label: 'event.sequence',
+            label: '',
           },
         ],
         timestampField: [

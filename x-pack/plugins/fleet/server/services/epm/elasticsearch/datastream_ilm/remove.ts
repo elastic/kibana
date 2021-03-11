@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import { CallESAsCurrentUser, ElasticsearchAssetType, EsAssetReference } from '../../../../types';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+
+import { ElasticsearchAssetType } from '../../../../types';
+import type { EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 
-export const deleteIlms = async (callCluster: CallESAsCurrentUser, ilmPolicyIds: string[]) => {
+export const deleteIlms = async (esClient: ElasticsearchClient, ilmPolicyIds: string[]) => {
   await Promise.all(
     ilmPolicyIds.map(async (ilmPolicyId) => {
-      await callCluster('transport.request', {
-        method: 'DELETE',
-        path: `_ilm/policy/${ilmPolicyId}`,
-        ignore: [404, 400],
-      });
+      await esClient.transport.request(
+        {
+          method: 'DELETE',
+          path: `_ilm/policy/${ilmPolicyId}`,
+        },
+        {
+          ignore: [404, 400],
+        }
+      );
     })
   );
 };

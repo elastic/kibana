@@ -21,5 +21,6 @@ export type TestSubjects =
   | 'policyTablePolicyNameLink'
   | 'policyTitle'
   | 'createPolicyButton'
-  | 'freezeSwitch'
+  | 'cold-freezeSwitch'
+  | 'frozen-freezeSwitch'
   | string;

@@ -16,6 +16,7 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { IndexPattern } from './types';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { documentField } from './document_field';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
@@ -70,6 +71,14 @@ describe('IndexPattern Field Item', () => {
           aggregatable: true,
           searchable: true,
         },
+        {
+          name: 'ip_range',
+          displayName: 'ip_range',
+          type: 'ip_range',
+          aggregatable: true,
+          searchable: true,
+        },
+        documentField,
       ],
     } as IndexPattern;
 
@@ -221,5 +230,36 @@ describe('IndexPattern Field Item', () => {
         fieldName: 'bytes',
       }),
     });
+  });
+
+  it('should not request field stats for document field', async () => {
+    const wrapper = mountWithIntl(<InnerFieldItem {...defaultProps} field={documentField} />);
+
+    clickField(wrapper, 'Records');
+
+    expect(core.http.post).not.toHaveBeenCalled();
+    expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+  });
+
+  it('should not request field stats for range fields', async () => {
+    const wrapper = mountWithIntl(
+      <InnerFieldItem
+        {...defaultProps}
+        field={{
+          name: 'ip_range',
+          displayName: 'ip_range',
+          type: 'ip_range',
+          aggregatable: true,
+          searchable: true,
+        }}
+      />
+    );
+
+    await act(async () => {
+      clickField(wrapper, 'ip_range');
+    });
+
+    expect(core.http.post).not.toHaveBeenCalled();
   });
 });

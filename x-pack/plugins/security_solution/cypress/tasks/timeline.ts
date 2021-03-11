@@ -51,6 +51,11 @@ import {
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
   QUERY_TAB_BUTTON,
   CLOSE_OPEN_TIMELINE_MODAL_BTN,
+  TIMELINE_ADD_FIELD_BUTTON,
+  TIMELINE_DATA_PROVIDER_FIELD,
+  TIMELINE_DATA_PROVIDER_OPERATOR,
+  TIMELINE_DATA_PROVIDER_VALUE,
+  SAVE_DATA_PROVIDER_BTN,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
@@ -114,6 +119,17 @@ export const addFilter = (filter: TimelineFilter) => {
   cy.get(SAVE_FILTER_BTN).click();
 };
 
+export const addDataProvider = (filter: TimelineFilter) => {
+  cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
+  cy.get(TIMELINE_DATA_PROVIDER_FIELD).type(`${filter.field}{downarrow}{enter}`);
+  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR).type(filter.operator);
+  cy.get(COMBO_BOX).contains(filter.operator).click();
+  if (filter.operator !== 'exists') {
+    cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
+  }
+  return cy.get(SAVE_DATA_PROVIDER_BTN).click();
+};
+
 export const addNewCase = () => {
   cy.get(ALL_CASES_CREATE_NEW_CASE_TABLE_BTN).click();
 };
@@ -146,7 +162,6 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
-  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(CREATE_NEW_TIMELINE).click();
 };
 
@@ -177,8 +192,9 @@ export const openTimelineInspectButton = () => {
 };
 
 export const openTimelineFromSettings = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
-  cy.get(OPEN_TIMELINE_ICON).click({ force: true });
+  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click();
+  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').pipe(click);
+  cy.get(OPEN_TIMELINE_ICON).pipe(click);
 };
 
 export const openTimelineTemplateFromSettings = (id: string) => {

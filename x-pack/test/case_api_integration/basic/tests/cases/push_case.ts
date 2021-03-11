@@ -9,8 +9,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 
-import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../plugins/case/common/constants';
-import { postCaseReq, defaultUser, postCommentUserReq } from '../../../common/lib/mock';
+import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../plugins/cases/common/constants';
+import {
+  postCaseReq,
+  defaultUser,
+  postCommentUserReq,
+  postCollectionReq,
+} from '../../../common/lib/mock';
 import {
   deleteCases,
   deleteCasesUserActions,
@@ -23,6 +28,7 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
+import { CaseStatuses } from '../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -226,6 +232,59 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       expect(body.status).to.eql('closed');
+    });
+
+    it('should push a collection case but not close it when closure_type: close-by-pushing', async () => {
+      const { body: connector } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
+        .expect(200);
+
+      actionsRemover.add('default', connector.id, 'action', 'actions');
+      await supertest
+        .post(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          ...getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+          }),
+          closure_type: 'close-by-pushing',
+        })
+        .expect(200);
+
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          ...postCollectionReq,
+          connector: getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+            fields: {
+              urgency: '2',
+              impact: '2',
+              severity: '2',
+              category: 'software',
+              subcategory: 'os',
+            },
+          }).connector,
+        })
+        .expect(200);
+
+      const { body } = await supertest
+        .post(`${CASES_URL}/${postedCase.id}/connector/${connector.id}/_push`)
+        .set('kbn-xsrf', 'true')
+        .send({})
+        .expect(200);
+
+      expect(body.status).to.eql(CaseStatuses.open);
     });
 
     it('unhappy path - 404s when case does not exist', async () => {

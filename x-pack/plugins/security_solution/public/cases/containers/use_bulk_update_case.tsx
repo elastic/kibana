@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useReducer } from 'react';
-import { CaseStatuses } from '../../../../case/common/api';
+import { useCallback, useReducer, useRef, useEffect } from 'react';
+import { CaseStatuses } from '../../../../cases/common/api';
 import {
   displaySuccessToast,
   errorToToaster,
@@ -87,49 +87,45 @@ export const useUpdateCases = (): UseUpdateCases => {
     isUpdated: false,
   });
   const [, dispatchToaster] = useStateToaster();
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
-  const dispatchUpdateCases = useCallback((cases: BulkUpdateStatus[], action: string) => {
-    let cancel = false;
-    const abortCtrl = new AbortController();
+  const dispatchUpdateCases = useCallback(async (cases: BulkUpdateStatus[], action: string) => {
+    try {
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
 
-    const patchData = async () => {
-      try {
-        dispatch({ type: 'FETCH_INIT' });
-        const patchResponse = await patchCasesStatus(cases, abortCtrl.signal);
-        if (!cancel) {
-          const resultCount = Object.keys(patchResponse).length;
-          const firstTitle = patchResponse[0].title;
+      dispatch({ type: 'FETCH_INIT' });
+      const patchResponse = await patchCasesStatus(cases, abortCtrlRef.current.signal);
 
-          dispatch({ type: 'FETCH_SUCCESS', payload: true });
+      if (!isCancelledRef.current) {
+        const resultCount = Object.keys(patchResponse).length;
+        const firstTitle = patchResponse[0].title;
 
-          const messageArgs = {
-            totalCases: resultCount,
-            caseTitle: resultCount === 1 ? firstTitle : '',
-          };
+        dispatch({ type: 'FETCH_SUCCESS', payload: true });
+        const messageArgs = {
+          totalCases: resultCount,
+          caseTitle: resultCount === 1 ? firstTitle : '',
+        };
 
-          const message =
-            action === 'status'
-              ? getStatusToasterMessage(patchResponse[0].status, messageArgs)
-              : '';
+        const message =
+          action === 'status' ? getStatusToasterMessage(patchResponse[0].status, messageArgs) : '';
 
-          displaySuccessToast(message, dispatchToaster);
-        }
-      } catch (error) {
-        if (!cancel) {
+        displaySuccessToast(message, dispatchToaster);
+      }
+    } catch (error) {
+      if (!isCancelledRef.current) {
+        if (error.name !== 'AbortError') {
           errorToToaster({
             title: i18n.ERROR_TITLE,
             error: error.body && error.body.message ? new Error(error.body.message) : error,
             dispatchToaster,
           });
-          dispatch({ type: 'FETCH_FAILURE' });
         }
+        dispatch({ type: 'FETCH_FAILURE' });
       }
-    };
-    patchData();
-    return () => {
-      cancel = true;
-      abortCtrl.abort();
-    };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -137,14 +133,25 @@ export const useUpdateCases = (): UseUpdateCases => {
     dispatch({ type: 'RESET_IS_UPDATED' });
   }, []);
 
-  const updateBulkStatus = useCallback((cases: Case[], status: string) => {
-    const updateCasesStatus: BulkUpdateStatus[] = cases.map((theCase) => ({
-      status,
-      id: theCase.id,
-      version: theCase.version,
-    }));
-    dispatchUpdateCases(updateCasesStatus, 'status');
+  const updateBulkStatus = useCallback(
+    (cases: Case[], status: string) => {
+      const updateCasesStatus: BulkUpdateStatus[] = cases.map((theCase) => ({
+        status,
+        id: theCase.id,
+        version: theCase.version,
+      }));
+      dispatchUpdateCases(updateCasesStatus, 'status');
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  useEffect(() => {
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
+    };
   }, []);
+
   return { ...state, updateBulkStatus, dispatchResetIsUpdated };
 };

@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { DRAW_TYPE } from '../../../../common/constants';
-import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw-unminified';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { DrawCircle } from './draw_circle';
 import {

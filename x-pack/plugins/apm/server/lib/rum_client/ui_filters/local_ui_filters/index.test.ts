@@ -16,7 +16,7 @@ describe('getLocalUIFilters', () => {
   let mock: SearchParamsMock;
 
   beforeEach(() => {
-    jest.mock('../../../helpers/convert_ui_filters/get_es_filter', () => {
+    jest.mock('../get_es_filter', () => {
       return [];
     });
   });

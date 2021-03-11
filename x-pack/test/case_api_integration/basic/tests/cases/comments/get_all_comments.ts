@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
@@ -16,7 +16,7 @@ import {
   deleteAllCaseItems,
   deleteCaseAction,
 } from '../../../../common/lib/utils';
-import { CommentType } from '../../../../../../plugins/case/common/api';
+import { CommentType } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -83,13 +83,13 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should get comments from a sub cases', async () => {
       const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
       await supertest
-        .post(`${CASES_URL}/${caseInfo.subCase!.id}/comments`)
+        .post(`${CASES_URL}/${caseInfo.subCases![0].id}/comments`)
         .set('kbn-xsrf', 'true')
         .send(postCommentUserReq)
         .expect(200);
 
       const { body: comments } = await supertest
-        .get(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`)
+        .get(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
         .expect(200);
 
       expect(comments.length).to.eql(2);

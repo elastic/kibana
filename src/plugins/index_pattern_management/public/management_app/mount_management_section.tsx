@@ -41,7 +41,7 @@ export async function mountManagementSection(
   getMlCardState: () => MlCardState
 ) {
   const [
-    { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
+    { chrome, application, uiSettings, notifications, overlays, http, docLinks },
     { data, indexPatternFieldEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
@@ -54,7 +54,6 @@ export async function mountManagementSection(
   const deps: IndexPatternManagmentContext = {
     chrome,
     application,
-    savedObjects,
     uiSettings,
     notifications,
     overlays,

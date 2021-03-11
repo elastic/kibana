@@ -6,41 +6,61 @@
  * Side Public License, v 1.
  */
 
+const mockGetFieldsForWildcard = jest.fn(() => []);
+
+jest.mock('../../../../../data/server', () => ({
+  indexPatterns: {
+    isNestedField: jest.fn(() => false),
+  },
+  IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
+    getFieldsForWildcard: mockGetFieldsForWildcard,
+  })),
+}));
+
 import { from } from 'rxjs';
-import {
-  AbstractSearchStrategy,
-  ReqFacade,
-  toSanitizedFieldType,
-} from './abstract_search_strategy';
-import type { VisPayload } from '../../../../common/types';
+import { AbstractSearchStrategy, toSanitizedFieldType } from './abstract_search_strategy';
 import type { IFieldType } from '../../../../../data/common';
 import type { FieldSpec, RuntimeField } from '../../../../../data/common';
+import {
+  VisTypeTimeseriesRequest,
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
+import { Framework } from '../../../plugin';
+import { indexPatterns } from '../../../../../data/server';
 
 class FooSearchStrategy extends AbstractSearchStrategy {}
 
 describe('AbstractSearchStrategy', () => {
   let abstractSearchStrategy: AbstractSearchStrategy;
-  let req: ReqFacade;
   let mockedFields: IFieldType[];
   let indexPattern: string;
+  let requestContext: VisTypeTimeseriesRequestHandlerContext;
+  let framework: Framework;
 
   beforeEach(() => {
     mockedFields = [];
-    req = ({
-      payload: {},
-      pre: {
-        indexPatternsFetcher: {
-          getFieldsForWildcard: jest.fn().mockReturnValue(mockedFields),
-        },
-      },
+    framework = ({
       getIndexPatternsService: jest.fn(() =>
         Promise.resolve({
           find: jest.fn(() => []),
+          getDefault: jest.fn(() => {}),
         })
       ),
-    } as unknown) as ReqFacade<VisPayload>;
-
-    abstractSearchStrategy = new FooSearchStrategy();
+    } as unknown) as Framework;
+    requestContext = ({
+      core: {
+        elasticsearch: {
+          client: {
+            asCurrentUser: jest.fn(),
+          },
+        },
+      },
+      search: {
+        search: jest.fn().mockReturnValue(from(Promise.resolve({}))),
+      },
+    } as unknown) as VisTypeTimeseriesRequestHandlerContext;
+    abstractSearchStrategy = new FooSearchStrategy(framework);
   });
 
   test('should init an AbstractSearchStrategy instance', () => {
@@ -50,10 +70,14 @@ describe('AbstractSearchStrategy', () => {
   });
 
   test('should return fields for wildcard', async () => {
-    const fields = await abstractSearchStrategy.getFieldsForWildcard(req, indexPattern);
+    const fields = await abstractSearchStrategy.getFieldsForWildcard(
+      requestContext,
+      {} as VisTypeTimeseriesRequest,
+      indexPattern
+    );
 
     expect(fields).toEqual(mockedFields);
-    expect(req.pre.indexPatternsFetcher!.getFieldsForWildcard).toHaveBeenCalledWith({
+    expect(mockGetFieldsForWildcard).toHaveBeenCalledWith({
       pattern: indexPattern,
       metaFields: [],
       fieldCapsOptions: { allow_no_indices: true },
@@ -62,26 +86,23 @@ describe('AbstractSearchStrategy', () => {
 
   test('should return response', async () => {
     const searches = [{ body: 'body', index: 'index' }];
-    const searchFn = jest.fn().mockReturnValue(from(Promise.resolve({})));
 
     const responses = await abstractSearchStrategy.search(
+      requestContext,
       ({
-        payload: {
+        body: {
           searchSession: {
             sessionId: '1',
             isRestore: false,
             isStored: true,
           },
         },
-        requestContext: {
-          search: { search: searchFn },
-        },
-      } as unknown) as ReqFacade<VisPayload>,
+      } as unknown) as VisTypeTimeseriesVisDataRequest,
       searches
     );
 
     expect(responses).toEqual([{}]);
-    expect(searchFn).toHaveBeenCalledWith(
+    expect(requestContext.search.search).toHaveBeenCalledWith(
       {
         params: {
           body: 'body',
@@ -154,6 +175,8 @@ describe('AbstractSearchStrategy', () => {
           },
         },
       ];
+      // @ts-expect-error
+      indexPatterns.isNestedField.mockReturnValue(true);
 
       expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`Array []`);
     });

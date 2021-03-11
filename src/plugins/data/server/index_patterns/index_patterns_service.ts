@@ -19,7 +19,7 @@ import { DataPluginStartDependencies, DataPluginStart } from '../plugin';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
-import { IndexPatternsService as IndexPatternsCommonService } from '../../common/index_patterns';
+import { IndexPatternsCommonService } from '../';
 import { FieldFormatsStart } from '../field_formats';
 import { getIndexPatternLoad } from './expressions';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { CopySavedObjectsToSpaceFlyout } from './copy_to_space_flyout';
+export { getCopyToSpaceFlyoutComponent } from './copy_to_space_flyout';
+export type { CopyToSpaceFlyoutProps } from './copy_to_space_flyout_internal';

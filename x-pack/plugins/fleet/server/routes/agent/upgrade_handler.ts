@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
-import { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
+
+import type { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
 import { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
@@ -35,7 +36,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  const agent = await getAgent(soClient, esClient, request.params.agentId);
+  const agent = await getAgent(esClient, request.params.agentId);
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return response.customError({
       statusCode: 400,

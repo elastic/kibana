@@ -43,3 +43,27 @@ export interface IndexJob extends IIndexingStatus {
 }
 
 export type TOperation = typeof ADD | typeof UPDATE;
+
+export interface RoleRules {
+  username?: string;
+  role?: string;
+  email?: string;
+  metadata?: string;
+}
+
+export interface AttributeExamples {
+  username: string;
+  email: string;
+  metadata: string;
+}
+
+export type AttributeName = keyof AttributeExamples | 'role';
+
+export interface RoleMapping {
+  id: string;
+  attributeName: AttributeName;
+  attributeValue: string;
+  authProvider: string[];
+  roleType: string;
+  rules: RoleRules;
+}

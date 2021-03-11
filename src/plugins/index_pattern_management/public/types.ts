@@ -11,7 +11,6 @@ import {
   ApplicationStart,
   IUiSettingsClient,
   OverlayStart,
-  SavedObjectsStart,
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
@@ -25,7 +24,6 @@ import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/p
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
   application: ApplicationStart;
-  savedObjects: SavedObjectsStart;
   uiSettings: IUiSettingsClient;
   notifications: NotificationsStart;
   overlays: OverlayStart;

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { generateId } from '../../../id_generator';
-import { DragDrop, DragDropIdentifier } from '../../../drag_drop';
+import { DragDrop, DragDropIdentifier, DragContext } from '../../../drag_drop';
+
 import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../types';
 import { LayerDatasourceDropProps } from './types';
 
@@ -26,6 +27,7 @@ const getAdditionalClassesOnDroppable = (dropType?: string) => {
 
 export function EmptyDimensionButton({
   group,
+  groups,
   layerDatasource,
   layerDatasourceDropProps,
   layerId,
@@ -44,9 +46,13 @@ export function EmptyDimensionButton({
     dropType?: DropType
   ) => void;
   group: VisualizationDimensionGroupConfig;
+  groups: VisualizationDimensionGroupConfig[];
+
   layerDatasource: Datasource<unknown, unknown>;
   layerDatasourceDropProps: LayerDatasourceDropProps;
 }) {
+  const { dragging } = useContext(DragContext);
+
   const itemIndex = group.accessors.length;
 
   const [newColumnId, setNewColumnId] = useState<string>(generateId());
@@ -56,9 +62,11 @@ export function EmptyDimensionButton({
 
   const dropProps = layerDatasource.getDropProps({
     ...layerDatasourceDropProps,
+    dragging,
     columnId: newColumnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
+    dimensionGroups: groups,
   });
 
   const dropType = dropProps?.dropType;
@@ -81,14 +89,18 @@ export function EmptyDimensionButton({
     [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel]
   );
 
+  const handleOnDrop = React.useCallback(
+    (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
+    [value, onDrop]
+  );
+
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         value={value}
-        /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
         order={[2, layerIndex, groupIndex, itemIndex]}
-        onDrop={(droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType)}
+        onDrop={handleOnDrop}
         dropType={dropType}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
