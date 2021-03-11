@@ -61,7 +61,6 @@
     { "path": "./x-pack/plugins/beats_management/tsconfig.json" },
     { "path": "./x-pack/plugins/canvas/tsconfig.json" },
     { "path": "./x-pack/plugins/cloud/tsconfig.json" },
-    { "path": "./x-pack/plugins/code/tsconfig.json" },
     { "path": "./x-pack/plugins/console_extensions/tsconfig.json" },
     { "path": "./x-pack/plugins/dashboard_enhanced/tsconfig.json" },
     { "path": "./x-pack/plugins/data_enhanced/tsconfig.json" },

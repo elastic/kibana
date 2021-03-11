@@ -15,7 +15,7 @@ import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/public';
 import { FileUploadComponentProps } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
 import { GeoJsonImporter } from '../importer/geojson_importer';
-import { IngestPipeline, Settings } from '../../common';
+import { Settings } from '../../common';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',
@@ -87,7 +87,10 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         },
       },
     };
-    const ingestPipeline = ({} as unknown) as IngestPipeline;
+    const ingestPipeline = {
+      description: '',
+      processors: [],
+    };
     this.setState({
       importStatus: i18n.translate('xpack.fileUpload.jsonUploadAndParse.dataIndexingStarted', {
         defaultMessage: 'Creating index: {indexName}',
