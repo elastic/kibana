@@ -23,7 +23,7 @@ import {
   LAT_INDEX,
 } from '../constants';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
-import { Filter, FILTERS } from '../../../../../src/plugins/data/common';
+import { Filter, FilterMeta, FILTERS } from '../../../../../src/plugins/data/common';
 import { MapExtent } from '../descriptor_types';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
@@ -385,12 +385,13 @@ export function createSpatialFilterWithGeometry({
         defaultMessage: 'in',
       })
     : getEsSpatialRelationLabel(relation);
-  const meta = {
+  const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
     key: geoFieldName,
     alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`,
+    disabled: false,
   };
 
   const shapeQuery: GeoShapeQueryBody = {
@@ -425,8 +426,8 @@ export function createDistanceFilterWithMeta({
   geoFieldName: string;
   indexPatternId: string;
   point: Position;
-}) {
-  const meta = {
+}): GeoFilter {
+  const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
@@ -441,6 +442,7 @@ export function createDistanceFilterWithMeta({
             pointLabel: point.join(', '),
           },
         }),
+    disabled: false,
   };
 
   return {

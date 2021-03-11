@@ -11,12 +11,17 @@
 import turfDistance from '@turf/distance';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
+import { Position } from 'geojson';
+
+export interface DrawCircleProperties {
+  center: Position;
+  radiusKm: number;
+}
 
 type DrawCircleState = {
   circle: {
-    properties: {
-      center: {} | null;
-      radiusKm: number;
+    properties: Omit<DrawCircleProperties, 'center'> & {
+      center: Position | null;
     };
     id: string | number;
     incomingCoords: (coords: unknown[]) => void;

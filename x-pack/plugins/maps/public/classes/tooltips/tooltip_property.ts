@@ -29,7 +29,7 @@ export interface FeatureGeometry {
 }
 
 export interface RenderTooltipContentParams {
-  addFilters(filter: object): void;
+  addFilters(filter: object, actionId: string): void;
   closeTooltip(): void;
   features: TooltipFeature[];
   isLocked: boolean;

@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { URL_MAX_LENGTH } from '../../../../../../../src/core/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../src/plugins/data/public';
 import { createSpatialFilterWithGeometry } from '../../../../common/elasticsearch_util';
 import { GEO_JSON_TYPE } from '../../../../common/constants';
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
@@ -90,7 +91,7 @@ export class FeatureGeometryFilterForm extends Component {
       return;
     }
 
-    this.props.addFilters([filter]);
+    this.props.addFilters([filter], ACTION_GLOBAL_APPLY_FILTER);
     this.props.onClose();
   };
 

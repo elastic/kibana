@@ -6,24 +6,34 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, RefObject } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Map as MbMap } from 'mapbox-gl';
 import { DRAW_TYPE } from '../../../../common/constants';
+import { DrawState } from '../../../../common/descriptor_types';
 
 const noop = () => {};
 
-export class DrawTooltip extends Component {
-  state = {
+interface Props {
+  mbMap: MbMap;
+  drawState: DrawState;
+}
+
+interface State {
+  x?: number;
+  y?: number;
+  isOpen: boolean;
+}
+
+export class DrawTooltip extends Component<Props, State> {
+  private readonly _popoverRef: RefObject<EuiPopover> = React.createRef();
+
+  state: State = {
     x: undefined,
     y: undefined,
     isOpen: false,
   };
-
-  constructor(props) {
-    super(props);
-    this._popoverRef = React.createRef();
-  }
 
   componentDidMount() {
     this.props.mbMap.on('mousemove', this._updateTooltipLocation);
@@ -43,6 +53,10 @@ export class DrawTooltip extends Component {
   }
 
   render() {
+    if (this.state.x === undefined || this.state.y === undefined) {
+      return null;
+    }
+
     let instructions;
     if (this.props.drawState.drawType === DRAW_TYPE.BOUNDS) {
       instructions = i18n.translate('xpack.maps.drawTooltip.boundsInstructions', {

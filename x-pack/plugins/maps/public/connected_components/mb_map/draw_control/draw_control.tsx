@@ -6,11 +6,18 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
-import { DRAW_TYPE } from '../../../../common/constants';
+import React, { Component } from 'react';
+// @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
+// @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
-import { DrawCircle } from './draw_circle';
+import { Map as MbMap } from 'mapbox-gl';
+import { i18n } from '@kbn/i18n';
+import { Filter } from 'src/plugins/data/public';
+import { Feature, Polygon } from 'geojson';
+import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
+import { DrawState } from '../../../../common/descriptor_types';
+import { DrawCircle, DrawCircleProperties } from './draw_circle';
 import {
   createDistanceFilterWithMeta,
   createSpatialFilterWithGeometry,
@@ -18,6 +25,7 @@ import {
   roundCoordinates,
 } from '../../../../common/elasticsearch_util';
 import { DrawTooltip } from './draw_tooltip';
+import { getToasts } from '../../../kibana_services';
 
 const DRAW_RECTANGLE = 'draw_rectangle';
 const DRAW_CIRCLE = 'draw_circle';
@@ -26,15 +34,21 @@ const mbDrawModes = MapboxDraw.modes;
 mbDrawModes[DRAW_RECTANGLE] = DrawRectangle;
 mbDrawModes[DRAW_CIRCLE] = DrawCircle;
 
-export class DrawControl extends React.Component {
-  constructor() {
-    super();
-    this._mbDrawControl = new MapboxDraw({
-      displayControlsDefault: false,
-      modes: mbDrawModes,
-    });
-    this._mbDrawControlAdded = false;
-  }
+export interface Props {
+  addFilters: (filters: Filter[], actionId: string) => Promise<void>;
+  disableDrawState: () => void;
+  drawState?: DrawState;
+  isDrawingFilter: boolean;
+  mbMap: MbMap;
+}
+
+export class DrawControl extends Component<Props, {}> {
+  private _isMounted = false;
+  private _mbDrawControlAdded = false;
+  private _mbDrawControl = new MapboxDraw({
+    displayControlsDefault: false,
+    modes: mbDrawModes,
+  });
 
   componentDidUpdate() {
     this._syncDrawControl();
@@ -63,14 +77,19 @@ export class DrawControl extends React.Component {
     }
   }, 0);
 
-  _onDraw = async (e) => {
-    if (!e.features.length) {
+  _onDraw = async (e: { features: Feature[] }) => {
+    if (
+      !e.features.length ||
+      !this.props.drawState ||
+      !this.props.drawState.geoFieldName ||
+      !this.props.drawState.indexPatternId
+    ) {
       return;
     }
 
-    let filter;
+    let filter: Filter | undefined;
     if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
-      const circle = e.features[0];
+      const circle = e.features[0] as Feature & { properties: DrawCircleProperties };
       const distanceKm = _.round(
         circle.properties.radiusKm,
         circle.properties.radiusKm > 10 ? 0 : 2
@@ -85,7 +104,7 @@ export class DrawControl extends React.Component {
         precision = 3;
       }
       filter = createDistanceFilterWithMeta({
-        alias: this.props.drawState.filterLabel,
+        alias: this.props.drawState.filterLabel ? this.props.drawState.filterLabel : '',
         distanceKm,
         geoFieldName: this.props.drawState.geoFieldName,
         indexPatternId: this.props.drawState.indexPatternId,
@@ -95,7 +114,7 @@ export class DrawControl extends React.Component {
         ],
       });
     } else {
-      const geometry = e.features[0].geometry;
+      const geometry = e.features[0].geometry as Polygon;
       // MapboxDraw returns coordinates with 12 decimals. Round to a more reasonable number
       roundCoordinates(geometry.coordinates);
 
@@ -106,24 +125,34 @@ export class DrawControl extends React.Component {
             : geometry,
         indexPatternId: this.props.drawState.indexPatternId,
         geoFieldName: this.props.drawState.geoFieldName,
-        geoFieldType: this.props.drawState.geoFieldType,
-        geometryLabel: this.props.drawState.geometryLabel,
-        relation: this.props.drawState.relation,
+        geoFieldType: this.props.drawState.geoFieldType
+          ? this.props.drawState.geoFieldType
+          : ES_GEO_FIELD_TYPE.GEO_POINT,
+        geometryLabel: this.props.drawState.geometryLabel ? this.props.drawState.geometryLabel : '',
+        relation: this.props.drawState.relation
+          ? this.props.drawState.relation
+          : ES_SPATIAL_RELATIONS.INTERSECTS,
       });
     }
 
     try {
-      await this.props.addFilters([filter], this.props.drawState.actionId);
+      await this.props.addFilters([filter!], this.props.drawState.actionId);
     } catch (error) {
-      // TODO notify user why filter was not created
-      console.error(error);
+      getToasts().addWarning(
+        i18n.translate('xpack.maps.drawControl.unableToCreatFilter', {
+          defaultMessage: `Unable to create filter, error: '{errorMsg}'.`,
+          values: {
+            errorMsg: error.message,
+          },
+        })
+      );
     } finally {
       this.props.disableDrawState();
     }
   };
 
   _removeDrawControl() {
-    if (!this.props.mbMap || !this._mbDrawControlAdded) {
+    if (!this._mbDrawControlAdded) {
       return;
     }
 
@@ -134,7 +163,7 @@ export class DrawControl extends React.Component {
   }
 
   _updateDrawControl() {
-    if (!this.props.mbMap) {
+    if (!this.props.drawState) {
       return;
     }
 
@@ -159,7 +188,7 @@ export class DrawControl extends React.Component {
   }
 
   render() {
-    if (!this.props.mbMap || !this.props.isDrawingFilter) {
+    if (!this.props.isDrawingFilter || !this.props.drawState) {
       return null;
     }
 
