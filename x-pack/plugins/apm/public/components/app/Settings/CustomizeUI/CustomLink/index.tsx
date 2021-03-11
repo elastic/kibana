@@ -121,7 +121,7 @@ export function CustomLinkOverview() {
         <EuiText>
           {i18n.translate('xpack.apm.settings.customizeUI.customLink.info', {
             defaultMessage:
-              'These links will be shown in the Actions context menu for transactions.',
+              'These links will be shown in the Actions context menu in selected areas of the app, e.g. by the transactions detail.',
           })}
         </EuiText>
         {hasValidLicense ? (
