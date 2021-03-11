@@ -16,7 +16,7 @@ import { IndexPatternsHandlerContext } from './index_patterns';
  */
 export interface DataRequestHandlerContext extends RequestHandlerContext {
   search: SearchRequestHandlerContext;
-  indexPatterns: IndexPatternsHandlerContext;
+  indexPatterns?: IndexPatternsHandlerContext;
 }
 
 export type DataPluginRouter = IRouter<DataRequestHandlerContext>;

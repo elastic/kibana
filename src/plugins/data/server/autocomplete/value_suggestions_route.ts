@@ -46,6 +46,10 @@ export function registerValueSuggestionsRoute(
       const { index } = request.params;
       const signal = getRequestAbortedSignal(request.events.aborted$);
 
+      if (!context.indexPatterns) {
+        return response.badRequest();
+      }
+
       const autocompleteSearchOptions = {
         timeout: `${config.kibana.autocompleteTimeout.asMilliseconds()}ms`,
         terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),

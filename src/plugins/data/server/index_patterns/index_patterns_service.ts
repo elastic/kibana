@@ -36,6 +36,7 @@ export interface IndexPatternsServiceStart {
 
 export interface IndexPatternsServiceSetupDeps {
   expressions: ExpressionsServerSetup;
+  logger: Logger;
 }
 
 export interface IndexPatternsServiceStartDeps {
@@ -46,7 +47,7 @@ export interface IndexPatternsServiceStartDeps {
 export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { expressions }: IndexPatternsServiceSetupDeps
+    { logger, expressions }: IndexPatternsServiceSetupDeps
   ) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -55,10 +56,15 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
       'indexPatterns',
       async (context, request) => {
         const [coreStart, , dataStart] = await core.getStartServices();
-        return await dataStart.indexPatterns.indexPatternsServiceFactory(
-          coreStart.savedObjects.getScopedClient(request),
-          coreStart.elasticsearch.client.asScoped(request).asCurrentUser
-        );
+        try {
+          return await dataStart.indexPatterns.indexPatternsServiceFactory(
+            coreStart.savedObjects.getScopedClient(request),
+            coreStart.elasticsearch.client.asScoped(request).asCurrentUser
+          );
+        } catch (e) {
+          logger.error(e);
+          return undefined;
+        }
       }
     );
 
