@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 
-import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../plugins/case/common/constants';
+import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../plugins/cases/common/constants';
 import {
   postCaseReq,
   defaultUser,
@@ -28,7 +28,7 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
-import { CaseStatuses } from '../../../../../plugins/case/common/api';
+import { CaseStatuses } from '../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

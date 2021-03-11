@@ -7,7 +7,7 @@
 
 import { roleHasScopedEngines } from './';
 
-describe('roleHasScopedEngines()', () => {
+describe('roleHasScopedEngines', () => {
   it('returns false for owner and admin roles', () => {
     expect(roleHasScopedEngines('owner')).toEqual(false);
     expect(roleHasScopedEngines('admin')).toEqual(false);

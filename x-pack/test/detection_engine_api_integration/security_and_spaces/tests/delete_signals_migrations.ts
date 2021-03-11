@@ -35,7 +35,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('deleting signals migrations', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/94367
+  describe.skip('deleting signals migrations', () => {
     let outdatedSignalsIndexName: string;
     let createdMigration: CreateResponse;
     let finalizedMigration: FinalizeResponse;
