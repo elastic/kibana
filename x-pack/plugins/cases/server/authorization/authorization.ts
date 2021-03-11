@@ -117,8 +117,23 @@ export class Authorization {
       }
 
       if (hasAllRequested) {
-        // TODO: log success
+        // TODO: user authorized. log success
+      } else {
+        const authorizedPrivileges = privileges.kibana.reduce<string[]>((acc, privilege) => {
+          if (privilege.authorized) {
+            return [...acc, privilege.privilege];
+          }
+          return acc;
+        }, []);
+
+        const unauthorizedPrivilages = requiredPrivileges.filter(
+          (privilege) => !authorizedPrivileges.includes(privilege)
+        );
+
+        // TODO: User unauthorized. throw an error. authorizedPrivileges & unauthorizedPrivilages are needed for logging.
       }
+    } else if (!areAllClassAvailable) {
+      // TODO: throw an error
     }
   }
 }
