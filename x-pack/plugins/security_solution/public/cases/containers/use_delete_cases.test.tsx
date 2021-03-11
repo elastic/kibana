@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { CaseType } from '../../../../case/common/api';
+import { CaseType } from '../../../../cases/common/api';
 import { useDeleteCases, UseDeleteCase } from './use_delete_cases';
 import * as api from './api';
 

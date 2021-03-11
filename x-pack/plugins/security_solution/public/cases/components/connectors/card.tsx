@@ -10,7 +10,7 @@ import { EuiCard, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { connectorsConfiguration } from '.';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
 
 interface ConnectorCardProps {
   connectorType: ConnectorTypes;

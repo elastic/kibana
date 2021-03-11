@@ -34,6 +34,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_index_patterns_empty'));
       loadTestFile(require.resolve('./_scripted_fields'));
       loadTestFile(require.resolve('./_runtime_fields'));
+      loadTestFile(require.resolve('./_field_formatter'));
     });
 
     describe('', function () {
