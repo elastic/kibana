@@ -9,10 +9,14 @@
 import Stream, { PassThrough, Readable, Writable, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
-import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
+import {
+  createConcatStream,
+  createListStream,
+  createPromiseFromStreams,
+  kibanaPackageJson,
+} from '@kbn/utils';
 
 import { createParseArchiveStreams } from './parse';
-import { version as kibanaPackageVersion } from '../../../../../package.json';
 
 describe('esArchiver createParseArchiveStreams', () => {
   describe('{ gzip: false }', () => {
@@ -63,7 +67,7 @@ describe('esArchiver createParseArchiveStreams', () => {
           ]),
           ...createParseArchiveStreams({ gzip: false }),
         ]);
-        return expect(output).toEqual({ [kibanaPackageVersion]: 'enabled' });
+        return expect(output).toEqual({ [kibanaPackageJson.version]: 'enabled' });
       });
 
       it('provides each JSON object as soon as it is parsed', async () => {
@@ -149,6 +153,18 @@ describe('esArchiver createParseArchiveStreams', () => {
         ] as [Readable, ...Writable[]]);
 
         expect(output).toEqual([{ a: 1 }, { a: 2 }]);
+      });
+
+      it('replaces $KIBANA_PACKAGE_VERSION with the current kibana version', async () => {
+        const output = await createPromiseFromStreams([
+          createListStream([
+            Buffer.from('{'),
+            Buffer.from('"$KIBANA_PACKAGE_VERSION": "enabled"}'),
+          ]),
+          createGzip(),
+          ...createParseArchiveStreams({ gzip: true }),
+        ]);
+        return expect(output).toEqual({ [kibanaPackageJson.version]: 'enabled' });
       });
     });
 
