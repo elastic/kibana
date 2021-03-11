@@ -383,23 +383,7 @@ xpack.security.authc.providers:
 
 One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it. If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
 
-If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding, then you will need to add the `auth_provider_hint=<anonymous-provider-name>` query string parameter to the {kib} URL that you're embedding.
-
-For example, if you generate the iframe code to embed {kib}, it will look like this:
-
-```html
-<iframe src="https://localhost:5601/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?embed=true&_g=(....)" height="600" width="800"></iframe>
-```
-
-To make this iframe leverage anonymous access automatically, you will need to modify a link to {kib} in the `src` iframe attribute to look like this:
-
-```html
-<iframe src="https://localhost:5601/app/dashboards?auth_provider_hint=anonymous1#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?embed=true&_g=(....)" height="600" width="800"></iframe>
-```
-
-Note that `auth_provider_hint` query string parameter goes *before* the hash URL fragment.
-
-For more information, refer to <<embedding, Embed {kib} content in a web page>>.
+If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding, then you will need to manually modify the {kib} URL in the iframe code. For more information, refer to <<embedding, Embed {kib} content in a web page>>.
 
 [[http-authentication]]
 ==== HTTP authentication
