@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { createContext } from 'react';
+import React, { createContext, useContext } from 'react';
+import { IBasePath } from 'kibana/public';
 
 export interface Context {
   isCloudEnabled: boolean;
+  basePath: IBasePath;
 }
 
 export const AppContext = createContext<Context>({} as any);
@@ -21,4 +23,11 @@ export const AppContextProvider = ({
   context: Context;
 }) => {
   return <AppContext.Provider value={context}>{children}</AppContext.Provider>;
+};
+
+export const useAppContext = () => {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('Cannot use outside of app context');
+
+  return ctx;
 };
