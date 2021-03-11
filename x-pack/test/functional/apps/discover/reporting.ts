@@ -17,6 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker']);
   const filterBar = getService('filterBar');
 
+  const setFieldsFromSource = async (setValue: boolean) => {
+    await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
+  };
+
   describe('Discover', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
@@ -67,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
-      it('generates a report with data', async () => {
+      it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.reporting.setTimepickerInDataRange();
         await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
@@ -80,6 +84,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
         expectSnapshot(res.text).toMatch();
+      });
+
+      it('generates a report from a new search with data: discover:searchFieldsFromSource', async () => {
+        await setFieldsFromSource(true);
+        await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.reporting.setTimepickerInDataRange();
+        await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
+        await PageObjects.reporting.openCsvReportingPanel();
+        await PageObjects.reporting.clickGenerateReportButton();
+
+        const url = await PageObjects.reporting.getReportURL(60000);
+        const res = await PageObjects.reporting.getResponse(url);
+
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+        expectSnapshot(res.text).toMatch();
+        await setFieldsFromSource(false);
       });
 
       it('generates a report with no data', async () => {
@@ -156,11 +177,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
 
-        await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': true });
+        await setFieldsFromSource(true);
         await browser.refresh();
 
         const { text } = await getReport();
         expectSnapshot(text).toMatch();
+        await setFieldsFromSource(false);
       });
     });
   });

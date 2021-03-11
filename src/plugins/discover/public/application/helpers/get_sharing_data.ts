@@ -38,8 +38,6 @@ export async function getSharingData(
   searchSource.removeField('size');
 
   // fields get re-set to match the saved search columns
-  searchSource.removeField('fields');
-  searchSource.removeField('fieldsFromSource');
   let columns = state.columns || [];
 
   // NOTE: A newly saved search with no columns selected will return a
@@ -48,15 +46,16 @@ export async function getSharingData(
     columns = [];
   }
 
-  // conditionally add the time field column
-  let timeFieldName: string | undefined;
-  const hideTimeColumn = config.get(DOC_HIDE_TIME_COLUMN_SETTING);
-  if (!hideTimeColumn && index && index.timeFieldName) {
-    timeFieldName = index.timeFieldName;
-  }
-
-  if (columns && columns.length > 0 && timeFieldName) {
-    columns = [timeFieldName, ...columns];
+  if (columns && columns.length > 0) {
+    // conditionally add the time field column:
+    let timeFieldName: string | undefined;
+    const hideTimeColumn = config.get(DOC_HIDE_TIME_COLUMN_SETTING);
+    if (!hideTimeColumn && index && index.timeFieldName) {
+      timeFieldName = index.timeFieldName;
+    }
+    if (timeFieldName) {
+      columns = [timeFieldName, ...columns];
+    }
   }
 
   // if search source uses fieldsFromSource, set that
@@ -68,11 +67,6 @@ export async function getSharingData(
     searchSource: searchSource.getSerializedFields(true),
   };
 }
-
-/**
- * makes getSharingData lazy loadable
- */
-export function getSharingDataModule() {}
 
 export interface DiscoverCapabilities {
   createShortUrl?: boolean;
