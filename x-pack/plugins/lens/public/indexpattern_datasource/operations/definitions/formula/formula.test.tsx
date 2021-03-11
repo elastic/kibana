@@ -9,6 +9,7 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { formulaOperation, GenericOperationDefinition, IndexPatternColumn } from '../index';
 import { FormulaIndexPatternColumn, regenerateLayerFromAst } from './formula';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
+import { tinymathFunctions } from './util';
 
 jest.mock('../../layer_helpers', () => {
   return {
@@ -396,6 +397,16 @@ describe('formula', () => {
       const formula = 'moving_average(avg(bytes), window=7, window=3)';
       testIsBrokenFormula(formula);
     });
+
+    it('returns error if a math operation has less arguments than required', () => {
+      const formula = 'pow(5)';
+      testIsBrokenFormula(formula);
+    });
+
+    it('returns error if a math operation has the wrong argument type', () => {
+      const formula = 'pow(bytes)';
+      testIsBrokenFormula(formula);
+    });
   });
 
   describe('getErrorMessage', () => {
@@ -511,7 +522,7 @@ describe('formula', () => {
           indexPattern,
           operationDefinitionMap
         )
-      ).toEqual([`Math operations are allowed between operations, not fields`]);
+      ).toEqual([`The operation add does not accept any field as argument`]);
     });
 
     it('returns an error if parsing a syntax invalid formula', () => {
@@ -739,5 +750,56 @@ describe('formula', () => {
         ).toEqual(undefined);
       }
     });
+
+    // there are 4 types of errors for math functions:
+    // * no argument passed
+    // * too many arguments passed
+    // * field passed
+    // * missing argument
+    const errors = [
+      (operation: string) =>
+        `The first argument for ${operation} should be a operation name. Found ()`,
+      (operation: string) => `The operation ${operation} has too many arguments`,
+      (operation: string) => `The operation ${operation} does not accept any field as argument`,
+      (operation: string) => {
+        const required = tinymathFunctions[operation].positionalArguments.filter(
+          ({ optional }) => !optional
+        );
+        return `The operation ${operation} in the Formula is missing ${
+          required.length - 1
+        } arguments: ${required
+          .slice(1)
+          .map(({ name }) => name)
+          .join(', ')}`;
+      },
+    ];
+    // we'll try to map all of these here in this test
+    for (const fn of Object.keys(tinymathFunctions)) {
+      it(`returns an error for the math functions available: ${fn}`, () => {
+        const nArgs = tinymathFunctions[fn].positionalArguments;
+        // start with the first 3 types
+        const formulas = [
+          `${fn}()`,
+          `${fn}(1, 2, 3, 4, 5)`,
+          // to simplify a bit, add the required number of args by the function filled with the field name
+          `${fn}(${Array(nArgs.length).fill('bytes').join(', ')})`,
+        ];
+        // add the fourth check only for those functions with more than 1 arg required
+        const enableFourthCheck = nArgs.filter(({ optional }) => !optional).length > 1;
+        if (enableFourthCheck) {
+          formulas.push(`${fn}(1)`);
+        }
+        formulas.forEach((formula, i) => {
+          expect(
+            formulaOperation.getErrorMessage!(
+              getNewLayerWithFormula(formula),
+              'col1',
+              indexPattern,
+              operationDefinitionMap
+            )
+          ).toEqual([errors[i](fn)]);
+        });
+      });
+    }
   });
 });

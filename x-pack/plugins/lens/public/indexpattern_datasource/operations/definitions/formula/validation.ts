@@ -25,21 +25,43 @@ import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import type { TinymathNodeTypes } from './types';
 
 const validationErrors = {
-  missingField: 'missing field',
-  missingOperation: 'missing operation',
-  missingParameter: 'missing parameter',
-  wrongTypeParameter: 'wrong type parameter',
-  wrongFirstArgument: 'wrong first argument',
-  cannotAcceptParameter: 'cannot accept parameter',
-  shouldNotHaveField: 'operation should not have field',
-  tooManyArguments: 'too many arguments',
-  fieldWithNoOperation: 'unexpected field with no operation',
-  failedParsing: 'Failed to parse expression.', // note: this string comes from Tinymath, do not change it
-  duplicateArgument: 'duplicate argument',
+  missingField: { message: 'missing field', type: { variablesLength: 1, variablesList: 'string' } },
+  missingOperation: {
+    message: 'missing operation',
+    type: { operationLength: 1, operationsList: 'string' },
+  },
+  missingParameter: {
+    message: 'missing parameter',
+    type: { operation: 'string', params: 'string' },
+  },
+  wrongTypeParameter: {
+    message: 'wrong type parameter',
+    type: { operation: 'string', params: 'string' },
+  },
+  wrongFirstArgument: {
+    message: 'wrong first argument',
+    type: { operation: 'string', type: 'string', argument: 'any' as string | number },
+  },
+  cannotAcceptParameter: { message: 'cannot accept parameter', type: { operation: 'string' } },
+  shouldNotHaveField: { message: 'operation should not have field', type: { operation: 'string' } },
+  tooManyArguments: { message: 'too many arguments', type: { operation: 'string' } },
+  fieldWithNoOperation: {
+    message: 'unexpected field with no operation',
+    type: { field: 'string' },
+  },
+  failedParsing: { message: 'Failed to parse expression', type: { expression: 'string' } },
+  duplicateArgument: {
+    message: 'duplicate argument',
+    type: { operation: 'string', params: 'string' },
+  },
+  missingMathArgument: {
+    message: 'missing math argument',
+    type: { operation: 'string', count: 1, params: 'string' },
+  },
 };
-export const errorsLookup = new Set(Object.values(validationErrors));
-
+export const errorsLookup = new Set(Object.values(validationErrors).map(({ message }) => message));
 type ErrorTypes = keyof typeof validationErrors;
+type ErrorValues<K extends ErrorTypes> = typeof validationErrors[K]['type'];
 
 export interface ErrorWrapper {
   message: string;
@@ -47,16 +69,16 @@ export interface ErrorWrapper {
 }
 
 export function isParsingError(message: string) {
-  return message.includes(validationErrors.failedParsing);
+  return message.includes(validationErrors.failedParsing.message);
 }
 
-function getMessageFromId({
+function getMessageFromId<K extends ErrorTypes>({
   messageId,
   values,
   locations,
 }: {
-  messageId: ErrorTypes;
-  values: Record<string, string | number>;
+  messageId: K;
+  values: ErrorValues<K>;
   locations: TinymathLocation[];
 }): ErrorWrapper {
   let message: string;
@@ -129,7 +151,14 @@ function getMessageFromId({
       break;
     case 'tooManyArguments':
       message = i18n.translate('xpack.lens.indexPattern.formulaWithTooManyArguments', {
-        defaultMessage: 'The formula {expression} has too many arguments',
+        defaultMessage: 'The operation {operation} has too many arguments',
+        values,
+      });
+      break;
+    case 'missingMathArgument':
+      message = i18n.translate('xpack.lens.indexPattern.formulaMathMissingArgument', {
+        defaultMessage:
+          'The operation {operation} in the Formula is missing {count} arguments: {params}',
         values,
       });
       break;
@@ -508,7 +537,8 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
   mathNodes.forEach((node: TinymathFunction) => {
     const { positionalArguments } = tinymathFunctions[node.name];
     if (!node.args.length) {
-      errors.push(
+      // we can stop here
+      return errors.push(
         getMessageFromId({
           messageId: 'wrongFirstArgument',
           values: {
@@ -533,47 +563,43 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
       );
     }
 
-    positionalArguments.forEach((requirements, index) => {
+    // no need to iterate all the arguments, one field is anough to trigger the error
+    const hasFieldAsArgument = positionalArguments.some((requirements, index) => {
       const arg = node.args[index];
-      if (requirements.type === 'number' && typeof arg !== 'number') {
-        errors.push(
-          getMessageFromId({
-            messageId: 'wrongTypeParameter',
-            values: {
-              operation: node.name,
-              params: getValueOrName(arg),
-            },
-            locations: [node.location],
-          })
-        );
-      }
-
-      if (isObject(arg) && arg.type === 'variable' && !missingVariableSet.has(arg.value)) {
-        errors.push(
-          getMessageFromId({
-            messageId: 'shouldNotHaveField',
-            values: {
-              operation: node.name,
-              params: getValueOrName(arg),
-            },
-            locations: [node.location],
-          })
-        );
-      }
-
-      if (requirements.type === 'function' && !isObject(arg)) {
-        errors.push(
-          getMessageFromId({
-            messageId: 'wrongTypeParameter',
-            values: {
-              operation: node.name,
-              params: getValueOrName(arg),
-            },
-            locations: [node.location],
-          })
-        );
+      if (arg != null && typeof arg !== 'number') {
+        return arg.type === 'variable' && !missingVariableSet.has(arg.value);
       }
     });
+    if (hasFieldAsArgument) {
+      errors.push(
+        getMessageFromId({
+          messageId: 'shouldNotHaveField',
+          values: {
+            operation: node.name,
+          },
+          locations: [node.location],
+        })
+      );
+    }
+
+    const mandatoryArguments = positionalArguments.filter(({ optional }) => !optional);
+    // if there is only 1 mandatory arg, this is already handled by the wrongFirstArgument check
+    if (mandatoryArguments.length > 1 && node.args.length < mandatoryArguments.length) {
+      const missingArgs = positionalArguments.filter(
+        ({ name, optional }, i) => !optional && node.args[i] == null
+      );
+      errors.push(
+        getMessageFromId({
+          messageId: 'missingMathArgument',
+          values: {
+            operation: node.name,
+            count: mandatoryArguments.length - node.args.length,
+            params: missingArgs.map(({ name }) => name).join(', '),
+          },
+          locations: [node.location],
+        })
+      );
+    }
   });
   return errors;
 }
