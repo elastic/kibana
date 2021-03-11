@@ -35,11 +35,15 @@ APM queries can be handy for removing noise from your data in the <<services,Ser
 <<errors,Errors>>, <<metrics,Metrics>>, and <<traces,Traces>> views.
 
 For example, in the *Services* view, you can quickly view a list of all the instrumented services running on your production
-environment: `service.environment : production` and expand the query by including the name of the programming language used:
-`service.environment : production and service.language.name: "Java"`.
+environment: `service.environment : production`. Or filter the list by including the APM agent's name and the host it’s running on:
+`service.environment : "production" and agent.name : "java" and host.name : "prod-server1"`.
+
+On the *Traces* view, you might want to view failed transaction results from any of your running containers:
+`transaction.result :"FAILURE" and container.id : *`.
 
 On the *Transactions* view, you may want to list only the slower transactions than a specified time threshold: `transaction.duration.us > 2000000`.
-Or on the *Errors* view, filter by a response status code: `http.response.status_code : 404`.
+Or filter the list it by including the service version and the Kubernetes pod it's running on:
+`transaction.duration.us > 2000000 and service.version : "7.12.0" and kubernetes.pod.name : "pod-5468b47f57-pqk2m"`.
 
 [float]
 [[discover-advanced-queries]]
