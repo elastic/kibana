@@ -24,6 +24,7 @@ import {
   ModuleDatafeed,
   ModuleJob,
   Module,
+  FileBasedModule,
   Logo,
   JobOverride,
   DatafeedOverride,
@@ -62,16 +63,6 @@ export const SAVED_OBJECT_TYPES = {
   SEARCH: 'search',
   VISUALIZATION: 'visualization',
 };
-
-interface FileBasedModule extends Omit<Module, 'jobs' | 'datafeeds' | 'kibana'> {
-  jobs: Array<{ file: string; id: string }>;
-  datafeeds: Array<{ file: string; job_id: string; id: string }>;
-  kibana: {
-    search: Array<{ file: string; id: string }>;
-    visualization: Array<{ file: string; id: string }>;
-    dashboard: Array<{ file: string; id: string }>;
-  };
-}
 
 function isModule(arg: unknown): arg is Module {
   return isPopulatedObject(arg) && Array.isArray(arg.jobs) && arg.jobs[0]?.config !== undefined;
@@ -312,7 +303,9 @@ export class DataRecognizer {
         configs.push(await this.getModule(config.module.id));
       }
     }
-    return configs;
+    // casting return as Module[] so not to break external plugins who rely on this function
+    // once FileBasedModules are removed this function will only deal with Modules
+    return configs as Module[];
   }
 
   // called externally by an endpoint

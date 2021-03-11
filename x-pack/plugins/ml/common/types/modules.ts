@@ -58,6 +58,16 @@ export interface Module {
   kibana: KibanaObjects;
 }
 
+export interface FileBasedModule extends Omit<Module, 'jobs' | 'datafeeds' | 'kibana'> {
+  jobs: Array<{ file: string; id: string }>;
+  datafeeds: Array<{ file: string; job_id: string; id: string }>;
+  kibana: {
+    search: Array<{ file: string; id: string }>;
+    visualization: Array<{ file: string; id: string }>;
+    dashboard: Array<{ file: string; id: string }>;
+  };
+}
+
 export type Logo = { icon: string } | null;
 
 export interface ResultItem {
