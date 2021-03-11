@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
 export { EditorController, TSVB_EDITOR_NAME } from './editor_controller';
 export * from './lib';
