@@ -37,7 +37,6 @@ import { Role } from '../../types';
 import {
   ADMIN_ROLE_TYPE_DESCRIPTION,
   USER_ROLE_TYPE_DESCRIPTION,
-  ROLE_SELECTOR_DISABLED_TEXT,
   GROUP_ASSIGNMENT_TITLE,
   GROUP_ASSIGNMENT_INVALID_ERROR,
   GROUP_ASSIGNMENT_ALL_GROUPS_LABEL,
@@ -86,7 +85,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
     elasticsearchRoles,
     dataLoading,
     roleType,
-    roleMappings,
     attributeValue,
     attributeName,
     availableGroups,
@@ -119,11 +117,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
     <EuiButton disabled={!hasGroupAssignment} onClick={handleSaveMapping} fill>
       {SAVE_ROLE_MAPPING_LABEL}
     </EuiButton>
-  );
-
-  const hasAdminRoleMapping = roleMappings.some(
-    ({ roleType: roleMappingRoleType }: { roleType: string }) =>
-      roleMappingRoleType === ('admin' as string)
   );
 
   return (
@@ -160,8 +153,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
                   onChange={handleRoleChange}
                   roleTypeOption={type}
                   description={description}
-                  disabled={!(type === 'admin' || hasAdminRoleMapping)}
-                  disabledText={ROLE_SELECTOR_DISABLED_TEXT}
                 />
               ))}
             </EuiPanel>

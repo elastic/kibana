@@ -27,8 +27,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 93,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L93"
+              "lineNumber": 93
             },
             "signature": [
               "() => any"
@@ -42,8 +41,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/monitoring/server/types.ts",
-              "lineNumber": 94,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L94"
+              "lineNumber": 94
             },
             "signature": [
               "() => void"
@@ -52,8 +50,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/monitoring/server/types.ts",
-          "lineNumber": 92,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L92"
+          "lineNumber": 92
         },
         "initialIsOpen": false
       }
@@ -68,8 +65,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts",
-          "lineNumber": 53,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/kibana_monitoring/collectors/get_settings_collector.ts#L53"
+          "lineNumber": 53
         },
         "signature": [
           "Collector<EmailSettingData | undefined, {}> & KibanaSettingsCollectorExtraOptions"
@@ -84,8 +80,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/monitoring/server/config.ts",
-          "lineNumber": 92,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/config.ts#L92"
+          "lineNumber": 92
         },
         "signature": [
           "{ ui: { elasticsearch: MonitoringElasticsearchConfig; enabled: boolean; logs: Readonly<{} & { index: string; }>; container: Readonly<{} & { logstash: Readonly<{} & { enabled: boolean; }>; elasticsearch: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; }>; ccs: Readonly<{} & { enabled: boolean; }>; metricbeat: Readonly<{} & { index: string; }>; max_bucket_size: number; min_interval_seconds: number; show_license_expiration: boolean; }; enabled: boolean; kibana: Readonly<{} & { collection: Readonly<{} & { enabled: boolean; interval: number; }>; }>; cluster_alerts: Readonly<{} & { enabled: boolean; email_notifications: Readonly<{} & { enabled: boolean; email_address: string; }>; }>; licensing: Readonly<{} & { api_polling_frequency: ",
@@ -111,8 +106,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/monitoring/server/types.ts",
-            "lineNumber": 98,
-            "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L98"
+            "lineNumber": 98
           },
           "signature": [
             "() => any"
@@ -121,8 +115,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/monitoring/server/types.ts",
-        "lineNumber": 97,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/monitoring/server/types.ts#L97"
+        "lineNumber": 97
       },
       "lifecycle": "setup",
       "initialIsOpen": true

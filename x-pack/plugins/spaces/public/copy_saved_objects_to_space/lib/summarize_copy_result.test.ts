@@ -11,8 +11,8 @@ import type {
   SavedObjectsManagementRecord,
 } from 'src/plugins/saved_objects_management/public';
 
-import { summarizeCopyResult } from './summarize_copy_result';
 import type { SavedObjectTarget } from '../types';
+import { summarizeCopyResult } from './summarize_copy_result';
 
 // Sample data references:
 //

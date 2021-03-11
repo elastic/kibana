@@ -16,6 +16,7 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_TITLE,
   FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
   FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
+  FIELDS_BROWSER_FILTER_INPUT,
 } from '../../screens/fields_browser';
 import { TIMELINE_FIELDS_BUTTON } from '../../screens/timeline';
 import { cleanKibana } from '../../tasks/common';
@@ -194,7 +195,7 @@ describe('Fields Browser', () => {
 
     it('restores focus to the Customize Columns button when Esc is pressed', () => {
       openTimelineFieldsBrowser();
-      cy.get('body').type('{esc}');
+      cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{esc}');
 
       cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
     });

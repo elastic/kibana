@@ -26,6 +26,7 @@ import {
   EuiHealth,
   EuiText,
   EuiToolTip,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -54,7 +55,7 @@ import {
   AlertExecutionStatusValues,
   ALERTS_FEATURE_ID,
   AlertExecutionStatusErrorReasons,
-} from '../../../../../../alerts/common';
+} from '../../../../../../alerting/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -99,6 +100,10 @@ export const AlertsList: React.FunctionComponent = () => {
   const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
   const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
+  const [sort, setSort] = useState<EuiTableSortingType<AlertTableItem>['sort']>({
+    field: 'name',
+    direction: 'asc',
+  });
   const [manageLicenseModalOpts, setManageLicenseModalOpts] = useState<{
     licenseType: string;
     alertTypeId: string;
@@ -194,6 +199,7 @@ export const AlertsList: React.FunctionComponent = () => {
           typesFilter,
           actionTypesFilter,
           alertStatusesFilter,
+          sort,
         });
         await loadAlertAggs();
         setAlertsState({
@@ -307,7 +313,7 @@ export const AlertsList: React.FunctionComponent = () => {
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle',
         { defaultMessage: 'Name' }
       ),
-      sortable: false,
+      sortable: true,
       truncateText: true,
       width: '35%',
       'data-test-subj': 'alertsTableCell-name',
@@ -325,17 +331,17 @@ export const AlertsList: React.FunctionComponent = () => {
       },
     },
     {
-      field: 'executionStatus',
+      field: 'executionStatus.status',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
         { defaultMessage: 'Status' }
       ),
-      sortable: false,
+      sortable: true,
       truncateText: false,
       width: '150px',
       'data-test-subj': 'alertsTableCell-status',
       render: (executionStatus: AlertExecutionStatus, item: AlertTableItem) => {
-        return renderAlertExecutionStatus(executionStatus, item);
+        return renderAlertExecutionStatus(item.executionStatus, item);
       },
     },
     {
@@ -348,9 +354,9 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-tagsText',
     },
     {
-      field: 'actionsText',
+      field: 'actionsCount',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsCount',
         { defaultMessage: 'Actions' }
       ),
       render: (count: number, item: AlertTableItem) => {
@@ -361,7 +367,7 @@ export const AlertsList: React.FunctionComponent = () => {
         );
       },
       sortable: false,
-      'data-test-subj': 'alertsTableCell-actionsText',
+      'data-test-subj': 'alertsTableCell-actionsCount',
     },
     {
       field: 'alertType',
@@ -655,6 +661,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }
         itemId="id"
         columns={alertsTableColumns}
+        sorting={{ sort }}
         rowProps={(item: AlertTableItem) => ({
           'data-test-subj': 'alert-row',
           className: !alertTypesState.data.get(item.alertTypeId)?.enabledInLicense
@@ -680,8 +687,19 @@ export const AlertsList: React.FunctionComponent = () => {
             setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
           },
         }}
-        onChange={({ page: changedPage }: { page: Pagination }) => {
-          setPage(changedPage);
+        onChange={({
+          page: changedPage,
+          sort: changedSort,
+        }: {
+          page?: Pagination;
+          sort?: EuiTableSortingType<AlertTableItem>['sort'];
+        }) => {
+          if (changedPage) {
+            setPage(changedPage);
+          }
+          if (changedSort) {
+            setSort(changedSort);
+          }
         }}
       />
       {manageLicenseModalOpts && (
@@ -797,7 +815,7 @@ function convertAlertsToTableItems(
 ) {
   return alerts.map((alert) => ({
     ...alert,
-    actionsText: alert.actions.length,
+    actionsCount: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
     isEditable:

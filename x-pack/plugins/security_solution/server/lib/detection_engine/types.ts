@@ -53,7 +53,7 @@ import {
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
 import { Filter } from '../../../../../../src/plugins/data/server';
 import { ListArrayOrUndefined } from '../../../common/detection_engine/schemas/types';
-import { AlertTypeParams } from '../../../../alerts/common';
+import { AlertTypeParams } from '../../../../alerting/common';
 
 export type PartialFilter = Partial<Filter>;
 

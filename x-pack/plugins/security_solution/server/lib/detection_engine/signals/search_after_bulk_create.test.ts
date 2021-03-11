@@ -18,7 +18,7 @@ import {
 import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { buildRuleMessageFactory } from './rule_messages';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
 import { listMock } from '../../../../../lists/server/mocks';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';

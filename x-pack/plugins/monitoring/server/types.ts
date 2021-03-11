@@ -19,11 +19,11 @@ import type {
   PluginStartContract as ActionsPluginsStartContact,
   ActionsApiRequestHandlerContext,
 } from '../../actions/server';
-import type { AlertingApiRequestHandlerContext } from '../../alerts/server';
+import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerts/server';
+} from '../../alerting/server';
 import { InfraPluginSetup } from '../../infra/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
@@ -49,7 +49,7 @@ export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
-  alerts?: AlertingPluginSetupContract;
+  alerting?: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
   cloud?: CloudSetup;
 }
@@ -60,7 +60,7 @@ export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerCon
 }
 
 export interface PluginsStart {
-  alerts: AlertingPluginStartContract;
+  alerting: AlertingPluginStartContract;
   actions: ActionsPluginsStartContact;
 }
 

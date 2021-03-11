@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
 import {
   FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -99,10 +99,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-        params:
-          previousColumn && previousColumn.dataType === 'number'
-            ? previousColumn.params
-            : undefined,
+        params: getFormatFromPreviousColumn(previousColumn),
       } as T),
     onFieldChange: (oldColumn, field) => {
       return {

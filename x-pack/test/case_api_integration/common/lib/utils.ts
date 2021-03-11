@@ -10,7 +10,7 @@ import { Client } from '@elastic/elasticsearch';
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Explanation, SearchResponse } from 'elasticsearch';
-import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/case/common/constants';
+import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/cases/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
@@ -22,10 +22,10 @@ import {
   CaseStatuses,
   SubCasesResponse,
   CasesResponse,
-} from '../../../../plugins/case/common/api';
+} from '../../../../plugins/cases/common/api';
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getSubCasesUrl } from '../../../../plugins/case/common/api/helpers';
-import { ContextTypeGeneratedAlertType } from '../../../../plugins/case/server/connectors';
+import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
+import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 
 interface Hit<T> {

@@ -14,7 +14,7 @@ import type { SpacesContextProps } from 'src/plugins/spaces_oss/public';
 import type { SpacesManager } from '../spaces_manager';
 import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
 import { createSpacesReactContext } from './context';
-import type { SpacesReactContext, InternalProps } from './types';
+import type { InternalProps, SpacesReactContext } from './types';
 
 interface Services {
   application: ApplicationStart;
