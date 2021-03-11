@@ -11,7 +11,7 @@ import React, { lazy } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
 
-import { TimeseriesVisParams } from '../../../metrics_fn';
+import { TimeseriesVisParams } from '../../../types';
 import { TimeseriesVisData } from '../../../../common/types';
 
 /**
