@@ -53,12 +53,23 @@ const errorRateTab = {
 const tabs = [latencyTab, errorRateTab];
 
 export function Correlations() {
+  const license = useLicenseContext();
+  const hasActivePlatinumLicense = isActivePlatinumLicense(license);
   const { urlParams } = useUrlParams();
   const history = useHistory();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [currentTab, setCurrentTab] = useState(latencyTab.key);
   const { component: TabContent } =
     tabs.find((tab) => tab.key === currentTab) ?? latencyTab;
+  const metric = {
+    app: 'apm' as const,
+    metric: hasActivePlatinumLicense
+      ? 'correlations_flyout_view'
+      : 'correlations_license_prompt',
+    metricType: METRIC_TYPE.COUNT as METRIC_TYPE.COUNT,
+  };
+  useTrackMetric(metric);
+  useTrackMetric({ ...metric, delay: 15000 });
 
   return (
     <>
@@ -99,49 +110,61 @@ export function Correlations() {
                   />
                 </h2>
               </EuiTitle>
-              <EuiTabs style={{ marginBottom: '-25px' }}>
-                {tabs.map(({ key, label }) => (
-                  <EuiTab
-                    key={key}
-                    isSelected={key === currentTab}
-                    onClick={() => {
-                      setCurrentTab(key);
-                    }}
-                  >
-                    {label}
-                  </EuiTab>
-                ))}
-              </EuiTabs>
+              {hasActivePlatinumLicense && (
+                <EuiTabs style={{ marginBottom: '-25px' }}>
+                  {tabs.map(({ key, label }) => (
+                    <EuiTab
+                      key={key}
+                      isSelected={key === currentTab}
+                      onClick={() => {
+                        setCurrentTab(key);
+                      }}
+                    >
+                      {label}
+                    </EuiTab>
+                  ))}
+                </EuiTabs>
+              )}
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
-              <CorrelationsMetricsLicenseCheck>
-                {urlParams.kuery ? (
-                  <>
-                    <EuiCallOut size="s">
-                      <span>
-                        {i18n.translate(
-                          'xpack.apm.correlations.filteringByLabel',
-                          { defaultMessage: 'Filtering by' }
-                        )}
-                      </span>
-                      <EuiCode>{urlParams.kuery}</EuiCode>
-                      <EuiLink
-                        href={createHref(history, { query: { kuery: '' } })}
-                      >
-                        <EuiButtonEmpty size="xs" iconType="cross">
+              {hasActivePlatinumLicense ? (
+                <>
+                  {urlParams.kuery && (
+                    <>
+                      <EuiCallOut size="s">
+                        <span>
                           {i18n.translate(
-                            'xpack.apm.correlations.clearFiltersLabel',
-                            { defaultMessage: 'Clear' }
+                            'xpack.apm.correlations.filteringByLabel',
+                            { defaultMessage: 'Filtering by' }
                           )}
-                        </EuiButtonEmpty>
-                      </EuiLink>
-                    </EuiCallOut>
-                    <EuiSpacer />
-                  </>
-                ) : null}
-
-                <TabContent onClose={() => setIsFlyoutVisible(false)} />
-              </CorrelationsMetricsLicenseCheck>
+                        </span>
+                        <EuiCode>{urlParams.kuery}</EuiCode>
+                        <EuiLink
+                          href={createHref(history, { query: { kuery: '' } })}
+                        >
+                          <EuiButtonEmpty size="xs" iconType="cross">
+                            {i18n.translate(
+                              'xpack.apm.correlations.clearFiltersLabel',
+                              { defaultMessage: 'Clear' }
+                            )}
+                          </EuiButtonEmpty>
+                        </EuiLink>
+                      </EuiCallOut>
+                      <EuiSpacer />
+                    </>
+                  )}
+                  <TabContent onClose={() => setIsFlyoutVisible(false)} />
+                </>
+              ) : (
+                <LicensePrompt
+                  text={i18n.translate(
+                    'xpack.apm.correlations.licenseCheckText',
+                    {
+                      defaultMessage: `To use correlations, you must be subscribed to an Elastic Platinum license. With it, you'll be able to discover which fields are correlated with poor performance.`,
+                    }
+                  )}
+                />
+              )}
             </EuiFlyoutBody>
           </EuiFlyout>
         </EuiPortal>
