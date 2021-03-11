@@ -117,9 +117,7 @@ export async function persistedStateToExpression(
     };
   }
 
-  const indexPatternValidation = validateRequiredIndexPatterns(
-    datasourceStates[datasourceId].state
-  );
+  const indexPatternValidation = validateRequiredIndexPatterns(datasourceStates[datasourceId]);
 
   if (indexPatternValidation) {
     return {
@@ -177,26 +175,21 @@ export function getMissingIndexPattern(
 const validateRequiredIndexPatterns = (
   currentDatasourceState: unknown | null
 ): ErrorMessage[] | undefined => {
-  if (currentDatasourceState == null) {
+  const missingIds = getMissingIndexPattern(
+    currentDatasourceState as
+      | {
+          isLoading: boolean;
+          state: unknown;
+        }
+      | null
+      | string
+  );
+
+  if (!missingIds.length) {
     return;
   }
-  const dataSourceState = currentDatasourceState as {
-    currentIndexPatternId: string | null;
-    layers: Record<string, { indexPatternId: string }>;
-    indexPatterns: Record<string, unknown>;
-  };
 
-  const missingIds = Object.keys(dataSourceState.layers)
-    .filter((layerId) => {
-      const id = dataSourceState.layers[layerId].indexPatternId;
-      return !dataSourceState.indexPatterns[id];
-    })
-    .map((layerId) => dataSourceState.layers[layerId].indexPatternId);
-  if (missingIds.length) {
-    return [
-      { shortMessage: '', longMessage: getMissingIndexPatterns(missingIds), type: 'fixable' },
-    ];
-  }
+  return [{ shortMessage: '', longMessage: getMissingIndexPatterns(missingIds), type: 'fixable' }];
 };
 
 export const validateDatasourceAndVisualization = (
