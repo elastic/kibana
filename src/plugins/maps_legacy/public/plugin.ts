@@ -29,17 +29,6 @@ import type { IServiceSettings, MapsEmsPluginSetup, MapsEmsConfig } from '../../
  * @public
  */
 
-export const bindSetupCoreAndPlugins = (
-  core: CoreSetup,
-  config: MapsEmsConfig,
-  getServiceSettings: () => Promise<IServiceSettings>
-) => {
-  setToasts(core.notifications.toasts);
-  setUiSettings(core.uiSettings);
-  setMapsEmsConfig(config);
-  setGetServiceSettings(getServiceSettings);
-};
-
 export interface MapsLegacySetupDependencies {
   mapsEms: MapsEmsPluginSetup;
 }
