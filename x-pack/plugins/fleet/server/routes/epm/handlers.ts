@@ -40,12 +40,10 @@ import {
   getPackages,
   getFile,
   getPackageInfo,
-  handleInstallPackageFailure,
   isBulkInstallError,
   installPackage,
   removeInstallation,
   getLimitedPackages,
-  getInstallationObject,
   getInstallation,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
@@ -228,8 +226,6 @@ export const installPackageFromRegistryHandler: RequestHandler<
   const savedObjectsClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { pkgkey } = request.params;
-  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   try {
     const res = await installPackage({
       installSource: 'registry',
@@ -243,17 +239,7 @@ export const installPackageFromRegistryHandler: RequestHandler<
     };
     return response.ok({ body });
   } catch (e) {
-    const defaultResult = await defaultIngestErrorHandler({ error: e, response });
-    await handleInstallPackageFailure({
-      savedObjectsClient,
-      error: e,
-      pkgName,
-      pkgVersion,
-      installedPkg,
-      esClient,
-    });
-
-    return defaultResult;
+    return await defaultIngestErrorHandler({ error: e, response });
   }
 };
 

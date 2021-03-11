@@ -84,9 +84,7 @@ export interface IBulkInstallPackageHTTPError {
 
 export interface BulkInstallPackageInfo {
   name: string;
-  newVersion: string;
-  // this will be null if no package was present before the upgrade (aka it was an install)
-  oldVersion: string | null;
+  version: string;
   assets: AssetReference[];
 }
 

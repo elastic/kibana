@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
-import type { UnwrapPromise } from '@kbn/utility-types';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
@@ -177,64 +175,6 @@ export interface IBulkInstallPackageError {
 }
 export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
 
-interface UpgradePackageParams {
-  savedObjectsClient: SavedObjectsClientContract;
-  esClient: ElasticsearchClient;
-  installedPkg: UnwrapPromise<ReturnType<typeof getInstallationObject>>;
-  latestPkg: UnwrapPromise<ReturnType<typeof Registry.fetchFindLatestPackage>>;
-  pkgToUpgrade: string;
-}
-export async function upgradePackage({
-  savedObjectsClient,
-  esClient,
-  installedPkg,
-  latestPkg,
-  pkgToUpgrade,
-}: UpgradePackageParams): Promise<BulkInstallResponse> {
-  if (!installedPkg || semverGt(latestPkg.version, installedPkg.attributes.version)) {
-    const pkgkey = Registry.pkgToPkgKey({
-      name: latestPkg.name,
-      version: latestPkg.version,
-    });
-
-    try {
-      const assets = await installPackage({
-        installSource: 'registry',
-        savedObjectsClient,
-        pkgkey,
-        esClient,
-      });
-      return {
-        name: pkgToUpgrade,
-        newVersion: latestPkg.version,
-        oldVersion: installedPkg?.attributes.version ?? null,
-        assets,
-      };
-    } catch (installFailed) {
-      await handleInstallPackageFailure({
-        savedObjectsClient,
-        error: installFailed,
-        pkgName: latestPkg.name,
-        pkgVersion: latestPkg.version,
-        installedPkg,
-        esClient,
-      });
-      return { name: pkgToUpgrade, error: installFailed };
-    }
-  } else {
-    // package was already at the latest version
-    return {
-      name: pkgToUpgrade,
-      newVersion: latestPkg.version,
-      oldVersion: latestPkg.version,
-      assets: [
-        ...installedPkg.attributes.installed_es,
-        ...installedPkg.attributes.installed_kibana,
-      ],
-    };
-  }
-}
-
 interface InstallRegistryPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
@@ -250,29 +190,47 @@ async function installPackageFromRegistry({
 }: InstallRegistryPackageParams): Promise<AssetReference[]> {
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
+
   // get the currently installed package
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const installType = getInstallType({ pkgVersion, installedPkg });
-  // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
+
+  // get latest package version
+  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+
+  // let the user install out-of-date package versions if using the force flag or
+  // needing to reinstall or install a previous version due to failed update
   const installOutOfDateVersionOk =
     installType === 'reinstall' || installType === 'reupdate' || installType === 'rollback';
-
-  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-  if (semverLt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
+  if (!force && !installOutOfDateVersionOk && semverLt(pkgVersion, latestPackage.version)) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
 
+  // get package info
   const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
-  return _installPackage({
-    savedObjectsClient,
-    esClient,
-    installedPkg,
-    paths,
-    packageInfo,
-    installType,
-    installSource: 'registry',
-  });
+  // try installing the package, if there was an error, call error handler and rethrow
+  try {
+    return _installPackage({
+      savedObjectsClient,
+      esClient,
+      installedPkg,
+      paths,
+      packageInfo,
+      installType,
+      installSource: 'registry',
+    });
+  } catch (e) {
+    await handleInstallPackageFailure({
+      savedObjectsClient,
+      error: e,
+      pkgName,
+      pkgVersion,
+      installedPkg,
+      esClient,
+    });
+    throw e;
+  }
 }
 
 interface InstallUploadedArchiveParams {
@@ -339,7 +297,6 @@ export async function installPackage(args: InstallPackageParams) {
 
   if (args.installSource === 'registry') {
     const { savedObjectsClient, pkgkey, esClient, force } = args;
-
     return installPackageFromRegistry({
       savedObjectsClient,
       pkgkey,

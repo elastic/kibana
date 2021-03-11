@@ -9,8 +9,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 
 import * as Registry from '../registry';
 
-import { getInstallationObject } from './index';
-import { upgradePackage } from './install';
+import { installPackage } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
@@ -24,41 +23,40 @@ export async function bulkInstallPackages({
   packagesToUpgrade,
   esClient,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
-  const installedAndLatestPromises = packagesToUpgrade.map((pkgToUpgrade) =>
-    Promise.all([
-      getInstallationObject({ savedObjectsClient, pkgName: pkgToUpgrade }),
-      Registry.fetchFindLatestPackage(pkgToUpgrade),
-    ])
+  const latestPackagesResults = await Promise.allSettled(
+    packagesToUpgrade.map((packageName) => Registry.fetchFindLatestPackage(packageName))
   );
-  const installedAndLatestResults = await Promise.allSettled(installedAndLatestPromises);
-  const installResponsePromises = installedAndLatestResults.map(async (result, index) => {
-    const pkgToUpgrade = packagesToUpgrade[index];
-    if (result.status === 'fulfilled') {
-      const [installedPkg, latestPkg] = result.value;
-      return upgradePackage({
-        savedObjectsClient,
-        esClient,
-        installedPkg,
-        latestPkg,
-        pkgToUpgrade,
-      });
-    } else {
-      return { name: pkgToUpgrade, error: result.reason };
-    }
-  });
-  const installResults = await Promise.allSettled(installResponsePromises);
-  const installResponses = installResults.map((result, index) => {
-    const pkgToUpgrade = packagesToUpgrade[index];
-    if (result.status === 'fulfilled') {
-      return result.value;
-    } else {
-      return { name: pkgToUpgrade, error: result.reason };
-    }
-  });
 
-  return installResponses;
+  const installResults = await Promise.allSettled(
+    latestPackagesResults.map(async (result, index) => {
+      const packageName = packagesToUpgrade[index];
+      if (result.status === 'fulfilled') {
+        const latestPackage = result.value;
+        return {
+          name: packageName,
+          version: latestPackage.version,
+          assets: await installPackage({
+            savedObjectsClient,
+            esClient,
+            pkgkey: Registry.pkgToPkgKey(latestPackage),
+            installSource: 'registry',
+          }),
+        };
+      }
+      return { name: packageName, error: result.reason };
+    })
+  );
+
+  return installResults.map((result, index) => {
+    const packageName = packagesToUpgrade[index];
+    return result.status === 'fulfilled'
+      ? result.value
+      : { name: packageName, error: result.reason };
+  });
 }
 
-export function isBulkInstallError(test: any): test is IBulkInstallPackageError {
-  return 'error' in test && test.error instanceof Error;
+export function isBulkInstallError(
+  installResponse: any
+): installResponse is IBulkInstallPackageError {
+  return 'error' in installResponse && installResponse.error instanceof Error;
 }
