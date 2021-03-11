@@ -298,10 +298,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
       this.getSource(),
       this.getCurrentStyle()
     );
+    const source = this.getSource();
     const canSkipFetch = await canSkipSourceUpdate({
-      source: this.getSource(),
+      source,
       prevDataRequest: this.getDataRequest(dataRequestId),
       nextMeta: searchFilters,
+      extentAware: source.isFilterByMapBounds(),
     });
 
     let activeSource;

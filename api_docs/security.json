@@ -445,6 +445,20 @@
             "signature": [
               "number | undefined"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.UserMenuLink.setAsProfile",
+            "type": "CompoundType",
+            "label": "setAsProfile",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
+              "lineNumber": 33
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
           }
         ],
         "source": {
