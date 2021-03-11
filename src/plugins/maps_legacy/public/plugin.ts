@@ -21,7 +21,7 @@ import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
 import { MapsLegacyConfig } from '../config';
 // @ts-ignore
 import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
-import type { IServiceSettings, MapsEmsPluginSetup, MapsEmsConfig } from '../../maps_ems/public';
+import type { MapsEmsPluginSetup } from '../../maps_ems/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
