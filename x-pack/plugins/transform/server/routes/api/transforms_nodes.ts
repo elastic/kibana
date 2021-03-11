@@ -13,6 +13,21 @@ import { addBasePath } from '../index';
 
 import { wrapError, wrapEsError } from './error_utils';
 
+interface NodesAttributes {
+  attributes: {
+    'transform.node': string;
+  };
+}
+
+const isNodesAttributes = (arg: unknown): arg is NodesAttributes => {
+  return (
+    isPopulatedObject(arg) &&
+    {}.hasOwnProperty.call(arg, 'attributes') &&
+    isPopulatedObject(arg.attributes) &&
+    {}.hasOwnProperty.call(arg.attributes, 'transform.node')
+  );
+};
+
 export function registerTransformNodesRoutes({ router, license }: RouteDependencies) {
   /**
    * @apiGroup Transform Nodes
@@ -28,13 +43,15 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
     },
     license.guardApiRoute<undefined, undefined, undefined>(async (ctx, req, res) => {
       try {
-        const { body } = await ctx.core.elasticsearch.client.asInternalUser.nodes.info({
+        const {
+          body: { nodes },
+        } = await ctx.core.elasticsearch.client.asInternalUser.nodes.info({
           filter_path: 'nodes.*.attributes',
         });
 
         let count = 0;
-        if (isPopulatedObject(body.nodes)) {
-          for (const { attributes } of Object.values(body.nodes)) {
+        if (isNodesAttributes(nodes)) {
+          for (const { attributes } of Object.values(nodes)) {
             if (attributes['transform.node'] === 'true') {
               count++;
             }
