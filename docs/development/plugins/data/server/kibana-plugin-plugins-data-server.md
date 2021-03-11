@@ -35,7 +35,7 @@
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
-|  [searchUsageObserver(logger, usage)](./kibana-plugin-plugins-data-server.searchusageobserver.md) | Rxjs observer for easily doing <code>tap(searchUsageObserver(logger, usage))</code> in an rxjs chain. |
+|  [searchUsageObserver(logger, usage, { isRestore })](./kibana-plugin-plugins-data-server.searchusageobserver.md) | Rxjs observer for easily doing <code>tap(searchUsageObserver(logger, usage))</code> in an rxjs chain. |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
 |  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 

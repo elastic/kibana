@@ -9,7 +9,7 @@ Rxjs observer for easily doing `tap(searchUsageObserver(logger, usage))` in an r
 <b>Signature:</b>
 
 ```typescript
-export declare function searchUsageObserver(logger: Logger, usage?: SearchUsage): {
+export declare function searchUsageObserver(logger: Logger, usage?: SearchUsage, { isRestore }?: ISearchOptions): {
     next(response: IEsSearchResponse): void;
     error(): void;
 };
@@ -21,6 +21,7 @@ export declare function searchUsageObserver(logger: Logger, usage?: SearchUsage)
 |  --- | --- | --- |
 |  logger | <code>Logger</code> |  |
 |  usage | <code>SearchUsage</code> |  |
+|  { isRestore } | <code>ISearchOptions</code> |  |
 
 <b>Returns:</b>
 

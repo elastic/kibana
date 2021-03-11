@@ -1350,7 +1350,7 @@ export interface SearchUsage {
 // Warning: (ae-missing-release-tag) "searchUsageObserver" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export function searchUsageObserver(logger: Logger_2, usage?: SearchUsage): {
+export function searchUsageObserver(logger: Logger_2, usage?: SearchUsage, { isRestore }?: ISearchOptions): {
     next(response: IEsSearchResponse): void;
     error(): void;
 };
