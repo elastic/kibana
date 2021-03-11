@@ -15,20 +15,19 @@ import { wrapError, wrapEsError } from './error_utils';
 
 interface NodesAttributes {
   attributes: {
-    'transform.node': string;
+    'transform.node'?: string;
   };
 }
 type Nodes = Record<string, NodesAttributes>;
 
-const isNodes = (arg: unknown): arg is Nodes => {
+export const isNodes = (arg: unknown): arg is Nodes => {
   return (
     isPopulatedObject(arg) &&
     Object.values(arg).every(
       (node) =>
         isPopulatedObject(node) &&
         {}.hasOwnProperty.call(node, 'attributes') &&
-        isPopulatedObject(node.attributes) &&
-        {}.hasOwnProperty.call(node.attributes, 'transform.node')
+        isPopulatedObject(node.attributes)
     )
   );
 };
