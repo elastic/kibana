@@ -8,7 +8,6 @@
 import { getBannerInfoMock } from './plugin.test.mocks';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { BannersPlugin } from './plugin';
-import { BannerClientConfig } from './types';
 
 const nextTick = async () => await new Promise<void>((resolve) => resolve());
 
@@ -28,8 +27,8 @@ describe('BannersPlugin', () => {
     });
   });
 
-  const startPlugin = async (config: BannerClientConfig) => {
-    pluginInitContext = coreMock.createPluginInitializerContext(config);
+  const startPlugin = async () => {
+    pluginInitContext = coreMock.createPluginInitializerContext();
     plugin = new BannersPlugin(pluginInitContext);
     plugin.setup(coreSetup);
     plugin.start(coreStart);
@@ -42,19 +41,9 @@ describe('BannersPlugin', () => {
   });
 
   it('calls `getBannerInfo` if `config.placement !== disabled`', async () => {
-    await startPlugin({
-      placement: 'header',
-    });
+    await startPlugin();
 
     expect(getBannerInfoMock).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not call `getBannerInfo` if `config.placement === disabled`', async () => {
-    await startPlugin({
-      placement: 'disabled',
-    });
-
-    expect(getBannerInfoMock).not.toHaveBeenCalled();
   });
 
   it('registers the header banner if `getBannerInfo` return `allowed=true`', async () => {
@@ -62,9 +51,7 @@ describe('BannersPlugin', () => {
       allowed: true,
     });
 
-    await startPlugin({
-      placement: 'header',
-    });
+    await startPlugin();
 
     expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(1);
     expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledWith({
@@ -77,9 +64,7 @@ describe('BannersPlugin', () => {
       allowed: false,
     });
 
-    await startPlugin({
-      placement: 'header',
-    });
+    await startPlugin();
 
     expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
   });
