@@ -211,7 +211,10 @@ export async function loadInitialState({
   options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
   const { isFullEditor } = options ?? {};
-  const indexPatternRefs = await (isFullEditor ? loadIndexPatternRefs(indexPatternsService) : []);
+  // make it explicit or TS will infer never[] and break few lines down
+  const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
+    ? loadIndexPatternRefs(indexPatternsService)
+    : []);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
 
   const state =
