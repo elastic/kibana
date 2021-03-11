@@ -25,27 +25,22 @@ export interface ConfigurationIssues {
    * See https://github.com/elastic/elasticsearch/blob/master/docs/reference/ilm/actions/ilm-searchable-snapshot.asciidoc.
    */
   isUsingSearchableSnapshotInHotPhase: boolean;
-
-  /**
-   * If this value is true, phases after hot cannot set subsequent shrink, forcemerge, freeze or rollup actions.
-   *
-   * See https://github.com/elastic/elasticsearch/blob/master/docs/reference/ilm/actions/ilm-searchable-snapshot.asciidoc.
-   */
   isUsingSearchableSnapshotInColdPhase: boolean;
 }
 
 const ConfigurationIssuesContext = createContext<ConfigurationIssues>(null as any);
 
-const fieldPaths = {
-  hotPhaseSearchableSnapshot: 'phases.hot.actions.searchable_snapshot.snapshot_repository',
-  coldPhaseSearchableSnapshot: 'phases.cold.actions.searchable_snapshot.snapshot_repository',
-};
+const pathToHotPhaseSearchableSnapshot =
+  'phases.hot.actions.searchable_snapshot.snapshot_repository';
+
+const pathToColdPhaseSearchableSnapshot =
+  'phases.cold.actions.searchable_snapshot.snapshot_repository';
 
 export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData({
     watch: [
-      fieldPaths.hotPhaseSearchableSnapshot,
-      fieldPaths.coldPhaseSearchableSnapshot,
+      pathToHotPhaseSearchableSnapshot,
+      pathToColdPhaseSearchableSnapshot,
       isUsingCustomRolloverPath,
       isUsingDefaultRolloverPath,
     ],
@@ -59,9 +54,9 @@ export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => 
       value={{
         isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
         isUsingSearchableSnapshotInHotPhase:
-          get(formData, fieldPaths.hotPhaseSearchableSnapshot) != null,
+          get(formData, pathToHotPhaseSearchableSnapshot) != null,
         isUsingSearchableSnapshotInColdPhase:
-          get(formData, fieldPaths.coldPhaseSearchableSnapshot) != null,
+          get(formData, pathToColdPhaseSearchableSnapshot) != null,
       }}
     >
       {children}

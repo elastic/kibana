@@ -6,7 +6,7 @@
  */
 
 /**
- * The id of the tagging feature as registered to to `features` plugin
+ * The id of the tagging feature as registered to `features` plugin
  */
 export const tagFeatureId = 'savedObjectsTagging';
 /**

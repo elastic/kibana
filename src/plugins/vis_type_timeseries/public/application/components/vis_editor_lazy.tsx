@@ -8,11 +8,11 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { TimeseriesEditorProps } from './vis_editor';
 
-// @ts-ignore
 const VisEditorComponent = lazy(() => import('./vis_editor'));
 
-export const VisEditor = (props: any) => (
+export const VisEditor = (props: TimeseriesEditorProps) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
     <VisEditorComponent {...props} />
   </Suspense>

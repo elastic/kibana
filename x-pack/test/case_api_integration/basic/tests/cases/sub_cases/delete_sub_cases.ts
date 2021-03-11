@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   CASES_URL,
   SUB_CASES_PATCH_DEL_URL,
-} from '../../../../../../plugins/case/common/constants';
+} from '../../../../../../plugins/cases/common/constants';
 import { postCommentUserReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
@@ -18,8 +18,8 @@ import {
   deleteAllCaseItems,
   deleteCaseAction,
 } from '../../../../common/lib/utils';
-import { getSubCaseDetailsUrl } from '../../../../../../plugins/case/common/api/helpers';
-import { CaseResponse } from '../../../../../../plugins/case/common/api';
+import { getSubCaseDetailsUrl } from '../../../../../../plugins/cases/common/api/helpers';
+import { CaseResponse } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {

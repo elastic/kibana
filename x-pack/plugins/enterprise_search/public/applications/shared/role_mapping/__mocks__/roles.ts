@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { AttributeName } from '../../types';
+
 export const asRoleMapping = {
   id: null,
-  attributeName: 'role',
+  attributeName: 'role' as AttributeName,
   attributeValue: ['superuser'],
   authProvider: ['*'],
   roleType: 'owner',
@@ -23,7 +25,7 @@ export const asRoleMapping = {
 
 export const wsRoleMapping = {
   id: '602d4ba85foobarbaz123',
-  attributeName: 'username',
+  attributeName: 'username' as AttributeName,
   attributeValue: 'user',
   authProvider: ['*', 'other_auth'],
   roleType: 'admin',

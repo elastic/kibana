@@ -24,3 +24,5 @@ export { ReplicasField } from './replicas_field';
 export { RollupField } from './rollup_field';
 
 export { IndexPriorityField } from './index_priority_field';
+
+export { FreezeField } from './freeze_field';

@@ -18,7 +18,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField } from '../../../form';
 
 interface Props {
-  phase: 'hot' | 'warm' | 'cold';
+  phase: 'hot' | 'warm' | 'cold' | 'frozen';
 }
 
 export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {
