@@ -96,9 +96,14 @@ export const buildEventsSearchQuery = ({
         },
       ],
       ...(aggregations ? { aggregations } : {}),
-    },
-    sort: {
-      [sortField]: sortOrder ?? 'asc',
+      sort: [
+        {
+          [sortField]: {
+            order: sortOrder ?? 'asc',
+            unmapped_type: 'date',
+          },
+        },
+      ],
     },
   };
 
