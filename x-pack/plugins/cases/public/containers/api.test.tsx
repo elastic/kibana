@@ -50,7 +50,7 @@ import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
-jest.mock('../../common/lib/kibana');
+jest.mock('../common/lib/kibana');
 
 const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });

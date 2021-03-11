@@ -18,8 +18,8 @@ import { ConnectorTypes } from '../../../common/api/connectors';
 
 jest.mock('./api');
 const mockErrorToToaster = jest.fn();
-jest.mock('../../../common/components/toasters', () => {
-  const original = jest.requireActual('../../../common/components/toasters');
+jest.mock('../../components/toasters', () => {
+  const original = jest.requireActual('../../components/toasters');
   return {
     ...original,
     errorToToaster: () => mockErrorToToaster(),
