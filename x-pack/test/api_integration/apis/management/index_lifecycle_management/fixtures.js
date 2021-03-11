@@ -75,8 +75,16 @@ export const getPolicyPayload = (name) => ({
         },
       },
     },
+    frozen: {
+      min_age: '20d',
+      actions: {
+        searchable_snapshot: {
+          snapshot_repository: 'backing_repo',
+        },
+      },
+    },
     delete: {
-      min_age: '10d',
+      min_age: '30d',
       actions: {
         wait_for_snapshot: {
           policy: 'policy',

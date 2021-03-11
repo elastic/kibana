@@ -51,9 +51,17 @@ export interface RoleRules {
   metadata?: string;
 }
 
+export interface AttributeExamples {
+  username: string;
+  email: string;
+  metadata: string;
+}
+
+export type AttributeName = keyof AttributeExamples | 'role';
+
 export interface RoleMapping {
   id: string;
-  attributeName: string;
+  attributeName: AttributeName;
   attributeValue: string;
   authProvider: string[];
   roleType: string;

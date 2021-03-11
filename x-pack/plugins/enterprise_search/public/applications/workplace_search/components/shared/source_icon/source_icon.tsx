@@ -14,14 +14,12 @@ import { EuiIcon, IconSize } from '@elastic/eui';
 import './source_icon.scss';
 
 import { images } from '../assets/source_icons';
-import { imagesFull } from '../assets/sources_full_bleed';
 
 interface SourceIconProps {
   serviceType: string;
   name: string;
   className?: string;
   wrapped?: boolean;
-  fullBleed?: boolean;
   size?: IconSize;
 }
 
@@ -30,16 +28,10 @@ export const SourceIcon: React.FC<SourceIconProps> = ({
   serviceType,
   className,
   wrapped,
-  fullBleed = false,
   size = 'xxl',
 }) => {
   const icon = (
-    <EuiIcon
-      type={fullBleed ? imagesFull[camelCase(serviceType)] : images[camelCase(serviceType)]}
-      title={name}
-      className={className}
-      size={size}
-    />
+    <EuiIcon type={images[camelCase(serviceType)]} title={name} className={className} size={size} />
   );
   return wrapped ? (
     <div className="wrapped-icon" title={name}>
