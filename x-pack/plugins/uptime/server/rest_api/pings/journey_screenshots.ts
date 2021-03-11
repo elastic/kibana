@@ -31,7 +31,7 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
       stepIndex,
     });
 
-    if (result === null) {
+    if (result === null || !result.blob) {
       return response.notFound();
     }
     return response.ok({

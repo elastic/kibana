@@ -27,7 +27,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
           },
           {
             term: {
-              'synthetics.type': 'journey/end',
+              'synthetics.type': 'journey/start',
             },
           },
         ],
@@ -52,7 +52,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
             },
             {
               term: {
-                'synthetics.type': 'journey/end',
+                'synthetics.type': 'journey/start',
               },
             },
           ],

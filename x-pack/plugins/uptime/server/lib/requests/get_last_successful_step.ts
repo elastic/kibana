@@ -49,7 +49,7 @@ export const getStepLastSuccessfulStep: UMElasticsearchQueryFn<
           },
           {
             term: {
-              'synthetics.payload.status': 'succeeded',
+              'synthetics.step.status': 'succeeded',
             },
           },
           {
