@@ -43,6 +43,7 @@ steps:
           image: 'gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT'
           propagate-environment: true
           mount-checkout: false
+    depends_on: default-build
   # - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'
   #   label: 'Default CI Group 1'
   #   agents:
