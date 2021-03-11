@@ -9,9 +9,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiSpacer,
   EuiTitle,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -82,14 +82,14 @@ export function CustomLinkOverview() {
         />
       )}
       <EuiPanel>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup gutterSize="none" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <EuiTitle>
+                <EuiTitle size="s">
                   <EuiFlexGroup
                     alignItems="center"
-                    gutterSize="s"
+                    gutterSize="none"
                     responsive={false}
                   >
                     <EuiFlexItem grow={false}>
@@ -117,8 +117,8 @@ export function CustomLinkOverview() {
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText color="subdued" size="s">
           {i18n.translate('xpack.apm.settings.customizeUI.customLink.info', {
             defaultMessage:
               'These links will be shown in the Actions context menu in selected areas of the app, e.g. by the transactions detail.',
