@@ -545,7 +545,10 @@ export async function loadDataForCharts(
   influencers = [],
   selectedCells,
   influencersFilterQuery,
-  useRequestCount = true
+  // choose whether or not to keep track of the request that could be out of date
+  // in Anomaly Explorer this is being used to ignore any request that are out of date
+  // but in embeddables, we might have multiple requests coming from multiple different panels
+  takeLatestOnly = true
 ) {
   return new Promise((resolve) => {
     // Just skip doing the request when this function
@@ -574,7 +577,7 @@ export async function loadDataForCharts(
       )
       .then((resp) => {
         // Ignore this response if it's returned by an out of date promise
-        if (useRequestCount && newRequestCount < requestCount) {
+        if (takeLatestOnly && newRequestCount < requestCount) {
           resolve([]);
         }
 

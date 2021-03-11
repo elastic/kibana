@@ -123,6 +123,7 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
       style={{
         width: '100%',
         overflowY: 'scroll',
+        overflowX: 'hidden',
         padding: '8px',
       }}
       data-test-subj={`mlExplorerEmbeddable_${embeddableContext.id}`}

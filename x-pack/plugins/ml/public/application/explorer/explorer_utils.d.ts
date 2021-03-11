@@ -141,8 +141,8 @@ export declare const loadDataForCharts: (
   influencers: any[],
   selectedCells: AppStateSelectedCells | undefined,
   influencersFilterQuery: any,
-  // choose whether or not to keep track of the request could be out of date
-  useRequestCount: boolean
+  // choose whether or not to keep track of the request that could be out of date
+  takeLatestOnly: boolean
 ) => Promise<ChartRecord[] | undefined>;
 
 export declare const loadFilteredTopInfluencers: (

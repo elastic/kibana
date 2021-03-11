@@ -10,12 +10,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ENTITY_FIELD_OPERATIONS } from '../../../../../../../common/util/anomaly_utils';
 
-type Operation = '+' | '-';
 interface InfluencerFilterProps {
   onFilter: (params: {
     influencerFieldName: string;
     influencerFieldValue: string;
-    operation: Operation;
+    operation: typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
   }) => void;
   influencerFieldName: string;
   influencerFieldValue: string;
