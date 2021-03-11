@@ -74,10 +74,6 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   getDefaultLabel: (column, indexPattern, columns) =>
     ofName(getSafeName(column.sourceField, indexPattern), column.params.percentile),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
-    const existingFormat =
-      previousColumn?.params && 'format' in previousColumn?.params
-        ? previousColumn?.params?.format
-        : undefined;
     const existingPercentileParam =
       previousColumn?.operationType === 'percentile' && previousColumn?.params.percentile;
     const newPercentileParam =

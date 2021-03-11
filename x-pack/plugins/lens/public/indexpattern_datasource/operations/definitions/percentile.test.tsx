@@ -194,7 +194,7 @@ describe('percentile', () => {
       );
       expect(percentileColumn.dataType).toEqual('number');
       expect(percentileColumn.params.percentile).toEqual(75);
-      expect(percentileColumn.label).toEqual('95th percentile of test');
+      expect(percentileColumn.label).toEqual('75th percentile of test');
     });
   });
 
