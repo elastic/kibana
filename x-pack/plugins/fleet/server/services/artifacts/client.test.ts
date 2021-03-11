@@ -70,7 +70,7 @@ describe('When using the Fleet Artifacts Client', () => {
         created: expect.any(String),
         decodedSha256: '05d13b11501327cc43f9a29165f1b4cab5c65783d86227536fcf798e6fa45586',
         decodedSize: 18,
-        encodedSha256: '7b29249c36eb138fb1fff4b74de29e4560215e3f38d346285bc0968e6f9b62ef',
+        encodedSha256: '373d059bac3b51b05af96128cdaf013abd0c59d3d50579589937068059690a68',
         encodedSize: 26,
         id: expect.any(String),
         identifier: 'some-identifier',
@@ -164,7 +164,7 @@ describe('When using the Fleet Artifacts Client', () => {
         compressionAlgorithm: 'zlib',
         decodedSha256: '05d13b11501327cc43f9a29165f1b4cab5c65783d86227536fcf798e6fa45586',
         decodedSize: 18,
-        encodedSha256: '7b29249c36eb138fb1fff4b74de29e4560215e3f38d346285bc0968e6f9b62ef',
+        encodedSha256: '373d059bac3b51b05af96128cdaf013abd0c59d3d50579589937068059690a68',
         encodedSize: 26,
       });
     });

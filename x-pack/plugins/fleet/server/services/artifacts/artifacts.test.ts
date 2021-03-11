@@ -206,7 +206,7 @@ describe('When using the artifacts services', () => {
         compressionAlgorithm: 'zlib',
         decodedSha256: '9724c1e20e6e3e4d7f57ed25f9d4efb006e508590d528c90da597f6a775c13e5',
         decodedSize: 16,
-        encodedSha256: '446086d1609189c3ad93a943976e4b7474c028612e5ec4810a81cc01a631f0f9',
+        encodedSha256: 'b411ccf0a7bf4e015d849ee82e3512683d72c5a3c9bd233db9c885b229b8adf4',
         encodedSize: 24,
       });
     });
