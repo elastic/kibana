@@ -58,7 +58,7 @@ export const fetchIndices = (
   client: ElasticsearchClient,
   indicesToFetch: string[]
 ): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
-  // @ts-expect-error IndexState.alias and IndexState.mappings should be required
+  // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
   () => {
     return client.indices
       .get(
@@ -137,8 +137,11 @@ export const removeWriteBlock = (
         // Don't change any existing settings
         preserve_existing: true,
         body: {
-          // @ts-expect-error
-          'index.blocks.write': false,
+          index: {
+            blocks: {
+              write: false
+            }
+          }
         },
       },
       { maxRetries: 0 /** handle retry ourselves for now */ }
@@ -313,7 +316,7 @@ const waitForTask = (
       const failures = body.response?.failures ?? [];
       return Either.right({
         completed: body.completed,
-        // @ts-expect-error - this could satisfy the types by using `res.context.meta.error`, but not sure if correct
+        // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't declare `error` property
         error: Option.fromNullable(body.error),
         failures: failures.length > 0 ? Option.some(failures) : Option.none,
         description: body.task.description,
@@ -820,20 +823,7 @@ export const bulkOverwriteTransformedDocuments = (
   transformedDocs: SavedObjectsRawDoc[]
 ): TaskEither.TaskEither<RetryableEsClientError, 'bulk_index_succeeded'> => () => {
   return client
-    .bulk<{
-      took: number;
-      errors: boolean;
-      items: [
-        {
-          index: {
-            _id: string;
-            status: number;
-            // the filter_path ensures that only items with errors are returned
-            error: { type: string; reason: string };
-          };
-        }
-      ];
-    }>({
+    .bulk({
       // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
       // can't bulkIndex to an alias with require_alias=true. This means if
       // users tamper during this operation (delete indices or restore a
@@ -853,7 +843,6 @@ export const bulkOverwriteTransformedDocuments = (
       // field or using a Point In Time as a cursor to go through all documents.
       refresh: 'wait_for',
       filter_path: ['items.*.error'],
-      // @ts-expect-error
       body: transformedDocs.flatMap((doc) => {
         return [
           {

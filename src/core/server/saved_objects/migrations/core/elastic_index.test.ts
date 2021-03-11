@@ -240,7 +240,7 @@ describe('ElasticIndex', () => {
         } as estypes.ReindexResponse)
       );
       client.tasks.get.mockResolvedValue(
-        // @ts-expect-error GetTaskResponse requires a `task` property even on errors
+        // @ts-expect-error @elastic/elasticsearch GetTaskResponse requires a `task` property even on errors
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           completed: true,
           error: {

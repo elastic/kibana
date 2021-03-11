@@ -47,7 +47,7 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
 
   const [indexName, indexInfo] = Object.entries(body)[0];
 
-  // @ts-expect-error IndexState.alias and IndexState.mappings should be required
+    // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
   return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
 }
 
@@ -380,10 +380,9 @@ async function reindex(
       task_id: task,
     });
 
-    // @ts-expect-error
-    if (body.error) {
-      // @ts-expect-error
-      const e = body.error;
+    // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't contain `error` property
+    const e = body.error;
+    if (e) {
       throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
     }
 

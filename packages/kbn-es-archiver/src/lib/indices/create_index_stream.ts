@@ -63,8 +63,6 @@ export function createCreateIndexStream({
 
         await client.indices.create(
           {
-            // @ts-expect-error `CreateIndexRequest` do not currently allow the `method` parameter to be specified
-            method: 'PUT',
             index,
             body: {
               settings,

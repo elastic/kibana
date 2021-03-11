@@ -258,8 +258,7 @@ describe('migration actions', () => {
           index: 'clone_red_then_yellow_index',
           body: {
             // Enable all shard allocation so that the index status goes yellow
-            // @ts-expect-error `UpdateIndexSettingsRequest` does not support Record<string, any> as it should.
-            'index.routing.allocation.enable': 'all',
+            index: { routing: { allocation: { enable: 'all' } } }
           },
         });
         indexYellow = true;
@@ -927,8 +926,7 @@ describe('migration actions', () => {
           index: 'red_then_yellow_index',
           body: {
             // Disable all shard allocation so that the index status is red
-            // @ts-expect-error `UpdateIndexSettingsRequest` does not support Record<string, any> as it should.
-            'index.routing.allocation.enable': 'all',
+            index: { routing: { allocation: { enable: 'all' } } }
           },
         });
         indexYellow = true;

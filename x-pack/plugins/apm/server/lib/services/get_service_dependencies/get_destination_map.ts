@@ -6,7 +6,6 @@
  */
 
 import { isEqual, keyBy, mapValues } from 'lodash';
-import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { pickKeys } from '../../../../common/utils/pick_keys';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {

@@ -17,7 +17,7 @@ export function getSortingParams(
   type: string | string[],
   sortField?: string,
   sortOrder?: estypes.SortOrder
-): { sort?: Array<Record<string, estypes.Sort>> } {
+): { sort?: Array<estypes.SortContainer> } {
   if (!sortField) {
     return {};
   }
@@ -27,7 +27,6 @@ export function getSortingParams(
   if (TOP_LEVEL_FIELDS.includes(sortField)) {
     return {
       sort: [
-        // @ts-expect-error Unsure if there should be a default sort order or the type is wrong?
         {
           [sortField]: {
             order: sortOrder,
@@ -47,7 +46,6 @@ export function getSortingParams(
 
     return {
       sort: [
-        // @ts-expect-error Unsure if there should be a default sort order or the type is wrong?
         {
           [sortField]: {
             order: sortOrder,
@@ -72,7 +70,6 @@ export function getSortingParams(
 
   return {
     sort: [
-      // @ts-expect-error Unsure if there should be a default sort order or the type is wrong?
       {
         [key]: {
           order: sortOrder,
