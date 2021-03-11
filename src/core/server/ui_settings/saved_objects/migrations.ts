@@ -56,23 +56,4 @@ export const migrations = {
     }),
     references: doc.references || [],
   }),
-  '7.13.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
-    ...doc,
-    ...(doc.attributes && {
-      attributes: Object.keys(doc.attributes).reduce(
-        (acc, key) =>
-          key === 'ml:fileDataVisualizerMaxFileSize'
-            ? {
-                ...acc,
-                ['fileUpload:maxFileSize']: doc.attributes[key],
-              }
-            : {
-                ...acc,
-                [key]: doc.attributes[key],
-              },
-        {}
-      ),
-    }),
-    references: doc.references || [],
-  }),
 };
