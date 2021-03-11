@@ -19,7 +19,7 @@ export const mockKibanaSemverVersion = new SemVer(mockKibanaVersion);
  * In readonly mode, the user will not be able to perform any actions in the UI
  * and will be presented with a message indicating as such.
  */
-export const UA_READONLY_MODE = false;
+export const UA_READONLY_MODE = true;
 
 /*
  * Map of 7.0 --> 8.0 index setting deprecation log messages and associated settings
