@@ -276,12 +276,10 @@ export interface ElasticsearchLegacySource {
   };
   index_stats?: ElasticsearchIndexStats;
   node_stats?: ElasticsearchNodeStats;
-  service?: {
-    address?: string;
-  };
   shard?: {
     index?: string;
     shard?: string;
+    state?: string;
     primary?: boolean;
     relocating_node?: string;
     node?: string;
@@ -345,6 +343,9 @@ export interface ElasticsearchMetricbeatNode {
 
 export interface ElasticsearchMetricbeatSource {
   '@timestamp'?: string;
+  service?: {
+    address?: string;
+  };
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
     index?: ElasticsearchIndexStats & {
@@ -354,7 +355,7 @@ export interface ElasticsearchMetricbeatSource {
     shard?: ElasticsearchLegacySource['shard'] & {
       number?: string;
       relocating_node?: {
-        uuid?: string;
+        id?: string;
       };
     };
     ml?: {
@@ -422,6 +423,7 @@ export interface ElasticsearchMetricbeatSource {
           };
         };
         nodes?: {
+          versions?: string[];
           count?: number;
           jvm?: {
             max_uptime?: {

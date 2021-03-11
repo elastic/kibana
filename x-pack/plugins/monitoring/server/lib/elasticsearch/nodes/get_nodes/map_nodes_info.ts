@@ -47,7 +47,7 @@ export function mapNodesInfo(
       ...prev,
       [uuid]: {
         name: sourceNode?.name,
-        transport_address: sourceNode?.transport_address,
+        transport_address: node._source.service?.address ?? sourceNode?.transport_address,
         type: nodeType,
         isOnline,
         nodeTypeLabel,

@@ -209,7 +209,7 @@ function isObject(value) {
 }
 
 function countBuckets(data, count = 0) {
-  if (data.buckets) {
+  if (data && data.buckets) {
     count += data.buckets.length;
     for (const bucket of data.buckets) {
       for (const key of Object.keys(bucket)) {
@@ -218,7 +218,7 @@ function countBuckets(data, count = 0) {
         }
       }
     }
-  } else {
+  } else if (data) {
     for (const key of Object.keys(data)) {
       if (isObject(data[key])) {
         count = countBuckets(data[key], count);

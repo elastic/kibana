@@ -44,7 +44,7 @@ export function getClusterStatus(cluster: ElasticsearchSource, shardStats: unkno
       clusterStatsMB?.nodes?.jvm?.max_uptime?.ms ??
       clusterStatsLegacy?.nodes?.jvm?.max_uptime_in_millis ??
       0,
-    version: clusterStatsLegacy?.nodes?.versions ?? null,
+    version: clusterStatsMB?.nodes?.versions ?? clusterStatsLegacy?.nodes?.versions,
     memUsed:
       clusterStatsMB?.nodes?.jvm?.memory?.heap?.used?.bytes ??
       clusterStatsLegacy?.nodes?.jvm?.mem?.heap_used_in_bytes ??

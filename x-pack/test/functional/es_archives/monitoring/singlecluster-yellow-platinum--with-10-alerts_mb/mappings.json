@@ -3446,13 +3446,6 @@
                   "properties": {
                     "indices": {
                       "properties": {
-                        "docs": {
-                          "properties": {
-                            "total": {
-                              "type": "long"
-                            }
-                          }
-                        },
                         "fielddata": {
                           "properties": {
                             "memory": {
@@ -3580,10 +3573,6 @@
                               "type": "long"
                             }
                           }
-                        },
-                        "versions": {
-                          "ignore_above": 1024,
-                          "type": "keyword"
                         }
                       }
                     },
@@ -3617,62 +3606,6 @@
                         "master_node": {
                           "ignore_above": 1024,
                           "type": "keyword"
-                        },
-                        "nodes": {
-                          "properties": {
-                            "jlBta62WTuCkaZ54LZVHGg": {
-                              "properties": {
-                                "attributes": {
-                                  "properties": {
-                                    "ml": {
-                                      "properties": {
-                                        "machine_memory": {
-                                          "ignore_above": 1024,
-                                          "type": "keyword"
-                                        },
-                                        "max_jvm_size": {
-                                          "ignore_above": 1024,
-                                          "type": "keyword"
-                                        },
-                                        "max_open_jobs": {
-                                          "ignore_above": 1024,
-                                          "type": "keyword"
-                                        }
-                                      }
-                                    },
-                                    "transform": {
-                                      "properties": {
-                                        "node": {
-                                          "ignore_above": 1024,
-                                          "type": "keyword"
-                                        }
-                                      }
-                                    },
-                                    "xpack": {
-                                      "properties": {
-                                        "installed": {
-                                          "ignore_above": 1024,
-                                          "type": "keyword"
-                                        }
-                                      }
-                                    }
-                                  }
-                                },
-                                "ephemeral_id": {
-                                  "ignore_above": 1024,
-                                  "type": "keyword"
-                                },
-                                "name": {
-                                  "ignore_above": 1024,
-                                  "type": "keyword"
-                                },
-                                "transport_address": {
-                                  "ignore_above": 1024,
-                                  "type": "keyword"
-                                }
-                              }
-                            }
-                          }
                         },
                         "nodes_hash": {
                           "ignore_above": 1024,
@@ -4324,7 +4257,7 @@
                           "type": "long"
                         },
                         "total_size_in_bytes": {
-                          "type": "float"
+                          "type": "long"
                         },
                         "total_time_in_millis": {
                           "type": "long"
@@ -5182,7 +5115,7 @@
                             "load_avg": {
                               "properties": {
                                 "1m": {
-                                  "type": "double"
+                                  "type": "half_float"
                                 }
                               }
                             }
@@ -5313,7 +5246,7 @@
                 },
                 "relocating_node": {
                   "properties": {
-                    "name": {
+                    "id": {
                       "ignore_above": 1024,
                       "type": "keyword"
                     }
@@ -5336,9 +5269,6 @@
                   "type": "keyword"
                 }
               }
-            },
-            "version": {
-              "type": "long"
             }
           }
         },
@@ -7123,13 +7053,6 @@
             "containerized": {
               "type": "boolean"
             },
-            "cpu": {
-              "properties": {
-                "pct": {
-                  "type": "long"
-                }
-              }
-            },
             "domain": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -7187,30 +7110,6 @@
             "name": {
               "ignore_above": 1024,
               "type": "keyword"
-            },
-            "network": {
-              "properties": {
-                "in": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "packets": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "out": {
-                  "properties": {
-                    "bytes": {
-                      "type": "long"
-                    },
-                    "packets": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
             },
             "os": {
               "properties": {
@@ -8190,9 +8089,29 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "kibana": {
+                  "properties": {
+                    "status": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "name": {
                   "ignore_above": 1024,
                   "type": "keyword"
+                },
+                "os": {
+                  "properties": {
+                    "memory": {
+                      "properties": {
+                        "free_in_bytes": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
                 },
                 "process": {
                   "properties": {
@@ -8239,6 +8158,13 @@
                           }
                         }
                       }
+                    },
+                    "uptime": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 },
@@ -8282,10 +8208,6 @@
                     "index": {
                       "ignore_above": 1024,
                       "type": "keyword"
-                    },
-                    "name": {
-                      "path": "kibana.stats.usage.index",
-                      "type": "alias"
                     }
                   }
                 }
@@ -8327,6 +8249,50 @@
                   }
                 }
               }
+            }
+          }
+        },
+        "kibana_stats": {
+          "properties": {
+            "kibana": {
+              "properties": {
+                "response_time": {
+                  "properties": {
+                    "max": {
+                      "path": "kibana.stats.response_time.max.ms",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "status": {
+                  "path": "kibana.stats.kibana.status",
+                  "type": "alias"
+                }
+              }
+            },
+            "os": {
+              "properties": {
+                "memory": {
+                  "properties": {
+                    "free_in_bytes": {
+                      "path": "kibana.stats.os.memory.free_in_bytes",
+                      "type": "alias"
+                    }
+                  }
+                }
+              }
+            },
+            "process": {
+              "properties": {
+                "uptime_in_millis": {
+                  "path": "kibana.stats.process.uptime.ms",
+                  "type": "alias"
+                }
+              }
+            },
+            "timestamp": {
+              "path": "@timestamp",
+              "type": "alias"
             }
           }
         },
@@ -17173,7 +17139,7 @@
               "type": "alias"
             },
             "node": {
-              "path": "elasticsearch.node.name",
+              "path": "elasticsearch.node.id",
               "type": "alias"
             },
             "primary": {
@@ -20475,7 +20441,7 @@
             "elasticsearch.node.stats.os.cgroup.memory.control_group",
             "elasticsearch.cluster.pending_task.source",
             "elasticsearch.shard.state",
-            "elasticsearch.shard.relocating_node.name",
+            "elasticsearch.shard.relocating_node.id",
             "elasticsearch.shard.source_node.name",
             "elasticsearch.shard.source_node.uuid",
             "etcd.api_version",
@@ -20528,11 +20494,13 @@
             "kibana.settings.version",
             "kibana.settings.status",
             "kibana.settings.locale",
+            "kibana.stats.kibana.status",
             "kibana.stats.usage.index",
             "kibana.stats.name",
             "kibana.stats.index",
             "kibana.stats.host.name",
             "kibana.stats.status",
+            "kibana.stats.os.memory.free_in_bytes",
             "kibana.status.name",
             "kibana.status.status.overall.state",
             "kubernetes.apiserver.request.client",

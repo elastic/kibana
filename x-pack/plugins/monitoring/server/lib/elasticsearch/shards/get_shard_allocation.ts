@@ -17,7 +17,6 @@ import {
   ElasticsearchMetricbeatSource,
 } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
-
 export function handleResponse(response: ElasticsearchResponse) {
   const hits = response.hits?.hits;
   if (!hits) {
@@ -28,38 +27,36 @@ export function handleResponse(response: ElasticsearchResponse) {
   const uniqueShards = new Set<string>();
 
   // map into object with shard and source propertiesd
-  return hits.reduce(
-    (
-      shards: Array<
-        | ElasticsearchLegacySource['shard']
-        | NonNullable<ElasticsearchMetricbeatSource['elasticsearch']>['shard']
-      >,
-      hit
-    ) => {
-      const legacyShard = hit._source.shard;
-      const mbShard = hit._source.elasticsearch;
+  return hits.reduce((shards: Array<ElasticsearchLegacySource['shard']>, hit) => {
+    const legacyShard = hit._source.shard;
+    const mbShard = hit._source.elasticsearch;
 
-      if (legacyShard || mbShard) {
-        const index = mbShard?.index?.name ?? legacyShard?.index;
-        const shardNumber = mbShard?.shard?.number ?? legacyShard?.shard;
-        const primary = mbShard?.shard?.primary ?? legacyShard?.primary;
-        const relocatingNode =
-          mbShard?.shard?.relocating_node?.uuid ?? legacyShard?.relocating_node;
-        const node = mbShard?.node?.name ?? legacyShard?.node;
-        // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
-        const shardId = `${index}-${shardNumber}-${primary}-${relocatingNode}-${node}`;
+    if (legacyShard || mbShard) {
+      const index = mbShard?.index?.name ?? legacyShard?.index;
+      const shardNumber = mbShard?.shard?.number ?? legacyShard?.shard;
+      const primary = mbShard?.shard?.primary ?? legacyShard?.primary;
+      const relocatingNode =
+        mbShard?.shard?.relocating_node?.id ?? legacyShard?.relocating_node ?? null;
+      const node = mbShard?.node?.id ?? legacyShard?.node;
+      // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
+      const shardId = `${index}-${shardNumber}-${primary}-${relocatingNode}-${node}`;
 
-        if (!uniqueShards.has(shardId)) {
-          // @ts-ignore
-          shards.push(legacyShard || mbShard);
-          uniqueShards.add(shardId);
-        }
+      if (!uniqueShards.has(shardId)) {
+        // @ts-ignore
+        shards.push({
+          index,
+          node,
+          primary,
+          relocating_node: relocatingNode,
+          shard: shardNumber,
+          state: legacyShard?.state ?? mbShard?.shard?.state,
+        });
+        uniqueShards.add(shardId);
       }
+    }
 
-      return shards;
-    },
-    []
-  );
+    return shards;
+  }, []);
 }
 
 export function getShardAllocation(

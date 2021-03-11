@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { Transform } from 'stream';
 import { set } from '@elastic/safer-lodash-set';
 import { resolve, dirname, relative } from 'path';
 import {
@@ -24,7 +25,7 @@ import {
 import { Readable, Writable } from 'stream';
 import { fromNode } from 'bluebird';
 import { ToolingLog } from '@kbn/dev-utils';
-import { createPromiseFromStreams, createMapStream, createFilterStream } from '@kbn/utils';
+import { createPromiseFromStreams, createFilterStream } from '@kbn/utils';
 import {
   prioritizeMappings,
   readDirectory,
@@ -32,6 +33,37 @@ import {
   createParseArchiveStreams,
   createFormatArchiveStreams,
 } from '../lib';
+
+function makeid(length: number) {
+  let result = '';
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
+export function createChrisStream<T>(fn: (value: T, i: number) => any[] | undefined) {
+  let i = 0;
+
+  return new Transform({
+    objectMode: true,
+    async transform(value, enc, done) {
+      try {
+        const results = await fn(value, i++);
+        if (results) {
+          for (const result of results) {
+            this.push(result);
+          }
+        }
+        done();
+      } catch (err) {
+        done(err);
+      }
+    },
+  });
+}
 
 async function isDirectory(path: string): Promise<boolean> {
   const stats: Stats = await fromNode((cb) => stat(path, cb));
@@ -46,10 +78,20 @@ function convertLegacyTypeToMetricsetName(type: string) {
   return type;
 }
 
-function applyCustomRules(legacyDoc: any, mbDoc: any) {
+const hashes: any = {};
+
+function applyCustomRules(item: any, legacyDoc: any, mbDoc: any) {
+  const extraMbDocs = [];
+
+  set(mbDoc, 'elasticsearch.node', {
+    ...legacyDoc.source_node,
+    ...mbDoc.elasticsearch.node,
+  });
+
   if (legacyDoc.type === 'shards') {
     set(mbDoc, 'elasticsearch.cluster.state.id', legacyDoc.state_uuid);
     set(mbDoc, 'elasticsearch.cluster.stats.state.state_uuid', legacyDoc.state_uuid);
+    set(mbDoc, 'elasticsearch.shard.relocating_node.id', legacyDoc.shard.relocating_node);
   }
   if (legacyDoc.type === 'cluster_stats') {
     set(
@@ -63,7 +105,58 @@ function applyCustomRules(legacyDoc: any, mbDoc: any) {
       legacyDoc.cluster_stats.indices.store.size_in_bytes
     );
     set(mbDoc, 'elasticsearch.cluster.stats.state', legacyDoc.cluster_state);
+    set(
+      mbDoc,
+      'elasticsearch.cluster.stats.nodes.versions',
+      legacyDoc.cluster_stats.nodes.versions
+    );
   }
+  if (legacyDoc.type === 'node_stats') {
+    set(mbDoc, 'service.address', legacyDoc.source_node.transport_address);
+  }
+  if (legacyDoc.type === 'index_recovery') {
+    const first = legacyDoc.index_recovery.shards.shift();
+    set(mbDoc, 'elasticsearch.index.recovery', first);
+    for (const shard of legacyDoc.index_recovery.shards) {
+      const extraMbDoc = {
+        ...item,
+        value: {
+          ...item.value,
+          id: makeid(12),
+          index: `metricbeat-8.0.0`,
+          source: {
+            ...mbDoc,
+            elasticsearch: {
+              ...mbDoc.elasticsearch,
+              index: {
+                ...mbDoc.elasticsearch.index,
+                recovery: shard,
+              },
+            },
+          },
+        },
+      };
+      const hash = JSON.stringify(shard);
+      if (!hashes[hash]) {
+        hashes[hash] = true;
+        extraMbDocs.push(extraMbDoc);
+      }
+    }
+  }
+
+  return [
+    {
+      ...item,
+      value: {
+        ...item.value,
+        index: `metricbeat-8.0.0`,
+        source: {
+          ...mbDoc,
+        },
+      },
+    },
+    ...extraMbDocs,
+  ];
 }
 
 export async function rebuildAllAction({
@@ -108,7 +201,7 @@ export async function rebuildAllAction({
       await createPromiseFromStreams([
         createReadStream(childPath) as Readable,
         ...createParseArchiveStreams({ gzip }),
-        createMapStream<any>((item) => {
+        createChrisStream<any>((item) => {
           if (
             item &&
             (item.type === '_doc' || item.type === 'doc') &&
@@ -120,7 +213,7 @@ export async function rebuildAllAction({
                 name: convertLegacyTypeToMetricsetName(legacyDoc.type),
               },
             };
-            // const debug = legacyDoc.type === 'indices_stats';
+            // const debug = legacyDoc.type === 'index_recovery';
             for (const alias of aliases) {
               let value = _.get(legacyDoc, alias.key, null);
               if (value === null && alias.key.includes('.shards.')) {
@@ -130,19 +223,10 @@ export async function rebuildAllAction({
                 set(mbDoc, alias.path, value);
               }
             }
-            applyCustomRules(legacyDoc, mbDoc);
-            if (!_.isEmpty(mbDoc)) {
+            const mbDocs = applyCustomRules(item, legacyDoc, mbDoc);
+            if (mbDocs && mbDocs.length && !_.isEmpty(mbDocs[0])) {
               foundMbFiles = true;
-              return {
-                ...item,
-                value: {
-                  ...item.value,
-                  index: `metricbeat-8.0.0`,
-                  source: {
-                    ...mbDoc,
-                  },
-                },
-              };
+              return mbDocs;
             }
           }
           return undefined;
