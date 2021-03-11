@@ -47,8 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/94367
-  describe.skip('Finalizing signals migrations', () => {
+  describe('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;
     let createdMigrations: CreateResponse[];
@@ -251,7 +250,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(finalizeResponse.completed).not.to.eql(true);
       expect(finalizeResponse.error).to.eql({
         message:
-          'security_exception: action [cluster:monitor/task/get] is unauthorized for user [t1_analyst], this action is granted by the cluster privileges [monitor,manage,all]',
+          'security_exception: action [cluster:monitor/task/get] is unauthorized for user [t1_analyst] with roles [t1_analyst], this action is granted by the cluster privileges [monitor,manage,all]',
         status_code: 403,
       });
 

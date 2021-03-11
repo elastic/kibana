@@ -21,8 +21,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/94367
-  describe.skip('create_index', () => {
+  describe('create_index', () => {
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
     });
@@ -92,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(403);
         expect(body).to.eql({
           message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t1_analyst], this action is granted by the cluster privileges [read_ilm,manage_ilm,manage,all]',
+            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t1_analyst] with roles [t1_analyst], this action is granted by the cluster privileges [read_ilm,manage_ilm,manage,all]',
           status_code: 403,
         });
       });
