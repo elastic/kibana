@@ -71,7 +71,7 @@ export const RoleMappings: React.FC = () => {
       values={{
         strongText: (
           <strong>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.resetMappingsWarningModalBody', {
+            {i18n.translate('xpack.enterpriseSearch.appSearch.resetMappingsWarningModalBodyBold', {
               defaultMessage: 'All role mappings will be deleted',
             })}
           </strong>
