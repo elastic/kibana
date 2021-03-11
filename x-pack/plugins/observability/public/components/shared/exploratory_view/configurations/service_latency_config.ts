@@ -7,23 +7,21 @@
 
 import { DataSeries } from '../types';
 
-interface Props {
-  seriesId: string;
-  serviceName?: string;
-}
-
-export function getPageLoadDistLensConfig({ seriesId, serviceName }: Props): DataSeries {
+export function getServiceLatencyLensConfig(): DataSeries {
   return {
-    id: seriesId ?? 'unique-key',
-    dataViewType: 'page-load-dist',
+    name: 'elastic.co',
+    id: 'elastic-co',
+    dataViewType: 'service-latency',
     defaultSeriesType: 'line',
     indexPattern: 'apm_static_index_pattern_id',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
-      sourceField: 'transaction.duration.us',
+      sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'count',
+      operationType: 'avg',
+      sourceField: 'transaction.duration.us',
+      label: 'Latency',
     },
     defaultFilters: [
       'user_agent.name',
@@ -37,9 +35,8 @@ export function getPageLoadDistLensConfig({ seriesId, serviceName }: Props): Dat
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: [
-      { query: { match_phrase: { 'transaction.type': 'page-load' } } },
-      ...(serviceName ? [{ query: { match_phrase: { 'service.type': serviceName } } }] : []),
-    ],
+    filters: {
+      query: { match_phrase: { 'transaction.type': 'request' } },
+    },
   };
 }

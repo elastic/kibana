@@ -19,15 +19,16 @@ import { useFetcher } from '../../../../..';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
-import { SeriesUrl, UrlFilter } from '../../types';
+import { UrlFilter } from '../../types';
 
 interface Props {
+  seriesId: string;
   label: string;
   field: string;
   goBack: () => void;
 }
 
-export const FilterExpanded = ({ field, label, goBack }: Props) => {
+export const FilterExpanded = ({ seriesId, field, label, goBack }: Props) => {
   const { indexPattern } = useIndexPatternContext();
 
   const [value, setValue] = useState('');
@@ -36,7 +37,7 @@ export const FilterExpanded = ({ field, label, goBack }: Props) => {
     services: { data },
   } = useKibana<ObservabilityClientPluginsStart>();
 
-  const storage = useUrlStorage();
+  const { series, setSeries } = useUrlStorage(seriesId);
 
   const { data: values, status } = useFetcher(() => {
     return data.autocomplete.getValueSuggestions({
@@ -46,8 +47,6 @@ export const FilterExpanded = ({ field, label, goBack }: Props) => {
       field: { name: field, type: 'string', aggregatable: true },
     });
   }, [field]);
-
-  const series = storage.get<SeriesUrl>('elastic-co');
 
   const filters = series?.filters ?? [];
 
@@ -61,7 +60,7 @@ export const FilterExpanded = ({ field, label, goBack }: Props) => {
       } else {
         currFilter.values = [id];
       }
-      storage.set('elastic-co', { ...series, filters: [currFilter] });
+      setSeries(seriesId, { ...series, filters: [currFilter] });
       return;
     }
 
@@ -82,9 +81,9 @@ export const FilterExpanded = ({ field, label, goBack }: Props) => {
       currFilter.values = values.length > 0 ? values : undefined;
 
       if (notValues.length > 0 || values.length > 0) {
-        storage.set('elastic-co', { ...series, filters: [currFilter] });
+        setSeries(seriesId, { ...series, filters: [currFilter] });
       } else {
-        storage.set('elastic-co', { ...series, filters: undefined });
+        setSeries(seriesId, { ...series, filters: undefined });
       }
     }
   };

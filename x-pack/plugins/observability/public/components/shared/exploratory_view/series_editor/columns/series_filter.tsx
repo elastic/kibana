@@ -20,6 +20,7 @@ import { FieldLabels } from '../../configurations/constants';
 import { SelectedFilters } from '../selected_filters';
 
 interface Props {
+  seriesId: string;
   defaultFilters: DataSeries['defaultFilters'];
 }
 
@@ -28,7 +29,7 @@ export interface Field {
   field: string;
 }
 
-export const SeriesFilter = ({ defaultFilters = [] }: Props) => {
+export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 
   const [selectedField, setSelectedField] = useState<Field | null>(null);
@@ -95,7 +96,7 @@ export const SeriesFilter = ({ defaultFilters = [] }: Props) => {
         </EuiPopover>
       </EuiFlexItem>
       <EuiFlexItem>
-        <SelectedFilters />
+        <SelectedFilters seriesId={seriesId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

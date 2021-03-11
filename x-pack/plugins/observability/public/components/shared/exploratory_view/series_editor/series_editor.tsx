@@ -7,18 +7,21 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiBasicTable, EuiButton, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { SeriesFilter } from './columns/series_filter';
 import { ActionsCol } from './columns/actions_col';
 import { Breakdowns } from './columns/breakdowns';
 import { DataSeries, DataViewType } from '../types';
-import { getDefaultConfigs } from '../configurations/default_configs';
+import { SeriesBuilder } from '../series_builder/series_builder';
+import { useUrlStorage } from '../hooks/use_url_strorage';
+import { getPageLoadDistLensConfig } from '../configurations/page_load_dist_config';
+import { RemoveSeries } from './columns/remove_series';
 
 export const SeriesEditor = () => {
   const columns = [
     {
       name: 'Name',
-      field: 'name',
+      field: 'id',
       width: '20%',
       render: (val: string) => (
         <EuiText>
@@ -30,7 +33,9 @@ export const SeriesEditor = () => {
       name: 'Filter',
       field: 'defaultFilters',
       width: '30%',
-      render: (defaultFilters: string[]) => <SeriesFilter defaultFilters={defaultFilters} />,
+      render: (defaultFilters: string[], series: DataSeries) => (
+        <SeriesFilter defaultFilters={defaultFilters} seriesId={series.id} />
+      ),
     },
     {
       name: 'Breakdowns',
@@ -46,11 +51,29 @@ export const SeriesEditor = () => {
       field: 'id',
       render: (val: string, item: DataSeries) => <ActionsCol series={item} />,
     },
+    {
+      name: 'Remove',
+      width: '5%',
+      field: 'id',
+      render: (val: string, item: DataSeries) => <RemoveSeries series={item} />,
+    },
   ];
 
   const { dataViewType } = useParams<{ dataViewType: DataViewType }>();
 
-  const items: DataSeries[] = [getDefaultConfigs({ dataViewType })];
+  const { allSeries } = useUrlStorage();
+
+  console.log(allSeries);
+
+  const allSeriesKeys = Object.keys(allSeries);
+
+  const items: DataSeries[] = allSeriesKeys.map((seriesKey) => {
+    const series = allSeries[seriesKey];
+    return getPageLoadDistLensConfig({
+      seriesId: seriesKey,
+      serviceName: series.serviceName,
+    });
+  });
 
   return (
     <>
@@ -62,9 +85,7 @@ export const SeriesEditor = () => {
         rowProps={() => ({ height: 100 })}
       />
       <EuiSpacer />
-      <EuiButton iconType="plus" color="secondary">
-        Add series
-      </EuiButton>
+      <SeriesBuilder />
     </>
   );
 };

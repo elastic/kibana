@@ -25,11 +25,10 @@ export const Breakdowns = ({ seriesId, breakdowns = [] }: Props) => {
     setSelectedBreakdown((prevState) => (prevState === optionId ? undefined : optionId));
   };
 
-  const storage = useUrlStorage();
-  const series = storage.get<SeriesUrl>(seriesId) ?? {};
+  const { setSeries, series } = useUrlStorage(seriesId);
 
   useEffect(() => {
-    storage.set(seriesId, { ...series, breakdown: selectedBreakdown });
+    setSeries(seriesId, { ...series, breakdown: selectedBreakdown });
   }, [selectedBreakdown]);
 
   return (

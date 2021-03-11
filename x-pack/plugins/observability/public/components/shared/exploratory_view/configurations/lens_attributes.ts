@@ -171,8 +171,8 @@ export class LensAttributes {
   }
 
   parseFilters() {
-    const defaultFilters = this.dataViewConfig.filters ?? {};
-    const parsedFilters = this.dataViewConfig.filters ? [defaultFilters] : [];
+    const defaultFilters = this.dataViewConfig.filters ?? [];
+    const parsedFilters = this.dataViewConfig.filters ? [...defaultFilters] : [];
 
     this.filters.forEach(({ field, values = [], notValues = [] }) => {
       values?.forEach((value) => {

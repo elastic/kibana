@@ -10,7 +10,6 @@ import React, { useEffect } from 'react';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../../hooks/use_kibana_ui_settings';
 import { useUrlStorage } from '../hooks/use_url_strorage';
-import { SeriesUrl } from '../types';
 
 export interface TimePickerTime {
   from: string;
@@ -38,18 +37,16 @@ export function SeriesDatePicker({ seriesId }: Props) {
     label: display,
   }));
 
-  const storage = useUrlStorage();
-
-  const series = storage.get<SeriesUrl>(seriesId);
+  const { series, setSeries } = useUrlStorage(seriesId);
 
   function onTimeChange({ start, end }: { start: string; end: string }) {
     onRefreshTimeRange();
-    storage.set(seriesId, { ...series, time: { from: start, to: end } });
+    setSeries(seriesId, { ...series, time: { from: start, to: end } });
   }
 
   useEffect(() => {
     if (!series || !series.time) {
-      storage.set(seriesId, { ...series, time: { from: 'now-15m', to: 'now' } });
+      setSeries(seriesId, { ...series, time: { from: 'now-15m', to: 'now' } });
     }
   }, []);
 

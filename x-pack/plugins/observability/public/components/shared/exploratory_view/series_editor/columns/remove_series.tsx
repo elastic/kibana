@@ -7,8 +7,18 @@
 
 import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
+import { DataSeries } from '../../types';
+import { useUrlStorage } from '../../hooks/use_url_strorage';
 
-interface Props {}
-export const RemoveSeries = (props: Props) => {
-  return <EuiButtonIcon iconType="crossInACircleFilled" />;
+interface Props {
+  series: DataSeries;
+}
+
+export const RemoveSeries = ({ series }: Props) => {
+  const { removeSeries } = useUrlStorage();
+
+  const onClick = () => {
+    removeSeries(series.id);
+  };
+  return <EuiButtonIcon iconType="crossInACircleFilled" color="danger" onClick={onClick} />;
 };

@@ -13,16 +13,15 @@ import { i18n } from '@kbn/i18n';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
-import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
+// import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
 import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizontal_stacked';
-import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
+// import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
 import { LensIconChartArea } from '../assets/chart_area';
-import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
+// import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
 import { LensIconChartLine } from '../assets/chart_line';
 import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
 import styled from 'styled-components';
 import { useUrlStorage } from '../hooks/use_url_strorage';
-import { SeriesUrl } from '../types';
 
 const ButtonGroup = styled(EuiButtonGroup)`
   &&& {
@@ -33,9 +32,7 @@ const ButtonGroup = styled(EuiButtonGroup)`
 `;
 
 export const ChartTypes = () => {
-  const storage = useUrlStorage();
-
-  const series = storage.get<SeriesUrl>('elastic-co');
+  const { series, setSeries, allSeries } = useUrlStorage();
 
   return (
     <ButtonGroup
@@ -54,7 +51,11 @@ export const ChartTypes = () => {
       }))}
       idSelected={series?.seriesType ?? 'line'}
       onChange={(seriesType: string) => {
-        storage.set('elastic-co', { ...series, seriesType });
+        Object.keys(allSeries).forEach((seriesKey) => {
+          const series = allSeries[seriesKey];
+
+          setSeries(seriesKey, { ...series, seriesType });
+        });
       }}
     />
   );
@@ -96,14 +97,14 @@ export const visualizationTypes: VisualizationType[] = [
     }),
     groupLabel: groupLabelForBar,
   },
-  {
-    id: 'bar_percentage_stacked',
-    icon: LensIconChartBarPercentage,
-    label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
-      defaultMessage: 'Bar vertical percentage',
-    }),
-    groupLabel: groupLabelForBar,
-  },
+  // {
+  //   id: 'bar_percentage_stacked',
+  //   icon: LensIconChartBarPercentage,
+  //   label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
+  //     defaultMessage: 'Bar vertical percentage',
+  //   }),
+  //   groupLabel: groupLabelForBar,
+  // },
   {
     id: 'bar_horizontal_stacked',
     icon: LensIconChartBarHorizontalStacked,
@@ -115,20 +116,20 @@ export const visualizationTypes: VisualizationType[] = [
     }),
     groupLabel: groupLabelForBar,
   },
-  {
-    id: 'bar_horizontal_percentage_stacked',
-    icon: LensIconChartBarHorizontalPercentage,
-    label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
-      defaultMessage: 'H. Percentage bar',
-    }),
-    fullLabel: i18n.translate(
-      'xpack.lens.xyVisualization.stackedPercentageBarHorizontalFullLabel',
-      {
-        defaultMessage: 'Bar horizontal percentage',
-      }
-    ),
-    groupLabel: groupLabelForBar,
-  },
+  // {
+  //   id: 'bar_horizontal_percentage_stacked',
+  //   icon: LensIconChartBarHorizontalPercentage,
+  //   label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
+  //     defaultMessage: 'H. Percentage bar',
+  //   }),
+  //   fullLabel: i18n.translate(
+  //     'xpack.lens.xyVisualization.stackedPercentageBarHorizontalFullLabel',
+  //     {
+  //       defaultMessage: 'Bar horizontal percentage',
+  //     }
+  //   ),
+  //   groupLabel: groupLabelForBar,
+  // },
   {
     id: 'area',
     icon: LensIconChartArea,
@@ -145,14 +146,14 @@ export const visualizationTypes: VisualizationType[] = [
     }),
     groupLabel: groupLabelForLineAndArea,
   },
-  {
-    id: 'area_percentage_stacked',
-    icon: LensIconChartAreaPercentage,
-    label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
-      defaultMessage: 'Area percentage',
-    }),
-    groupLabel: groupLabelForLineAndArea,
-  },
+  // {
+  //   id: 'area_percentage_stacked',
+  //   icon: LensIconChartAreaPercentage,
+  //   label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
+  //     defaultMessage: 'Area percentage',
+  //   }),
+  //   groupLabel: groupLabelForLineAndArea,
+  // },
   {
     id: 'line',
     icon: LensIconChartLine,

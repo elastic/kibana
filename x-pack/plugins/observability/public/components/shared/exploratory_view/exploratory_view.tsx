@@ -22,7 +22,6 @@ import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { ExploratoryViewHeader } from './header';
 import { SeriesEditor } from './series_editor/series_editor';
 import { useUrlStorage } from './hooks/use_url_strorage';
-import { SeriesUrl } from './types';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import styled from 'styled-components';
 
@@ -31,31 +30,24 @@ export interface Props {
   defaultIndexPattern?: IndexPattern | null;
 }
 
-export const ExploratoryView = ({ seriesId, defaultIndexPattern }: Props) => {
+export const ExploratoryView = ({ defaultIndexPattern }: Props) => {
   const {
     services: { lens },
   } = useKibana<ObservabilityClientPluginsStart>();
 
   const LensComponent = lens.EmbeddableComponent;
 
-  const storage = useUrlStorage();
+  const { firstSeries: seriesId } = useUrlStorage();
 
-  const series = storage.get<SeriesUrl>('elastic-co');
+  const { series } = useUrlStorage(seriesId);
 
   const lensAttributes = useLensAttributes({
-    seriesId: 'elastic-co',
+    seriesId,
   });
 
   return (
     <EuiPage>
       <EuiPageBody style={{ maxWidth: 1600, margin: '0 auto' }}>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l">
-              <h1>Exploratory view</h1>
-            </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody style={{ maxWidth: 1400, margin: '0 auto' }}>
             {defaultIndexPattern ? (
@@ -70,7 +62,7 @@ export const ExploratoryView = ({ seriesId, defaultIndexPattern }: Props) => {
                       to: 'now',
                     }
                   }
-                  attributes={lensAttributes}
+                  attributes={seriesId ? lensAttributes : undefined}
                 />
                 <SeriesEditor />
               </>

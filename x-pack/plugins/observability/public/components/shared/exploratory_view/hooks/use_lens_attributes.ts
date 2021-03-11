@@ -27,9 +27,7 @@ export const useLensAttributes = ({
 
   const { indexPattern: defaultIndexPattern } = useIndexPatternContext(dataViewConfig.indexPattern);
 
-  const storage = useUrlStorage();
-
-  const series = storage.get<SeriesUrl>(seriesId);
+  const { series } = useUrlStorage(seriesId);
 
   const { filters = [] } = series ?? {};
 

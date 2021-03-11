@@ -26,6 +26,8 @@ export function ChartTemplates() {
 
   let flyout;
 
+  const style = { minWidth: 200 };
+
   if (isFlyoutVisible) {
     flyout = (
       <EuiFlyout size="s" onClose={() => setIsFlyoutVisible(false)} aria-labelledby="flyoutTitle">
@@ -37,8 +39,8 @@ export function ChartTemplates() {
         <EuiFlyoutBody>
           <SelectionTabs />
           <EuiSpacer />
-          <EuiFlexGroup>
-            <EuiFlexItem>
+          <EuiFlexGroup wrap>
+            <EuiFlexItem style={style}>
               <EuiCard
                 icon={<EuiIcon size="xxl" type="logoObservability" />}
                 title={`Page load distribution`}
@@ -46,7 +48,7 @@ export function ChartTemplates() {
                 href="/app/observability/exploratory-view/page-load-dist"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem style={style}>
               <EuiCard
                 icon={<EuiIcon size="xxl" type="logoLogging" />}
                 title={`Page views`}
@@ -54,12 +56,20 @@ export function ChartTemplates() {
                 href="/app/observability/exploratory-view/page-views"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem style={style}>
               <EuiCard
                 icon={<EuiIcon size="xxl" type="logoUptime" />}
                 title={`Monitor duration`}
                 description="Uptime monitor duration, slice and dice by location etc"
                 href="/app/observability/exploratory-view/uptime-duration"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem style={style}>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="logoUptime" />}
+                title={`APM Service latency`}
+                description="Uptime monitor duration, slice and dice by location etc"
+                href="/app/observability/exploratory-view/service-latency"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

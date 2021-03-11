@@ -7,17 +7,35 @@
 
 import React, { Fragment } from 'react';
 import { useUrlStorage } from '../hooks/use_url_strorage';
-import { SeriesUrl } from '../types';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FieldLabels } from '../configurations/constants';
 
-interface Props {}
-export const SelectedFilters = (props: Props) => {
-  const storage = useUrlStorage();
+interface Props {
+  seriesId: string;
+}
+export const SelectedFilters = ({ seriesId }: Props) => {
+  const { series, setSeries } = useUrlStorage(seriesId);
 
-  const { filters = [] } = storage.get<SeriesUrl>('elastic-co') ?? {};
+  const filters = series?.filters ?? [];
 
   const style = { maxWidth: 250 };
+
+  const removeFilter = (field: string, value: string, notVal: boolean) => {
+    const filtersN = filters.map((filter) => {
+      if (filter.field === field) {
+        if (notVal) {
+          const notValuesN = filter.notValues?.filter((val) => val !== value);
+          return { ...filter, notValues: notValuesN };
+        } else {
+          const valuesN = filter.values?.filter((val) => val !== value);
+          return { ...filter, values: valuesN };
+        }
+      }
+
+      return filter;
+    });
+    setSeries(seriesId, { ...series, filters: filtersN });
+  };
 
   return (
     <EuiFlexGroup wrap gutterSize="xs">
@@ -25,15 +43,29 @@ export const SelectedFilters = (props: Props) => {
         <Fragment key={field}>
           {(values ?? []).map((val) => (
             <EuiFlexItem key={field + val}>
-              <EuiButton fill size="s" iconType="cross" iconSide="right" style={style}>
+              <EuiButton
+                fill
+                size="s"
+                iconType="cross"
+                iconSide="right"
+                style={style}
+                onClick={() => removeFilter(field, val, false)}
+              >
                 {FieldLabels[field]}: {val}
               </EuiButton>
             </EuiFlexItem>
           ))}
           {(notValues ?? []).map((val) => (
             <EuiFlexItem key={field + val}>
-              <EuiButton fill size="s" iconType="cross" iconSide="right" style={style}>
-                {FieldLabels[field]}: {val}
+              <EuiButton
+                fill
+                size="s"
+                iconType="cross"
+                iconSide="right"
+                style={style}
+                onClick={() => removeFilter(field, val, true)}
+              >
+                Not {FieldLabels[field]}: {val}
               </EuiButton>
             </EuiFlexItem>
           ))}

@@ -13,6 +13,7 @@ export const FieldLabels: Record<string, string> = {
   'client.geo.country_name': 'Location',
   'user_agent.device.name': 'Device',
   'observer.geo.name': 'Observer location',
+  'service.name': 'Service',
 };
 
 export const DataViewLabels: Record<DataViewType, string> = {
@@ -20,4 +21,5 @@ export const DataViewLabels: Record<DataViewType, string> = {
   'page-views': 'Page views',
   'uptime-duration': 'Uptime monitor duration',
   'uptime-pings': 'Uptime pings',
+  'service-latency': 'APM Service latency',
 };

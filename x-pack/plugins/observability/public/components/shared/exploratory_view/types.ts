@@ -12,12 +12,16 @@ import {
   LastValueIndexPatternColumn,
 } from '../../../../../lens/public';
 
-export type DataViewType = 'page-load-dist' | 'page-views' | 'uptime-duration' | 'uptime-pings';
+export type DataViewType =
+  | 'page-load-dist'
+  | 'page-views'
+  | 'uptime-duration'
+  | 'uptime-pings'
+  | 'service-latency';
 
 export interface DataSeries {
   dataViewType: DataViewType;
   indexPattern: string;
-  name: string;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumn:
@@ -32,12 +36,13 @@ export interface DataSeries {
 }
 
 export interface SeriesUrl {
+  id: string;
   time: {
     to: string;
     from: string;
   };
-  breakdown: string;
-  filters: UrlFilter[];
+  breakdown?: string;
+  filters?: UrlFilter[];
   seriesType: string;
 }
 
@@ -46,3 +51,5 @@ export interface UrlFilter {
   values?: string[];
   notValues?: string[];
 }
+
+export type AppDataType = 'synthetics' | 'rum' | 'logs' | 'metrics' | 'apm';

@@ -29,12 +29,12 @@ export function ExploratoryViewHeader({ lensAttributes }: Props) {
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <EuiText>
           <h2>{DataViewLabels[dataViewType]}</h2>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <ChartTypes />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
