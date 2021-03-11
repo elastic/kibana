@@ -84,6 +84,9 @@ export const enhancedEsSearchStrategyProvider = (
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
       catchError((e) => {
+        if (e.body.error) {
+          logger.error(e.body.error);
+        }
         throw getKbnServerError(e);
       })
     );
