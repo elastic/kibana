@@ -161,7 +161,7 @@ Content is fetched from the remote (https://feeds.elastic.co and https://feeds-s
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects/README.md[savedObjects]
-|The savedObjects plugin exposes utilities to manipulate saved objects on the client side.
+|NOTE: This plugin is deprecated and will be removed in 8.0. See https://github.com/elastic/kibana/issues/46435 for more information.
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects_management/README.md[savedObjectsManagement]
