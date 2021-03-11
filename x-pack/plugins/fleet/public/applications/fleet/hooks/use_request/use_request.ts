@@ -15,6 +15,7 @@ import {
 import type {
   SendRequestConfig,
   SendRequestResponse,
+  UseRequestConfig,
 } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
 let httpClient: HttpSetup;
