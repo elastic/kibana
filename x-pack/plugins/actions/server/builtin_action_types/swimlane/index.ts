@@ -55,7 +55,7 @@ export function getActionType(
         validate: curry(validate.config)(configurationUtilities),
       }),
       secrets: schema.object(SwimlaneSecretsConfiguration, {
-        validate: curry(validate.config)(configurationUtilities),
+        validate: curry(validate.secrets)(configurationUtilities),
       }),
       params: ExecutorParamsSchema,
     },
@@ -95,16 +95,6 @@ async function executor(
     const errorMessage = `[Action][ExternalService] -> [Swimlane] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
-  }
-
-  if (subAction === 'application') {
-    const res = await api.application({
-      externalService,
-    });
-
-    if (res != null) {
-      data = res;
-    }
   }
 
   if (subAction === 'createRecord') {

@@ -17,17 +17,6 @@ const createMock = (): jest.Mocked<ExternalService> => {
         id: '123456',
       })
     ),
-    application: jest.fn().mockImplementation(() =>
-      Promise.resolve({
-        id: '987456',
-        fields: [
-          {
-            id: '333333',
-            key: 'foo-key',
-          },
-        ],
-      })
-    ),
   };
 };
 

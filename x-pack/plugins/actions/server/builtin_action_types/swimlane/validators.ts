@@ -5,12 +5,12 @@
  */
 
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ActionTypeConfigType, ActionTypeSecretsType, ExternalServiceValidation } from './types';
+import { ExternalServiceValidation, SwimlanePublicConfigurationType } from './types';
 import * as i18n from './translations';
 
 export const validateCommonConfig = (
   configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ActionTypeConfigType
+  configObject: SwimlanePublicConfigurationType
 ) => {
   try {
     configurationUtilities.ensureUriAllowed(configObject.apiUrl);
@@ -19,10 +19,7 @@ export const validateCommonConfig = (
   }
 };
 
-export const validateCommonSecrets = (
-  configurationUtilities: ActionsConfigurationUtilities,
-  secrets: ActionTypeSecretsType
-) => {};
+export const validateCommonSecrets = () => {};
 
 export const validate: ExternalServiceValidation = {
   config: validateCommonConfig,

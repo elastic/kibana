@@ -16,22 +16,25 @@ import {
   CreateRecordResponse,
   SwimlaneSecretConfigurationType,
   MappingConfigType,
-  SwimlaneRecordPayload,
-  GetApplicationResponse,
 } from './types';
 import * as i18n from './translations';
 import { getErrorMessage, request } from '../lib/axios_utils';
+// import { ActionsConfigurationUtilities } from '../../actions_config';
+import { getBodyForEventAction } from './helpers';
 
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
+  // configurationUtilities: ActionsConfigurationUtilities,
   proxySettings?: ProxySettings
 ): ExternalService => {
   const { apiUrl: url, appId, mappings } = config as SwimlanePublicConfigurationType;
   const { apiToken } = secrets as SwimlaneSecretConfigurationType;
 
   const axiosInstance = axios.create({
-    httpsAgent: new https.Agent({}),
+    httpsAgent: new https.Agent({
+      rejectUnauthorized: false,
+    }),
   });
 
   if (!url || !appId || !apiToken || !mappings) {
@@ -47,70 +50,13 @@ export const createExternalService = (
   const apiUrl = urlWithoutTrailingSlash.endsWith('api')
     ? urlWithoutTrailingSlash
     : urlWithoutTrailingSlash + '/api';
-  const applicationUrl = `${apiUrl}/app/{appId}`;
   const recordUrl = `${apiUrl}/app/{appId}/record`;
-  const getApplicationUrl = (id: string) => applicationUrl.replace('{appId}', id);
   const getPostRecordUrl = (id: string) => recordUrl.replace('{appId}', id);
-
-  const getBodyForEventAction = (
-    applicationId: string,
-    mappingConfig: MappingConfigType,
-    params: CreateRecordParams
-  ): SwimlaneRecordPayload => {
-    const data: SwimlaneRecordPayload = {
-      applicationId: appId,
-    };
-
-    const values: Record<string, unknown> = {};
-
-    for (const mappingsKey in mappingConfig) {
-      if (!Object.hasOwnProperty.call(mappingConfig, mappingsKey)) {
-        continue;
-      }
-
-      const fieldMap = mappingConfig[mappingsKey];
-
-      if (!fieldMap) {
-        continue;
-      }
-
-      const { id, key } = fieldMap;
-      const paramName = key.replace('KeyName', '');
-
-      values[id] = params[paramName];
-    }
-
-    data.values = values;
-
-    return data;
-  };
-
-  const getApplication = async (): Promise<GetApplicationResponse> => {
-    try {
-      const res = await request({
-        axios: axiosInstance,
-        url: getApplicationUrl(appId),
-        logger,
-        proxySettings,
-        headers,
-      });
-
-      return { ...(res?.data?.application ?? {}) };
-    } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get application with id ${appId}. Error: ${error.message}`
-        )
-      );
-    }
-  };
 
   const createRecord = async (params: CreateRecordParams): Promise<CreateRecordResponse> => {
     try {
       const mappingConfig = mappings as MappingConfigType;
       const data = getBodyForEventAction(appId, mappingConfig, params);
-
       const res = await request({
         axios: axiosInstance,
         url: getPostRecordUrl(appId),
@@ -119,6 +65,7 @@ export const createExternalService = (
         headers,
         method: 'post',
         data,
+        // configurationUtilities,
       });
       return { id: res.data.id };
     } catch (error) {
@@ -133,6 +80,5 @@ export const createExternalService = (
 
   return {
     createRecord,
-    application: getApplication,
   };
 };

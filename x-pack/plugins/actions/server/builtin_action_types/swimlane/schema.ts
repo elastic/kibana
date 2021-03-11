@@ -47,9 +47,9 @@ export const ExecutorSubActionSchema = schema.oneOf([
 ]);
 
 export const ExecutorSubActionCreateRecordParamsSchema = schema.object({
-  alertName: schema.string(),
-  severity: schema.string(),
-  alertSource: schema.string(),
+  alertName: schema.nullable(schema.string()),
+  severity: schema.nullable(schema.string()),
+  alertSource: schema.nullable(schema.string()),
   caseName: schema.nullable(schema.string()),
   caseId: schema.nullable(schema.string()),
   comments: schema.nullable(schema.string()),
@@ -58,10 +58,6 @@ export const ExecutorSubActionCreateRecordParamsSchema = schema.object({
 export const ExecutorSubActionGetApplicationParamsSchema = schema.object({ id: schema.string() });
 
 export const ExecutorParamsSchema = schema.oneOf([
-  schema.object({
-    subAction: schema.literal('application'),
-    subActionParams: ExecutorSubActionGetApplicationParamsSchema,
-  }),
   schema.object({
     subAction: schema.literal('createRecord'),
     subActionParams: ExecutorSubActionCreateRecordParamsSchema,

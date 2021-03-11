@@ -34,11 +34,6 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
   const { apiToken } = action.secrets;
   const { docLinks } = useKibana().services;
 
-  // const [connectionStatus, setConnectionStatus] = useState('incomplete');
-
-  // editActionConfig('apiUrl', 'https://swimlaneelastic.swimlane.us');
-  // editActionConfig('appId', 'acq16kdTcz5jlwM6h');
-  // editActionSecrets('apiToken', 'g2aykuTQxdpKoqj6joYVzYVil13uDmxA');
   const isValid = () => {
     return apiUrl && apiToken && appId;
   };
@@ -48,8 +43,7 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
     const application = await getApplication({ http, url: apiUrl, appId, apiToken });
 
     if (!application) {
-      // throw error
-      return;
+      throw new Error(i18n.SW_GET_APPLICATION_API_ERROR(appId));
     }
     const allFields = application.fields;
     updateFields(allFields);

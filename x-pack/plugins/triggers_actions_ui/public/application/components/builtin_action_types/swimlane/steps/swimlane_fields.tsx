@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useCallback } from 'react';
+import React, { Fragment } from 'react';
 import { EuiButton, EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import * as i18n from '../translations';
 import { StepProps } from './';
@@ -25,10 +25,10 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
     .sort((a, b) => (a.label?.toLowerCase() > b.label?.toLowerCase() ? 1 : -1));
 
   const findOption = (searchValue: string) => {
-      return options.find((f) => searchValue === f.value);
-    };
+    return options.find((f) => searchValue === f.value);
+  };
 
-  const findItem =(searchValue: string) => {
+  const findItem = (searchValue: string) => {
     return fields.find((f) => searchValue === f.id);
   };
 
@@ -48,19 +48,19 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
   };
 
   const editMappings = (key: string, option: EuiComboBoxOptionOption<string>) => {
-      if (!option?.value) {
-        return;
-      }
-      const item = findItem(option.value);
-      if (!item) {
-        return;
-      }
-      const newProps = {
-        ...mappings,
-        [key]: { id: item.id, name: item.name, key: item.key, fieldType: item.fieldType },
-      };
-      editActionConfig('mappings', newProps);
+    if (!option?.value) {
+      return;
+    }
+    const item = findItem(option.value);
+    if (!item) {
+      return;
+    }
+    const newProps = {
+      ...mappings,
+      [key]: { id: item.id, name: item.name, key: item.key, fieldType: item.fieldType },
     };
+    editActionConfig('mappings', newProps);
+  };
 
   const empty = { label: '', value: '' };
   return (
@@ -83,7 +83,6 @@ export const SwimlaneFields: React.FunctionComponent<StepProps> = ({
           selectedOptions={[state.severityConfig || empty]}
           options={options}
           singleSelection={SINGLE_SELECTION}
-          isInvalid={!state.severityConfig?.value}
           data-test-subj="swimlaneSeverityInput"
           onChange={(e) => {
             editMappings('severityConfig', e[0]);

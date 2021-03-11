@@ -4,16 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CreateRecordApiHandlerArgs,
-  CreateRecordResponse,
-  ExternalServiceApi,
-  GetApplicationHandlerArgs,
-} from './types';
-
-const getApplicationHandler = async ({ externalService }: GetApplicationHandlerArgs) => {
-  return await externalService.application();
-};
+import { CreateRecordApiHandlerArgs, CreateRecordResponse, ExternalServiceApi } from './types';
 
 const createRecordHandler = async ({
   externalService,
@@ -23,6 +14,5 @@ const createRecordHandler = async ({
 };
 
 export const api: ExternalServiceApi = {
-  application: getApplicationHandler,
   createRecord: createRecordHandler,
 };

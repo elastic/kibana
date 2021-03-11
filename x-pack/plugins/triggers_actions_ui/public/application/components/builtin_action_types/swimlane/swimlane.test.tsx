@@ -91,3 +91,24 @@ describe('swimlane connector validation', () => {
     });
   });
 });
+
+describe('swimlane action params validation', () => {
+  test('action params validation succeeds when action params is valid', () => {
+    const actionParams = {
+      subActionParams: {
+        alertName: 'Alert Name',
+      },
+    };
+
+    expect(actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        alertName: [],
+        alertSource: [],
+        caseId: [],
+        caseName: [],
+        comments: [],
+        severity: [],
+      },
+    });
+  });
+});

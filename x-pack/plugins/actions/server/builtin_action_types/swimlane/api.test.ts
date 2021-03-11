@@ -16,23 +16,6 @@ describe('api', () => {
   beforeEach(() => {
     externalService = externalServiceMock.create();
   });
-  describe('application', () => {
-    test('it returns the application correctly', async () => {
-      const res = await api.application({
-        externalService,
-        params: { id: '123456' },
-      });
-      expect(res).toEqual({
-        id: '987456',
-        fields: [
-          {
-            id: '333333',
-            key: 'foo-key',
-          },
-        ],
-      });
-    });
-  });
 
   describe('createRecord', () => {
     test('it creates a record correctly', async () => {
