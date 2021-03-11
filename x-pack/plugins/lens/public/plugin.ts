@@ -181,6 +181,13 @@ export class LensPlugin {
       return ContextProvider;
     };
 
+    const ensureDefaultIndexPattern = async () => {
+      const [, deps] = await core.getStartServices();
+      // make sure a default index pattern exists
+      // if not, the page will be redirected to management and visualize won't be rendered
+      await deps.data.indexPatterns.ensureDefaultIndexPattern();
+    };
+
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -188,6 +195,7 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { mountApp, stopReportManager } = await import('./async_services');
         this.stopReportManager = stopReportManager;
+        await ensureDefaultIndexPattern();
         return mountApp(core, params, {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,
