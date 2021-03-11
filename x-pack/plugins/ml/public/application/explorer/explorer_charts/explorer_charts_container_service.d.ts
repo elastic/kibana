@@ -15,7 +15,7 @@ export declare interface ExplorerChartsData {
   seriesToPlot: any[];
   tooManyBuckets: boolean;
   timeFieldName: string;
-  errorMessages: ExplorerChartSeriesErrorMessages;
+  errorMessages: ExplorerChartSeriesErrorMessages | undefined;
 }
 
 export declare const getDefaultChartsData: () => ExplorerChartsData;

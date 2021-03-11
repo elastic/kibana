@@ -32,6 +32,7 @@ import {
   getSelectionTimeRange,
   loadDataForCharts,
 } from '../../application/explorer/explorer_utils';
+import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import {
@@ -40,8 +41,7 @@ import {
   AnomalyExplorerServices,
 } from '..';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-import type { AnomalyChartData } from '../../application/services/anomaly_explorer_service';
-import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
+import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -68,7 +68,7 @@ export function useExplorerInputResolver(
   services: [CoreStart, MlStartDependencies, AnomalyExplorerServices],
   chartWidth: number,
   severity: number
-): { chartsData: AnomalyChartData; isLoading: boolean; error: Error | null | undefined } {
+): { chartsData: ExplorerChartsData; isLoading: boolean; error: Error | null | undefined } {
   const [
     { uiSettings },
     { data: dataServices },

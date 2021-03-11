@@ -15,15 +15,15 @@ import {
   SelectSeverityUI,
   TableSeverity,
 } from '../components/controls/select_severity/select_severity';
-import type { AnomalyChartData } from '../services/anomaly_explorer_service';
 import type { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
 import type { TimeBuckets } from '../util/time_buckets';
 import type { TimefilterContract } from '../../../../../../src/plugins/data/public';
 import type { EntityField } from '../../../common/util/anomaly_utils';
+import type { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
-  chartsData: AnomalyChartData;
+  chartsData: ExplorerChartsData;
   showCharts: boolean;
   severity: TableSeverity;
   setSeverity: (severity: TableSeverity) => void;

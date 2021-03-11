@@ -36,6 +36,7 @@ import { RecordsForCriteria, ScheduledEventsByBucket } from './results_service/r
 import { isPopulatedObject } from '../../../common/util/object_utils';
 import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
+import { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -104,23 +105,16 @@ interface ChartRange {
   max: number;
 }
 
-export interface AnomalyChartData {
-  chartsPerRow: number;
-  errorMessages?: Record<string, any>;
-  seriesToPlot: SeriesConfigWithMetadata[];
-  tooManyBuckets: boolean;
-  timeFieldName: string;
-}
 /**
  * Service for retrieving anomaly swim lanes data.
  */
 export class AnomalyExplorerService {
   constructor(private mlApiServices: MlApiServices, private mlResultsService: MlResultsService) {}
 
-  public getDefaultChartsData() {
+  public getDefaultChartsData(): ExplorerChartsData {
     return {
       chartsPerRow: 1,
-      errorMessages: {},
+      errorMessages: undefined,
       seriesToPlot: [] as SeriesConfigWithMetadata[],
       // default values, will update on every re-render
       tooManyBuckets: false,
@@ -383,7 +377,7 @@ export class AnomalyExplorerService {
     timefilter: TimefilterContract,
     severity = 0,
     maxSeries = 6
-  ): Promise<void | AnomalyChartData> {
+  ): Promise<void | ExplorerChartsData> {
     const data = this.getDefaultChartsData();
 
     const containerWith = chartsContainerWidth + SWIM_LANE_LABEL_WIDTH;
@@ -471,7 +465,9 @@ export class AnomalyExplorerService {
     );
     data.tooManyBuckets = tooManyBuckets;
 
-    data.errorMessages = errorMessages ?? {};
+    if (errorMessages) {
+      data.errorMessages = errorMessages;
+    }
 
     if (explorerService) {
       explorerService.setCharts({ ...data });
