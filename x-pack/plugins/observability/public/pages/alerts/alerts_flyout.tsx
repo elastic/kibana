@@ -7,12 +7,10 @@
 
 import {
   EuiBadge,
-  EuiDescriptionList,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutProps,
   EuiInMemoryTable,
-  EuiLink,
   EuiSpacer,
   EuiTabbedContent,
   EuiTitle,
