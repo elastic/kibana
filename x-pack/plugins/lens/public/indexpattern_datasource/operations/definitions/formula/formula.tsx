@@ -18,7 +18,6 @@ import {
   EuiSpacer,
   EuiModal,
   EuiModalHeader,
-  EuiModalBody,
   EuiModalFooter,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
@@ -55,6 +54,7 @@ import {
   suggest,
   getSuggestion,
   getPossibleFunctions,
+  getSignatureHelp,
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 
@@ -350,13 +350,35 @@ function FormulaEditor({
     [indexPattern, operationDefinitionMap]
   );
 
-  // const provideSignature = useCallback(() => {}, []);
+  const provideSignatureHelp = useCallback(
+    async (
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+      token: monaco.CancellationToken,
+      context: monaco.languages.SignatureHelpContext
+    ) => {
+      const innerText = model.getValue();
+      const textRange = model.getFullModelRange();
+
+      const lengthAfterPosition = model.getValueLengthInRange({
+        startLineNumber: position.lineNumber,
+        startColumn: position.column,
+        endLineNumber: textRange.endLineNumber,
+        endColumn: textRange.endColumn,
+      });
+      return getSignatureHelp(
+        model.getValue(),
+        innerText.length - lengthAfterPosition,
+        operationDefinitionMap
+      );
+    },
+    [operationDefinitionMap]
+  );
 
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
     value: text ?? '',
     onChange: setText,
-    // signatureProvider: provideSignature,
     options: {
       automaticLayout: false,
       fontSize: 14,
@@ -379,7 +401,11 @@ function FormulaEditor({
       triggerCharacters: ['.', ',', '(', '='],
       provideCompletionItems,
     });
-  }, [provideCompletionItems]);
+    monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {
+      signatureHelpTriggerCharacters: ['(', ',', '='],
+      provideSignatureHelp,
+    });
+  }, [provideCompletionItems, provideSignatureHelp]);
 
   return (
     <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">

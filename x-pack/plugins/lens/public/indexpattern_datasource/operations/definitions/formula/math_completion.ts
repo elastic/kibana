@@ -243,7 +243,7 @@ export function getSuggestion(
         id: 'editor.action.triggerSuggest',
       };
       kind = monaco.languages.CompletionItemKind.Field;
-      insertText = `${insertText}=`;
+      label = `${label}=`;
       insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
       detail = '';
 
@@ -259,4 +259,95 @@ export function getSuggestion(
     command,
     range,
   };
+}
+
+export function getSignatureHelp(
+  expression: string,
+  position: number,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+): monaco.languages.SignatureHelpResult {
+  const text = expression.substr(0, position) + MARKER + expression.substr(position);
+  try {
+    const ast = parse(text);
+
+    const tokenInfo = getInfoAtPosition(ast, position);
+
+    if (tokenInfo?.parent) {
+      const name = tokenInfo.parent.name;
+      // reference equality is fine here because of the way the getInfo function works
+      const index = tokenInfo.parent.args.findIndex((arg) => arg === tokenInfo.ast);
+
+      if (tinymathFunctions[name]) {
+        const stringify = `${name}(${tinymathFunctions[name].positionalArguments
+          .map((arg) => arg.name)
+          .join(', ')})`;
+        return {
+          value: {
+            signatures: [
+              {
+                label: stringify,
+                parameters: tinymathFunctions[name].positionalArguments.map((arg) => ({
+                  label: arg.name,
+                  documentation: arg.optional ? 'Optional' : '',
+                })),
+              },
+            ],
+            activeParameter: index,
+            activeSignature: 0,
+          },
+          dispose: () => {},
+        };
+      } else if (operationDefinitionMap[name]) {
+        const def = operationDefinitionMap[name];
+
+        const firstParam: monaco.languages.ParameterInformation | null =
+          def.type !== 'count'
+            ? {
+                label:
+                  def.input === 'field' ? 'field' : def.input === 'fullReference' ? 'function' : '',
+              }
+            : null;
+        if ('operationParams' in def) {
+          return {
+            value: {
+              signatures: [
+                {
+                  label: `${name}(${
+                    firstParam ? firstParam.label + ', ' : ''
+                  }${def.operationParams!.map((arg) => `${arg.name}=${arg.type}`)}`,
+                  parameters: [
+                    ...(firstParam ? [firstParam] : []),
+                    ...def.operationParams!.map((arg) => ({
+                      label: `${arg.name}=${arg.type}`,
+                      documentation: arg.required ? 'Required' : '',
+                    })),
+                  ],
+                },
+              ],
+              activeParameter: index,
+              activeSignature: 0,
+            },
+            dispose: () => {},
+          };
+        } else {
+          return {
+            value: {
+              signatures: [
+                {
+                  label: `${name}(${firstParam ? firstParam.label : ''})`,
+                  parameters: firstParam ? [firstParam] : [],
+                },
+              ],
+              activeParameter: index,
+              activeSignature: 0,
+            },
+            dispose: () => {},
+          };
+        }
+      }
+    }
+  } catch (e) {
+    // do nothing
+  }
+  return { value: { signatures: [], activeParameter: 0, activeSignature: 0 }, dispose: () => {} };
 }
