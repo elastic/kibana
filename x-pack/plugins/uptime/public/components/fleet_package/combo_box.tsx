@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { ConfigKeys, ICustomFields } from './types';
 
 // is there a way in typescript to express ConfigKey of type string[]?
 type ComboBoxKeys =
-  | ConfigKeys.PORTS
   | ConfigKeys.TAGS
   | ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE
   | ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
@@ -32,37 +31,46 @@ export const ComboBox = ({
   >(selectedOptions.map((option) => ({ label: option, key: option })));
   const [isInvalid, setInvalid] = useState(false);
 
-  const onOptionsChange = (options: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelectedOptions(options);
-    const formattedTags = options.map((option) => option.label);
-    setFields((currentFields) => ({ ...currentFields, [configKey]: formattedTags }));
-    setInvalid(false);
-  };
-
-  const onCreateOption = (tag: string) => {
-    const formattedTag = tag.trim();
-    const newOption = {
-      label: formattedTag,
-    };
-
-    setFields((currentFields) => ({
-      ...currentFields,
-      [configKey]: [...currentFields[configKey], formattedTag],
-    }));
-
-    // Select the option.
-    setSelectedOptions([...formattedSelectedOptions, newOption]);
-  };
-
-  const onSearchChange = (searchValue: string) => {
-    if (!searchValue) {
+  const onOptionsChange = useCallback(
+    (options: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedOptions(options);
+      const formattedTags = options.map((option) => option.label);
+      setFields((currentFields) => ({ ...currentFields, [configKey]: formattedTags }));
       setInvalid(false);
+    },
+    [configKey, setFields, setSelectedOptions, setInvalid]
+  );
 
-      return;
-    }
+  const onCreateOption = useCallback(
+    (tag: string) => {
+      const formattedTag = tag.trim();
+      const newOption = {
+        label: formattedTag,
+      };
 
-    setInvalid(!isValid(searchValue));
-  };
+      setFields((currentFields) => ({
+        ...currentFields,
+        [configKey]: [...currentFields[configKey], formattedTag],
+      }));
+
+      // Select the option.
+      setSelectedOptions([...formattedSelectedOptions, newOption]);
+    },
+    [configKey, formattedSelectedOptions, setFields, setSelectedOptions]
+  );
+
+  const onSearchChange = useCallback(
+    (searchValue: string) => {
+      if (!searchValue) {
+        setInvalid(false);
+
+        return;
+      }
+
+      setInvalid(!isValid(searchValue));
+    },
+    [setInvalid]
+  );
 
   return (
     <EuiComboBox<string>
