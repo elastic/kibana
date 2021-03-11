@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
+import React, { FC, useCallback, useState, useMemo } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -50,7 +50,6 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(optionValueToThreshold(ANOMALY_THRESHOLD.MINOR));
-  const [selectedEntityFields, setSelectedEntityFields] = useState<EntityField[]>([]);
 
   const [
     { uiSettings },
@@ -83,13 +82,6 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
     chartWidth,
     severity.val
   );
-
-  useEffect(() => {
-    onOutputChange({
-      entityFields: selectedEntityFields,
-    });
-  }, [selectedEntityFields]);
-
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       setChartWidth(e.width);
@@ -117,11 +109,12 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
 
   const addEntityFieldFilter = (entity: EntityField) => {
     const uniqueSelectedEntities = [entity];
-    // setSelectedEntityFields([...uniqueSelectedEntities]);
     uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({
       embeddable: embeddableContext,
       data: uniqueSelectedEntities,
-      updateCallback: setSelectedEntityFields.bind(null, uniqueSelectedEntities),
+    });
+    onOutputChange({
+      entityFields: uniqueSelectedEntities,
     });
   };
   return (

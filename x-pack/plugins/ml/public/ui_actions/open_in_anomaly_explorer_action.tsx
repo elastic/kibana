@@ -9,12 +9,21 @@ import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
+import {
+  ANOMALY_EXPLORER_EMBEDDABLE_TYPE,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+  ExplorerFieldSelectionContext,
+  isAnomalyExplorerEmbeddable,
+  isSwimLaneEmbeddable,
+  SwimLaneDrilldownContext,
+} from '../embeddables';
+import { ENTITFY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
+import { ExplorerAppState } from '../../common/types/ml_url_generator';
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
 export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<SwimLaneDrilldownContext>({
+  return createAction<SwimLaneDrilldownContext | ExplorerFieldSelectionContext>({
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
     getIconType(context): string {
@@ -25,42 +34,96 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         defaultMessage: 'Open in Anomaly Explorer',
       });
     },
-    async getHref({ embeddable, data }): Promise<string> {
+    async getHref(context): Promise<string | undefined> {
       const [, pluginsStart] = await getStartServices();
       const urlGenerator = pluginsStart.share.urlGenerators.getUrlGenerator(ML_APP_URL_GENERATOR);
-      const { jobIds, timeRange, viewBy } = embeddable.getInput();
-      const { perPage, fromPage } = embeddable.getOutput();
 
-      return urlGenerator.createUrl({
-        page: 'explorer',
-        pageState: {
-          jobIds,
-          timeRange,
-          mlExplorerSwimlane: {
-            viewByFromPage: fromPage,
-            viewByPerPage: perPage,
-            viewByFieldName: viewBy,
-            ...(data
-              ? {
-                  selectedType: data.type,
-                  selectedTimes: data.times,
-                  selectedLanes: data.lanes,
-                }
-              : {}),
+      if (isSwimLaneEmbeddable(context)) {
+        const { embeddable, data } = context;
+
+        const { jobIds, timeRange, viewBy } = embeddable.getInput();
+        const { perPage, fromPage } = embeddable.getOutput();
+
+        return urlGenerator.createUrl({
+          page: 'explorer',
+          pageState: {
+            jobIds,
+            timeRange,
+            mlExplorerSwimlane: {
+              viewByFromPage: fromPage,
+              viewByPerPage: perPage,
+              viewByFieldName: viewBy,
+              ...(data
+                ? {
+                    selectedType: data.type,
+                    selectedTimes: data.times,
+                    selectedLanes: data.lanes,
+                  }
+                : {}),
+            },
           },
-        },
-      });
+        });
+      } else if (isAnomalyExplorerEmbeddable(context)) {
+        const { embeddable } = context;
+
+        const { jobIds, timeRange } = embeddable.getInput();
+        const { entityFields } = embeddable.getOutput();
+
+        let mlExplorerFilter: ExplorerAppState['mlExplorerFilter'] | undefined;
+        if (
+          Array.isArray(entityFields) &&
+          entityFields.length === 1 &&
+          entityFields[0].operation === ENTITFY_FIELD_OPERATIONS.ADD
+        ) {
+          const { fieldName, fieldValue } = entityFields[0];
+          if (typeof fieldName === 'string' && typeof fieldValue === 'string') {
+            const influencersFilterQuery = {
+              bool: {
+                should: [
+                  {
+                    match_phrase: {
+                      [fieldName]: fieldValue,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            };
+            const filteredFields = [fieldName, fieldValue];
+            mlExplorerFilter = {
+              influencersFilterQuery,
+              filterActive: true,
+              queryString: `${fieldName}:"${fieldValue}"`,
+              ...(Array.isArray(filteredFields) ? { filteredFields } : {}),
+            };
+          }
+        }
+        return urlGenerator.createUrl({
+          page: 'explorer',
+          pageState: {
+            jobIds,
+            timeRange,
+            ...(mlExplorerFilter ? { mlExplorerFilter } : {}),
+          },
+        });
+      }
+      return undefined;
     },
-    async execute({ embeddable, data }) {
-      if (!embeddable) {
+    async execute(context) {
+      if (!context.embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
       const [{ application }] = await getStartServices();
-      const anomalyExplorerUrl = await this.getHref!({ embeddable, data });
-      await application.navigateToUrl(anomalyExplorerUrl!);
+      const anomalyExplorerUrl = await this.getHref!(context);
+      if (anomalyExplorerUrl) {
+        await application.navigateToUrl(anomalyExplorerUrl!);
+      }
     },
-    async isCompatible({ embeddable }: SwimLaneDrilldownContext) {
-      return embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
+    async isCompatible({ embeddable }: SwimLaneDrilldownContext | ExplorerFieldSelectionContext) {
+      return (
+        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE ||
+        embeddable.type === ANOMALY_EXPLORER_EMBEDDABLE_TYPE
+      );
     },
   });
 }

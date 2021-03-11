@@ -25,6 +25,8 @@ import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
 import { EntityField } from '../../common/util/anomaly_utils';
+import { isPopulatedObject } from '../../common/util/object_utils';
+import { ANOMALY_EXPLORER_EMBEDDABLE_TYPE, ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './constants';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -72,6 +74,14 @@ export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {
   data?: AppStateSelectedCells;
 }
 
+export function isSwimLaneEmbeddable(arg: unknown): arg is SwimLaneDrilldownContext {
+  return (
+    isPopulatedObject(arg) &&
+    arg.hasOwnProperty('embeddable') &&
+    arg.embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE
+  );
+}
+
 /**
  * Anomaly Explorer
  */
@@ -111,4 +121,11 @@ export interface ExplorerFieldSelectionContext extends EditExplorerPanelContext 
    * Optional data provided by swim lane selection
    */
   data?: EntityField[];
+}
+export function isAnomalyExplorerEmbeddable(arg: unknown): arg is ExplorerFieldSelectionContext {
+  return (
+    isPopulatedObject(arg) &&
+    arg.hasOwnProperty('embeddable') &&
+    arg.embeddable.type === ANOMALY_EXPLORER_EMBEDDABLE_TYPE
+  );
 }
