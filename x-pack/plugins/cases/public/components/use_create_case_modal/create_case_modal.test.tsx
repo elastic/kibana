@@ -8,7 +8,6 @@
 import React, { ReactNode } from 'react';
 import { mount } from 'enzyme';
 
-import '../../../common/mock/match_media';
 import { CreateCaseModal } from './create_case_modal';
 import { TestProviders } from '../../common/mock';
 

@@ -11,7 +11,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useKibana } from '../../common/lib/kibana';
-import '../../../common/mock/match_media';
 import { useCreateCaseModal, UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
 import { TestProviders } from '../../common/mock';
 
@@ -58,8 +57,6 @@ jest.mock('../create/submit_button', () => {
     },
   };
 });
-
-jest.mock('../../../common/hooks/use_selector');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const onCaseCreated = jest.fn();

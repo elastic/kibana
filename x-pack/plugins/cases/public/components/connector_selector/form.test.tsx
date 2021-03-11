@@ -12,9 +12,7 @@ import { ConnectorSelector } from './form';
 import { connectorsMock } from '../../containers/mock';
 import { getFormMock } from '../__mock__/form';
 
-jest.mock(
-  '../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form'
-);
+jest.mock('../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form');
 
 const useFormMock = useForm as jest.Mock;
 

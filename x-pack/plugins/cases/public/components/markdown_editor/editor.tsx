@@ -23,7 +23,7 @@ interface MarkdownEditorProps {
 }
 
 // create plugin stuff here
-const { uiPlugins, parsingPlugins, processingPlugins } = {
+export const { uiPlugins, parsingPlugins, processingPlugins } = {
   uiPlugins: getDefaultEuiMarkdownUiPlugins(),
   parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
   processingPlugins: getDefaultEuiMarkdownProcessingPlugins(),

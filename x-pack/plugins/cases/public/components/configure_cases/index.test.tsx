@@ -24,7 +24,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useActionTypes } from '../../containers/configure/use_action_types';
-import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 
 import {
   connectors,
@@ -35,16 +34,15 @@ import {
 } from './__mock__';
 import { ConnectorTypes } from '../../../common/api/connectors';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
 jest.mock('../../containers/configure/use_action_types');
-jest.mock('../../../common/components/navigation/use_get_url_search');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
-const useGetUrlSearchMock = useGetUrlSearch as jest.Mock;
+const useGetUrlSearchMock = jest.fn();
 const useActionTypesMock = useActionTypes as jest.Mock;
 
 describe('ConfigureCases', () => {
