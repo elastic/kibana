@@ -42,9 +42,25 @@ export async function getUpgradeAssistantStatus(
   const criticalWarnings = cluster.concat(indices).filter((d) => d.level === 'critical');
 
   return {
-    readyForUpgrade: criticalWarnings.length === 0,
-    cluster,
-    indices,
+    readyForUpgrade: false,
+    cluster: [],
+    indices: [
+      {
+        level: 'warning',
+        message: 'translog retention settings are ignored',
+        url: 'doc_url',
+        index: 'test1',
+        deprecatedIndexSettings: ['refresh_interval'], // this isn't the actual deprecated setting, but since the correct ones are deprecated on 9.0 (master) we're testing the functionality against settings that exist
+      },
+      {
+        level: 'none',
+        message: 'none level test',
+        url: 'test/url',
+        details: 'test details',
+        index: 'test2',
+        reindex: true,
+      },
+    ],
   };
 }
 

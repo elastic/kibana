@@ -21,11 +21,7 @@ export interface ParsedIndexName {
  * as these are only marked as deprecated if soft deletes is enabled
  * See logic in getDeprecatedSettingWarning() for more details
  */
-const deprecatedSettings = [
-  'index.force_memory_term_dictionary',
-  'index.max_adjacency_matrix_filters',
-  'index.soft_deletes.enabled',
-];
+const deprecatedSettings = ['index.refresh_interval']; // this isn't an actual deprecated setting, but since the correct ones are deprecated on 8.0 (master) we're testing the functionality against settings that exist
 
 /**
  * Validates, and updates deprecated settings and mappings to be applied to the
@@ -133,18 +129,18 @@ export const getReindexWarnings = (
 ): ReindexWarning[] => {
   const warnings = [] as ReindexWarning[];
 
-  if (versionService.getMajorVersion() === 7) {
-    const customTypeWarning = getCustomTypeWarning(flatSettings);
-    const deprecatedSettingWarning = getDeprecatedSettingWarning(flatSettings);
+  // if (versionService.getMajorVersion() === 7) {
+  const customTypeWarning = getCustomTypeWarning(flatSettings);
+  const deprecatedSettingWarning = getDeprecatedSettingWarning(flatSettings);
 
-    if (customTypeWarning) {
-      warnings.push(customTypeWarning);
-    }
-
-    if (deprecatedSettingWarning) {
-      warnings.push(deprecatedSettingWarning);
-    }
+  if (customTypeWarning) {
+    warnings.push(customTypeWarning);
   }
+
+  if (deprecatedSettingWarning) {
+    warnings.push(deprecatedSettingWarning);
+  }
+  // }
 
   return warnings;
 };
