@@ -9,7 +9,6 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { mount, ReactWrapper } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { EditExceptionModal } from './';
 import { useCurrentUser } from '../../../../common/lib/kibana';
@@ -28,6 +27,18 @@ import {
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiBreakpoints: {
+      l: '1200px',
+    },
+    paddingSizes: {
+      m: '10px',
+    },
+  },
+});
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');
@@ -84,7 +95,7 @@ describe('When the edit exception modal is opened', () => {
         },
       ]);
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <EditExceptionModal
             ruleIndices={[]}
             ruleId="123"
@@ -113,7 +124,7 @@ describe('When the edit exception modal is opened', () => {
           ] as EntriesArray,
         };
         wrapper = mount(
-          <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <ThemeProvider theme={mockTheme}>
             <EditExceptionModal
               ruleIndices={['filebeat-*']}
               ruleId="123"
@@ -158,7 +169,7 @@ describe('When the edit exception modal is opened', () => {
       let wrapper: ReactWrapper;
       beforeEach(async () => {
         wrapper = mount(
-          <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+          <ThemeProvider theme={mockTheme}>
             <EditExceptionModal
               ruleIndices={['filebeat-*']}
               ruleId="123"
@@ -211,7 +222,7 @@ describe('When the edit exception modal is opened', () => {
         },
       }));
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <EditExceptionModal
             ruleIndices={['filebeat-*']}
             ruleId="123"
@@ -255,7 +266,7 @@ describe('When the edit exception modal is opened', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <EditExceptionModal
             ruleIndices={['filebeat-*']}
             ruleId="123"
@@ -300,7 +311,7 @@ describe('When the edit exception modal is opened', () => {
     beforeEach(async () => {
       const exceptionItemMock = { ...getExceptionListItemSchemaMock(), entries: [] };
       wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <EditExceptionModal
             ruleIndices={['filebeat-*']}
             ruleId="123"
@@ -336,7 +347,7 @@ describe('When the edit exception modal is opened', () => {
 
   test('when there are exception builder errors has the add exception button disabled', async () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <EditExceptionModal
           ruleId="123"
           ruleIndices={['filebeat-*']}
