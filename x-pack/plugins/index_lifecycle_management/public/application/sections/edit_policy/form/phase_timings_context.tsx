@@ -23,19 +23,24 @@ const getPhaseTimingConfiguration = (
   hot: PhaseTimingConfiguration;
   warm: PhaseTimingConfiguration;
   cold: PhaseTimingConfiguration;
+  frozen: PhaseTimingConfiguration;
 } => {
   const isWarmPhaseEnabled = formData?._meta?.warm?.enabled;
   const isColdPhaseEnabled = formData?._meta?.cold?.enabled;
+  const isFrozenPhaseEnabled = formData?._meta?.frozen?.enabled;
+
   return {
-    hot: { isFinalDataPhase: !isWarmPhaseEnabled && !isColdPhaseEnabled },
-    warm: { isFinalDataPhase: isWarmPhaseEnabled && !isColdPhaseEnabled },
-    cold: { isFinalDataPhase: isColdPhaseEnabled },
+    hot: { isFinalDataPhase: !isWarmPhaseEnabled && !isColdPhaseEnabled && !isFrozenPhaseEnabled },
+    warm: { isFinalDataPhase: isWarmPhaseEnabled && !isColdPhaseEnabled && !isFrozenPhaseEnabled },
+    cold: { isFinalDataPhase: isColdPhaseEnabled && !isFrozenPhaseEnabled },
+    frozen: { isFinalDataPhase: isFrozenPhaseEnabled },
   };
 };
 export interface PhaseTimings {
   hot: PhaseTimingConfiguration;
   warm: PhaseTimingConfiguration;
   cold: PhaseTimingConfiguration;
+  frozen: PhaseTimingConfiguration;
   isDeletePhaseEnabled: boolean;
   setDeletePhaseEnabled: (enabled: boolean) => void;
 }
@@ -44,7 +49,12 @@ const PhaseTimingsContext = createContext<PhaseTimings>(null as any);
 
 export const PhaseTimingsProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData<FormInternal>({
-    watch: ['_meta.warm.enabled', '_meta.cold.enabled', '_meta.delete.enabled'],
+    watch: [
+      '_meta.warm.enabled',
+      '_meta.cold.enabled',
+      '_meta.frozen.enabled',
+      '_meta.delete.enabled',
+    ],
   });
 
   return (
@@ -65,6 +75,7 @@ export const PhaseTimingsProvider: FunctionComponent = ({ children }) => {
     </UseField>
   );
 };
+
 export const usePhaseTimings = () => {
   const ctx = useContext(PhaseTimingsContext);
   if (!ctx) throw new Error('Cannot use phase timings outside of phase timings context');

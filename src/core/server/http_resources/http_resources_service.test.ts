@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { getApmConfigMock } from './http_resources_service.test.mocks';
+
 import { IRouter, RouteConfig } from '../http';
 
 import { coreMock } from '../mocks';
@@ -24,6 +26,12 @@ describe('HttpResources service', () => {
   let router: jest.Mocked<IRouter>;
   const kibanaRequest = httpServerMock.createKibanaRequest();
   const context = { core: coreMock.createRequestHandlerContext() };
+  const apmConfig = { mockApmConfig: true };
+
+  beforeEach(() => {
+    getApmConfigMock.mockReturnValue(apmConfig);
+  });
+
   describe('#createRegistrar', () => {
     beforeEach(() => {
       setupDeps = {
@@ -52,6 +60,9 @@ describe('HttpResources service', () => {
             context.core.uiSettings.client,
             {
               includeUserSettings: true,
+              vars: {
+                apmConfig,
+              },
             }
           );
         });
@@ -101,6 +112,9 @@ describe('HttpResources service', () => {
             context.core.uiSettings.client,
             {
               includeUserSettings: false,
+              vars: {
+                apmConfig,
+              },
             }
           );
         });
