@@ -18,3 +18,5 @@ export const ROLLOVER_FORM_PATHS = {
   maxAge: 'phases.hot.actions.rollover.max_age',
   maxSize: 'phases.hot.actions.rollover.max_size',
 };
+
+export const policyNamePath = 'name';

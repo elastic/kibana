@@ -62,7 +62,7 @@ export interface Props {
   history: RouteComponentProps['history'];
 }
 
-const policyNamePath = 'name';
+import { policyNamePath } from './constants';
 
 export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   const [isShowingPolicyJsonFlyout, setIsShowingPolicyJsonFlyout] = useState(false);
@@ -159,36 +159,36 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     <EuiPage>
       <EuiPageBody>
         <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle size="l" data-test-subj="policyTitle">
-                <h1>
-                  {isNewPolicy
-                    ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                        defaultMessage: 'Create policy',
-                      })
-                    : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                        defaultMessage: 'Edit policy {originalPolicyName}',
-                        values: { originalPolicyName },
-                      })}
-                </h1>
-              </EuiTitle>
-            </EuiPageContentHeaderSection>
-            <EuiPageContentHeaderSection>
-              <EuiButtonEmpty
-                href={createDocLink('index-lifecycle-management.html')}
-                target="_blank"
-                iconType="help"
-              >
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
-                  defaultMessage="Documentation"
-                />
-              </EuiButtonEmpty>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-
           <div style={{ display: currentView.id === 'policy' ? undefined : 'none' }}>
+            <EuiPageContentHeader>
+              <EuiPageContentHeaderSection>
+                <EuiTitle size="l" data-test-subj="policyTitle">
+                  <h1>
+                    {isNewPolicy
+                      ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
+                          defaultMessage: 'Create policy',
+                        })
+                      : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
+                          defaultMessage: 'Edit policy {originalPolicyName}',
+                          values: { originalPolicyName },
+                        })}
+                  </h1>
+                </EuiTitle>
+              </EuiPageContentHeaderSection>
+              <EuiPageContentHeaderSection>
+                <EuiButtonEmpty
+                  href={createDocLink('index-lifecycle-management.html')}
+                  target="_blank"
+                  iconType="help"
+                >
+                  <FormattedMessage
+                    id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
+                    defaultMessage="Documentation"
+                  />
+                </EuiButtonEmpty>
+              </EuiPageContentHeaderSection>
+            </EuiPageContentHeader>
+
             <Form form={form}>
               {isNewPolicy ? null : (
                 <Fragment>
@@ -354,6 +354,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
           {currentView.id === 'rollupAction' && hasCurrentRollupField && (
             <RollupWizard
               form={form}
+              policyName={currentPolicyName || originalPolicyName}
               phase={currentView.phase}
               onCancel={() => {
                 const { phase } = currentView;

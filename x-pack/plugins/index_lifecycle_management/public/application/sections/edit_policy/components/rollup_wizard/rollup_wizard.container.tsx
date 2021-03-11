@@ -15,9 +15,9 @@ import { FieldChooserProvider } from './field_chooser_context';
 type Props = Omit<RollupWizardViewProps, 'value'> & { form: FormHook };
 
 export const RollupWizard: FunctionComponent<Props> = ({ phase, form, ...rest }) => {
-  const path = `phases.${phase}.actions.rollup.config`;
-  const [data] = useFormData({ form, watch: path });
-  const value = get(data, path);
+  const rollupPath = `phases.${phase}.actions.rollup.config`;
+  const [data] = useFormData({ form, watch: rollupPath });
+  const value = get(data, rollupPath);
   return (
     <FieldChooserProvider>
       <RollupWizardView value={value} phase={phase} {...rest} />

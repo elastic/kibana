@@ -12,8 +12,8 @@ import {
   EuiStepsHorizontal,
   EuiHorizontalRule,
   EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiPageContentHeaderSection,
+  EuiPageContentHeader,
 } from '@elastic/eui';
 
 import { cloneDeep, mapValues } from 'lodash';
@@ -93,6 +93,7 @@ export interface Props {
    */
   value?: RollupAction['config'];
   phase: 'hot' | 'cold';
+  policyName?: string;
   onCancel: () => void;
   onDone: (value: RollupAction['config']) => void;
 }
@@ -327,28 +328,34 @@ export class RollupWizard extends Component<Props, State> {
   };
 
   render() {
-    const { phase, onCancel } = this.props;
+    const { phase, onCancel, policyName } = this.props;
     return (
       <>
-        <EuiButtonEmpty flush="left" onClick={onCancel} iconType="arrowLeft" iconSide="left">
-          {i18n.translate('xpack.indexLifecycleMgmt.rollup.backToPolicyButtonLabel', {
-            defaultMessage: 'Back to policy',
-          })}
-        </EuiButtonEmpty>
-        <EuiHorizontalRule />
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
-          <EuiTitle size="m">
-            <h1>
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.rollup.createTitle"
-                defaultMessage="Configure {phase} phase rollup action"
-                values={{
-                  phase: i18nTexts.title[phase],
-                }}
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexGroup>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <EuiTitle size="l" data-test-subj="policyTitle">
+              <h1>
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.rollup.createTitle"
+                  defaultMessage="Configure {phase} phase rollup action"
+                  values={{
+                    phase: i18nTexts.title[phase],
+                  }}
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageContentHeaderSection>
+          <EuiPageContentHeaderSection>
+            <EuiButtonEmpty flush="left" onClick={onCancel} iconType="arrowLeft" iconSide="left">
+              {i18n.translate('xpack.indexLifecycleMgmt.rollup.backToPolicyButtonLabel', {
+                defaultMessage: 'Back to policy {policyName}',
+                values: {
+                  policyName,
+                },
+              })}
+            </EuiButtonEmpty>
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
 
         <EuiSpacer />
 
