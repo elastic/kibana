@@ -23,6 +23,8 @@ import {
 } from './helpers';
 
 interface ResultSettingsActions {
+  openConfirmResetModal(): void;
+  openConfirmSaveModal(): void;
   closeModals(): void;
   clearAllFields(): void;
   resetAllFields(): void;
@@ -43,6 +45,8 @@ interface ResultSettingsValues {
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
   path: ['enterprise_search', 'app_search', 'result_settings_logic'],
   actions: () => ({
+    openConfirmResetModal: () => true,
+    openConfirmSaveModal: () => true,
     closeModals: () => true,
     clearAllFields: () => true,
     resetAllFields: () => true,
@@ -54,6 +58,8 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       {
         closeModals: () => OpenModal.None,
         resetAllFields: () => OpenModal.None,
+        openConfirmResetModal: () => OpenModal.ConfirmResetModal,
+        openConfirmSaveModal: () => OpenModal.ConfirmSaveModal,
       },
     ],
     nonTextResultFields: [

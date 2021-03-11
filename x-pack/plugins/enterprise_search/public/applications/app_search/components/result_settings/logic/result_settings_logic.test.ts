@@ -45,6 +45,32 @@ describe('ResultSettingsLogic', () => {
   });
 
   describe('actions', () => {
+    describe('openConfirmSaveModal', () => {
+      mount({
+        openModal: OpenModal.None,
+      });
+
+      ResultSettingsLogic.actions.openConfirmSaveModal();
+
+      expect(ResultSettingsLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        openModal: OpenModal.ConfirmSaveModal,
+      });
+    });
+
+    describe('openConfirmResetModal', () => {
+      mount({
+        openModal: OpenModal.None,
+      });
+
+      ResultSettingsLogic.actions.openConfirmResetModal();
+
+      expect(ResultSettingsLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        openModal: OpenModal.ConfirmResetModal,
+      });
+    });
+
     describe('closeModals', () => {
       itShouldCloseOpenModals(() => {
         ResultSettingsLogic.actions.closeModals();
