@@ -96,6 +96,12 @@ export class Authorization {
       const requiredPrivileges: string[] = classes.map((className) =>
         securityAuth.actions.cases.get(className, operation)
       );
+
+      const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
+      const { hasAllRequested, username, privileges } = checkPrivileges({
+        kibana: requiredPrivileges,
+      });
+
     }
   }
 }
