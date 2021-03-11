@@ -131,15 +131,15 @@ export enum ES_SPATIAL_RELATIONS {
   WITHIN = 'WITHIN',
 }
 
-export const GEO_JSON_TYPE = {
-  POINT: 'Point',
-  MULTI_POINT: 'MultiPoint',
-  LINE_STRING: 'LineString',
-  MULTI_LINE_STRING: 'MultiLineString',
-  POLYGON: 'Polygon',
-  MULTI_POLYGON: 'MultiPolygon',
-  GEOMETRY_COLLECTION: 'GeometryCollection',
-};
+export enum GEO_JSON_TYPE {
+  POINT = 'Point',
+  MULTI_POINT = 'MultiPoint',
+  LINE_STRING = 'LineString',
+  MULTI_LINE_STRING = 'MultiLineString',
+  POLYGON = 'Polygon',
+  MULTI_POLYGON = 'MultiPolygon',
+  GEOMETRY_COLLECTION = 'GeometryCollection',
+}
 
 export const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
 export const LON_INDEX = 0;

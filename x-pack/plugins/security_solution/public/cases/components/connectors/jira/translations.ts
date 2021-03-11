@@ -56,21 +56,21 @@ export const SEARCH_ISSUES_LOADING = i18n.translate(
 );
 
 export const PRIORITY = i18n.translate(
-  'xpack.securitySolution.case.connectors.jira.prioritySelectFieldLabel',
+  'xpack.securitySolution.cases.connectors.jira.prioritySelectFieldLabel',
   {
     defaultMessage: 'Priority',
   }
 );
 
 export const ISSUE_TYPE = i18n.translate(
-  'xpack.securitySolution.case.connectors.jira.issueTypesSelectFieldLabel',
+  'xpack.securitySolution.cases.connectors.jira.issueTypesSelectFieldLabel',
   {
     defaultMessage: 'Issue type',
   }
 );
 
 export const PARENT_ISSUE = i18n.translate(
-  'xpack.securitySolution.case.connectors.jira.parentIssueSearchLabel',
+  'xpack.securitySolution.cases.connectors.jira.parentIssueSearchLabel',
   {
     defaultMessage: 'Parent issue',
   }

@@ -14,10 +14,10 @@ import { i18n } from '@kbn/i18n';
 
 import { RelevanceTuningLogic } from '../..';
 import { PROXIMITY_BOOST_FUNCTION_DISPLAY_MAP } from '../../constants';
-import { Boost, BoostType, ProximityBoostFunction } from '../../types';
+import { BoostType, ProximityBoost, ProximityBoostFunction } from '../../types';
 
 interface Props {
-  boost: Boost;
+  boost: ProximityBoost;
   index: number;
   name: string;
 }
