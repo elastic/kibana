@@ -7,39 +7,46 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
+import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
+import { installIndexPatterns } from '../kibana/index_pattern/install';
 
 import { installPackage } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
-  packagesToUpgrade: string[];
+  packagesToInstall: string[];
   esClient: ElasticsearchClient;
 }
 
 export async function bulkInstallPackages({
   savedObjectsClient,
-  packagesToUpgrade,
+  packagesToInstall,
   esClient,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
+  const logger = appContextService.getLogger();
+  const installSource = 'registry';
   const latestPackagesResults = await Promise.allSettled(
-    packagesToUpgrade.map((packageName) => Registry.fetchFindLatestPackage(packageName))
+    packagesToInstall.map((packageName) => Registry.fetchFindLatestPackage(packageName))
   );
 
+  logger.debug(`kicking off bulk install of ${packagesToInstall.join(', ')} from registry`);
   const installResults = await Promise.allSettled(
     latestPackagesResults.map(async (result, index) => {
-      const packageName = packagesToUpgrade[index];
+      const packageName = packagesToInstall[index];
       if (result.status === 'fulfilled') {
         const latestPackage = result.value;
         return {
           name: packageName,
           version: latestPackage.version,
-          assets: await installPackage({
+          result: await installPackage({
             savedObjectsClient,
             esClient,
             pkgkey: Registry.pkgToPkgKey(latestPackage),
-            installSource: 'registry',
+            installSource,
+            skipPostInstall: true,
+            allowedInstallTypes: ['install'],
           }),
         };
       }
@@ -47,8 +54,17 @@ export async function bulkInstallPackages({
     })
   );
 
+  // only install index patterns if we installed any package for the first time
+  if (
+    installResults.find(
+      (result) => result.status === 'fulfilled' && result.value.result?.status === 'installed'
+    )
+  ) {
+    await installIndexPatterns({ savedObjectsClient, esClient, installSource });
+  }
+
   return installResults.map((result, index) => {
-    const packageName = packagesToUpgrade[index];
+    const packageName = packagesToInstall[index];
     return result.status === 'fulfilled'
       ? result.value
       : { name: packageName, error: result.reason };

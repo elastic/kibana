@@ -235,7 +235,7 @@ export const installPackageFromRegistryHandler: RequestHandler<
       force: request.body?.force,
     });
     const body: InstallPackageResponse = {
-      response: res,
+      response: res.assets,
     };
     return response.ok({ body });
   } catch (e) {
@@ -268,7 +268,7 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
-    packagesToUpgrade: request.body.packages,
+    packagesToInstall: request.body.packages,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -301,7 +301,7 @@ export const installPackageByUploadHandler: RequestHandler<
       contentType,
     });
     const body: InstallPackageResponse = {
-      response: res,
+      response: res.assets,
     };
     return response.ok({ body });
   } catch (error) {

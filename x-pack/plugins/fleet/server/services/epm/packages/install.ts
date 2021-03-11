@@ -26,12 +26,14 @@ import type {
   AssetType,
   EsAssetReference,
   InstallType,
+  InstallResult,
 } from '../../../types';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
+import { installIndexPatterns } from '../kibana/index_pattern/install';
 
 import {
   isRequiredPackage,
@@ -61,7 +63,7 @@ export async function installLatestPackage(options: {
       savedObjectsClient,
       pkgkey,
       esClient,
-    });
+    }).then(({ assets }) => assets);
   } catch (err) {
     throw err;
   }
@@ -74,7 +76,7 @@ export async function ensureInstalledDefaultPackages(
   const installations = [];
   const bulkResponse = await bulkInstallPackages({
     savedObjectsClient,
-    packagesToUpgrade: Object.values(defaultPackages),
+    packagesToInstall: Object.values(defaultPackages),
     esClient,
   });
 
@@ -162,6 +164,7 @@ export async function handleInstallPackageFailure({
         savedObjectsClient,
         pkgkey: prevVersion,
         esClient,
+        allowedInstallTypes: ['reinstall', 'reupdate', 'rollback'],
       });
     }
   } catch (e) {
@@ -180,6 +183,7 @@ interface InstallRegistryPackageParams {
   pkgkey: string;
   esClient: ElasticsearchClient;
   force?: boolean;
+  allowedInstallTypes?: InstallType[];
 }
 
 async function installPackageFromRegistry({
@@ -187,7 +191,9 @@ async function installPackageFromRegistry({
   pkgkey,
   esClient,
   force = false,
-}: InstallRegistryPackageParams): Promise<AssetReference[]> {
+  allowedInstallTypes = ['install', 'update'],
+}: InstallRegistryPackageParams): Promise<InstallResult> {
+  const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
 
@@ -198,12 +204,32 @@ async function installPackageFromRegistry({
   // get latest package version
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
 
-  // let the user install out-of-date package versions if using the force flag or
-  // needing to reinstall or install a previous version due to failed update
-  const installOutOfDateVersionOk =
-    installType === 'reinstall' || installType === 'reupdate' || installType === 'rollback';
-  if (!force && !installOutOfDateVersionOk && semverLt(pkgVersion, latestPackage.version)) {
-    throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
+  // if the requested version is the same as installed version, check if we allow it
+  // if we don't allow it, just return the asset references from the existing installation
+  if (installedPkg?.attributes.version === pkgVersion) {
+    if (!force && !allowedInstallTypes.includes(installType)) {
+      logger.debug(`${pkgkey} is already installed, skipping installation`);
+      return {
+        assets: [
+          ...installedPkg.attributes.installed_es,
+          ...installedPkg.attributes.installed_kibana,
+        ],
+        status: 'already_installed',
+      };
+    }
+  }
+
+  // if the requested version is out-of-date of the latest package version, check if we allow it
+  // if we don't allow it, return an error
+  if (semverLt(pkgVersion, latestPackage.version)) {
+    if (!force && !allowedInstallTypes.includes(installType)) {
+      throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
+    }
+    logger.debug(
+      `${pkgkey} is out-of-date, installing anyway due to ${
+        force ? 'force flag' : `install type ${installType}`
+      }`
+    );
   }
 
   // get package info
@@ -219,6 +245,8 @@ async function installPackageFromRegistry({
       packageInfo,
       installType,
       installSource: 'registry',
+    }).then((assets) => {
+      return { assets, status: 'installed' };
     });
   } catch (e) {
     await handleInstallPackageFailure({
@@ -240,16 +268,12 @@ interface InstallUploadedArchiveParams {
   contentType: string;
 }
 
-export type InstallPackageParams =
-  | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
-  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams);
-
 async function installPackageByUpload({
   savedObjectsClient,
   esClient,
   archiveBuffer,
   contentType,
-}: InstallUploadedArchiveParams): Promise<AssetReference[]> {
+}: InstallUploadedArchiveParams): Promise<InstallResult> {
   const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
 
   const installedPkg = await getInstallationObject({
@@ -287,25 +311,59 @@ async function installPackageByUpload({
     packageInfo,
     installType,
     installSource,
+  }).then((assets) => {
+    return { assets, status: 'installed' };
   });
 }
+
+export type InstallPackageParams = {
+  skipPostInstall?: boolean;
+} & (
+  | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
+  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
+);
 
 export async function installPackage(args: InstallPackageParams) {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
+  const logger = appContextService.getLogger();
 
   if (args.installSource === 'registry') {
-    const { savedObjectsClient, pkgkey, esClient, force } = args;
-    return installPackageFromRegistry({
+    const {
       savedObjectsClient,
       pkgkey,
       esClient,
       force,
+      skipPostInstall = false,
+      installSource,
+      allowedInstallTypes,
+    } = args;
+    const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
+    logger.debug(`kicking off install of ${pkgkey} from registry`);
+    const response = installPackageFromRegistry({
+      savedObjectsClient,
+      pkgkey,
+      esClient,
+      force,
+      allowedInstallTypes,
+    }).then(async (installResult) => {
+      if (skipPostInstall) {
+        return installResult;
+      }
+      logger.debug(`install of ${pkgkey} finished, running post-install`);
+      return installIndexPatterns({
+        savedObjectsClient,
+        esClient,
+        pkgName,
+        pkgVersion,
+        installSource,
+      }).then(() => installResult);
     });
+    return response;
   } else if (args.installSource === 'upload') {
     const { savedObjectsClient, esClient, archiveBuffer, contentType } = args;
-
+    logger.debug(`kicking off install of uploaded package`);
     return installPackageByUpload({
       savedObjectsClient,
       esClient,
@@ -408,26 +466,27 @@ export async function ensurePackagesCompletedInstall(
     searchFields: ['install_status'],
     search: 'installing',
   });
-  const installingPromises = installingPackages.saved_objects.reduce<
-    Array<Promise<AssetReference[]>>
-  >((acc, pkg) => {
-    const startDate = pkg.attributes.install_started_at;
-    const nowDate = new Date().toISOString();
-    const elapsedTime = Date.parse(nowDate) - Date.parse(startDate);
-    const pkgkey = `${pkg.attributes.name}-${pkg.attributes.install_version}`;
-    // reinstall package
-    if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
-      acc.push(
-        installPackage({
-          installSource: 'registry',
-          savedObjectsClient,
-          pkgkey,
-          esClient,
-        })
-      );
-    }
-    return acc;
-  }, []);
+  const installingPromises = installingPackages.saved_objects.reduce<Array<Promise<InstallResult>>>(
+    (acc, pkg) => {
+      const startDate = pkg.attributes.install_started_at;
+      const nowDate = new Date().toISOString();
+      const elapsedTime = Date.parse(nowDate) - Date.parse(startDate);
+      const pkgkey = `${pkg.attributes.name}-${pkg.attributes.install_version}`;
+      // reinstall package
+      if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
+        acc.push(
+          installPackage({
+            installSource: 'registry',
+            savedObjectsClient,
+            pkgkey,
+            esClient,
+          })
+        );
+      }
+      return acc;
+    },
+    []
+  );
   await Promise.all(installingPromises);
   return installingPackages;
 }

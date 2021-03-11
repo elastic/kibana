@@ -82,10 +82,15 @@ export interface IBulkInstallPackageHTTPError {
   error: string | Error;
 }
 
+export interface InstallResult {
+  assets: AssetReference[];
+  status: 'installed' | 'already_installed';
+}
+
 export interface BulkInstallPackageInfo {
   name: string;
   version: string;
-  assets: AssetReference[];
+  result: InstallResult;
 }
 
 export interface BulkInstallPackagesResponse {

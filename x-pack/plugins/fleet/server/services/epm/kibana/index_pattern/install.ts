@@ -61,16 +61,29 @@ const typeMap: TypeMap = {
 };
 
 export const indexPatternTypes = Object.values(dataTypes);
-export async function installIndexPatterns(
-  savedObjectsClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  pkgName?: string,
-  pkgVersion?: string,
-  installSource?: InstallSource
-) {
+export async function installIndexPatterns({
+  savedObjectsClient,
+  esClient,
+  pkgName,
+  pkgVersion,
+  installSource,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  pkgName?: string;
+  pkgVersion?: string;
+  installSource?: InstallSource;
+}) {
+  const logger = appContextService.getLogger();
   const indexPatternService = await appContextService
     .getData()
     .indexPatterns.indexPatternsServiceFactory(savedObjectsClient, esClient);
+
+  logger.debug(
+    `kicking off installation of index patterns for ${
+      pkgName && pkgVersion ? `${pkgName}-${pkgVersion}` : 'no specific package'
+    }`
+  );
 
   // get all user installed packages
   const installedPackagesRes = await getPackageSavedObjects(savedObjectsClient);
@@ -105,6 +118,7 @@ export async function installIndexPatterns(
       });
     }
   }
+
   // get each package's registry info
   const packagesToFetchPromise = packagesToFetch.map((pkg) =>
     getPackageFromSource({
@@ -115,12 +129,14 @@ export async function installIndexPatterns(
     })
   );
   const packages = await Promise.all(packagesToFetchPromise);
+
   // for each index pattern type, create an index pattern
   return Promise.all(
     indexPatternTypes.map(async (indexPatternType) => {
       // if this is an update because a package is being uninstalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
       if (!pkgName && installedPackagesSavedObjects.length === 0) {
         try {
+          logger.debug(`deleting index pattern ${indexPatternType}-*`);
           await indexPatternService.delete(`${indexPatternType}-*`);
         } catch (err) {
           // index pattern was probably deleted by the user already
@@ -131,7 +147,9 @@ export async function installIndexPatterns(
       // get all data stream fields from all installed packages
       const fields = await getAllDataStreamFieldsByType(packagesWithInfo, indexPatternType);
       const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
+
       // create or overwrite the index pattern
+      logger.debug(`creating index pattern ${kibanaIndexPattern.title}`);
       await indexPatternService.createAndSave(kibanaIndexPattern, true, true);
     })
   );
