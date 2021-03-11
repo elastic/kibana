@@ -73,8 +73,8 @@ export function AnomalyDetection() {
           })}
         </h1>
       </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiText>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
         {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
           defaultMessage: `Machine Learning's anomaly detection integration enables application health status indicators for services in each configured environment by identifying anomalies in latency.`,
         })}
