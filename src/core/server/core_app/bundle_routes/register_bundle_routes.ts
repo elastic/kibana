@@ -39,7 +39,7 @@ export function registerBundleRoutes({
   const { dist: isDist, buildNum } = packageInfo;
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
-  // will store the 100 most recently used hashes.
+  // will store the most recently used hashes.
   const fileHashCache = new FileHashCache();
 
   registerRouteForBundle(router, {
