@@ -273,7 +273,6 @@ Example: ${'`mod(sum(bytes), 2)`'}
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
       {
         name: i18n.translate('xpack.lens.formula.base', { defaultMessage: 'base' }),
-        optional: true,
       },
     ],
     help: `
