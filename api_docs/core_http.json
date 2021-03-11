@@ -2887,7 +2887,7 @@
             "type": "Function",
             "label": "notHandled",
             "description": [
-              "\nUser has no credentials.\nAllows user to access a resource when authRequired: 'optional'\nRejects a request when authRequired: true"
+              "\nUser has no credentials.\nAllows user to access a resource when authRequired is 'optional'\nRejects a request when authRequired: true"
             ],
             "source": {
               "path": "src/core/server/http/lifecycle/auth.ts",
@@ -4732,7 +4732,7 @@
             "type": "CompoundType",
             "label": "authRequired",
             "description": [
-              "\nDefines authentication mode for a route:\n- true. A user has to have valid credentials to access a resource\n- false. A user can access a resource without any credentials.\n- 'optional'. A user can access a resource if has valid credentials or no credentials at all.\nCan be useful when we grant access to a resource but want to identify a user if possible.\n\nDefaults to `true` if an auth mechanism is registered."
+              "\nDefines authentication mode for a route:\n- true. A user has to have valid credentials to access a resource\n- false. A user can access a resource without any credentials.\n- 'optional'. A user can access a resource, and will be authenticated if provided credentials are valid.\n              Can be useful when we grant access to a resource but want to identify a user if possible.\n\nDefaults to `true` if an auth mechanism is registered."
             ],
             "source": {
               "path": "src/core/server/http/router/route.ts",

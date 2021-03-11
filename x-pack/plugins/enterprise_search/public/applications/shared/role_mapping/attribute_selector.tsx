@@ -20,6 +20,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { AttributeName, AttributeExamples } from '../types';
+
 import {
   ANY_AUTH_PROVIDER,
   ANY_AUTH_PROVIDER_OPTION_LABEL,
@@ -30,8 +32,6 @@ import {
   EXTERNAL_ATTRIBUTE_LABEL,
   ATTRIBUTE_VALUE_LABEL,
 } from './constants';
-
-export type AttributeName = keyof AttributeExamples | 'role';
 
 interface Props {
   attributeName: AttributeName;
@@ -45,12 +45,6 @@ interface Props {
   handleAttributeSelectorChange(value: string, elasticsearchRole: string): void;
   handleAttributeValueChange(value: string): void;
   handleAuthProviderChange?(value: string[]): void;
-}
-
-interface AttributeExamples {
-  username: string;
-  email: string;
-  metadata: string;
 }
 
 interface ParentOption extends EuiComboBoxOptionOption<string> {
