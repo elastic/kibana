@@ -19,5 +19,7 @@ export function iconForNode(node: cytoscape.NodeSingular) {
   const subtype = node.data(SPAN_SUBTYPE);
   const type = node.data(SPAN_TYPE);
 
-  return agentName ? getAgentIcon(agentName) : getSpanIcon(type, subtype);
+  return agentName
+    ? getAgentIcon(agentName, false)
+    : getSpanIcon(type, subtype);
 }
