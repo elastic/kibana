@@ -35,7 +35,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
-import { indexDataProvider } from './create_index_source';
+import { createIndexSource } from './create_index_source';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -598,18 +598,6 @@ export async function initRoutes(
     }
   );
 
-  async function indexData(core, index, mappings) {
-    const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
-      core.savedObjects.client,
-      core.elasticsearch.client.asCurrentUser
-    );
-    const { indexData: _indexData } = indexDataProvider(
-      core.elasticsearch.client,
-      indexPatternsService
-    );
-    return _indexData(index, mappings);
-  }
-
   if (drawingFeatureEnabled) {
     router.post(
       {
@@ -629,7 +617,16 @@ export async function initRoutes(
       },
       async (context, request, response) => {
         const { index, mappings } = request.body;
-        const result = await indexData(context.core, index, mappings);
+        const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
+          core.savedObjects.client,
+          core.elasticsearch.client.asCurrentUser
+        );
+        const result = await createIndexSource(
+          index,
+          mappings,
+          core.elasticsearch.client,
+          indexPatternsService
+        );
         if (result.success) {
           return response.ok({ body: result });
         } else {

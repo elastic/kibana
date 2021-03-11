@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export interface CreateResponse {
+export interface CreateIndexSourceResp {
   success: boolean;
   error?: Error;
 }
 
-export interface Mappings {
+export interface IndexSourceMappings {
   _meta?: {
     created_by: string;
   };
