@@ -77,10 +77,16 @@ export const i18nTexts = {
         defaultMessage: 'Select a node attribute',
       }
     ),
-    searchableSnapshotsFieldLabel: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldLabel',
+    searchableSnapshotsRepoFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotRepoFieldLabel',
       {
         defaultMessage: 'Searchable snapshot repository',
+      }
+    ),
+    searchableSnapshotsStorageFieldLabel: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotStorageFieldLabel',
+      {
+        defaultMessage: 'Searchable snapshot storage',
       }
     ),
     errors: {
@@ -188,6 +194,9 @@ export const i18nTexts = {
       cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.coldPhase.coldPhaseTitle', {
         defaultMessage: 'Cold phase',
       }),
+      frozen: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseTitle', {
+        defaultMessage: 'Frozen phase',
+      }),
       delete: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseTitle', {
         defaultMessage: 'Delete phase',
       }),
@@ -205,6 +214,13 @@ export const i18nTexts = {
         defaultMessage:
           'Move data to the cold tier, which is optimized for cost savings over search performance. Data is normally read-only in the cold phase.',
       }),
+      frozen: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription',
+        {
+          defaultMessage:
+            'Archive data as searchable snapshots in the frozen tier. The frozen tier is optimized for maximum cost savings. Data in the frozen tier is rarely accessed and never updated.',
+        }
+      ),
       delete: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseDescription',
         {

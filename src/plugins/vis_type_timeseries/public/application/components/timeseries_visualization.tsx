@@ -15,7 +15,7 @@ import { PersistedState } from 'src/plugins/visualizations/public';
 // @ts-expect-error
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
-import { TimeseriesVisParams } from '../../metrics_fn';
+import { TimeseriesVisParams } from '../../types';
 import { TimeseriesVisData } from '../../../common/types';
 
 interface TimeseriesVisualizationProps {

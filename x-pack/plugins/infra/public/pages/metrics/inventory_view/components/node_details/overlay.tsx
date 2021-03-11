@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { EuiOutsideClickDetector } from '@elastic/eui';
 import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
@@ -46,6 +47,10 @@ export const NodeContextPopover = ({
   const tabConfigs = [MetricsTab, LogsTab, ProcessesTab, PropertiesTab];
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+  const uiCapabilities = useKibana().services.application?.capabilities;
+  const canCreateAlerts = useMemo(() => Boolean(uiCapabilities?.infrastructure?.save), [
+    uiCapabilities,
+  ]);
 
   const tabs = useMemo(() => {
     return tabConfigs.map((m) => {
@@ -96,20 +101,22 @@ export const NodeContextPopover = ({
               </OverlayTitle>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      onClick={openAlertFlyout}
-                      size="xs"
-                      iconSide={'left'}
-                      flush="both"
-                      iconType="bell"
-                    >
-                      <FormattedMessage
-                        id="xpack.infra.infra.nodeDetails.createAlertLink"
-                        defaultMessage="Create alert"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
+                  {canCreateAlerts && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        onClick={openAlertFlyout}
+                        size="xs"
+                        iconSide={'left'}
+                        flush="both"
+                        iconType="bell"
+                      >
+                        <FormattedMessage
+                          id="xpack.infra.infra.nodeDetails.createAlertLink"
+                          defaultMessage="Create alert"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       size="xs"

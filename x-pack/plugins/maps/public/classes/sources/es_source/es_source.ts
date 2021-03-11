@@ -238,7 +238,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           : searchFilters.buffer;
       const extentFilter = createExtentFilter(buffer, geoField.name);
 
-      // @ts-expect-error
       allFilters.push(extentFilter);
     }
     if (searchFilters.applyGlobalTime && (await this.isTimeAware())) {
