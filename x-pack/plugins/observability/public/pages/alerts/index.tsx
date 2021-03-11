@@ -8,8 +8,6 @@
 import {
   EuiButton,
   EuiCallOut,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
