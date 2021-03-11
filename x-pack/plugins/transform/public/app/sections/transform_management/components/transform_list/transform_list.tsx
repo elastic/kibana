@@ -239,7 +239,7 @@ export const TransformList: FC<TransformListProps> = ({
         <RefreshTransformListButton onClick={refresh} isLoading={isLoading} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <CreateTransformButton onClick={onCreateTransform} />
+        <CreateTransformButton onClick={onCreateTransform} transformNodes={transformNodes} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
