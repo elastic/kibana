@@ -6,6 +6,7 @@
  */
 
 import {
+  convertToServerFieldResultSetting,
   clearAllServerFields,
   clearAllFields,
   resetAllServerFields,
@@ -64,6 +65,48 @@ describe('resetAllServerFields', () => {
     ).toEqual({
       foo: { raw: {} },
       bar: { raw: {} },
+    });
+  });
+});
+
+describe('convertToServerFieldResultSetting', () => {
+  it('will convert a settings object to a format that the server expects', () => {
+    expect(
+      convertToServerFieldResultSetting({
+        raw: true,
+        rawSize: 5,
+        snippet: true,
+        snippetFallback: true,
+        snippetSize: 3,
+      })
+    ).toEqual({
+      raw: { size: 5 },
+      snippet: { size: 3, fallback: true },
+    });
+  });
+
+  it('will not include snippet or raw information if they are set to false', () => {
+    expect(
+      convertToServerFieldResultSetting({
+        raw: false,
+        rawSize: 5,
+        snippet: false,
+        snippetFallback: true,
+        snippetSize: 3,
+      })
+    ).toEqual({});
+  });
+
+  it('will not include sizes if they are not included, or fallback if it is false', () => {
+    expect(
+      convertToServerFieldResultSetting({
+        raw: true,
+        snippet: true,
+        snippetFallback: false,
+      })
+    ).toEqual({
+      raw: {},
+      snippet: {},
     });
   });
 });

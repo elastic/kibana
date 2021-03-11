@@ -9,6 +9,7 @@ import { DEFAULT_FIELD_SETTINGS } from '../constants';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
+  ServerFieldResultSetting,
   ServerFieldResultSettingObject,
 } from '../types';
 
@@ -32,3 +33,25 @@ export const resetAllServerFields = (fields: ServerFieldResultSettingObject) =>
 
 export const resetAllFields = (fields: FieldResultSettingObject) =>
   updateAllFields(fields, DEFAULT_FIELD_SETTINGS);
+
+export const convertToServerFieldResultSetting = (fieldResultSetting: FieldResultSetting) => {
+  const serverFieldResultSetting: ServerFieldResultSetting = {};
+  if (fieldResultSetting.raw) {
+    serverFieldResultSetting.raw = {};
+    if (fieldResultSetting.rawSize) {
+      serverFieldResultSetting.raw.size = fieldResultSetting.rawSize;
+    }
+  }
+
+  if (fieldResultSetting.snippet) {
+    serverFieldResultSetting.snippet = {};
+    if (fieldResultSetting.snippetFallback) {
+      serverFieldResultSetting.snippet.fallback = fieldResultSetting.snippetFallback;
+    }
+    if (fieldResultSetting.snippetSize) {
+      serverFieldResultSetting.snippet.size = fieldResultSetting.snippetSize;
+    }
+  }
+
+  return serverFieldResultSetting;
+};

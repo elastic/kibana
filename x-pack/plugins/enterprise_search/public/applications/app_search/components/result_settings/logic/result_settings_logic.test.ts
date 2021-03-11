@@ -134,5 +134,74 @@ describe('ResultSettingsLogic', () => {
         });
       });
     });
+
+    describe('updateField', () => {
+      const initialValues = {
+        nonTextResultFields: {
+          foo: { raw: true, snippet: true, snippetFallback: true },
+          bar: { raw: true, snippet: true, snippetFallback: true },
+        },
+        textResultFields: {
+          foo: { raw: true, snippet: true, snippetFallback: true },
+          bar: { raw: true, snippet: true, snippetFallback: true },
+        },
+        resultFields: {
+          foo: { raw: true, snippet: true, snippetFallback: true },
+          bar: { raw: true, snippet: true, snippetFallback: true },
+        },
+        serverResultFields: {
+          foo: { raw: { size: 5 } },
+          bar: { raw: true },
+        },
+      };
+
+      it('should update settings for an individual field', () => {
+        mount(initialValues);
+
+        ResultSettingsLogic.actions.updateField('foo', {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        });
+
+        expect(ResultSettingsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          // the settings for foo are updated below for any *ResultFields state in which they appear
+          nonTextResultFields: {
+            foo: { raw: true, snippet: false, snippetFallback: false },
+            bar: { raw: true, snippet: true, snippetFallback: true },
+          },
+          textResultFields: {
+            foo: { raw: true, snippet: false, snippetFallback: false },
+            bar: { raw: true, snippet: true, snippetFallback: true },
+          },
+          resultFields: {
+            foo: { raw: true, snippet: false, snippetFallback: false },
+            bar: { raw: true, snippet: true, snippetFallback: true },
+          },
+          serverResultFields: {
+            // Note that the specified settings for foo get converted to a "server" format here
+            foo: { raw: {} },
+            bar: { raw: true },
+          },
+        });
+      });
+
+      it('should do nothing if the specified field does not exist', () => {
+        mount(initialValues);
+
+        ResultSettingsLogic.actions.updateField('baz', {
+          raw: false,
+          snippet: false,
+          snippetFallback: false,
+        });
+
+        // 'baz' does not exist in state, so nothing is updated
+        expect(ResultSettingsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          ...initialValues,
+        });
+      });
+    });
   });
 });
