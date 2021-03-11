@@ -87,6 +87,7 @@ export class SecurityNavControlService {
             `Only one custom profile link can be set. A custom profile link named ${hasCustomProfileLink.label} (${hasCustomProfileLink.href}) already exists`
           );
         }
+
         if (passedCustomProfileLinkCount > 1) {
           throw new Error(
             `Only one custom profile link can be passed at a time (found ${passedCustomProfileLinkCount})`
