@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { ExternalLinkIcon } from '../../../../../../common/components/external_link_icon';
 import { getLinksFromSignature } from './suricata_links';
 
 const LinkEuiFlexItem = styled(EuiFlexItem)`
@@ -27,7 +26,6 @@ export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }
           <EuiLink href={link} color="subdued" target="_blank">
             {link}
           </EuiLink>
-          <ExternalLinkIcon />
         </LinkEuiFlexItem>
       ))}
     </EuiFlexGroup>
