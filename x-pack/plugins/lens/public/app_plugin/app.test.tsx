@@ -534,6 +534,24 @@ describe('Lens App', () => {
       expect(props.redirectTo).toHaveBeenCalled();
     });
 
+    it('handles missing indexpattern load errors', async () => {
+      const services = makeDefaultServices();
+      services.data.indexPatterns.get = jest.fn().mockRejectedValue('failed to load');
+      const { component } = mountWith({ services });
+
+      await act(async () => {
+        component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
+      });
+
+      expect(services.attributeService.unwrapAttributes).toHaveBeenCalledWith({
+        savedObjectId: defaultSavedObjectId,
+      });
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        'Error loading index patterns'
+      );
+      expect(services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
+    });
+
     it('adds to the recently accessed list on load', async () => {
       const { component, services } = mountWith({});
 
