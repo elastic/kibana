@@ -26,7 +26,7 @@ export const luceneFunction: ExpressionFunctionLucene = {
   type: 'kibana_query',
   inputTypes: ['null'],
   help: i18n.translate('data.search.functions.lucene.help', {
-    defaultMessage: 'Create kibana query',
+    defaultMessage: 'Create kibana lucene query',
   }),
   args: {
     q: {

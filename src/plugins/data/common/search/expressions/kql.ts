@@ -26,7 +26,7 @@ export const kqlFunction: ExpressionFunctionKql = {
   type: 'kibana_query',
   inputTypes: ['null'],
   help: i18n.translate('data.search.functions.kql.help', {
-    defaultMessage: 'Create kibana query',
+    defaultMessage: 'Create kibana kql query',
   }),
   args: {
     q: {

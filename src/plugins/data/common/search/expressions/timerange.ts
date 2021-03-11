@@ -24,27 +24,28 @@ export const kibanaTimerangeFunction: ExpressionFunctionKibanaTimerange = {
   type: 'timerange',
   inputTypes: ['null'],
   help: i18n.translate('data.search.functions.timerange.help', {
-    defaultMessage: 'Create kibana query',
+    defaultMessage: 'Create kibana timerange',
   }),
   args: {
     from: {
       types: ['string'],
       required: true,
       help: i18n.translate('data.search.functions.timerange.from.help', {
-        defaultMessage: 'Specify Kibana free form text query',
+        defaultMessage: 'Specify the start date',
       }),
     },
     to: {
       types: ['string'],
       required: true,
       help: i18n.translate('data.search.functions.timerange.to.help', {
-        defaultMessage: 'Specify the type of the query (kql or lucene)',
+        defaultMessage: 'Specify the end date',
       }),
     },
     mode: {
       types: ['string'],
+      options: ['absolute', 'relative'],
       help: i18n.translate('data.search.functions.timerange.mode.help', {
-        defaultMessage: 'Specify the type of the query (kql or lucene)',
+        defaultMessage: 'Specify the mode (absolute or relative)',
       }),
     },
   },
