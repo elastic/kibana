@@ -24,6 +24,7 @@ import { healthRoute } from './health';
 import { ruleTypesRoute } from './rule_types';
 import { muteAllRuleRoute } from './mute_all_rule';
 import { muteAlertRoute } from './mute_alert';
+import { unmuteAllRuleRoute } from './unmute_all_rule';
 
 export function defineRoutes(
   router: IRouter<AlertingRequestHandlerContext>,
@@ -45,4 +46,5 @@ export function defineRoutes(
   ruleTypesRoute(router, licenseState);
   muteAllRuleRoute(router, licenseState);
   muteAlertRoute(router, licenseState);
+  unmuteAllRuleRoute(router, licenseState);
 }
