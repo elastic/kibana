@@ -355,15 +355,13 @@ image:images/Dashboard_inspect.png[Inspect in dashboard]
 
 When you're finished making changes, save the dashboard.
 
-. From the toolbar, click *Save*.
+From the toolbar, choose one of the following options:
 
-. Enter the dashboard *Title* and an optional *Description*.
+* *Save as* &mdash; Opens the *Save dashboard* window, which allows you to specify the title and dashboard options.
 
-. From the *Tags* dropdown, select the tags you want to apply.
+* *Save* &mdash; Allows you to save the changes you've made to an existing dashboard.
 
-. To save the time range, select *Store time with dashboard*.
-
-. Click *Save*.
+* *Switch to view mode* &mdash; Allows you to exit *Edit* mode without saving your changes, or you can discard the changes you've made. All dashboards with unsaved changes display *Unsaved changes* in the toolbar.
 
 [float]
 [[share-the-dashboard]]
