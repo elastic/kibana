@@ -54,19 +54,27 @@ describe('ui_settings 7.12.0 migrations', () => {
     });
   });
   test('properly migrates timepicker:quickRanges', () => {
+    const initialQuickRange: any = {
+      from: '123',
+      to: '321',
+      display: 'abc',
+      section: 2,
+    };
+    const { section, ...migratedQuickRange } = initialQuickRange;
+
     const doc = {
       type: 'config',
       id: '8.0.0',
       attributes: {
         buildNum: 9007199254740991,
-        'timepicker:quickRanges': '[{"from":"123","to":"321","display":"abc","section":2}]',
+        'timepicker:quickRanges': JSON.stringify([initialQuickRange]),
       },
       references: [],
       updated_at: '2020-06-09T20:18:20.349Z',
       migrationVersion: {},
     };
     const migrated = migration(doc);
-    expect(migrated.attributes['timepicker:quickRanges'].indexOf('section')).toEqual(-1);
+    expect(JSON.parse(migrated.attributes['timepicker:quickRanges'])).toEqual([migratedQuickRange]);
   });
 });
 
