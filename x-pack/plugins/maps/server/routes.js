@@ -56,7 +56,14 @@ const EMPTY_EMS_CLIENT = {
   addQueryParams() {},
 };
 
-export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, logger) {
+export async function initRoutes(
+  core,
+  getLicenseId,
+  emsSettings,
+  kbnVersion,
+  logger,
+  drawingFeatureEnabled
+) {
   let emsClient;
   let lastLicenseId;
   const router = core.http.createRouter();
@@ -603,36 +610,38 @@ export async function initRoutes(core, getLicenseId, emsSettings, kbnVersion, lo
     return _indexData(index, mappings);
   }
 
-  router.post(
-    {
-      path: `/${INDEX_SOURCE_API_PATH}`,
-      validate: {
-        body: schema.object({
-          index: schema.string(),
-          mappings: schema.any(),
-        }),
-      },
-      options: {
-        body: {
-          accepts: ['application/json'],
-          maxBytes: MAX_DRAWING_SIZE_BYTES,
+  if (drawingFeatureEnabled) {
+    router.post(
+      {
+        path: `/${INDEX_SOURCE_API_PATH}`,
+        validate: {
+          body: schema.object({
+            index: schema.string(),
+            mappings: schema.any(),
+          }),
+        },
+        options: {
+          body: {
+            accepts: ['application/json'],
+            maxBytes: MAX_DRAWING_SIZE_BYTES,
+          },
         },
       },
-    },
-    async (context, request, response) => {
-      const { index, mappings } = request.body;
-      const result = await indexData(context.core, index, mappings);
-      if (result.success) {
-        return response.ok({ body: result });
-      } else {
-        logger.error(result.error);
-        return response.custom({
-          body: result.error.message,
-          statusCode: 500,
-        });
+      async (context, request, response) => {
+        const { index, mappings } = request.body;
+        const result = await indexData(context.core, index, mappings);
+        if (result.success) {
+          return response.ok({ body: result });
+        } else {
+          logger.error(result.error);
+          return response.custom({
+            body: result.error.message,
+            statusCode: 500,
+          });
+        }
       }
-    }
-  );
+    );
+  }
 
   function checkEMSProxyEnabled() {
     const proxyEMSInMaps = emsSettings.isProxyElasticMapsServiceInMaps();
