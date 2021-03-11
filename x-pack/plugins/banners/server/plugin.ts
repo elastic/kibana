@@ -10,6 +10,7 @@ import { BannerConfiguration } from '../common';
 import { BannersConfigType } from './config';
 import { BannersRequestHandlerContext } from './types';
 import { registerRoutes } from './routes';
+import { registerSettings } from './ui_settings';
 
 export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
   private readonly config: BannerConfiguration;
@@ -21,6 +22,7 @@ export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
   setup({ uiSettings, getStartServices, http }: CoreSetup<{}, {}>) {
     const router = http.createRouter<BannersRequestHandlerContext>();
     registerRoutes(router, this.config);
+    registerSettings(uiSettings, this.config);
 
     return {};
   }

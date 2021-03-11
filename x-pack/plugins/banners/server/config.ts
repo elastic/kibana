@@ -36,7 +36,5 @@ export type BannersConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<BannersConfigType> = {
   schema: configSchema,
-  exposeToBrowser: {
-    placement: true,
-  },
+  exposeToBrowser: {},
 };

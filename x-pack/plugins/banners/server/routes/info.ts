@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { IUiSettingsClient } from 'kibana/server';
 import { ILicense } from '../../../licensing/server';
-import { BannerInfoResponse, BannerConfiguration } from '../../common';
+import { BannerInfoResponse, BannerConfiguration, BannerPlacement } from '../../common';
 import { BannersRouter } from '../types';
 
 export const registerInfoRoute = (router: BannersRouter, config: BannerConfiguration) => {
@@ -15,16 +16,20 @@ export const registerInfoRoute = (router: BannersRouter, config: BannerConfigura
       path: '/api/banners/info',
       validate: false,
       options: {
-        authRequired: false,
+        authRequired: 'optional',
       },
     },
-    (ctx, req, res) => {
+    async (ctx, req, res) => {
       const allowed = isValidLicense(ctx.licensing.license);
+
+      const bannerConfig = req.auth.isAuthenticated
+        ? await getBannerConfig(ctx.core.uiSettings.client)
+        : config;
 
       return res.ok({
         body: {
           allowed,
-          banner: config,
+          banner: bannerConfig,
         } as BannerInfoResponse,
       });
     }
@@ -33,4 +38,20 @@ export const registerInfoRoute = (router: BannersRouter, config: BannerConfigura
 
 const isValidLicense = (license: ILicense): boolean => {
   return license.hasAtLeast('gold');
+};
+
+const getBannerConfig = async (client: IUiSettingsClient): Promise<BannerConfiguration> => {
+  const [placement, textContent, textColor, backgroundColor] = await Promise.all([
+    client.get<BannerPlacement>('banner:placement'),
+    client.get<string>('banner:textContent'),
+    client.get<string>('banner:textColor'),
+    client.get<string>('banner:backgroundColor'),
+  ]);
+
+  return {
+    placement,
+    textContent,
+    textColor,
+    backgroundColor,
+  };
 };
