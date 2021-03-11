@@ -20,6 +20,13 @@ import { enableRuleRoute } from './enable_rule';
 import { findRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleStateRoute } from './get_rule_state';
+import { healthRoute } from './health';
+import { ruleTypesRoute } from './rule_types';
+import { muteAllRuleRoute } from './mute_all_rule';
+import { muteAlertRoute } from './mute_alert';
+import { unmuteAllRuleRoute } from './unmute_all_rule';
+import { unmuteAlertRoute } from './unmute_alert';
+import { updateRuleApiKeyRoute } from './update_rule_api_key';
 
 export function defineRoutes(
   router: IRouter<AlertingRequestHandlerContext>,
@@ -36,4 +43,12 @@ export function defineRoutes(
   enableRuleRoute(router, licenseState);
   findRulesRoute(router, licenseState);
   getRuleAlertSummaryRoute(router, licenseState);
+  getRuleStateRoute(router, licenseState);
+  healthRoute(router, licenseState, encryptedSavedObjects);
+  ruleTypesRoute(router, licenseState);
+  muteAllRuleRoute(router, licenseState);
+  muteAlertRoute(router, licenseState);
+  unmuteAllRuleRoute(router, licenseState);
+  unmuteAlertRoute(router, licenseState);
+  updateRuleApiKeyRoute(router, licenseState);
 }
