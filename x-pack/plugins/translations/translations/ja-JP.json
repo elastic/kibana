@@ -7618,7 +7618,6 @@
     "xpack.enterpriseSearch.appSearch.result.documentDetailLink": "ドキュメントの詳細を表示",
     "xpack.enterpriseSearch.appSearch.result.hideAdditionalFields": "追加フィールドを非表示",
     "xpack.enterpriseSearch.appSearch.result.title": "ドキュメント{id}",
-    "xpack.enterpriseSearch.appSearch.roleMappings.title": "ロールマッピング",
     "xpack.enterpriseSearch.appSearch.settings.logRetention.analytics.label": "分析ログ",
     "xpack.enterpriseSearch.appSearch.settings.logRetention.api.label": "API ログ",
     "xpack.enterpriseSearch.appSearch.settings.logRetention.description": "API ログと分析のデフォルト書き込み設定を管理します。",

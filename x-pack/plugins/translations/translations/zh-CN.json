@@ -7685,7 +7685,6 @@
     "xpack.enterpriseSearch.appSearch.result.hideAdditionalFields": "隐藏其他字段",
     "xpack.enterpriseSearch.appSearch.result.showAdditionalFields": "显示其他 {numberOfAdditionalFields, number} 个{numberOfAdditionalFields, plural, other {字段}}",
     "xpack.enterpriseSearch.appSearch.result.title": "文档 {id}",
-    "xpack.enterpriseSearch.appSearch.roleMappings.title": "角色映射",
     "xpack.enterpriseSearch.appSearch.settings.logRetention.analytics.label": "分析日志",
     "xpack.enterpriseSearch.appSearch.settings.logRetention.api.label": "API 日志",
     "xpack.enterpriseSearch.appSearch.settings.logRetention.description": "管理 API 日志和分析的默认写入设置。",
