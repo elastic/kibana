@@ -8,7 +8,7 @@
 
 import { join } from 'path';
 import { PackageInfo } from '@kbn/config';
-import * as UiSharedDeps from '@kbn/ui-shared-deps';
+import { distDir as uiSharedDepsDistDir } from '@kbn/ui-shared-deps';
 import { IRouter } from '../../http';
 import { UiPlugins } from '../../plugins';
 import { fromRoot } from '../../utils';
@@ -45,7 +45,7 @@ export function registerBundleRoutes({
   registerRouteForBundle(router, {
     publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps/`,
     routePath: `/${buildNum}/bundles/kbn-ui-shared-deps/`,
-    bundlesPath: UiSharedDeps.distDir,
+    bundlesPath: uiSharedDepsDistDir,
     fileHashCache,
     isDist,
   });
