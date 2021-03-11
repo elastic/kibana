@@ -9,10 +9,8 @@ import React, { useMemo } from 'react';
 import moment from 'moment';
 import { AutoRefresh } from '../../use_log_entry_rate_results_url_state';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  AnomalySwimlaneEmbeddableInput,
-} from '../../../../../../../ml/public';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../../../../../../../ml/common';
+import { AnomalySwimlaneEmbeddableInput } from '../../../../../../../ml/public';
 import { EmbeddableRenderer } from '../../../../../../../../../src/plugins/embeddable/public';
 import { partitionField } from '../../../../../../common/infra_ml';
 import { MissingEmbeddableFactoryCallout } from '../../../../../components/missing_embeddable_factory_callout';

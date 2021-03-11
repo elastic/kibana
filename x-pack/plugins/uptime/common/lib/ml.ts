@@ -7,6 +7,8 @@
 
 import { ML_JOB_ID } from '../constants';
 
+export { getSeverityColor, getSeverityType, ANOMALY_SEVERITY } from '../../../ml/common';
+
 export const getJobPrefix = (monitorId: string) => {
   // ML App doesn't support upper case characters in job name
   // Also Spaces and the characters / ? , " < > | * are not allowed

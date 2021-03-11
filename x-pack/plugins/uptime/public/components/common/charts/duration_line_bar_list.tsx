@@ -9,11 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { AnnotationTooltipFormatter, RectAnnotation, RectAnnotationDatum } from '@elastic/charts';
 import { AnnotationTooltip } from './annotation_tooltip';
-import {
-  ANOMALY_SEVERITY,
-  getSeverityColor,
-  getSeverityType,
-} from '../../../../../../plugins/ml/public';
+import { ANOMALY_SEVERITY, getSeverityColor, getSeverityType } from '../../../../common/lib/ml';
 
 interface Props {
   anomalies: any;

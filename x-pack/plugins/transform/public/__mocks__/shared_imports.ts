@@ -16,4 +16,5 @@ export const useRequest = jest.fn(() => ({
 export const createSavedSearchesLoader = jest.fn();
 
 // just passing through the reimports
-export { getMlSharedImports, HITS_TOTAL_RELATION } from '../../../ml/public';
+export { HITS_TOTAL_RELATION } from '../../../ml/common';
+export { getMlSharedImports } from '../../../ml/public';

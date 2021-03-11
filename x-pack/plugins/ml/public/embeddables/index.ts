@@ -9,7 +9,7 @@ import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane';
 import type { MlCoreSetup } from '../plugin';
 import type { EmbeddableSetup } from '../../../../../src/plugins/embeddable/public';
 
-export * from './constants';
+export * from '../../common/constants/embeddables';
 export * from './types';
 
 export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {

@@ -19,7 +19,7 @@ import { AnomalyTranslations } from './translations';
 import { AlertExpressionPopover } from '../alert_expression_popover';
 import { DEFAULT_SEVERITY, SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
 import { monitorIdSelector } from '../../../../state/selectors';
-import { getSeverityColor, getSeverityType } from '../../../../../../ml/public';
+import { getSeverityColor, getSeverityType } from '../../../../../common/lib/ml';
 
 interface Props {
   alertParams: { [key: string]: any };

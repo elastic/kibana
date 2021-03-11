@@ -9,13 +9,14 @@ export { createSavedSearchesLoader } from '../../../../src/plugins/discover/publ
 export { XJsonMode } from '@kbn/ace';
 export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shared/public';
 
+export { HITS_TOTAL_RELATION } from '../../ml/common';
+
 export {
   getMlSharedImports,
   GetMlSharedImportsReturnType,
   UseIndexDataReturnType,
   EsSorting,
   RenderCellValue,
-  HITS_TOTAL_RELATION,
 } from '../../ml/public';
 
 import { XJson } from '../../../../src/plugins/es_ui_shared/public';
