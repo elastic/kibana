@@ -6,14 +6,14 @@
  */
 
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import { Inspect, Maybe } from '../../../common';
+import { Inspect, Maybe, Direction } from '../../../common';
 import { RequestOptionsPaginated } from '../..';
-import { HostsFields, SortRequestDirection } from '../common';
+import { HostsFields } from '../common';
 
 export interface HostFirstLastSeenRequestOptions
   extends Partial<RequestOptionsPaginated<HostsFields>> {
   hostName: string;
-  order: SortRequestDirection;
+  order: Direction;
 }
 export interface HostFirstLastSeenStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;

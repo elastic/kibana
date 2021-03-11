@@ -8,7 +8,7 @@
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
 import { Inspect, Maybe, TimerangeInput } from '../../../common';
-import { HostItem, HostsFields, SortRequestDirection } from '../common';
+import { HostItem, HostsFields, Direction } from '../common';
 import { RequestOptionsPaginated } from '../..';
 
 export interface HostDetailsStrategyResponse extends IEsSearchResponse {
@@ -34,7 +34,7 @@ export interface AggregationRequest {
         lang: string;
       };
       order?: {
-        [aggSortField: string]: SortRequestDirection;
+        [aggSortField: string]: Direction;
       };
     };
     max?: {
@@ -51,7 +51,7 @@ export interface AggregationRequest {
       size?: number;
       sort?: Array<{
         [aggSortField: string]: {
-          order: SortRequestDirection;
+          order: Direction;
         };
       }>;
       _source: {
