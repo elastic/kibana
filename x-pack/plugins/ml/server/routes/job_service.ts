@@ -781,10 +781,10 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    * @apiGroup JobService
    *
    * @api {post} /api/ml/jobs/datafeed_preview Get datafeed preview
-   * @apiName TopCategories
-   * @apiDescription Returns list of top categories
+   * @apiName DatafeedPreview
+   * @apiDescription Returns a preview of the datafeed search
    *
-   * @apiSchema (body) topCategoriesSchema
+   * @apiSchema (body) datafeedPreviewSchema
    */
   router.post(
     {
