@@ -600,6 +600,45 @@ export async function initRoutes(
   if (drawingFeatureEnabled) {
     router.post(
       {
+        path: `/${INDEX_SOURCE_API_PATH}/{indexName}/feature`,
+        validate: {
+          body: schema.object({
+            data: schema.arrayOf(schema.any(), { minSize: 1 }),
+          }),
+        },
+        options: {
+          body: {
+            accepts: ['application/json'],
+            maxBytes: MAX_DRAWING_SIZE_BYTES,
+          },
+        },
+      },
+      async (context, request, response) => {
+        const { index, mappings } = request.body;
+        const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
+          context.core.savedObjects.client,
+          context.core.elasticsearch.client.asCurrentUser
+        );
+        const result = await createIndexSource(
+          index,
+          mappings,
+          context.core.elasticsearch.client,
+          indexPatternsService
+        );
+        if (result.success) {
+          return response.ok({ body: result });
+        } else {
+          logger.error(result.error);
+          return response.custom({
+            body: result.error.message,
+            statusCode: 500,
+          });
+        }
+      }
+    );
+
+    router.post(
+      {
         path: `/${INDEX_SOURCE_API_PATH}`,
         validate: {
           body: schema.object({
