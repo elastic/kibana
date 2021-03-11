@@ -6,50 +6,55 @@
  * Side Public License, v 1.
  */
 
-import { handleChange, handleAdd, handleDelete } from './collection_actions';
+import {
+  handleChange,
+  handleAdd,
+  handleDelete,
+  CollectionActionsProps,
+} from './collection_actions';
 
 describe('collection actions', () => {
   test('handleChange() calls props.onChange() with updated collection', () => {
     const fn = jest.fn();
-    const props = {
-      model: { test: [{ id: 1, title: 'foo' }] },
+    const props = ({
+      model: { test: [{ id: '1', title: 'foo' }] },
       name: 'test',
       onChange: fn,
-    };
-    handleChange.call(null, props, { id: 1, title: 'bar' });
+    } as unknown) as CollectionActionsProps;
+    handleChange.call(null, props, { id: '1', text: 'bar' });
     expect(fn.mock.calls.length).toEqual(1);
     expect(fn.mock.calls[0][0]).toEqual({
-      test: [{ id: 1, title: 'bar' }],
+      test: [{ id: '1', text: 'bar' }],
     });
   });
 
   test('handleAdd() calls props.onChange() with update collection', () => {
-    const newItemFn = jest.fn(() => ({ id: 2, title: 'example' }));
+    const newItemFn = jest.fn(() => ({ id: '2', text: 'example' }));
     const fn = jest.fn();
-    const props = {
-      model: { test: [{ id: 1, title: 'foo' }] },
+    const props = ({
+      model: { test: [{ id: '1', text: 'foo' }] },
       name: 'test',
       onChange: fn,
-    };
+    } as unknown) as CollectionActionsProps;
     handleAdd.call(null, props, newItemFn);
     expect(fn.mock.calls.length).toEqual(1);
     expect(newItemFn.mock.calls.length).toEqual(1);
     expect(fn.mock.calls[0][0]).toEqual({
       test: [
-        { id: 1, title: 'foo' },
-        { id: 2, title: 'example' },
+        { id: '1', text: 'foo' },
+        { id: '2', text: 'example' },
       ],
     });
   });
 
   test('handleDelete() calls props.onChange() with update collection', () => {
     const fn = jest.fn();
-    const props = {
-      model: { test: [{ id: 1, title: 'foo' }] },
+    const props = ({
+      model: { test: [{ id: '1', title: 'foo' }] },
       name: 'test',
       onChange: fn,
-    };
-    handleDelete.call(null, props, { id: 1 });
+    } as unknown) as CollectionActionsProps;
+    handleDelete.call(null, props, { id: '1' });
     expect(fn.mock.calls.length).toEqual(1);
     expect(fn.mock.calls[0][0]).toEqual({
       test: [],
