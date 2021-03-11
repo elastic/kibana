@@ -129,9 +129,8 @@ export class AnomalyTimelineService {
       interval.asSeconds()
     );
 
-    // @TODO: Add back
     // eslint-disable-next-line no-console
-    // console.log('Explorer overall swim lane data set:', overallSwimlaneData);
+    console.log('Explorer overall swim lane data set:', overallSwimlaneData);
 
     return overallSwimlaneData;
   }
@@ -223,9 +222,8 @@ export class AnomalyTimelineService {
       viewBySwimlaneFieldName,
       swimlaneBucketInterval.asSeconds()
     );
-    // @TODO: add back
     // eslint-disable-next-line no-console
-    // console.log('Explorer view by swim lane data set:', viewBySwimlaneData);
+    console.log('Explorer view by swim lane data set:', viewBySwimlaneData);
 
     return viewBySwimlaneData;
   }
