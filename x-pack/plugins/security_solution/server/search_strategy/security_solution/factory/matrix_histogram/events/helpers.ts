@@ -52,7 +52,7 @@ export const buildThresholdTermsQuery = ({
   stackByField: string;
   missing: { missing?: string };
 }): BaseQuery => {
-  if (fields.length > 0) {
+  if (fields.length > 1) {
     return {
       eventActionGroup: {
         ...query.eventActionGroup,
@@ -71,7 +71,7 @@ export const buildThresholdTermsQuery = ({
         ...query.eventActionGroup,
         terms: {
           ...query.eventActionGroup.terms,
-          field: stackByField,
+          field: fields[0] ?? stackByField,
           ...missing,
         },
       },

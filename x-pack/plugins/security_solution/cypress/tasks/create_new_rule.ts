@@ -280,18 +280,6 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
-export const fillDefineThresholdRuleQueryOnlyAndContinue = (rule: ThresholdRule) => {
-  getIndexPatternClearButton().click();
-
-  cy.get(DEFINE_INDEX_FORM_INPUT).type(`${rule.index.join('')}{enter}`, { force: true });
-
-  cy.get(CUSTOM_QUERY_INPUT).eq(0).type('agent.name:{enter}', { force: true });
-  cy.get(CUSTOM_QUERY_INPUT).eq(0).type('suricata*{enter}', { force: true });
-
-  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
-  cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
-};
-
 export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
