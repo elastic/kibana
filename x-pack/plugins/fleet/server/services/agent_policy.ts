@@ -106,32 +106,13 @@ class AgentPolicyService {
     esClient: ElasticsearchClient
   ): Promise<{
     created: boolean;
-    defaultAgentPolicy: AgentPolicy;
+    policy: AgentPolicy;
   }> {
-    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    const searchParams = {
       searchFields: ['is_default'],
       search: 'true',
-    });
-
-    if (agentPolicies.total === 0) {
-      const newDefaultAgentPolicy: NewAgentPolicy = {
-        ...DEFAULT_AGENT_POLICY,
-      };
-
-      return {
-        created: true,
-        defaultAgentPolicy: await this.create(soClient, esClient, newDefaultAgentPolicy),
-      };
-    }
-
-    return {
-      created: false,
-      defaultAgentPolicy: {
-        id: agentPolicies.saved_objects[0].id,
-        ...agentPolicies.saved_objects[0].attributes,
-      },
     };
+    return await this.ensureAgentPolicy(soClient, esClient, DEFAULT_AGENT_POLICY, searchParams);
   }
 
   public async ensureDefaultFleetServerAgentPolicy(
@@ -141,20 +122,66 @@ class AgentPolicyService {
     created: boolean;
     policy: AgentPolicy;
   }> {
-    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    const searchParams = {
       searchFields: ['is_default_fleet_server'],
       search: 'true',
+    };
+    return await this.ensureAgentPolicy(
+      soClient,
+      esClient,
+      DEFAULT_FLEET_SERVER_AGENT_POLICY,
+      searchParams
+    );
+  }
+
+  public async ensurePreconfiguredAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    config: NewAgentPolicy
+  ): Promise<{
+    created: boolean;
+    policy: AgentPolicy;
+  }> {
+    const { name } = config;
+    const searchParams = {
+      searchFields: ['name'],
+      search: escapeSearchQueryPhrase(name),
+    };
+
+    const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+    };
+
+    const newAgentPolicy: NewAgentPolicy = {
+      ...newAgentPolicyDefaults,
+      ...config,
+    };
+
+    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
+  }
+
+  private async ensureAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    newAgentPolicy: NewAgentPolicy,
+    searchParams: {
+      searchFields: string[];
+      search: string;
+    }
+  ): Promise<{
+    created: boolean;
+    policy: AgentPolicy;
+  }> {
+    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      ...searchParams,
     });
 
     if (agentPolicies.total === 0) {
-      const newDefaultAgentPolicy: NewAgentPolicy = {
-        ...DEFAULT_FLEET_SERVER_AGENT_POLICY,
-      };
-
       return {
         created: true,
-        policy: await this.create(soClient, esClient, newDefaultAgentPolicy),
+        policy: await this.create(soClient, esClient, newAgentPolicy),
       };
     }
 
@@ -514,7 +541,7 @@ class AgentPolicyService {
     }
 
     const {
-      defaultAgentPolicy: { id: defaultAgentPolicyId },
+      policy: { id: defaultAgentPolicyId },
     } = await this.ensureDefaultAgentPolicy(soClient, esClient);
     if (id === defaultAgentPolicyId) {
       throw new Error('The default agent policy cannot be deleted');

@@ -17,6 +17,15 @@ import {
 
 import { FleetPlugin } from './plugin';
 
+const packageNameWithSemverRegex = () =>
+  /(?<=^v?|\sv?)(.+):(?:(?:0|[1-9]\d*)\.){2}(?:0|[1-9]\d*)(?:-(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*)(?:\.(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*))*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/gi;
+
+const validatePackageNameWithSemver = (value: string) => {
+  if (!packageNameWithSemverRegex().test(value)) {
+    return 'must be in the format <package-name>:<semver>';
+  }
+};
+
 export { default as apm } from 'elastic-apm-node';
 export {
   AgentService,
@@ -70,6 +79,28 @@ export const config: PluginConfigDescriptor = {
         defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
       }),
     }),
+    packages: schema.maybe(
+      schema.arrayOf(schema.string({ validate: validatePackageNameWithSemver }))
+    ),
+    policies: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          namespace: schema.maybe(schema.string()),
+          description: schema.maybe(schema.string()),
+          monitoring_enabled: schema.maybe(
+            schema.arrayOf(schema.oneOf([schema.literal('logs'), schema.literal('metrics')]))
+          ),
+          integrations: schema.arrayOf(
+            schema.object({
+              package: schema.string({ validate: validatePackageNameWithSemver }),
+              name: schema.string(),
+              settings: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+            })
+          ),
+        })
+      )
+    ),
   }),
 };
 

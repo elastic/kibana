@@ -18,6 +18,7 @@ import type { PackagePolicy, AgentPolicy, Installation, Output } from '../../com
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
+import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import {
@@ -55,7 +56,7 @@ async function createSetupSideEffects(
   const [
     installedPackages,
     defaultOutput,
-    { created: defaultAgentPolicyCreated, defaultAgentPolicy },
+    { created: defaultAgentPolicyCreated, policy: defaultAgentPolicy },
     { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
   ] = await Promise.all([
     // packages installed by default
@@ -73,6 +74,18 @@ async function createSetupSideEffects(
       return Promise.reject(e);
     }),
   ]);
+
+  const { policies } = appContextService.getConfig() ?? {};
+  const preconfiguredPolicies = await Promise.all(
+    (policies ?? []).map(async ({ integrations, ...newAgentPolicy }) => {
+      const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
+        soClient,
+        esClient,
+        newAgentPolicy
+      );
+      return { created, policy, integrations };
+    })
+  );
 
   // Keeping this outside of the Promise.all because it introduces a race condition.
   // If one of the required packages fails to install/upgrade it might get stuck in the installing state.
@@ -145,9 +158,47 @@ async function createSetupSideEffects(
     }
   }
 
+  for (const preconfiguredPolicy of preconfiguredPolicies) {
+    const { created, policy, integrations } = preconfiguredPolicy;
+    if (created) {
+      await addPreconfiguredPolicyPackages(
+        soClient,
+        esClient,
+        policy,
+        integrations.map((i) => i.package.split(':')[0]),
+        defaultOutput
+      );
+    }
+  }
+
   await ensureAgentActionPolicyChangeExists(soClient);
 
   return { isIntialized: true };
+}
+
+async function addPreconfiguredPolicyPackages(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentPolicy: AgentPolicy,
+  packages: string[],
+  defaultOutput: Output
+) {
+  return await Promise.all(
+    packages.map(async (pkgName) => {
+      const installedPackage = await ensureInstalledPackage({
+        savedObjectsClient: soClient,
+        pkgName,
+        esClient,
+      });
+      return addPackageToAgentPolicy(
+        soClient,
+        esClient,
+        installedPackage,
+        agentPolicy,
+        defaultOutput
+      );
+    })
+  );
 }
 
 async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {

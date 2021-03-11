@@ -7,6 +7,7 @@
 
 export * from './models';
 export * from './rest_spec';
+import { NewAgentPolicy } from './models';
 
 export interface FleetConfigType {
   enabled: boolean;
@@ -28,6 +29,15 @@ export interface FleetConfigType {
     agentPolicyRolloutRateLimitIntervalMs: number;
     agentPolicyRolloutRateLimitRequestPerInterval: number;
   };
+  policies?: Array<
+    NewAgentPolicy & {
+      integrations: Array<{
+        package: string;
+        name: string;
+        settings?: Record<string, string>;
+      }>;
+    }
+  >;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
