@@ -86,7 +86,7 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
     throttle((e: { width: number; height: number }) => {
       setChartWidth(e.width);
     }, RESIZE_THROTTLE_TIME_MS),
-    [chartWidth]
+    []
   );
 
   if (error) {

@@ -28,20 +28,19 @@ import {
   SWIMLANE_TYPE,
   SwimlaneType,
 } from '../../application/explorer/explorer_constants';
-import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
-import { Query } from '../../../../../../src/plugins/data/common/query';
-import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
 } from '..';
+import { processFilters } from '../common/process_filters';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -149,7 +148,7 @@ export function useSwimlaneInputResolver(
 
           let appliedFilters: any;
           try {
-            appliedFilters = processFilters(filters, query);
+            appliedFilters = processFilters(filters, query, CONTROLLED_BY_SWIM_LANE_FILTER);
           } catch (e) {
             // handle query syntax errors
             setError(e);
@@ -241,45 +240,4 @@ export function useSwimlaneInputResolver(
     isLoading,
     error,
   ];
-}
-
-export function processFilters(filters: Filter[], query: Query) {
-  const inputQuery =
-    query.language === 'kuery'
-      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string))
-      : query.query;
-
-  const must = [inputQuery];
-  const mustNot = [];
-  for (const filter of filters) {
-    // ignore disabled filters as well as created by swim lane selection
-    if (filter.meta.disabled || filter.meta.controlledBy === CONTROLLED_BY_SWIM_LANE_FILTER)
-      continue;
-
-    const {
-      meta: { negate, type, key: fieldName },
-    } = filter;
-
-    let filterQuery = filter.query;
-
-    if (filterQuery === undefined && type === 'exists') {
-      filterQuery = {
-        exists: {
-          field: fieldName,
-        },
-      };
-    }
-
-    if (negate) {
-      mustNot.push(filterQuery);
-    } else {
-      must.push(filterQuery);
-    }
-  }
-  return {
-    bool: {
-      must,
-      must_not: mustNot,
-    },
-  };
 }

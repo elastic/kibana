@@ -21,9 +21,7 @@ import {
 import { CoreStart } from 'kibana/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
-import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
-import { Query } from '../../../../../../src/plugins/data/common/query';
-import { esKuery, esQuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import {
   AppStateSelectedCells,
   ExplorerJob,
@@ -42,6 +40,7 @@ import {
 } from '..';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
+import { processFilters } from '../common/process_filters';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -215,45 +214,4 @@ export function useExplorerInputResolver(
   }, [severity]);
 
   return { chartsData, isLoading, error };
-}
-
-export function processFilters(filters: Filter[], query: Query) {
-  const inputQuery =
-    query.language === 'kuery'
-      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string))
-      : esQuery.luceneStringToDsl(query.query);
-
-  const must = [inputQuery];
-  const mustNot = [];
-
-  for (const filter of filters) {
-    // ignore disabled filters as well as created by swim lane selection
-    if (filter.meta.disabled) continue;
-
-    const {
-      meta: { negate, type, key: fieldName },
-    } = filter;
-
-    let filterQuery = filter.query;
-
-    if (filterQuery === undefined && type === 'exists') {
-      filterQuery = {
-        exists: {
-          field: fieldName,
-        },
-      };
-    }
-
-    if (negate) {
-      mustNot.push(filterQuery);
-    } else {
-      must.push(filterQuery);
-    }
-  }
-  return {
-    bool: {
-      must,
-      must_not: mustNot,
-    },
-  };
 }

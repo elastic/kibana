@@ -106,7 +106,7 @@ interface ChartRange {
 }
 
 /**
- * Service for retrieving anomaly swim lanes data.
+ * Service for retrieving anomaly explorer charts data.
  */
 export class AnomalyExplorerChartsService {
   constructor(private mlApiServices: MlApiServices, private mlResultsService: MlResultsService) {}

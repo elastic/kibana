@@ -6,12 +6,14 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { processFilters, useSwimlaneInputResolver } from './swimlane_input_resolver';
+import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { CoreStart, IUiSettingsClient } from 'kibana/public';
 import { MlStartDependencies } from '../../plugin';
 import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
+import { processFilters } from '../common/process_filters';
 
 describe('useSwimlaneInputResolver', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;
@@ -254,7 +256,8 @@ describe('processFilters', () => {
         {
           language: 'kuery',
           query: 'instance : "i-088147ac"',
-        }
+        },
+        CONTROLLED_BY_SWIM_LANE_FILTER
       )
     ).toEqual({
       bool: {

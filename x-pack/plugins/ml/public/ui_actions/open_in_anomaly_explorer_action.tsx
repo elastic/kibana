@@ -76,7 +76,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
           entityFields[0].operation === ENTITY_FIELD_OPERATIONS.ADD
         ) {
           const { fieldName, fieldValue } = entityFields[0];
-          if (typeof fieldName === 'string' && typeof fieldValue === 'string') {
+          if (typeof fieldName === 'string' && fieldValue !== undefined) {
             const influencersFilterQuery = {
               bool: {
                 should: [
@@ -107,7 +107,6 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
           },
         });
       }
-      return undefined;
     },
     async execute(context) {
       if (!context.embeddable) {

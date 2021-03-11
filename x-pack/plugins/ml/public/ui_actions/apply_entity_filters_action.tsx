@@ -51,7 +51,6 @@ export function createApplyEntityFieldFiltersAction(
                     labelValue: `${fieldName}:${fieldValue}`,
                   },
                 }),
-                index: '0d6bc6b0-7aad-11eb-a0a1-3b94c0829943',
                 controlledBy: CONTROLLED_BY_EXPLORER_FILTER,
                 negate: false,
                 disabled: false,
