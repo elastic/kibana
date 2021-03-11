@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { VALIDATION_STATUS } from '../constants/validation';
@@ -44,7 +45,7 @@ export function findAggField(
       value = returnParent === true ? aggs : aggs[k];
       return true;
     }
-    if (aggs.hasOwnProperty(k) && typeof aggs[k] === 'object') {
+    if (aggs.hasOwnProperty(k) && aggs[k] !== null && typeof aggs[k] === 'object') {
       value = findAggField(aggs[k], fieldName, returnParent);
       return value !== undefined;
     }

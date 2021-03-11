@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { setupGetOperatorSuggestions } from './operator';
@@ -62,6 +64,36 @@ describe('Kuery operator suggestions', () => {
     const suggestions = await getSuggestions(
       querySuggestionsArgs,
       mockKueryNode({ fieldName: 'bytes' })
+    );
+
+    expect(suggestions.find(({ text }) => text === ': ')).toBeDefined();
+    expect(suggestions.find(({ text }) => text === '< ')).toBeDefined();
+  });
+
+  test('should return numeric operators for numeric range fields', async () => {
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({ fieldName: 'bytes_range' })
+    );
+
+    expect(suggestions.find(({ text }) => text === ': ')).toBeDefined();
+    expect(suggestions.find(({ text }) => text === '< ')).toBeDefined();
+  });
+
+  test('should return range operators for date range fields', async () => {
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({ fieldName: 'time_range' })
+    );
+
+    expect(suggestions.find(({ text }) => text === ': ')).toBeDefined();
+    expect(suggestions.find(({ text }) => text === '< ')).toBeDefined();
+  });
+
+  test('should return range operators for ip range fields', async () => {
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({ fieldName: 'ip_range' })
     );
 
     expect(suggestions.find(({ text }) => text === ': ')).toBeDefined();

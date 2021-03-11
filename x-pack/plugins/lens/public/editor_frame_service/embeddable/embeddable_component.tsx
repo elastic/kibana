@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import {
   EmbeddableRenderer,
@@ -14,7 +16,7 @@ import type { IndexPatternPersistedState } from '../../indexpattern_datasource/t
 import type { XYState } from '../../xy_visualization/types';
 import type { PieVisualizationState } from '../../pie_visualization/types';
 import type { DatatableVisualizationState } from '../../datatable_visualization/visualization';
-import type { State as MetricState } from '../../metric_visualization/types';
+import type { MetricState } from '../../metric_visualization/types';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,

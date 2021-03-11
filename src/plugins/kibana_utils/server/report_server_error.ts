@@ -1,39 +1,47 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { KibanaResponseFactory } from 'kibana/server';
 import { KbnError } from '../common';
 
 export class KbnServerError extends KbnError {
-  constructor(message: string, public readonly statusCode: number) {
+  public errBody?: Record<string, any>;
+  constructor(message: string, public readonly statusCode: number, errBody?: Record<string, any>) {
     super(message);
+    this.errBody = errBody;
   }
 }
 
-export function reportServerError(res: KibanaResponseFactory, err: any) {
+/**
+ * Formats any error thrown into a standardized `KbnServerError`.
+ * @param e `Error` or `ElasticsearchClientError`
+ * @returns `KbnServerError`
+ */
+export function getKbnServerError(e: Error) {
+  return new KbnServerError(
+    e.message ?? 'Unknown error',
+    e instanceof ResponseError ? e.statusCode : 500,
+    e instanceof ResponseError ? e.body : undefined
+  );
+}
+
+/**
+ *
+ * @param res Formats a `KbnServerError` into a server error response
+ * @param err
+ */
+export function reportServerError(res: KibanaResponseFactory, err: KbnServerError) {
   return res.customError({
     statusCode: err.statusCode ?? 500,
     body: {
       message: err.message,
-      attributes: {
-        error: err.body?.error || err.message,
-      },
+      attributes: err.errBody?.error,
     },
   });
 }

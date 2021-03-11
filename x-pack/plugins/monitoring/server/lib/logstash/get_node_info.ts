@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { merge } from 'lodash';
@@ -9,7 +10,11 @@ import { merge } from 'lodash';
 import { checkParam } from '../error_missing_required';
 // @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
-import { LegacyRequest, ElasticsearchResponse } from '../../types';
+import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+// @ts-ignore
+import { standaloneClusterFilter } from '../standalone_clusters/standalone_cluster_query_filter';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const source = resp.hits?.hits[0]?._source?.logstash_stats;
@@ -30,6 +35,11 @@ export function getNodeInfo(
   { clusterUuid, logstashUuid }: { clusterUuid: string; logstashUuid: string }
 ) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getNodeInfo');
+  const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
+
+  const clusterFilter = isStandaloneCluster
+    ? standaloneClusterFilter
+    : { term: { cluster_uuid: clusterUuid } };
 
   const params = {
     index: lsIndexPattern,
@@ -46,10 +56,7 @@ export function getNodeInfo(
     body: {
       query: {
         bool: {
-          filter: [
-            { term: { cluster_uuid: clusterUuid } },
-            { term: { 'logstash_stats.logstash.uuid': logstashUuid } },
-          ],
+          filter: [clusterFilter, { term: { 'logstash_stats.logstash.uuid': logstashUuid } }],
         },
       },
       collapse: { field: 'logstash_stats.logstash.uuid' },

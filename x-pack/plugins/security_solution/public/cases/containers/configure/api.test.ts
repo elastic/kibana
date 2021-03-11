@@ -1,18 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { KibanaServices } from '../../../common/lib/kibana';
-import { fetchConnectors, getCaseConfigure, postCaseConfigure, patchCaseConfigure } from './api';
+import {
+  fetchConnectors,
+  getCaseConfigure,
+  postCaseConfigure,
+  patchCaseConfigure,
+  fetchActionTypes,
+} from './api';
 import {
   connectorsMock,
+  actionTypesMock,
   caseConfigurationMock,
   caseConfigurationResposeMock,
   caseConfigurationCamelCaseResponseMock,
 } from './mock';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -121,6 +129,26 @@ describe('Case Configuration API', () => {
         abortCtrl.signal
       );
       expect(resp).toEqual(caseConfigurationCamelCaseResponseMock);
+    });
+  });
+
+  describe('fetch actionTypes', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(actionTypesMock);
+    });
+
+    test('check url, method, signal', async () => {
+      await fetchActionTypes({ signal: abortCtrl.signal });
+      expect(fetchMock).toHaveBeenCalledWith('/api/actions/list_action_types', {
+        method: 'GET',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('happy path', async () => {
+      const resp = await fetchActionTypes({ signal: abortCtrl.signal });
+      expect(resp).toEqual(actionTypesMock);
     });
   });
 });

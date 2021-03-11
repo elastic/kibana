@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import _ from 'lodash';
@@ -50,6 +51,7 @@ import { IndexPatternsContract } from '../../../../../../src/plugins/data/public
 import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
+import type { ErrorMessage } from '../types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -76,7 +78,9 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
-  documentToExpression: (doc: Document) => Promise<Ast | null>;
+  documentToExpression: (
+    doc: Document
+  ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
   editable: boolean;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
@@ -98,6 +102,7 @@ export class Embeddable
   private subscription: Subscription;
   private isInitialized = false;
   private activeData: Partial<DefaultInspectorAdapters> | undefined;
+  private errors: ErrorMessage[] | undefined;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -173,7 +178,8 @@ export class Embeddable
       });
 
     // Update search context and reload on changes related to search
-    input$
+    this.getUpdated$()
+      .pipe(map(() => this.getInput()))
       .pipe(
         distinctUntilChanged((a, b) =>
           isEqual(
@@ -224,13 +230,11 @@ export class Embeddable
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
-    const expression = await this.deps.documentToExpression(this.savedVis);
-    this.expression = expression ? toExpression(expression) : null;
+    const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
+    this.errors = errors;
+    this.expression = ast ? toExpression(ast) : null;
     await this.initializeOutput();
     this.isInitialized = true;
-    if (this.domNode) {
-      this.render(this.domNode);
-    }
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
@@ -281,6 +285,7 @@ export class Embeddable
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
+        errors={this.errors}
         searchContext={this.getMergedSearchContext()}
         variables={input.palette ? { theme: { palette: input.palette } } : {}}
         searchSessionId={this.externalSearchContext.searchSessionId}
@@ -370,6 +375,9 @@ export class Embeddable
   };
 
   async reload() {
+    if (!this.savedVis || !this.isInitialized) {
+      return;
+    }
     this.handleContainerStateChanged(this.input);
     if (this.domNode) {
       this.render(this.domNode);

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchAfterAndBulkCreateReturnType } from '../types';
+import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
+import { ThreatMatchNamedQuery } from './types';
 
 /**
  * Given two timers this will take the max of each and add them to each other and return that addition.
@@ -112,3 +114,29 @@ export const combineConcurrentResults = (
 
   return combineResults(currentResult, maxedNewResult);
 };
+
+const separator = '__SEP__';
+export const encodeThreatMatchNamedQuery = ({
+  id,
+  index,
+  field,
+  value,
+}: ThreatMatchNamedQuery): string => {
+  return [id, index, field, value].join(separator);
+};
+
+export const decodeThreatMatchNamedQuery = (encoded: string): ThreatMatchNamedQuery => {
+  const queryValues = encoded.split(separator);
+  const [id, index, field, value] = queryValues;
+  const query = { id, index, field, value };
+
+  if (queryValues.length !== 4 || !queryValues.every(Boolean)) {
+    const queryString = JSON.stringify(query);
+    throw new Error(`Decoded query is invalid. Decoded value: ${queryString}`);
+  }
+
+  return query;
+};
+
+export const extractNamedQueries = (hit: SignalSourceHit): ThreatMatchNamedQuery[] =>
+  hit.matched_queries?.map((match) => decodeThreatMatchNamedQuery(match)) ?? [];

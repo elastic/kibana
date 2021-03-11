@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash';
@@ -24,6 +25,7 @@ export interface ConfigurationIssues {
    * See https://github.com/elastic/elasticsearch/blob/master/docs/reference/ilm/actions/ilm-searchable-snapshot.asciidoc.
    */
   isUsingSearchableSnapshotInHotPhase: boolean;
+  isUsingSearchableSnapshotInColdPhase: boolean;
 }
 
 const ConfigurationIssuesContext = createContext<ConfigurationIssues>(null as any);
@@ -31,10 +33,14 @@ const ConfigurationIssuesContext = createContext<ConfigurationIssues>(null as an
 const pathToHotPhaseSearchableSnapshot =
   'phases.hot.actions.searchable_snapshot.snapshot_repository';
 
+const pathToColdPhaseSearchableSnapshot =
+  'phases.cold.actions.searchable_snapshot.snapshot_repository';
+
 export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData({
     watch: [
       pathToHotPhaseSearchableSnapshot,
+      pathToColdPhaseSearchableSnapshot,
       isUsingCustomRolloverPath,
       isUsingDefaultRolloverPath,
     ],
@@ -49,6 +55,8 @@ export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => 
         isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
         isUsingSearchableSnapshotInHotPhase:
           get(formData, pathToHotPhaseSearchableSnapshot) != null,
+        isUsingSearchableSnapshotInColdPhase:
+          get(formData, pathToColdPhaseSearchableSnapshot) != null,
       }}
     >
       {children}

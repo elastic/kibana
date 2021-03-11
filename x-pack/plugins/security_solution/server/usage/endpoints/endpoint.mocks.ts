@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { SavedObjectsFindResponse } from 'src/core/server';
 import { AgentEventSOAttributes } from './../../../../fleet/common/types/models/agent';
-import {
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common/constants/agent';
+import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../../../fleet/common/constants/agent';
 import { Agent } from '../../../../fleet/common';
 import { FLEET_ENDPOINT_PACKAGE_CONSTANT } from './fleet_saved_objects';
 
@@ -34,84 +33,68 @@ export const MockOSFullName = 'somePlatformFullName';
 export const mockFleetObjectsResponse = (
   hasDuplicates = true,
   lastCheckIn = new Date().toISOString()
-): SavedObjectsFindResponse<Agent> => ({
+): { agents: Agent[]; total: number; page: number; perPage: number } | undefined => ({
   page: 1,
-  per_page: 20,
+  perPage: 20,
   total: 1,
-  saved_objects: [
+  agents: [
     {
-      type: AGENT_SAVED_OBJECT_TYPE,
+      active: true,
       id: testAgentId,
-      attributes: {
-        active: true,
-        id: testAgentId,
-        policy_id: 'randoAgentPolicyId',
-        type: 'PERMANENT',
-        user_provided_metadata: {},
-        enrolled_at: lastCheckIn,
-        current_error_events: [],
-        local_metadata: {
-          elastic: {
-            agent: {
-              id: testAgentId,
-            },
-          },
-          host: {
-            hostname: testHostName,
-            name: testHostName,
-            id: testHostId,
-          },
-          os: {
-            platform: MockOSPlatform,
-            version: MockOSVersion,
-            name: MockOSName,
-            full: MockOSFullName,
+      policy_id: 'randoAgentPolicyId',
+      type: 'PERMANENT',
+      user_provided_metadata: {},
+      enrolled_at: lastCheckIn,
+      current_error_events: [],
+      local_metadata: {
+        elastic: {
+          agent: {
+            id: testAgentId,
           },
         },
-        packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
-        last_checkin: lastCheckIn,
+        host: {
+          hostname: testHostName,
+          name: testHostName,
+          id: testHostId,
+        },
+        os: {
+          platform: MockOSPlatform,
+          version: MockOSVersion,
+          name: MockOSName,
+          full: MockOSFullName,
+        },
       },
-      references: [],
-      updated_at: lastCheckIn,
-      version: 'WzI4MSwxXQ==',
-      score: 0,
+      packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
+      last_checkin: lastCheckIn,
     },
     {
-      type: AGENT_SAVED_OBJECT_TYPE,
-      id: testAgentId,
-      attributes: {
-        active: true,
-        id: 'oldTestAgentId',
-        policy_id: 'randoAgentPolicyId',
-        type: 'PERMANENT',
-        user_provided_metadata: {},
-        enrolled_at: lastCheckIn,
-        current_error_events: [],
-        local_metadata: {
-          elastic: {
-            agent: {
-              id: 'oldTestAgentId',
-            },
-          },
-          host: {
-            hostname: hasDuplicates ? testHostName : 'oldRandoHostName',
-            name: hasDuplicates ? testHostName : 'oldRandoHostName',
-            id: hasDuplicates ? testHostId : 'oldRandoHostId',
-          },
-          os: {
-            platform: MockOSPlatform,
-            version: MockOSVersion,
-            name: MockOSName,
-            full: MockOSFullName,
+      active: true,
+      id: 'oldTestAgentId',
+      policy_id: 'randoAgentPolicyId',
+      type: 'PERMANENT',
+      user_provided_metadata: {},
+      enrolled_at: lastCheckIn,
+      current_error_events: [],
+      local_metadata: {
+        elastic: {
+          agent: {
+            id: 'oldTestAgentId',
           },
         },
-        packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
-        last_checkin: lastCheckIn,
+        host: {
+          hostname: hasDuplicates ? testHostName : 'oldRandoHostName',
+          name: hasDuplicates ? testHostName : 'oldRandoHostName',
+          id: hasDuplicates ? testHostId : 'oldRandoHostId',
+        },
+        os: {
+          platform: MockOSPlatform,
+          version: MockOSVersion,
+          name: MockOSName,
+          full: MockOSFullName,
+        },
       },
-      references: [],
-      updated_at: lastCheckIn,
-      version: 'WzI4MSwxXQ==',
-      score: 0,
+      packages: [FLEET_ENDPOINT_PACKAGE_CONSTANT, 'system'],
+      last_checkin: lastCheckIn,
     },
   ],
 });

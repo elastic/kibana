@@ -7,12 +7,8 @@
 Kibana is provided for Linux and Darwin as a `.tar.gz` package. These packages
 are the easiest formats to use when trying out Kibana.
 
-These packages are free to use under the Elastic license. They contain open
-source and free commercial features and access to paid commercial features.
-<<managing-licenses,Start a 30-day trial>> to try out all of the
-paid commercial features. See the
-https://www.elastic.co/subscriptions[Subscriptions] page for information about
-Elastic license levels.
+This package contains both free and subscription features.
+<<managing-licenses,Start a 30-day trial>> to try out all of the features.
 
 The latest stable version of Kibana can be found on the
 link:/downloads/kibana[Download Kibana] page.
@@ -92,10 +88,6 @@ cd kibana-{version}-darwin-x86_64/ <2>
     `kibana-{version}-darwin-x86_64.tar.gz: OK`.
 <2> This directory is known as `$KIBANA_HOME`.
 
-Alternatively, you can download the following package, which contains only
-features that are available under the Apache 2.0 license:
-https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-darwin-x86_64.tar.gz
-
 endif::[]
 
 
@@ -142,6 +134,7 @@ important data later on.
 | config
   | Configuration files including `kibana.yml`
   | $KIBANA_HOME\config
+  | <<settings,KBN_PATH_CONF>>
  d|
 
 | data

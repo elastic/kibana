@@ -1,25 +1,22 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import './discover_field.scss';
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip, EuiTitle } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiTitle,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
@@ -227,6 +224,33 @@ export function DiscoverField({
     );
   }
 
+  const getFieldInfoIcon = () => {
+    if (field.type !== 'conflict') {
+      return null;
+    }
+    return (
+      <EuiToolTip
+        position="bottom"
+        content={i18n.translate('discover.field.mappingConflict', {
+          defaultMessage:
+            'This field is defined as several types (string, integer, etc) across the indices that match this pattern.' +
+            'You may still be able to use this conflicting field, but it will be unavailable for functions that require Kibana to know their type. Correcting this issue will require reindexing your data.',
+        })}
+      >
+        <EuiIcon
+          tabIndex={0}
+          type="alert"
+          title={i18n.translate('discover.field.mappingConflict.title', {
+            defaultMessage: 'Mapping Conflict',
+          })}
+          size="s"
+        />
+      </EuiToolTip>
+    );
+  };
+
+  const fieldInfoIcon = getFieldInfoIcon();
+
   const shouldRenderMultiFields = !!multiFields;
   const renderMultiFields = () => {
     if (!multiFields) {
@@ -273,6 +297,7 @@ export function DiscoverField({
           fieldIcon={dscFieldIcon}
           fieldAction={actionButton}
           fieldName={fieldName}
+          fieldInfoIcon={fieldInfoIcon}
         />
       }
       isOpen={infoIsOpen}
@@ -280,7 +305,9 @@ export function DiscoverField({
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >
-      <EuiPopoverTitle style={{ textTransform: 'none' }}>{field.displayName}</EuiPopoverTitle>
+      <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
+        {field.displayName}
+      </EuiPopoverTitle>
       <EuiTitle size="xxxs">
         <h5>
           {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -18,6 +19,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 import {
+  getFormattedSeverityScore,
   getSeverityWithLow,
   getMultiBucketImpactLabel,
 } from '../../../../../common/util/anomaly_utils';
@@ -1074,11 +1076,7 @@ class TimeseriesChartIntl extends Component {
       .defined((d) => d.lower !== null && d.upper !== null);
 
     if (modelPlotEnabled === true) {
-      cxtGroup
-        .append('path')
-        .datum(data)
-        .attr('class', 'area context')
-        .attr('d', contextBoundsArea);
+      cxtGroup.append('path').datum(data).attr('class', 'area bounds').attr('d', contextBoundsArea);
     }
 
     const contextValuesLine = d3.svg
@@ -1441,12 +1439,11 @@ class TimeseriesChartIntl extends Component {
 
     if (marker.anomalyScore !== undefined) {
       const score = parseInt(marker.anomalyScore);
-      const displayScore = score > 0 ? score : '< 1';
       tooltipData.push({
         label: i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.anomalyScoreLabel', {
           defaultMessage: 'anomaly score',
         }),
-        value: displayScore,
+        value: getFormattedSeverityScore(score),
         color: anomalyColorScale(score),
         seriesIdentifier: {
           key: seriesKey,

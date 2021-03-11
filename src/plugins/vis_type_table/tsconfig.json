@@ -8,6 +8,7 @@
     "declarationMap": true
   },
   "include": [
+    "common/**/*",
     "public/**/*",
     "server/**/*",
     "*.ts"

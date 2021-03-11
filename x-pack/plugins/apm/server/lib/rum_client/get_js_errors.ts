@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mergeProjection } from '../../projections/util/merge_projection';
@@ -12,7 +13,9 @@ import {
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   TRANSACTION_ID,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function getJSErrors({
   setup,
@@ -57,6 +60,20 @@ export async function getJSErrors({
                 from: pageIndex * pageSize,
               },
             },
+            impactedPages: {
+              filter: {
+                term: {
+                  [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
+                },
+              },
+              aggs: {
+                pageCount: {
+                  cardinality: {
+                    field: TRANSACTION_ID,
+                  },
+                },
+              },
+            },
             sample: {
               top_hits: {
                 _source: [
@@ -86,9 +103,9 @@ export async function getJSErrors({
     totalErrorPages: totalErrorPages?.value ?? 0,
     totalErrors: response.hits.total.value ?? 0,
     totalErrorGroups: totalErrorGroups?.value ?? 0,
-    items: errors?.buckets.map(({ sample, doc_count: count, key }) => {
+    items: errors?.buckets.map(({ sample, key, impactedPages }) => {
       return {
-        count,
+        count: impactedPages.pageCount.value,
         errorGroupId: key,
         errorMessage: (sample.hits.hits[0]._source as {
           error: { exception: Array<{ message: string }> };

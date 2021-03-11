@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
-import { defaultSetPriority, defaultPhaseIndexPriority } from '../../../constants';
+import { defaultIndexPriority } from '../../../constants';
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
-const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
-
 import { FormInternal } from '../types';
+
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 import {
   ifExistsNumberGreaterThanZero,
@@ -28,6 +29,90 @@ const { emptyField, numberGreaterThanField } = fieldValidators;
 const serializers = {
   stringToNumber: (v: string): any => (v != null ? parseInt(v, 10) : undefined),
 };
+
+const maxNumSegmentsField = {
+  label: i18nTexts.editPolicy.maxNumSegmentsFieldLabel,
+  validations: [
+    {
+      validator: emptyField(
+        i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError',
+          { defaultMessage: 'A value for number of segments is required.' }
+        )
+      ),
+    },
+    {
+      validator: ifExistsNumberGreaterThanZero,
+    },
+  ],
+  serializer: serializers.stringToNumber,
+};
+
+export const searchableSnapshotFields = {
+  snapshot_repository: {
+    label: i18nTexts.editPolicy.searchableSnapshotsRepoFieldLabel,
+    validations: [
+      { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
+    ],
+  },
+  storage: {
+    label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageLabel', {
+      defaultMessage: 'Storage',
+    }),
+    helpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageHelpText',
+      {
+        defaultMessage:
+          "Type of snapshot mounted for the searchable snapshot. This is an advanced option. Only change it if you know what you're doing.",
+      }
+    ),
+  },
+};
+
+const numberOfReplicasField = {
+  label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel', {
+    defaultMessage: 'Number of replicas',
+  }),
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    {
+      validator: ifExistsNumberNonNegative,
+    },
+  ],
+  serializer: serializers.stringToNumber,
+};
+
+const numberOfShardsField = {
+  label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
+    defaultMessage: 'Number of primary shards',
+  }),
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    {
+      validator: numberGreaterThanField({
+        message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+        than: 0,
+      }),
+    },
+  ],
+  serializer: serializers.stringToNumber,
+};
+
+const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
+  defaultValue: defaultIndexPriority[phase] as any,
+  label: i18nTexts.editPolicy.indexPriorityFieldLabel,
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    { validator: ifExistsNumberNonNegative },
+  ],
+  serializer: serializers.stringToNumber,
+});
 
 export const schema: FormSchema<FormInternal> = {
   _meta: {
@@ -54,7 +139,6 @@ export const schema: FormSchema<FormInternal> = {
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
-        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
       readonlyEnabled: {
         defaultValue: false,
@@ -69,18 +153,11 @@ export const schema: FormSchema<FormInternal> = {
           { defaultMessage: 'Activate warm phase' }
         ),
       },
-      warmPhaseOnRollover: {
-        defaultValue: true,
-        label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel', {
-          defaultMessage: 'Move to warm phase on rollover',
-        }),
-      },
       minAgeUnit: {
-        defaultValue: 'ms',
+        defaultValue: 'd',
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
-        helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
       },
       dataTierAllocationType: {
         label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
@@ -104,6 +181,30 @@ export const schema: FormSchema<FormInternal> = {
       freezeEnabled: {
         defaultValue: false,
         label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
+          defaultMessage: 'Freeze index',
+        }),
+      },
+      minAgeUnit: {
+        defaultValue: 'd',
+      },
+      dataTierAllocationType: {
+        label: i18nTexts.editPolicy.allocationTypeOptionsFieldLabel,
+      },
+      allocationNodeAttribute: {
+        label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+    },
+    frozen: {
+      enabled: {
+        defaultValue: false,
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel',
+          { defaultMessage: 'Activate frozen phase' }
+        ),
+      },
+      freezeEnabled: {
+        defaultValue: false,
+        label: i18n.translate('xpack.indexLifecycleMgmt.frozePhase.freezeIndexLabel', {
           defaultMessage: 'Freeze index',
         }),
       },
@@ -179,50 +280,13 @@ export const schema: FormSchema<FormInternal> = {
           },
         },
         forcemerge: {
-          max_num_segments: {
-            label: i18nTexts.editPolicy.maxNumSegmentsFieldLabel,
-            validations: [
-              {
-                validator: emptyField(
-                  i18n.translate(
-                    'xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError',
-                    { defaultMessage: 'A value for number of segments is required.' }
-                  )
-                ),
-              },
-              {
-                validator: ifExistsNumberGreaterThanZero,
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          max_num_segments: maxNumSegmentsField,
         },
         shrink: {
-          number_of_shards: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
-              defaultMessage: 'Number of primary shards',
-            }),
-            validations: [
-              {
-                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
-              },
-              {
-                validator: numberGreaterThanField({
-                  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
-                  than: 0,
-                }),
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          number_of_shards: numberOfShardsField,
         },
         set_priority: {
-          priority: {
-            defaultValue: defaultSetPriority as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberNonNegative }],
-            serializer: serializers.stringToNumber,
-          },
+          priority: getPriorityField('hot'),
         },
       },
     },
@@ -237,63 +301,16 @@ export const schema: FormSchema<FormInternal> = {
       },
       actions: {
         allocate: {
-          number_of_replicas: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.numberOfReplicasLabel', {
-              defaultMessage: 'Number of replicas (optional)',
-            }),
-            validations: [
-              {
-                validator: ifExistsNumberNonNegative,
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          number_of_replicas: numberOfReplicasField,
         },
         shrink: {
-          number_of_shards: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
-              defaultMessage: 'Number of primary shards',
-            }),
-            validations: [
-              {
-                validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
-              },
-              {
-                validator: numberGreaterThanField({
-                  message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
-                  than: 0,
-                }),
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          number_of_shards: numberOfShardsField,
         },
         forcemerge: {
-          max_num_segments: {
-            label: i18nTexts.editPolicy.maxNumSegmentsFieldLabel,
-            validations: [
-              {
-                validator: emptyField(
-                  i18n.translate(
-                    'xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError',
-                    { defaultMessage: 'A value for number of segments is required.' }
-                  )
-                ),
-              },
-              {
-                validator: ifExistsNumberGreaterThanZero,
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          max_num_segments: maxNumSegmentsField,
         },
         set_priority: {
-          priority: {
-            defaultValue: defaultPhaseIndexPriority as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberNonNegative }],
-            serializer: serializers.stringToNumber,
-          },
+          priority: getPriorityField('warm'),
         },
       },
     },
@@ -308,37 +325,15 @@ export const schema: FormSchema<FormInternal> = {
       },
       actions: {
         allocate: {
-          number_of_replicas: {
-            label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.numberOfReplicasLabel', {
-              defaultMessage: 'Number of replicas (optional)',
-            }),
-            validations: [
-              {
-                validator: ifExistsNumberNonNegative,
-              },
-            ],
-            serializer: serializers.stringToNumber,
-          },
+          number_of_replicas: numberOfReplicasField,
         },
         set_priority: {
-          priority: {
-            defaultValue: '0' as any,
-            label: i18nTexts.editPolicy.setPriorityFieldLabel,
-            validations: [{ validator: ifExistsNumberNonNegative }],
-            serializer: serializers.stringToNumber,
-          },
+          priority: getPriorityField('cold'),
         },
-        searchable_snapshot: {
-          snapshot_repository: {
-            label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
-            validations: [
-              { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
-            ],
-          },
-        },
+        searchable_snapshot: searchableSnapshotFields,
       },
     },
-    delete: {
+    frozen: {
       min_age: {
         defaultValue: '0',
         validations: [
@@ -346,6 +341,37 @@ export const schema: FormSchema<FormInternal> = {
             validator: minAgeValidator,
           },
         ],
+      },
+      actions: {
+        allocate: {
+          number_of_replicas: numberOfReplicasField,
+        },
+        set_priority: {
+          priority: getPriorityField('frozen'),
+        },
+        searchable_snapshot: searchableSnapshotFields,
+      },
+    },
+    delete: {
+      min_age: {
+        defaultValue: '365',
+        validations: [
+          {
+            validator: minAgeValidator,
+          },
+        ],
+      },
+      actions: {
+        wait_for_snapshot: {
+          policy: {
+            label: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.waitForSnapshot.snapshotPolicyFieldLabel',
+              {
+                defaultMessage: 'Policy name (optional)',
+              }
+            ),
+          },
+        },
       },
     },
   },

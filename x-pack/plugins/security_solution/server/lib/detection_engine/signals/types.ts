@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DslQuery, Filter } from 'src/plugins/data/common';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
@@ -15,8 +16,8 @@ import {
   AlertInstanceContext,
   AlertExecutorOptions,
   AlertServices,
-} from '../../../../../alerts/server';
-import { BaseSearchResponse, SearchResponse, TermAggregationBucket } from '../../types';
+} from '../../../../../alerting/server';
+import { BaseSearchResponse, SearchHit, SearchResponse, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -49,8 +50,34 @@ export interface SignalsStatusParams {
 }
 
 export interface ThresholdResult {
+  terms?: Array<{
+    field: string;
+    value: string;
+  }>;
+  cardinality?: Array<{
+    field: string;
+    value: number;
+  }>;
   count: number;
-  value: string;
+  from: string;
+}
+
+export interface ThresholdSignalHistoryRecord {
+  terms: Array<{
+    field?: string;
+    value: SearchTypes;
+  }>;
+  lastSignalTimestamp: number;
+}
+
+export interface ThresholdSignalHistory {
+  [hash: string]: ThresholdSignalHistoryRecord;
+}
+
+export interface RuleRangeTuple {
+  to: moment.Moment;
+  from: moment.Moment;
+  maxSignals: number;
 }
 
 export interface SignalSource {
@@ -73,8 +100,9 @@ export interface SignalSource {
     };
     // signal.depth doesn't exist on pre-7.10 signals
     depth?: number;
+    original_time?: string;
+    threshold_result?: ThresholdResult;
   };
-  threshold_result?: ThresholdResult;
 }
 
 export interface BulkItem {
@@ -227,9 +255,14 @@ export interface QueryFilter {
   };
 }
 
+export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
+
 export interface SearchAfterAndBulkCreateParams {
-  gap: moment.Duration | null;
-  previousStartedAt: Date | null | undefined;
+  tuples: Array<{
+    to: moment.Moment;
+    from: moment.Moment;
+    maxSignals: number;
+  }>;
   ruleParams: RuleTypeParams;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   listClient: ListClient;
@@ -253,6 +286,7 @@ export interface SearchAfterAndBulkCreateParams {
   tags: string[];
   throttle: string;
   buildRuleMessage: BuildRuleMessage;
+  enrichment?: SignalsEnrichment;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -263,10 +297,37 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignalsCount: number;
   createdSignals: SignalHit[];
   errors: string[];
+  totalToFromTuples?: Array<{
+    to: Moment | undefined;
+    from: Moment | undefined;
+    maxSignals: number;
+  }>;
 }
 
 export interface ThresholdAggregationBucket extends TermAggregationBucket {
   top_threshold_hits: BaseSearchResponse<SignalSource>;
+  cardinality_count: {
+    value: number;
+  };
+}
+
+export interface MultiAggBucket {
+  cardinality?: Array<{
+    field: string;
+    value: number;
+  }>;
+  terms: Array<{
+    field: string;
+    value: string;
+  }>;
+  docCount: number;
+  topThresholdHits?:
+    | {
+        hits: {
+          hits: SearchHit[];
+        };
+      }
+    | undefined;
 }
 
 export interface ThresholdQueryBucket extends TermAggregationBucket {

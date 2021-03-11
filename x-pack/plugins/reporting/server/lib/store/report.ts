@@ -1,14 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 // @ts-ignore no module definition
 import Puid from 'puid';
 import { JOB_STATUSES } from '../../../common/constants';
-import { ReportApiJSON, ReportDocumentHead, ReportSource } from '../../../common/types';
+import {
+  ReportApiJSON,
+  ReportDocument,
+  ReportDocumentHead,
+  ReportSource,
+} from '../../../common/types';
+import { ReportTaskParams } from '../tasks';
+
+export { ReportDocument };
+export { ReportApiJSON, ReportSource };
 
 const puid = new Puid();
 
@@ -34,9 +44,9 @@ export class Report implements Partial<ReportSource> {
   public readonly output?: ReportSource['output'];
   public readonly started_at?: ReportSource['started_at'];
   public readonly completed_at?: ReportSource['completed_at'];
-  public readonly process_expiration?: ReportSource['process_expiration'];
-  public readonly priority?: ReportSource['priority'];
   public readonly timeout?: ReportSource['timeout'];
+
+  public process_expiration?: ReportSource['process_expiration'];
 
   /*
    * Create an unsaved report
@@ -62,7 +72,6 @@ export class Report implements Partial<ReportSource> {
     this.created_by = opts.created_by || false;
     this.meta = opts.meta || { objectType: 'unknown' };
     this.browser_type = opts.browser_type;
-    this.priority = opts.priority;
 
     this.status = opts.status || JOB_STATUSES.PENDING;
     this.output = opts.output || null;
@@ -97,13 +106,34 @@ export class Report implements Partial<ReportSource> {
         meta: this.meta,
         timeout: this.timeout,
         max_attempts: this.max_attempts,
-        priority: this.priority,
         browser_type: this.browser_type,
         status: this.status,
         attempts: this.attempts,
         started_at: this.started_at,
         completed_at: this.completed_at,
+        process_expiration: this.process_expiration,
       },
+    };
+  }
+
+  /*
+   * Parameters to save in a task instance
+   */
+  toReportTaskJSON(): ReportTaskParams {
+    if (!this._index) {
+      throw new Error(`Task is missing the _index field!`);
+    }
+
+    return {
+      id: this._id,
+      index: this._index,
+      jobtype: this.jobtype,
+      created_at: this.created_at,
+      created_by: this.created_by,
+      payload: this.payload,
+      meta: this.meta,
+      attempts: this.attempts,
+      max_attempts: this.max_attempts,
     };
   }
 
@@ -123,7 +153,6 @@ export class Report implements Partial<ReportSource> {
       meta: this.meta,
       timeout: this.timeout,
       max_attempts: this.max_attempts,
-      priority: this.priority,
       browser_type: this.browser_type,
       status: this.status,
       attempts: this.attempts,
@@ -132,5 +161,3 @@ export class Report implements Partial<ReportSource> {
     };
   }
 }
-
-export { ReportApiJSON, ReportSource };

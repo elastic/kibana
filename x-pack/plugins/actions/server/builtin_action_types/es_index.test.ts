@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 jest.mock('./lib/send_email', () => ({
@@ -17,6 +18,8 @@ import {
   ESIndexActionType,
   ESIndexActionTypeExecutorOptions,
 } from './es_index';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
 
 const ACTION_TYPE_ID = '.index';
 
@@ -160,14 +163,23 @@ describe('execute()', () => {
 
     const actionId = 'some-id';
 
-    executorOptions = { actionId, config, secrets, params, services };
-    services.callCluster.mockClear();
-    await actionType.executor(executorOptions);
+    executorOptions = {
+      actionId,
+      config,
+      secrets,
+      params,
+      services,
+    };
+    const scopedClusterClient = elasticsearchClientMock.createClusterClient().asScoped()
+      .asCurrentUser;
+    await actionType.executor({
+      ...executorOptions,
+      services: { ...services, scopedClusterClient },
+    });
 
-    expect(services.callCluster.mock.calls).toMatchInlineSnapshot(`
+    expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
-              "bulk",
               Object {
                 "body": Array [
                   Object {
@@ -191,17 +203,20 @@ describe('execute()', () => {
     };
 
     executorOptions = { actionId, config, secrets, params, services };
-    services.callCluster.mockClear();
-    await actionType.executor(executorOptions);
+    scopedClusterClient.bulk.mockClear();
+    await actionType.executor({
+      ...executorOptions,
+      services: { ...services, scopedClusterClient },
+    });
 
-    const calls = services.callCluster.mock.calls;
-    const timeValue = calls[0][1]?.body[1].field_to_use_for_time;
+    const calls = scopedClusterClient.bulk.mock.calls;
+    const timeValue = ((calls[0][0]?.body as unknown[])[1] as Record<string, unknown>)
+      .field_to_use_for_time;
     expect(timeValue).toBeInstanceOf(Date);
-    delete calls[0][1]?.body[1].field_to_use_for_time;
+    delete ((calls[0][0]?.body as unknown[])[1] as Record<string, unknown>).field_to_use_for_time;
     expect(calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "bulk",
             Object {
               "body": Array [
                 Object {
@@ -225,13 +240,16 @@ describe('execute()', () => {
     };
 
     executorOptions = { actionId, config, secrets, params, services };
-    services.callCluster.mockClear();
-    await actionType.executor(executorOptions);
 
-    expect(services.callCluster.mock.calls).toMatchInlineSnapshot(`
+    scopedClusterClient.bulk.mockClear();
+    await actionType.executor({
+      ...executorOptions,
+      services: { ...services, scopedClusterClient },
+    });
+
+    expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "bulk",
           Object {
             "body": Array [
               Object {
@@ -255,13 +273,15 @@ describe('execute()', () => {
     };
 
     executorOptions = { actionId, config, secrets, params, services };
-    services.callCluster.mockClear();
-    await actionType.executor(executorOptions);
+    scopedClusterClient.bulk.mockClear();
+    await actionType.executor({
+      ...executorOptions,
+      services: { ...services, scopedClusterClient },
+    });
 
-    expect(services.callCluster.mock.calls).toMatchInlineSnapshot(`
+    expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
-              "bulk",
               Object {
                 "body": Array [
                   Object {
@@ -294,35 +314,38 @@ describe('execute()', () => {
     };
 
     const actionId = 'some-id';
-
-    services.callCluster.mockResolvedValue({
-      took: 0,
-      errors: true,
-      items: [
-        {
-          index: {
-            _index: 'indexme',
-            _id: '7buTjHQB0SuNSiS9Hayt',
-            status: 400,
-            error: {
-              type: 'mapper_parsing_exception',
-              reason: 'failed to parse',
-              caused_by: {
-                type: 'illegal_argument_exception',
-                reason: 'field name cannot be an empty string',
+    const scopedClusterClient = elasticsearchClientMock.createClusterClient().asScoped()
+      .asCurrentUser;
+    scopedClusterClient.bulk.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        took: 0,
+        errors: true,
+        items: [
+          {
+            index: {
+              _index: 'indexme',
+              _id: '7buTjHQB0SuNSiS9Hayt',
+              status: 400,
+              error: {
+                type: 'mapper_parsing_exception',
+                reason: 'failed to parse',
+                caused_by: {
+                  type: 'illegal_argument_exception',
+                  reason: 'field name cannot be an empty string',
+                },
               },
             },
           },
-        },
-      ],
-    });
+        ],
+      })
+    );
 
     expect(await actionType.executor({ actionId, config, secrets, params, services }))
       .toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
         "message": "error indexing documents",
-        "serviceMessage": "failed to parse (field name cannot be an empty string)",
+        "serviceMessage": "Cannot destructure property 'body' of '(intermediate value)' as it is undefined.",
         "status": "error",
       }
     `);

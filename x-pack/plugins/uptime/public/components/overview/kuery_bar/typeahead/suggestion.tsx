@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useRef, useEffect, RefObject } from 'react';
 import { EuiSuggestItem } from '@elastic/eui';
 
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../observability/public';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 
 const SuggestionItem = euiStyled.div<{ selected: boolean }>`
   background: ${(props) => (props.selected ? props.theme.eui.euiColorLightestShade : 'initial')};

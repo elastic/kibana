@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom, { isBoom } from '@hapi/boom';
-import {
+import { KibanaRequest } from 'src/core/server';
+import type {
   RequestHandlerContext,
-  KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'src/core/server';
 import { errors as LegacyESErrors } from 'elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+
 import { appContextService } from '../services';
+
 import {
   IngestManagerError,
   RegistryError,
@@ -21,6 +24,7 @@ import {
   AgentPolicyNameExistsError,
   PackageUnsupportedMediaTypeError,
   ConcurrentInstallOperationError,
+  AgentNotFoundError,
 } from './index';
 
 type IngestErrorHandler = (
@@ -43,7 +47,9 @@ interface LegacyESClientError {
   path?: string;
   query?: string | undefined;
   body?: {
-    error: object;
+    error: {
+      type: string;
+    };
     status: number;
   };
   statusCode?: number;
@@ -72,6 +78,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   }
   if (error instanceof ConcurrentInstallOperationError) {
     return 409; // Conflict
+  }
+  if (error instanceof AgentNotFoundError) {
+    return 404;
   }
   return 400; // Bad Request
 };

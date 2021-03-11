@@ -22,6 +22,7 @@
 
 .mlDataGridChart__legendBoolean {
   width: 100%;
+  min-width: $euiButtonMinWidth;
   td { text-align: center }
 }
 

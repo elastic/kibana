@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -27,11 +28,14 @@ storiesOf('components/SearchSessionIndicator', module).add('default', () => (
       <SearchSessionIndicator state={SearchSessionState.Restored} />
     </div>
     <div>
+      <SearchSessionIndicator state={SearchSessionState.Canceled} />
+    </div>
+    <div>
       <SearchSessionIndicator
         state={SearchSessionState.Completed}
-        disabled={true}
-        disabledReasonText={
-          'Send to background capability is unavailable when auto-refresh is enabled'
+        saveDisabled={true}
+        saveDisabledReasonText={
+          'Search results have expired and it is no longer possible to save this search session'
         }
       />
     </div>

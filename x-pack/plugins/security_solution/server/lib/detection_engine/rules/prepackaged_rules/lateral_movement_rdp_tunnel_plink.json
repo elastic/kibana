@@ -6,12 +6,13 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Remote Desktop Tunneling Detected",
-  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and \n/* RDP port and usual SSH tunneling related switches in commandline */\nwildcard(process.args, \"*:3389\") and wildcard(process.args,\"-L\", \"-P\", \"-R\", \"-pw\", \"-ssh\") \n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  /* RDP port and usual SSH tunneling related switches in command line */\n  process.args : \"*:3389\" and\n  process.args : (\"-L\", \"-P\", \"-R\", \"-pw\", \"-ssh\")\n",
   "references": [
     "https://blog.netspi.com/how-to-access-rdp-over-a-reverse-ssh-tunnel/"
   ],
@@ -42,6 +43,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

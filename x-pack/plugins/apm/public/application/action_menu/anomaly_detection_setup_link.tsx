@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   EuiHeaderLink,
   EuiIcon,
@@ -16,10 +18,11 @@ import {
   getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
+import { useAnomalyDetectionJobsContext } from '../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
-import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useLicenseContext } from '../../context/license/use_license_context';
 import { useUrlParams } from '../../context/url_params_context/use_url_params';
+import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { APIReturnType } from '../../services/rest/createCallApmApi';
 import { units } from '../../style/variables';
 
@@ -28,8 +31,9 @@ export type AnomalyDetectionApiResponse = APIReturnType<'GET /api/apm/settings/a
 const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
 
 export function AnomalyDetectionSetupLink() {
-  const { uiFilters } = useUrlParams();
-  const environment = uiFilters.environment;
+  const {
+    urlParams: { environment },
+  } = useUrlParams();
   const { core } = useApmPluginContext();
   const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
   const license = useLicenseContext();
@@ -55,20 +59,18 @@ export function AnomalyDetectionSetupLink() {
 }
 
 export function MissingJobsAlert({ environment }: { environment?: string }) {
-  const { data = DEFAULT_DATA, status } = useFetcher(
-    (callApmApi) =>
-      callApmApi({ endpoint: `GET /api/apm/settings/anomaly-detection/jobs` }),
-    [],
-    { preservePreviousData: false, showToastOnError: false }
-  );
+  const {
+    anomalyDetectionJobsData = DEFAULT_DATA,
+    anomalyDetectionJobsStatus,
+  } = useAnomalyDetectionJobsContext();
 
   const defaultIcon = <EuiIcon type="inspect" color="primary" />;
 
-  if (status === FETCH_STATUS.LOADING) {
+  if (anomalyDetectionJobsStatus === FETCH_STATUS.LOADING) {
     return <EuiLoadingSpinner />;
   }
 
-  if (status !== FETCH_STATUS.SUCCESS) {
+  if (anomalyDetectionJobsStatus !== FETCH_STATUS.SUCCESS) {
     return defaultIcon;
   }
 
@@ -76,14 +78,14 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
     environment && environment !== ENVIRONMENT_ALL.value;
 
   // there are jobs for at least one environment
-  if (!isEnvironmentSelected && data.jobs.length > 0) {
+  if (!isEnvironmentSelected && anomalyDetectionJobsData.jobs.length > 0) {
     return defaultIcon;
   }
 
   // there are jobs for the selected environment
   if (
     isEnvironmentSelected &&
-    data.jobs.some((job) => environment === job.environment)
+    anomalyDetectionJobsData.jobs.some((job) => environment === job.environment)
   ) {
     return defaultIcon;
   }

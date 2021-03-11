@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import _ from 'lodash';
@@ -54,11 +43,36 @@ describe('tooltipFormatter', function () {
       extraMetrics: [],
       seriesId: '1',
     },
+    config: {
+      get: (name) => {
+        const config = {
+          setColorRange: false,
+          gauge: false,
+          percentageMode: false,
+        };
+        return config[name];
+      },
+    },
+    handler: {
+      pointSeries: {
+        getSeries: () => ({
+          getValueAxis: () => ({
+            getScale: () => ({
+              domain: () => [0, 10],
+            }),
+          }),
+        }),
+      },
+    },
+  };
+
+  const uiSettings = {
+    get: () => '',
   };
 
   it('returns html based on the mouse event', function () {
     const event = _.cloneDeep(baseEvent);
-    const $el = $(tooltipFormatter(event));
+    const $el = $(tooltipFormatter(event, uiSettings));
     const $rows = $el.find('tr');
     expect($rows.length).toBe(3);
 
@@ -78,7 +92,7 @@ describe('tooltipFormatter', function () {
   it('renders correctly on missing extraMetrics in datum', function () {
     const event = _.cloneDeep(baseEvent);
     delete event.datum.extraMetrics;
-    const $el = $(tooltipFormatter(event));
+    const $el = $(tooltipFormatter(event, uiSettings));
     const $rows = $el.find('tr');
     expect($rows.length).toBe(3);
   });

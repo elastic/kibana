@@ -56,6 +56,6 @@ include::{kib-repo-dir}/setup/access.asciidoc[]
 
 include::{kib-repo-dir}/setup/connect-to-elasticsearch.asciidoc[]
 
-include::{kib-repo-dir}/setup/production.asciidoc[]
-
 include::{kib-repo-dir}/setup/upgrade.asciidoc[]
+
+include::{kib-repo-dir}/setup/embedding.asciidoc[]

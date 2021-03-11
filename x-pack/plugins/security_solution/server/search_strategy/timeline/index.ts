@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { map, mergeMap } from 'rxjs/operators';
@@ -23,7 +24,6 @@ export const securitySolutionTimelineSearchStrategyProvider = <T extends Timelin
   data: PluginStart
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
-
   return {
     search: (request, options, deps) => {
       if (request.factoryQueryType == null) {
@@ -32,13 +32,12 @@ export const securitySolutionTimelineSearchStrategyProvider = <T extends Timelin
       const queryFactory: SecuritySolutionTimelineFactory<T> =
         securitySolutionTimelineFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
-
       return es.search({ ...request, params: dsl }, options, deps).pipe(
         map((response) => {
           return {
             ...response,
             ...{
-              rawResponse: shimHitsTotal(response.rawResponse),
+              rawResponse: shimHitsTotal(response.rawResponse, options),
             },
           };
         }),

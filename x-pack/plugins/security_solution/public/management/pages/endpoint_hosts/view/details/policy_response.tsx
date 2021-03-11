@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import {
@@ -27,7 +29,7 @@ import {
  */
 const PolicyResponseConfigAccordion = styled(EuiAccordion)`
   .euiAccordion__triggerWrapper {
-    padding: ${(props) => props.theme.eui.paddingSizes.s};
+    padding: ${(props) => props.theme.eui.paddingSizes.xs};
   }
 
   &.euiAccordion-isOpen {

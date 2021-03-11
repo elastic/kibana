@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { produce } from 'immer';
@@ -16,7 +17,7 @@ import { FormInternal } from '../types';
 
 export const deserializer = (policy: SerializedPolicy): FormInternal => {
   const {
-    phases: { hot, warm, cold, delete: deletePhase },
+    phases: { hot, warm, cold, frozen, delete: deletePhase },
   } = policy;
 
   const _meta: FormInternal['_meta'] = {
@@ -39,6 +40,11 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       enabled: Boolean(cold),
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
       freezeEnabled: Boolean(cold?.actions?.freeze),
+    },
+    frozen: {
+      enabled: Boolean(frozen),
+      dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
+      freezeEnabled: Boolean(frozen?.actions?.freeze),
     },
     delete: {
       enabled: Boolean(deletePhase),

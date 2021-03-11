@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { KibanaRequest, LegacyElasticsearchErrorHelpers } from '../../../../../../src/core/server';
+import type { KibanaRequest } from 'src/core/server';
+
+import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -12,7 +15,8 @@ import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
-import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
+import type { AuthenticationProviderOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Credentials that are based on the username and password.
@@ -213,7 +217,7 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
       // Create session only if it doesn't exist yet, otherwise keep it unchanged.
       return AuthenticationResult.succeeded(user, { authHeaders, state: state ? undefined : {} });
     } catch (err) {
-      if (LegacyElasticsearchErrorHelpers.isNotAuthorizedError(err)) {
+      if (getErrorStatusCode(err) === 401) {
         if (!this.httpAuthorizationHeader) {
           this.logger.error(
             `Failed to authenticate anonymous request using Elasticsearch reserved anonymous user. Anonymous access may not be properly configured in Elasticsearch: ${err.message}`

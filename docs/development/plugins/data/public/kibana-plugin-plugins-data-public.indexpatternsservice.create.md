@@ -23,3 +23,5 @@ create(spec: IndexPatternSpec, skipFetchFields?: boolean): Promise<IndexPattern>
 
 `Promise<IndexPattern>`
 
+IndexPattern
+

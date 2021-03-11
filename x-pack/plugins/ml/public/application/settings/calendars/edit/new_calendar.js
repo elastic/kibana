@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -9,7 +10,7 @@ import { PropTypes } from 'prop-types';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiPage, EuiPageBody, EuiPageContent, EuiOverlayMask } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
 import { NavigationMenu } from '../../../components/navigation_menu';
 
@@ -335,19 +336,13 @@ class NewCalendarUI extends Component {
     let modal = '';
 
     if (isNewEventModalVisible) {
-      modal = (
-        <EuiOverlayMask>
-          <NewEventModal addEvent={this.addEvent} closeModal={this.closeNewEventModal} />
-        </EuiOverlayMask>
-      );
+      modal = <NewEventModal addEvent={this.addEvent} closeModal={this.closeNewEventModal} />;
     } else if (isImportModalVisible) {
       modal = (
-        <EuiOverlayMask>
-          <ImportModal
-            addImportedEvents={this.addImportedEvents}
-            closeImportModal={this.closeImportModal}
-          />
-        </EuiOverlayMask>
+        <ImportModal
+          addImportedEvents={this.addImportedEvents}
+          closeImportModal={this.closeImportModal}
+        />
       );
     }
 

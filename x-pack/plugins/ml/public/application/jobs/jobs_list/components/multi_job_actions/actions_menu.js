@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { checkPermission } from '../../../../capabilities/check_capabilities';
@@ -26,6 +27,7 @@ class MultiJobActionsMenuUI extends Component {
     this.canDeleteJob = checkPermission('canDeleteJob');
     this.canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
     this.canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
+    this.canCreateMlAlerts = checkPermission('canCreateMlAlerts');
   }
 
   onButtonClick = () => {
@@ -143,6 +145,26 @@ class MultiJobActionsMenuUI extends Component {
       );
     }
 
+    if (this.canCreateMlAlerts) {
+      items.push(
+        <EuiContextMenuItem
+          key="create alert"
+          icon="bell"
+          disabled={false}
+          onClick={() => {
+            this.props.showCreateAlertFlyout(this.props.jobs.map(({ id }) => id));
+            this.closePopover();
+          }}
+          data-test-subj="mlADJobListMultiSelectCreateAlertActionButton"
+        >
+          <FormattedMessage
+            id="xpack.ml.jobsList.multiJobsActions.createAlertsLabel"
+            defaultMessage="Create alert"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
     return (
       <EuiPopover
         button={button}
@@ -161,6 +183,7 @@ MultiJobActionsMenuUI.propTypes = {
   showStartDatafeedModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
+  showCreateAlertFlyout: PropTypes.func.isRequired,
 };
 
 export const MultiJobActionsMenu = MultiJobActionsMenuUI;

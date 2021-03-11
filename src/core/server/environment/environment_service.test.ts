@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -73,18 +62,24 @@ describe('UuidService', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
   let configService: ReturnType<typeof configServiceMock.create>;
   let coreContext: CoreContext;
+  let service: EnvironmentService;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
     logger = loggingSystemMock.create();
     configService = getConfigService();
     coreContext = mockCoreContext.create({ logger, configService });
+
+    service = new EnvironmentService(coreContext);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('#setup()', () => {
     it('calls resolveInstanceUuid with correct parameters', async () => {
-      const service = new EnvironmentService(coreContext);
       await service.setup();
+
       expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
       expect(resolveInstanceUuid).toHaveBeenCalledWith({
         pathConfig,
@@ -94,8 +89,8 @@ describe('UuidService', () => {
     });
 
     it('calls createDataFolder with correct parameters', async () => {
-      const service = new EnvironmentService(coreContext);
       await service.setup();
+
       expect(createDataFolder).toHaveBeenCalledTimes(1);
       expect(createDataFolder).toHaveBeenCalledWith({
         pathConfig,
@@ -104,8 +99,8 @@ describe('UuidService', () => {
     });
 
     it('calls writePidFile with correct parameters', async () => {
-      const service = new EnvironmentService(coreContext);
       await service.setup();
+
       expect(writePidFile).toHaveBeenCalledTimes(1);
       expect(writePidFile).toHaveBeenCalledWith({
         pidConfig,
@@ -114,9 +109,31 @@ describe('UuidService', () => {
     });
 
     it('returns the uuid resolved from resolveInstanceUuid', async () => {
-      const service = new EnvironmentService(coreContext);
       const setup = await service.setup();
+
       expect(setup.instanceUuid).toEqual('SOME_UUID');
+    });
+
+    describe('process warnings', () => {
+      it('logs warnings coming from the process', async () => {
+        await service.setup();
+
+        const warning = new Error('something went wrong');
+        process.emit('warning', warning);
+
+        expect(logger.get('process').warn).toHaveBeenCalledTimes(1);
+        expect(logger.get('process').warn).toHaveBeenCalledWith(warning);
+      });
+
+      it('does not log deprecation warnings', async () => {
+        await service.setup();
+
+        const warning = new Error('something went wrong');
+        warning.name = 'DeprecationWarning';
+        process.emit('warning', warning);
+
+        expect(logger.get('process').warn).not.toHaveBeenCalled();
+      });
     });
   });
 });

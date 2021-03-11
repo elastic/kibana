@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiTab, EuiTitle } from '@elastic/eui';
@@ -15,7 +16,7 @@ import { useTraceOverviewHref } from '../../shared/Links/apm/TraceOverviewLink';
 import { MainTabs } from '../../shared/main_tabs';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceInventory } from '../service_inventory';
-import { TraceOverview } from '../TraceOverview';
+import { TraceOverview } from '../trace_overview';
 
 interface Tab {
   key: string;

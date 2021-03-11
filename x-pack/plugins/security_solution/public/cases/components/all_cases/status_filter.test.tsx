@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common/api';
 import { StatusFilter } from './status_filter';
+import { StatusAll } from '../status';
 
 const stats = {
+  [StatusAll]: 0,
   [CaseStatuses.open]: 2,
   [CaseStatuses['in-progress']]: 5,
   [CaseStatuses.closed]: 7,
@@ -59,5 +62,25 @@ describe('StatusFilter', () => {
     await waitFor(() => {
       expect(onStatusChanged).toBeCalledWith('closed');
     });
+  });
+
+  it('should disabled selected statuses', () => {
+    const wrapper = mount(
+      <StatusFilter {...defaultProps} disabledStatuses={[CaseStatuses.closed]} />
+    );
+
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+
+    expect(
+      wrapper.find('button[data-test-subj="case-status-filter-open"]').prop('disabled')
+    ).toBeFalsy();
+
+    expect(
+      wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').prop('disabled')
+    ).toBeFalsy();
+
+    expect(
+      wrapper.find('button[data-test-subj="case-status-filter-closed"]').prop('disabled')
+    ).toBeTruthy();
   });
 });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -38,7 +39,6 @@ import {
 } from '../../../../common/search_strategy/security_solution/network';
 import { useUiSetting$, useKibana } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
-import { ExternalLinkIcon } from '../external_link_icon';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
@@ -53,11 +53,19 @@ export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
   <EuiLink {...props}>{children}</EuiLink>
 );
 
+export const PortContainer = styled.div`
+  & svg {
+    position: relative;
+    top: -1px;
+  }
+`;
+
 // Internal Links
-const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName: string }> = ({
-  children,
-  hostName,
-}) => {
+const HostDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  hostName: string;
+  isButton?: boolean;
+}> = ({ children, hostName, isButton }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
   const goToHostDetails = useCallback(
@@ -70,7 +78,14 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
     [hostName, navigateToApp, search]
   );
 
-  return (
+  return isButton ? (
+    <LinkButton
+      onClick={goToHostDetails}
+      href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+    >
+      {children ? children : hostName}
+    </LinkButton>
+  ) : (
     <LinkAnchor
       onClick={goToHostDetails}
       href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
@@ -79,6 +94,7 @@ const HostDetailsLinkComponent: React.FC<{ children?: React.ReactNode; hostName:
     </LinkAnchor>
   );
 };
+
 export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
 
 const allowedUrlSchemes = ['http://', 'https://'];
@@ -102,11 +118,12 @@ export const ExternalLink = React.memo<{
     const inAllowlist = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
     return url && inAllowlist && !isUrlInvalid(url) && children ? (
       <EuiToolTip content={url} position="top" data-test-subj="externalLinkTooltip">
-        <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
-          {children}
-          <ExternalLinkIcon data-test-subj="externalLinkIcon" />
+        <>
+          <EuiLink href={url} target="_blank" rel="noopener" data-test-subj="externalLink">
+            {children}
+          </EuiLink>
           {!isNil(idx) && idx < lastIndexToShow && <Comma data-test-subj="externalLinkComma" />}
-        </EuiLink>
+        </>
       </EuiToolTip>
     ) : null;
   }
@@ -118,7 +135,8 @@ const NetworkDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   ip: string;
   flowTarget?: FlowTarget | FlowTargetSourceDest;
-}> = ({ children, ip, flowTarget = FlowTarget.source }) => {
+  isButton?: boolean;
+}> = ({ children, ip, flowTarget = FlowTarget.source, isButton }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const goToNetworkDetails = useCallback(
@@ -131,7 +149,14 @@ const NetworkDetailsLinkComponent: React.FC<{
     [flowTarget, ip, navigateToApp, search]
   );
 
-  return (
+  return isButton ? (
+    <LinkButton
+      href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
+      onClick={goToNetworkDetails}
+    >
+      {children ? children : ip}
+    </LinkButton>
+  ) : (
     <LinkAnchor
       onClick={goToNetworkDetails}
       href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip))))}
@@ -146,24 +171,25 @@ export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
+  subCaseId?: string;
   title?: string;
-}> = ({ children, detailName, title }) => {
+}> = ({ children, detailName, subCaseId, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCaseDetails = useCallback(
     (ev) => {
       ev.preventDefault();
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCaseDetailsUrl({ id: detailName, search }),
+        path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
       });
     },
-    [detailName, navigateToApp, search]
+    [detailName, navigateToApp, search, subCaseId]
   );
 
   return (
     <LinkAnchor
       onClick={goToCaseDetails}
-      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+      href={formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }))}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >
@@ -210,15 +236,17 @@ export const PortOrServiceNameLink = React.memo<{
   children?: React.ReactNode;
   portOrServiceName: number | string;
 }>(({ children, portOrServiceName }) => (
-  <EuiLink
-    data-test-subj="port-or-service-name-link"
-    href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
-      String(portOrServiceName)
-    )}`}
-    target="_blank"
-  >
-    {children ? children : portOrServiceName}
-  </EuiLink>
+  <PortContainer>
+    <EuiLink
+      data-test-subj="port-or-service-name-link"
+      href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
+        String(portOrServiceName)
+      )}`}
+      target="_blank"
+    >
+      {children ? children : portOrServiceName}
+    </EuiLink>
+  </PortContainer>
 ));
 
 PortOrServiceNameLink.displayName = 'PortOrServiceNameLink';

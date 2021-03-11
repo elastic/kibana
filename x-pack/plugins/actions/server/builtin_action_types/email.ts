@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry } from 'lodash';
@@ -156,7 +157,7 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
       params: ParamsSchema,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger, publicBaseUrl }),
+    executor: curry(executor)({ logger, publicBaseUrl, configurationUtilities }),
   };
 }
 
@@ -178,7 +179,12 @@ async function executor(
   {
     logger,
     publicBaseUrl,
-  }: { logger: GetActionTypeParams['logger']; publicBaseUrl: GetActionTypeParams['publicBaseUrl'] },
+    configurationUtilities,
+  }: {
+    logger: GetActionTypeParams['logger'];
+    publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
+    configurationUtilities: ActionsConfigurationUtilities;
+  },
   execOptions: EmailActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -221,8 +227,8 @@ async function executor(
       subject: params.subject,
       message: `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`,
     },
-    proxySettings: execOptions.proxySettings,
     hasAuth: config.hasAuth,
+    configurationUtilities,
   };
 
   let result;

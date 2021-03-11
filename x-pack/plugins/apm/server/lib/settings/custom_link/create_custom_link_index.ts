@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ILegacyClusterClient, Logger } from 'src/core/server';
+import { ElasticsearchClient, Logger } from 'src/core/server';
 import {
   createOrUpdateIndex,
   MappingsDefinition,
@@ -13,18 +14,18 @@ import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export const createApmCustomLinkIndex = async ({
-  esClient,
+  client,
   config,
   logger,
 }: {
-  esClient: ILegacyClusterClient;
+  client: ElasticsearchClient;
   config: APMConfig;
   logger: Logger;
 }) => {
   const index = getApmIndicesConfig(config).apmCustomLinkIndex;
   return createOrUpdateIndex({
     index,
-    apiCaller: esClient.callAsInternalUser,
+    client,
     logger,
     mappings,
   });

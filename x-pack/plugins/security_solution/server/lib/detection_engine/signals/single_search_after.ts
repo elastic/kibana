@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { performance } from 'perf_hooks';
@@ -9,7 +10,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
@@ -86,6 +87,34 @@ export const singleSearchAfter = async ({
     };
   } catch (exc) {
     logger.error(buildRuleMessage(`[-] nextSearchAfter threw an error ${exc}`));
+    if (
+      exc.message.includes('No mapping found for [@timestamp] in order to sort on') ||
+      exc.message.includes(`No mapping found for [${timestampOverride}] in order to sort on`)
+    ) {
+      logger.error(buildRuleMessage(`[-] failure reason: ${exc.message}`));
+
+      const searchRes: SignalSearchResponse = {
+        took: 0,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          failed: 0,
+          skipped: 0,
+        },
+        hits: {
+          total: 0,
+          max_score: 0,
+          hits: [],
+        },
+      };
+      return {
+        searchResult: searchRes,
+        searchDuration: '-1.0',
+        searchErrors: exc.message,
+      };
+    }
+
     throw exc;
   }
 };

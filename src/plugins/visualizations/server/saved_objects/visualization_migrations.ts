@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow } from 'lodash';
+import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
 
 import { SavedObjectMigrationFn } from 'kibana/server';
 
@@ -247,6 +236,48 @@ const migrateDateHistogramAggregation: SavedObjectMigrationFn<any, any> = (doc) 
           delete agg.params.customBucket.params.customInterval;
         }
       });
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
+// Migrate schemas inside aggregation (replace 'schema' object to name of the schema)
+const migrateSchema: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+
+    function replaceSchema(agg: any) {
+      forOwn(agg, (value: any, key: string) => {
+        if (typeof value === 'object') {
+          if (key === 'schema') {
+            agg[key] = value.name;
+          } else {
+            replaceSchema(value);
+          }
+        }
+      });
+    }
+
+    if (visState && visState.aggs) {
+      for (const agg of visState.aggs) {
+        if (typeof agg === 'object') {
+          replaceSchema(agg);
+        }
+      }
       return {
         ...doc,
         attributes: {
@@ -894,5 +925,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
   '7.11.0': flow(enableDataTableVisToolbar),
-  '7.12.0': flow(migrateVislibAreaLineBarTypes),
+  '7.12.0': flow(migrateVislibAreaLineBarTypes, migrateSchema),
 };

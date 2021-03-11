@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpSetup } from 'kibana/public';
@@ -9,7 +10,7 @@ import { Errors, identity } from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
-import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/common';
+import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
 import {
   Alert,
@@ -18,6 +19,8 @@ import {
   AlertUpdates,
   AlertTaskState,
   AlertInstanceSummary,
+  Pagination,
+  Sorting,
 } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
@@ -102,13 +105,15 @@ export async function loadAlerts({
   typesFilter,
   actionTypesFilter,
   alertStatusesFilter,
+  sort = { field: 'name', direction: 'asc' },
 }: {
   http: HttpSetup;
-  page: { index: number; size: number };
+  page: Pagination;
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
   alertStatusesFilter?: string[];
+  sort?: Sorting;
 }): Promise<{
   page: number;
   perPage: number;
@@ -124,8 +129,8 @@ export async function loadAlerts({
       search: searchText,
       filter: filters.length ? filters.join(' and ') : undefined,
       default_search_operator: 'AND',
-      sort_field: 'name.keyword',
-      sort_order: 'asc',
+      sort_field: sort.field,
+      sort_order: sort.direction,
     },
   });
 }
@@ -282,6 +287,10 @@ export async function unmuteAlerts({
   await Promise.all(ids.map((id) => unmuteAlert({ id, http })));
 }
 
-export async function health({ http }: { http: HttpSetup }): Promise<AlertingFrameworkHealth> {
+export async function alertingFrameworkHealth({
+  http,
+}: {
+  http: HttpSetup;
+}): Promise<AlertingFrameworkHealth> {
   return await http.get(`${BASE_ALERT_API_PATH}/_health`);
 }

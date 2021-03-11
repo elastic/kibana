@@ -115,49 +115,68 @@ exports[`share url panel content render 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      data-test-subj="createShortUrl"
       describedByIds={Array []}
       display="row"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="URL"
+          id="share.urlPanel.urlGroupTitle"
+          values={Object {}}
+        />
+      }
       labelType="label"
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
+      <EuiSpacer
+        size="s"
+      />
+      <EuiFormRow
+        data-test-subj="createShortUrl"
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
       >
-        <EuiFlexItem
-          grow={false}
+        <EuiFlexGroup
+          gutterSize="none"
+          responsive={false}
         >
-          <EuiSwitch
-            checked={false}
-            data-test-subj="useShortUrl"
-            label={
-              <FormattedMessage
-                defaultMessage="Short URL"
-                id="share.urlPanel.shortUrlLabel"
-                values={Object {}}
-              />
-            }
-            onChange={[Function]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIconTip
-            content={
-              <FormattedMessage
-                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
-                id="share.urlPanel.shortUrlHelpText"
-                values={Object {}}
-              />
-            }
-            position="bottom"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiSwitch
+              checked={false}
+              data-test-subj="useShortUrl"
+              label={
+                <FormattedMessage
+                  defaultMessage="Short URL"
+                  id="share.urlPanel.shortUrlLabel"
+                  values={Object {}}
+                />
+              }
+              onChange={[Function]}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiIconTip
+              content={
+                <FormattedMessage
+                  defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
+                  id="share.urlPanel.shortUrlHelpText"
+                  values={Object {}}
+                />
+              }
+              position="bottom"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
     </EuiFormRow>
     <EuiSpacer
       size="m"
@@ -277,49 +296,68 @@ exports[`share url panel content should enable saved object export option when o
       />
     </EuiFormRow>
     <EuiFormRow
-      data-test-subj="createShortUrl"
       describedByIds={Array []}
       display="row"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="URL"
+          id="share.urlPanel.urlGroupTitle"
+          values={Object {}}
+        />
+      }
       labelType="label"
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
+      <EuiSpacer
+        size="s"
+      />
+      <EuiFormRow
+        data-test-subj="createShortUrl"
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
       >
-        <EuiFlexItem
-          grow={false}
+        <EuiFlexGroup
+          gutterSize="none"
+          responsive={false}
         >
-          <EuiSwitch
-            checked={false}
-            data-test-subj="useShortUrl"
-            label={
-              <FormattedMessage
-                defaultMessage="Short URL"
-                id="share.urlPanel.shortUrlLabel"
-                values={Object {}}
-              />
-            }
-            onChange={[Function]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIconTip
-            content={
-              <FormattedMessage
-                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
-                id="share.urlPanel.shortUrlHelpText"
-                values={Object {}}
-              />
-            }
-            position="bottom"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiSwitch
+              checked={false}
+              data-test-subj="useShortUrl"
+              label={
+                <FormattedMessage
+                  defaultMessage="Short URL"
+                  id="share.urlPanel.shortUrlLabel"
+                  values={Object {}}
+                />
+              }
+              onChange={[Function]}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiIconTip
+              content={
+                <FormattedMessage
+                  defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
+                  id="share.urlPanel.shortUrlHelpText"
+                  values={Object {}}
+                />
+              }
+              position="bottom"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
     </EuiFormRow>
     <EuiSpacer
       size="m"
@@ -436,6 +474,25 @@ exports[`share url panel content should hide short url section when allowShortUr
             },
           ]
         }
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="URL"
+          id="share.urlPanel.urlGroupTitle"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <EuiSpacer
+        size="s"
       />
     </EuiFormRow>
     <EuiSpacer
@@ -569,49 +626,68 @@ exports[`should show url param extensions 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
-      data-test-subj="createShortUrl"
       describedByIds={Array []}
       display="row"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="URL"
+          id="share.urlPanel.urlGroupTitle"
+          values={Object {}}
+        />
+      }
       labelType="label"
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
+      <EuiSpacer
+        size="s"
+      />
+      <EuiFormRow
+        data-test-subj="createShortUrl"
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
       >
-        <EuiFlexItem
-          grow={false}
+        <EuiFlexGroup
+          gutterSize="none"
+          responsive={false}
         >
-          <EuiSwitch
-            checked={false}
-            data-test-subj="useShortUrl"
-            label={
-              <FormattedMessage
-                defaultMessage="Short URL"
-                id="share.urlPanel.shortUrlLabel"
-                values={Object {}}
-              />
-            }
-            onChange={[Function]}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiIconTip
-            content={
-              <FormattedMessage
-                defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
-                id="share.urlPanel.shortUrlHelpText"
-                values={Object {}}
-              />
-            }
-            position="bottom"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiSwitch
+              checked={false}
+              data-test-subj="useShortUrl"
+              label={
+                <FormattedMessage
+                  defaultMessage="Short URL"
+                  id="share.urlPanel.shortUrlLabel"
+                  values={Object {}}
+                />
+              }
+              onChange={[Function]}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <EuiIconTip
+              content={
+                <FormattedMessage
+                  defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
+                  id="share.urlPanel.shortUrlHelpText"
+                  values={Object {}}
+                />
+              }
+              position="bottom"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
     </EuiFormRow>
     <EuiSpacer
       size="m"

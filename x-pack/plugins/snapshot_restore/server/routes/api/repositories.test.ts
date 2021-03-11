@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { addBasePath } from '../helpers';
 import { registerRepositoriesRoutes } from './repositories';
@@ -106,8 +108,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         jest.fn().mockRejectedValueOnce(new Error()),
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -212,8 +213,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         jest.fn().mockRejectedValueOnce(new Error()),
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 
@@ -290,8 +290,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
         jest.fn().mockRejectedValueOnce(new Error('Error getting pluggins')),
       ];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError('Error getting pluggins');
     });
   });
 
@@ -326,9 +325,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const error = new Error('Oh no!');
       router.callAsCurrentUserResponses = [{}, jest.fn().mockRejectedValueOnce(error)];
 
-      const response = await router.runRequest(mockRequest);
-      expect(response.body.message).toEqual(error.message);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError(error);
     });
   });
 
@@ -356,8 +353,7 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
 
     it('should throw if ES error', async () => {
       router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
-      const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(500);
+      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
 

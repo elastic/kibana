@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable react/display-name */
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -11,12 +13,12 @@ import '../../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../../common/mock';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock } from '../../containers/configure/mock';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -37,10 +39,10 @@ jest.mock('../../containers/configure/api');
 describe('usePushToService', () => {
   const caseId = '12345';
   const updateCase = jest.fn();
-  const postPushToService = jest.fn();
+  const pushCaseToExternalService = jest.fn();
   const mockPostPush = {
     isLoading: false,
-    postPushToService,
+    pushCaseToExternalService,
   };
 
   const mockConnector = connectorsMock[0];
@@ -59,7 +61,7 @@ describe('usePushToService', () => {
     connector: {
       id: mockConnector.id,
       name: mockConnector.name,
-      type: ConnectorTypes.servicenow,
+      type: ConnectorTypes.serviceNowITSM,
       fields: null,
     },
     caseId,
@@ -69,19 +71,6 @@ describe('usePushToService', () => {
     updateCase,
     userCanCrud: true,
     isValidConnector: true,
-    alerts: {
-      'alert-id-1': {
-        _id: 'alert-id-1',
-        _index: 'alert-index-1',
-        '@timestamp': '2020-11-20T15:35:28.373Z',
-        rule: {
-          id: 'rule-id-1',
-          name: 'Awesome rule',
-          from: 'now-360s',
-          to: 'now',
-        },
-      },
-    },
   };
 
   beforeEach(() => {
@@ -103,28 +92,13 @@ describe('usePushToService', () => {
       );
       await waitForNextUpdate();
       result.current.pushButton.props.children.props.onClick();
-      expect(postPushToService).toBeCalledWith({
+      expect(pushCaseToExternalService).toBeCalledWith({
         caseId,
-        caseServices,
         connector: {
           fields: null,
           id: 'servicenow-1',
           name: 'My Connector',
-          type: ConnectorTypes.servicenow,
-        },
-        updateCase,
-        alerts: {
-          'alert-id-1': {
-            _id: 'alert-id-1',
-            _index: 'alert-index-1',
-            '@timestamp': '2020-11-20T15:35:28.373Z',
-            rule: {
-              id: 'rule-id-1',
-              name: 'Awesome rule',
-              from: 'now-360s',
-              to: 'now',
-            },
-          },
+          type: ConnectorTypes.serviceNowITSM,
         },
       });
       expect(result.current.pushCallouts).toBeNull();

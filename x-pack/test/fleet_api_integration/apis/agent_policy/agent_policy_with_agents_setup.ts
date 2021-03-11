@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents, getSupertestWithoutAuth } from '../agents/services';
+import { AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS } from '../../../../plugins/fleet/common';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -75,6 +77,10 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.loadIfNeeded('fleet/agents');
     });
     after(async () => {
+      // Wait before agent status is updated
+      return new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
+    });
+    after(async () => {
       await esArchiver.unload('fleet/agents');
     });
 
@@ -103,7 +109,7 @@ export default function (providerContext: FtrProviderContext) {
         const agentPolicy = action.data.policy;
         expect(agentPolicy.id).to.be(policyId);
         // should have system inputs
-        expect(agentPolicy.inputs).length(2);
+        expect(agentPolicy.inputs).length(3);
         // should have default output
         expect(agentPolicy.outputs.default).not.empty();
       });

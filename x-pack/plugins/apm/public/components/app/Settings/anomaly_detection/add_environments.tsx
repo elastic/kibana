@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -25,6 +26,7 @@ import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { createJobs } from './create_jobs';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
+import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 
 interface Props {
   currentEnvironments: string[];
@@ -37,6 +39,7 @@ export function AddEnvironments({
   onCancel,
 }: Props) {
   const { notifications, application } = useApmPluginContext().core;
+  const { anomalyDetectionJobsRefetch } = useAnomalyDetectionJobsContext();
   const canCreateJob = !!application.capabilities.ml.canCreateJob;
   const { toasts } = notifications;
   const { data = [], status } = useFetcher(
@@ -157,6 +160,7 @@ export function AddEnvironments({
                 toasts,
               });
               if (success) {
+                anomalyDetectionJobsRefetch();
                 onCreateJobSuccess();
               }
               setIsSaving(false);

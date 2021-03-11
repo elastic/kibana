@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
+import { Route, Switch, useParams } from 'react-router-dom';
 
-import { History } from 'history';
 import { useActions, useValues } from 'kea';
 import moment from 'moment';
-import { Route, Switch, useHistory, useParams } from 'react-router-dom';
 
 import { EuiButton, EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { Loading } from '../../../shared/loading';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-
+import { AppLogic } from '../../app_logic';
 import { NAV } from '../../constants';
-
+import { CUSTOM_SERVICE_TYPE } from '../../constants';
 import {
   ENT_SEARCH_LICENSE_MANAGEMENT,
   REINDEX_JOB_PATH,
@@ -30,13 +31,6 @@ import {
   getSourcesPath,
 } from '../../routes';
 
-import { AppLogic } from '../../app_logic';
-
-import { Loading } from '../../../shared/loading';
-
-import { CUSTOM_SERVICE_TYPE } from '../../constants';
-import { SourceLogic } from './source_logic';
-
 import { DisplaySettingsRouter } from './components/display_settings';
 import { Overview } from './components/overview';
 import { Schema } from './components/schema';
@@ -44,16 +38,21 @@ import { SchemaChangeErrors } from './components/schema/schema_change_errors';
 import { SourceContent } from './components/source_content';
 import { SourceInfoCard } from './components/source_info_card';
 import { SourceSettings } from './components/source_settings';
+import {
+  SOURCE_DISABLED_CALLOUT_TITLE,
+  SOURCE_DISABLED_CALLOUT_DESCRIPTION,
+  SOURCE_DISABLED_CALLOUT_BUTTON,
+} from './constants';
+import { SourceLogic } from './source_logic';
 
 export const SourceRouter: React.FC = () => {
-  const history = useHistory() as History;
   const { sourceId } = useParams() as { sourceId: string };
   const { initializeSource } = useActions(SourceLogic);
   const { contentSource, dataLoading } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   useEffect(() => {
-    initializeSource(sourceId, history);
+    initializeSource(sourceId);
   }, []);
 
   if (dataLoading) return <Loading />;
@@ -82,14 +81,10 @@ export const SourceRouter: React.FC = () => {
 
   const callout = (
     <>
-      <EuiCallOut title="Content source is disabled" color="warning" iconType="alert">
-        <p>
-          Your organization’s license level has changed. Your data is safe, but document-level
-          permissions are no longer supported and searching of this source has been disabled.
-          Upgrade to a Platinum license to re-enable this source.
-        </p>
+      <EuiCallOut title={SOURCE_DISABLED_CALLOUT_TITLE} color="warning" iconType="alert">
+        <p>{SOURCE_DISABLED_CALLOUT_DESCRIPTION}</p>
         <EuiButton color="warning" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-          Explore Platinum license
+          {SOURCE_DISABLED_CALLOUT_BUTTON}
         </EuiButton>
       </EuiCallOut>
       <EuiSpacer />

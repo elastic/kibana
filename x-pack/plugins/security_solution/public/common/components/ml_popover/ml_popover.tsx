@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonEmpty, EuiCallOut, EuiPopover, EuiPopoverTitle, EuiSpacer } from '@elastic/eui';
@@ -26,6 +27,10 @@ import { useSecurityJobs } from './hooks/use_security_jobs';
 
 const PopoverContentsDiv = styled.div`
   max-width: 684px;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 15px;
 `;
 
 PopoverContentsDiv.displayName = 'PopoverContentsDiv';

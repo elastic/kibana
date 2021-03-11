@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { fields } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
@@ -16,6 +16,13 @@ import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/
 import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
 
 import { BuilderExceptionListItemComponent } from './exception_item';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiColorLightShade: '#ece',
+  },
+});
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -45,7 +52,7 @@ describe('BuilderExceptionListItemComponent', () => {
         entries: [getEntryMatchMock(), getEntryMatchMock()],
       };
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
             exceptionId={'123'}
@@ -74,7 +81,7 @@ describe('BuilderExceptionListItemComponent', () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchMock()];
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
             exceptionId={'123'}
@@ -101,7 +108,7 @@ describe('BuilderExceptionListItemComponent', () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
             exceptionId={'123'}
@@ -130,7 +137,7 @@ describe('BuilderExceptionListItemComponent', () => {
       const exceptionItem = getExceptionListItemSchemaMock();
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
             exceptionId={'123'}

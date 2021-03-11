@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { BasePathProxyServer, BasePathProxyServerOptions } from './base_path_proxy_server';
@@ -716,12 +705,8 @@ describe('BasePathProxyServer', () => {
         options: { body: { output: 'stream' } },
       },
       (_, req, res) => {
-        try {
-          expect(req.body).toBeInstanceOf(Readable);
-          return res.ok({ body: req.route.options.body });
-        } catch (err) {
-          return res.internalError({ body: err.message });
-        }
+        expect(req.body).toBeInstanceOf(Readable);
+        return res.ok({ body: req.route.options.body });
       }
     );
     registerRouter(router);
@@ -751,15 +736,11 @@ describe('BasePathProxyServer', () => {
             },
           },
           (_, req, res) => {
-            try {
-              return res.ok({
-                body: {
-                  timeout: req.route.options.timeout,
-                },
-              });
-            } catch (err) {
-              return res.internalError({ body: err.message });
-            }
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
           }
         );
         registerRouter(router);
@@ -790,15 +771,11 @@ describe('BasePathProxyServer', () => {
             },
           },
           (context, req, res) => {
-            try {
-              return res.ok({
-                body: {
-                  timeout: req.route.options.timeout,
-                },
-              });
-            } catch (err) {
-              return res.internalError({ body: err.message });
-            }
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
           }
         );
         registerRouter(router);
@@ -826,15 +803,11 @@ describe('BasePathProxyServer', () => {
             },
           },
           (_, req, res) => {
-            try {
-              return res.ok({
-                body: {
-                  timeout: req.route.options.timeout,
-                },
-              });
-            } catch (err) {
-              return res.internalError({ body: err.message });
-            }
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
           }
         );
         registerRouter(router);
@@ -862,15 +835,11 @@ describe('BasePathProxyServer', () => {
             },
           },
           (_, req, res) => {
-            try {
-              return res.ok({
-                body: {
-                  timeout: req.route.options.timeout,
-                },
-              });
-            } catch (err) {
-              return res.internalError({ body: err.message });
-            }
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
           }
         );
         registerRouter(router);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Dispatch, SetStateAction } from 'react';
@@ -9,14 +10,19 @@ import { Dispatch, SetStateAction } from 'react';
 import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
 import { Dictionary } from '../../../../common/types/common';
+import { HitsTotalRelation } from '../../../../common/types/es_client';
+import { ChartData } from '../../../../common/types/field_histograms';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
 
-import { ChartData } from './use_column_chart';
 import { FeatureImportanceBaseline } from '../../../../common/types/feature_importance';
 
 export type ColumnId = string;
 export type DataGridItem = Record<string, any>;
+
+// `undefined` is used to indicate a non-initialized state.
+export type ChartsVisible = boolean | undefined;
+export type RowCountRelation = HitsTotalRelation | undefined;
 
 export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
@@ -59,6 +65,7 @@ export interface UseIndexDataReturnType
     | 'setPagination'
     | 'setVisibleColumns'
     | 'rowCount'
+    | 'rowCountRelation'
     | 'sortingColumns'
     | 'status'
     | 'tableItems'
@@ -72,7 +79,7 @@ export interface UseIndexDataReturnType
 }
 
 export interface UseDataGridReturnType {
-  chartsVisible: boolean;
+  chartsVisible: ChartsVisible;
   chartsButtonVisible: boolean;
   columnsWithCharts: EuiDataGridColumn[];
   errorMessage: string;
@@ -84,11 +91,13 @@ export interface UseDataGridReturnType {
   pagination: IndexPagination;
   resetPagination: () => void;
   rowCount: number;
+  rowCountRelation: RowCountRelation;
   setColumnCharts: Dispatch<SetStateAction<ChartData[]>>;
   setErrorMessage: Dispatch<SetStateAction<string>>;
   setNoDataMessage: Dispatch<SetStateAction<string>>;
   setPagination: Dispatch<SetStateAction<IndexPagination>>;
   setRowCount: Dispatch<SetStateAction<number>>;
+  setRowCountRelation: Dispatch<SetStateAction<RowCountRelation>>;
   setSortingColumns: Dispatch<SetStateAction<EuiDataGridSorting['columns']>>;
   setStatus: Dispatch<SetStateAction<INDEX_STATUS>>;
   setTableItems: Dispatch<SetStateAction<DataGridItem[]>>;

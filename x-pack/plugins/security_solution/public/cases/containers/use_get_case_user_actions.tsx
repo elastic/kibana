@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty, uniqBy } from 'lodash/fp';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
-import { CaseFullExternalService } from '../../../../case/common/api/cases';
-import { getCaseUserActions } from './api';
+import { CaseFullExternalService } from '../../../../cases/common/api/cases';
+import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { CaseConnector, CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
@@ -45,7 +46,7 @@ export const initialData: CaseUserActionsState = {
 };
 
 export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (caseId: string) => void;
+  fetchCaseUserActions: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
 }
 
 const getExternalService = (value: string): CaseExternalService | null =>
@@ -237,75 +238,88 @@ export const getPushedInfo = (
 
 export const useGetCaseUserActions = (
   caseId: string,
-  caseConnectorId: string
+  caseConnectorId: string,
+  subCaseId?: string
 ): UseGetCaseUserActions => {
   const [caseUserActionsState, setCaseUserActionsState] = useState<CaseUserActionsState>(
     initialData
   );
-
+  const abortCtrlRef = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
   const [, dispatchToaster] = useStateToaster();
 
   const fetchCaseUserActions = useCallback(
-    (thisCaseId: string) => {
-      let didCancel = false;
-      const abortCtrl = new AbortController();
-      const fetchData = async () => {
+    async (thisCaseId: string, thisCaseConnectorId: string, thisSubCaseId?: string) => {
+      try {
+        isCancelledRef.current = false;
+        abortCtrlRef.current.abort();
+        abortCtrlRef.current = new AbortController();
         setCaseUserActionsState({
           ...caseUserActionsState,
           isLoading: true,
         });
-        try {
-          const response = await getCaseUserActions(thisCaseId, abortCtrl.signal);
-          if (!didCancel) {
-            // Attention Future developer
-            // We are removing the first item because it will always be the creation of the case
-            // and we do not want it to simplify our life
-            const participants = !isEmpty(response)
-              ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
-              : [];
 
-            const caseUserActions = !isEmpty(response) ? response.slice(1) : [];
-            setCaseUserActionsState({
-              caseUserActions,
-              ...getPushedInfo(caseUserActions, caseConnectorId),
-              isLoading: false,
-              isError: false,
-              participants,
-            });
-          }
-        } catch (error) {
-          if (!didCancel) {
+        const response = await (thisSubCaseId
+          ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrlRef.current.signal)
+          : getCaseUserActions(thisCaseId, abortCtrlRef.current.signal));
+
+        if (!isCancelledRef.current) {
+          // Attention Future developer
+          // We are removing the first item because it will always be the creation of the case
+          // and we do not want it to simplify our life
+          const participants = !isEmpty(response)
+            ? uniqBy('actionBy.username', response).map((cau) => cau.actionBy)
+            : [];
+
+          const caseUserActions = !isEmpty(response)
+            ? thisSubCaseId
+              ? response
+              : response.slice(1)
+            : [];
+
+          setCaseUserActionsState({
+            caseUserActions,
+            ...getPushedInfo(caseUserActions, thisCaseConnectorId),
+            isLoading: false,
+            isError: false,
+            participants,
+          });
+        }
+      } catch (error) {
+        if (!isCancelledRef.current) {
+          if (error.name !== 'AbortError') {
             errorToToaster({
               title: i18n.ERROR_TITLE,
               error: error.body && error.body.message ? new Error(error.body.message) : error,
               dispatchToaster,
             });
-            setCaseUserActionsState({
-              caseServices: {},
-              caseUserActions: [],
-              hasDataToPush: false,
-              isError: true,
-              isLoading: false,
-              participants: [],
-            });
           }
+
+          setCaseUserActionsState({
+            caseServices: {},
+            caseUserActions: [],
+            hasDataToPush: false,
+            isError: true,
+            isLoading: false,
+            participants: [],
+          });
         }
-      };
-      fetchData();
-      return () => {
-        didCancel = true;
-        abortCtrl.abort();
-      };
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseUserActionsState, caseConnectorId]
+    [caseUserActionsState]
   );
 
   useEffect(() => {
     if (!isEmpty(caseId)) {
-      fetchCaseUserActions(caseId);
+      fetchCaseUserActions(caseId, caseConnectorId, subCaseId);
     }
+
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, caseConnectorId]);
+  }, [caseId, subCaseId]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };

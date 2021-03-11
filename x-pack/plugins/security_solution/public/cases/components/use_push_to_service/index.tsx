@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
@@ -16,12 +17,11 @@ import { getConfigureCasesUrl, useFormatUrl } from '../../../common/components/l
 import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
-import { CaseConnector, ActionConnector, CaseStatuses } from '../../../../../case/common/api';
+import { CaseConnector, ActionConnector, CaseStatuses } from '../../../../../cases/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { LinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
 import { ErrorMessage } from '../callout/types';
-import { Alert } from '../case_view';
 
 export interface UsePushToService {
   caseId: string;
@@ -32,7 +32,6 @@ export interface UsePushToService {
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
   isValidConnector: boolean;
-  alerts: Record<string, Alert>;
 }
 
 export interface ReturnUsePushToService {
@@ -49,25 +48,25 @@ export const usePushToService = ({
   updateCase,
   userCanCrud,
   isValidConnector,
-  alerts,
 }: UsePushToService): ReturnUsePushToService => {
   const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
-  const { isLoading, postPushToService } = usePostPushToService();
+  const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
   const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
 
-  const handlePushToService = useCallback(() => {
+  const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
-      postPushToService({
+      const theCase = await pushCaseToExternalService({
         caseId,
-        caseServices,
         connector,
-        updateCase,
-        alerts,
       });
+
+      if (theCase != null) {
+        updateCase(theCase);
+      }
     }
-  }, [alerts, caseId, caseServices, connector, postPushToService, updateCase]);
+  }, [caseId, connector, pushCaseToExternalService, updateCase]);
 
   const goToConfigureCases = useCallback(
     (ev) => {
@@ -91,7 +90,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must configure a {link}."
-              id="xpack.securitySolution.case.caseView.pushToServiceDisableByNoConnectors"
+              id="xpack.securitySolution.cases.caseView.pushToServiceDisableByNoConnectors"
               values={{
                 link: (
                   <LinkAnchor
@@ -116,7 +115,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must select an external incident management system for this case."
-              id="xpack.securitySolution.case.caseView.pushToServiceDisableByNoCaseConfigDescription"
+              id="xpack.securitySolution.cases.caseView.pushToServiceDisableByNoCaseConfigDescription"
             />
           ),
         },
@@ -130,7 +129,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="The connector used to send updates to external service has been deleted. To update cases in external systems, select a different connector or create a new one."
-              id="xpack.securitySolution.case.caseView.pushToServiceDisableByInvalidConnector"
+              id="xpack.securitySolution.cases.caseView.pushToServiceDisableByInvalidConnector"
             />
           ),
           errorType: 'danger',
@@ -146,7 +145,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="Closed cases cannot be sent to external systems. Reopen the case if you want to open or update it in an external system."
-              id="xpack.securitySolution.case.caseView.pushToServiceDisableBecauseCaseClosedDescription"
+              id="xpack.securitySolution.cases.caseView.pushToServiceDisableBecauseCaseClosedDescription"
             />
           ),
         },

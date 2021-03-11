@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { InstallablePackage } from '../../../types';
-import { ArchiveEntry, getArchiveFilelist, getAsset } from '../archive';
+import type { InstallablePackage } from '../../../types';
+import { getArchiveFilelist, getAsset } from '../archive';
+import type { ArchiveEntry } from '../archive';
 
 // paths from RegistryPackage are routes to the assets on EPR
 // e.g. `/package/nginx/1.2.0/data_stream/access/fields/fields.yml`

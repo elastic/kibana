@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FormEvent } from 'react';
@@ -10,16 +11,14 @@ import { useActions, useValues } from 'kea';
 
 import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
+import { ContentSection } from '../../../components/shared/content_section';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import {
   CUSTOMIZE_HEADER_TITLE,
   CUSTOMIZE_HEADER_DESCRIPTION,
   CUSTOMIZE_NAME_LABEL,
   CUSTOMIZE_NAME_BUTTON,
 } from '../../../constants';
-
-import { ContentSection } from '../../../components/shared/content_section';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
 import { SettingsLogic } from '../settings_logic';
 
 export const Customize: React.FC = () => {

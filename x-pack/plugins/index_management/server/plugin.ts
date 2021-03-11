@@ -1,14 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    dataManagement?: DataManagementContext;
-  }
-}
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,20 +11,16 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  ILegacyScopedClusterClient,
   ILegacyCustomClusterClient,
 } from 'src/core/server';
 
-import { PLUGIN } from '../common';
+import { PLUGIN } from '../common/constants/plugin';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
 import { isEsError, handleEsError, parseEsError } from './shared_imports';
 import { elasticsearchJsPlugin } from './client/elasticsearch';
-
-export interface DataManagementContext {
-  client: ILegacyScopedClusterClient;
-}
+import type { IndexManagementRequestHandlerContext } from './types';
 
 export interface IndexManagementPluginSetup {
   indexDataEnricher: {
@@ -61,7 +52,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     { http, getStartServices }: CoreSetup,
     { features, licensing, security }: Dependencies
   ): IndexManagementPluginSetup {
-    const router = http.createRouter();
+    const router = http.createRouter<IndexManagementRequestHandlerContext>();
 
     this.license.setup(
       {
@@ -92,14 +83,17 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       ],
     });
 
-    http.registerRouteHandlerContext('dataManagement', async (ctx, request) => {
-      this.dataManagementESClient =
-        this.dataManagementESClient ?? (await getCustomEsClient(getStartServices));
+    http.registerRouteHandlerContext<IndexManagementRequestHandlerContext, 'dataManagement'>(
+      'dataManagement',
+      async (ctx, request) => {
+        this.dataManagementESClient =
+          this.dataManagementESClient ?? (await getCustomEsClient(getStartServices));
 
-      return {
-        client: this.dataManagementESClient.asScoped(request),
-      };
-    });
+        return {
+          client: this.dataManagementESClient.asScoped(request),
+        };
+      }
+    );
 
     this.apiRoutes.setup({
       router,

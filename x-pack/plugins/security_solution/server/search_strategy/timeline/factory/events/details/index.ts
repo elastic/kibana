@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep, merge, unionBy } from 'lodash/fp';
@@ -12,11 +13,13 @@ import {
   TimelineEventsQueries,
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsDetailsRequestOptions,
+  TimelineEventsDetailsItem,
+  EventSource,
 } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
-import { getDataFromFieldsHits, getDataFromSourceHits } from './helpers';
+import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './helpers';
 
 export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (options: TimelineEventsDetailsRequestOptions) => {
@@ -32,11 +35,23 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
     };
-    const sourceData = getDataFromSourceHits(_source);
-    const fieldsData = getDataFromFieldsHits(merge(fields, hitsData));
+    if (response.isRunning) {
+      return {
+        ...response,
+        data: [],
+        inspect,
+      };
+    }
+    const sourceData = await getDataSafety<EventSource, TimelineEventsDetailsItem[]>(
+      getDataFromSourceHits,
+      _source
+    );
+    const fieldsData = await getDataSafety<EventHit['fields'], TimelineEventsDetailsItem[]>(
+      getDataFromFieldsHits,
+      merge(fields, hitsData)
+    );
 
     const data = unionBy('field', fieldsData, sourceData);
-
     return {
       ...response,
       data,

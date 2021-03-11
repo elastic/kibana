@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -17,7 +18,7 @@ export function FleetIntegrations({ getService, getPageObjects }: FtrProviderCon
   return {
     async navigateToIntegrationDetails(pkgkey: string) {
       await pageObjects.common.navigateToApp(PLUGIN_ID, {
-        hash: pagePathGetters.integration_details({ pkgkey }),
+        hash: pagePathGetters.integration_details_overview({ pkgkey }),
       });
     },
 

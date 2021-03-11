@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -57,6 +46,7 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  ChromeUserBanner,
   NavType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
@@ -64,16 +54,22 @@ import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
+import {
+  Plugin,
+  AsyncPlugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginOpaqueId,
+} from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 
-export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
-export { CoreContext, CoreSystem } from './core_system';
+export type { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
+export type { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
-export {
+export type {
   AppCategory,
   UiSettingsParams,
   UserProvidedValues,
@@ -84,7 +80,8 @@ export {
   StringValidationRegexString,
 } from '../types';
 
-export {
+export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
+export type {
   ApplicationSetup,
   ApplicationStart,
   App,
@@ -96,8 +93,6 @@ export {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppStatus,
-  AppNavLinkStatus,
   AppMeta,
   AppUpdatableFields,
   AppUpdater,
@@ -105,11 +100,11 @@ export {
   PublicAppInfo,
   PublicAppMetaInfo,
   PublicAppSearchDeepLinkInfo,
-  ScopedHistory,
   NavigateToAppOptions,
 } from './application';
 
-export {
+export { SimpleSavedObject } from './saved_objects';
+export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
@@ -130,7 +125,6 @@ export {
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
   SavedObjectsClient,
-  SimpleSavedObject,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -141,12 +135,16 @@ export {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsNamespaceType,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from './saved_objects';
 
-export {
+export { HttpFetchError } from './http';
+
+export type {
   HttpHeadersInit,
   HttpRequestInit,
-  HttpFetchError,
   HttpFetchOptions,
   HttpFetchOptionsWithPath,
   HttpFetchQuery,
@@ -163,7 +161,7 @@ export {
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export {
+export type {
   OverlayStart,
   OverlayBannersStart,
   OverlayRef,
@@ -174,7 +172,7 @@ export {
   OverlayModalStart,
 } from './overlays';
 
-export {
+export type {
   Toast,
   ToastInput,
   IToasts,
@@ -186,7 +184,7 @@ export {
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
 
@@ -281,7 +279,7 @@ export interface CoreStart {
   };
 }
 
-export {
+export type {
   Capabilities,
   ChromeBadge,
   ChromeBrand,
@@ -301,6 +299,7 @@ export {
   ChromeDocTitle,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  ChromeUserBanner,
   ChromeStart,
   DocLinksStart,
   FatalErrorInfo,
@@ -312,6 +311,7 @@ export {
   NotificationsSetup,
   NotificationsStart,
   Plugin,
+  AsyncPlugin,
   PluginInitializer,
   PluginInitializerContext,
   SavedObjectsStart,

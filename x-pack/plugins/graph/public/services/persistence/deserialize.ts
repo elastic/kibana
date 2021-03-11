@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -104,7 +105,11 @@ export function mapFields(indexPattern: IndexPattern): WorkspaceField[] {
   return indexPattern
     .getNonScriptedFields()
     .filter(
-      (field) => !blockedFieldNames.includes(field.name) && !indexPatternsUtils.isNestedField(field)
+      (field) =>
+        // Make sure to only include mapped fields, e.g. no index pattern runtime fields
+        field.isMapped &&
+        !blockedFieldNames.includes(field.name) &&
+        !indexPatternsUtils.isNestedField(field)
     )
     .map((field, index) => ({
       name: field.name,

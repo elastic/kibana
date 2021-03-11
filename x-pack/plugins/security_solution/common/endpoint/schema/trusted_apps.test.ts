@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { GetTrustedAppsRequestSchema, PostTrustedAppCreateRequestSchema } from './trusted_apps';
@@ -105,7 +106,7 @@ describe('When invoking Trusted Apps Schema', () => {
       expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
     });
 
-    it('should validate `os` to to only accept known values', () => {
+    it('should validate `os` to only accept known values', () => {
       const bodyMsg = createNewTrustedApp({ os: undefined });
       expect(() => body.validate(bodyMsg)).toThrow();
 

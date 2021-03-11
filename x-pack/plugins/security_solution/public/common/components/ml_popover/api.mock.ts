@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MlSummaryJob } from '../../../../../ml/public';
@@ -46,6 +47,7 @@ export const mockOpenedJob: MlSummaryJob = {
   memory_status: 'hard_limit',
   nodeName: 'siem-es',
   processed_record_count: 3425264,
+  awaitingNodeAssignment: false,
 };
 
 export const mockJobsSummaryResponse: MlSummaryJob[] = [
@@ -64,6 +66,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     latestTimestampMs: 1561402325194,
     earliestTimestampMs: 1554327458406,
     isSingleMetricViewerJob: true,
+    awaitingNodeAssignment: false,
   },
   {
     id: 'siem-api-rare_process_linux_ecs',
@@ -79,6 +82,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     latestTimestampMs: 1557434782207,
     earliestTimestampMs: 1557353420495,
     isSingleMetricViewerJob: true,
+    awaitingNodeAssignment: false,
   },
   {
     id: 'siem-api-rare_process_windows_ecs',
@@ -92,6 +96,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     datafeedIndices: ['winlogbeat-*'],
     datafeedState: 'stopped',
     isSingleMetricViewerJob: true,
+    awaitingNodeAssignment: false,
   },
   {
     id: 'siem-api-suspicious_login_activity_ecs',
@@ -105,6 +110,7 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
     datafeedIndices: ['auditbeat-*'],
     datafeedState: 'stopped',
     isSingleMetricViewerJob: true,
+    awaitingNodeAssignment: false,
   },
 ];
 
@@ -513,6 +519,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     isCompatible: true,
     isInstalled: true,
     isElasticJob: true,
+    awaitingNodeAssignment: false,
   },
   {
     id: 'rare_process_by_host_linux_ecs',
@@ -531,6 +538,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     isCompatible: true,
     isInstalled: true,
     isElasticJob: true,
+    awaitingNodeAssignment: false,
   },
   {
     datafeedId: '',
@@ -549,5 +557,6 @@ export const mockSecurityJobs: SecurityJob[] = [
     isCompatible: false,
     isInstalled: false,
     isElasticJob: true,
+    awaitingNodeAssignment: false,
   },
 ];

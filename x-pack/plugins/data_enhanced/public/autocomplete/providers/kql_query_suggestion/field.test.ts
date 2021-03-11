@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { setupGetFieldSuggestions } from './field';
@@ -68,6 +70,17 @@ describe('Kuery field suggestions', () => {
   test('should return suggestions where the query matches somewhere in the middle', async () => {
     const prefix = '.';
     const suffix = '';
+    const suggestions = await getSuggestions(
+      querySuggestionsArgs,
+      mockKueryNode({ prefix, suffix })
+    );
+
+    expect(suggestions.find(({ text }) => text === 'machine.os ')).toBeDefined();
+  });
+
+  test('should field names that match the search', async () => {
+    const prefix = 'machi';
+    const suffix = 'ne.os';
     const suggestions = await getSuggestions(
       querySuggestionsArgs,
       mockKueryNode({ prefix, suffix })

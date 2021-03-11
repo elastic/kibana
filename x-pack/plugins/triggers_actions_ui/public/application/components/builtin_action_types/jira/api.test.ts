@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { httpServiceMock } from '../../../../../../../../src/core/public/mocks';
 import { getIssueTypes, getFieldsByIssueType, getIssues, getIssue } from './api';
 
 const issueTypesResponse = {
+  status: 'ok',
   data: {
     projects: [
       {
@@ -24,9 +26,11 @@ const issueTypesResponse = {
       },
     ],
   },
+  actionId: 'test',
 };
 
 const fieldsResponse = {
+  status: 'ok',
   data: {
     projects: [
       {
@@ -70,13 +74,18 @@ const fieldsResponse = {
         ],
       },
     ],
+    actionId: 'test',
   },
 };
 
 const issueResponse = {
-  id: '10267',
-  key: 'RJ-107',
-  fields: { summary: 'Test title' },
+  status: 'ok',
+  data: {
+    id: '10267',
+    key: 'RJ-107',
+    fields: { summary: 'Test title' },
+  },
+  actionId: 'test',
 };
 
 const issuesResponse = [issueResponse];

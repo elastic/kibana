@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { EuiIconTip, EuiText } from '@elastic/eui';
 import React from 'react';
-import { EuiText, EuiIconTip } from '@elastic/eui';
-import { SecuredFeature } from '../../../../model';
+
+import type { SecuredFeature } from '../../../../model';
 
 interface Props {
   feature: SecuredFeature;

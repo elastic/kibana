@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,8 +10,6 @@ import React, { FunctionComponent } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 
 import { PhaseWithAllocation, DataTierRole } from '../../../../../../../../../common/types';
-
-import { AllocationNodeRole } from '../../../../../../../lib';
 
 const i18nTextsNodeRoleToDataTier: Record<DataTierRole, string> = {
   data_hot: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierHotLabel', {
@@ -21,6 +20,9 @@ const i18nTextsNodeRoleToDataTier: Record<DataTierRole, string> = {
   }),
   data_cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierColdLabel', {
     defaultMessage: 'cold',
+  }),
+  data_frozen: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierFrozenLabel', {
+    defaultMessage: 'frozen',
   }),
 };
 
@@ -49,6 +51,21 @@ const i18nTexts = {
             'This policy will move data in the cold phase to {tier} tier nodes instead.',
           values: { tier: i18nTextsNodeRoleToDataTier[nodeRole] },
         }),
+    },
+    frozen: {
+      title: i18n.translate(
+        'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.frozen.title',
+        { defaultMessage: 'No nodes assigned to the frozen tier' }
+      ),
+      body: (nodeRole: DataTierRole) =>
+        i18n.translate(
+          'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.frozen',
+          {
+            defaultMessage:
+              'This policy will move data in the frozen phase to {tier} tier nodes instead.',
+            values: { tier: i18nTextsNodeRoleToDataTier[nodeRole] },
+          }
+        ),
     },
   },
   warning: {
@@ -83,24 +100,13 @@ const i18nTexts = {
 
 interface Props {
   phase: PhaseWithAllocation;
-  targetNodeRole: AllocationNodeRole;
+  targetNodeRole: DataTierRole;
 }
 
 export const DefaultAllocationNotice: FunctionComponent<Props> = ({ phase, targetNodeRole }) => {
-  const content =
-    targetNodeRole === 'none' ? (
-      <EuiCallOut
-        data-test-subj="defaultAllocationWarning"
-        title={i18nTexts.warning[phase].title}
-        color="warning"
-      >
-        {i18nTexts.warning[phase].body}
-      </EuiCallOut>
-    ) : (
-      <EuiCallOut data-test-subj="defaultAllocationNotice" title={i18nTexts.notice[phase].title}>
-        {i18nTexts.notice[phase].body(targetNodeRole)}
-      </EuiCallOut>
-    );
-
-  return content;
+  return (
+    <EuiCallOut data-test-subj="defaultAllocationNotice" title={i18nTexts.notice[phase].title}>
+      {i18nTexts.notice[phase].body(targetNodeRole)}
+    </EuiCallOut>
+  );
 };

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
 import * as Rx from 'rxjs';
 import { toArray, map } from 'rxjs/operators';
 
-import { AlertingPlugin } from '../../../../alerts/server';
+import { AlertingPlugin } from '../../../../alerting/server';
 import { APMConfig } from '../..';
 
 import { registerErrorCountAlertType } from './register_error_count_alert_type';
@@ -29,14 +30,14 @@ const mockedConfig$ = (Rx.of('apm_oss.errorIndices').pipe(
 describe('Error count alert', () => {
   it("doesn't send an alert when error count is less than threshold", async () => {
     let alertExecutor: any;
-    const alerts = {
+    const alerting = {
       registerType: ({ executor }) => {
         alertExecutor = executor;
       },
     } as AlertingPlugin['setup'];
 
     registerErrorCountAlertType({
-      alerts,
+      alerting,
       config$: mockedConfig$,
     });
     expect(alertExecutor).toBeDefined();
@@ -59,14 +60,14 @@ describe('Error count alert', () => {
 
   it('sends alerts with service name and environment', async () => {
     let alertExecutor: any;
-    const alerts = {
+    const alerting = {
       registerType: ({ executor }) => {
         alertExecutor = executor;
       },
     } as AlertingPlugin['setup'];
 
     registerErrorCountAlertType({
-      alerts,
+      alerting,
       config$: mockedConfig$,
     });
     expect(alertExecutor).toBeDefined();
@@ -143,14 +144,14 @@ describe('Error count alert', () => {
   });
   it('sends alerts with service name', async () => {
     let alertExecutor: any;
-    const alerts = {
+    const alerting = {
       registerType: ({ executor }) => {
         alertExecutor = executor;
       },
     } as AlertingPlugin['setup'];
 
     registerErrorCountAlertType({
-      alerts,
+      alerting,
       config$: mockedConfig$,
     });
     expect(alertExecutor).toBeDefined();

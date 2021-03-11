@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
-import { alertsMock } from '../../../alerts/server/mocks';
+import { alertsMock } from '../../../alerting/server/mocks';
 import { xpackMocks } from '../../../../mocks';
 import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
 import {
@@ -27,6 +29,7 @@ import { EndpointAppContext } from './types';
 import { MetadataRequestContext } from './routes/metadata/handlers';
 // import { licenseMock } from '../../../licensing/common/licensing.mock';
 import { LicenseService } from '../../common/license/license';
+import { SecuritySolutionRequestHandlerContext } from '../types';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -72,13 +75,14 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     manifestManager: getManifestManagerMock(),
     appClientFactory: factory,
     security: securityMock.createSetup(),
-    alerts: alertsMock.createStart(),
+    alerting: alertsMock.createStart(),
     config,
     licenseService: new LicenseService(),
     registerIngestCallback: jest.fn<
       ReturnType<FleetStartContract['registerExternalCallback']>,
       Parameters<FleetStartContract['registerExternalCallback']>
     >(),
+    exceptionListsClient: listMock.getExceptionListClient(),
   };
 };
 
@@ -116,7 +120,7 @@ export const createMockMetadataRequestContext = (): jest.Mocked<MetadataRequestC
   return {
     endpointAppContextService: createMockEndpointAppContextService(),
     logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
-    requestHandlerContext: xpackMocks.createRequestHandlerContext(),
+    requestHandlerContext: (xpackMocks.createRequestHandlerContext() as unknown) as jest.Mocked<SecuritySolutionRequestHandlerContext>,
   };
 };
 

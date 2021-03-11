@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSelect } from '@elastic/eui';
@@ -28,7 +29,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   }));
 
   const updateServiceName = useCallback(
-    (serviceN: string) => {
+    (serviceN: string, replaceHistory?: boolean) => {
       const newLocation = {
         ...history.location,
         search: fromQuery({
@@ -36,7 +37,11 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
           serviceName: serviceN,
         }),
       };
-      history.push(newLocation);
+      if (replaceHistory) {
+        history.replace(newLocation);
+      } else {
+        history.push(newLocation);
+      }
     },
     [history]
   );
@@ -45,12 +50,12 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
     if (serviceNames?.length > 0) {
       // select first from the list
       if (!selectedServiceName) {
-        updateServiceName(serviceNames[0]);
+        updateServiceName(serviceNames[0], true);
       }
 
       // in case serviceName is cached from url and isn't present in current list
       if (selectedServiceName && !serviceNames.includes(selectedServiceName)) {
-        updateServiceName(serviceNames[0]);
+        updateServiceName(serviceNames[0], true);
       }
     }
 

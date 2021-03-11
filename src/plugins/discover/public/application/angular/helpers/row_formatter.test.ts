@@ -1,33 +1,27 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { formatRow } from './row_formatter';
+import { formatRow, formatTopLevelObject } from './row_formatter';
 import { stubbedSavedObjectIndexPattern } from '../../../__mocks__/stubbed_saved_object_index_pattern';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
 import { fieldFormatsMock } from '../../../../../data/common/field_formats/mocks';
 
 describe('Row formatter', () => {
   const hit = {
-    foo: 'bar',
-    number: 42,
-    hello: '<h1>World</h1>',
-    also: 'with "quotes" or \'single quotes\'',
+    _id: 'a',
+    _type: 'doc',
+    _score: 1,
+    _source: {
+      foo: 'bar',
+      number: 42,
+      hello: '<h1>World</h1>',
+      also: 'with "quotes" or \'single quotes\'',
+    },
   };
 
   const createIndexPattern = () => {
@@ -48,22 +42,123 @@ describe('Row formatter', () => {
 
   const indexPattern = createIndexPattern();
 
+  // Realistic response with alphabetical insertion order
   const formatHitReturnValue = {
     also: 'with \\&quot;quotes\\&quot; or &#39;single qoutes&#39;',
-    number: '42',
     foo: 'bar',
+    number: '42',
     hello: '&lt;h1&gt;World&lt;/h1&gt;',
+    _id: 'a',
+    _type: 'doc',
+    _score: 1,
   };
-  const formatHitMock = jest.fn().mockReturnValueOnce(formatHitReturnValue);
+
+  const formatHitMock = jest.fn().mockReturnValue(formatHitReturnValue);
 
   beforeEach(() => {
-    // @ts-ignore
+    // @ts-expect-error
     indexPattern.formatHit = formatHitMock;
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, indexPattern).trim()).toBe(
-      '<dl class="source truncate-by-height"><dt>also:</dt><dd>with \\&quot;quotes\\&quot; or &#39;single qoutes&#39;</dd> <dt>number:</dt><dd>42</dd> <dt>foo:</dt><dd>bar</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> </dl>'
+    expect(formatRow(hit, indexPattern).trim()).toMatchInlineSnapshot(
+      `"<dl class=\\"source truncate-by-height\\"><dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> <dt>foo:</dt><dd>bar</dd> <dt>number:</dt><dd>42</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> <dt>_id:</dt><dd>a</dd> <dt>_type:</dt><dd>doc</dd> <dt>_score:</dt><dd>1</dd> </dl>"`
+    );
+  });
+
+  it('formats document with highlighted fields first', () => {
+    expect(
+      formatRow({ ...hit, highlight: { number: '42' } }, indexPattern).trim()
+    ).toMatchInlineSnapshot(
+      `"<dl class=\\"source truncate-by-height\\"><dt>number:</dt><dd>42</dd> <dt>also:</dt><dd>with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;</dd> <dt>foo:</dt><dd>bar</dd> <dt>hello:</dt><dd>&lt;h1&gt;World&lt;/h1&gt;</dd> <dt>_id:</dt><dd>a</dd> <dt>_type:</dt><dd>doc</dd> <dt>_score:</dt><dd>1</dd> </dl>"`
+    );
+  });
+
+  it('formats top level objects using formatter', () => {
+    indexPattern.getFieldByName = jest.fn().mockReturnValue({
+      name: 'subfield',
+    });
+    indexPattern.getFormatterForField = jest.fn().mockReturnValue({
+      convert: () => 'formatted',
+    });
+    expect(
+      formatTopLevelObject(
+        {
+          fields: {
+            'object.value': [5, 10],
+          },
+        },
+        {
+          'object.value': [5, 10],
+        },
+        indexPattern
+      ).trim()
+    ).toMatchInlineSnapshot(
+      `"<dl class=\\"source truncate-by-height\\"><dt>object.value:</dt><dd>formatted, formatted</dd> </dl>"`
+    );
+  });
+
+  it('formats top level objects in alphabetical order', () => {
+    indexPattern.getFieldByName = jest.fn().mockReturnValue({
+      name: 'subfield',
+    });
+    indexPattern.getFormatterForField = jest.fn().mockReturnValue({
+      convert: () => 'formatted',
+    });
+    const formatted = formatTopLevelObject(
+      { fields: { 'a.zzz': [100], 'a.ccc': [50] } },
+      { 'a.zzz': [100], 'a.ccc': [50] },
+      indexPattern
+    ).trim();
+    expect(formatted.indexOf('<dt>a.ccc:</dt>')).toBeLessThan(formatted.indexOf('<dt>a.zzz:</dt>'));
+  });
+
+  it('formats top level objects with subfields and highlights', () => {
+    indexPattern.getFieldByName = jest.fn().mockReturnValue({
+      name: 'subfield',
+    });
+    indexPattern.getFormatterForField = jest.fn().mockReturnValue({
+      convert: () => 'formatted',
+    });
+    expect(
+      formatTopLevelObject(
+        {
+          fields: {
+            'object.value': [5, 10],
+            'object.keys': ['a', 'b'],
+          },
+          highlight: {
+            'object.keys': 'a',
+          },
+        },
+        {
+          'object.value': [5, 10],
+          'object.keys': ['a', 'b'],
+        },
+        indexPattern
+      ).trim()
+    ).toMatchInlineSnapshot(
+      `"<dl class=\\"source truncate-by-height\\"><dt>object.keys:</dt><dd>formatted, formatted</dd> <dt>object.value:</dt><dd>formatted, formatted</dd> </dl>"`
+    );
+  });
+
+  it('formats top level objects, converting unknown fields to string', () => {
+    indexPattern.getFieldByName = jest.fn();
+    indexPattern.getFormatterForField = jest.fn();
+    expect(
+      formatTopLevelObject(
+        {
+          fields: {
+            'object.value': [5, 10],
+          },
+        },
+        {
+          'object.value': [5, 10],
+        },
+        indexPattern
+      ).trim()
+    ).toMatchInlineSnapshot(
+      `"<dl class=\\"source truncate-by-height\\"><dt>object.value:</dt><dd>5, 10</dd> </dl>"`
     );
   });
 });

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Component } from 'react';
@@ -23,9 +12,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import { DataViewColumn, DataViewRow } from '../types';
-import { exportAsCsv } from './export_csv';
+import { CSV_MIME_TYPE, datatableToCSV } from '../../../../common';
+import { Datatable } from '../../../../../expressions';
+import { downloadMultipleAs } from '../../../../../share/public';
 import { FieldFormatsStart } from '../../../field_formats';
+import { IUiSettingsClient } from '../../../../../../core/public';
 
 interface DataDownloadOptionsState {
   isPopoverOpen: boolean;
@@ -33,10 +24,8 @@ interface DataDownloadOptionsState {
 
 interface DataDownloadOptionsProps {
   title: string;
-  columns: DataViewColumn[];
-  rows: DataViewRow[];
-  csvSeparator: string;
-  quoteValues: boolean;
+  datatables: Datatable[];
+  uiSettings: IUiSettingsClient;
   isFormatted?: boolean;
   fieldFormats: FieldFormatsStart;
 }
@@ -44,10 +33,8 @@ interface DataDownloadOptionsProps {
 class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownloadOptionsState> {
   static propTypes = {
     title: PropTypes.string.isRequired,
-    csvSeparator: PropTypes.string.isRequired,
-    quoteValues: PropTypes.bool.isRequired,
-    columns: PropTypes.array,
-    rows: PropTypes.array,
+    uiSettings: PropTypes.object.isRequired,
+    datatables: PropTypes.array,
     fieldFormats: PropTypes.object.isRequired,
   };
 
@@ -74,15 +61,30 @@ class DataDownloadOptions extends Component<DataDownloadOptionsProps, DataDownlo
         defaultMessage: 'unsaved',
       });
     }
-    exportAsCsv({
-      filename: `${filename}.csv`,
-      columns: this.props.columns,
-      rows: this.props.rows,
-      csvSeparator: this.props.csvSeparator,
-      quoteValues: this.props.quoteValues,
-      isFormatted,
-      fieldFormats: this.props.fieldFormats,
-    });
+
+    const content = this.props.datatables.reduce<Record<string, { content: string; type: string }>>(
+      (memo, datatable, i) => {
+        // skip empty datatables
+        if (datatable) {
+          const postFix = this.props.datatables.length > 1 ? `-${i + 1}` : '';
+
+          memo[`${filename}${postFix}.csv`] = {
+            content: datatableToCSV(datatable, {
+              csvSeparator: this.props.uiSettings.get('csv:separator', ','),
+              quoteValues: this.props.uiSettings.get('csv:quoteValues', true),
+              raw: !isFormatted,
+              formatFactory: this.props.fieldFormats.deserialize,
+            }),
+            type: CSV_MIME_TYPE,
+          };
+        }
+        return memo;
+      },
+      {}
+    );
+    if (content) {
+      downloadMultipleAs(content);
+    }
   };
 
   exportFormattedCsv = () => {

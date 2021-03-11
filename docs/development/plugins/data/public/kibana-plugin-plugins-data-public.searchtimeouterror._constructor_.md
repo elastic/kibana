@@ -9,13 +9,13 @@ Constructs a new instance of the `SearchTimeoutError` class
 <b>Signature:</b>
 
 ```typescript
-constructor(err: Error, mode: TimeoutErrorMode);
+constructor(err: Record<string, any>, mode: TimeoutErrorMode);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  err | <code>Error</code> |  |
+|  err | <code>Record&lt;string, any&gt;</code> |  |
 |  mode | <code>TimeoutErrorMode</code> |  |
 

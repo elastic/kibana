@@ -1,14 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    rollup?: RollupContext;
-  }
-}
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -18,14 +13,13 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-  ILegacyScopedClusterClient,
   SharedGlobalConfig,
 } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { PLUGIN, CONFIG_ROLLUPS } from '../common';
-import { Dependencies } from './types';
+import { Dependencies, RollupHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
 import { registerRollupUsageCollector } from './collectors';
@@ -36,9 +30,6 @@ import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
 
-interface RollupContext {
-  client: ILegacyScopedClusterClient;
-}
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
   const [core] = await getStartServices();
   // Extend the elasticsearchJs client with additional endpoints.
@@ -91,12 +82,15 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       ],
     });
 
-    http.registerRouteHandlerContext('rollup', async (context, request) => {
-      this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
-      return {
-        client: this.rollupEsClient.asScoped(request),
-      };
-    });
+    http.registerRouteHandlerContext<RollupHandlerContext, 'rollup'>(
+      'rollup',
+      async (context, request) => {
+        this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
+        return {
+          client: this.rollupEsClient.asScoped(request),
+        };
+      }
+    );
 
     registerApiRoutes({
       router: http.createRouter(),

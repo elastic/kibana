@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import {
+
+import type {
   AppMountParameters,
   CoreSetup,
   Plugin,
@@ -11,19 +13,22 @@ import {
   CoreStart,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import {
-  HomePublicPluginSetup,
-  FeatureCatalogueCategory,
-} from '../../../../src/plugins/home/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
-import { LicensingPluginSetup } from '../../licensing/public';
-import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
-import { BASE_PATH } from './applications/fleet/constants';
 
-import { FleetConfigType } from '../common/types';
-import { setupRouteService, appRoutesService } from '../common';
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
+import type {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../src/plugins/data/public';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import type { LicensingPluginSetup } from '../../licensing/public';
+import { PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
+import type { CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
+
+import type { FleetConfigType } from '../common/types';
+
+import { BASE_PATH } from './applications/fleet/constants';
 import { licenseService } from './applications/fleet/hooks/use_license';
 import { setHttpClient } from './applications/fleet/hooks/use_request/use_request';
 import {
@@ -32,7 +37,10 @@ import {
   TutorialModuleNotice,
 } from './applications/fleet/components/home_integration';
 import { createExtensionRegistrationCallback } from './applications/fleet/services/ui_extensions';
-import { UIExtensionRegistrationCallback, UIExtensionsStorage } from './applications/fleet/types';
+import type {
+  UIExtensionRegistrationCallback,
+  UIExtensionsStorage,
+} from './applications/fleet/types';
 
 export { FleetConfigType } from '../common/types';
 
@@ -153,7 +161,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {};
   }
 
-  public async start(core: CoreStart): Promise<FleetStart> {
+  public start(core: CoreStart): FleetStart {
     let successPromise: ReturnType<FleetStart['isInitialized']>;
 
     return {

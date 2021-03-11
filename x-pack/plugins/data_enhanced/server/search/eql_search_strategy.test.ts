@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { Logger } from 'kibana/server';
 import { EqlSearchStrategyRequest } from '../../common/search/types';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
@@ -117,7 +119,6 @@ describe('EQL search strategy', () => {
         expect(request).toEqual(
           expect.objectContaining({
             wait_for_completion_timeout: '100ms',
-            keep_alive: '1m',
           })
         );
       });
@@ -156,7 +157,6 @@ describe('EQL search strategy', () => {
         expect(request).toEqual(
           expect.objectContaining({
             wait_for_completion_timeout: '5ms',
-            keep_alive: '1m',
             keep_on_completion: false,
           })
         );

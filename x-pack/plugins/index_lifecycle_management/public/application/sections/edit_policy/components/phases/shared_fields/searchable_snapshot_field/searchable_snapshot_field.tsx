@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -16,29 +17,18 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
-import {
-  UseField,
-  ComboBoxField,
-  useKibana,
-  fieldValidators,
-  useFormData,
-} from '../../../../../../../shared_imports';
+import { ComboBoxField, useKibana, useFormData } from '../../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../../edit_policy_context';
-import { useConfigurationIssues } from '../../../../form';
-
-import { i18nTexts } from '../../../../i18n_texts';
-
+import { useConfigurationIssues, UseField, searchableSnapshotFields } from '../../../../form';
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
-
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 
 import './_searchable_snapshot_field.scss';
 
-const { emptyField } = fieldValidators;
-
 export interface Props {
-  phase: 'hot' | 'cold';
+  phase: 'hot' | 'cold' | 'frozen';
+  canBeDisabled?: boolean;
 }
 
 /**
@@ -47,34 +37,67 @@ export interface Props {
  */
 const CLOUD_DEFAULT_REPO = 'found-snapshots';
 
-export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => {
+const geti18nTexts = (phase: Props['phase']) => ({
+  title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
+    defaultMessage: 'Searchable snapshot',
+  }),
+  description:
+    phase === 'frozen' ? (
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.searchableSnapshotFieldDescription"
+        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. To reduce costs, only a cache of the snapshot is mounted in the frozen tier. {learnMoreLink}"
+        values={{
+          learnMoreLink: (
+            <LearnMoreLink docPath="searchable-snapshots.html#searchable-snapshots-shared-cache" />
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
+        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. {learnMoreLink}"
+        values={{
+          learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
+        }}
+      />
+    ),
+});
+
+export const SearchableSnapshotField: FunctionComponent<Props> = ({
+  phase,
+  canBeDisabled = true,
+}) => {
   const {
     services: { cloud },
   } = useKibana();
-  const { getUrlForApp, policy, license } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase, isUsingRollover } = useConfigurationIssues();
+  const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
 
-  const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
-  const [formData] = useFormData({ watch: searchableSnapshotPath });
-  const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
+  const [formData] = useFormData({ watch: searchableSnapshotRepoPath });
+  const searchableSnapshotRepo = get(formData, searchableSnapshotRepoPath);
 
+  const isColdPhase = phase === 'cold';
+  const isFrozenPhase = phase === 'frozen';
+  const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
-  const isDisabledInColdDueToHotPhase = phase === 'cold' && isUsingSearchableSnapshotInHotPhase;
-  const isDisabledInColdDueToRollover = phase === 'cold' && !isUsingRollover;
-
-  const isDisabled =
-    isDisabledDueToLicense || isDisabledInColdDueToHotPhase || isDisabledInColdDueToRollover;
 
   const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
-    Boolean(policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository)
+    Boolean(
+      // New policy on cloud should have searchable snapshot on in cold and frozen phase
+      (isColdOrFrozenPhase && isNewPolicy && cloud?.isCloudEnabled) ||
+        policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
+    )
   );
 
+  const i18nTexts = geti18nTexts(phase);
+
   useEffect(() => {
-    if (isDisabled) {
+    if (isDisabledDueToLicense) {
       setIsFieldToggleChecked(false);
     }
-  }, [isDisabled]);
+  }, [isDisabledDueToLicense]);
 
   const renderField = () => (
     <SearchableSnapshotDataProvider>
@@ -180,17 +203,10 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           <div className="ilmSearchableSnapshotField">
             <UseField<string>
               config={{
+                ...searchableSnapshotFields.snapshot_repository,
                 defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
-                label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
-                validations: [
-                  {
-                    validator: emptyField(
-                      i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired
-                    ),
-                  },
-                ],
               }}
-              path={searchableSnapshotPath}
+              path={searchableSnapshotRepoPath}
             >
               {(field) => {
                 const singleSelectionArray: [selectedSnapshot?: string] = field.value
@@ -205,6 +221,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                         value: singleSelectionArray,
                       } as any
                     }
+                    label={field.label}
                     fullWidth={false}
                     euiFieldProps={{
                       'data-test-subj': 'searchableSnapshotCombobox',
@@ -250,7 +267,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
             {
               defaultMessage:
-                'Force merge, shrink, freeze and cold phase searchable snapshots are not allowed when searchable snapshots are enabled in the hot phase.',
+                'Force merge, shrink and freeze actions are not allowed when searchable snapshots are enabled in this phase.',
             }
           )}
           data-test-subj="searchableSnapshotFieldsDisabledCallout"
@@ -274,34 +291,6 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
           )}
         </EuiCallOut>
       );
-    } else if (isDisabledInColdDueToHotPhase) {
-      infoCallout = (
-        <EuiCallOut
-          size="s"
-          data-test-subj="searchableSnapshotFieldsEnabledInHotCallout"
-          title={i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotDisabledCalloutBody',
-            {
-              defaultMessage:
-                'Cannot create a searchable snapshot in cold when it is configured in hot phase.',
-            }
-          )}
-        />
-      );
-    } else if (isDisabledInColdDueToRollover) {
-      infoCallout = (
-        <EuiCallOut
-          size="s"
-          data-test-subj="searchableSnapshotFieldsNoRolloverCallout"
-          title={i18n.translate(
-            'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotNoRolloverCalloutBody',
-            {
-              defaultMessage:
-                'Cannot create a searchable snapshot when rollover is disabled in the hot phase.',
-            }
-          )}
-        />
-      );
     }
 
     return infoCallout ? (
@@ -316,40 +305,30 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   return (
     <DescribedFormRow
       data-test-subj={`searchableSnapshotField-${phase}`}
-      switchProps={{
-        checked: isFieldToggleChecked,
-        disabled: isDisabled,
-        onChange: setIsFieldToggleChecked,
-        'data-test-subj': 'searchableSnapshotToggle',
-        label: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
-          { defaultMessage: 'Create searchable snapshot' }
-        ),
-      }}
-      title={
-        <h3>
-          {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
-            defaultMessage: 'Searchable snapshot',
-          })}
-        </h3>
+      switchProps={
+        canBeDisabled
+          ? {
+              checked: isFieldToggleChecked,
+              disabled: isDisabledDueToLicense,
+              onChange: setIsFieldToggleChecked,
+              'data-test-subj': 'searchableSnapshotToggle',
+              label: i18n.translate(
+                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
+                { defaultMessage: 'Create searchable snapshot' }
+              ),
+            }
+          : undefined
       }
+      title={<h3>{i18nTexts.title}</h3>}
       description={
         <>
-          <EuiTextColor color="subdued">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
-              defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}."
-              values={{
-                learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
-              }}
-            />
-          </EuiTextColor>
+          <EuiTextColor color="subdued">{i18nTexts.description}</EuiTextColor>
         </>
       }
       fieldNotices={renderInfoCallout()}
       fullWidth
     >
-      {isDisabled ? <div /> : renderField}
+      {isDisabledDueToLicense ? <div /> : renderField}
     </DescribedFormRow>
   );
 };

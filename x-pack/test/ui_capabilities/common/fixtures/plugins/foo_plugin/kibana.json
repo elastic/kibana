@@ -1,5 +1,5 @@
 {
-  "id": "foo_plugin",
+  "id": "fooPlugin",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": ["features"],

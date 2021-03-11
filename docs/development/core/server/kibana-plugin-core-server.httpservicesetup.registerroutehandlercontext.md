@@ -9,7 +9,7 @@ Register a context provider for a route handler.
 <b>Signature:</b>
 
 ```typescript
-registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
+registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Context>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
 ```
 
 ## Example
@@ -17,7 +17,10 @@ registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName
 
 ```ts
  // my-plugin.ts
- deps.http.registerRouteHandlerContext(
+ interface MyRequestHandlerContext extends RequestHandlerContext {
+   myApp: { search(id: string): Promise<Result> };
+ }
+ deps.http.registerRouteHandlerContext<MyRequestHandlerContext, 'myApp'>(
    'myApp',
    (context, req) => {
     async function search (id: string) {
@@ -28,6 +31,8 @@ registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName
  );
 
 // my-route-handler.ts
+ import type { MyRequestHandlerContext } from './my-plugin.ts';
+ const router = createRouter<MyRequestHandlerContext>();
  router.get({ path: '/', validate: false }, async (context, req, res) => {
    const response = await context.myApp.search(...);
    return res.ok(response);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -26,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('visualize');
       await PageObjects.visualize.openSavedVisualization('A Pie');
       await PageObjects.common.navigateToApp('home');
-      await appsMenu.clickLink('Visualize');
+      await appsMenu.clickLink('Visualize Library');
       await PageObjects.visChart.waitForVisualization();
       const activeTitle = await globalNav.getLastBreadcrumb();
       expect(activeTitle).to.be('A Pie');
@@ -42,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Visualize');
+      await appsMenu.clickLink('Visualize Library');
       await PageObjects.visualize.openSavedVisualization('A Pie in another space');
 
       await PageObjects.spaceSelector.openSpacesNav();
@@ -50,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('default');
 
       // default space
-      await appsMenu.clickLink('Visualize');
+      await appsMenu.clickLink('Visualize Library');
       await PageObjects.visChart.waitForVisualization();
       const activeTitleDefaultSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleDefaultSpace).to.be('A Pie');
@@ -60,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Visualize');
+      await appsMenu.clickLink('Visualize Library');
       await PageObjects.visChart.waitForVisualization();
       const activeTitleOtherSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleOtherSpace).to.be('A Pie in another space');

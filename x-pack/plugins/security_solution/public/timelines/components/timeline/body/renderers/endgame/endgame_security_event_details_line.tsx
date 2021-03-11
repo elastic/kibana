@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
@@ -34,6 +35,7 @@ interface Props {
   endgameTargetUserName: string | null | undefined;
   eventAction: string | null | undefined;
   eventCode: string | null | undefined;
+  eventOutcome: string | null | undefined;
   hostName: string | null | undefined;
   id: string;
   processExecutable: string | null | undefined;
@@ -56,6 +58,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     endgameTargetUserName,
     eventAction,
     eventCode,
+    eventOutcome,
     hostName,
     id,
     processExecutable,
@@ -66,7 +69,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     winlogEventId,
   }) => {
     const domain = getTargetUserAndTargetDomain(eventAction) ? endgameTargetDomainName : userDomain;
-    const eventDetails = getEventDetails(eventAction);
+    const eventDetails = getEventDetails({ eventAction, eventOutcome });
     const hostNameSeparator = getHostNameSeparator(eventAction);
     const user = getTargetUserAndTargetDomain(eventAction) ? endgameTargetUserName : userName;
     const userDomainField = getUserDomainField(eventAction);

@@ -1,21 +1,11 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
+
 import { template } from 'lodash';
 import { IndexPattern } from '../../../kibana_services';
 
@@ -36,12 +26,42 @@ export const doTemplate = template(noWhiteSpace(templateHtml));
 
 export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
   const highlights = hit?.highlight ?? {};
+  // Keys are sorted in the hits object
   const formatted = indexPattern.formatHit(hit);
   const highlightPairs: Array<[string, unknown]> = [];
   const sourcePairs: Array<[string, unknown]> = [];
   Object.entries(formatted).forEach(([key, val]) => {
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     pairs.push([key, val]);
+  });
+  return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs] });
+};
+
+export const formatTopLevelObject = (
+  row: Record<string, any>,
+  fields: Record<string, any>,
+  indexPattern: IndexPattern
+) => {
+  const highlights = row.highlight ?? {};
+  const highlightPairs: Array<[string, unknown]> = [];
+  const sourcePairs: Array<[string, unknown]> = [];
+  const sorted = Object.entries(fields).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+  sorted.forEach(([key, values]) => {
+    const field = indexPattern.getFieldByName(key);
+    const formatter = field
+      ? indexPattern.getFormatterForField(field)
+      : { convert: (v: string, ...rest: unknown[]) => String(v) };
+    const formatted = values
+      .map((val: unknown) =>
+        formatter.convert(val, 'html', {
+          field,
+          hit: row,
+          indexPattern,
+        })
+      )
+      .join(', ');
+    const pairs = highlights[key] ? highlightPairs : sourcePairs;
+    pairs.push([key, formatted]);
   });
   return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs] });
 };

@@ -1,23 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { sendRequest, useRequest } from './use_request';
+
 import { packagePolicyRouteService } from '../../services';
-import {
+import type {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   UpdatePackagePolicyRequest,
   UpdatePackagePolicyResponse,
 } from '../../types';
-import {
+import type {
   DeletePackagePoliciesRequest,
   DeletePackagePoliciesResponse,
   GetPackagePoliciesRequest,
   GetPackagePoliciesResponse,
   GetOnePackagePolicyResponse,
 } from '../../../../../common/types/rest_spec';
+
+import { sendRequest, useRequest } from './use_request';
 
 export const sendCreatePackagePolicy = (body: CreatePackagePolicyRequest['body']) => {
   return sendRequest<CreatePackagePolicyResponse>({

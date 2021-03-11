@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { of, throwError } from 'rxjs';
@@ -41,13 +42,12 @@ describe('POST /internal/global_search/find', () => {
     ({ server, httpSetup } = await setupServer(pluginId));
 
     globalSearchHandlerContext = globalSearchPluginMock.createRouteHandlerContext();
-    httpSetup.registerRouteHandlerContext(
-      pluginId,
-      'globalSearch',
-      () => globalSearchHandlerContext
-    );
+    httpSetup.registerRouteHandlerContext<
+      ReturnType<typeof globalSearchPluginMock.createRequestHandlerContext>,
+      'globalSearch'
+    >(pluginId, 'globalSearch', () => globalSearchHandlerContext);
 
-    const router = httpSetup.createRouter('/');
+    const router = httpSetup.createRouter<any>('/');
 
     registerInternalFindRoute(router);
 

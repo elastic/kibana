@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
@@ -13,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
-  EuiOverlayMask,
   EuiPageContent,
   EuiPageContentBody,
   EuiSpacer,
@@ -105,7 +105,7 @@ export const TransformManagement: FC = () => {
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.transform.transformList.transformDescription"
-              defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized or entity-centric indices."
+              defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access."
             />
           </EuiText>
         </EuiTitle>
@@ -123,15 +123,13 @@ export const TransformManagement: FC = () => {
         </EuiPageContentBody>
       </EuiPageContent>
       {isSearchSelectionVisible && (
-        <EuiOverlayMask>
-          <EuiModal
-            onClose={onCloseModal}
-            className="transformCreateTransformSearchDialog"
-            data-test-subj="transformSelectSourceModal"
-          >
-            <SearchSelection onSearchSelected={onSearchSelected} />
-          </EuiModal>
-        </EuiOverlayMask>
+        <EuiModal
+          onClose={onCloseModal}
+          className="transformCreateTransformSearchDialog"
+          data-test-subj="transformSelectSourceModal"
+        >
+          <SearchSelection onSearchSelected={onSearchSelected} />
+        </EuiModal>
       )}
     </Fragment>
   );

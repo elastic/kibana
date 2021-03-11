@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const APACHE_2_0_LICENSE_HEADER = `
@@ -38,11 +27,40 @@ const APACHE_2_0_LICENSE_HEADER = `
  */
 `;
 
-const ELASTIC_LICENSE_HEADER = `
+const OLD_DUAL_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * and the Server Side Public License, v 1; you may not use this file except in
+ * compliance with, at your election, the Elastic License or the Server Side
+ * Public License, v 1.
+ */
+`;
+
+const DUAL_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+`;
+
+const OLD_ELASTIC_LICENSE_HEADER = `
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
+ */
+`;
+
+const ELASTIC_LICENSE_HEADER = `
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 `;
 
@@ -113,12 +131,49 @@ module.exports = {
     },
 
     /**
-     * Files that require Apache 2.0 headers, settings
+     * Files that require dual-license headers, settings
      * are overridden below for files that require Elastic
      * Licence headers
      */
     {
-      files: ['**/*.{js,mjs,ts,tsx}', '!plugins/**/*'],
+      files: [
+        '**/*.{js,mjs,ts,tsx}',
+        '!plugins/**/*',
+        '!packages/elastic-datemath/**/*',
+        '!packages/elastic-eslint-config-kibana/**/*',
+      ],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: DUAL_LICENSE_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * Files that require Apache headers
+     */
+    {
+      files: [
+        'packages/elastic-datemath/**/*.{js,mjs,ts,tsx}',
+        'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -130,7 +185,10 @@ module.exports = {
           'error',
           {
             licenses: [
+              DUAL_LICENSE_HEADER,
               ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -151,7 +209,7 @@ module.exports = {
     },
 
     /**
-     * Files that require Elastic license headers instead of Apache 2.0 header
+     * Files that require Elastic license headers instead of dual-license header
      */
     {
       files: ['x-pack/**/*.{js,mjs,ts,tsx}'],
@@ -167,6 +225,9 @@ module.exports = {
           {
             licenses: [
               APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
@@ -192,8 +253,11 @@ module.exports = {
           'error',
           {
             licenses: [
-              ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
@@ -214,8 +278,11 @@ module.exports = {
           'error',
           {
             licenses: [
-              ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
@@ -236,8 +303,11 @@ module.exports = {
           'error',
           {
             licenses: [
-              ELASTIC_LICENSE_HEADER,
               APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
             ],
@@ -502,7 +572,6 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        'src/legacy/ui/ui_render/bootstrap/kbn_bundles_loader_source.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -716,6 +785,22 @@ module.exports = {
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': ['error', { additionalHooks: '^useFetcher$' }],
+      },
+    },
+
+    /**
+     * Fleet overrides
+     */
+    {
+      files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/order': [
+          'warn',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent'],
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
       },
     },
 
@@ -1017,7 +1102,9 @@ module.exports = {
      */
     {
       // typescript for front and back end
-      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1042,12 +1129,55 @@ module.exports = {
 
     /**
      * Enterprise Search overrides
+     * NOTE: We also have a single rule at the bottom of the file that
+     * overrides Prettier's default of not linting unnecessary backticks
      */
     {
+      // All files
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        'import/order': [
+          'error',
+          {
+            groups: ['unknown', ['builtin', 'external'], 'internal', 'parent', 'sibling', 'index'],
+            pathGroups: [
+              {
+                pattern:
+                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../}{common/,*}__mocks__{*,/**}',
+                group: 'unknown',
+              },
+              {
+                pattern: '{**,.}/*.mock',
+                group: 'unknown',
+              },
+              {
+                pattern: 'react*',
+                group: 'external',
+                position: 'before',
+              },
+              {
+                pattern: '{@elastic/**,@kbn/**,src/**}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+        'import/newline-after-import': 'error',
+        'react-hooks/exhaustive-deps': 'off',
+        'react/jsx-boolean-value': ['error', 'never'],
+      },
+    },
+    {
+      // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
       excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
       rules: {
-        'react-hooks/exhaustive-deps': 'off',
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
@@ -1154,6 +1284,37 @@ module.exports = {
     },
 
     /**
+     * Osquery overrides
+     */
+    {
+      extends: [
+        'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:@typescript-eslint/recommended',
+      ],
+      plugins: ['react', '@typescript-eslint'],
+      files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'arrow-body-style': ['error', 'as-needed'],
+        'prefer-arrow-callback': 'error',
+        'no-unused-vars': 'off',
+        'react/prop-types': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
+      },
+    },
+    {
+      // typescript and javascript for front end react performance
+      files: ['x-pack/plugins/osquery/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      plugins: ['react', 'react-perf'],
+      rules: {
+        'react-perf/jsx-no-new-object-as-prop': 'error',
+        'react-perf/jsx-no-new-array-as-prop': 'error',
+        'react-perf/jsx-no-new-function-as-prop': 'error',
+        'react/jsx-no-bind': 'error',
+      },
+    },
+
+    /**
      * Prettier disables all conflicting rules, listing as last override so it takes precedence
      */
     {
@@ -1164,10 +1325,69 @@ module.exports = {
         ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
+    /**
+     * Enterprise Search Prettier override
+     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
+      },
+    },
+
+    /**
+     * Platform Security Team overrides
+     */
+    {
+      files: [
+        'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
+        'src/plugins/spaces_oss/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 1,
+        'import/order': [
+          // This rule sorts import declarations
+          'error',
+          {
+            groups: [
+              'unknown',
+              ['builtin', 'external'],
+              'internal',
+              ['parent', 'sibling', 'index'],
+            ],
+            pathGroups: [
+              {
+                pattern: '{@kbn/**,src/**,kibana{,/**}}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'always',
+          },
+        ],
+        'import/no-duplicates': ['error'],
+        'sort-imports': [
+          // This rule sorts imports of multiple members (destructured imports)
+          'error',
+          {
+            ignoreCase: true,
+            ignoreDeclarationSort: true,
+          },
+        ],
+      },
+    },
 
     {
       files: [
-        // platform-team owned code
+        // core-team owned code
         'src/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
@@ -1176,6 +1396,14 @@ module.exports = {
         'packages/kbn-config-schema',
         'src/plugins/status_page/**',
         'src/plugins/saved_objects_management/**',
+        'packages/kbn-analytics/**',
+        'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        'src/plugins/usage_collection/**',
+        'src/plugins/telemetry/**',
+        'src/plugins/telemetry_collection_manager/**',
+        'src/plugins/telemetry_management_section/**',
+        'x-pack/plugins/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
@@ -1191,7 +1419,7 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: ['lodash/*', '!lodash/fp'],
+            patterns: ['lodash/*', '!lodash/fp', 'rxjs/internal-compatibility'],
           },
         ],
       },

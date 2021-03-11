@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Unusual Child Process from a System Virtual Process",
   "query": "event.category:process and event.type:(start or process_started) and process.parent.pid:4 and not process.executable:(Registry or MemCompression or \"C:\\Windows\\System32\\smss.exe\")",
   "risk_score": 73,
@@ -39,6 +40,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

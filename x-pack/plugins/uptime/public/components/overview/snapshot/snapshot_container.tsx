@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useContext, useEffect } from 'react';
@@ -20,7 +21,7 @@ interface Props {
 }
 
 export const Snapshot: React.FC<Props> = ({ height }: Props) => {
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+  const { dateRangeStart, dateRangeEnd, query } = useGetUrlParams();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
@@ -30,7 +31,7 @@ export const Snapshot: React.FC<Props> = ({ height }: Props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getSnapshotCountAction({ dateRangeStart, dateRangeEnd, filters: esKuery }));
-  }, [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, dispatch]);
+    dispatch(getSnapshotCountAction.get({ query, dateRangeStart, dateRangeEnd, filters: esKuery }));
+  }, [dateRangeStart, dateRangeEnd, esKuery, lastRefresh, dispatch, query]);
   return <SnapshotComponent count={count} height={height} loading={loading} />;
 };

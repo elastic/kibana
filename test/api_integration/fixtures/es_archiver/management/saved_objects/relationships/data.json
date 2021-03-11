@@ -1,0 +1,190 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "timelion-sheet:190f3e90-2ec3-11e8-ba48-69fc4e41e1f6",
+    "source": {
+      "type": "timelion-sheet",
+      "updated_at": "2018-03-23T17:53:30.872Z",
+      "timelion-sheet": {
+        "title": "New TimeLion Sheet",
+        "hits": 0,
+        "description": "",
+        "timelion_sheet": [
+          ".es(*)"
+        ],
+        "timelion_interval": "auto",
+        "timelion_chart_height": 275,
+        "timelion_columns": 2,
+        "timelion_rows": 2,
+        "version": 1
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "index-pattern:8963ca30-3224-11e8-a572-ffca06da1357",
+    "source": {
+      "type": "index-pattern",
+      "updated_at": "2018-03-28T01:08:34.290Z",
+      "index-pattern": {
+        "title": "saved_objects*",
+        "fields": "[{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"name\":\"id\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "config:7.0.0-alpha1",
+    "source": {
+      "type": "config",
+      "updated_at": "2018-03-28T01:08:39.248Z",
+      "config": {
+        "buildNum": 8467,
+        "telemetry:optIn": false,
+        "defaultIndex": "8963ca30-3224-11e8-a572-ffca06da1357"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "search:960372e0-3224-11e8-a572-ffca06da1357",
+    "source": {
+      "type": "search",
+      "updated_at": "2018-03-28T01:08:55.182Z",
+      "search": {
+        "title": "OneRecord",
+        "description": "",
+        "hits": 0,
+        "columns": [
+          "_source"
+        ],
+        "sort": [
+          "_score",
+          "desc"
+        ],
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"index\":\"8963ca30-3224-11e8-a572-ffca06da1357\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"id:3\",\"language\":\"lucene\"},\"filter\":[]}"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:a42c0580-3224-11e8-a572-ffca06da1357",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2018-03-28T01:09:18.936Z",
+      "visualization": {
+        "title": "VisualizationFromSavedSearch",
+        "visState": "{\"title\":\"VisualizationFromSavedSearch\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"showTotal\":false,\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}]}",
+        "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+        "description": "",
+        "savedSearchId": "960372e0-3224-11e8-a572-ffca06da1357",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "visualization:add810b0-3224-11e8-a572-ffca06da1357",
+    "source": {
+      "type": "visualization",
+      "updated_at": "2018-03-28T01:09:35.163Z",
+      "visualization": {
+        "title": "Visualization",
+        "visState": "{\"title\":\"Visualization\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"metric\",\"metric\":{\"percentageMode\":false,\"useRanges\":false,\"colorSchema\":\"Green to Red\",\"metricColorMode\":\"None\",\"colorsRange\":[{\"from\":0,\"to\":10000}],\"labels\":{\"show\":true},\"invertColors\":false,\"style\":{\"bgFill\":\"#000\",\"bgColor\":false,\"labelColor\":false,\"subText\":\"\",\"fontSize\":60}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}]}",
+        "uiStateJSON": "{}",
+        "description": "",
+        "version": 1,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"index\":\"8963ca30-3224-11e8-a572-ffca06da1357\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "dashboard:b70c7ae0-3224-11e8-a572-ffca06da1357",
+    "source": {
+      "type": "dashboard",
+      "updated_at": "2018-03-28T01:09:50.606Z",
+      "dashboard": {
+        "title": "Dashboard",
+        "hits": 0,
+        "description": "",
+        "panelsJSON": "[{\"gridData\":{\"w\":24,\"h\":15,\"x\":0,\"y\":0,\"i\":\"1\"},\"version\":\"7.0.0-alpha1\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"id\":\"add810b0-3224-11e8-a572-ffca06da1357\",\"embeddableConfig\":{}},{\"gridData\":{\"w\":24,\"h\":15,\"x\":24,\"y\":0,\"i\":\"2\"},\"version\":\"7.0.0-alpha1\",\"panelIndex\":\"2\",\"type\":\"visualization\",\"id\":\"a42c0580-3224-11e8-a572-ffca06da1357\",\"embeddableConfig\":{}}]",
+        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "dashboard:invalid-refs",
+    "source": {
+      "type": "dashboard",
+      "updated_at": "2018-03-28T01:09:50.606Z",
+      "dashboard": {
+        "title": "Dashboard",
+        "hits": 0,
+        "description": "",
+        "panelsJSON": "[]",
+        "optionsJSON": "{}",
+        "version": 1,
+        "timeRestore": false,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{}"
+        }
+      },
+      "references": [
+        {
+          "type":"visualization",
+          "id": "add810b0-3224-11e8-a572-ffca06da1357",
+          "name": "valid-ref"
+        },
+        {
+          "type":"visualization",
+          "id": "invalid-vis",
+          "name": "missing-ref"
+        }
+      ]
+    }
+  }
+}

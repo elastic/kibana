@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -10,6 +11,7 @@ import {
   ServiceNowconnectorOptions,
   TestCase,
 } from '../objects/case';
+import { ALL_CASES_OPEN_CASES_COUNT, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
 
 import {
   BACK_TO_CASES_BTN,
@@ -37,6 +39,11 @@ import {
 
 export const backToCases = () => {
   cy.get(BACK_TO_CASES_BTN).click({ force: true });
+};
+
+export const filterStatusOpen = () => {
+  cy.get(ALL_CASES_OPEN_CASES_COUNT).click();
+  cy.get(ALL_CASES_OPEN_FILTER).click();
 };
 
 export const fillCasesMandatoryfields = (newCase: TestCase) => {
@@ -91,6 +98,6 @@ export const fillIbmResilientConnectorOptions = (
   ibmResilientConnector.incidentTypes.forEach((incidentType) => {
     cy.get(SELECT_INCIDENT_TYPE).type(`${incidentType}{enter}`, { force: true });
   });
-  cy.get(CONNECTOR_RESILIENT).click();
+  cy.get(CONNECTOR_RESILIENT).click({ force: true });
   cy.get(SELECT_SEVERITY).select(ibmResilientConnector.severity);
 };

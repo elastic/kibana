@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
@@ -9,16 +10,16 @@ import {
   findRulesSchema,
   FindRulesSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/find_rules_schema';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
-import { transformValidateFindAlerts } from './validate';
 import { transformError, buildSiemResponse } from '../utils';
 import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { transformFindAlerts } from './utils';
 
-export const findRulesRoute = (router: IRouter) => {
+export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_find`,
@@ -95,12 +96,11 @@ export const findRulesRoute = (router: IRouter) => {
             return results;
           })
         );
-
-        const [validated, errors] = transformValidateFindAlerts(rules, ruleActions, ruleStatuses);
-        if (errors != null) {
-          return siemResponse.error({ statusCode: 500, body: errors });
+        const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
+        if (transformed == null) {
+          return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {
-          return response.ok({ body: validated ?? {} });
+          return response.ok({ body: transformed ?? {} });
         }
       } catch (err) {
         const error = transformError(err);

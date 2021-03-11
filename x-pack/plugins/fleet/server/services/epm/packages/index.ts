@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObject } from 'src/core/server';
-import {
-  RequiredPackage,
-  requiredPackages,
-  ValueOf,
-  installationStatuses,
-} from '../../../../common';
-import { AssetType, Installable, Installation, KibanaAssetType } from '../../../types';
+import type { SavedObject } from 'src/core/server';
+
+import { requiredPackages, installationStatuses } from '../../../../common';
+import type { RequiredPackage, ValueOf } from '../../../../common';
+import { KibanaAssetType } from '../../../types';
+import type { AssetType, Installable, Installation } from '../../../types';
 
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 export {

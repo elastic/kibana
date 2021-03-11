@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { useRef } from 'react';
@@ -96,4 +97,13 @@ export function isValidNumber(
     (upperBound === undefined || inputValueAsNumber <= upperBound) &&
     (lowerBound === undefined || inputValueAsNumber >= lowerBound)
   );
+}
+
+export function getFormatFromPreviousColumn(previousColumn: IndexPatternColumn | undefined) {
+  return previousColumn?.dataType === 'number' &&
+    previousColumn.params &&
+    'format' in previousColumn.params &&
+    previousColumn.params.format
+    ? { format: previousColumn.params.format }
+    : undefined;
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getOr, noop, sortBy } from 'lodash/fp';
@@ -107,7 +108,6 @@ export const EventFieldsBrowser = React.memo<Props>(
 
     const columnHeaders = useDeepEqualSelector((state) => {
       const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
-
       return getColumnHeaders(columns, browserFields);
     });
 

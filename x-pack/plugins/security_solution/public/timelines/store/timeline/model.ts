@@ -1,19 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Filter } from '../../../../../../../src/plugins/data/public';
+import { Filter, IFieldSubType } from '../../../../../../../src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
 import { PinnedEvent } from '../../../graphql/types';
-import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import {
+  EqlOptionsSelected,
+  TimelineNonEcsData,
+} from '../../../../common/search_strategy/timeline';
 import { SerializedFilterQuery } from '../../../common/store/types';
 import type {
   TimelineEventsType,
-  TimelineExpandedEvent,
+  TimelineExpandedDetail,
   TimelineType,
   TimelineStatus,
   RowRendererId,
@@ -39,6 +43,7 @@ export interface ColumnHeaderOptions {
   label?: string;
   linkField?: string;
   placeholder?: string;
+  subType?: IFieldSubType;
   type?: string;
   width: number;
 }
@@ -56,13 +61,15 @@ export interface TimelineModel {
   deletedEventIds: string[];
   /** A summary of the events and notes in this timeline */
   description: string;
+  eqlOptions: EqlOptionsSelected;
   /** Type of event you want to see in this timeline */
   eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
-  expandedEvent: TimelineExpandedEvent;
+  /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */
+  expandedDetail: TimelineExpandedDetail;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
@@ -142,7 +149,7 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
-    | 'expandedEvent'
+    | 'expandedDetail'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'

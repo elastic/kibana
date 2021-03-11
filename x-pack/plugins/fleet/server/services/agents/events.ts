@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { AgentEventSOAttributes, AgentEvent } from '../../types';
+import type { AgentEventSOAttributes, AgentEvent } from '../../types';
 import { normalizeKuery } from '../saved_object';
 
 export async function getAgentEvents(

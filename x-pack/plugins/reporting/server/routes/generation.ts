@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -47,7 +48,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
       const enqueueJob = enqueueJobFactory(reporting, logger);
       const report = await enqueueJob(exportTypeId, jobParams, user, context, req);
 
-      // return the queue's job information
+      // return task manager's task information and the download URL
       const downloadBaseUrl = getDownloadBaseUrl(reporting);
 
       return res.ok({

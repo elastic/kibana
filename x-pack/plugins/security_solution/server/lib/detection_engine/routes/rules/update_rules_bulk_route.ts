@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { validate } from '../../../../../common/validate';
@@ -9,7 +10,7 @@ import { updateRuleValidateTypeDependents } from '../../../../../common/detectio
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { updateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import { IRouter } from '../../../../../../../../src/core/server';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -21,7 +22,10 @@ import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
+export const updateRulesBulkRoute = (
+  router: SecuritySolutionPluginRouter,
+  ml: SetupPlugins['ml']
+) => {
   router.put(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,

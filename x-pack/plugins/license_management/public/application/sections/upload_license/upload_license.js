@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment } from 'react';
@@ -12,7 +13,6 @@ import {
   EuiForm,
   EuiSpacer,
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiText,
   EuiTitle,
   EuiFlexGroup,
@@ -61,41 +61,39 @@ export class UploadLicense extends React.PureComponent {
       return null;
     }
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
-              defaultMessage="Confirm License Upload"
-            />
-          }
-          onCancel={this.cancel}
-          onConfirm={() => this.send(true)}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
-              defaultMessage="Confirm"
-            />
-          }
-        >
-          <div>
-            <EuiText>{firstLine}</EuiText>
-            <EuiText>
-              <ul>
-                {messages.map((message) => (
-                  <li key={message}>{message}</li>
-                ))}
-              </ul>
-            </EuiText>
-          </div>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title={
+          <FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+            defaultMessage="Confirm License Upload"
+          />
+        }
+        onCancel={this.cancel}
+        onConfirm={() => this.send(true)}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+            defaultMessage="Confirm"
+          />
+        }
+      >
+        <div>
+          <EuiText>{firstLine}</EuiText>
+          <EuiText>
+            <ul>
+              {messages.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+          </EuiText>
+        </div>
+      </EuiConfirmModal>
     );
   }
   errorMessage() {

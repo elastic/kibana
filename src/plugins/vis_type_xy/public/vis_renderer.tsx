@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { lazy } from 'react';
@@ -27,7 +16,6 @@ import { VisualizationContainer } from '../../visualizations/public';
 import type { PersistedState } from '../../visualizations/public';
 
 import { XyVisType } from '../common';
-import { SplitChartWarning } from './components/split_chart_warning';
 import { VisComponentType } from './vis_component';
 import { RenderValue, visName } from './xy_vis_fn';
 
@@ -47,24 +35,20 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
   reuseDomNode: true,
   render: async (domNode, { visData, visConfig, visType, syncColors }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
-    const isSplitChart = Boolean(visConfig.dimensions.splitRow);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
     render(
       <I18nProvider>
-        <>
-          {isSplitChart && <SplitChartWarning />}
-          <VisualizationContainer handlers={handlers} showNoResult={showNoResult || isSplitChart}>
-            <VisComponent
-              visParams={visConfig}
-              visData={visData}
-              renderComplete={handlers.done}
-              fireEvent={handlers.event}
-              uiState={handlers.uiState as PersistedState}
-              syncColors={syncColors}
-            />
-          </VisualizationContainer>
-        </>
+        <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+          <VisComponent
+            visParams={visConfig}
+            visData={visData}
+            renderComplete={handlers.done}
+            fireEvent={handlers.event}
+            uiState={handlers.uiState as PersistedState}
+            syncColors={syncColors}
+          />
+        </VisualizationContainer>
       </I18nProvider>,
       domNode
     );

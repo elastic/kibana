@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -22,14 +23,13 @@ import {
 } from '@elastic/eui';
 
 import { BASE_PATH, Section } from '../../constants';
-import { useConfig } from '../../app_context';
+import { useConfig, useCore } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
 import { RestoreList } from './restore_list';
 import { PolicyList } from './policy_list';
-import { documentationLinksService } from '../../services/documentation';
 
 interface MatchParams {
   section: Section;
@@ -42,6 +42,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   history,
 }) => {
   const { slm_ui: slmUi } = useConfig();
+  const { docLinks } = useCore();
 
   const tabs: Array<{
     id: Section;
@@ -113,7 +114,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href={documentationLinksService.getRepositoryTypeDocUrl()}
+                href={docLinks.links.snapshotRestore.guide}
                 target="_blank"
                 iconType="help"
                 data-test-subj="documentationLink"

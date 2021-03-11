@@ -1,14 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import gql from 'graphql-tag';
 
 export const persistTimelineFavoriteMutation = gql`
-  mutation PersistTimelineFavoriteMutation($timelineId: ID) {
-    persistFavorite(timelineId: $timelineId) {
+  mutation PersistTimelineFavoriteMutation(
+    $timelineId: ID
+    $templateTimelineId: String
+    $templateTimelineVersion: Int
+    $timelineType: TimelineType!
+  ) {
+    persistFavorite(
+      timelineId: $timelineId
+      templateTimelineId: $templateTimelineId
+      templateTimelineVersion: $templateTimelineVersion
+      timelineType: $timelineType
+    ) {
       savedObjectId
       version
       favorite {
@@ -16,6 +27,9 @@ export const persistTimelineFavoriteMutation = gql`
         userName
         favoriteDate
       }
+      templateTimelineId
+      templateTimelineVersion
+      timelineType
     }
   }
 `;

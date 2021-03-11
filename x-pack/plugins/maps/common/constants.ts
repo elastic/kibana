@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
@@ -85,6 +87,7 @@ export enum SOURCE_TYPES {
   REGIONMAP_FILE = 'REGIONMAP_FILE',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
+  TABLE_SOURCE = 'TABLE_SOURCE',
 }
 
 export enum FIELD_ORIGIN {
@@ -128,15 +131,15 @@ export enum ES_SPATIAL_RELATIONS {
   WITHIN = 'WITHIN',
 }
 
-export const GEO_JSON_TYPE = {
-  POINT: 'Point',
-  MULTI_POINT: 'MultiPoint',
-  LINE_STRING: 'LineString',
-  MULTI_LINE_STRING: 'MultiLineString',
-  POLYGON: 'Polygon',
-  MULTI_POLYGON: 'MultiPolygon',
-  GEOMETRY_COLLECTION: 'GeometryCollection',
-};
+export enum GEO_JSON_TYPE {
+  POINT = 'Point',
+  MULTI_POINT = 'MultiPoint',
+  LINE_STRING = 'LineString',
+  MULTI_LINE_STRING = 'MultiLineString',
+  POLYGON = 'Polygon',
+  MULTI_POLYGON = 'MultiPolygon',
+  GEOMETRY_COLLECTION = 'GeometryCollection',
+}
 
 export const POLYGON_COORDINATES_EXTERIOR_INDEX = 0;
 export const LON_INDEX = 0;

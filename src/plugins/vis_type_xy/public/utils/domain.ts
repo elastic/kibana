@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { uniq } from 'lodash';
@@ -25,22 +14,20 @@ import { DomainRange } from '@elastic/charts';
 import { getAdjustedInterval } from '../../../charts/public';
 import { Datatable } from '../../../expressions/public';
 
-import { getTimefilter } from '../services';
 import { Aspect, DateHistogramParams, HistogramParams } from '../types';
 
 export const getXDomain = (params: Aspect['params']): DomainRange => {
   const minInterval = (params as DateHistogramParams | HistogramParams)?.interval ?? undefined;
+  const bounds = (params as DateHistogramParams).date
+    ? (params as DateHistogramParams).bounds
+    : null;
 
-  if ((params as DateHistogramParams).date) {
-    const bounds = getTimefilter().getBounds();
-
-    if (bounds) {
-      return {
-        min: bounds.min ? bounds.min.valueOf() : undefined,
-        max: bounds.max ? bounds.max.valueOf() : undefined,
-        minInterval,
-      };
-    }
+  if (bounds) {
+    return {
+      min: bounds.min as number,
+      max: bounds.max as number,
+      minInterval,
+    };
   }
 
   return {

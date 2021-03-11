@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
@@ -18,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -27,10 +30,10 @@ import {
   TRAINING_PERCENT_MAX,
   FieldSelectionItem,
 } from '../../../../common/analytics';
+import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import {
-  AnalyticsJobType,
   DEFAULT_MODEL_MEMORY_LIMIT,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
@@ -46,23 +49,21 @@ import { DataGrid } from '../../../../../components/data_grid';
 import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
-import { useSavedSearch } from './use_saved_search';
+import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
-import { LEGEND_TYPES, ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
+import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 
-const getScatterplotMatrixLegendType = (jobType: AnalyticsJobType) => {
-  switch (jobType) {
-    case ANALYSIS_CONFIG_TYPE.CLASSIFICATION:
-      return LEGEND_TYPES.NOMINAL;
-    case ANALYSIS_CONFIG_TYPE.REGRESSION:
-      return LEGEND_TYPES.QUANTITATIVE;
-    default:
-      return undefined;
+function getIndexDataQuery(savedSearchQuery: SavedSearchQuery, jobConfigQuery: any) {
+  // Return `undefined` if savedSearchQuery itself is `undefined`, meaning it hasn't been initialized yet.
+  if (savedSearchQuery === undefined) {
+    return;
   }
-};
+
+  return savedSearchQuery !== null ? savedSearchQuery : jobConfigQuery;
+}
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -71,6 +72,8 @@ const requiredFieldsErrorText = i18n.translate(
       'At least one field must be included in the analysis in addition to the dependent variable.',
   }
 );
+
+const maxRuntimeFieldsDisplayCount = 5;
 
 export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
@@ -89,6 +92,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     EuiComboBoxOptionOption[]
   >([]);
   const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
+  const [fetchingExplainData, setFetchingExplainData] = useState<boolean>(false);
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
   const [unsupportedFieldsError, setUnsupportedFieldsError] = useState<string | undefined>();
   const [minimumFieldsRequiredMessage, setMinimumFieldsRequiredMessage] = useState<
@@ -135,7 +139,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const indexData = useIndexData(
     currentIndexPattern,
-    savedSearchQuery !== undefined ? savedSearchQuery : jobConfigQuery,
+    getIndexDataQuery(savedSearchQuery, jobConfigQuery),
     toastNotifications
   );
 
@@ -156,7 +160,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     maxDistinctValuesError !== undefined ||
     minimumFieldsRequiredMessage !== undefined ||
     requiredFieldsError !== undefined ||
-    unsupportedFieldsError !== undefined;
+    unsupportedFieldsError !== undefined ||
+    fetchingExplainData;
 
   const loadDepVarOptions = async (formState: State['form']) => {
     setLoadingDepVarOptions(true);
@@ -197,6 +202,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   };
 
   const debouncedGetExplainData = debounce(async () => {
+    setFetchingExplainData(true);
     const jobTypeChanged = previousJobType !== jobType;
     const shouldUpdateModelMemoryLimit =
       (!firstUpdate.current || !modelMemoryLimit) && useEstimatedMml === true;
@@ -239,6 +245,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
         });
       }
+      setFetchingExplainData(false);
     } else {
       let maxDistinctValuesErrorMessage;
       let unsupportedFieldsErrorMessage;
@@ -286,6 +293,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       setFieldOptionsFetchFail(true);
       setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
       setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+      setFetchingExplainData(false);
       setFormState({
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
@@ -297,7 +305,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   }, []);
 
   useEffect(() => {
-    if (savedSearchQueryStr !== undefined) {
+    if (typeof savedSearchQueryStr === 'string') {
       setFormState({ jobConfigQuery: savedSearchQuery, jobConfigQueryString: savedSearchQueryStr });
     }
   }, [JSON.stringify(savedSearchQuery), savedSearchQueryStr]);
@@ -324,12 +332,36 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     };
   }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
+  const unsupportedRuntimeFields = useMemo(
+    () =>
+      currentIndexPattern.fields
+        .getAll()
+        .filter((f) => f.runtimeField)
+        .map((f) => `'${f.displayName}'`),
+    [currentIndexPattern.fields]
+  );
+
+  // Show the Scatterplot Matrix only if
+  // - There's more than one suitable field available
+  // - The job type is outlier detection, or
+  // - The job type is regression or classification and the dependent variable has been set
+  const showScatterplotMatrix =
+    (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION ||
+      ((jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+        jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) &&
+        !dependentVariableEmpty)) &&
+    scatterplotFieldOptions.length > 1;
+
+  // Don't render until `savedSearchQuery` has been initialized.
+  // `undefined` means uninitialized, `null` means initialized but not used.
+  if (savedSearchQuery === undefined) return null;
+
   return (
     <Fragment>
       <Messages messages={requestMessages} />
       <SupportedFieldsMessage jobType={jobType} />
       <JobType type={jobType} setFormState={setFormState} />
-      {savedSearchQuery === undefined && (
+      {savedSearchQuery === null && (
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceQueryLabel', {
             defaultMessage: 'Query',
@@ -346,7 +378,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       <EuiFormRow
         label={
           <Fragment>
-            {savedSearchQuery !== undefined && (
+            {savedSearchQuery !== null && (
               <EuiText>
                 {i18n.translate('xpack.ml.dataframe.analytics.create.savedSearchLabel', {
                   defaultMessage: 'Saved search',
@@ -354,7 +386,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               </EuiText>
             )}
             <EuiBadge color="hollow">
-              {savedSearchQuery !== undefined
+              {savedSearchQuery !== null
                 ? currentSavedSearch?.attributes.title
                 : currentIndexPattern.title}
             </EuiBadge>
@@ -455,6 +487,36 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
+      {Array.isArray(unsupportedRuntimeFields) && unsupportedRuntimeFields.length > 0 && (
+        <>
+          <EuiCallOut size="s" color="warning">
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.create.unsupportedRuntimeFieldsCallout"
+              defaultMessage="The runtime {runtimeFieldsCount, plural, one {field} other {fields}} {unsupportedRuntimeFields} {extraCountMsg} are not supported for analysis."
+              values={{
+                runtimeFieldsCount: unsupportedRuntimeFields.length,
+                extraCountMsg:
+                  unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount > 0 ? (
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.create.extraUnsupportedRuntimeFieldsMsg"
+                      defaultMessage="and {count} more"
+                      values={{
+                        count: unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount,
+                      }}
+                    />
+                  ) : (
+                    ''
+                  ),
+                unsupportedRuntimeFields: unsupportedRuntimeFields
+                  .slice(0, maxRuntimeFieldsDisplayCount)
+                  .join(', '),
+              }}
+            />
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}
         includes={includes}
@@ -466,7 +528,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
-      {scatterplotFieldOptions.length > 1 && (
+      {showScatterplotMatrix && (
         <>
           <EuiFormRow
             data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
@@ -477,7 +539,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               'xpack.ml.dataframe.analytics.create.scatterplotMatrixLabelHelpText',
               {
                 defaultMessage:
-                  'Visualizes the relationships between pairs of selected included fields',
+                  'Visualizes the relationships between pairs of selected included fields.',
               }
             )}
             fullWidth
@@ -498,6 +560,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
                   : undefined
               }
               legendType={getScatterplotMatrixLegendType(jobType)}
+              searchQuery={jobConfigQuery}
             />
           </EuiPanel>
           <EuiSpacer />

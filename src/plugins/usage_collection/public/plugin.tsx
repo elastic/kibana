@@ -1,34 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { Reporter, METRIC_TYPE, ApplicationUsageTracker } from '@kbn/analytics';
-import { Subject, merge, Subscription } from 'rxjs';
+import { Reporter, ApplicationUsageTracker } from '@kbn/analytics';
+import type { Subscription } from 'rxjs';
 import React from 'react';
-import { Storage } from '../../kibana_utils/public';
-import { createReporter, trackApplicationUsageChange } from './services';
-import {
+import type {
   PluginInitializerContext,
   Plugin,
   CoreSetup,
   CoreStart,
   HttpSetup,
-} from '../../../core/public';
+} from 'src/core/public';
+import { Storage } from '../../kibana_utils/public';
+import { createReporter, trackApplicationUsageChange } from './services';
 import { ApplicationUsageContext } from './components/track_application_view';
 
 export interface PublicConfigType {
@@ -46,28 +35,11 @@ export interface UsageCollectionSetup {
   components: {
     ApplicationUsageTrackingProvider: React.FC;
   };
-  allowTrackUserAgent: (allow: boolean) => void;
-  applicationUsageTracker: IApplicationUsageTracker;
   reportUiCounter: Reporter['reportUiCounter'];
-  METRIC_TYPE: typeof METRIC_TYPE;
-  __LEGACY: {
-    /**
-     * Legacy handler so we can report the actual app being used inside "kibana#/{appId}".
-     * To be removed when we get rid of the legacy world
-     *
-     * @deprecated
-     */
-    appChanged: (appId: string) => void;
-  };
 }
 
 export interface UsageCollectionStart {
   reportUiCounter: Reporter['reportUiCounter'];
-  METRIC_TYPE: typeof METRIC_TYPE;
-  applicationUsageTracker: Pick<
-    ApplicationUsageTracker,
-    'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
-  >;
 }
 
 export function isUnauthenticated(http: HttpSetup) {
@@ -76,9 +48,7 @@ export function isUnauthenticated(http: HttpSetup) {
 }
 
 export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
-  private readonly legacyAppId$ = new Subject<string>();
   private applicationUsageTracker?: ApplicationUsageTracker;
-  private trackUserAgent: boolean = true;
   private subscriptions: Subscription[] = [];
   private reporter?: Reporter;
   private config: PublicConfigType;
@@ -108,15 +78,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
           </ApplicationUsageContext.Provider>
         ),
       },
-      applicationUsageTracker,
-      allowTrackUserAgent: (allow: boolean) => {
-        this.trackUserAgent = allow;
-      },
       reportUiCounter: this.reporter.reportUiCounter,
-      METRIC_TYPE,
-      __LEGACY: {
-        appChanged: (appId) => this.legacyAppId$.next(appId),
-      },
     };
   }
 
@@ -129,19 +91,15 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
       this.reporter.start();
       this.applicationUsageTracker.start();
       this.subscriptions = trackApplicationUsageChange(
-        merge(application.currentAppId$, this.legacyAppId$),
+        application.currentAppId$,
         this.applicationUsageTracker
       );
     }
 
-    if (this.trackUserAgent) {
-      this.reporter.reportUserAgent('kibana');
-    }
+    this.reporter.reportUserAgent('kibana');
 
     return {
-      applicationUsageTracker: this.getPublicApplicationUsageTracker(),
       reportUiCounter: this.reporter.reportUiCounter,
-      METRIC_TYPE,
     };
   }
 

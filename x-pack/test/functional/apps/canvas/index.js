@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export default function canvasApp({ loadTestFile, getService }) {
@@ -26,6 +27,7 @@ export default function canvasApp({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./custom_elements'));
     loadTestFile(require.resolve('./feature_controls/canvas_security'));
     loadTestFile(require.resolve('./feature_controls/canvas_spaces'));
+    loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./reports'));
   });
 }

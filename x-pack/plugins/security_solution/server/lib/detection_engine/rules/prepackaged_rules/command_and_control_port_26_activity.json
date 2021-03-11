@@ -6,13 +6,14 @@
   "false_positives": [
     "Servers that process email traffic may cause false positives and should be excluded from this rule as this is expected behavior."
   ],
+  "from": "now-9m",
   "index": [
     "filebeat-*",
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "SMTP on Port 26/TCP",
   "query": "event.category:(network or network_traffic) and network.transport:tcp and (destination.port:26 or (event.dataset:zeek.smtp and destination.port:26))",
   "references": [
@@ -55,6 +56,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

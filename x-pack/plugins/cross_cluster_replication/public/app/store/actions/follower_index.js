@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 
 import { routing } from '../../services/routing';
@@ -38,7 +40,7 @@ export const loadFollowerIndices = (isUpdating = false) =>
     label: t.FOLLOWER_INDEX_LOAD,
     scope,
     status: isUpdating ? API_STATUS.UPDATING : API_STATUS.LOADING,
-    handler: async () => await loadFollowerIndicesRequest(),
+    handler: async () => await loadFollowerIndicesRequest(isUpdating),
   });
 
 export const getFollowerIndex = (id) =>

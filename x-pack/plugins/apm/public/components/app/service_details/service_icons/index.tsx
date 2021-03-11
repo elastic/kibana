@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactChild, useState } from 'react';
+import { useTheme } from '../../../../hooks/use_theme';
 import { ContainerType } from '../../../../../common/service_metadata';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -56,12 +58,13 @@ interface PopoverItem {
 export function ServiceIcons({ serviceName }: Props) {
   const {
     urlParams: { start, end },
-    uiFilters,
   } = useUrlParams();
   const [
     selectedIconPopover,
     setSelectedIconPopover,
   ] = useState<Icons | null>();
+
+  const theme = useTheme();
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
@@ -70,12 +73,12 @@ export function ServiceIcons({ serviceName }: Props) {
           endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
           params: {
             path: { serviceName },
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: { start, end },
           },
         });
       }
     },
-    [serviceName, start, end, uiFilters]
+    [serviceName, start, end]
   );
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
@@ -86,12 +89,12 @@ export function ServiceIcons({ serviceName }: Props) {
           endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
           params: {
             path: { serviceName },
-            query: { start, end, uiFilters: JSON.stringify(uiFilters) },
+            query: { start, end },
           },
         });
       }
     },
-    [selectedIconPopover, serviceName, start, end, uiFilters]
+    [selectedIconPopover, serviceName, start, end]
   );
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
@@ -103,7 +106,7 @@ export function ServiceIcons({ serviceName }: Props) {
   const popoverItems: PopoverItem[] = [
     {
       key: 'service',
-      icon: getAgentIcon(icons?.agentName) || 'node',
+      icon: getAgentIcon(icons?.agentName, theme.darkMode) || 'node',
       isVisible: !!icons?.agentName,
       title: i18n.translate('xpack.apm.serviceIcons.service', {
         defaultMessage: 'Service',

@@ -1,19 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { KibanaFeature } from '../../../../../features/common';
-import { RouteDefinitionParams } from '../../index';
-import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
+import type { KibanaFeature } from '../../../../../features/common';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import {
-  ElasticsearchRole,
-  getPutPayloadSchema,
-  transformPutPayloadToElasticsearchRole,
-} from './model';
+import type { RouteDefinitionParams } from '../../index';
+import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import type { ElasticsearchRole } from './model';
+import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
 const roleGrantsSubFeaturePrivileges = (
   features: KibanaFeature[],

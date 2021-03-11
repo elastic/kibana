@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+
+import { CaseType } from '../../../../cases/common/api';
 import { useDeleteCases, UseDeleteCase } from './use_delete_cases';
 import * as api from './api';
 
@@ -12,7 +15,11 @@ jest.mock('./api');
 
 describe('useDeleteCases', () => {
   const abortCtrl = new AbortController();
-  const deleteObj = [{ id: '1' }, { id: '2' }, { id: '3' }];
+  const deleteObj = [
+    { id: '1', type: CaseType.individual },
+    { id: '2', type: CaseType.individual },
+    { id: '3', type: CaseType.individual },
+  ];
   const deleteArr = ['1', '2', '3'];
   it('init', async () => {
     await act(async () => {

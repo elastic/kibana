@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { Alert } from '../../../../../alerts/common';
+import { Alert } from '../../../../../alerting/common';
 import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
@@ -46,6 +47,7 @@ export const createRules = async ({
   threat,
   threatFilters,
   threatIndex,
+  threatIndicatorPath,
   threatLanguage,
   concurrentSearches,
   itemsPerSearch,
@@ -101,6 +103,7 @@ export const createRules = async ({
          */
         threatFilters: threatFilters as PartialFilter[] | undefined,
         threatIndex,
+        threatIndicatorPath,
         threatQuery,
         concurrentSearches,
         itemsPerSearch,
