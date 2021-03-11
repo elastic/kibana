@@ -206,7 +206,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
         await ctx.core.elasticsearch.client.asCurrentUser.transform
           .putTransform({
-            // @ts-expect-error max_page_search_size is required in TransformPivot
+            // @ts-expect-error @elastic/elasticsearch max_page_search_size is required in TransformPivot
             body: req.body,
             transform_id: transformId,
           })

@@ -319,10 +319,9 @@ export class TaskStore {
 
       return {
         docs: tasks
-          // There's an incompatability between the `_id` field on `estypes.Hit<SavedObjectsRawDocSource>` and `SavedObjectsRawDoc`
-          // @ts-expect-error
+          // @ts-expect-error @elastic/elasticsearch `Hid._id` expected to be `string`
           .filter((doc) => this.serializer.isRawSavedObject(doc))
-          // @ts-expect-error
+          // @ts-expect-error @elastic/elasticsearch `Hid._id` expected to be `string`
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map(savedObjectToConcreteTaskInstance),

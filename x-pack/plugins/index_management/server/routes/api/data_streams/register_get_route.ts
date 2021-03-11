@@ -143,7 +143,7 @@ export function registerGetAllRoute({
         dataStreams = enhanceDataStreams({
           dataStreams,
           dataStreamsStats,
-          // @ts-expect-error incompatible interface
+          // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
           dataStreamsPrivileges,
         });
 
@@ -196,7 +196,7 @@ export function registerGetOneRoute({
           const enhancedDataStreams = enhanceDataStreams({
             dataStreams,
             dataStreamsStats,
-            // @ts-expect-error incompatible interface
+            // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
             dataStreamsPrivileges,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);

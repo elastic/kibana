@@ -155,8 +155,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       authentication: AuthenticationInfo;
     };
     try {
-      // @ts-expect-error `GetUserAccessTokenResponse` doesn't define `refresh_token`, `authentication` and
-      // `kerberos_authentication_response_token`.
+      // @ts-expect-error authentication.email can be optional
       tokens = (
         await this.options.client.asInternalUser.security.getToken({
           body: {

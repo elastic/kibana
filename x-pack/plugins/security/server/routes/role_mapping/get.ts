@@ -36,7 +36,7 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
           return {
             name,
             ...mapping,
-            // @ts-expect-error `XPackRoleMapping` type doesn't define `role_templates` property.
+            // @ts-expect-error @elastic/elasticsearch `XPackRoleMapping` type doesn't define `role_templates` property.
             role_templates: (mapping.role_templates || []).map((entry: RoleTemplate) => {
               return {
                 ...entry,

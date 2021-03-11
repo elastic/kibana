@@ -179,7 +179,7 @@ export async function getTile({
             [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
           },
           geometry: esBboxToGeoJsonPolygon(
-            // @ts-expect-error no way to declare aggregations for search response
+            // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
             bboxResponse.rawResponse.aggregations.data_bounds.bounds,
             tileToESBbox(x, y, z)
           ),

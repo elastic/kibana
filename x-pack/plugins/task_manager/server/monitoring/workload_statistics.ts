@@ -137,11 +137,9 @@ export function createWorkloadAggregator(
                   field: 'task.runAt',
                   ranges: [
                     {
-                      // The `AggregationRange` type only supports `double` for `from` and `to` but it can be a string too
-                      // for time based ranges
-                      // @ts-expect-error
+                      // @ts-expect-error @elastic/elasticsearch The `AggregationRange` type only supports `double` for `from` and `to` but it can be a string too for time based ranges
                       from: `now`,
-                      // @ts-expect-error
+                      // @ts-expect-error @elastic/elasticsearch The `AggregationRange` type only supports `double` for `from` and `to` but it can be a string too for time based ranges
                       to: `now+${asInterval(scheduleDensityBuckets * pollInterval)}`,
                     },
                   ],
