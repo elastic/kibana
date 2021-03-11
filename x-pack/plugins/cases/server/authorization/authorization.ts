@@ -101,7 +101,7 @@ export class Authorization {
       );
 
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, username, privileges } = checkPrivileges({
+      const { hasAllRequested, username, privileges } = await checkPrivileges({
         kibana: requiredPrivileges,
       });
 
@@ -114,6 +114,10 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
+      }
+
+      if (hasAllRequested) {
+        // TODO: log success
       }
     }
   }
