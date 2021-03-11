@@ -66,6 +66,7 @@ export interface SaveModalState {
 
 const generateId = htmlIdGenerator();
 
+/** @deprecated */
 export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   public readonly state = {
