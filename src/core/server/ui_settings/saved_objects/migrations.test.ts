@@ -45,6 +45,31 @@ describe('ui_settings 7.9.0 migrations', () => {
   });
 });
 
+describe('ui_settings 7.12.0 migrations', () => {
+  const migration = migrations['7.12.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+  test('properly migrates timepicker:quickRanges', () => {
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'timepicker:quickRanges': '[{"from":"123","to":"321","display":"abc","section":2}]',
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    const migrated = migration(doc);
+    expect(migrated.attributes['timepicker:quickRanges'].indexOf('section')).toEqual(-1);
+  });
+});
+
 describe('ui_settings 7.13.0 migrations', () => {
   const migration = migrations['7.13.0'];
 
