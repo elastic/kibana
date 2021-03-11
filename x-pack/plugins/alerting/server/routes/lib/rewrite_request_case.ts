@@ -45,13 +45,6 @@ type AsApiContract<
           T[K];
     };
 
-/**
-     * // If it's a partial type, unwrap the partial, convert it and make it partial again
-        T[K] extends Partial<infer NonPartialK>
-        ? AsApiContract<NonPartialK>
-        : 
-     */
-
 export type RewriteRequestCase<T> = (requested: AsApiContract<T>) => T;
 export type RewriteResponseCase<T> = (
   responded: T
