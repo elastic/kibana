@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-export { HotPhase } from './hot_phase';
+import { ROLE_MAPPING_PATH } from '../../routes';
+import { generateEncodedPath } from '../../utils/encode_path_params';
 
-export { WarmPhase } from './warm_phase';
-
-export { ColdPhase } from './cold_phase';
-
-export { FrozenPhase } from './frozen_phase';
-
-export { DeletePhase } from './delete_phase';
-
-export { Phase } from './phase';
+export const generateRoleMappingPath = (roleId: string) =>
+  generateEncodedPath(ROLE_MAPPING_PATH, { roleId });
