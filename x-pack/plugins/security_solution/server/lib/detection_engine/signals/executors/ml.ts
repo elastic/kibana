@@ -22,7 +22,7 @@ import { filterEventsAgainstList } from '../filters/filter_events_against_list';
 import { findMlSignals } from '../find_ml_signals';
 import { BuildRuleMessage } from '../rule_messages';
 import { RuleStatusService } from '../rule_status_service';
-import { RuleAlertAttributes } from '../types';
+import { MachineLearningRuleAttributes } from '../types';
 import { createErrorsFromShard, createSearchAfterReturnType, mergeReturns } from '../utils';
 
 export const mlExecutor = async ({
@@ -36,7 +36,7 @@ export const mlExecutor = async ({
   refresh,
   buildRuleMessage,
 }: {
-  rule: SavedObject<RuleAlertAttributes>;
+  rule: SavedObject<MachineLearningRuleAttributes>;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[] | undefined;
@@ -107,7 +107,6 @@ export const mlExecutor = async ({
   if (anomalyCount) {
     logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
   }
-
   const {
     success,
     errors,

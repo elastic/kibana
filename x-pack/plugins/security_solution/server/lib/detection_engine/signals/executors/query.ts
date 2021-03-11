@@ -18,7 +18,7 @@ import { RefreshTypes } from '../../types';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { RuleAlertAttributes, RuleRangeTuple } from '../types';
+import { QueryRuleAttributes, RuleRangeTuple } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 
@@ -35,7 +35,7 @@ export const queryExecutor = async ({
   eventsTelemetry,
   buildRuleMessage,
 }: {
-  rule: SavedObject<RuleAlertAttributes>;
+  rule: SavedObject<QueryRuleAttributes>;
   tuples: RuleRangeTuple[];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[] | undefined;

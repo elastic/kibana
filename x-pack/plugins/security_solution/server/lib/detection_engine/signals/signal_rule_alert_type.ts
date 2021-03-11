@@ -6,11 +6,12 @@
  */
 /* eslint-disable complexity */
 
-import { Logger } from 'src/core/server';
+import { Logger, SavedObject } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
+import { validateNonExact } from '../../../../common/validate';
 import { toError, toPromise } from '../../../../common/fp_utils';
 
 import {
@@ -28,7 +29,15 @@ import {
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
+import {
+  SignalRuleAlertTypeDefinition,
+  RuleAlertAttributes,
+  MachineLearningRuleAttributes,
+  ThresholdRuleAttributes,
+  ThreatRuleAttributes,
+  QueryRuleAttributes,
+  EqlRuleAttributes,
+} from './types';
 import {
   getListsClient,
   getExceptions,
@@ -55,6 +64,13 @@ import { queryExecutor } from './executors/query';
 import { threatMatchExecutor } from './executors/threat_match';
 import { thresholdExecutor } from './executors/threshold';
 import { mlExecutor } from './executors/ml';
+import {
+  eqlRuleParams,
+  machineLearningRuleParams,
+  queryRuleParams,
+  threatRuleParams,
+  thresholdRuleParams,
+} from '../schemas/rule_schemas';
 
 export const signalRulesAlertType = ({
   logger,
@@ -209,8 +225,9 @@ export const signalRulesAlertType = ({
         });
 
         if (isMlRule(type)) {
+          const mlRuleSO = asMlSO(savedObject);
           result = await mlExecutor({
-            rule: savedObject,
+            rule: mlRuleSO,
             ml,
             listClient,
             exceptionItems,
@@ -221,8 +238,9 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
         } else if (isThresholdRule(type)) {
+          const thresholdRuleSO = asThresholdSO(savedObject);
           result = await thresholdExecutor({
-            rule: savedObject,
+            rule: thresholdRuleSO,
             tuples,
             exceptionItems,
             ruleStatusService,
@@ -234,8 +252,9 @@ export const signalRulesAlertType = ({
             startedAt,
           });
         } else if (isThreatMatchRule(type)) {
+          const threatRuleSO = asThreatSO(savedObject);
           result = await threatMatchExecutor({
-            rule: savedObject,
+            rule: threatRuleSO,
             tuples,
             listClient,
             exceptionItems,
@@ -248,8 +267,9 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
         } else if (isQueryRule(type)) {
+          const queryRuleSO = asQuerySO(savedObject);
           result = await queryExecutor({
-            rule: savedObject,
+            rule: queryRuleSO,
             tuples,
             listClient,
             exceptionItems,
@@ -262,8 +282,9 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
         } else if (isEqlRule(type)) {
+          const eqlRuleSO = asEqlSO(savedObject);
           result = await eqlExecutor({
-            rule: savedObject,
+            rule: eqlRuleSO,
             exceptionItems,
             ruleStatusService,
             services,
@@ -366,4 +387,54 @@ export const signalRulesAlertType = ({
       }
     },
   };
+};
+
+export const asMlSO = (
+  ruleSO: SavedObject<RuleAlertAttributes>
+): SavedObject<MachineLearningRuleAttributes> => {
+  const [, errors] = validateNonExact(ruleSO.attributes.params, machineLearningRuleParams);
+  if (errors != null) {
+    throw new Error(`ML rule tried to execute with invalid params: ${errors}`);
+  }
+  return ruleSO as SavedObject<MachineLearningRuleAttributes>;
+};
+
+export const asThresholdSO = (
+  ruleSO: SavedObject<RuleAlertAttributes>
+): SavedObject<ThresholdRuleAttributes> => {
+  const [, errors] = validateNonExact(ruleSO.attributes.params, thresholdRuleParams);
+  if (errors != null) {
+    throw new Error(`Threshold rule tried to execute with invalid params: ${errors}`);
+  }
+  return ruleSO as SavedObject<ThresholdRuleAttributes>;
+};
+
+export const asThreatSO = (
+  ruleSO: SavedObject<RuleAlertAttributes>
+): SavedObject<ThreatRuleAttributes> => {
+  const [, errors] = validateNonExact(ruleSO.attributes.params, threatRuleParams);
+  if (errors != null) {
+    throw new Error(`Threat match rule tried to execute with invalid params: ${errors}`);
+  }
+  return ruleSO as SavedObject<ThreatRuleAttributes>;
+};
+
+export const asQuerySO = (
+  ruleSO: SavedObject<RuleAlertAttributes>
+): SavedObject<QueryRuleAttributes> => {
+  const [, errors] = validateNonExact(ruleSO.attributes.params, queryRuleParams);
+  if (errors != null) {
+    throw new Error(`Query rule tried to execute with invalid params: ${errors}`);
+  }
+  return ruleSO as SavedObject<QueryRuleAttributes>;
+};
+
+export const asEqlSO = (
+  ruleSO: SavedObject<RuleAlertAttributes>
+): SavedObject<EqlRuleAttributes> => {
+  const [, errors] = validateNonExact(ruleSO.attributes.params, eqlRuleParams);
+  if (errors != null) {
+    throw new Error(`Eql rule tried to execute with invalid params: ${errors}`);
+  }
+  return ruleSO as SavedObject<EqlRuleAttributes>;
 };

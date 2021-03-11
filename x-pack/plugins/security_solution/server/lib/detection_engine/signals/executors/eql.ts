@@ -25,8 +25,8 @@ import { getInputIndex } from '../get_input_output_index';
 import { RuleStatusService } from '../rule_status_service';
 import { bulkInsertSignals, filterDuplicateSignals } from '../single_bulk_create';
 import {
+  EqlRuleAttributes,
   EqlSignalSearchResponse,
-  RuleAlertAttributes,
   SearchAfterAndBulkCreateReturnType,
   WrappedSignalHit,
 } from '../types';
@@ -42,7 +42,7 @@ export const eqlExecutor = async ({
   logger,
   refresh,
 }: {
-  rule: SavedObject<RuleAlertAttributes>;
+  rule: SavedObject<EqlRuleAttributes>;
   exceptionItems: ExceptionListItemSchema[] | undefined;
   ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;

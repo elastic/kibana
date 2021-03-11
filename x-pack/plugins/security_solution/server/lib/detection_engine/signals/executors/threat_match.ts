@@ -16,7 +16,7 @@ import { ListClient } from '../../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { RefreshTypes } from '../../types';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleAlertAttributes, RuleRangeTuple } from '../types';
+import { RuleRangeTuple, ThreatRuleAttributes } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
@@ -34,7 +34,7 @@ export const threatMatchExecutor = async ({
   eventsTelemetry,
   buildRuleMessage,
 }: {
-  rule: SavedObject<RuleAlertAttributes>;
+  rule: SavedObject<ThreatRuleAttributes>;
   tuples: RuleRangeTuple[];
   listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[] | undefined;

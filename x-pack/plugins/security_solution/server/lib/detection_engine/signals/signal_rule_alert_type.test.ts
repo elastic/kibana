@@ -646,6 +646,7 @@ describe('rules_notification_alert_type', () => {
     it('when bulk indexing failed', async () => {
       const result: SearchAfterAndBulkCreateReturnType = {
         success: false,
+        warning: false,
         searchAfterTimes: [],
         bulkCreateTimes: [],
         lastLookBackDate: null,

@@ -28,7 +28,11 @@ import {
   getThresholdBucketFilters,
   getThresholdSignalHistory,
 } from '../threshold';
-import { RuleAlertAttributes, RuleRangeTuple, SearchAfterAndBulkCreateReturnType } from '../types';
+import {
+  RuleRangeTuple,
+  SearchAfterAndBulkCreateReturnType,
+  ThresholdRuleAttributes,
+} from '../types';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
@@ -47,7 +51,7 @@ export const thresholdExecutor = async ({
   buildRuleMessage,
   startedAt,
 }: {
-  rule: SavedObject<RuleAlertAttributes>;
+  rule: SavedObject<ThresholdRuleAttributes>;
   tuples: RuleRangeTuple[];
   exceptionItems: ExceptionListItemSchema[] | undefined;
   ruleStatusService: RuleStatusService;
