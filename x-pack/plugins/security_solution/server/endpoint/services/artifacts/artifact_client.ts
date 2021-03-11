@@ -20,10 +20,12 @@ import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server'
 const inflateAsync = promisify(_inflate);
 
 export interface EndpointArtifactClientInterface {
-  getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema>>;
+  getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema> | undefined>;
+
   createArtifact(
     artifact: InternalArtifactCompleteSchema
   ): Promise<SavedObject<InternalArtifactCompleteSchema>>;
+
   deleteArtifact(id: string): Promise<void>;
 }
 
@@ -84,6 +86,10 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
       kuery: `decodedSha256: "${decodedSha256}" AND identifier: "${identifier}"`,
       perPage: 1,
     });
+
+    if (artifacts.items.length === 0) {
+      return;
+    }
 
     // FIXME:PT change method signature so that it returns back only the `InternalArtifactCompleteSchema`
     return ({
