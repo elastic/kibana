@@ -119,13 +119,13 @@ describe('bundle routes', () => {
     await server.start();
 
     const response = await supertest(innerServer.listener)
-      .get(`/${buildNum}/bundles/plugin/foo/gzip-chunk.js`)
+      .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
       .expect(200);
 
     expect(response.get('content-encoding')).toEqual('gzip');
     expect(response.get('content-type')).toEqual('application/javascript; charset=utf-8');
 
-    const actualFile = await readFile(resolve(fooPluginFixture, 'gzip-chunk.js'));
+    const actualFile = await readFile(resolve(fooPluginFixture, 'gzip_chunk.js'));
     expect(actualFile.toString('utf8')).toEqual(response.text);
   });
 
@@ -143,7 +143,7 @@ describe('bundle routes', () => {
       await server.start();
 
       const response = await supertest(innerServer.listener)
-        .get(`/${buildNum}/bundles/plugin/foo/gzip-chunk.js`)
+        .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
       expect(response.get('cache-control')).toEqual('max-age=31536000');
@@ -161,7 +161,7 @@ describe('bundle routes', () => {
       await server.start();
 
       const response = await supertest(innerServer.listener)
-        .get(`/${buildNum}/bundles/plugin/foo/gzip-chunk.js`)
+        .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
       expect(response.get('cache-control')).toEqual('must-revalidate');
