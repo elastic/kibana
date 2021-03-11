@@ -7,7 +7,7 @@
 
 import { CoreStart } from 'kibana/public';
 
-type GlobalServices = Pick<CoreStart, 'http'>; // | 'uiSettings' & Pick<StartPlugins, 'data'>; not sure if we need this
+type GlobalServices = Pick<CoreStart, 'http'>;
 
 export class KibanaServices {
   private static kibanaVersion?: string;

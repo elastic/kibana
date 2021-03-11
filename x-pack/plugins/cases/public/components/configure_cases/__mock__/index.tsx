@@ -14,7 +14,6 @@ import { connectorsMock, actionTypesMock } from '../../../containers/configure/m
 export { mappings } from '../../../containers/configure/mock';
 export const connectors: ActionConnector[] = connectorsMock;
 
-// x - pack / plugins / triggers_actions_ui;
 export const searchURL =
   '?timerange=(global:(linkTo:!(),timerange:(from:1585487656371,fromStr:now-24h,kind:relative,to:1585574056371,toStr:now)),timeline:(linkTo:!(),timerange:(from:1585227005527,kind:absolute,to:1585313405527)))';
 
