@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -46,6 +47,11 @@ export function AgentConfigurations() {
           })}
         </h1>
       </EuiTitle>
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.agentConfig.descriptionText', {
+          defaultMessage: `This allows you to fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
+        })}
+      </EuiText>
       <EuiSpacer size="l" />
       <EuiPanel>
         <EuiFlexGroup alignItems="center">
