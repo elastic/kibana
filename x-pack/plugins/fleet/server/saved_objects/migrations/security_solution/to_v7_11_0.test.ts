@@ -7,7 +7,7 @@
 
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
 
-import { PackagePolicy } from '../../../common';
+import type { PackagePolicy } from '../../../../common';
 
 import { migratePackagePolicyToV7110 } from './to_v7_11_0';
 

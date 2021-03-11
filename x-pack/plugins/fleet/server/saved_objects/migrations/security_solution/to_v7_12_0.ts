@@ -8,7 +8,7 @@
 import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { cloneDeep } from 'lodash';
 
-import type { PackagePolicy } from '../../../common';
+import type { PackagePolicy } from '../../../../common';
 
 export const migratePackagePolicyToV7120: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc
