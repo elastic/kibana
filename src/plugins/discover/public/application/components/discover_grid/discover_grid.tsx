@@ -329,6 +329,7 @@ export const DiscoverGrid = ({
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
             onClose={() => setExpandedDoc(undefined)}
+            setExpandedDoc={setExpandedDoc}
             services={services}
           />
         )}

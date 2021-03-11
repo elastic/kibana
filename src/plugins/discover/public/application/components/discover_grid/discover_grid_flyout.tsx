@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiPortal,
+  EuiPagination,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
@@ -29,19 +30,31 @@ import { getContextUrl } from '../../helpers/get_context_url';
 interface Props {
   columns: string[];
   hit: ElasticSearchHit;
+  hits?: ElasticSearchHit[];
   indexPattern: IndexPattern;
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
   services: DiscoverServices;
+  setExpandedDoc: (doc: ElasticSearchHit) => void;
 }
 
+function getDocFingerprintId(doc: ElasticSearchHit) {
+  return [doc._index, doc._id].join('|');
+}
+
+function getIndexByDocId(hits: ElasticSearchHit[], id: string) {
+  return hits.findIndex((h) => {
+    return getDocFingerprintId(h) === id;
+  });
+}
 /**
  * Flyout displaying an expanded Elasticsearch document
  */
 export function DiscoverGridFlyout({
   hit,
+  hits,
   indexPattern,
   columns,
   onFilter,
@@ -49,23 +62,57 @@ export function DiscoverGridFlyout({
   onRemoveColumn,
   onAddColumn,
   services,
+  setExpandedDoc,
 }: Props) {
+  const pageCount = useMemo(() => hits && hits.length, [hits]);
+  const activePage = useMemo(() => {
+    const id = getDocFingerprintId(hit);
+    if (!hits) {
+      return -1;
+    }
+
+    return getIndexByDocId(hits, id);
+  }, [hits, hit]);
+
+  const setPage = useCallback(
+    (pageIdx) => {
+      if (hits && hits[pageIdx]) {
+        setExpandedDoc(hits[pageIdx]);
+      }
+    },
+    [hits, setExpandedDoc]
+  );
+
   return (
     <EuiPortal>
       <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle
-            size="s"
-            className="dscTable__flyoutHeader"
-            data-test-subj="docTableRowDetailsTitle"
-          >
-            <h2>
-              {i18n.translate('discover.grid.tableRow.detailHeading', {
-                defaultMessage: 'Expanded document',
-              })}
-            </h2>
-          </EuiTitle>
-
+          <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={true}>
+              <EuiTitle
+                size="s"
+                className="dscTable__flyoutHeader"
+                data-test-subj="docTableRowDetailsTitle"
+              >
+                <h2>
+                  {i18n.translate('discover.grid.tableRow.detailHeading', {
+                    defaultMessage: 'Expanded document',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {activePage !== -1 && (
+              <EuiFlexItem grow={false}>
+                <EuiPagination
+                  aria-label="Custom pagination example"
+                  pageCount={pageCount}
+                  activePage={activePage}
+                  onPageClick={setPage}
+                  compressed
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
             <EuiFlexItem grow={false}>
