@@ -20,8 +20,6 @@ import {
 } from '../../../utils/elasticsearch_runtime_types';
 import { createSortClause, createTimeRangeFilterClauses } from './common';
 
-const CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
-
 export const createGetLogEntriesQuery = (
   logEntriesIndex: string,
   startTimestamp: number,
@@ -36,7 +34,6 @@ export const createGetLogEntriesQuery = (
 ): RequestParams.AsyncSearchSubmit<Record<string, any>> => {
   const sortDirection = getSortDirection(cursor);
   const highlightQuery = createHighlightQuery(highlightTerm, fields);
-  const fieldsWithContext = createFieldsWithContext(fields);
 
   return {
     index: logEntriesIndex,
@@ -54,7 +51,7 @@ export const createGetLogEntriesQuery = (
           ],
         },
       },
-      fields: fieldsWithContext,
+      fields,
       _source: false,
       ...createSortClause(sortDirection, timestampField, tiebreakerField),
       ...createSearchAfterClause(cursor),
@@ -119,9 +116,6 @@ const createHighlightQuery = (
     };
   }
 };
-
-const createFieldsWithContext = (fields: string[]): string[] =>
-  Array.from(new Set([...fields, ...CONTEXT_FIELDS]));
 
 export const logEntryHitRT = rt.intersection([
   commonHitFieldsRT,

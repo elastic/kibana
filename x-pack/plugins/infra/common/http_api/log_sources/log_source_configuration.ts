@@ -40,7 +40,7 @@ const logSourceMessageColumnConfigurationRT = rt.strict({
   messageColumn: logSourceCommonColumnConfigurationRT,
 });
 
-const logSourceFieldColumnConfigurationRT = rt.strict({
+export const logSourceFieldColumnConfigurationRT = rt.strict({
   fieldColumn: rt.intersection([
     logSourceCommonColumnConfigurationRT,
     rt.strict({
