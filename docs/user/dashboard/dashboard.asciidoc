@@ -85,8 +85,8 @@ Begin with an empty dashboard, or open an existing dashboard.
 [[add-panels]]
 === Add panels
 
-To add panels to the dashboard, use one of the editors to create the panel, 
-add a panel from the *Visualize Library*, a table of live streaming logs, or the results from a machine learning anomaly detection job.
+To add panels to the dashboard, you can use one of the editors to create a new panel, 
+add an existing panel from the *Visualize Library*, add a table of live streaming logs, or the add the results from a machine learning anomaly detection job.
 
 [float]
 [[create-panels-with-lens]]
@@ -102,17 +102,19 @@ To create panels, use one of the editors, then add the panel to the dashboard.
 
 . To add the panel to the dashboard, choose one of the following options:
 
+* To add the panel to the dashboard without saving to the *Visualize Library*, click *Save and return*. 
++
+To add a title to the panel, click *No Title*, enter the *Panel title*, then click *Save*.
+
 * To save the panel to the *Visualize Library*, click *Save to Library*, configure the options, then click *Save and return*.
 +
-When panels are saved in the *Visualize Library*, the panel displays image:dashboard/images/visualize-library-icon.png[Visualize Library icon] in the header.
-
-* To add the panel to the dashboard without saving to the *Visualize Library*, click *Save and return*.
+When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
 
 [float]
 [[add-panels-from-the-library]]
 ==== Add panels from the library
 
-Add panels that you've already created from the *Visualize Library*, 
+Add panels that you've already created from the *Visualize Library*. 
 
 . On the dashboard, click *Add from library*.
 
@@ -122,7 +124,13 @@ Add panels that you've already created from the *Visualize Library*,
 +
 When a panel contains a stored query, both queries are applied.
 
-. To unlink the panel from the *Visualize Library*, open the panel menu, then click *More > Unlink from library*.
+. To make changes to the panel, open the panel menu, then select the following options:
+
+* *Edit visualization* &mdash; Opens an editor so that you can reconfigure the panel. 
++
+To make changes to the panel without affecting the original version, open the panel menu, then click *More > Unlink from library*.
+
+* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title* and specify whether you want to display the panel title.
 
 [float]
 [[add-a-table-of-live-streaming-logs]]
@@ -150,7 +158,7 @@ Add a panel that displays the results from machine learning anomaly detection jo
 [[resizing-containers]]
 === Arrange the panels
 
-To compare the data in the panels, arrange the panels on the dashboard, or remove the panel from the dashboard.
+To compare the data in the panels, reorganize or remove the panels on the dashboard.
 
 . From the toolbar, click *Edit*, then use the following options:
 
@@ -160,7 +168,7 @@ To compare the data in the panels, arrange the panels on the dashboard, or remov
 
 * To maximize the panel to fullscreen, open the panel menu, then click *More > Maximize panel*.
 
-* To delete, open the panel menu, then select *Delete from dashboard*.
+* To delete, open the panel menu, then click *More > Delete from dashboard*.
 
 . To save your changes, click *Save* in the toolbar.
 
@@ -178,7 +186,7 @@ Apply a set of design options to the entire dashboard.
 
 * *Show panel titles* &mdash; Specifies the appearance of titles in the header of each panel.
 
-* *Sync color pallettes across panels* &mdash; Specifies the color pallette that is applied to all panels.
+* *Sync color pallettes across panels* &mdash; Specifies whether the color pallette is applied to all panels.
 
 [float]
 [[search-or-filter-your-data]]
@@ -227,18 +235,20 @@ image:images/time_range_per_panel.gif[Time range per dashboard panel]
 [[additional-filters-with-and]]
 ==== Additional filters with AND
 
-Add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, use a basic editor or an advanced JSON editor for the {es} {ref}/query-dsl.html[query DSL]. 
-When you use more than one index pattern on a dashboard, the filter editor allows you to filter only one dashboard.
+Add filters to a dashboard, or pin filters to multiple places in {kib}. To add filters, you can use the *Edit Filter* options, or the advanced JSON editor for the {es} {ref}/query-dsl.html[Query DSL]. 
+When there is one or more index patterns on the dashboard, you can select the index pattern that contains the fields you want to create the filter.
 
-For example, to filter the dashboard to display only ios data:
+For example, to filter the dashboard to display only ios data from *kibana_sample_data_logs*:
 
 . Click *Add filter*.
+
+. From the *Index Pattern* dropdown, select *kibana_sample_data_logs*.
 
 . Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
 
 . *Save* the filter.
-
-. To remove the filter, click *x*.
++
+To remove the filter, click *x*.
 
 [float]
 [[add-dynamic-filters]]
@@ -249,8 +259,8 @@ When you see data in a panel that you want to use as a filter, you can dynamical
 . Click the data in the panel. 
 
 . Select filters you want to apply to all of the dashboard panels, then click *Apply*.
-
-. To remove the filters, click *x*.
++
+To remove the filters, click *x*.
 
 [float]
 [[clone-panels]]
@@ -258,7 +268,7 @@ When you see data in a panel that you want to use as a filter, you can dynamical
 
 To duplicate a panel and the configured functionality, clone the panel. Cloned panels continue to replicate all of the functionality from the original panel, 
 including renaming, editing, and cloning. When you clone a panel, the clone appears beside the original panel, and moves other panels to provide a space on the 
-dashboard.
+dashboard. 
 
 . From the toolbar, click *Edit*. 
 
@@ -267,7 +277,7 @@ dashboard.
 [role="screenshot"]
 image:images/clone_panel.gif[clone panel]
 +
-To access the cloned panel, open the main menu, then click *Visualize Library*.
+When cloned panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
 
 [float]
 [[copy-to-dashboard]]
@@ -314,7 +324,7 @@ image::images/explore_data_in_chart.png[Explore underlying data from chart]
 
 [float]
 [[download-csv]]
-=== Download panel data as CSV
+=== Download the panel data
 
 Download panel data in a CSV file. You can download most panels in a CSV file, but there is a shortcut available
 for *Lens* panels.
