@@ -10,8 +10,8 @@ import { kea, MakeLogicType } from 'kea';
 import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
-import { AttributeName } from '../../../shared/role_mapping/attribute_selector';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
+import { AttributeName } from '../../../shared/types';
 import { ROLE_MAPPINGS_PATH } from '../../routes';
 import { RoleGroup, WSRoleMapping, Role } from '../../types';
 

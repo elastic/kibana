@@ -21,6 +21,9 @@ const i18nTextsNodeRoleToDataTier: Record<DataTierRole, string> = {
   data_cold: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierColdLabel', {
     defaultMessage: 'cold',
   }),
+  data_frozen: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.dataTierFrozenLabel', {
+    defaultMessage: 'frozen',
+  }),
 };
 
 const i18nTexts = {
@@ -48,6 +51,21 @@ const i18nTexts = {
             'This policy will move data in the cold phase to {tier} tier nodes instead.',
           values: { tier: i18nTextsNodeRoleToDataTier[nodeRole] },
         }),
+    },
+    frozen: {
+      title: i18n.translate(
+        'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.frozen.title',
+        { defaultMessage: 'No nodes assigned to the frozen tier' }
+      ),
+      body: (nodeRole: DataTierRole) =>
+        i18n.translate(
+          'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultAllocationNotice.frozen',
+          {
+            defaultMessage:
+              'This policy will move data in the frozen phase to {tier} tier nodes instead.',
+            values: { tier: i18nTextsNodeRoleToDataTier[nodeRole] },
+          }
+        ),
     },
   },
   warning: {

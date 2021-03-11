@@ -45,6 +45,7 @@ describe('<EditPolicy /> timeline', () => {
     const { actions } = testBed;
     expect(actions.hot.forceMergeFieldExists()).toBeTruthy();
   });
+
   test('hides forcemerge when rollover is disabled', async () => {
     const { actions } = testBed;
     await actions.hot.toggleDefaultRollover(false);
@@ -56,22 +57,26 @@ describe('<EditPolicy /> timeline', () => {
     const { actions } = testBed;
     expect(actions.hot.shrinkExists()).toBeTruthy();
   });
+
   test('hides shrink input when rollover is disabled', async () => {
     const { actions } = testBed;
     await actions.hot.toggleDefaultRollover(false);
     await actions.hot.toggleRollover(false);
     expect(actions.hot.shrinkExists()).toBeFalsy();
   });
+
   test('shows readonly input when rollover enabled', async () => {
     const { actions } = testBed;
     expect(actions.hot.readonlyExists()).toBeTruthy();
   });
+
   test('hides readonly input when rollover is disabled', async () => {
     const { actions } = testBed;
     await actions.hot.toggleDefaultRollover(false);
     await actions.hot.toggleRollover(false);
     expect(actions.hot.readonlyExists()).toBeFalsy();
   });
+
   test('hides and disables searchable snapshot field', async () => {
     const { actions } = testBed;
     await actions.hot.toggleDefaultRollover(false);
@@ -86,12 +91,15 @@ describe('<EditPolicy /> timeline', () => {
 
     await actions.warm.enable(true);
     await actions.cold.enable(true);
+    await actions.frozen.enable(true);
     await actions.delete.enablePhase();
 
     expect(actions.warm.hasRolloverTipOnMinAge()).toBeTruthy();
     expect(actions.cold.hasRolloverTipOnMinAge()).toBeTruthy();
+    expect(actions.frozen.hasRolloverTipOnMinAge()).toBeTruthy();
     expect(actions.delete.hasRolloverTipOnMinAge()).toBeTruthy();
   });
+
   test('hiding rollover tip on minimum age', async () => {
     const { actions } = testBed;
     await actions.hot.toggleDefaultRollover(false);
@@ -99,10 +107,12 @@ describe('<EditPolicy /> timeline', () => {
 
     await actions.warm.enable(true);
     await actions.cold.enable(true);
+    await actions.frozen.enable(true);
     await actions.delete.enablePhase();
 
     expect(actions.warm.hasRolloverTipOnMinAge()).toBeFalsy();
     expect(actions.cold.hasRolloverTipOnMinAge()).toBeFalsy();
+    expect(actions.frozen.hasRolloverTipOnMinAge()).toBeFalsy();
     expect(actions.delete.hasRolloverTipOnMinAge()).toBeFalsy();
   });
 });
