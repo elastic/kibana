@@ -291,13 +291,17 @@ export async function changeIndexPattern({
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
 }) {
-  try {
-    const indexPatterns = await loadIndexPatterns({
-      indexPatternsService,
-      cache: state.indexPatterns,
-      patterns: [id],
-    });
+  const indexPatterns = await loadIndexPatterns({
+    indexPatternsService,
+    cache: state.indexPatterns,
+    patterns: [id],
+  });
 
+  if (indexPatterns[id] == null) {
+    return onError(Error('Missing indexpatterns'));
+  }
+
+  try {
     setState((s) => ({
       ...s,
       layers: isSingleEmptyLayer(state.layers)
@@ -334,13 +338,16 @@ export async function changeLayerIndexPattern({
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
 }) {
-  try {
-    const indexPatterns = await loadIndexPatterns({
-      indexPatternsService,
-      cache: state.indexPatterns,
-      patterns: [indexPatternId],
-    });
+  const indexPatterns = await loadIndexPatterns({
+    indexPatternsService,
+    cache: state.indexPatterns,
+    patterns: [indexPatternId],
+  });
+  if (indexPatterns[indexPatternId] == null) {
+    return onError(Error('Missing indexpatterns'));
+  }
 
+  try {
     setState((s) => ({
       ...s,
       layers: {

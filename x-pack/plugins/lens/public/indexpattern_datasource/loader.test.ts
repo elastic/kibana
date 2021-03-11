@@ -186,7 +186,11 @@ const sampleIndexPatterns = {
 function mockIndexPatternsService() {
   return ({
     get: jest.fn(async (id: '1' | '2') => {
-      return { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      if (!result.fields) {
+        result.fields = [];
+      }
+      return result;
     }),
     getIdsWithTitle: jest.fn(async () => {
       return [
@@ -691,7 +695,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 
@@ -819,7 +823,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 
