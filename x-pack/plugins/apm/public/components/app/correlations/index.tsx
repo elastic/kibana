@@ -176,36 +176,3 @@ export function Correlations() {
 const CORRELATIONS_TITLE = i18n.translate('xpack.apm.correlations.title', {
   defaultMessage: 'Correlations',
 });
-
-function CorrelationsMetricsLicenseCheck({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const license = useLicenseContext();
-  const hasActivePlatinumLicense = isActivePlatinumLicense(license);
-
-  const metric = {
-    app: 'apm' as const,
-    metric: hasActivePlatinumLicense
-      ? 'correlations_flyout_view'
-      : 'correlations_license_prompt',
-    metricType: METRIC_TYPE.COUNT as METRIC_TYPE.COUNT,
-  };
-  useTrackMetric(metric);
-  useTrackMetric({ ...metric, delay: 15000 });
-
-  return (
-    <>
-      {hasActivePlatinumLicense ? (
-        children
-      ) : (
-        <LicensePrompt
-          text={i18n.translate('xpack.apm.correlations.licenseCheckText', {
-            defaultMessage: `To use correlations, you must be subscribed to an Elastic Platinum license. With it, you'll be able to discover which fields are correlated with poor performance.`,
-          })}
-        />
-      )}
-    </>
-  );
-}
