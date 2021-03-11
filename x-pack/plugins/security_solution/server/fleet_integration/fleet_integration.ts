@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { ExceptionListClient } from '../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../fleet/server';
-import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';
 import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common/types/models';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
 } from '../../common/endpoint/models/policy_config';
 import { NewPolicyData } from '../../common/endpoint/types';
-import { ManifestManager } from './services/artifacts';
-import { Manifest } from './lib/artifacts';
-import { reportErrors } from './lib/artifacts/common';
-import { InternalArtifactCompleteSchema } from './schemas/artifacts';
+import { ManifestManager } from '../endpoint/services/artifacts';
+import { Manifest } from '../endpoint/lib/artifacts';
+import { reportErrors } from '../endpoint/lib/artifacts/common';
+import { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
 import { manifestDispatchSchema } from '../../common/endpoint/schema/manifest';
 import { AppClientFactory } from '../client';
 import { createDetectionIndex } from '../lib/detection_engine/routes/index/create_index_route';
@@ -61,6 +61,12 @@ const getManifest = async (logger: Logger, manifestManager: ManifestManager): Pr
   return manifest ?? ManifestManager.createDefaultManifest();
 };
 
+const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
+  packagePolicy: T
+): boolean => {
+  return packagePolicy.package?.name === 'endpoint';
+};
+
 /**
  * Callback to handle creation of PackagePolicies in Fleet
  */
@@ -80,7 +86,7 @@ export const getPackagePolicyCreateCallback = (
     request: KibanaRequest
   ): Promise<NewPackagePolicy> => {
     // We only care about Endpoint package policies
-    if (newPackagePolicy.package?.name !== 'endpoint') {
+    if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
 
@@ -135,9 +141,6 @@ export const getPackagePolicyCreateCallback = (
     // follow the types/schema expected
     let updatedPackagePolicy = newPackagePolicy as NewPolicyData;
 
-    // Until we get the Default Policy Configuration in the Endpoint package,
-    // we will add it here manually at creation time.
-
     // generate the correct default policy depending on the license
     const defaultPolicy = isAtLeast(licenseService.getLicenseInformation(), 'platinum')
       ? policyConfigFactory()
@@ -175,7 +178,7 @@ export const getPackagePolicyUpdateCallback = (
     context: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<UpdatePackagePolicy> => {
-    if (newPackagePolicy.package?.name !== 'endpoint') {
+    if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
 
