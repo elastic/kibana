@@ -12,19 +12,18 @@ steps:
       docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain && \
       docker push gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT
     agents:
-      queue: ci-group
+      queue: bootstrap
   - wait
   - command: node scripts/jest --ci --verbose
     label: 'Jest'
     agents:
-      queue: ci-group
+      queue: bootstrap
     plugins:
       - docker#v3.8.0:
           image: 'gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT'
           propagate-environment: true
           mount-checkout: false
-          entrypoint: /bin/bash
-          shell: [-e, '-c']
+          shell: false
     parallelism: 2
     timeout_in_minutes: 120
   # - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'

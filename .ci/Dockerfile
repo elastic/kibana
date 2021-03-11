@@ -48,60 +48,19 @@ RUN LATEST_VAULT_RELEASE=$(curl -s https://api.github.com/repos/hashicorp/vault/
 
 # ENTRYPOINT [ "yarn" ]
 
+
 RUN mkdir -p /var/lib/kibana/workspace/kibana
 WORKDIR /var/lib/kibana/workspace/kibana
 COPY package.json yarn.lock preinstall_check.js ./
+RUN npm install -g --force yarn@^"$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
 RUN yarn config set yarn-offline-mirror "/var/lib/kibana/yarn-offline-cache"
 RUN --mount=type=cache,target=/var/lib/kibana/yarn-offline-cache yarn install
 
-# TODO move all of this to a wrapper?
-
-ENV CI=true
-ENV HOME=/var/lib/kibana
-
-ENV KIBANA_DIR=/var/lib/kibana/workspace/kibana
-ENV XPACK_DIR=/var/lib/kibana/workspace/kibana/x-pack
-
-ENV CACHE_DIR=/var/lib/kibana/.cache
-ENV PARENT_DIR=/var/lib/kibana/workspace
-ENV WORKSPACE=/var/lib/kibana/workspace
-
-# TODO change to ARG?
-ENV KIBANA_PKG_BRANCH=master
-ENV KIBANA_BASE_BRANCH=naster
-
-ENV GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-ENV CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-ENV RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-ENV CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
-
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-
-ENV FORCE_COLOR=1
-ENV TEST_BROWSER_HEADLESS=1
-
-ENV ELASTIC_APM_ENVIRONMENT=ci
-ENV ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
-
-ENV ELASTIC_APM_ACTIVE=false
-ENV CHECKS_REPORTER_ACTIVE=false
-
-ENV FLEET_PACKAGE_REGISTRY_PORT=6104
-ENV TEST_CORS_SERVER_PORT=6105
-
-ENV DETECT_CHROMEDRIVER_VERSION=true
-ENV CHROMEDRIVER_FORCE_DOWNLOAD=true
-
-ENV GCS_UPLOAD_PREFIX=asihdauishd98u42589
-
-# TODO
-ENV NODE_VERSION=14.16.0
-
 COPY . .
 
-RUN node --version
 RUN yarn kbn bootstrap
 RUN yarn kbn run build -i @kbn/pm
 RUN node scripts/build_plugin_list_docs
+RUN rm -rf .git
 
-ENTRYPOINT "/bin/bash"
+ENTRYPOINT ["/var/lib/kibana/workspace/kibana/.ci/entrypoint.sh"]
