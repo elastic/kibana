@@ -18,13 +18,18 @@ interface NodesAttributes {
     'transform.node': string;
   };
 }
+type Nodes = Record<string, NodesAttributes>;
 
-const isNodesAttributes = (arg: unknown): arg is NodesAttributes => {
+const isNodes = (arg: unknown): arg is Nodes => {
   return (
     isPopulatedObject(arg) &&
-    {}.hasOwnProperty.call(arg, 'attributes') &&
-    isPopulatedObject(arg.attributes) &&
-    {}.hasOwnProperty.call(arg.attributes, 'transform.node')
+    Object.values(arg).every(
+      (node) =>
+        isPopulatedObject(node) &&
+        {}.hasOwnProperty.call(node, 'attributes') &&
+        isPopulatedObject(node.attributes) &&
+        {}.hasOwnProperty.call(node.attributes, 'transform.node')
+    )
   );
 };
 
@@ -50,7 +55,7 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
         });
 
         let count = 0;
-        if (isNodesAttributes(nodes)) {
+        if (isNodes(nodes)) {
           for (const { attributes } of Object.values(nodes)) {
             if (attributes['transform.node'] === 'true') {
               count++;
