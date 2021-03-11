@@ -14,7 +14,7 @@ jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Job List Columns', () => {
   test('useColumns()', () => {
-    const { result } = renderHook(() => useColumns([], () => {}, []));
+    const { result } = renderHook(() => useColumns([], () => {}, 1, []));
     const columns: ReturnType<typeof useColumns>['columns'] = result.current.columns;
 
     expect(columns).toHaveLength(7);
