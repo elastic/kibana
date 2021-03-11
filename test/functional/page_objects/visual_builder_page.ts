@@ -616,10 +616,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async setMetricsDataTimerangeMode(value: string) {
-      const timerangeMode = await find.byCssSelector(
-        '[id$="_timeRange-row"] [data-test-subj="comboBoxInput"]'
-      );
-      return await comboBox.setElement(timerangeMode, value);
+      const dataTimeRangeMode = await testSubjects.find('dataTimeRangeMode');
+      return await comboBox.setElement(dataTimeRangeMode, value);
     }
   }
 

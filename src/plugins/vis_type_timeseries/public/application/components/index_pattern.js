@@ -137,6 +137,7 @@ export const IndexPattern = ({
               })}
             >
               <EuiComboBox
+                data-test-subj="dataTimeRangeMode"
                 isClearable={false}
                 placeholder={i18n.translate(
                   'visTypeTimeseries.indexPattern.timeRange.selectTimeRange',
