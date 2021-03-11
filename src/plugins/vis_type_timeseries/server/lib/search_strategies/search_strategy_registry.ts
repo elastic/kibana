@@ -6,17 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  extractIndexPatterns,
-  convertIndexPatternObjectToStringRepresentation,
-} from '../../../common/index_patterns_utils';
-import { PanelSchema } from '../../../common/types';
-import {
-  VisTypeTimeseriesRequest,
-  VisTypeTimeseriesRequestHandlerContext,
-  VisTypeTimeseriesVisDataRequest,
-} from '../../types';
+import { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
 import { AbstractSearchStrategy } from './strategies';
+import { IndexPatternObject } from '../../../common/types';
+
 export class SearchStrategyRegistry {
   private strategies: AbstractSearchStrategy[] = [];
 
@@ -30,7 +23,7 @@ export class SearchStrategyRegistry {
   async getViableStrategy(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPattern: string
+    indexPattern: string | IndexPatternObject
   ) {
     for (const searchStrategy of this.strategies) {
       const { isViable, capabilities } = await searchStrategy.checkForViability(
@@ -46,17 +39,5 @@ export class SearchStrategyRegistry {
         };
       }
     }
-  }
-
-  async getViableStrategyForPanel(
-    requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: VisTypeTimeseriesVisDataRequest,
-    panel: PanelSchema
-  ) {
-    const indexPattern = extractIndexPatterns(panel, panel.default_index_pattern)
-      .map(convertIndexPatternObjectToStringRepresentation)
-      .join(',');
-
-    return this.getViableStrategy(requestContext, req, indexPattern);
   }
 }

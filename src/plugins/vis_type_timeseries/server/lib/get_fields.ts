@@ -17,8 +17,9 @@ export async function getFields(
   framework: Framework,
   indexPatternString: string
 ) {
+  const indexPatternsService = await framework.getIndexPatternsService(requestContext);
+
   if (!indexPatternString) {
-    const indexPatternsService = await framework.getIndexPatternsService(requestContext);
     const defaultIndexPattern = await indexPatternsService.getDefault();
 
     indexPatternString = defaultIndexPattern?.title ?? '';
@@ -34,9 +35,8 @@ export async function getFields(
   ))!;
 
   const fields = await searchStrategy.getFieldsForWildcard(
-    requestContext,
-    request,
     indexPatternString,
+    indexPatternsService,
     capabilities
   );
 

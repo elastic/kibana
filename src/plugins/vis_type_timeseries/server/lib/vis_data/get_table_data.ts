@@ -55,7 +55,11 @@ export async function getTableData(
 
   const { searchStrategy, capabilities } = strategy;
 
-  const extractFields = createFieldsFetcher(req, { requestContext, searchStrategy, capabilities });
+  const extractFields = createFieldsFetcher(req, {
+    indexPatternsService: services.indexPatternsService,
+    searchStrategy,
+    capabilities,
+  });
 
   const calculatePivotLabel = async () => {
     if (panel.pivot_id && indexPatternObject?.title) {

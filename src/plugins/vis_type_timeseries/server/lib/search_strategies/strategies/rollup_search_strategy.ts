@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getCapabilitiesForRollupIndices } from '../../../../../data/server';
+import { getCapabilitiesForRollupIndices, IndexPatternsService } from '../../../../../data/server';
 import {
   VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,
@@ -14,6 +14,7 @@ import {
 } from '../../../types';
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
+import { IndexPatternObject } from '../../../../common/types';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');
@@ -33,24 +34,30 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     indexPattern: string
   ) {
-    return requestContext.core.elasticsearch.client.asCurrentUser.rollup
-      .getRollupIndexCaps({
+    try {
+      const { getRollupIndexCaps } = requestContext.core.elasticsearch.client.asCurrentUser.rollup;
+      const { body } = await getRollupIndexCaps({
         index: indexPattern,
-      })
-      .then((data) => data.body)
-      .catch(() => Promise.resolve({}));
+      });
+
+      return body;
+    } catch (e) {
+      return {};
+    }
   }
 
   async checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPattern: string
+    indexPattern: string | IndexPatternObject
   ) {
     let isViable = false;
     let capabilities = null;
 
-    if (isIndexPatternValid(indexPattern)) {
-      const rollupData = await this.getRollupData(requestContext, indexPattern);
+    const index = typeof indexPattern === 'string' ? indexPattern : indexPattern?.title ?? '';
+
+    if (isIndexPatternValid(index)) {
+      const rollupData = await this.getRollupData(requestContext, index);
       const rollupIndices = getRollupIndices(rollupData);
 
       isViable = rollupIndices.length === 1;
@@ -70,12 +77,11 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
   }
 
   async getFieldsForWildcard(
-    requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: VisTypeTimeseriesRequest,
     indexPattern: string,
+    indexPatternsService: IndexPatternsService,
     capabilities?: unknown
   ) {
-    return super.getFieldsForWildcard(requestContext, req, indexPattern, capabilities, {
+    return super.getFieldsForWildcard(indexPattern, indexPatternsService, capabilities, {
       type: 'rollup',
       rollupIndex: indexPattern,
     });

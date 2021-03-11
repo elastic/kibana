@@ -9,6 +9,7 @@
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
 import { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRequest } from '../../../types';
+import { IndexPatternsService } from '../../../../../data/server';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
   checkForViability(
@@ -22,11 +23,10 @@ export class DefaultSearchStrategy extends AbstractSearchStrategy {
   }
 
   async getFieldsForWildcard(
-    requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: VisTypeTimeseriesRequest,
     indexPattern: string,
+    indexPatternsService: IndexPatternsService,
     capabilities?: unknown
   ) {
-    return super.getFieldsForWildcard(requestContext, req, indexPattern, capabilities);
+    return super.getFieldsForWildcard(indexPattern, indexPatternsService, capabilities);
   }
 }

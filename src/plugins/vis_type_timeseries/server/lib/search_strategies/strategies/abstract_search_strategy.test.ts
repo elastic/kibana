@@ -6,28 +6,16 @@
  * Side Public License, v 1.
  */
 
-const mockGetFieldsForWildcard = jest.fn(() => []);
-
-jest.mock('../../../../../data/server', () => ({
-  indexPatterns: {
-    isNestedField: jest.fn(() => false),
-  },
-  IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
-    getFieldsForWildcard: mockGetFieldsForWildcard,
-  })),
-}));
+import { IndexPatternsService } from '../../../../../data/common';
 
 import { from } from 'rxjs';
 import { AbstractSearchStrategy, toSanitizedFieldType } from './abstract_search_strategy';
 import type { IFieldType } from '../../../../../data/common';
 import type { FieldSpec, RuntimeField } from '../../../../../data/common';
 import {
-  VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { Framework } from '../../../plugin';
-import { indexPatterns } from '../../../../../data/server';
 
 class FooSearchStrategy extends AbstractSearchStrategy {}
 
@@ -36,18 +24,9 @@ describe('AbstractSearchStrategy', () => {
   let mockedFields: IFieldType[];
   let indexPattern: string;
   let requestContext: VisTypeTimeseriesRequestHandlerContext;
-  let framework: Framework;
 
   beforeEach(() => {
     mockedFields = [];
-    framework = ({
-      getIndexPatternsService: jest.fn(() =>
-        Promise.resolve({
-          find: jest.fn(() => []),
-          getDefault: jest.fn(() => {}),
-        })
-      ),
-    } as unknown) as Framework;
     requestContext = ({
       core: {
         elasticsearch: {
@@ -60,7 +39,7 @@ describe('AbstractSearchStrategy', () => {
         search: jest.fn().mockReturnValue(from(Promise.resolve({}))),
       },
     } as unknown) as VisTypeTimeseriesRequestHandlerContext;
-    abstractSearchStrategy = new FooSearchStrategy(framework);
+    abstractSearchStrategy = new FooSearchStrategy();
   });
 
   test('should init an AbstractSearchStrategy instance', () => {
@@ -70,18 +49,12 @@ describe('AbstractSearchStrategy', () => {
   });
 
   test('should return fields for wildcard', async () => {
-    const fields = await abstractSearchStrategy.getFieldsForWildcard(
-      requestContext,
-      {} as VisTypeTimeseriesRequest,
-      indexPattern
-    );
+    const fields = await abstractSearchStrategy.getFieldsForWildcard(indexPattern, ({
+      getDefault: jest.fn(),
+      getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
+    } as unknown) as IndexPatternsService);
 
     expect(fields).toEqual(mockedFields);
-    expect(mockGetFieldsForWildcard).toHaveBeenCalledWith({
-      pattern: indexPattern,
-      metaFields: [],
-      fieldCapsOptions: { allow_no_indices: true },
-    });
   });
 
   test('should return response', async () => {
@@ -175,9 +148,6 @@ describe('AbstractSearchStrategy', () => {
           },
         },
       ];
-      // @ts-expect-error
-      indexPatterns.isNestedField.mockReturnValue(true);
-
       expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`Array []`);
     });
   });

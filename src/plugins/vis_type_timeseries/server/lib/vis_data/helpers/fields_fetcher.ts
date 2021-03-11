@@ -6,21 +6,19 @@
  * Side Public License, v 1.
  */
 
-import {
-  VisTypeTimeseriesRequestHandlerContext,
-  VisTypeTimeseriesVisDataRequest,
-} from '../../../types';
+import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 import { AbstractSearchStrategy, DefaultSearchCapabilities } from '../../search_strategies';
+import { IndexPatternsService } from '../../../../../data/common';
 
 export interface FieldsFetcherServices {
-  requestContext: VisTypeTimeseriesRequestHandlerContext;
+  indexPatternsService: IndexPatternsService;
   searchStrategy: AbstractSearchStrategy;
   capabilities: DefaultSearchCapabilities;
 }
 
 export const createFieldsFetcher = (
   req: VisTypeTimeseriesVisDataRequest,
-  { capabilities, requestContext, searchStrategy }: FieldsFetcherServices
+  { capabilities, indexPatternsService, searchStrategy }: FieldsFetcherServices
 ) => {
   const fieldsCacheMap = new Map();
 
@@ -30,9 +28,8 @@ export const createFieldsFetcher = (
     }
 
     const fields = await searchStrategy.getFieldsForWildcard(
-      requestContext,
-      req,
       index,
+      indexPatternsService,
       capabilities
     );
 

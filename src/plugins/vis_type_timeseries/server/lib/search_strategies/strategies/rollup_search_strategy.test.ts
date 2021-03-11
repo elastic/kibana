@@ -7,11 +7,11 @@
  */
 
 import { RollupSearchStrategy } from './rollup_search_strategy';
-import { Framework } from '../../../plugin';
 import {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
+import { IndexPatternsService } from '../../../../../data/common';
 
 jest.mock('./abstract_search_strategy', () => {
   class AbstractSearchStrategyMock {
@@ -49,12 +49,11 @@ describe('Rollup Search Strategy', () => {
       },
     },
   } as unknown) as VisTypeTimeseriesRequestHandlerContext;
-  const framework = {} as Framework;
 
   const indexPattern = 'indexPattern';
 
   test('should create instance of RollupSearchRequest', () => {
-    const rollupSearchStrategy = new RollupSearchStrategy(framework);
+    const rollupSearchStrategy = new RollupSearchStrategy();
 
     expect(rollupSearchStrategy).toBeDefined();
   });
@@ -64,7 +63,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy(framework);
+      rollupSearchStrategy = new RollupSearchStrategy();
       rollupSearchStrategy.getRollupData = jest.fn(() =>
         Promise.resolve({
           [rollupIndex]: {
@@ -113,7 +112,7 @@ describe('Rollup Search Strategy', () => {
     let rollupSearchStrategy: RollupSearchStrategy;
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy(framework);
+      rollupSearchStrategy = new RollupSearchStrategy();
     });
 
     test('should return rollup data', async () => {
@@ -140,7 +139,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy(framework);
+      rollupSearchStrategy = new RollupSearchStrategy();
       fieldsCapabilities = {
         [rollupIndex]: {
           aggs: {
@@ -154,9 +153,8 @@ describe('Rollup Search Strategy', () => {
 
     test('should return fields for wildcard', async () => {
       const fields = await rollupSearchStrategy.getFieldsForWildcard(
-        requestContext,
-        {} as VisTypeTimeseriesVisDataRequest,
         indexPattern,
+        {} as IndexPatternsService,
         {
           fieldsCapabilities,
           rollupIndex,

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Framework } from '../../../plugin';
 import {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
@@ -14,14 +13,13 @@ import {
 import { DefaultSearchStrategy } from './default_search_strategy';
 
 describe('DefaultSearchStrategy', () => {
-  const framework = {} as Framework;
   const requestContext = {} as VisTypeTimeseriesRequestHandlerContext;
   let defaultSearchStrategy: DefaultSearchStrategy;
   let req: VisTypeTimeseriesVisDataRequest;
 
   beforeEach(() => {
     req = {} as VisTypeTimeseriesVisDataRequest;
-    defaultSearchStrategy = new DefaultSearchStrategy(framework);
+    defaultSearchStrategy = new DefaultSearchStrategy();
   });
 
   test('should init an DefaultSearchStrategy instance', () => {

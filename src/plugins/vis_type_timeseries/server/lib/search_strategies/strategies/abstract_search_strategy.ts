@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { indexPatterns, IndexPatternsFetcher } from '../../../../../data/server';
+import { indexPatterns, IndexPatternsService } from '../../../../../data/server';
 
-import type { Framework } from '../../../plugin';
 import type { FieldSpec } from '../../../../../data/common';
-import type { SanitizedFieldType } from '../../../../common/types';
+import type { IndexPatternObject, SanitizedFieldType } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,
@@ -36,7 +35,6 @@ export const toSanitizedFieldType = (fields: FieldSpec[]) => {
 };
 
 export abstract class AbstractSearchStrategy {
-  constructor(private framework: Framework) {}
   async search(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesVisDataRequest,
@@ -66,35 +64,29 @@ export abstract class AbstractSearchStrategy {
   checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPattern: string
+    indexPattern: string | IndexPatternObject
   ): Promise<{ isViable: boolean; capabilities: any }> {
     throw new TypeError('Must override method');
   }
 
   async getFieldsForWildcard(
-    requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: VisTypeTimeseriesRequest,
     indexPattern: string,
+    indexPatternsService: IndexPatternsService,
     capabilities?: unknown,
     options?: Partial<{
       type: string;
       rollupIndex: string;
     }>
   ) {
-    const indexPatternsFetcher = new IndexPatternsFetcher(
-      requestContext.core.elasticsearch.client.asCurrentUser
-    );
-    const indexPatternsService = await this.framework.getIndexPatternsService(requestContext);
-    const { indexPatternObject } = await getIndexPatternObject(indexPattern, {
+    const { indexPatternObject, indexPatternString } = await getIndexPatternObject(indexPattern, {
       indexPatternsService,
     });
 
     return toSanitizedFieldType(
       indexPatternObject
         ? indexPatternObject.getNonScriptedFields()
-        : await indexPatternsFetcher!.getFieldsForWildcard({
-            pattern: indexPattern,
-            fieldCapsOptions: { allow_no_indices: true },
+        : await indexPatternsService.getFieldsForWildcard({
+            pattern: indexPatternString,
             metaFields: [],
             ...options,
           })

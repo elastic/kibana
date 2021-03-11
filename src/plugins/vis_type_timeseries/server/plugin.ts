@@ -111,8 +111,8 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       },
     };
 
-    searchStrategyRegistry.addStrategy(new DefaultSearchStrategy(framework));
-    searchStrategyRegistry.addStrategy(new RollupSearchStrategy(framework));
+    searchStrategyRegistry.addStrategy(new DefaultSearchStrategy());
+    searchStrategyRegistry.addStrategy(new RollupSearchStrategy());
 
     visDataRoutes(router, framework);
     fieldsRoutes(router, framework);
