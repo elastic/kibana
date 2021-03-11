@@ -57,3 +57,85 @@ export const ROLE_MAPPINGS_RESET_CANCEL_BUTTON = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+
+export const DEV_ROLE_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.DEV_ROLE_TYPE_DESCRIPTION',
+  {
+    defaultMessage: 'Devs can manage all aspects of an Engine.',
+  }
+);
+
+export const EDITOR_ROLE_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.editorRoleTypeDescription',
+  {
+    defaultMessage: 'Editors can manage Search Settings.',
+  }
+);
+
+export const ANALYST_ROLE_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.analystRoleTypeDescription',
+  {
+    defaultMessage: 'Analysts can only view Documents, Query Tester, and Analytics.',
+  }
+);
+
+export const OWNER_ROLE_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.ownerRoleTypeDescription',
+  {
+    defaultMessage:
+      'Owners can do anything. There can be many owners on the account, but there must be at least one owner at any time.',
+  }
+);
+
+export const ADMIN_ROLE_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.adminRoleTypeDescription',
+  {
+    defaultMessage: 'Admins can do anything, except manage account settings.',
+  }
+);
+
+export const ADVANCED_ROLE_SELECTORS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.advancedRoleSelectorsTitle',
+  {
+    defaultMessage: 'Full or limited engine access',
+  }
+);
+
+export const ROLE_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.roleTitle', {
+  defaultMessage: 'Role',
+});
+
+export const FULL_ENGINE_ACCESS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.fullEngineAccessTitle',
+  {
+    defaultMessage: 'Full engine access',
+  }
+);
+
+export const FULL_ENGINE_ACCESS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.fullEngineAccessDescription',
+  {
+    defaultMessage: 'Access to all current and future engines.',
+  }
+);
+
+export const LIMITED_ENGINE_ACCESS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.limitedEngineAccessTitle',
+  {
+    defaultMessage: 'Limited engine access',
+  }
+);
+
+export const LIMITED_ENGINE_ACCESS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.limitedEngineAccessDescription',
+  {
+    defaultMessage: 'Limit user access to specific engines:',
+  }
+);
+
+export const ENGINE_ACCESS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineAccessTitle',
+  {
+    defaultMessage: 'Engine access',
+  }
+);
