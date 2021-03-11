@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../../types';
+import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
 import {
   createActionConnector,
   deleteActions,
@@ -14,7 +14,7 @@ import {
   loadAllActions,
   updateActionConnector,
   executeAction,
-} from './action_connector_api';
+} from './index';
 
 const http = httpServiceMock.createStartContract();
 
@@ -22,6 +22,18 @@ beforeEach(() => jest.resetAllMocks());
 
 describe('loadActionTypes', () => {
   test('should call get types API', async () => {
+    const apiResponseValue = [
+      {
+        id: 'test',
+        name: 'Test',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        minimum_license_required: 'basic',
+      },
+    ];
+    http.get.mockResolvedValueOnce(apiResponseValue);
+
     const resolvedValue: ActionType[] = [
       {
         id: 'test',
@@ -32,7 +44,6 @@ describe('loadActionTypes', () => {
         minimumLicenseRequired: 'basic',
       },
     ];
-    http.get.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadActionTypes({ http });
     expect(result).toEqual(resolvedValue);
@@ -52,7 +63,7 @@ describe('loadAllActions', () => {
     expect(result).toEqual([]);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/api/actions",
+        "/api/actions/connectors",
       ]
     `);
   });
@@ -60,6 +71,16 @@ describe('loadAllActions', () => {
 
 describe('createActionConnector', () => {
   test('should call create action API', async () => {
+    const apiResponse = {
+      connector_type_id: 'test',
+      is_preconfigured: false,
+      name: 'My test',
+      config: {},
+      secrets: {},
+      id: '123',
+    };
+    http.post.mockResolvedValueOnce(apiResponse);
+
     const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
@@ -67,8 +88,7 @@ describe('createActionConnector', () => {
       config: {},
       secrets: {},
     };
-    const resolvedValue: ActionConnector = { ...connector, id: '123' };
-    http.post.mockResolvedValueOnce(resolvedValue);
+    const resolvedValue = { ...connector, id: '123' };
 
     const result = await createActionConnector({ http, connector });
     expect(result).toEqual(resolvedValue);
@@ -76,7 +96,7 @@ describe('createActionConnector', () => {
       Array [
         "/api/actions/connector",
         Object {
-          "body": "{\\"actionTypeId\\":\\"test\\",\\"isPreconfigured\\":false,\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{}}",
+          "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"connector_type_id\\":\\"test\\",\\"is_preconfigured\\":false}",
         },
       ]
     `);
@@ -86,6 +106,16 @@ describe('createActionConnector', () => {
 describe('updateActionConnector', () => {
   test('should call the update API', async () => {
     const id = '123';
+    const apiResponse = {
+      connector_type_id: 'test',
+      is_preconfigured: false,
+      name: 'My test',
+      config: {},
+      secrets: {},
+      id,
+    };
+    http.put.mockResolvedValueOnce(apiResponse);
+
     const connector: ActionConnectorWithoutId<{}, {}> = {
       actionTypeId: 'test',
       isPreconfigured: false,
@@ -94,7 +124,6 @@ describe('updateActionConnector', () => {
       secrets: {},
     };
     const resolvedValue = { ...connector, id };
-    http.put.mockResolvedValueOnce(resolvedValue);
 
     const result = await updateActionConnector({ http, connector, id });
     expect(result).toEqual(resolvedValue);
@@ -140,7 +169,7 @@ describe('executeAction', () => {
     };
 
     http.post.mockResolvedValueOnce({
-      actionId: id,
+      connector_id: id,
       status: 'ok',
     });
 
