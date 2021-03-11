@@ -9,8 +9,21 @@
 import LruCache from 'lru-cache';
 
 /** @internal */
-export class FileHashCache {
-  private lru = new LruCache<string, Promise<string>>(100);
+export interface IFileHashCache {
+  get(key: string): Promise<string> | undefined;
+
+  set(key: string, value: Promise<string>): void;
+
+  del(key: string): void;
+}
+
+/** @internal */
+export class FileHashCache implements IFileHashCache {
+  private lru: LruCache<string, Promise<string>>;
+
+  constructor(maxSize: number = 250) {
+    this.lru = new LruCache(maxSize);
+  }
 
   get(key: string) {
     return this.lru.get(key);

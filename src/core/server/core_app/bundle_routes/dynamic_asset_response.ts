@@ -13,7 +13,7 @@ import agent from 'elastic-apm-node';
 
 import { fstat, close } from './fs';
 import { RequestHandler } from '../../http';
-import { FileHashCache } from './file_hash_cache';
+import { IFileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';
 import { selectCompressedFile } from './select_compressed_file';
 
@@ -22,7 +22,7 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 /**
- *  Create a Hapi response for the requested path. This is designed
+ *  Serve asset for the requested path. This is designed
  *  to replicate a subset of the features provided by Hapi's Inert
  *  plugin including:
  *   - ensure path is not traversing out of the bundle directory
@@ -46,7 +46,7 @@ export const createDynamicAssetHandler = ({
 }: {
   bundlesPath: string;
   publicPath: string;
-  fileHashCache: FileHashCache;
+  fileHashCache: IFileHashCache;
   isDist: boolean;
 }): RequestHandler<{ path: string }, {}, {}> => {
   return async (ctx, req, res) => {
