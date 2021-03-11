@@ -293,12 +293,12 @@ export class CsvGenerator {
       this.logger.error(err);
     }
 
-    do {
-      if (this.cancellationToken.isCancelled()) {
-        break;
-      }
-      let results: SearchResponse<unknown> | undefined;
-      try {
+    try {
+      do {
+        if (this.cancellationToken.isCancelled()) {
+          break;
+        }
+        let results: SearchResponse<unknown> | undefined;
         if (scrollId == null) {
           // open a scroll cursor in Elasticsearch
           results = await this.scan(index, searchSource, scrollSettings);
@@ -311,69 +311,67 @@ export class CsvGenerator {
           // use the scroll cursor in Elasticsearch
           results = await this.scroll(scrollId, scrollSettings);
         }
-      } catch (err) {
-        this.logger.error(err);
+
+        if (!results) {
+          this.logger.warning(`Search results are undefined!`);
+          break;
+        }
+
+        let table: Datatable | undefined;
+        try {
+          table = tabifyDocs(results, index, { shallow: true, meta: true });
+        } catch (err) {
+          this.logger.error(err);
+        }
+
+        if (!table) {
+          break;
+        }
+
+        // write the header and initialize formatters / column orderings
+        // depends on the table to know what order to place the columns
+        if (first) {
+          first = false;
+          this.generateHeader(fields, table, builder, settings);
+        }
+
+        if (table.rows.length < 1) {
+          break; // empty report with just the header
+        }
+
+        const formatters = this.getFormatters(table);
+        this.generateRows(fields, table, builder, formatters, settings);
+
+        // update iterator
+        currentRecord += table.rows.length;
+      } while (currentRecord < totalRecords - 1);
+
+      // Add warnings to be logged
+      if (this.csvContainsFormulas && escapeFormulaValues) {
+        warnings.push(
+          i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues', {
+            defaultMessage: 'CSV may contain formulas whose values have been escaped',
+          })
+        );
       }
-
-      if (!results) {
-        this.logger.warning(`Search results are undefined!`);
-        break;
+    } finally {
+      // clear scrollID
+      if (scrollId) {
+        this.logger.debug(`executing clearScroll request`);
+        try {
+          await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
+        } catch (err) {
+          this.logger.error(err);
+        }
+      } else {
+        this.logger.warn(`No scrollId to clear!`);
       }
-
-      let table: Datatable | undefined;
-      try {
-        table = tabifyDocs(results, index, { shallow: true, meta: true });
-      } catch (err) {
-        this.logger.error(err);
-      }
-
-      if (!table) {
-        break;
-      }
-
-      // write the header and initialize formatters / column orderings
-      // depends on the table to know what order to place the columns
-      if (first) {
-        first = false;
-        this.generateHeader(fields, table, builder, settings);
-      }
-
-      if (table.rows.length < 1) {
-        break; // empty report with just the header
-      }
-
-      const formatters = this.getFormatters(table);
-      this.generateRows(fields, table, builder, formatters, settings);
-
-      // update iterator
-      currentRecord += table.rows.length;
-    } while (currentRecord < totalRecords - 1);
+    }
 
     const size = builder.getSizeInBytes();
     this.logger.debug(
       `Finished generating. Total size in bytes: ${size}. Row count: ${this.csvRowCount}.`
     );
-
-    // Add warnings to be logged
-    if (this.csvContainsFormulas && escapeFormulaValues) {
-      warnings.push(
-        i18n.translate('xpack.reporting.exportTypes.csv.generateCsv.escapedFormulaValues', {
-          defaultMessage: 'CSV may contain formulas whose values have been escaped',
-        })
-      );
-    }
-
-    // clear scrollID
-    if (scrollId) {
-      this.logger.debug(`executing clearScroll request`);
-      try {
-        await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
-      } catch (err) {
-        this.logger.error(err);
-      }
-    } else {
-      this.logger.warn(`No scrollId to clear!`);
-    }
 
     return {
       content: builder.getString(),
