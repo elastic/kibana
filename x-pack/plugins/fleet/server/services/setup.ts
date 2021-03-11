@@ -53,17 +53,25 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
+  const { policiesPromise, packagesPromise } = ensurePreconfiguredPackagesAndPolicies(
+    soClient,
+    esClient
+  );
+
   const [
     installedPackages,
     defaultOutput,
     { created: defaultAgentPolicyCreated, policy: defaultAgentPolicy },
     { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
+    preconfiguredPolicies,
   ] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, esClient),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
     agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient),
+    policiesPromise,
+    packagesPromise,
     updateFleetRoleIfExists(esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
@@ -74,24 +82,6 @@ async function createSetupSideEffects(
       return Promise.reject(e);
     }),
   ]);
-
-  const { policies, packages } = appContextService.getConfig() ?? {};
-  await Promise.all(
-    (packages ?? []).map((packageString) =>
-      ensureInstalledPreconfiguredPackage(soClient, esClient, packageString)
-    )
-  );
-
-  const preconfiguredPolicies = await Promise.all(
-    (policies ?? []).map(async ({ integrations, ...newAgentPolicy }) => {
-      const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
-        soClient,
-        esClient,
-        newAgentPolicy
-      );
-      return { created, policy, integrations };
-    })
-  );
 
   // Keeping this outside of the Promise.all because it introduces a race condition.
   // If one of the required packages fails to install/upgrade it might get stuck in the installing state.
@@ -183,6 +173,34 @@ async function createSetupSideEffects(
   return { isIntialized: true };
 }
 
+function ensurePreconfiguredPackagesAndPolicies(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) {
+  const { policies, packages } = appContextService.getConfig() ?? {};
+
+  // Create policies specified in Kibana config
+  const policiesPromise = Promise.all(
+    (policies ?? []).map(async ({ integrations, ...newAgentPolicy }) => {
+      const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
+        soClient,
+        esClient,
+        newAgentPolicy
+      );
+      return { created, policy, integrations };
+    })
+  );
+
+  // Preinstall packages specified in Kibana config
+  const packagesPromise = Promise.all(
+    (packages ?? []).map((packageString) =>
+      ensureInstalledPreconfiguredPackage(soClient, esClient, packageString)
+    )
+  );
+
+  return { policiesPromise, packagesPromise };
+}
+
 async function addPreconfiguredPolicyPackages(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -213,9 +231,7 @@ async function ensureInstalledPreconfiguredPackage(
   esClient: ElasticsearchClient,
   packageString: string
 ) {
-  const [pkgName, versionAndSubdirectory] = packageString.split(':');
-  // @ts-ignore
-  const [version, subdirectory] = versionAndSubdirectory.split('/');
+  const [pkgName, version] = packageString.split(':');
   return ensureInstalledPackage({
     savedObjectsClient: soClient,
     pkgName,
