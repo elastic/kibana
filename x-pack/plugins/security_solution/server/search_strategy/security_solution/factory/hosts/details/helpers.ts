@@ -15,7 +15,7 @@ import {
   HostItem,
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { toStringArray } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
 
 export const HOST_FIELDS = [
   '_id',
@@ -38,64 +38,6 @@ export const HOST_FIELDS = [
   'endpoint.policyStatus',
   'endpoint.sensorVersion',
 ];
-
-export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
-  HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
-    const fieldValue = getHostFieldValue(fieldName, bucket);
-    if (fieldValue != null) {
-      if (fieldName === '_id') {
-        return set('_id', fieldValue, flattenedFields);
-      }
-      return set(fieldName, toStringArray(fieldValue), flattenedFields);
-    }
-    return flattenedFields;
-  }, {});
-
-const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | string[] | null => {
-  const aggField = hostFieldsMap[fieldName]
-    ? hostFieldsMap[fieldName].replace(/\./g, '_')
-    : fieldName.replace(/\./g, '_');
-  if (
-    [
-      'host.ip',
-      'host.mac',
-      'cloud.instance.id',
-      'cloud.machine.type',
-      'cloud.provider',
-      'cloud.region',
-    ].includes(fieldName) &&
-    has(aggField, bucket)
-  ) {
-    const data: HostBuckets = get(aggField, bucket);
-    return data.buckets.map((obj) => obj.key);
-  } else if (has(`${aggField}.buckets`, bucket)) {
-    return getFirstItem(get(`${aggField}`, bucket));
-  } else if (has(aggField, bucket)) {
-    const valueObj: HostValue = get(aggField, bucket);
-    return valueObj.value_as_string;
-  } else if (['host.name', 'host.os.name', 'host.os.version'].includes(fieldName)) {
-    switch (fieldName) {
-      case 'host.name':
-        return get('key', bucket) || null;
-      case 'host.os.name':
-        return get('os.hits.hits[0]._source.host.os.name', bucket) || null;
-      case 'host.os.version':
-        return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
-    }
-  } else if (aggField === '_id') {
-    const hostName = get(`host_name`, bucket);
-    return hostName ? getFirstItem(hostName) : null;
-  }
-  return null;
-};
-
-const getFirstItem = (data: HostBuckets): string | null => {
-  const firstItem = head(data.buckets);
-  if (firstItem == null) {
-    return null;
-  }
-  return firstItem.key;
-};
 
 export const buildFieldsTermAggregation = (esFields: readonly string[]): AggregationRequest =>
   esFields.reduce<AggregationRequest>(
@@ -149,4 +91,66 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
       },
     },
   };
+};
+
+export const formatHostItem = (bucket: HostAggEsItem): HostItem =>
+  HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
+    const fieldValue = getHostFieldValue(fieldName, bucket);
+    if (fieldValue != null) {
+      if (fieldName === '_id') {
+        return set('_id', fieldValue, flattenedFields);
+      }
+      return set(
+        fieldName,
+        toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
+        flattenedFields
+      );
+    }
+    return flattenedFields;
+  }, {});
+
+const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | string[] | null => {
+  const aggField = hostFieldsMap[fieldName]
+    ? hostFieldsMap[fieldName].replace(/\./g, '_')
+    : fieldName.replace(/\./g, '_');
+  if (
+    [
+      'host.ip',
+      'host.mac',
+      'cloud.instance.id',
+      'cloud.machine.type',
+      'cloud.provider',
+      'cloud.region',
+    ].includes(fieldName) &&
+    has(aggField, bucket)
+  ) {
+    const data: HostBuckets = get(aggField, bucket);
+    return data.buckets.map((obj) => obj.key);
+  } else if (has(`${aggField}.buckets`, bucket)) {
+    return getFirstItem(get(`${aggField}`, bucket));
+  } else if (has(aggField, bucket)) {
+    const valueObj: HostValue = get(aggField, bucket);
+    return valueObj.value_as_string;
+  } else if (['host.name', 'host.os.name', 'host.os.version'].includes(fieldName)) {
+    switch (fieldName) {
+      case 'host.name':
+        return get('key', bucket) || null;
+      case 'host.os.name':
+        return get('os.hits.hits[0]._source.host.os.name', bucket) || null;
+      case 'host.os.version':
+        return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
+    }
+  } else if (aggField === '_id') {
+    const hostName = get(`host_name`, bucket);
+    return hostName ? getFirstItem(hostName) : null;
+  }
+  return null;
+};
+
+const getFirstItem = (data: HostBuckets): string | null => {
+  const firstItem = head(data.buckets);
+  if (firstItem == null) {
+    return null;
+  }
+  return firstItem.key;
 };
