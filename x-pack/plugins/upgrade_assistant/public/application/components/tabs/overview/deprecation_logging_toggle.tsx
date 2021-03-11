@@ -5,71 +5,52 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { HttpSetup } from 'src/core/public';
+import { useAppContext } from '../../../app_context';
+import { ResponseError } from '../../../lib/api';
 
-import { LoadingState } from '../../types';
+export const DeprecationLoggingToggle: React.FunctionComponent = () => {
+  const { api } = useAppContext();
 
-interface DeprecationLoggingTabProps {
-  http: HttpSetup;
-}
+  const [isEnabled, setIsEnabled] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<ResponseError | undefined>(undefined);
 
-interface DeprecationLoggingTabState {
-  loadingState: LoadingState;
-  loggingEnabled?: boolean;
-}
+  useEffect(() => {
+    async function getDeprecationLoggingStatus() {
+      setIsLoading(true);
 
-export class DeprecationLoggingToggle extends React.Component<
-  DeprecationLoggingTabProps,
-  DeprecationLoggingTabState
-> {
-  constructor(props: DeprecationLoggingTabProps) {
-    super(props);
+      const { data, error: responseError } = await api.getDeprecationLogging();
 
-    this.state = {
-      loadingState: LoadingState.Loading,
-    };
-  }
+      setIsLoading(false);
 
-  public UNSAFE_componentWillMount() {
-    this.loadData();
-  }
-
-  public render() {
-    const { loggingEnabled, loadingState } = this.state;
-
-    // Show a spinner until we've done the initial load.
-    if (loadingState === LoadingState.Loading && loggingEnabled === undefined) {
-      return <EuiLoadingSpinner size="l" />;
+      if (responseError) {
+        setError(responseError);
+      } else if (data) {
+        setIsEnabled(data.isEnabled);
+      }
     }
 
-    return (
-      <EuiSwitch
-        id="xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch"
-        data-test-subj="upgradeAssistantDeprecationToggle"
-        label={this.renderLoggingState()}
-        checked={loggingEnabled || false}
-        onChange={this.toggleLogging}
-        disabled={loadingState === LoadingState.Loading || loadingState === LoadingState.Error}
-      />
-    );
+    getDeprecationLoggingStatus();
+  }, [api]);
+
+  if (isLoading) {
+    return <EuiLoadingSpinner size="l" />;
   }
 
-  private renderLoggingState() {
-    const { loggingEnabled, loadingState } = this.state;
-
-    if (loadingState === LoadingState.Error) {
+  const renderLoggingState = () => {
+    if (error) {
       return i18n.translate(
         'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.errorLabel',
         {
           defaultMessage: 'Could not load logging state',
         }
       );
-    } else if (loggingEnabled) {
+    } else if (isEnabled) {
       return i18n.translate(
         'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
         {
@@ -84,39 +65,34 @@ export class DeprecationLoggingToggle extends React.Component<
         }
       );
     }
-  }
+  };
 
-  private loadData = async () => {
-    try {
-      this.setState({ loadingState: LoadingState.Loading });
-      const resp = await this.props.http.get('/api/upgrade_assistant/deprecation_logging');
-      this.setState({
-        loadingState: LoadingState.Success,
-        loggingEnabled: resp.isEnabled,
-      });
-    } catch (e) {
-      this.setState({ loadingState: LoadingState.Error });
+  const toggleLogging = async () => {
+    const newIsEnabledValue = !isEnabled;
+
+    setIsLoading(true);
+
+    const { data, error: updateError } = await api.updateDeprecationLogging({
+      isEnabled: newIsEnabledValue,
+    });
+
+    setIsLoading(false);
+
+    if (updateError) {
+      setError(updateError);
+    } else if (data) {
+      setIsEnabled(data.isEnabled);
     }
   };
 
-  private toggleLogging = async () => {
-    try {
-      // Optimistically toggle the UI
-      const newEnabled = !this.state.loggingEnabled;
-      this.setState({ loadingState: LoadingState.Loading, loggingEnabled: newEnabled });
-
-      const resp = await this.props.http.put('/api/upgrade_assistant/deprecation_logging', {
-        body: JSON.stringify({
-          isEnabled: newEnabled,
-        }),
-      });
-
-      this.setState({
-        loadingState: LoadingState.Success,
-        loggingEnabled: resp.isEnabled,
-      });
-    } catch (e) {
-      this.setState({ loadingState: LoadingState.Error });
-    }
-  };
-}
+  return (
+    <EuiSwitch
+      id="xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch"
+      data-test-subj="upgradeAssistantDeprecationToggle"
+      label={renderLoggingState()}
+      checked={isEnabled}
+      onChange={toggleLogging}
+      disabled={isLoading || Boolean(error)}
+    />
+  );
+};

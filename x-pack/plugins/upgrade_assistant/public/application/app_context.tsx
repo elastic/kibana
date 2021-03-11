@@ -7,6 +7,7 @@
 
 import { DocLinksStart, HttpSetup } from 'src/core/public';
 import React, { createContext, useContext } from 'react';
+import { ApiService } from './lib/api';
 
 export interface KibanaVersionContext {
   currentMajor: number;
@@ -20,6 +21,7 @@ export interface ContextValue {
   docLinks: DocLinksStart;
   kibanaVersionInfo: KibanaVersionContext;
   isReadOnlyMode: boolean;
+  api: ApiService;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

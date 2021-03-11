@@ -19,4 +19,6 @@ export const mockKibanaSemverVersion = new SemVer(mockKibanaVersion);
  * In readonly mode, the user will not be able to perform any actions in the UI
  * and will be presented with a message indicating as such.
  */
-export const UA_READONLY_MODE = true;
+export const UA_READONLY_MODE = false;
+
+export const API_BASE_PATH = '/api/upgrade_assistant';

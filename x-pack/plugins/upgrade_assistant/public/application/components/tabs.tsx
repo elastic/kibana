@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { findIndex, get } from 'lodash';
-import React from 'react';
+import { findIndex } from 'lodash';
+import React, { useEffect, useState, useMemo } from 'react';
 
 import {
   EuiEmptyPrompt,
@@ -18,13 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup } from 'src/core/public';
 
-import { UpgradeAssistantStatus } from '../../../common/types';
 import { LatestMinorBanner } from './latest_minor_banner';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
-import { LoadingState, TelemetryState, UpgradeAssistantTabProps } from './types';
+import { TelemetryState, UpgradeAssistantTabProps } from './types';
+import { useAppContext } from '../app_context';
 
 enum ClusterUpgradeState {
   needsUpgrade,
@@ -32,158 +30,24 @@ enum ClusterUpgradeState {
   upgraded,
 }
 
-interface TabsState {
-  loadingState: LoadingState;
-  loadingError?: Error;
-  checkupData?: UpgradeAssistantStatus;
-  selectedTabIndex: number;
-  telemetryState: TelemetryState;
-  clusterUpgradeState: ClusterUpgradeState;
-}
+export const UpgradeAssistantTabs: React.FunctionComponent = () => {
+  const [clusterUpgradeState, setClusterUpgradeState] = useState<ClusterUpgradeState>(
+    ClusterUpgradeState.needsUpgrade
+  );
+  const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
+  const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
-interface Props {
-  http: HttpSetup;
-}
+  const { api } = useAppContext();
 
-export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      loadingState: LoadingState.Loading,
-      clusterUpgradeState: ClusterUpgradeState.needsUpgrade,
-      selectedTabIndex: 0,
-      telemetryState: TelemetryState.Complete,
-    };
-  }
+  const { data: checkupData, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
 
-  public async componentDidMount() {
-    await this.loadData();
-
-    // Send telemetry info about the default selected tab
-    this.sendTelemetryInfo(this.tabs[this.state.selectedTabIndex].id);
-  }
-
-  public render() {
-    const { selectedTabIndex, telemetryState, clusterUpgradeState } = this.state;
-    const tabs = this.tabs;
-
-    if (clusterUpgradeState === ClusterUpgradeState.partiallyUpgraded) {
-      return (
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <EuiEmptyPrompt
-              iconType="logoElasticsearch"
-              title={
-                <h2>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingTitle"
-                    defaultMessage="Your cluster is upgrading"
-                  />
-                </h2>
-              }
-              body={
-                <p>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingDescription"
-                    defaultMessage="One or more Elasticsearch nodes have a newer version of
-                      Elasticsearch than Kibana. Once all your nodes are upgraded, upgrade Kibana."
-                  />
-                </p>
-              }
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      );
-    } else if (clusterUpgradeState === ClusterUpgradeState.upgraded) {
-      return (
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <EuiEmptyPrompt
-              iconType="logoElasticsearch"
-              title={
-                <h2>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteTitle"
-                    defaultMessage="Your cluster has been upgraded"
-                  />
-                </h2>
-              }
-              body={
-                <p>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteDescription"
-                    defaultMessage="All Elasticsearch nodes have been upgraded. You may now upgrade Kibana."
-                  />
-                </p>
-              }
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      );
-    }
-
-    return (
-      <EuiTabbedContent
-        data-test-subj={
-          telemetryState === TelemetryState.Running ? 'upgradeAssistantTelemetryRunning' : undefined
-        }
-        tabs={tabs}
-        onTabClick={this.onTabClick}
-        selectedTab={tabs[selectedTabIndex]}
-      />
-    );
-  }
-
-  private onTabClick = (selectedTab: EuiTabbedContentTab) => {
-    const selectedTabIndex = findIndex(this.tabs, { id: selectedTab.id });
-    if (selectedTabIndex === -1) {
-      throw new Error(`Clicked tab did not exist in tabs array`);
-    }
-
-    // Send telemetry info about the current selected tab
-    // only in case the clicked tab id it's different from the
-    // current selected tab id
-    if (this.tabs[this.state.selectedTabIndex].id !== selectedTab.id) {
-      this.sendTelemetryInfo(selectedTab.id);
-    }
-
-    this.setSelectedTabIndex(selectedTabIndex);
-  };
-
-  private setSelectedTabIndex = (selectedTabIndex: number) => {
-    this.setState({ selectedTabIndex });
-  };
-
-  private loadData = async () => {
-    try {
-      this.setState({ loadingState: LoadingState.Loading });
-      const resp = await this.props.http.get('/api/upgrade_assistant/status');
-      this.setState({
-        loadingState: LoadingState.Success,
-        checkupData: resp,
-      });
-    } catch (e) {
-      if (get(e, 'response.status') === 426) {
-        this.setState({
-          loadingState: LoadingState.Success,
-          clusterUpgradeState: get(e, 'response.data.attributes.allNodesUpgraded', false)
-            ? ClusterUpgradeState.upgraded
-            : ClusterUpgradeState.partiallyUpgraded,
-        });
-      } else {
-        this.setState({ loadingState: LoadingState.Error, loadingError: e });
-      }
-    }
-  };
-
-  private get tabs() {
-    const { loadingError, loadingState, checkupData } = this.state;
-    const commonProps: UpgradeAssistantTabProps = {
-      loadingError,
-      loadingState,
-      refreshCheckupData: this.loadData,
-      setSelectedTabIndex: this.setSelectedTabIndex,
-      // Remove this in last minor of the current major (eg. 6.7)
+  const tabs = useMemo(() => {
+    const commonTabProps: UpgradeAssistantTabProps = {
+      loadingError: error,
+      isLoading,
+      refreshCheckupData: resendRequest,
+      setSelectedTabIndex,
+      // Remove this in last minor of the current major (e.g., 7.15)
       alertBanner: <LatestMinorBanner />,
     };
 
@@ -194,7 +58,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
         name: i18n.translate('xpack.upgradeAssistant.overviewTab.overviewTabTitle', {
           defaultMessage: 'Overview',
         }),
-        content: <OverviewTab checkupData={checkupData} {...commonProps} />,
+        content: <OverviewTab checkupData={checkupData} {...commonTabProps} />,
       },
       {
         id: 'cluster',
@@ -209,7 +73,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
             checkupLabel={i18n.translate('xpack.upgradeAssistant.tabs.checkupTab.clusterLabel', {
               defaultMessage: 'cluster',
             })}
-            {...commonProps}
+            {...commonTabProps}
           />
         ),
       },
@@ -227,27 +91,112 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
               defaultMessage: 'index',
             })}
             showBackupWarning
-            {...commonProps}
+            {...commonTabProps}
           />
         ),
       },
     ];
-  }
+  }, [checkupData, error, isLoading, resendRequest]);
 
-  private async sendTelemetryInfo(tabName: string) {
-    // In case we don't have any data yet, we wanna to ignore the
-    // telemetry info update
-    if (this.state.loadingState !== LoadingState.Success) {
-      return;
+  useEffect(() => {
+    if (error?.statusCode === 426) {
+      setClusterUpgradeState(
+        error.attributes?.allNodesUpgraded
+          ? ClusterUpgradeState.upgraded
+          : ClusterUpgradeState.partiallyUpgraded
+      );
     }
+  }, [error]);
 
-    this.setState({ telemetryState: TelemetryState.Running });
+  const tabName = tabs[selectedTabIndex].id;
 
-    await this.props.http.fetch('/api/upgrade_assistant/stats/ui_open', {
-      method: 'PUT',
-      body: JSON.stringify(set({}, tabName, true)),
-    });
+  useEffect(() => {
+    if (isLoading === false) {
+      setTelemetryState(TelemetryState.Running);
 
-    this.setState({ telemetryState: TelemetryState.Complete });
+      async function sendTelemetryData() {
+        await api.sendTelemetryData({
+          [tabName]: true,
+        });
+      }
+
+      sendTelemetryData();
+
+      setTelemetryState(TelemetryState.Complete);
+    }
+  }, [api, selectedTabIndex, tabName, isLoading]);
+
+  const onTabClick = (selectedTab: EuiTabbedContentTab) => {
+    const newSelectedTabIndex = findIndex(tabs, { id: selectedTab.id });
+    if (selectedTabIndex === -1) {
+      throw new Error(`Clicked tab did not exist in tabs array`);
+    }
+    setSelectedTabIndex(newSelectedTabIndex);
+  };
+
+  if (clusterUpgradeState === ClusterUpgradeState.partiallyUpgraded) {
+    return (
+      <EuiPageContent>
+        <EuiPageContentBody>
+          <EuiEmptyPrompt
+            iconType="logoElasticsearch"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingTitle"
+                  defaultMessage="Your cluster is upgrading"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingDescription"
+                  defaultMessage="One or more Elasticsearch nodes have a newer version of
+                      Elasticsearch than Kibana. Once all your nodes are upgraded, upgrade Kibana."
+                />
+              </p>
+            }
+          />
+        </EuiPageContentBody>
+      </EuiPageContent>
+    );
+  } else if (clusterUpgradeState === ClusterUpgradeState.upgraded) {
+    return (
+      <EuiPageContent>
+        <EuiPageContentBody>
+          <EuiEmptyPrompt
+            iconType="logoElasticsearch"
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteTitle"
+                  defaultMessage="Your cluster has been upgraded"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteDescription"
+                  defaultMessage="All Elasticsearch nodes have been upgraded. You may now upgrade Kibana."
+                />
+              </p>
+            }
+          />
+        </EuiPageContentBody>
+      </EuiPageContent>
+    );
   }
-}
+
+  return (
+    <EuiTabbedContent
+      data-test-subj={
+        telemetryState === TelemetryState.Running ? 'upgradeAssistantTelemetryRunning' : undefined
+      }
+      tabs={tabs}
+      onTabClick={onTabClick}
+      selectedTab={tabs[selectedTabIndex]}
+    />
+  );
+};
