@@ -3706,7 +3706,83 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "id": "def-common.buildExceptionFilter",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-common.buildExceptionFilter.{\n- lists,\n  excludeExceptions,\n  chunkSize,\n}",
+            "type": "Object",
+            "label": "{\n  lists,\n  excludeExceptions,\n  chunkSize,\n}",
+            "tags": [],
+            "description": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-common.buildExceptionFilter.{\n- lists,\n  excludeExceptions,\n  chunkSize,\n}.lists",
+                "type": "Array",
+                "label": "lists",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
+                  "lineNumber": 74
+                },
+                "signature": [
+                  "(({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) | { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; })[]"
+                ]
+              },
+              {
+                "tags": [],
+                "id": "def-common.buildExceptionFilter.{\n- lists,\n  excludeExceptions,\n  chunkSize,\n}.excludeExceptions",
+                "type": "boolean",
+                "label": "excludeExceptions",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
+                  "lineNumber": 75
+                }
+              },
+              {
+                "tags": [],
+                "id": "def-common.buildExceptionFilter.{\n- lists,\n  excludeExceptions,\n  chunkSize,\n}.chunkSize",
+                "type": "number",
+                "label": "chunkSize",
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
+                  "lineNumber": 76
+                }
+              }
+            ],
+            "source": {
+              "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
+              "lineNumber": 73
+            }
+          }
+        ],
+        "signature": [
+          "({ lists, excludeExceptions, chunkSize, }: { lists: (({ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; list_id: string; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }) | { _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; })[]; excludeExceptions: boolean; chunkSize: number; }) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          " | undefined"
+        ],
+        "description": [],
+        "label": "buildExceptionFilter",
+        "source": {
+          "path": "x-pack/plugins/lists/common/exceptions/build_exceptions_filter.ts",
+          "lineNumber": 69
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [
       {

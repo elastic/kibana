@@ -25,7 +25,7 @@ import {
   DefaultAllocationNotice,
   DefaultAllocationWarning,
   NoNodeAttributesWarning,
-  MissingColdTierCallout,
+  MissingCloudTierCallout,
   CloudDataTierCallout,
   LoadingError,
 } from './components';
@@ -71,17 +71,21 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
     switch (allocationType) {
       case 'node_roles':
         /**
-         * We'll drive Cloud users to add a cold tier to their deployment if there are no nodes with the cold node role.
+         * We'll drive Cloud users to add a cold or frozen tier to their deployment if there are no nodes with that role.
          */
-        if (isCloudEnabled && phase === 'cold' && !isUsingDeprecatedDataRoleConfig) {
-          const hasNoNodesWithNodeRole = !nodesByRoles.data_cold?.length;
+        if (
+          isCloudEnabled &&
+          !isUsingDeprecatedDataRoleConfig &&
+          (phase === 'cold' || phase === 'frozen')
+        ) {
+          const hasNoNodesWithNodeRole = !nodesByRoles[`data_${phase}` as const]?.length;
 
           if (hasDataNodeRoles && hasNoNodesWithNodeRole) {
             // Tell cloud users they can deploy nodes on cloud.
             return (
               <>
                 <EuiSpacer size="s" />
-                <MissingColdTierCallout linkToCloudDeployment={cloudDeploymentUrl} />
+                <MissingCloudTierCallout phase={phase} linkToCloudDeployment={cloudDeploymentUrl} />
               </>
             );
           }
