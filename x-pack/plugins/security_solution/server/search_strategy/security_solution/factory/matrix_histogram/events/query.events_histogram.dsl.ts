@@ -43,7 +43,7 @@ export const buildEventsHistogramQuery = ({
       date_histogram: {
         field: histogramTimestampField,
         fixed_interval: interval,
-        min_doc_count: threshold?.value ?? 0,
+        min_doc_count: threshold != null ? Number(threshold?.value) : 0,
         extended_bounds: {
           min: moment(from).valueOf(),
           max: moment(to).valueOf(),
@@ -75,17 +75,21 @@ export const buildEventsHistogramQuery = ({
       const baseQuery = buildThresholdTermsQuery({
         query,
         fields: threshold.field ?? [],
-        value: threshold.value,
         stackByField,
         missing,
       });
-      const enrichedQuery = buildThresholdCardinalityQuery({
-        query: baseQuery,
-        cardinalityField: threshold.cardinality.field[0],
-        cardinalityValue: threshold.cardinality.value,
-      });
 
-      return enrichedQuery;
+      if (threshold.cardinality != null) {
+        const enrichedQuery = buildThresholdCardinalityQuery({
+          query: baseQuery,
+          cardinalityField: threshold.cardinality.field[0],
+          cardinalityValue: threshold.cardinality.value,
+        });
+
+        return enrichedQuery;
+      }
+
+      return baseQuery;
     }
 
     return {

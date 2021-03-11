@@ -42,13 +42,11 @@ export interface BaseQuery {
 export const buildThresholdTermsQuery = ({
   query,
   fields,
-  value,
   stackByField,
   missing,
 }: {
   query: BaseQuery;
   fields: string[];
-  value: number;
   stackByField: string;
   missing: { missing?: string };
 }): BaseQuery => {
@@ -86,9 +84,9 @@ export const buildThresholdCardinalityQuery = ({
 }: {
   query: BaseQuery;
   cardinalityField: string | undefined;
-  cardinalityValue: number;
+  cardinalityValue: string;
 }): BaseQuery => {
-  if (cardinalityField != null && cardinalityField !== '' && cardinalityValue > 0) {
+  if (cardinalityField != null && cardinalityField !== '' && cardinalityValue !== '') {
     return {
       eventActionGroup: {
         ...query.eventActionGroup,

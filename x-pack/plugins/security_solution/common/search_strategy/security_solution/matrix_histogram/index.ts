@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Threshold } from '../../../public/detections/components/rules/query_preview';
 import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
 import { AuthenticationHit } from '../hosts';
 import { Inspect, Maybe, TimerangeInput } from '../../common';
@@ -37,7 +36,16 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
   histogramType: MatrixHistogramType;
   stackByField: string;
-  threshold?: Threshold;
+  threshold?:
+    | {
+        field: string[];
+        value: string;
+        cardinality?: {
+          field: string[];
+          value: string;
+        };
+      }
+    | undefined;
   inspect?: Maybe<Inspect>;
   isPtrIncluded?: boolean;
 }

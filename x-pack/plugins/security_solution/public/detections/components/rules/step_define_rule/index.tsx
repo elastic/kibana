@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
@@ -34,7 +34,7 @@ import { MlJobSelect } from '../ml_job_select';
 import { PickTimeline } from '../pick_timeline';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
-import { FieldValueThreshold, ThresholdInput } from '../threshold_input';
+import { ThresholdInput } from '../threshold_input';
 import {
   Field,
   Form,
@@ -54,7 +54,7 @@ import {
 import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
-import { PreviewQuery, Threshold } from '../query_preview';
+import { PreviewQuery } from '../query_preview';
 
 const CommonUseField = getUseField({ component: Field });
 

@@ -19,23 +19,22 @@ describe('buildEventsHistogramQuery', () => {
     expect(buildEventsHistogramQuery(mockOptions)).toEqual(expectedDsl);
   });
 
-  test('builds query with just min doc if "threshold.field" is undefined and "missing" param included', () => {
+  test('builds query with just min doc if "threshold.field" is empty array and "missing" param included', () => {
     expect(
       buildEventsHistogramQuery({
         ...mockOptions,
-        threshold: { field: undefined, value: 200, cardinality: { field: [], value: 0 } },
+        threshold: { field: [], value: '200', cardinality: { field: [], value: '0' } },
       })
     ).toEqual(expectedThresholdMissingFieldDsl);
   });
 
-  test('builds query with specified threshold fields and without "missing" param if "threshold.field" is defined', () => {
+  test('builds query with specified threshold fields and without "missing" param if "threshold.field" is multi field', () => {
     expect(
       buildEventsHistogramQuery({
         ...mockOptions,
         threshold: {
           field: ['host.name', 'agent.name'],
-          value: 200,
-          cardinality: { field: [], value: 0 },
+          value: '200',
         },
       })
     ).toEqual(expectedThresholdDsl);
@@ -47,8 +46,8 @@ describe('buildEventsHistogramQuery', () => {
         ...mockOptions,
         threshold: {
           field: [],
-          value: 200,
-          cardinality: { field: ['agent.name'], value: 10 },
+          value: '200',
+          cardinality: { field: ['agent.name'], value: '10' },
         },
       })
     ).toEqual(expectedThresholdWithCardinalityDsl);
@@ -60,8 +59,8 @@ describe('buildEventsHistogramQuery', () => {
         ...mockOptions,
         threshold: {
           field: ['host.name', 'agent.name'],
-          value: 200,
-          cardinality: { field: ['agent.name'], value: 10 },
+          value: '200',
+          cardinality: { field: ['agent.name'], value: '10' },
         },
       })
     ).toEqual({

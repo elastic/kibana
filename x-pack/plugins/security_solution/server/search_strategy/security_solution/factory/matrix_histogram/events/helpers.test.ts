@@ -39,7 +39,6 @@ describe('buildEventsHistogramQuery - helpers', () => {
       const query = buildThresholdTermsQuery({
         query: BASE_QUERY,
         fields: ['agent.name', 'host.name'],
-        value: 200,
         stackByField: STACK_BY_FIELD,
         missing: {},
       });
@@ -56,7 +55,6 @@ describe('buildEventsHistogramQuery - helpers', () => {
             },
           },
           terms: {
-            min_doc_count: 200,
             order: { _count: 'desc' },
             script: {
               lang: 'painless',
@@ -72,7 +70,6 @@ describe('buildEventsHistogramQuery - helpers', () => {
       const query = buildThresholdTermsQuery({
         query: BASE_QUERY,
         fields: [],
-        value: 200,
         stackByField: STACK_BY_FIELD,
         missing: { missing: 'All others' },
       });
@@ -90,7 +87,6 @@ describe('buildEventsHistogramQuery - helpers', () => {
           },
           terms: {
             field: 'event.action',
-            min_doc_count: 200,
             missing: 'All others',
             order: { _count: 'desc' },
             size: 10,
@@ -126,7 +122,7 @@ describe('buildEventsHistogramQuery - helpers', () => {
       const query = buildThresholdCardinalityQuery({
         query: TERMS_QUERY,
         cardinalityField: 'agent.name',
-        cardinalityValue: 100,
+        cardinalityValue: '100',
       });
       expect(query).toEqual({
         eventActionGroup: {
@@ -156,7 +152,7 @@ describe('buildEventsHistogramQuery - helpers', () => {
       const query = buildThresholdCardinalityQuery({
         query: TERMS_QUERY,
         cardinalityField: '',
-        cardinalityValue: 0,
+        cardinalityValue: '',
       });
       expect(query).toEqual({
         eventActionGroup: {
