@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../../types';
+import { ActionConnectorWithoutId, ActionType } from '../../../types';
 import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
 import {
   createActionConnector,
