@@ -89,9 +89,13 @@ export class Authorization {
   }
 
   public async ensureAuthorized(classes: string[], operation: ReadOperations | WriteOperations) {
+    const { securityAuth } = this;
     // TODO: throw if the request is not authorized
-    if (this.shouldCheckAuthorization()) {
+    if (securityAuth && this.shouldCheckAuthorization()) {
       // TODO: implement ensure logic
+      const requiredPrivileges: string[] = classes.map((className) =>
+        securityAuth.actions.cases.get(className, operation)
+      );
     }
   }
 }
