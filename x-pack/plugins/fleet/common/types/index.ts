@@ -38,6 +38,7 @@ export interface FleetConfigType {
       }>;
     }
   >;
+  packages: string[];
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

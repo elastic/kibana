@@ -101,18 +101,32 @@ export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   esClient: ElasticsearchClient;
+  version?: string;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, esClient } = options;
+  const { savedObjectsClient, pkgName, esClient, version } = options;
   const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
   if (installedPackage) {
     return installedPackage;
   }
   // if the requested packaged was not found to be installed, install
-  await installLatestPackage({
-    savedObjectsClient,
-    pkgName,
-    esClient,
-  });
+  if (version && version !== 'latest') {
+    const pkgkey = Registry.pkgToPkgKey({
+      name: pkgName,
+      version,
+    });
+    await installPackage({
+      installSource: 'registry',
+      savedObjectsClient,
+      pkgkey,
+      esClient,
+    });
+  } else {
+    await installLatestPackage({
+      savedObjectsClient,
+      pkgName,
+      esClient,
+    });
+  }
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new Error(`could not get installation ${pkgName}`);
   return installation;

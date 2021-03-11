@@ -17,8 +17,10 @@ import {
 
 import { FleetPlugin } from './plugin';
 
+// Regex to validate if a package name matches <name>:<semver | "latest">
+// Valid entries include: abc:1.0.2, def:2.10.3-beta, ghi:latest, jkl:3.3.3/subdirectory
 const packageNameWithSemverRegex = () =>
-  /(?<=^v?|\sv?)(.+):(?:(?:0|[1-9]\d*)\.){2}(?:0|[1-9]\d*)(?:-(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*)(?:\.(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*))*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/gi;
+  /(?<=^v?|\sv?)(.+):((?:(?:0|[1-9]\d*)\.){2}(?:0|[1-9]\d*)(?:-(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*)(?:\.(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*))*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b|latest)/gi;
 
 const validatePackageNameWithSemver = (value: string) => {
   if (!packageNameWithSemverRegex().test(value)) {

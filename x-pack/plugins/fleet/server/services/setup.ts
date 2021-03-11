@@ -75,7 +75,13 @@ async function createSetupSideEffects(
     }),
   ]);
 
-  const { policies } = appContextService.getConfig() ?? {};
+  const { policies, packages } = appContextService.getConfig() ?? {};
+  await Promise.all(
+    (packages ?? []).map((packageString) =>
+      ensureInstalledPreconfiguredPackage(soClient, esClient, packageString)
+    )
+  );
+
   const preconfiguredPolicies = await Promise.all(
     (policies ?? []).map(async ({ integrations, ...newAgentPolicy }) => {
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
@@ -161,11 +167,12 @@ async function createSetupSideEffects(
   for (const preconfiguredPolicy of preconfiguredPolicies) {
     const { created, policy, integrations } = preconfiguredPolicy;
     if (created) {
+      const packageStrings = integrations.map((i) => i.package);
       await addPreconfiguredPolicyPackages(
         soClient,
         esClient,
         policy,
-        integrations.map((i) => i.package.split(':')[0]),
+        packageStrings,
         defaultOutput
       );
     }
@@ -184,12 +191,12 @@ async function addPreconfiguredPolicyPackages(
   defaultOutput: Output
 ) {
   return await Promise.all(
-    packages.map(async (pkgName) => {
-      const installedPackage = await ensureInstalledPackage({
-        savedObjectsClient: soClient,
-        pkgName,
+    packages.map(async (packageString) => {
+      const installedPackage = await ensureInstalledPreconfiguredPackage(
+        soClient,
         esClient,
-      });
+        packageString
+      );
       return addPackageToAgentPolicy(
         soClient,
         esClient,
@@ -199,6 +206,22 @@ async function addPreconfiguredPolicyPackages(
       );
     })
   );
+}
+
+async function ensureInstalledPreconfiguredPackage(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  packageString: string
+) {
+  const [pkgName, versionAndSubdirectory] = packageString.split(':');
+  // @ts-ignore
+  const [version, subdirectory] = versionAndSubdirectory.split('/');
+  return ensureInstalledPackage({
+    savedObjectsClient: soClient,
+    pkgName,
+    esClient,
+    version,
+  });
 }
 
 async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {
