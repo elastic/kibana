@@ -12,10 +12,12 @@ import { ROUTES } from '../../../common/constants';
 import { SanitizedFieldType, IndexPatternObject } from '../../../common/types';
 import { getIndexPatternObjectKey } from '../../../common/index_patterns_utils';
 
+export type VisFields = Record<string, SanitizedFieldType[]>;
+
 export async function fetchFields(
   indexes: IndexPatternObject[] = [],
   signal?: AbortSignal
-): Promise<Record<string, SanitizedFieldType[]>> {
+): Promise<VisFields> {
   const patterns = Array.isArray(indexes) ? indexes : [indexes];
   const coreStart = getCoreStart();
   const dataStart = getDataStart();
@@ -37,7 +39,7 @@ export async function fetchFields(
       })
     );
 
-    const fields: Record<string, SanitizedFieldType[]> = patterns.reduce(
+    const fields: VisFields = patterns.reduce(
       (cumulatedFields, currentPattern, index) => ({
         ...cumulatedFields,
         [getIndexPatternObjectKey(currentPattern)]: indexFields[index],

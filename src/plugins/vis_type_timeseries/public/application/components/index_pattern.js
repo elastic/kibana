@@ -8,7 +8,7 @@
 
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useEffect } from 'react';
 import {
   htmlIdGenerator,
   EuiFieldText,
@@ -125,7 +125,9 @@ export const IndexPattern = ({
   );
   const isTimeSeries = model.type === PANEL_TYPES.TIMESERIES;
 
-  updateControlValidity(intervalName, intervalValidation.isValid);
+  useEffect(() => {
+    updateControlValidity(intervalName, intervalValidation.isValid);
+  }, [intervalName, intervalValidation.isValid, updateControlValidity]);
 
   return (
     <div className="index-pattern">
