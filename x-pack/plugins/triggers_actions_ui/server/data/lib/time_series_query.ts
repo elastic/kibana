@@ -134,7 +134,7 @@ export async function timeSeriesQuery(
 
   // console.log('time_series_query.ts request\n', JSON.stringify(esQuery, null, 4));
   try {
-    esResult = (await esClient.search<SearchResponse<unknown>>(esQuery)).body;
+    esResult = (await esClient.search<SearchResponse<unknown>>(esQuery, { ignore: [404] })).body;
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
     logger.warn(`${logPrefix} error: ${err.message}`);

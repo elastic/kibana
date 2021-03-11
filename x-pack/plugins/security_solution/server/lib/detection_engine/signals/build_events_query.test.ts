@@ -62,9 +62,14 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
-      },
-      sort: {
-        '@timestamp': 'asc',
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
       },
     });
   });
@@ -122,9 +127,14 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
-      },
-      sort: {
-        '@timestamp': 'asc',
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
       },
     });
   });
@@ -184,9 +194,14 @@ describe('create_signals', () => {
           },
         ],
         search_after: [fakeSortId],
-      },
-      sort: {
-        '@timestamp': 'asc',
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
       },
     });
   });
@@ -246,9 +261,14 @@ describe('create_signals', () => {
           },
         ],
         search_after: [fakeSortIdNumber],
-      },
-      sort: {
-        '@timestamp': 'asc',
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
       },
     });
   });
@@ -306,9 +326,14 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
-      },
-      sort: {
-        '@timestamp': 'asc',
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
       },
     });
   });
@@ -376,9 +401,14 @@ describe('create_signals', () => {
             },
           },
         },
-      },
-      sort: {
-        '@timestamp': 'asc',
+        sort: [
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
       },
     });
   });

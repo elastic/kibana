@@ -20,9 +20,12 @@ export const deleteAllIndex = async (
     }
 
     // resolve pattern to concrete index names
-    const { body: resp } = await esClient.indices.getAlias({
-      index: pattern,
-    });
+    const { body: resp } = await esClient.indices.getAlias(
+      {
+        index: pattern,
+      },
+      { ignore: [404] }
+    );
 
     if (resp.status === 404) {
       return true;
