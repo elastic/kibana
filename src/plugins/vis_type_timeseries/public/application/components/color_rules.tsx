@@ -15,17 +15,17 @@ import {
   EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { AddDeleteButtons } from './add_delete_buttons';
-// @ts-expect-error not typed yet
 import { collectionActions } from './lib/collection_actions';
 import { ColorPicker, ColorPickerProps } from './color_picker';
-import { TimeseriesVisParams } from '../../types';
+import { ColorRule, TimeseriesVisParams } from '../../types';
 
-interface ColorRulesProps {
+export interface ColorRulesProps {
   name: keyof TimeseriesVisParams;
   model: TimeseriesVisParams;
   onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
@@ -46,54 +46,65 @@ const defaultPrimaryName = i18n.translate('visTypeTimeseries.colorRules.defaultP
   defaultMessage: 'background',
 });
 
+const operatorOptions = [
+  {
+    label: i18n.translate('visTypeTimeseries.colorRules.greaterThanLabel', {
+      defaultMessage: '> greater than',
+    }),
+    value: 'gt',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.colorRules.greaterThanOrEqualLabel', {
+      defaultMessage: '>= greater than or equal',
+    }),
+    value: 'gte',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.colorRules.lessThanLabel', {
+      defaultMessage: '< less than',
+    }),
+    value: 'lt',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.colorRules.lessThanOrEqualLabel', {
+      defaultMessage: '<= less than or equal',
+    }),
+    value: 'lte',
+  },
+];
+
 export class ColorRules extends Component<ColorRulesProps> {
   constructor(props: ColorRulesProps) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
-  handleChange(item, name, cast = String) {
-    return (e) => {
-      const handleChange = collectionActions.handleChange.bind(null, this.props);
-      const part = {};
-      part[name] = cast(_.get(e, '[0].value', _.get(e, 'target.value')));
-      if (part[name] === 'undefined') part[name] = undefined;
-      if (cast === Number && isNaN(part[name])) part[name] = undefined;
-      handleChange(_.assign({}, item, part));
+  handleValueChange(item: ColorRule) {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      let value: number | undefined = Number(e.target.value);
+      if (isNaN(value)) value = undefined;
+      collectionActions.handleChange(this.props, {
+        ...item,
+        value,
+      });
     };
   }
 
-  renderRow(row, i, items) {
+  handleOperatorChange = (item: ColorRule) => {
+    return (options: Array<EuiComboBoxOptionOption<string>>) => {
+      collectionActions.handleChange(this.props, {
+        ...item,
+        operator: options[0].value,
+      });
+    };
+  };
+
+  renderRow(row: ColorRule, i: number, items: ColorRule[]) {
     const defaults = { value: 0 };
     const model = { ...defaults, ...row };
     const handleAdd = () => collectionActions.handleAdd(this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const operatorOptions = [
-      {
-        label: i18n.translate('visTypeTimeseries.colorRules.greaterThanLabel', {
-          defaultMessage: '> greater than',
-        }),
-        value: 'gt',
-      },
-      {
-        label: i18n.translate('visTypeTimeseries.colorRules.greaterThanOrEqualLabel', {
-          defaultMessage: '>= greater than or equal',
-        }),
-        value: 'gte',
-      },
-      {
-        label: i18n.translate('visTypeTimeseries.colorRules.lessThanLabel', {
-          defaultMessage: '< less than',
-        }),
-        value: 'lt',
-      },
-      {
-        label: i18n.translate('visTypeTimeseries.colorRules.lessThanOrEqualLabel', {
-          defaultMessage: '<= less than or equal',
-        }),
-        value: 'lte',
-      },
-    ];
+
     const handleColorChange: ColorPickerProps['onChange'] = (part) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       handleChange(_.assign({}, model, part));
@@ -107,6 +118,7 @@ export class ColorRules extends Component<ColorRulesProps> {
 
     let secondary;
     if (!this.props.hideSecondary) {
+      const secondaryVarName = this.props.secondaryVarName ?? 'color';
       secondary = (
         <Fragment>
           <EuiFlexItem grow={false}>
@@ -123,8 +135,8 @@ export class ColorRules extends Component<ColorRulesProps> {
           <EuiFlexItem grow={false}>
             <ColorPicker
               onChange={handleColorChange}
-              name={this.props.secondaryVarName ?? 'color'}
-              value={model[this.props.secondaryVarName ?? 'color']}
+              name={secondaryVarName}
+              value={model[secondaryVarName as keyof ColorRule] as string | undefined}
             />
           </EuiFlexItem>
         </Fragment>
@@ -154,7 +166,11 @@ export class ColorRules extends Component<ColorRulesProps> {
           <ColorPicker
             onChange={handleColorChange}
             name={this.props.primaryVarName ?? 'background_color'}
-            value={model[this.props.primaryVarName ?? 'background_color']}
+            value={
+              model[(this.props.primaryVarName ?? 'background_color') as keyof ColorRule] as
+                | string
+                | undefined
+            }
           />
         </EuiFlexItem>
 
@@ -175,7 +191,7 @@ export class ColorRules extends Component<ColorRulesProps> {
             id={htmlId('ifMetricIs')}
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
-            onChange={this.handleChange(model, 'operator')}
+            onChange={this.handleOperatorChange(model)}
             singleSelection={{ asPlainText: true }}
             data-test-subj="colorRuleOperator"
             fullWidth
@@ -187,8 +203,8 @@ export class ColorRules extends Component<ColorRulesProps> {
             aria-label={i18n.translate('visTypeTimeseries.colorRules.valueAriaLabel', {
               defaultMessage: 'Value',
             })}
-            value={model.value}
-            onChange={this.handleChange(model, 'value', Number)}
+            value={model.value ?? ''}
+            onChange={this.handleValueChange(model)}
             data-test-subj="colorRuleValue"
             fullWidth
           />
@@ -209,7 +225,7 @@ export class ColorRules extends Component<ColorRulesProps> {
   render() {
     const { model, name } = this.props;
     if (!model[name]) return <div />;
-    const rows = (model[name] as any[]).map(this.renderRow);
+    const rows = (model[name] as ColorRule[]).map(this.renderRow);
     return <div>{rows}</div>;
   }
 }
