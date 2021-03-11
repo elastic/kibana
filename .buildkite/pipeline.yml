@@ -14,7 +14,7 @@ steps:
     agents:
       queue: ci-group
   - wait
-  - command: scripts/jest --ci --verbose
+  - command: node scripts/jest --ci --verbose
     label: 'Jest'
     agents:
       queue: ci-group
