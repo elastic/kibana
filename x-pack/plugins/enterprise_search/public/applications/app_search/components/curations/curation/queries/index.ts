@@ -6,3 +6,4 @@
  */
 
 export { ActiveQuerySelect } from './active_query_select';
+export { ManageQueriesModal } from './manage_queries_modal';
