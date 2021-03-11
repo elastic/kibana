@@ -13,6 +13,7 @@ import uuid from 'uuid';
 
 import * as i18n from './translations';
 import {
+  AlertData,
   BuilderEntry,
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
@@ -38,6 +39,8 @@ import {
   UpdateExceptionListItemSchema,
   EntryNested,
   OsTypeArray,
+  EntriesArray,
+  osType,
 } from '../../../shared_imports';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { validate } from '../../../../common/validate';
@@ -45,6 +48,19 @@ import { Ecs } from '../../../../common/ecs';
 import { CodeSignature } from '../../../../common/ecs/file';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { addIdToItem, removeIdFromItem } from '../../../../common';
+
+export const addIdToEntries = (entries: EntriesArray): EntriesArray => {
+  return entries.map((singleEntry) => {
+    if (singleEntry.type === 'nested') {
+      return addIdToItem({
+        ...singleEntry,
+        entries: singleEntry.entries.map((nestedEntry) => addIdToItem(nestedEntry)),
+      });
+    } else {
+      return addIdToItem(singleEntry);
+    }
+  });
+};
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -150,14 +166,14 @@ export const getNewExceptionItem = ({
   return {
     comments: [],
     description: `${ruleName} - exception list item`,
-    entries: [
-      addIdToItem({
+    entries: addIdToEntries([
+      {
         field: '',
         operator: 'included',
         type: 'match',
         value: '',
-      }),
-    ],
+      },
+    ]),
     item_id: undefined,
     list_id: listId,
     meta: {
@@ -345,6 +361,17 @@ export const enrichExceptionItemsWithOS = (
   });
 };
 
+export const retrieveAlertOsTypes = (alertData?: AlertData): OsTypeArray => {
+  const osDefaults: OsTypeArray = ['windows', 'macos'];
+  if (alertData != null) {
+    const os = alertData.host && alertData.host.os && alertData.host.os.family;
+    if (os != null) {
+      return osType.is(os) ? [os] : osDefaults;
+    }
+  }
+  return osDefaults;
+};
+
 /**
  * Returns given exceptionItems with all hash-related entries lowercased
  */
@@ -464,7 +491,7 @@ export const getPrepopulatedEndpointException = ({
   const sha256Hash = file?.hash?.sha256 ?? '';
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
-    entries: [
+    entries: addIdToEntries([
       {
         field: 'file.Ext.code_signature',
         type: 'nested',
@@ -501,7 +528,7 @@ export const getPrepopulatedEndpointException = ({
         type: 'match',
         value: eventCode ?? '',
       },
-    ],
+    ]),
   };
 };
 
@@ -529,7 +556,7 @@ export const getPrepopulatedRansomwareException = ({
   const ransomwareFeature = Ransomware?.feature ?? '';
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
-    entries: [
+    entries: addIdToEntries([
       {
         field: 'process.Ext.code_signature',
         type: 'nested',
@@ -572,7 +599,7 @@ export const getPrepopulatedRansomwareException = ({
         type: 'match',
         value: eventCode ?? '',
       },
-    ],
+    ]),
   };
 };
 

@@ -107,3 +107,25 @@ export const MANAGE_ROLE_MAPPING_BUTTON = i18n.translate(
     defaultMessage: 'Manage',
   }
 );
+
+export const ROLE_MAPPINGS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingsTitle',
+  {
+    defaultMessage: 'Users & roles',
+  }
+);
+
+export const EMPTY_ROLE_MAPPINGS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.emptyRoleMappingsTitle',
+  {
+    defaultMessage: 'No role mappings yet',
+  }
+);
+
+export const ROLE_MAPPINGS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.roleMapping.roleMappingsDescription',
+  {
+    defaultMessage:
+      'Define role mappings for elasticsearch-native and elasticsearch-saml authentication.',
+  }
+);

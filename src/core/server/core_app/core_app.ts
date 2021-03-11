@@ -16,9 +16,11 @@ import { Logger } from '../logging';
 /** @internal */
 export class CoreApp {
   private readonly logger: Logger;
+
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-app');
   }
+
   setup(coreSetup: InternalCoreSetup) {
     this.logger.debug('Setting up core app.');
     this.registerDefaultRoutes(coreSetup);
@@ -27,7 +29,9 @@ export class CoreApp {
 
   private registerDefaultRoutes(coreSetup: InternalCoreSetup) {
     const httpSetup = coreSetup.http;
-    const router = httpSetup.createRouter('/');
+    const router = httpSetup.createRouter('');
+    const resources = coreSetup.httpResources.createRegistrar(router);
+
     router.get({ path: '/', validate: false }, async (context, req, res) => {
       const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
       const basePath = httpSetup.basePath.get(req);
@@ -39,12 +43,26 @@ export class CoreApp {
         },
       });
     });
+
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
 
+    resources.register(
+      {
+        path: '/app/{id}/{any*}',
+        validate: false,
+        options: {
+          authRequired: true,
+        },
+      },
+      async (context, request, response) => {
+        return response.renderCoreApp();
+      }
+    );
+
     const anonymousStatusPage = coreSetup.status.isStatusPageAnonymous();
-    coreSetup.httpResources.createRegistrar(router).register(
+    resources.register(
       {
         path: '/status',
         validate: false,
@@ -61,6 +79,7 @@ export class CoreApp {
       }
     );
   }
+
   private registerStaticDirs(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
 

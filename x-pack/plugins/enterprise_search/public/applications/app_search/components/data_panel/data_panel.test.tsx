@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 
 import { EuiIcon, EuiButton } from '@elastic/eui';
 
+import { LoadingOverlay } from '../../../shared/loading';
+
 import { DataPanel } from './data_panel';
 
 describe('DataPanel', () => {
@@ -78,6 +80,18 @@ describe('DataPanel', () => {
 
       expect(wrapper.prop('color')).toEqual('subdued');
       expect(wrapper.prop('className')).toEqual('dataPanel dataPanel--filled');
+    });
+
+    it('renders a loading overlay based on isLoading flag', () => {
+      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
+
+      expect(wrapper.prop('aria-busy')).toBeFalsy();
+      expect(wrapper.find(LoadingOverlay)).toHaveLength(0);
+
+      wrapper.setProps({ isLoading: true });
+
+      expect(wrapper.prop('aria-busy')).toBeTruthy();
+      expect(wrapper.find(LoadingOverlay)).toHaveLength(1);
     });
 
     it('passes class names', () => {

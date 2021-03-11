@@ -88,7 +88,7 @@ reports, you might need to change the following settings.
   Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
 
 | `xpack.reporting.queue.pollEnabled` {ess-icon}
-  | Set to `true` (default) to enable the {kib} instance to to poll the index for
+  | Set to `true` (default) to enable the {kib} instance to poll the index for
   pending jobs and claim them for execution. Setting this to `false` allows the
   {kib} instance to only add new jobs to the reporting queue, list jobs, and
   provide the downloads to completed report through the UI.
