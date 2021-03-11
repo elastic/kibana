@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContext } from '../../data/public';
 import { ExpressionFunctionDefinition, Render } from '../../expressions/public';
 
-import { PanelSchema, TimeseriesVisData } from '../common/types';
+import { TimeseriesVisData } from '../common/types';
 import { metricsRequestHandler } from './request_handler';
+import { TimeseriesVisParams } from './types';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimeseriesRenderValue>>;
@@ -20,8 +21,6 @@ interface Arguments {
   params: string;
   uiState: string;
 }
-
-export type TimeseriesVisParams = PanelSchema;
 
 export interface TimeseriesRenderValue {
   visData: TimeseriesVisData | {};
