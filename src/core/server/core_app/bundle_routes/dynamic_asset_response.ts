@@ -6,68 +6,20 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
+import { createReadStream } from 'fs';
 import { resolve, extname } from 'path';
 import mime from 'mime-types';
-import { promisify } from 'util';
-import Accept from 'accept';
-
 import agent from 'elastic-apm-node';
+
+import { fstat, close } from './fs';
 import { RequestHandler } from '../../http';
 import { FileHashCache } from './file_hash_cache';
 import { getFileHash } from './file_hash';
+import { selectCompressedFile } from './select_compressed_file';
 
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
-
-const asyncOpen = promisify(Fs.open);
-const asyncClose = promisify(Fs.close);
-const asyncFstat = promisify(Fs.fstat);
-
-declare module 'accept' {
-  // @types/accept does not include the `preferences` argument so we override the type to include it
-  export function encodings(encodingHeader?: string, preferences?: string[]): string[];
-}
-
-async function tryToOpenFile(filePath: string) {
-  try {
-    return await asyncOpen(filePath, 'r');
-  } catch (e) {
-    if (e.code === 'ENOENT') {
-      return undefined;
-    } else {
-      throw e;
-    }
-  }
-}
-
-async function selectCompressedFile(acceptEncodingHeader: string | undefined, path: string) {
-  let fd: number | undefined;
-  let fileEncoding: 'gzip' | 'br' | undefined;
-  const ext = extname(path);
-
-  const supportedEncodings = Accept.encodings(acceptEncodingHeader, ['br', 'gzip']);
-
-  if (ext === '.js' || ext === '.css') {
-    if (supportedEncodings[0] === 'br') {
-      fileEncoding = 'br';
-      fd = await tryToOpenFile(`${path}.br`);
-    }
-    if (!fd && supportedEncodings.includes('gzip')) {
-      fileEncoding = 'gzip';
-      fd = await tryToOpenFile(`${path}.gz`);
-    }
-  }
-
-  if (!fd) {
-    fileEncoding = undefined;
-    // Use raw open to trigger exception if it does not exist
-    fd = await asyncOpen(path, 'r');
-  }
-
-  return { fd, fileEncoding };
-}
 
 /**
  *  Create a Hapi response for the requested path. This is designed
@@ -125,13 +77,14 @@ export const createDynamicAssetHandler = ({
       if (isDist) {
         headers = { 'cache-control': `max-age=${365 * DAY}` };
       } else {
-        const stat = await asyncFstat(fd);
+        const stat = await fstat(fd);
         const hash = await getFileHash(fileHashCache, path, stat, fd);
         headers = {
           etag: `${hash}-${publicPath}`,
           'cache-control': 'must-revalidate',
         };
       }
+
       // If we manually selected a compressed file, specify the encoding header.
       // Otherwise, let Hapi automatically gzip the response.
       if (fileEncoding) {
@@ -143,12 +96,11 @@ export const createDynamicAssetHandler = ({
       const mediaType = mime.contentType(contentType || fileExt);
       headers['content-type'] = mediaType || '';
 
-      const content = Fs.createReadStream(null as any, {
+      const content = createReadStream(null as any, {
         fd,
         start: 0,
         autoClose: true,
       });
-      fd = undefined; // read stream is now responsible for fd
 
       return res.ok({
         body: content,
@@ -157,7 +109,7 @@ export const createDynamicAssetHandler = ({
     } catch (error) {
       if (fd) {
         try {
-          await asyncClose(fd);
+          await close(fd);
         } catch (_) {
           // ignore errors from close, we already have one to report
           // and it's very likely they are the same

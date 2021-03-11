@@ -8,6 +8,7 @@
 
 import LruCache from 'lru-cache';
 
+/** @internal */
 export class FileHashCache {
   private lru = new LruCache<string, Promise<string>>(100);
 

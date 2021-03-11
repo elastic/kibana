@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { registerBundleRoutes } from './register_bundle_routes';
+module.exports = 'GZIP-CHUNK';
