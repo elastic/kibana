@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export {
-  migratePackagePolicyToV7110,
-  migratePackagePolicyToV7120,
-} from '../../../security_solution/common';
+import { ROLE_MAPPING_PATH } from '../../routes';
+import { generateEncodedPath } from '../../utils/encode_path_params';
+
+export const generateRoleMappingPath = (roleId: string) =>
+  generateEncodedPath(ROLE_MAPPING_PATH, { roleId });
