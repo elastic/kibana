@@ -26,7 +26,7 @@ const MAX_SERIES_ALLOWED = 48;
 export interface AnomalyExplorerInitializerProps {
   defaultTitle: string;
   initialInput?: Partial<Pick<AnomalyExplorerEmbeddableInput, 'jobIds' | 'maxSeriesToPlot'>>;
-  onCreate: (swimlaneProps: { panelTitle: string; maxSeriesToPlot?: number }) => void;
+  onCreate: (props: { panelTitle: string; maxSeriesToPlot?: number }) => void;
   onCancel: () => void;
 }
 
@@ -46,7 +46,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
-            id="xpack.ml.swimlaneEmbeddable.setupModal.title"
+            id="xpack.ml.anomalyExplorerEmbeddable.setupModal.title"
             defaultMessage="Anomaly explorer configuration"
           />
         </EuiModalHeaderTitle>
@@ -57,7 +57,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.swimlaneEmbeddable.panelTitleLabel"
+                id="xpack.ml.anomalyExplorerEmbeddable.panelTitleLabel"
                 defaultMessage="Panel title"
               />
             }
@@ -75,7 +75,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.explorer.maxSeriesToPlotLabel"
+                id="xpack.ml.anomalyExplorerEmbeddable.maxSeriesToPlotLabel"
                 defaultMessage="Max series to plot"
               />
             }
@@ -95,7 +95,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel}>
           <FormattedMessage
-            id="xpack.ml.swimlaneEmbeddable.setupModal.cancelButtonLabel"
+            id="xpack.ml.anomalyExplorerEmbeddable.setupModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -109,7 +109,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           fill
         >
           <FormattedMessage
-            id="xpack.ml.swimlaneEmbeddable.setupModal.confirmButtonLabel"
+            id="xpack.ml.anomalyExplorerEmbeddable.setupModal.confirmButtonLabel"
             defaultMessage="Confirm"
           />
         </EuiButton>

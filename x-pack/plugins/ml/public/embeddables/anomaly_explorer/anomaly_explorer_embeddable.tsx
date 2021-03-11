@@ -23,7 +23,7 @@ import {
 } from '..';
 
 export const getDefaultPanelTitle = (jobIds: JobId[]) =>
-  i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
+  i18n.translate('xpack.ml.anomalyExplorerEmbeddable.title', {
     defaultMessage: 'ML anomaly explorer for {jobIds}',
     values: { jobIds: jobIds.join(', ') },
   });

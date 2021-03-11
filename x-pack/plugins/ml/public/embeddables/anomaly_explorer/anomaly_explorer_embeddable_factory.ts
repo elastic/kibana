@@ -36,7 +36,7 @@ export class AnomalyExplorerEmbeddableFactory
   }
 
   public getDisplayName() {
-    return i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
+    return i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
       defaultMessage: 'ML Anomaly Explorer',
     });
   }

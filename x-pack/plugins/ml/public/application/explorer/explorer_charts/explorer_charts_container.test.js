@@ -19,17 +19,6 @@ import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
 
-// Mock TimeBuckets and mlFieldFormatService, they don't play well
-// with the jest based test setup yet.
-jest.mock('../../util/time_buckets', () => ({
-  getTimeBucketsFromCache: jest.fn(() => {
-    return {
-      setBounds: jest.fn(),
-      setInterval: jest.fn(),
-      getScaledDateFormat: jest.fn(),
-    };
-  }),
-}));
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
     getFieldFormat: jest.fn(),
@@ -47,13 +36,18 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
   },
 }));
 
-describe('ExplorerChartsContainer', () => {
-  const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
-  const originalGetBBox = SVGElement.prototype.getBBox;
-  const rareChartUniqueString = 'y-axis event distribution split by';
-  beforeEach(() => (SVGElement.prototype.getBBox = () => mockedGetBBox));
-  afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
-
+const getUtilityProps = () => {
+  const mlUrlGenerator = {
+    createUrl: jest.fn(),
+  };
+  const timefilter = {
+    getActiveBounds: jest.fn(),
+  };
+  const timeBuckets = {
+    setBounds: jest.fn(),
+    setInterval: jest.fn(),
+    getScaledDateFormat: jest.fn(),
+  };
   const kibanaContextMock = {
     services: {
       application: { navigateToApp: jest.fn() },
@@ -67,14 +61,20 @@ describe('ExplorerChartsContainer', () => {
       },
     },
   };
+  return { mlUrlGenerator, timefilter, timeBuckets, kibana: kibanaContextMock };
+};
+
+describe('ExplorerChartsContainer', () => {
+  const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
+  const originalGetBBox = SVGElement.prototype.getBBox;
+  const rareChartUniqueString = 'y-axis event distribution split by';
+  beforeEach(() => (SVGElement.prototype.getBBox = () => mockedGetBBox));
+  afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
+
   test('Minimal Initialization', () => {
     const wrapper = shallow(
       <I18nProvider>
-        <ExplorerChartsContainer
-          {...getDefaultChartsData()}
-          kibana={kibanaContextMock}
-          severity={10}
-        />
+        <ExplorerChartsContainer {...getDefaultChartsData()} {...getUtilityProps()} severity={10} />
       </I18nProvider>
     );
 
@@ -99,7 +99,7 @@ describe('ExplorerChartsContainer', () => {
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} kibana={kibanaContextMock} />
+        <ExplorerChartsContainer {...props} {...getUtilityProps()} />
       </I18nProvider>
     );
 
@@ -127,7 +127,7 @@ describe('ExplorerChartsContainer', () => {
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} kibana={kibanaContextMock} />
+        <ExplorerChartsContainer {...props} {...getUtilityProps()} />
       </I18nProvider>
     );
 

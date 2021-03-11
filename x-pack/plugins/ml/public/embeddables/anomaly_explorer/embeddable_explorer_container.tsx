@@ -29,7 +29,7 @@ import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/trigge
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
-export interface ExplorerSwimlaneContainerProps {
+export interface EmbeddableExplorerContainerProps {
   id: string;
   embeddableContext: InstanceType<IAnomalyExplorerEmbeddable>;
   embeddableInput: Observable<AnomalyExplorerEmbeddableInput>;
@@ -39,7 +39,7 @@ export interface ExplorerSwimlaneContainerProps {
   onOutputChange: (output: Partial<AnomalyExplorerEmbeddableOutput>) => void;
 }
 
-export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = ({
+export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> = ({
   id,
   embeddableContext,
   embeddableInput,
@@ -102,8 +102,8 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.ml.swimlaneEmbeddable.errorMessage"
-            defaultMessage="Unable to load the ML swim lane data"
+            id="xpack.ml.anomalyExplorerEmbeddable.errorMessage"
+            defaultMessage="Unable to load the ML anomaly explorer data"
           />
         }
         color="danger"
@@ -150,7 +150,7 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
                 <EuiLoadingChart
                   size="xl"
                   mono={true}
-                  data-test-subj="mlSwimLaneLoadingIndicator"
+                  data-test-subj="mlAnomalyExplorerEmbeddableLoadingIndicator"
                 />
               </EuiText>
             )}

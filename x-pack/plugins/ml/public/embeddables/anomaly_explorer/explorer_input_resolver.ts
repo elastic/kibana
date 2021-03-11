@@ -103,7 +103,7 @@ export function useExplorerInputResolver(
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-        switchMap(([jobs, input, swimlaneContainerWidth, severityValue]) => {
+        switchMap(([jobs, input, embeddableContainerWidth, severityValue]) => {
           if (!jobs) {
             // couldn't load the list of jobs
             return of(undefined);
@@ -123,7 +123,6 @@ export function useExplorerInputResolver(
               bucketSpanSeconds: bucketSpan!.asSeconds(),
             };
           });
-          if (viewBySwimlaneFieldName === undefined) return of(undefined);
 
           let influencersFilterQuery: any;
           try {
@@ -143,20 +142,13 @@ export function useExplorerInputResolver(
             type: SWIMLANE_TYPE.OVERALL,
           };
 
-          const selectionInfluencers = getSelectionInfluencers(
-            selections,
-            viewBySwimlaneFieldName!
-          );
+          const selectionInfluencers = getSelectionInfluencers(selections, viewBySwimlaneFieldName);
 
           const jobIds = getSelectionJobIds(selections, explorerJobs);
 
-          const swimlaneBucketInterval = timeBuckets.getInterval();
+          const bucketInterval = timeBuckets.getInterval();
 
-          const timeRange = getSelectionTimeRange(
-            selections,
-            swimlaneBucketInterval.asSeconds(),
-            bounds
-          );
+          const timeRange = getSelectionTimeRange(selections, bucketInterval.asSeconds(), bounds);
           const explorer$ = forkJoin({
             combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
             anomalyChartRecords: loadDataForCharts(
@@ -182,7 +174,7 @@ export function useExplorerInputResolver(
                   anomalyExplorerService.getAnomalyData(
                     undefined,
                     combinedJobRecords,
-                    swimlaneContainerWidth,
+                    embeddableContainerWidth,
                     anomalyChartRecords,
                     timeRange.earliestMs,
                     timeRange.latestMs,
