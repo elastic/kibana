@@ -7,7 +7,7 @@
  */
 
 (function () {
-  var execa = require('execa');
+  var cp = require('child_process');
 
   var preserveSymlinksOption = '--preserve-symlinks';
   var nodeOptions = (process && process.env && process.env.NODE_OPTIONS) || [];
@@ -31,10 +31,22 @@
       : [preserveSymlinksOption];
   var restArgs = nodeArgv.length >= 2 ? nodeArgv.slice(1, nodeArgv.length) : [];
 
-  try {
-    var cmdResult = execa.sync(nodeArgv[0], nodeArgs.concat(restArgs), { stdio: 'inherit' });
-    process.exit(cmdResult.exitCode);
-  } catch (error) {
-    process.exit(error.exitCode);
-  }
+  var getExitCodeFromSpawnResult = function (spawnResult) {
+    if (spawnResult.status !== null) {
+      return spawnResult.status;
+    }
+
+    if (spawnResult.signal !== null) {
+      return 128 + spawnResult.signal;
+    }
+
+    if (spawnResult.error) {
+      return 1;
+    }
+
+    return 0;
+  };
+
+  var spawnResult = cp.spawnSync(nodeArgv[0], nodeArgs.concat(restArgs), { stdio: 'inherit' });
+  process.exit(getExitCodeFromSpawnResult(spawnResult));
 })();
