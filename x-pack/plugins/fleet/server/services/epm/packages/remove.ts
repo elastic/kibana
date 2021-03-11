@@ -78,6 +78,7 @@ export async function removeInstallation(options: {
   return installedAssets;
 }
 
+// TODO we have both deleteKibanaAssets and deleteKibanaSavedObjectsAssets (below)
 function deleteKibanaAssets(
   installedObjects: KibanaAssetReference[],
   savedObjectsClient: SavedObjectsClientContract
@@ -135,6 +136,7 @@ async function deleteTemplate(esClient: ElasticsearchClient, name: string): Prom
   }
 }
 
+// TODO we have both deleteKibanaSavedObjectsAssets and deleteKibanaAssets (above)
 export async function deleteKibanaSavedObjectsAssets(
   savedObjectsClient: SavedObjectsClientContract,
   installedRefs: AssetReference[]
@@ -152,6 +154,8 @@ export async function deleteKibanaSavedObjectsAssets(
   try {
     await Promise.all(deletePromises);
   } catch (err) {
-    logger.warn(err);
+    if (!savedObjectsClient.errors.isNotFoundError(err)) {
+      logger.error(err);
+    }
   }
 }
