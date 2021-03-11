@@ -97,7 +97,6 @@ export const config: PluginConfigDescriptor = {
             schema.object({
               package: schema.string({ validate: validatePackageNameWithSemver }),
               name: schema.string(),
-              settings: schema.maybe(schema.recordOf(schema.string(), schema.string())),
             })
           ),
         })
