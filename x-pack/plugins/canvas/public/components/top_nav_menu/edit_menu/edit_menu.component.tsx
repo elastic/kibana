@@ -5,124 +5,76 @@
  * 2.0.
  */
 
-import React, { Fragment, FunctionComponent, useState } from 'react';
+import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { ComponentStrings } from '../../../../i18n/components';
 import { ShortcutStrings } from '../../../../i18n/shortcuts';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
 import { CustomElementModal } from '../../custom_element_modal';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
 import { PositionedElement } from '../../../../types';
+import { AssetManager } from '../../asset_manager';
 
 const { WorkpadHeaderEditMenu: strings } = ComponentStrings;
 const shortcutHelp = ShortcutStrings.getShortcutHelp();
 
 export interface Props {
-  /**
-   * cuts selected elements
-   */
+  /** cuts selected elements */
   cutNodes: () => void;
-  /**
-   * copies selected elements to clipboard
-   */
+  /** copies selected elements to clipboard */
   copyNodes: () => void;
-  /**
-   * pastes elements stored in clipboard to page
-   */
+  /** pastes elements stored in clipboard to page */
   pasteNodes: () => void;
-  /**
-   * clones selected elements
-   */
+  /** clones selected elements */
   cloneNodes: () => void;
-  /**
-   * deletes selected elements
-   */
+  /** deletes selected elements */
   deleteNodes: () => void;
-  /**
-   * moves selected element to top layer
-   */
+  /** moves selected element to top layer */
   bringToFront: () => void;
-  /**
-   * moves selected element up one layer
-   */
+  /** moves selected element up one layer */
   bringForward: () => void;
-  /**
-   * moves selected element down one layer
-   */
+  /** moves selected element down one layer */
   sendBackward: () => void;
-  /**
-   * moves selected element to bottom layer
-   */
+  /** moves selected element to bottom layer */
   sendToBack: () => void;
-  /**
-   * saves the selected elements as an custom-element saved object
-   */
+  /** saves the selected elements as an custom-element saved object */
   createCustomElement: (name: string, description: string, image: string) => void;
-  /**
-   * indicated whether the selected element is a group or not
-   */
+  /** indicated whether the selected element is a group or not */
   groupIsSelected: boolean;
-  /**
-   * only more than one selected element can be grouped
-   */
+  /** only more than one selected element can be grouped */
   selectedNodes: PositionedElement[];
-  /**
-   * groups selected elements
-   */
+  /** groups selected elements */
   groupNodes: () => void;
-  /**
-   * ungroups selected group
-   */
+  /** ungroups selected group */
   ungroupNodes: () => void;
-  /**
-   * left align selected elements
-   */
+  /** left align selected elements */
   alignLeft: () => void;
-  /**
-   * center align selected elements
-   */
+  /** center align selected elements */
   alignCenter: () => void;
-  /**
-   * right align selected elements
-   */
+  /** right align selected elements */
   alignRight: () => void;
-  /**
-   * top align selected elements
-   */
+  /** top align selected elements */
   alignTop: () => void;
-  /**
-   * middle align selected elements
-   */
+  /** middle align selected elements */
   alignMiddle: () => void;
-  /**
-   * bottom align selected elements
-   */
+  /** bottom align selected elements */
   alignBottom: () => void;
-  /**
-   * horizontally distribute selected elements
-   */
+  /** horizontally distribute selected elements */
   distributeHorizontally: () => void;
-  /**
-   * vertically distribute selected elements
-   */
+  /** vertically distribute selected elements */
   distributeVertically: () => void;
-  /**
-   * Reverts last change to the workpad
-   */
+  /** Reverts last change to the workpad */
   undoHistory: () => void;
-  /**
-   * Reapplies last reverted change to the workpad
-   */
+  /** Reapplies last reverted change to the workpad */
   redoHistory: () => void;
-  /**
-   * Is there element clipboard data to paste?
-   */
+  /** Handler for closing the menu */
+  onClose: () => void;
+  /** Is there element clipboard data to paste? */
   hasPasteData: boolean;
 }
 
-export const EditMenu: FunctionComponent<Props> = ({
+export const EditMenu: FC<Props> = ({
   cutNodes,
   copyNodes,
   pasteNodes,
@@ -147,29 +99,22 @@ export const EditMenu: FunctionComponent<Props> = ({
   ungroupNodes,
   undoHistory,
   redoHistory,
+  onClose,
   hasPasteData,
 }) => {
-  const [isModalVisible, setModalVisible] = useState(false);
-  const showModal = () => setModalVisible(true);
-  const hideModal = () => setModalVisible(false);
+  const [isAssetModalVisible, setAssetModalVisible] = useState(false);
+  const [isSaveElementModalVisible, setSaveElementModal] = useState(false);
+  const showSaveElementModal = () => setSaveElementModal(true);
+  const hideSaveElementModal = () => setSaveElementModal(false);
+  const hideAssetModal = () => setAssetModalVisible(false);
+  const showAssetModal = () => setAssetModalVisible(true);
 
   const handleSave = (name: string, description: string, image: string) => {
     createCustomElement(name, description, image);
-    hideModal();
+    hideSaveElementModal();
   };
 
-  const editControl = (togglePopover: React.MouseEventHandler<any>) => (
-    <EuiButtonEmpty
-      size="xs"
-      aria-label={strings.getEditMenuLabel()}
-      onClick={togglePopover}
-      data-test-subj="canvasWorkpadEditMenuButton"
-    >
-      {strings.getEditMenuButtonLabel()}
-    </EuiButtonEmpty>
-  );
-
-  const getPanelTree = (closePopover: ClosePopoverFn) => {
+  const getPanelTree = () => {
     const groupMenuItem = groupIsSelected
       ? {
           name: strings.getUngroupMenuItemLabel(),
@@ -177,7 +122,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           icon: <EuiIcon type="empty" size="m" />,
           onClick: () => {
             ungroupNodes();
-            closePopover();
+            onClose();
           },
         }
       : {
@@ -187,7 +132,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           disabled: selectedNodes.length < 2,
           onClick: () => {
             groupNodes();
-            closePopover();
+            onClose();
           },
         };
 
@@ -237,7 +182,7 @@ export const EditMenu: FunctionComponent<Props> = ({
             icon: 'editorItemAlignLeft',
             onClick: () => {
               alignLeft();
-              closePopover();
+              onClose();
             },
           },
           {
@@ -245,7 +190,7 @@ export const EditMenu: FunctionComponent<Props> = ({
             icon: 'editorItemAlignCenter',
             onClick: () => {
               alignCenter();
-              closePopover();
+              onClose();
             },
           },
           {
@@ -253,7 +198,7 @@ export const EditMenu: FunctionComponent<Props> = ({
             icon: 'editorItemAlignRight',
             onClick: () => {
               alignRight();
-              closePopover();
+              onClose();
             },
           },
           {
@@ -261,7 +206,7 @@ export const EditMenu: FunctionComponent<Props> = ({
             icon: 'editorItemAlignTop',
             onClick: () => {
               alignTop();
-              closePopover();
+              onClose();
             },
           },
           {
@@ -269,7 +214,7 @@ export const EditMenu: FunctionComponent<Props> = ({
             icon: 'editorItemAlignMiddle',
             onClick: () => {
               alignMiddle();
-              closePopover();
+              onClose();
             },
           },
           {
@@ -277,7 +222,7 @@ export const EditMenu: FunctionComponent<Props> = ({
             icon: 'editorItemAlignBottom',
             onClick: () => {
               alignBottom();
-              closePopover();
+              onClose();
             },
           },
         ],
@@ -298,7 +243,7 @@ export const EditMenu: FunctionComponent<Props> = ({
             icon: 'editorDistributeHorizontal',
             onClick: () => {
               distributeHorizontally();
-              closePopover();
+              onClose();
             },
           },
           {
@@ -306,10 +251,21 @@ export const EditMenu: FunctionComponent<Props> = ({
             icon: 'editorDistributeVertical',
             onClick: () => {
               distributeVertically();
-              closePopover();
+              onClose();
             },
           },
         ],
+      },
+    };
+
+    const manageAssetMenuItem = {
+      name: strings.getAssetsMenuItemLabel(),
+      icon: <EuiIcon type="empty" size="m" />,
+      className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
+      'data-test-subj': 'canvasWorkpadEditMenu__manageAssetsButton',
+      onClick: () => {
+        showAssetModal();
+        onClose();
       },
     };
 
@@ -317,11 +273,10 @@ export const EditMenu: FunctionComponent<Props> = ({
       name: strings.getSaveElementMenuItemLabel(),
       icon: <EuiIcon type="indexOpen" size="m" />,
       disabled: selectedNodes.length < 1,
-      className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
       'data-test-subj': 'canvasWorkpadEditMenu__saveElementButton',
       onClick: () => {
-        showModal();
-        closePopover();
+        showSaveElementModal();
+        onClose();
       },
     };
 
@@ -349,7 +304,7 @@ export const EditMenu: FunctionComponent<Props> = ({
         disabled: selectedNodes.length < 1,
         onClick: () => {
           cutNodes();
-          closePopover();
+          onClose();
         },
       },
       {
@@ -366,7 +321,7 @@ export const EditMenu: FunctionComponent<Props> = ({
         disabled: !hasPasteData,
         onClick: () => {
           pasteNodes();
-          closePopover();
+          onClose();
         },
       },
       {
@@ -375,7 +330,7 @@ export const EditMenu: FunctionComponent<Props> = ({
         disabled: selectedNodes.length < 1,
         onClick: () => {
           deleteNodes();
-          closePopover();
+          onClose();
         },
       },
       {
@@ -384,13 +339,14 @@ export const EditMenu: FunctionComponent<Props> = ({
         disabled: selectedNodes.length < 1,
         onClick: () => {
           cloneNodes();
-          closePopover();
+          onClose();
         },
       },
       groupMenuItem,
       orderMenuItem,
       alignmentMenuItem,
       distributionMenuItem,
+      manageAssetMenuItem,
       savedElementMenuItem,
     ];
 
@@ -402,23 +358,17 @@ export const EditMenu: FunctionComponent<Props> = ({
   };
 
   return (
-    <Fragment>
-      <Popover button={editControl} panelPaddingSize="none" anchorPosition="downLeft">
-        {({ closePopover }: { closePopover: ClosePopoverFn }) => (
-          <EuiContextMenu
-            initialPanelId={0}
-            panels={flattenPanelTree(getPanelTree(closePopover))}
-          />
-        )}
-      </Popover>
-      {isModalVisible ? (
+    <div>
+      <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree())} />
+      {isSaveElementModalVisible ? (
         <CustomElementModal
           title={strings.getCreateElementModalTitle()}
           onSave={handleSave}
-          onCancel={hideModal}
+          onCancel={hideSaveElementModal}
         />
       ) : null}
-    </Fragment>
+      {isAssetModalVisible ? <AssetManager onClose={hideAssetModal} /> : null}
+    </div>
   );
 };
 

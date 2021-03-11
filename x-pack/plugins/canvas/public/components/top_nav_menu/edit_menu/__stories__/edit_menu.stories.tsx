@@ -34,6 +34,7 @@ const handlers = {
   ungroupNodes: action('ungroupNodes'),
   undoHistory: action('undoHistory'),
   redoHistory: action('redoHistory'),
+  onClose: action('onClose'),
 };
 
 storiesOf('components/WorkpadHeader/EditMenu', module)

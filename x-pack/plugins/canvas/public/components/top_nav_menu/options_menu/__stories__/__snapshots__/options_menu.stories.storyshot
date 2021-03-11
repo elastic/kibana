@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadHeader/OptionsMenu edit mode 1`] = `
+<div
+  className="euiContextMenu canvasOptionsMenu"
+  style={
+    Object {
+      "height": 0,
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiContextMenuPanel euiContextMenu__panel"
+    onAnimationEnd={[Function]}
+    onKeyDown={[Function]}
+    tabIndex={0}
+  >
+    <div />
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/OptionsMenu read only mode 1`] = `
+<div
+  className="euiContextMenu canvasOptionsMenu"
+  style={
+    Object {
+      "height": 0,
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiContextMenuPanel euiContextMenu__panel"
+    onAnimationEnd={[Function]}
+    onKeyDown={[Function]}
+    tabIndex={0}
+  >
+    <div />
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/OptionsMenu with autoplay enabled 1`] = `
+<div
+  className="euiContextMenu canvasOptionsMenu"
+  style={
+    Object {
+      "height": 0,
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiContextMenuPanel euiContextMenu__panel"
+    onAnimationEnd={[Function]}
+    onKeyDown={[Function]}
+    tabIndex={0}
+  >
+    <div />
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/OptionsMenu with refresh enabled 1`] = `
+<div
+  className="euiContextMenu canvasOptionsMenu"
+  style={
+    Object {
+      "height": 0,
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiContextMenuPanel euiContextMenu__panel"
+    onAnimationEnd={[Function]}
+    onKeyDown={[Function]}
+    tabIndex={0}
+  >
+    <div />
+  </div>
+</div>
+`;

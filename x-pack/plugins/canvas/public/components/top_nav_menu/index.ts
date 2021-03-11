@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { EditMenu } from './edit_menu';
-export { EditMenu as EditMenuComponent } from './edit_menu.component';
+export { TopNavMenu } from './top_nav_menu';

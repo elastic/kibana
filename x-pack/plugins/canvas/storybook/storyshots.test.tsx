@@ -78,12 +78,9 @@ jest.mock('@elastic/eui/lib/components/overlay_mask/overlay_mask', () => {
 });
 
 // Disabling this test due to https://github.com/elastic/eui/issues/2242
-jest.mock(
-  '../public/components/workpad_header/share_menu/flyout/__stories__/flyout.stories',
-  () => {
-    return 'Disabled Panel';
-  }
-);
+jest.mock('../public/components/top_nav_menu/share_menu/flyout/__stories__/flyout.stories', () => {
+  return 'Disabled Panel';
+});
 
 // @ts-expect-error untyped library
 import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';

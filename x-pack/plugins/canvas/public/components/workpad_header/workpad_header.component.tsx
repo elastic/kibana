@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 // @ts-expect-error no @types definition
 import { Shortcuts } from 'react-shortcuts';
@@ -15,22 +15,20 @@ import { ToolTipShortcut } from '../tool_tip_shortcut/';
 import { RefreshControl } from './refresh_control';
 // @ts-expect-error untyped local
 import { FullscreenControl } from './fullscreen_control';
-import { EditMenu } from './edit_menu';
 import { ElementMenu } from './element_menu';
-import { ShareMenu } from './share_menu';
-import { ViewMenu } from './view_menu';
 import { CommitFn } from '../../../types';
+import { TopNavMenu } from '../top_nav_menu';
 
 const { WorkpadHeader: strings } = ComponentStrings;
 
 export interface Props {
-  isWriteable: boolean;
   canUserWrite: boolean;
+  isWriteable: boolean;
   commit: CommitFn;
   onSetWriteable?: (writeable: boolean) => void;
 }
 
-export const WorkpadHeader: FunctionComponent<Props> = ({
+export const WorkpadHeader: FC<Props> = ({
   isWriteable,
   canUserWrite,
   commit,
@@ -89,61 +87,55 @@ export const WorkpadHeader: FunctionComponent<Props> = ({
   };
 
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="spaceBetween"
-      className="canvasLayout__stageHeaderInner"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="none">
-          {isWriteable && (
-            <EuiFlexItem grow={false}>
-              <ElementMenu />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <ViewMenu />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EditMenu commit={commit} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ShareMenu />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {canUserWrite && (
-              <Shortcuts
-                name="EDITOR"
-                handler={keyHandler}
-                targetNodeSelector="body"
-                global
-                isolate
-              />
+    <>
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        justifyContent="spaceBetween"
+        className="canvasLayout__stageHeaderInner"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            {isWriteable && (
+              <EuiFlexItem grow={false}>
+                <ElementMenu />
+              </EuiFlexItem>
             )}
-            <EuiToolTip position="bottom" content={getEditToggleToolTip()}>
-              <EuiButtonIcon
-                iconType={isWriteable ? 'eyeClosed' : 'eye'}
-                onClick={toggleWriteable}
-                size="s"
-                aria-label={getEditToggleToolTipText()}
-                isDisabled={!canUserWrite}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <RefreshControl />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <FullscreenControl>{fullscreenButton}</FullscreenControl>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              {canUserWrite && (
+                <Shortcuts
+                  name="EDITOR"
+                  handler={keyHandler}
+                  targetNodeSelector="body"
+                  global
+                  isolate
+                />
+              )}
+              <EuiToolTip position="bottom" content={getEditToggleToolTip()}>
+                <EuiButtonIcon
+                  iconType={isWriteable ? 'eyeClosed' : 'eye'}
+                  onClick={toggleWriteable}
+                  size="s"
+                  aria-label={getEditToggleToolTipText()}
+                  isDisabled={!canUserWrite}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RefreshControl />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FullscreenControl>{fullscreenButton}</FullscreenControl>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <TopNavMenu commit={commit} />
+    </>
   );
 };
 

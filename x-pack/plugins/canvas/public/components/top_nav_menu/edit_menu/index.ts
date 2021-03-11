@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ShareMenu } from './share_menu';
-export { ShareMenu as ShareMenuComponent } from './share_menu.component';
+export { EditMenu } from './edit_menu';
+export { EditMenu as EditMenuComponent, Props as EditMenuProps } from './edit_menu.component';

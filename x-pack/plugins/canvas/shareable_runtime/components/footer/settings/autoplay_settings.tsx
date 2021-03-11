@@ -13,7 +13,7 @@ import {
   setAutoplayIntervalAction,
 } from '../../../context';
 import { createTimeInterval } from '../../../../public/lib/time_interval';
-import { CustomInterval } from '../../../../public/components/workpad_header/view_menu/custom_interval';
+import { CustomInterval } from '../../../../public/components/top_nav_menu/options_menu/custom_interval';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type onSetAutoplayFn = (autoplay: boolean) => void;

@@ -6,18 +6,27 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { CoreSetup, CoreStart, AppUpdater } from '../../../../../src/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  AppUpdater,
+  AppMountParameters,
+} from '../../../../../src/core/public';
 import { CanvasSetupDeps, CanvasStartDeps } from '../plugin';
 import { notifyServiceFactory } from './notify';
 import { platformServiceFactory } from './platform';
 import { navLinkServiceFactory } from './nav_link';
 import { embeddablesServiceFactory } from './embeddables';
 import { expressionsServiceFactory } from './expressions';
+import { navigationServiceFactory } from './navigation';
+import { overlayServiceFactory } from './overlay';
 
 export { NotifyService } from './notify';
+export { OverlayService } from './overlay';
 export { PlatformService } from './platform';
 export { NavLinkService } from './nav_link';
 export { EmbeddablesService } from './embeddables';
+export { NavigationService } from './navigation';
 export { ExpressionsService } from '../../../../../src/plugins/expressions/common';
 export * from './context';
 
@@ -26,7 +35,8 @@ export type CanvasServiceFactory<Service> = (
   coreStart: CoreStart,
   canvasSetupPlugins: CanvasSetupDeps,
   canvasStartPlugins: CanvasStartDeps,
-  appUpdater: BehaviorSubject<AppUpdater>
+  appUpdater: BehaviorSubject<AppUpdater>,
+  params: AppMountParameters
 ) => Service | Promise<Service>;
 
 class CanvasServiceProvider<Service> {
@@ -46,14 +56,16 @@ class CanvasServiceProvider<Service> {
     coreStart: CoreStart,
     canvasSetupPlugins: CanvasSetupDeps,
     canvasStartPlugins: CanvasStartDeps,
-    appUpdater: BehaviorSubject<AppUpdater>
+    appUpdater: BehaviorSubject<AppUpdater>,
+    params: AppMountParameters
   ) {
     this.service = await this.factory(
       coreSetup,
       coreStart,
       canvasSetupPlugins,
       canvasStartPlugins,
-      appUpdater
+      appUpdater,
+      params
     );
   }
 
@@ -75,7 +87,9 @@ export type ServiceFromProvider<P> = P extends CanvasServiceProvider<infer T> ? 
 export const services = {
   embeddables: new CanvasServiceProvider(embeddablesServiceFactory),
   expressions: new CanvasServiceProvider(expressionsServiceFactory),
+  navigation: new CanvasServiceProvider(navigationServiceFactory),
   notify: new CanvasServiceProvider(notifyServiceFactory),
+  overlay: new CanvasServiceProvider(overlayServiceFactory),
   platform: new CanvasServiceProvider(platformServiceFactory),
   navLink: new CanvasServiceProvider(navLinkServiceFactory),
 };
@@ -85,7 +99,9 @@ export type CanvasServiceProviders = typeof services;
 export interface CanvasServices {
   embeddables: ServiceFromProvider<typeof services.embeddables>;
   expressions: ServiceFromProvider<typeof services.expressions>;
+  navigation: ServiceFromProvider<typeof services.navigation>;
   notify: ServiceFromProvider<typeof services.notify>;
+  overlay: ServiceFromProvider<typeof services.overlay>;
   platform: ServiceFromProvider<typeof services.platform>;
   navLink: ServiceFromProvider<typeof services.navLink>;
 }
@@ -95,10 +111,11 @@ export const startServices = async (
   coreStart: CoreStart,
   canvasSetupPlugins: CanvasSetupDeps,
   canvasStartPlugins: CanvasStartDeps,
-  appUpdater: BehaviorSubject<AppUpdater>
+  appUpdater: BehaviorSubject<AppUpdater>,
+  params: AppMountParameters
 ) => {
   const startPromises = Object.values(services).map((provider) =>
-    provider.start(coreSetup, coreStart, canvasSetupPlugins, canvasStartPlugins, appUpdater)
+    provider.start(coreSetup, coreStart, canvasSetupPlugins, canvasStartPlugins, appUpdater, params)
   );
 
   await Promise.all(startPromises);
@@ -110,7 +127,9 @@ export const stopServices = () => {
 
 export const {
   embeddables: embeddableService,
+  navigation: navigationService,
   notify: notifyService,
+  overlay: overlayService,
   platform: platformService,
   navLink: navLinkService,
   expressions: expressionsService,

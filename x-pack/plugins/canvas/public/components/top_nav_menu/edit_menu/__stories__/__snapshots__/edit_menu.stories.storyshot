@@ -1,0 +1,139 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadHeader/EditMenu 2 elements selected 1`] = `
+<div>
+  <div
+    className="euiContextMenu"
+    style={
+      Object {
+        "height": 0,
+        "width": undefined,
+      }
+    }
+  >
+    <div
+      className="euiContextMenuPanel euiContextMenu__panel"
+      onAnimationEnd={[Function]}
+      onKeyDown={[Function]}
+      tabIndex={0}
+    >
+      <div />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/EditMenu 3+ elements selected 1`] = `
+<div>
+  <div
+    className="euiContextMenu"
+    style={
+      Object {
+        "height": 0,
+        "width": undefined,
+      }
+    }
+  >
+    <div
+      className="euiContextMenuPanel euiContextMenu__panel"
+      onAnimationEnd={[Function]}
+      onKeyDown={[Function]}
+      tabIndex={0}
+    >
+      <div />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/EditMenu clipboard data exists 1`] = `
+<div>
+  <div
+    className="euiContextMenu"
+    style={
+      Object {
+        "height": 0,
+        "width": undefined,
+      }
+    }
+  >
+    <div
+      className="euiContextMenuPanel euiContextMenu__panel"
+      onAnimationEnd={[Function]}
+      onKeyDown={[Function]}
+      tabIndex={0}
+    >
+      <div />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/EditMenu default 1`] = `
+<div>
+  <div
+    className="euiContextMenu"
+    style={
+      Object {
+        "height": 0,
+        "width": undefined,
+      }
+    }
+  >
+    <div
+      className="euiContextMenuPanel euiContextMenu__panel"
+      onAnimationEnd={[Function]}
+      onKeyDown={[Function]}
+      tabIndex={0}
+    >
+      <div />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/EditMenu single element selected 1`] = `
+<div>
+  <div
+    className="euiContextMenu"
+    style={
+      Object {
+        "height": 0,
+        "width": undefined,
+      }
+    }
+  >
+    <div
+      className="euiContextMenuPanel euiContextMenu__panel"
+      onAnimationEnd={[Function]}
+      onKeyDown={[Function]}
+      tabIndex={0}
+    >
+      <div />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/EditMenu single grouped element selected 1`] = `
+<div>
+  <div
+    className="euiContextMenu"
+    style={
+      Object {
+        "height": 0,
+        "width": undefined,
+      }
+    }
+  >
+    <div
+      className="euiContextMenuPanel euiContextMenu__panel"
+      onAnimationEnd={[Function]}
+      onKeyDown={[Function]}
+      tabIndex={0}
+    >
+      <div />
+    </div>
+  </div>
+</div>
+`;

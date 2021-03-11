@@ -1227,6 +1227,10 @@ export const ComponentStrings = {
           'This refers to the vertical (i.e. left, center, right) and horizontal (i.e. top, middle, bottom) ' +
           'alignment options of the selected elements',
       }),
+    getAssetsMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderEditMenu.manageAssetsMenuItemLabel', {
+        defaultMessage: 'Manage assets',
+      }),
     getBottomAlignMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderEditMenu.bottomAlignMenuItemLabel', {
         defaultMessage: 'Bottom',
@@ -1308,10 +1312,6 @@ export const ComponentStrings = {
       }),
   },
   WorkpadHeaderElementMenu: {
-    getAssetsMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderElementMenu.manageAssetsMenuItemLabel', {
-        defaultMessage: 'Manage assets',
-      }),
     getChartMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.chartMenuItemLabel', {
         defaultMessage: 'Chart',
@@ -1369,6 +1369,87 @@ export const ComponentStrings = {
     getTitle: () =>
       i18n.translate('xpack.canvas.workpadHeaderKioskControl.controlTitle', {
         defaultMessage: 'Cycle fullscreen pages',
+      }),
+  },
+  WorkpadHeaderOptionsMenu: {
+    getAutoplayOffMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.autoplayOffMenuItemLabel', {
+        defaultMessage: 'Turn autoplay off',
+      }),
+    getAutoplayOnMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.autoplayOnMenuItemLabel', {
+        defaultMessage: 'Turn autoplay on',
+      }),
+    getAutoplaySettingsMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.autoplaySettingsMenuItemLabel', {
+        defaultMessage: 'Autoplay settings',
+      }),
+    getFullscreenMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.fullscreenMenuLabel', {
+        defaultMessage: 'Enter fullscreen mode',
+      }),
+    getHideEditModeLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.hideEditModeLabel', {
+        defaultMessage: 'Hide editing controls',
+      }),
+    getRefreshMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.refreshMenuItemLabel', {
+        defaultMessage: 'Refresh data',
+      }),
+    getRefreshSettingsMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.refreshSettingsMenuItemLabel', {
+        defaultMessage: 'Auto refresh settings',
+      }),
+    getShowEditModeLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.showEditModeLabel', {
+        defaultMessage: 'Show editing controls',
+      }),
+    getOptionsMenuButtonLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.viewMenuButtonLabel', {
+        defaultMessage: 'Options',
+      }),
+    getOptionsMenuLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.viewMenuLabel', {
+        defaultMessage: 'Options',
+      }),
+    getZoomControlsAriaLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.zoomControlsAriaLabel', {
+        defaultMessage: 'Zoom controls',
+      }),
+    getZoomControlsTooltip: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.zoomControlsTooltip', {
+        defaultMessage: 'Zoom controls',
+      }),
+    getZoomFitToWindowText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.zoomFitToWindowText', {
+        defaultMessage: 'Fit to window',
+      }),
+    getZoomInText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.zoomInText', {
+        defaultMessage: 'Zoom in',
+      }),
+    getZoomMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.zoomMenuItemLabel', {
+        defaultMessage: 'Zoom',
+      }),
+    getZoomOutText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.zoomOutText', {
+        defaultMessage: 'Zoom out',
+      }),
+    getZoomPanelTitle: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.zoomPanelTitle', {
+        defaultMessage: 'Zoom',
+      }),
+    getZoomPercentage: (scale: number) =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.zoomResetText', {
+        defaultMessage: '{scalePercentage}%',
+        values: {
+          scalePercentage: scale * 100,
+        },
+      }),
+    getZoomResetText: () =>
+      i18n.translate('xpack.canvas.workpadHeaderOptionsMenu.zoomPrecentageValue', {
+        defaultMessage: 'Reset',
       }),
   },
   WorkpadHeaderRefreshControlSettings: {
@@ -1520,87 +1601,6 @@ export const ComponentStrings = {
         values: {
           type,
         },
-      }),
-  },
-  WorkpadHeaderViewMenu: {
-    getAutoplayOffMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplayOffMenuItemLabel', {
-        defaultMessage: 'Turn autoplay off',
-      }),
-    getAutoplayOnMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplayOnMenuItemLabel', {
-        defaultMessage: 'Turn autoplay on',
-      }),
-    getAutoplaySettingsMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.autoplaySettingsMenuItemLabel', {
-        defaultMessage: 'Autoplay settings',
-      }),
-    getFullscreenMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.fullscreenMenuLabel', {
-        defaultMessage: 'Enter fullscreen mode',
-      }),
-    getHideEditModeLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.hideEditModeLabel', {
-        defaultMessage: 'Hide editing controls',
-      }),
-    getRefreshMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.refreshMenuItemLabel', {
-        defaultMessage: 'Refresh data',
-      }),
-    getRefreshSettingsMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.refreshSettingsMenuItemLabel', {
-        defaultMessage: 'Auto refresh settings',
-      }),
-    getShowEditModeLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.showEditModeLabel', {
-        defaultMessage: 'Show editing controls',
-      }),
-    getViewMenuButtonLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuButtonLabel', {
-        defaultMessage: 'View',
-      }),
-    getViewMenuLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.viewMenuLabel', {
-        defaultMessage: 'View options',
-      }),
-    getZoomControlsAriaLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomControlsAriaLabel', {
-        defaultMessage: 'Zoom controls',
-      }),
-    getZoomControlsTooltip: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomControlsTooltip', {
-        defaultMessage: 'Zoom controls',
-      }),
-    getZoomFitToWindowText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomFitToWindowText', {
-        defaultMessage: 'Fit to window',
-      }),
-    getZoomInText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomInText', {
-        defaultMessage: 'Zoom in',
-      }),
-    getZoomMenuItemLabel: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomMenuItemLabel', {
-        defaultMessage: 'Zoom',
-      }),
-    getZoomOutText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomOutText', {
-        defaultMessage: 'Zoom out',
-      }),
-    getZoomPanelTitle: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomPanelTitle', {
-        defaultMessage: 'Zoom',
-      }),
-    getZoomPercentage: (scale: number) =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomResetText', {
-        defaultMessage: '{scalePercentage}%',
-        values: {
-          scalePercentage: scale * 100,
-        },
-      }),
-    getZoomResetText: () =>
-      i18n.translate('xpack.canvas.workpadHeaderViewMenu.zoomPrecentageValue', {
-        defaultMessage: 'Reset',
       }),
   },
   WorkpadLoader: {

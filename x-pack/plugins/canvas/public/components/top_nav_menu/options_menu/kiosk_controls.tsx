@@ -68,7 +68,7 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
     <EuiFlexGroup
       direction="column"
       justifyContent="spaceBetween"
-      className="canvasViewMenu__kioskSettings"
+      className="canvasOptionsMenu__kioskSettings"
     >
       <EuiFlexItem grow={false}>
         <EuiDescriptionList textStyle="reverse">

@@ -20,7 +20,6 @@ import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { getId } from '../../../lib/get_id';
 import { Popover, ClosePopoverFn } from '../../popover';
-import { AssetManager } from '../../asset_manager';
 import { SavedElementsModal } from '../../saved_elements_modal';
 
 interface CategorizedElementLists {
@@ -87,12 +86,9 @@ export const ElementMenu: FunctionComponent<Props> = ({
   addElement,
   renderEmbedPanel,
 }) => {
-  const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isEmbedPanelVisible, setEmbedPanelVisible] = useState(false);
   const [isSavedElementsModalVisible, setSavedElementsModalVisible] = useState(false);
 
-  const hideAssetModal = () => setAssetModalVisible(false);
-  const showAssetModal = () => setAssetModalVisible(true);
   const hideEmbedPanel = () => setEmbedPanelVisible(false);
   const showEmbedPanel = () => setEmbedPanelVisible(true);
   const hideSavedElementsModal = () => setSavedElementsModalVisible(false);
@@ -158,14 +154,6 @@ export const ElementMenu: FunctionComponent<Props> = ({
           },
         },
         {
-          name: strings.getAssetsMenuItemLabel(),
-          icon: <EuiIcon type="empty" size="m" />,
-          onClick: () => {
-            showAssetModal();
-            closePopover();
-          },
-        },
-        {
           name: strings.getEmbedObjectMenuItemLabel(),
           className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
           icon: <EuiIcon type="logoKibana" size="m" />,
@@ -202,7 +190,6 @@ export const ElementMenu: FunctionComponent<Props> = ({
           />
         )}
       </Popover>
-      {isAssetModalVisible ? <AssetManager onClose={hideAssetModal} /> : null}
       {isEmbedPanelVisible ? renderEmbedPanel(hideEmbedPanel) : null}
       {isSavedElementsModalVisible ? <SavedElementsModal onClose={hideSavedElementsModal} /> : null}
     </Fragment>

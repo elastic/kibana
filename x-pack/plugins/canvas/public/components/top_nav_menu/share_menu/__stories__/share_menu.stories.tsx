@@ -18,5 +18,6 @@ storiesOf('components/WorkpadHeader/ShareMenu', module).add('default', () => (
       action(`getExportUrl('${type}')`);
       return type;
     }}
+    onClose={action('onClose')}
   />
 ));

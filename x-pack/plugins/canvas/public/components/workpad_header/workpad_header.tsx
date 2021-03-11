@@ -10,8 +10,22 @@ import { Dispatch } from 'redux';
 import { canUserWrite } from '../../state/selectors/app';
 import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
 import { setWriteable } from '../../state/actions/workpad';
-import { State } from '../../../types';
+import { CommitFn, State } from '../../../types';
 import { WorkpadHeader as Component } from './workpad_header.component';
+
+interface Props {
+  commit: CommitFn;
+}
+
+interface StateProps {
+  isWriteable: boolean;
+  canUserWrite: boolean;
+  selectedPage: string;
+}
+
+interface DispatchProps {
+  onSetWriteable: (isWriteable: boolean) => void;
+}
 
 const mapStateToProps = (state: State) => ({
   isWriteable: isWriteable(state) && canUserWrite(state),
@@ -23,4 +37,7 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   onSetWriteable: (isWorkpadWriteable: boolean) => dispatch(setWriteable(isWorkpadWriteable)),
 });
 
-export const WorkpadHeader = connect(mapStateToProps, mapDispatchToProps)(Component);
+export const WorkpadHeader = connect<StateProps, DispatchProps, Props, State>(
+  mapStateToProps,
+  mapDispatchToProps
+)(Component);

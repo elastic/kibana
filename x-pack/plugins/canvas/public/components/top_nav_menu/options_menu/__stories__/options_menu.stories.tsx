@@ -8,7 +8,7 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { ViewMenu } from '../view_menu.component';
+import { OptionsMenu } from '../options_menu.component';
 
 const handlers = {
   setZoomScale: action('setZoomScale'),
@@ -22,11 +22,12 @@ const handlers = {
   setRefreshInterval: action('setRefreshInterval'),
   setAutoplayInterval: action('setAutoplayInterval'),
   enableAutoplay: action('enableAutoplay'),
+  onClose: action('onClose'),
 };
 
-storiesOf('components/WorkpadHeader/ViewMenu', module)
+storiesOf('components/WorkpadHeader/OptionsMenu', module)
   .add('edit mode', () => (
-    <ViewMenu
+    <OptionsMenu
       isWriteable={true}
       zoomScale={1}
       refreshInterval={0}
@@ -36,7 +37,7 @@ storiesOf('components/WorkpadHeader/ViewMenu', module)
     />
   ))
   .add('read only mode', () => (
-    <ViewMenu
+    <OptionsMenu
       isWriteable={false}
       zoomScale={1}
       refreshInterval={0}
@@ -46,7 +47,7 @@ storiesOf('components/WorkpadHeader/ViewMenu', module)
     />
   ))
   .add('with refresh enabled', () => (
-    <ViewMenu
+    <OptionsMenu
       isWriteable={false}
       zoomScale={1}
       refreshInterval={1000}
@@ -56,7 +57,7 @@ storiesOf('components/WorkpadHeader/ViewMenu', module)
     />
   ))
   .add('with autoplay enabled', () => (
-    <ViewMenu
+    <OptionsMenu
       isWriteable={false}
       zoomScale={1}
       refreshInterval={0}

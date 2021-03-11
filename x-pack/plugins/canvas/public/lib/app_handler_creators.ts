@@ -13,10 +13,6 @@ export interface Props {
    */
   zoomScale: number;
   /**
-   * zoom level to scale workpad to fit into the viewport
-   */
-  fitZoomScale: number;
-  /**
    * sets the new zoom level
    */
   setZoomScale: (scale: number) => void;

@@ -29,8 +29,12 @@ import {
   getRefreshInterval,
   getAutoplay,
 } from '../../../state/selectors/workpad';
-import { ViewMenu as Component, Props as ComponentProps } from './view_menu.component';
+import { OptionsMenu as Component, Props as ComponentProps } from './options_menu.component';
 import { getFitZoomScale } from './lib/get_fit_zoom_scale';
+
+interface Props {
+  onClose: () => void;
+}
 
 interface StateProps {
   zoomScale: number;
@@ -95,7 +99,7 @@ const mergeProps = (
   };
 };
 
-export const ViewMenu = compose<ComponentProps, {}>(
+export const OptionsMenu = compose<ComponentProps, Props>(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withHandlers(zoomHandlerCreators)
 )(Component);

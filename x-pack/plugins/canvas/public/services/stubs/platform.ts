@@ -22,4 +22,5 @@ export const platformService: PlatformService = {
   getSavedObjectsClient: noop,
   getUISettings: noop,
   setFullscreen: noop,
+  setHeaderActionMenu: noop,
 };

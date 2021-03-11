@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadHeader/ShareMenu default 1`] = `
+<div
+  className="euiContextMenu"
+  style={
+    Object {
+      "height": 0,
+      "width": undefined,
+    }
+  }
+>
+  <div
+    className="euiContextMenuPanel euiContextMenu__panel"
+    onAnimationEnd={[Function]}
+    onKeyDown={[Function]}
+    tabIndex={0}
+  >
+    <div />
+  </div>
+</div>
+`;

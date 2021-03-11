@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiIcon,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   MAX_ZOOM_LEVEL,
   MIN_ZOOM_LEVEL,
@@ -20,82 +15,52 @@ import {
 } from '../../../../common/lib/constants';
 import { ComponentStrings } from '../../../../i18n/components';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { Popover, ClosePopoverFn } from '../../popover';
+import { ClosePopoverFn } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 import { KioskControls } from './kiosk_controls';
 
-const { WorkpadHeaderViewMenu: strings } = ComponentStrings;
+const { WorkpadHeaderOptionsMenu: strings } = ComponentStrings;
 
 const QUICK_ZOOM_LEVELS = [0.5, 1, 2];
 
 export interface Props {
-  /**
-   * Is the workpad edittable?
-   */
+  /**  Is the workpad editable? */
   isWriteable: boolean;
-  /**
-   * current workpad zoom level
-   */
+  /** current workpad zoom level */
   zoomScale: number;
-  /**
-   * zooms to fit entire workpad into view
-   */
+  /** zooms to fit entire workpad into view */
   fitToWindow: () => void;
-  /**
-   * handler to set the workpad zoom level to a specific value
-   */
+  /** handler to set the workpad zoom level to a specific value */
   setZoomScale: (scale: number) => void;
-  /**
-   * handler to increase the workpad zoom level
-   */
+  /** handler to increase the workpad zoom level */
   zoomIn: () => void;
-  /**
-   * handler to decrease workpad zoom level
-   */
+  /** handler to decrease workpad zoom level */
   zoomOut: () => void;
-  /**
-   * reset zoom to 100%
-   */
+  /** reset zoom to 100% */
   resetZoom: () => void;
-  /**
-   * toggle edit/read only mode
-   */
+  /** toggle edit/read only mode */
   toggleWriteable: () => void;
-  /**
-   * enter fullscreen mode
-   */
+  /** enter fullscreen mode */
   enterFullscreen: () => void;
-  /**
-   * triggers a refresh of the workpad
-   */
+  /** triggers a refresh of the workpad */
   doRefresh: () => void;
-  /**
-   * Current auto refresh interval
-   */
+  /** Current auto refresh interval */
   refreshInterval: number;
-  /**
-   * Sets auto refresh interval
-   */
+  /** Sets auto refresh interval */
   setRefreshInterval: (interval?: number) => void;
-  /**
-   * Is autoplay enabled?
-   */
+  /** Is autoplay enabled? */
   autoplayEnabled: boolean;
-  /**
-   * Current autoplay interval
-   */
+  /** Current autoplay interval */
   autoplayInterval: number;
-  /**
-   * Enables autoplay
-   */
+  /** Enables autoplay */
   enableAutoplay: (autoplay: boolean) => void;
-  /**
-   * Sets autoplay interval
-   */
+  /** Sets autoplay interval */
   setAutoplayInterval: (interval?: number) => void;
+  /** Handler for closing the menu */
+  onClose: () => void;
 }
 
-export const ViewMenu: FunctionComponent<Props> = ({
+export const OptionsMenu: FC<Props> = ({
   enterFullscreen,
   fitToWindow,
   isWriteable,
@@ -112,18 +77,13 @@ export const ViewMenu: FunctionComponent<Props> = ({
   autoplayInterval,
   enableAutoplay,
   setAutoplayInterval,
+  onClose,
 }) => {
   const setRefresh = (val: number | undefined) => setRefreshInterval(val);
 
   const disableInterval = () => {
     setRefresh(0);
   };
-
-  const viewControl = (togglePopover: React.MouseEventHandler<any>) => (
-    <EuiButtonEmpty size="xs" aria-label={strings.getViewMenuLabel()} onClick={togglePopover}>
-      {strings.getViewMenuButtonLabel()}
-    </EuiButtonEmpty>
-  );
 
   const getScaleMenuItems = (): EuiContextMenuPanelItemDescriptor[] =>
     QUICK_ZOOM_LEVELS.map((scale: number) => ({
@@ -242,19 +202,15 @@ export const ViewMenu: FunctionComponent<Props> = ({
   });
 
   return (
-    <Popover button={viewControl} panelPaddingSize="none" anchorPosition="downLeft">
-      {({ closePopover }: { closePopover: ClosePopoverFn }) => (
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={flattenPanelTree(getPanelTree(closePopover))}
-          className="canvasViewMenu"
-        />
-      )}
-    </Popover>
+    <EuiContextMenu
+      initialPanelId={0}
+      panels={flattenPanelTree(getPanelTree(onClose))}
+      className="canvasOptionsMenu"
+    />
   );
 };
 
-ViewMenu.propTypes = {
+OptionsMenu.propTypes = {
   isWriteable: PropTypes.bool.isRequired,
   zoomScale: PropTypes.number.isRequired,
   fitToWindow: PropTypes.func.isRequired,

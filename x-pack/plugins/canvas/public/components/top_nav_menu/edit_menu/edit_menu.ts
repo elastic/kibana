@@ -42,6 +42,7 @@ type CommitFn = (type: string, payload: any) => LayoutState;
 
 interface OwnProps {
   commit: CommitFn;
+  onClose: () => void;
 }
 
 const withGlobalState = (
@@ -110,13 +111,14 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 const mergeProps = (
   { state, selectedToplevelNodes, ...restStateProps }: ReturnType<typeof mapStateToProps>,
   { dispatch, ...restDispatchProps }: ReturnType<typeof mapDispatchToProps>,
-  { commit }: OwnProps
+  { commit, ...restOwnProps }: OwnProps
 ) => {
   const updateGlobalState = globalStateUpdater(dispatch, state);
 
   return {
     ...restDispatchProps,
     ...restStateProps,
+    ...restOwnProps,
     commit: withGlobalState(commit, updateGlobalState),
     groupIsSelected:
       selectedToplevelNodes.length === 1 && selectedToplevelNodes[0].includes('group'),

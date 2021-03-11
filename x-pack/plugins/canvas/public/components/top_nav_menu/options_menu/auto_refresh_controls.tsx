@@ -72,7 +72,7 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
     <EuiFlexGroup
       direction="column"
       justifyContent="spaceBetween"
-      className="canvasViewMenu__kioskSettings"
+      className="canvasOptionsMenu__kioskSettings"
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="xs">

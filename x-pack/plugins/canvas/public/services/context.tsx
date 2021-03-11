@@ -50,6 +50,7 @@ export const ServicesProvider: FC<{
   const value = {
     embeddables: specifiedProviders.embeddables.getService(),
     expressions: specifiedProviders.expressions.getService(),
+    navigation: specifiedProviders.navigation.getService(),
     notify: specifiedProviders.notify.getService(),
     platform: specifiedProviders.platform.getService(),
     navLink: specifiedProviders.navLink.getService(),

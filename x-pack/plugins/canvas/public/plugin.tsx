@@ -7,6 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import {
   CoreSetup,
   CoreStart,
@@ -49,6 +50,7 @@ export interface CanvasStartDeps {
   embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
   inspector: InspectorStart;
+  navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
   charts: ChartsPluginStart;
 }
@@ -105,7 +107,8 @@ export class CanvasPlugin
           plugins,
           depsStart,
           registries,
-          this.appUpdater
+          this.appUpdater,
+          params
         );
 
         const unmount = renderApp(coreStart, depsStart, params, canvasStore);
