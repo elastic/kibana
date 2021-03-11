@@ -264,6 +264,7 @@ interface SharedDimensionProps {
 export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   layerId: string;
   columnId: string;
+  groupId: string;
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
@@ -308,9 +309,11 @@ export function isDraggedOperation(
 
 export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   layerId: string;
+  groupId: string;
   columnId: string;
   state: T;
   setState: StateSetter<T>;
+  dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
@@ -388,6 +391,7 @@ export interface AccessorConfig {
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
+  groupTooltip?: string;
 
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
@@ -402,6 +406,10 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
    * will render the extra tab for the dimension editor
    */
   enableDimensionEditor?: boolean;
+  // if the visual order of dimension groups diverges from the intended nesting order, this property specifies the position of
+  // this dimension group in the hierarchy. If not specified, the position of the dimension in the array is used. specified nesting
+  // orders are always higher in the hierarchy than non-specified ones.
+  nestingOrder?: number;
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -592,7 +600,9 @@ export interface Visualization<T = unknown> {
    * The frame is telling the visualization to update or set a dimension based on user interaction
    * groupId is coming from the groupId provided in getConfiguration
    */
-  setDimension: (props: VisualizationDimensionChangeProps<T> & { groupId: string }) => T;
+  setDimension: (
+    props: VisualizationDimensionChangeProps<T> & { groupId: string; previousColumn?: string }
+  ) => T;
   /**
    * The frame is telling the visualization to remove a dimension. The visualization needs to
    * look at its internal state to determine which dimension is being affected.
