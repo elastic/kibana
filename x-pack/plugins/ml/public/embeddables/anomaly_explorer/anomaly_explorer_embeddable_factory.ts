@@ -66,16 +66,15 @@ export class AnomalyExplorerEmbeddableFactory
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
+    const mlApiServices = mlApiServicesProvider(httpService);
+    const mlResultsServices = mlResultsServiceProvider(mlApiServices);
+
     const anomalyTimelineService = new AnomalyTimelineService(
       pluginsStart.data.query.timefilter.timefilter,
       coreStart.uiSettings,
-      mlResultsServiceProvider(mlApiServicesProvider(httpService))
+      mlResultsServices
     );
-    const anomalyExplorerService = new AnomalyExplorerService(
-      coreStart.uiSettings,
-      mlApiServicesProvider(httpService),
-      mlResultsServiceProvider(mlApiServicesProvider(httpService))
-    );
+    const anomalyExplorerService = new AnomalyExplorerService(mlApiServices, mlResultsServices);
 
     return [
       coreStart,

@@ -13,7 +13,6 @@ import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
-import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
 import { explorerService } from '../explorer_dashboard_service';
 import {
   getDateFormatTz,
@@ -35,6 +34,9 @@ import { mlResultsServiceProvider } from '../../services/results_service';
 import { isViewBySwimLaneData } from '../swimlane_container';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
+import { AnomalyExplorerService } from '../../services/anomaly_explorer_service';
+import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
+import { mlJobService } from '../../services/job_service';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -52,7 +54,7 @@ const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
   return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual);
 };
 
-const memoizedAnomalyDataChange = memoize<typeof anomalyDataChange>(anomalyDataChange);
+// const memoizedAnomalyDataChange = memoize<typeof anomalyDataChange>(anomalyDataChange);
 const memoizedLoadAnnotationsTableData = memoize<typeof loadAnnotationsTableData>(
   loadAnnotationsTableData
 );
@@ -93,6 +95,7 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
  */
 const loadExplorerDataProvider = (
   anomalyTimelineService: AnomalyTimelineService,
+  anomalyExplorerService: AnomalyExplorerService,
   timefilter: TimefilterContract
 ) => {
   const memoizedLoadOverallData = memoize(
@@ -103,6 +106,11 @@ const loadExplorerDataProvider = (
     anomalyTimelineService.loadViewBySwimlane,
     anomalyTimelineService
   );
+  const memoizedAnomalyDataChange = memoize(
+    anomalyExplorerService.getAnomalyData,
+    anomalyExplorerService
+  );
+
   return (config: LoadExplorerDataConfig): Observable<Partial<ExplorerState>> => {
     if (!isLoadExplorerDataConfig(config)) {
       return of({});
@@ -123,6 +131,10 @@ const loadExplorerDataProvider = (
       viewByFromPage,
       viewByPerPage,
     } = config;
+
+    const combinedJobRecords: Record<string, CombinedJob> = selectedJobs.reduce((acc, job) => {
+      return { ...acc, [job.id]: mlJobService.getJob(job.id) };
+    }, {});
 
     const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
@@ -204,19 +216,25 @@ const loadExplorerDataProvider = (
         if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
           memoizedAnomalyDataChange(
             lastRefresh,
+            explorerService,
+            combinedJobRecords,
             swimlaneContainerWidth,
             anomalyChartRecords,
             timerange.earliestMs,
             timerange.latestMs,
+            timefilter,
             tableSeverity
           );
         } else {
           memoizedAnomalyDataChange(
             lastRefresh,
+            explorerService,
+            combinedJobRecords,
             swimlaneContainerWidth,
             [],
             timerange.earliestMs,
             timerange.latestMs,
+            timefilter,
             tableSeverity
           );
         }
@@ -291,12 +309,14 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
   } = useMlKibana();
 
   const loadExplorerData = useMemo(() => {
+    const mlResultsServices = mlResultsServiceProvider(mlApiServices);
     const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
       uiSettings,
-      mlResultsServiceProvider(mlApiServices)
+      mlResultsServices
     );
-    return loadExplorerDataProvider(anomalyTimelineService, timefilter);
+    const anomalyExplorerService = new AnomalyExplorerService(mlApiServices, mlResultsServices);
+    return loadExplorerDataProvider(anomalyTimelineService, anomalyExplorerService, timefilter);
   }, []);
 
   const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);

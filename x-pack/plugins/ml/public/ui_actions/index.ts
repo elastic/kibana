@@ -12,10 +12,16 @@ import { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public';
 import { MlPluginStart, MlStartDependencies } from '../plugin';
 import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
-import { SWIM_LANE_SELECTION_TRIGGER, swimLaneSelectionTrigger } from './triggers';
+import {
+  entityFieldSelectionTrigger,
+  EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
+  SWIM_LANE_SELECTION_TRIGGER,
+  swimLaneSelectionTrigger,
+} from './triggers';
 import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
 import { createClearSelectionAction } from './clear_selection_action';
 import { createEditExplorerPanelAction } from './edit_explorer_panel_action';
+import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
 export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
 export { APPLY_INFLUENCER_FILTERS_ACTION } from './apply_influencer_filters_action';
@@ -32,6 +38,7 @@ export function registerMlUiActions(
   const editSwimlanePanelAction = createEditSwimlanePanelAction(core.getStartServices);
   const openInExplorerAction = createOpenInExplorerAction(core.getStartServices);
   const applyInfluencerFiltersAction = createApplyInfluencerFiltersAction(core.getStartServices);
+  const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(core.getStartServices);
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
   const editExplorerPanelAction = createEditExplorerPanelAction(core.getStartServices);
@@ -40,6 +47,7 @@ export function registerMlUiActions(
   uiActions.registerAction(editSwimlanePanelAction);
   uiActions.registerAction(openInExplorerAction);
   uiActions.registerAction(applyInfluencerFiltersAction);
+  uiActions.registerAction(applyEntityFieldFilterAction);
   uiActions.registerAction(applyTimeRangeSelectionAction);
   uiActions.registerAction(clearSelectionAction);
   uiActions.registerAction(editExplorerPanelAction);
@@ -50,9 +58,11 @@ export function registerMlUiActions(
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, openInExplorerAction.id);
 
   uiActions.registerTrigger(swimLaneSelectionTrigger);
+  uiActions.registerTrigger(entityFieldSelectionTrigger);
 
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyInfluencerFiltersAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, applyTimeRangeSelectionAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, openInExplorerAction);
   uiActions.addTriggerAction(SWIM_LANE_SELECTION_TRIGGER, clearSelectionAction);
+  uiActions.addTriggerAction(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER, applyEntityFieldFilterAction);
 }

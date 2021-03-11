@@ -19,6 +19,8 @@ import type { AnomalyChartData } from '../services/anomaly_explorer_service';
 import type { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
 import type { TimeBuckets } from '../util/time_buckets';
 import type { TimefilterContract } from '../../../../../../src/plugins/data/public';
+import type { EntityField } from '../../../common/util/anomaly_utils';
+
 interface ExplorerAnomaliesContainerProps {
   id: string;
   chartsData: AnomalyChartData;
@@ -28,6 +30,7 @@ interface ExplorerAnomaliesContainerProps {
   mlUrlGenerator: UrlGeneratorContract<'ML_APP_URL_GENERATOR'>;
   timeBuckets: TimeBuckets;
   timefilter: TimefilterContract;
+  onSelectEntity: (entity: EntityField) => void;
 }
 export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = ({
   id,
@@ -38,6 +41,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   mlUrlGenerator,
   timeBuckets,
   timefilter,
+  onSelectEntity,
 }) => {
   return (
     <>
@@ -75,7 +79,14 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
       <div className="euiText explorer-charts">
         {showCharts && (
           <ExplorerChartsContainer
-            {...{ ...chartsData, severity: severity.val, mlUrlGenerator, timeBuckets, timefilter }}
+            {...{
+              ...chartsData,
+              severity: severity.val,
+              mlUrlGenerator,
+              timeBuckets,
+              timefilter,
+              onSelectEntity,
+            }}
           />
         )}
       </div>

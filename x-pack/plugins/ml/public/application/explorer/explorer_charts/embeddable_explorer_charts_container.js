@@ -66,6 +66,7 @@ function ExplorerChartContainer({
   basePath,
   timeBuckets,
   timefilter,
+  onSelectEntity,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
@@ -124,6 +125,7 @@ function ExplorerChartContainer({
             entityFields={entityFields}
             infoTooltip={{ ...series.infoTooltip, chartType }}
             wrapLabel={wrapLabel}
+            onSelectEntity={onSelectEntity}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -209,6 +211,7 @@ export const ExplorerChartsContainerUI = ({
   mlUrlGenerator,
   timeBuckets,
   timefilter,
+  onSelectEntity,
 }) => {
   const {
     services: {
@@ -264,6 +267,7 @@ export const ExplorerChartsContainerUI = ({
                 basePath={basePath.get()}
                 timeBuckets={timeBuckets}
                 timefilter={timefilter}
+                onSelectEntity={onSelectEntity}
               />
             </EuiFlexItem>
           ))}

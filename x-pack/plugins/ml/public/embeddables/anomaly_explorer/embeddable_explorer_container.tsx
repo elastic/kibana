@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useMemo } from 'react';
+import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { throttle } from 'lodash';
-import { IAnomalyExplorerEmbeddable } from './anomaly_explorer_embeddable';
 import { useExplorerInputResolver } from './explorer_input_resolver';
-import {
+import type { IAnomalyExplorerEmbeddable } from './anomaly_explorer_embeddable';
+import type {
   AnomalyExplorerEmbeddableInput,
   AnomalyExplorerEmbeddableOutput,
   AnomalyExplorerEmbeddableServices,
 } from '..';
+import type { EntityField } from '../../../common/util/anomaly_utils';
+
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts_container';
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { ANOMALY_THRESHOLD } from '../../../common';
-import { TimeBuckets } from '../../application/util/time_buckets';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { TimeBuckets } from '../../application/util/time_buckets';
+import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -43,11 +46,11 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
   services,
   refresh,
   onInputChange,
-  // @TODO
-  // onOutputChange,
+  onOutputChange,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(optionValueToThreshold(ANOMALY_THRESHOLD.MINOR));
+  const [selectedEntityFields, setSelectedEntityFields] = useState<EntityField[]>([]);
 
   const [
     { uiSettings },
@@ -56,6 +59,7 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
       share: {
         urlGenerators: { getUrlGenerator },
       },
+      uiActions,
     },
   ] = services;
   const { timefilter } = dataServices.query.timefilter;
@@ -80,13 +84,11 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
     severity.val
   );
 
-  // useEffect(() => {
-  //   onOutputChange({
-  //     perPage,
-  //     fromPage,
-  //     interval: swimlaneData?.interval,
-  //   });
-  // }, [perPage, fromPage, swimlaneData]);
+  useEffect(() => {
+    onOutputChange({
+      entityFields: selectedEntityFields,
+    });
+  }, [selectedEntityFields]);
 
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
@@ -113,6 +115,15 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
     );
   }
 
+  const addEntityFieldFilter = (entity: EntityField) => {
+    const uniqueSelectedEntities = [entity];
+    // setSelectedEntityFields([...uniqueSelectedEntities]);
+    uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({
+      embeddable: embeddableContext,
+      data: uniqueSelectedEntities,
+      updateCallback: setSelectedEntityFields.bind(null, uniqueSelectedEntities),
+    });
+  };
   return (
     <div
       id={`mlAnomalyExplorerEmbeddableWrapper-${id}`}
@@ -153,6 +164,7 @@ export const EmbeddableExplorerContainer: FC<ExplorerSwimlaneContainerProps> = (
                 mlUrlGenerator={mlUrlGenerator}
                 timeBuckets={timeBuckets}
                 timefilter={timefilter}
+                onSelectEntity={addEntityFieldFilter}
               />
             )}
           </div>

@@ -24,6 +24,7 @@ import type { AnomalyTimelineService } from '../application/services/anomaly_tim
 import type { MlDependencies } from '../application/app';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import { AnomalyExplorerService } from '../application/services/anomaly_explorer_service';
+import { EntityField } from '../../common/util/anomaly_utils';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -99,12 +100,15 @@ export type AnomalyExplorerEmbeddableServices = [
   AnomalyExplorerServices
 ];
 export interface AnomalyExplorerCustomOutput {
-  perPage?: number;
-  fromPage?: number;
-  interval?: number;
-  severity?: number;
+  entityFields?: EntityField[];
 }
 export type AnomalyExplorerEmbeddableOutput = EmbeddableOutput & AnomalyExplorerCustomOutput;
 export interface EditExplorerPanelContext {
   embeddable: IEmbeddable<AnomalyExplorerEmbeddableInput, AnomalyExplorerEmbeddableOutput>;
+}
+export interface ExplorerFieldSelectionContext extends EditExplorerPanelContext {
+  /**
+   * Optional data provided by swim lane selection
+   */
+  data?: EntityField[];
 }

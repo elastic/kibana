@@ -156,3 +156,5 @@ export const explorerService = {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE, payload });
   },
 };
+
+export type ExplorerService = typeof explorerService;

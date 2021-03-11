@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
 import { each, find, get, map, reduce, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { RecordForInfluencer } from './results_service/results_service';
@@ -33,6 +32,10 @@ import { CriteriaField, MlResultsService } from './results_service';
 import { TimefilterContract } from '../../../../../../src/plugins/data/public';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 import type { ChartRecord } from '../explorer/explorer_utils';
+import { RecordsForCriteria, ScheduledEventsByBucket } from './results_service/result_service_rx';
+import { isPopulatedObject } from '../../../common/util/object_utils';
+import type { ExplorerService } from '../explorer/explorer_dashboard_service';
+import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -40,6 +43,22 @@ const ML_TIME_FIELD_NAME = 'timestamp';
 const USE_OVERALL_CHART_LIMITS = false;
 const MAX_CHARTS_PER_ROW = 4;
 
+interface ChartPoint {
+  date: number;
+  anomalyScore?: number;
+  actual?: number[];
+  multiBucketImpact?: number;
+  typical?: number[];
+  value?: number | null;
+  entity?: string;
+  byFieldName?: string;
+  numberOfCauses?: number;
+  scheduledEvents?: any[];
+}
+interface MetricData {
+  results: Record<string, number>;
+  success: boolean;
+}
 interface SeriesConfig {
   jobId: JobId;
   detectorIndex: number;
@@ -63,13 +82,22 @@ interface InfoTooltip {
 interface SeriesConfigWithMetadata extends SeriesConfig {
   functionDescription?: string;
   bucketSpanSeconds: number;
-  detectorLabel: string;
+  detectorLabel?: string;
   fieldName: string;
   entityFields: any[];
   infoTooltip: InfoTooltip;
   loading?: boolean;
-  chartData?: ChartRecord[];
+  chartData?: ChartPoint[] | null;
+  mapData?: any[];
 }
+
+export const isSeriesConfigWithMetadata = (arg: unknown): arg is SeriesConfigWithMetadata => {
+  return (
+    isPopulatedObject(arg) &&
+    {}.hasOwnProperty.call(arg, 'bucketSpanSeconds') &&
+    {}.hasOwnProperty.call(arg, 'detectorLabel')
+  );
+};
 
 interface ChartRange {
   min: number;
@@ -87,16 +115,12 @@ export interface AnomalyChartData {
  * Service for retrieving anomaly swim lanes data.
  */
 export class AnomalyExplorerService {
-  constructor(
-    uiSettings: IUiSettingsClient,
-    private mlApiServices: MlApiServices,
-    private mlResultsService: MlResultsService
-  ) {}
+  constructor(private mlApiServices: MlApiServices, private mlResultsService: MlResultsService) {}
 
   public getDefaultChartsData() {
     return {
       chartsPerRow: 1,
-      errorMessages: undefined,
+      errorMessages: {},
       seriesToPlot: [] as SeriesConfigWithMetadata[],
       // default values, will update on every re-render
       tooManyBuckets: false,
@@ -278,62 +302,79 @@ export class AnomalyExplorerService {
     return config;
   }
 
-  public buildConfig(record: ChartRecord, job: CombinedJob) {
+  public buildConfig(record: ChartRecord, job: CombinedJob): SeriesConfigWithMetadata {
     const detectorIndex = record.detector_index;
-    const config: Partial<SeriesConfigWithMetadata> = {
+    const config: Omit<
+      SeriesConfigWithMetadata,
+      'bucketSpanSeconds' | 'detectorLabel' | 'fieldName' | 'entityFields' | 'infoTooltip'
+    > = {
       ...this.buildConfigFromDetector(job, detectorIndex),
     };
 
+    const fullSeriesConfig: SeriesConfigWithMetadata = {
+      bucketSpanSeconds: 0,
+      entityFields: [],
+      fieldName: '',
+      // @ts-ignore
+      infoTooltip: {},
+      ...config,
+    };
     // Add extra properties used by the explorer dashboard charts.
-    config.functionDescription = record.function_description;
-    config.bucketSpanSeconds = parseInterval(job.analysis_config.bucket_span)!.asSeconds();
+    fullSeriesConfig.functionDescription = record.function_description;
+    fullSeriesConfig.bucketSpanSeconds = parseInterval(
+      job.analysis_config.bucket_span
+    )!.asSeconds();
 
-    config.detectorLabel = record.function;
+    fullSeriesConfig.detectorLabel = record.function;
     const jobDetectors = job.analysis_config.detectors;
     if (jobDetectors) {
-      config.detectorLabel = jobDetectors[detectorIndex].detector_description;
+      fullSeriesConfig.detectorLabel = jobDetectors[detectorIndex].detector_description;
     } else {
       if (record.field_name !== undefined) {
-        config.detectorLabel += ` ${config.fieldName}`;
+        fullSeriesConfig.detectorLabel += ` ${fullSeriesConfig.fieldName}`;
       }
     }
 
     if (record.field_name !== undefined) {
-      config.fieldName = record.field_name;
-      config.metricFieldName = record.field_name;
+      fullSeriesConfig.fieldName = record.field_name;
+      fullSeriesConfig.metricFieldName = record.field_name;
     }
 
     // Add the 'entity_fields' i.e. the partition, by, over fields which
     // define the metric series to be plotted.
-    config.entityFields = getEntityFieldList(record);
+    fullSeriesConfig.entityFields = getEntityFieldList(record);
 
     if (record.function === ML_JOB_AGGREGATION.METRIC) {
-      config.metricFunction = mlFunctionToESAggregation(record.function_description);
+      fullSeriesConfig.metricFunction = mlFunctionToESAggregation(record.function_description);
     }
 
     // Build the tooltip data for the chart info icon, showing further details on what is being plotted.
     let functionLabel = `${config.metricFunction}`;
-    if (config.metricFieldName !== undefined && config.metricFieldName !== null) {
-      functionLabel += ` ${config.metricFieldName}`;
+    if (
+      fullSeriesConfig.metricFieldName !== undefined &&
+      fullSeriesConfig.metricFieldName !== null
+    ) {
+      functionLabel += ` ${fullSeriesConfig.metricFieldName}`;
     }
 
-    config.infoTooltip = {
+    fullSeriesConfig.infoTooltip = {
       jobId: record.job_id,
-      aggregationInterval: config.interval,
+      aggregationInterval: fullSeriesConfig.interval,
       chartFunction: functionLabel,
-      entityFields: config.entityFields.map((f) => ({
+      entityFields: fullSeriesConfig.entityFields.map((f) => ({
         fieldName: f.fieldName,
         fieldValue: f.fieldValue,
       })),
     };
 
-    return config;
+    return fullSeriesConfig;
   }
   public async getCombinedJobs(jobIds: string[]): Promise<CombinedJobWithStats[]> {
     return this.mlApiServices.jobs.jobs(jobIds);
   }
 
   public async getAnomalyData(
+    explorerService: ExplorerService | undefined,
     combinedJobRecords: Record<string, CombinedJob>,
     chartsContainerWidth: number,
     anomalyRecords: ChartRecord[] | undefined,
@@ -389,7 +430,10 @@ export class AnomalyExplorerService {
       for (let i = 0; i < seriesConfigs.length; i++) {
         const config = seriesConfigs[i];
         let records;
-        if (config.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)) {
+        if (
+          config.detectorLabel !== undefined &&
+          config.detectorLabel.includes(ML_JOB_AGGREGATION.LAT_LONG)
+        ) {
           if (config.entityFields.length) {
             records = [
               recordsToPlot.find((record) => {
@@ -427,10 +471,11 @@ export class AnomalyExplorerService {
     );
     data.tooManyBuckets = tooManyBuckets;
 
-    data.errorMessages = errorMessages;
+    data.errorMessages = errorMessages ?? {};
 
-    // // explorerService.setCharts({ ...data });
-
+    if (explorerService) {
+      explorerService.setCharts({ ...data });
+    }
     if (seriesConfigs.length === 0) {
       return data;
     }
@@ -440,7 +485,7 @@ export class AnomalyExplorerService {
       mlResultsService: MlResultsService,
       config: SeriesConfigWithMetadata,
       range: ChartRange
-    ) {
+    ): Promise<MetricData> {
       const { jobId, detectorIndex, entityFields, bucketSpanSeconds } = config;
 
       const job = combinedJobRecords[jobId];
@@ -453,7 +498,9 @@ export class AnomalyExplorerService {
         const datafeedQuery = get(config, 'datafeedConfig.query', null);
         return mlResultsService
           .getMetricData(
-            config.datafeedConfig.indices,
+            Array.isArray(config.datafeedConfig.indices)
+              ? config.datafeedConfig.indices[0]
+              : config.datafeedConfig.indices,
             entityFields,
             datafeedQuery,
             config.metricFunction,
@@ -505,7 +552,7 @@ export class AnomalyExplorerService {
         return new Promise((resolve, reject) => {
           const obj = {
             success: true,
-            results: {},
+            results: {} as Record<string, number>,
           };
 
           return mlResultsService
@@ -596,7 +643,9 @@ export class AnomalyExplorerService {
 
       const datafeedQuery = get(config, 'datafeedConfig.query', null);
       return mlResultsService.getEventDistributionData(
-        config.datafeedConfig.indices,
+        Array.isArray(config.datafeedConfig.indices)
+          ? config.datafeedConfig.indices[0]
+          : config.datafeedConfig.indices,
         splitField,
         filterField,
         datafeedQuery,
@@ -613,7 +662,9 @@ export class AnomalyExplorerService {
     // only after that trigger data processing and page render.
     // TODO - if query returns no results e.g. source data has been deleted,
     // display a message saying 'No data between earliest/latest'.
-    const seriesPromises = [];
+    const seriesPromises: Array<
+      Promise<[MetricData, RecordsForCriteria, ScheduledEventsByBucket, any]>
+    > = [];
     // Use seriesConfigs list without geo data config so indices match up after seriesPromises are resolved and we map through the responses
     const seriesConfigsForPromises = hasGeoData ? seriesConfigsNoGeoData : seriesConfigs;
     seriesConfigsForPromises.forEach((seriesConfig) => {
@@ -626,7 +677,10 @@ export class AnomalyExplorerService {
         ])
       );
     });
-    function processChartData(response, seriesIndex) {
+    function processChartData(
+      response: [MetricData, RecordsForCriteria, ScheduledEventsByBucket, any],
+      seriesIndex: number
+    ) {
       const metricData = response[0].results;
       const records = response[1].records;
       const jobId = seriesConfigsForPromises[seriesIndex].jobId;
@@ -642,11 +696,11 @@ export class AnomalyExplorerService {
       // Return dataset in format used by the chart.
       // i.e. array of Objects with keys date (timestamp), value,
       //    plus anomalyScore for points with anomaly markers.
-      let chartData = [];
+      let chartData: ChartPoint[] = [];
       if (metricData !== undefined) {
         if (eventDistribution.length > 0 && records.length > 0) {
           const filterField = records[0].by_field_value || records[0].over_field_value;
-          chartData = eventDistribution.filter((d) => d.entity !== filterField);
+          chartData = eventDistribution.filter((d: { entity: any }) => d.entity !== filterField);
           map(metricData, (value, time) => {
             // The filtering for rare/event_distribution charts needs to be handled
             // differently because of how the source data is structured.
@@ -682,31 +736,32 @@ export class AnomalyExplorerService {
         const recordTime = record[ML_TIME_FIELD_NAME];
         let chartPoint = findChartPointForTime(chartDataForPointSearch, recordTime);
         if (chartPoint === undefined) {
-          chartPoint = { date: new Date(recordTime), value: null };
+          chartPoint = { date: recordTime, value: null };
           chartData.push(chartPoint);
         }
+        if (chartPoint !== undefined) {
+          chartPoint.anomalyScore = record.record_score;
 
-        chartPoint.anomalyScore = record.record_score;
-
-        if (record.actual !== undefined) {
-          chartPoint.actual = record.actual;
-          chartPoint.typical = record.typical;
-        } else {
-          const causes = get(record, 'causes', []);
-          if (causes.length > 0) {
-            chartPoint.byFieldName = record.by_field_name;
-            chartPoint.numberOfCauses = causes.length;
-            if (causes.length === 1) {
-              // If only a single cause, copy actual and typical values to the top level.
-              const cause = record.causes[0];
-              chartPoint.actual = cause.actual;
-              chartPoint.typical = cause.typical;
+          if (record.actual !== undefined) {
+            chartPoint.actual = record.actual;
+            chartPoint.typical = record.typical;
+          } else {
+            const causes = get(record, 'causes', []);
+            if (causes.length > 0) {
+              chartPoint.byFieldName = record.by_field_name;
+              chartPoint.numberOfCauses = causes.length;
+              if (causes.length === 1) {
+                // If only a single cause, copy actual and typical values to the top level.
+                const cause = record.causes[0];
+                chartPoint.actual = cause.actual;
+                chartPoint.typical = cause.typical;
+              }
             }
           }
-        }
 
-        if (record.multi_bucket_impact !== undefined) {
-          chartPoint.multiBucketImpact = record.multi_bucket_impact;
+          if (record.multi_bucket_impact !== undefined) {
+            chartPoint.multiBucketImpact = record.multi_bucket_impact;
+          }
         }
       });
 
@@ -726,7 +781,11 @@ export class AnomalyExplorerService {
       return chartData;
     }
 
-    function getChartDataForPointSearch(chartData, record, chartType) {
+    function getChartDataForPointSearch(
+      chartData: ChartPoint[],
+      record: AnomalyRecordDoc,
+      chartType: typeof CHART_TYPE[keyof typeof CHART_TYPE]
+    ) {
       if (
         chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
         chartType === CHART_TYPE.POPULATION_DISTRIBUTION
@@ -739,7 +798,7 @@ export class AnomalyExplorerService {
       return chartData;
     }
 
-    function findChartPointForTime(chartData, time) {
+    function findChartPointForTime(chartData: ChartPoint[], time: number) {
       return chartData.find((point) => point.date === time);
     }
 
@@ -753,7 +812,7 @@ export class AnomalyExplorerService {
             each(series, (d) => datapoints.push(d));
             return datapoints;
           },
-          []
+          [] as ChartPoint[]
         );
         const overallChartLimits = chartLimits(allDataPoints);
 
@@ -775,6 +834,9 @@ export class AnomalyExplorerService {
         if (mapData.length) {
           // push map data in if it's available
           data.seriesToPlot.push(...mapData);
+        }
+        if (explorerService) {
+          explorerService.setCharts({ ...data });
         }
         return Promise.resolve(data);
       })
@@ -933,7 +995,7 @@ export class AnomalyExplorerService {
     });
 
     // Group job id by error message instead of by job:
-    const errorMessages: Record<string, Set<string>> = {};
+    const errorMessages: Record<string, Set<string>> | undefined = {};
     Object.keys(jobsErrorMessage).forEach((jobId) => {
       const msg = jobsErrorMessage[jobId];
       if (errorMessages[msg] === undefined) {

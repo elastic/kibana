@@ -1223,7 +1223,11 @@ export function resultsServiceProvider(mlApiServices) {
           },
         };
 
-        if (metricFieldName !== undefined && metricFieldName !== '') {
+        if (
+          metricFieldName !== undefined &&
+          metricFieldName !== '' &&
+          typeof metricFunction === 'string'
+        ) {
           body.aggs.sample.aggs.byTime.aggs.entities.aggs = {};
 
           const metricAgg = {

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const CONTROLLED_BY_SWIM_LANE_FILTER = 'anomaly-swim-lane';
-export const CONTROLLED_BY_EXPLORER_FILTER = 'anomaly-explorer';
+export { InfluencerFilter } from './influencer_filter';

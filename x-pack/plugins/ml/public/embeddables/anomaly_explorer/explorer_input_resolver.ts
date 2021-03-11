@@ -23,7 +23,7 @@ import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
 import { Query } from '../../../../../../src/plugins/data/common/query';
-import { esKuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { esKuery, esQuery, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import {
   AppStateSelectedCells,
   ExplorerJob,
@@ -34,7 +34,6 @@ import {
 } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/constants';
 import {
   AnomalyExplorerEmbeddableInput,
   AnomalyExplorerEmbeddableOutput,
@@ -109,6 +108,7 @@ export function useExplorerInputResolver(
             // couldn't load the list of jobs
             return of(undefined);
           }
+
           const { maxSeriesToPlot, timeRange: timeRangeInput, filters, query } = input;
 
           const viewBySwimlaneFieldName = OVERALL_LABEL;
@@ -180,6 +180,7 @@ export function useExplorerInputResolver(
               return forkJoin({
                 chartsData: from(
                   anomalyExplorerService.getAnomalyData(
+                    undefined,
                     combinedJobRecords,
                     swimlaneContainerWidth,
                     anomalyChartRecords,
@@ -228,14 +229,14 @@ export function processFilters(filters: Filter[], query: Query) {
   const inputQuery =
     query.language === 'kuery'
       ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string))
-      : query.query;
+      : esQuery.luceneStringToDsl(query.query);
 
   const must = [inputQuery];
   const mustNot = [];
+
   for (const filter of filters) {
     // ignore disabled filters as well as created by swim lane selection
-    if (filter.meta.disabled || filter.meta.controlledBy === CONTROLLED_BY_SWIM_LANE_FILTER)
-      continue;
+    if (filter.meta.disabled) continue;
 
     const {
       meta: { negate, type, key: fieldName },

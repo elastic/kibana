@@ -678,7 +678,6 @@ function calculateChartRange(
   // Look for the chart with the shortest bucket span as this determines
   // the length of the time range that can be plotted.
   const midpointMs = Math.ceil((selectedEarliestMs + selectedLatestMs) / 2);
-  console.log('seriesConfigs', seriesConfigs);
   const minBucketSpanMs = Math.min.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
   const maxBucketSpanMs = Math.max.apply(null, map(seriesConfigs, 'bucketSpanSeconds')) * 1000;
 

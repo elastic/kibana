@@ -67,8 +67,8 @@ export function resultsServiceProvider(
     splitField: string,
     filterField: string,
     query: any,
-    metricFunction: string, // ES aggregation name
-    metricFieldName: string,
+    metricFunction: string | undefined | null, // ES aggregation name
+    metricFieldName: string | undefined,
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
