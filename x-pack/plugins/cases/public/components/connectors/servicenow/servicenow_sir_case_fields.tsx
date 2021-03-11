@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 
 import { ConnectorTypes, ServiceNowSIRFieldsType } from '../../../../common/api/connectors';
-import { useKibana } from '../../../common/lib/kibana_react';
+import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';

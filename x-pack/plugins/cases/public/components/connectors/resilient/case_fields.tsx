@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useKibana } from '../../../common/lib/kibana_react';
+import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorFieldsProps } from '../types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';

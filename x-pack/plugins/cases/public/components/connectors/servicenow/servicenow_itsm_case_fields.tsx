@@ -11,7 +11,7 @@ import * as i18n from './translations';
 
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorTypes, ServiceNowITSMFieldsType } from '../../../../common/api/connectors';
-import { useKibana } from '../../../common/lib/kibana_react';
+import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
 import { Fields, Choice } from './types';

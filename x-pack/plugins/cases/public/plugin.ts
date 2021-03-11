@@ -11,7 +11,7 @@ import { TestComponent } from '.';
 import { CreateCaseProps } from './components/create';
 import { SetupPlugins, StartPlugins } from './types';
 import { getCreateCaseLazy } from './get_create_case';
-import { KibanaServices } from './common/lib/kibana_react';
+import { KibanaServices } from './common/lib/kibana';
 
 export interface CasesUiStart {
   casesComponent: () => JSX.Element;

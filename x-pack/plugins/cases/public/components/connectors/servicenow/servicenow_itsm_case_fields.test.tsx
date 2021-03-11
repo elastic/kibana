@@ -16,7 +16,7 @@ import Fields from './servicenow_itsm_case_fields';
 
 let onChoicesSuccess = (c: Choice[]) => {};
 
-jest.mock('../../../common/lib/kibana_react');
+jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_choices', () => ({
   useGetChoices: (args: { onSuccess: () => void }) => {
     onChoicesSuccess = args.onSuccess;

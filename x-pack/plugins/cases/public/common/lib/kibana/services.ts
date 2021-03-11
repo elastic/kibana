@@ -6,15 +6,6 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import {
-  KibanaContextProvider,
-  useKibana,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../types';
-
-const useTypedKibana = () => useKibana<StartServices>();
-
-export { KibanaContextProvider, useTypedKibana as useKibana };
 
 type GlobalServices = Pick<CoreStart, 'http'>; // | 'uiSettings' & Pick<StartPlugins, 'data'>; not sure if we need this
 

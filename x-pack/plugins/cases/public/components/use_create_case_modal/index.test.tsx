@@ -10,12 +10,12 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { useKibana } from '../../common/lib/kibana_react';
+import { useKibana } from '../../common/lib/kibana';
 import '../../../common/mock/match_media';
 import { useCreateCaseModal, UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('../../common/lib/kibana_react');
+jest.mock('../../common/lib/kibana');
 jest.mock('../create/form_context', () => {
   return {
     FormContext: ({

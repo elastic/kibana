@@ -15,7 +15,7 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import Fields from './case_fields';
 
-jest.mock('../../../common/lib/kibana_react');
+jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
 

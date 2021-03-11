@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaServices } from '../common/lib/kibana_react';
+import { KibanaServices } from '../common/lib/kibana';
 
 import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
 import { CASES_URL } from '../../common/constants';
