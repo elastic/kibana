@@ -143,10 +143,15 @@ export class CsvGenerator {
     };
   }
 
-  private getFieldsFromSearchSource(searchSource: ISearchSource): SearchFieldValue[] {
-    let fields: string | boolean | SearchFieldValue[] | undefined =
-      searchSource.getField('fields') || searchSource.getField('fieldsFromSource');
+  private getFields(searchSource: ISearchSource): SearchFieldValue[] {
+    const fieldValues: Record<string, string | boolean | SearchFieldValue[] | undefined> = {
+      fields: searchSource.getField('fields'),
+      fieldsFromSource: searchSource.getField('fieldsFromSource'),
+    };
+    const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
+    this.logger.info(`Getting search source fields from: '${fieldSource}'`);
 
+    let fields = fieldValues[fieldSource];
     if (fields === true || typeof fields === 'string') {
       fields = [fields.toString()];
     }
@@ -345,7 +350,7 @@ export class CsvGenerator {
 
         // write the header and initialize formatters / column orderings
         // depends on the table to know what order to place the columns
-        const fields = this.getFieldsFromSearchSource(searchSource);
+        const fields = this.getFields(searchSource);
 
         if (first) {
           first = false;

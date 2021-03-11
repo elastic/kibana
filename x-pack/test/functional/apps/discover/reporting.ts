@@ -113,12 +113,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
-      it('generates a report with data', async () => {
-        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+      const setupPage = async () => {
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      };
 
+      const getReport = async () => {
         await PageObjects.reporting.openCsvReportingPanel();
         await PageObjects.reporting.clickGenerateReportButton();
 
@@ -127,64 +128,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
-        expectSnapshot(res.text).toMatch();
+        return res;
+      };
+
+      it('generates a report with data', async () => {
+        await setupPage();
+        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
+
+        const { text } = await getReport();
+        expectSnapshot(text).toMatch();
       });
 
       it('generates a report with filtered data', async () => {
+        await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
-        const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
-        const toTime = 'Aug 23, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         // filter and re-save
         await filterBar.addFilter('currency', 'is', 'EUR');
-        await PageObjects.discover.saveSearch(`Ecommerce Data: EUR Filtered`);
+        await PageObjects.discover.saveSearch(`Ecommerce Data: EUR Filtered`); // renamed the search
 
-        await PageObjects.reporting.openCsvReportingPanel();
-        await PageObjects.reporting.clickGenerateReportButton();
-
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
-
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
-        expectSnapshot(res.text).toMatch();
-      });
-    });
-
-    describe('Generate CSV: Fields From Source limitation', () => {
-      before(async () => {
-        await esArchiver.load('reporting/ecommerce');
-        await esArchiver.load('reporting/ecommerce_kibana');
+        const { text } = await getReport();
+        expectSnapshot(text).toMatch();
+        await PageObjects.discover.saveSearch(`Ecommerce Data`); // rename the search back for the next test
       });
 
-      after(async () => {
-        await esArchiver.unload('reporting/ecommerce');
-        await esArchiver.unload('reporting/ecommerce_kibana');
-      });
+      it('generates a report with discover:searchFieldsFromSource = true', async () => {
+        await setupPage();
+        await PageObjects.discover.loadSavedSearch('Ecommerce Data');
 
-      afterEach(async () => {
-        await kibanaServer.uiSettings.replace({});
-      });
-
-      beforeEach(() => PageObjects.common.navigateToApp('discover'));
-
-      it('With using fieldsFromSource, it generates a report that does not have GEOIP data', async () => {
         await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': true });
-        await PageObjects.discover.loadSavedSearch('ECommerce Data');
-        const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
-        const toTime = 'Aug 23, 2019 @ 16:18:51.821';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await browser.refresh();
 
-        await PageObjects.reporting.openCsvReportingPanel();
-        await PageObjects.reporting.clickGenerateReportButton();
-
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
-
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
-        expectSnapshot(res.text).toMatch();
+        const { text } = await getReport();
+        expectSnapshot(text).toMatch();
       });
     });
   });
