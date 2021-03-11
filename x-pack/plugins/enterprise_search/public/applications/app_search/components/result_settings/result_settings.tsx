@@ -7,13 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
-  EuiPageContentBody,
-  EuiPageContent,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageContentBody, EuiPageContent } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
