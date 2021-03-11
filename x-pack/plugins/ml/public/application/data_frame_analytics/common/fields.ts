@@ -18,7 +18,7 @@ import {
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 import { newJobCapsService } from '../../services/new_job_capabilities_service';
 
-import { FEATURE_IMPORTANCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
+import { FEATURE_IMPORTANCE, FEATURE_INFLUENCE, OUTLIER_SCORE, TOP_CLASSES } from './constants';
 import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
 export type EsId = string;
@@ -187,6 +187,18 @@ export const getDefaultFieldsFromJobCaps = (
   let predictedField: string | undefined;
 
   if (isOutlierAnalysis(jobConfig.analysis)) {
+    if (jobConfig.analysis.outlier_detection.compute_feature_influence) {
+      featureImportanceFields.push({
+        id: `${resultsField}.${FEATURE_INFLUENCE}`,
+        name: `${resultsField}.${FEATURE_INFLUENCE}`,
+        type: KBN_FIELD_TYPES.UNKNOWN,
+      });
+      // remove flattened feature influence fields
+      fields = fields.filter(
+        (field: any) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
+      );
+    }
+
     // Only need to add these fields if we didn't use dest index pattern to get the fields
     if (needsDestIndexFields === true) {
       allFields.push({
