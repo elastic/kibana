@@ -322,7 +322,9 @@ export class IndexPattern implements IIndexPattern {
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: this.fields
-        ? JSON.stringify(this.fields.filter((field) => field.scripted))
+        ? JSON.stringify(
+            this.allowNoIndex ? this.fields : this.fields.filter((field) => field.scripted)
+          )
         : undefined,
       fieldFormatMap,
       type: this.type,
