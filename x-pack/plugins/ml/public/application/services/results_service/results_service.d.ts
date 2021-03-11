@@ -7,6 +7,7 @@
 
 import { MlApiServices } from '../ml_api_service';
 import type { AnomalyRecordDoc } from '../../../../common/types/anomalies';
+import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 
 type RecordForInfluencer = AnomalyRecordDoc;
 export function resultsServiceProvider(
@@ -28,7 +29,7 @@ export function resultsServiceProvider(
     perPage?: number,
     fromPage?: number,
     influencers?: any[],
-    influencersFilterQuery?: any
+    influencersFilterQuery?: InfluencersFilterQuery
   ): Promise<any>;
   getTopInfluencerValues(): Promise<any>;
   getOverallBucketScores(
@@ -48,7 +49,7 @@ export function resultsServiceProvider(
     maxResults: number,
     perPage: number,
     fromPage: number,
-    influencersFilterQuery: any
+    influencersFilterQuery: InfluencersFilterQuery
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
   getRecordsForInfluencer(): Promise<RecordForInfluencer[]>;

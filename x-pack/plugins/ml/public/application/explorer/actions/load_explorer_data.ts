@@ -37,6 +37,7 @@ import { TimefilterContract } from '../../../../../../../src/plugins/data/public
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { mlJobService } from '../../services/job_service';
+import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -65,7 +66,7 @@ const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
 const memoizedLoadAnomaliesTableData = memoize(loadAnomaliesTableData);
 
 export interface LoadExplorerDataConfig {
-  influencersFilterQuery: any;
+  influencersFilterQuery: InfluencersFilterQuery;
   lastRefresh: number;
   noInfluencersConfigured: boolean;
   selectedCells: AppStateSelectedCells | undefined;

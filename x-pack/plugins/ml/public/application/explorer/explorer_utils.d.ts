@@ -10,6 +10,7 @@ import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { SwimlaneType } from './explorer_constants';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { RecordForInfluencer } from '../services/results_service/results_service';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -131,7 +132,7 @@ export declare const loadAnomaliesTableData: (
   fieldName: string,
   tableInterval: string,
   tableSeverity: number,
-  influencersFilterQuery: any
+  influencersFilterQuery: InfluencersFilterQuery
 ) => Promise<AnomaliesTableData>;
 
 export declare const loadDataForCharts: (
@@ -140,7 +141,7 @@ export declare const loadDataForCharts: (
   latestMs: number,
   influencers: any[],
   selectedCells: AppStateSelectedCells | undefined,
-  influencersFilterQuery: any,
+  influencersFilterQuery: InfluencersFilterQuery,
   // choose whether or not to keep track of the request that could be out of date
   takeLatestOnly: boolean
 ) => Promise<ChartRecord[] | undefined>;
@@ -152,7 +153,7 @@ export declare const loadFilteredTopInfluencers: (
   records: any[],
   influencers: any[],
   noInfluencersConfigured: boolean,
-  influencersFilterQuery: any
+  influencersFilterQuery: InfluencersFilterQuery
 ) => Promise<any[]>;
 
 export declare const loadTopInfluencers: (
@@ -179,7 +180,7 @@ export declare const loadViewByTopFieldValuesForSelectedTime: (
 ) => Promise<any>;
 
 export declare interface FilterData {
-  influencersFilterQuery: any;
+  influencersFilterQuery: InfluencersFilterQuery;
   filterActive: boolean;
   filteredFields: string[];
   queryString: string;

@@ -41,6 +41,7 @@ import {
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
 import { processFilters } from '../common/process_filters';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
@@ -123,7 +124,7 @@ export function useExplorerInputResolver(
             };
           });
 
-          let influencersFilterQuery: any;
+          let influencersFilterQuery: InfluencersFilterQuery;
           try {
             influencersFilterQuery = processFilters(filters, query);
           } catch (e) {
