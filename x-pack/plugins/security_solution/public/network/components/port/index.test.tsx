@@ -60,13 +60,13 @@ describe('Port', () => {
     );
   });
 
-  test('it renders an external link', () => {
+  test('it renders only one external link icon', () => {
     const wrapper = mount(
       <TestProviders>
         <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="external-link-icon"]').first().exists()).toBe(true);
+    expect(wrapper.find('span [data-euiicon-type="popout"]').length).toBe(1);
   });
 });
