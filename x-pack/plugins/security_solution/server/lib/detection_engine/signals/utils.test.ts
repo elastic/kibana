@@ -1108,6 +1108,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1126,6 +1127,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1319,6 +1321,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1332,6 +1335,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
@@ -1341,6 +1345,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1359,6 +1364,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1375,6 +1381,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(merged).toEqual(expected);
     });
@@ -1448,6 +1455,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
+        warning: false,
       };
       expect(merged).toEqual(expected);
     });

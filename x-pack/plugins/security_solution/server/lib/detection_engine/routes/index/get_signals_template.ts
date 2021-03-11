@@ -21,7 +21,7 @@ import ecsMapping from './ecs_mapping.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 25;
+export const SIGNALS_TEMPLATE_VERSION = 27;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 
 export const getSignalsTemplate = (index: string) => {

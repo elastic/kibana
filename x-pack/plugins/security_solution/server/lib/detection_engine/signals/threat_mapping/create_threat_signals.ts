@@ -57,6 +57,7 @@ export const createThreatSignals = async ({
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
+    warning: false,
     bulkCreateTimes: [],
     searchAfterTimes: [],
     lastLookBackDate: null,

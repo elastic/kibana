@@ -621,6 +621,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
 
 export const createSearchAfterReturnType = ({
   success,
+  warning,
   searchAfterTimes,
   bulkCreateTimes,
   lastLookBackDate,
@@ -629,6 +630,7 @@ export const createSearchAfterReturnType = ({
   errors,
 }: {
   success?: boolean | undefined;
+  warning?: boolean;
   searchAfterTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
@@ -638,6 +640,7 @@ export const createSearchAfterReturnType = ({
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
+    warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
@@ -672,6 +675,7 @@ export const mergeReturns = (
   return searchAfters.reduce((prev, next) => {
     const {
       success: existingSuccess,
+      warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       lastLookBackDate: existingLastLookBackDate,
@@ -682,6 +686,7 @@ export const mergeReturns = (
 
     const {
       success: newSuccess,
+      warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
@@ -692,6 +697,7 @@ export const mergeReturns = (
 
     return {
       success: existingSuccess && newSuccess,
+      warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,

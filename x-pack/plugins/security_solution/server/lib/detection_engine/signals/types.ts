@@ -30,6 +30,7 @@ import { Logger } from '../../../../../../../src/core/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
+import { EqlRuleParams } from '../schemas/rule_schemas';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -241,6 +242,10 @@ export interface RuleAlertAttributes extends AlertAttributes {
   params: RuleTypeParams;
 }
 
+export interface EqlRuleAlertAttributes extends AlertAttributes {
+  params: EqlRuleParams;
+}
+
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
 
 /**
@@ -291,6 +296,7 @@ export interface SearchAfterAndBulkCreateParams {
 
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
+  warning: boolean;
   searchAfterTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
