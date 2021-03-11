@@ -15,6 +15,7 @@ import {
   EuiComboBox,
   EuiText,
   EuiCodeEditor,
+  EuiFieldPassword,
 } from '@elastic/eui';
 import { RegistryVarsEntry } from '../../../../types';
 
@@ -51,48 +52,58 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
         />
       );
     }
-    if (type === 'yaml') {
-      return (
-        <EuiCodeEditor
-          width="100%"
-          mode="yaml"
-          theme="textmate"
-          setOptions={{
-            minLines: 10,
-            maxLines: 30,
-            tabSize: 2,
-            showGutter: false,
-          }}
-          value={value}
-          onChange={(newVal) => onChange(newVal)}
-          onBlur={() => setIsDirty(true)}
-        />
-      );
+    switch (type) {
+      case 'yaml':
+        return (
+          <EuiCodeEditor
+            width="100%"
+            mode="yaml"
+            theme="textmate"
+            setOptions={{
+              minLines: 10,
+              maxLines: 30,
+              tabSize: 2,
+              showGutter: false,
+            }}
+            value={value}
+            onChange={(newVal) => onChange(newVal)}
+            onBlur={() => setIsDirty(true)}
+          />
+        );
+      case 'bool':
+        return (
+          <EuiSwitch
+            label={fieldLabel}
+            checked={value}
+            showLabel={false}
+            onChange={(e) => onChange(e.target.checked)}
+            onBlur={() => setIsDirty(true)}
+          />
+        );
+      case 'password':
+        return (
+          <EuiFieldPassword
+            type="dual"
+            isInvalid={isInvalid}
+            value={value === undefined ? '' : value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={() => setIsDirty(true)}
+          />
+        );
+      default:
+        return (
+          <EuiFieldText
+            isInvalid={isInvalid}
+            value={value === undefined ? '' : value}
+            onChange={(e) => onChange(e.target.value)}
+            onBlur={() => setIsDirty(true)}
+          />
+        );
     }
-    if (type === 'bool') {
-      return (
-        <EuiSwitch
-          label={fieldLabel}
-          checked={value}
-          showLabel={false}
-          onChange={(e) => onChange(e.target.checked)}
-          onBlur={() => setIsDirty(true)}
-        />
-      );
-    }
-
-    return (
-      <EuiFieldText
-        isInvalid={isInvalid}
-        value={value === undefined ? '' : value}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={() => setIsDirty(true)}
-      />
-    );
   }, [isInvalid, multi, onChange, type, value, fieldLabel]);
 
   // Boolean cannot be optional by default set to false
-  const isOptional = type !== 'bool' && !required;
+  const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
   return (
     <EuiFormRow

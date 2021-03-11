@@ -1556,7 +1556,15 @@
             "section": "def-server.SearchUsage",
             "text": "SearchUsage"
           },
-          " | undefined) => { next(response: ",
+          " | undefined, { isRestore }: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchOptions",
+            "text": "ISearchOptions"
+          },
+          ") => { next(response: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -1580,8 +1588,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/collectors/usage.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/search/collectors/usage.ts#L64"
+              "lineNumber": 83
             }
           },
           {
@@ -1601,8 +1608,79 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/collectors/usage.ts",
-              "lineNumber": 64,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/data/server/search/collectors/usage.ts#L64"
+              "lineNumber": 84
+            }
+          },
+          {
+            "type": "Object",
+            "label": "{ isRestore }",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchOptions",
+                "text": "ISearchOptions"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/collectors/usage.ts",
+              "lineNumber": 85
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/data/server/search/collectors/usage.ts",
+          "lineNumber": 82
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.usageProvider",
+        "type": "Function",
+        "label": "usageProvider",
+        "signature": [
+          "(core: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.CoreSetup",
+            "text": "CoreSetup"
+          },
+          "<object, unknown>) => ",
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.SearchUsage",
+            "text": "SearchUsage"
+          }
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Object",
+            "label": "core",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/server/search/collectors/usage.ts",
+              "lineNumber": 22
             }
           }
         ],

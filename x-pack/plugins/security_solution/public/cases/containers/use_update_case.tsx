@@ -91,7 +91,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
 
         if (!isCancelledRef.current) {
           if (fetchCaseUserActions != null) {
-            fetchCaseUserActions(caseId);
+            fetchCaseUserActions(caseId, response[0].connector.id);
           }
           if (updateCase != null) {
             updateCase(response[0]);
