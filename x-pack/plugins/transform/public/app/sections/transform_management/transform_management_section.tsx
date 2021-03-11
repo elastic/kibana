@@ -110,7 +110,7 @@ export const TransformManagement: FC = () => {
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.transform.transformList.transformDescription"
-              defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized or entity-centric indices."
+              defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access."
             />
           </EuiText>
         </EuiTitle>
