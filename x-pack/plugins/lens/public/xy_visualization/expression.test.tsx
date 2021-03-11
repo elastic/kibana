@@ -40,7 +40,6 @@ import {
   tickLabelsConfig,
   gridlinesConfig,
 } from './types';
-import { coreMock } from '../../../../../src/core/public/mocks';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
@@ -49,7 +48,6 @@ import { EmptyPlaceholder } from '../shared_components/empty_placeholder';
 const onClickValue = jest.fn();
 const onSelectRange = jest.fn();
 
-const chromeIsVisible$ = coreMock.createStart().chrome.getIsVisible$();
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const paletteService = chartPluginMock.createPaletteRegistry();
 
@@ -445,7 +443,6 @@ describe('xy_expression', () => {
         renderMode: 'display',
         chartsThemeService,
         paletteService,
-        chromeIsVisible$,
         minInterval: 50,
         onClickValue,
         onSelectRange,

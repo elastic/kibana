@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
 import { CoreSetup, IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { LensPluginStartDependencies } from '../plugin';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;

@@ -19,7 +19,6 @@ import { LensMultiTable, FormatFactory, LensFilterEvent } from '../types';
 import { PieExpressionProps, PieExpressionArgs } from './types';
 import { PieComponent } from './render_function';
 import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
-import { CoreStart } from '../../../../../src/core/public';
 
 export interface PieRender {
   type: 'render';

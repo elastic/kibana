@@ -24,7 +24,6 @@ import {
   HorizontalAlignment,
   ElementClickListener,
   BrushEndListener,
-  TooltipProps,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -61,7 +60,6 @@ import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
 import { getColorAssignments } from './color_assignment';
-import { CoreStart } from '../../../../../src/core/public';
 
 declare global {
   interface Window {
