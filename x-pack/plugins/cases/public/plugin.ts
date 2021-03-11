@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Plugin } from 'src/core/public';
+import { CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ReactElement } from 'react';
 import { TestComponent } from '.';
 import { CreateCaseProps } from './components/create';
 import { SetupPlugins, StartPlugins } from './types';
 import { getCreateCaseLazy } from './get_create_case';
+import { KibanaServices } from './common/lib/kibana_react';
 
 export interface CasesUiStart {
   casesComponent: () => JSX.Element;
@@ -18,9 +19,15 @@ export interface CasesUiStart {
 }
 
 export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, StartPlugins> {
+  private kibanaVersion: string;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  }
   public setup() {}
 
-  public start(): CasesUiStart {
+  public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
+    KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     return {
       casesComponent: TestComponent,
       getCreateCase: (props) => {

@@ -6,9 +6,12 @@
  */
 
 import React, { memo, useEffect, useState, useCallback } from 'react';
-import { EuiMarkdownEditor } from '@elastic/eui';
-
-import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
+import {
+  EuiMarkdownEditor,
+  getDefaultEuiMarkdownParsingPlugins,
+  getDefaultEuiMarkdownProcessingPlugins,
+  getDefaultEuiMarkdownUiPlugins,
+} from '@elastic/eui';
 
 interface MarkdownEditorProps {
   onChange: (content: string) => void;
@@ -19,6 +22,12 @@ interface MarkdownEditorProps {
   height?: number;
 }
 
+// create plugin stuff here
+const { uiPlugins, parsingPlugins, processingPlugins } = {
+  uiPlugins: getDefaultEuiMarkdownUiPlugins(),
+  parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
+  processingPlugins: getDefaultEuiMarkdownProcessingPlugins(),
+};
 const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
   onChange,
   value,

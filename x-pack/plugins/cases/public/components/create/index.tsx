@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -28,8 +28,8 @@ export interface CreateCaseProps {
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
 }
-type CC = (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
-export const CreateCase: CC = ({ onCancel, onSuccess }: CreateCaseProps) => (
+
+export const CreateCase = ({ onCancel, onSuccess }: CreateCaseProps) => (
   <FormContext onSuccess={onSuccess}>
     <CreateCaseForm />
     <Container>

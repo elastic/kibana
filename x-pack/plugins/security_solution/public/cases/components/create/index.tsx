@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
@@ -20,7 +20,6 @@ import { fieldName as descriptionFieldName } from './description';
 import { SubmitCaseButton } from './submit_button';
 import { USE_RAC_CASES_UI } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { TestComponent } from '../../../../../cases/public';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -29,17 +28,17 @@ const Container = styled.div`
     margin-top: ${theme.eui.euiSize};
   `}
 `;
-//
-// const InsertTimeline = () => {
-//   const { setFieldValue, getFormData } = useFormContext();
-//   const formData = getFormData();
-//   const onTimelineAttached = useCallback(
-//     (newValue: string) => setFieldValue(descriptionFieldName, newValue),
-//     [setFieldValue]
-//   );
-//   useInsertTimeline(formData[descriptionFieldName] ?? '', onTimelineAttached);
-//   return null;
-// };
+
+const InsertTimeline = () => {
+  const { setFieldValue, getFormData } = useFormContext();
+  const formData = getFormData();
+  const onTimelineAttached = useCallback(
+    (newValue: string) => setFieldValue(descriptionFieldName, newValue),
+    [setFieldValue]
+  );
+  useInsertTimeline(formData[descriptionFieldName] ?? '', onTimelineAttached);
+  return null;
+};
 
 export const Create = React.memo(() => {
   const { cases } = useKibana().services;
@@ -87,9 +86,9 @@ export const Create = React.memo(() => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </Container>
+          <InsertTimeline />
         </FormContext>
       )}
-      {/* <InsertTimeline />*/}
     </EuiPanel>
   );
 });

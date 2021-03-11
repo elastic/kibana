@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiMarkdownEditorProps, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
 
 import { MarkdownEditor } from './editor';
 
