@@ -6,14 +6,14 @@
  */
 
 import {
-  LegacyAPICaller,
+  ElasticsearchClient,
   SavedObjectsBaseOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
 } from 'kibana/server';
 import { ActionResult } from '../types';
 
-export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: string) {
+export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: string) {
   const scriptedMetric = {
     scripted_metric: {
       init_script: 'state.types = [:]',
@@ -40,7 +40,7 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
     },
   };
 
-  const searchResult = await callCluster('search', {
+  const { body: searchResult } = await esClient.search({
     index: kibanaIndex,
     body: {
       query: {
@@ -61,7 +61,7 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
       0
     ),
     countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
-      // ES DSL aggregations are returned as `any` by callCluster
+      // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
@@ -75,7 +75,7 @@ export async function getTotalCount(callCluster: LegacyAPICaller, kibanaIndex: s
 }
 
 export async function getInUseTotalCount(
-  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   actionsBulkGet: (
     objects?: SavedObjectsBulkGetObject[] | undefined,
     options?: SavedObjectsBaseOptions | undefined
@@ -117,7 +117,7 @@ export async function getInUseTotalCount(
     },
   };
 
-  const actionResults = await callCluster('search', {
+  const { body: actionResults } = await esClient.search({
     index: kibanaIndex,
     body: {
       query: {
