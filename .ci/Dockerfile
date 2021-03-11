@@ -61,6 +61,5 @@ COPY . .
 RUN yarn kbn bootstrap
 RUN yarn kbn run build -i @kbn/pm
 RUN node scripts/build_plugin_list_docs
-RUN rm -rf .git
 
-ENTRYPOINT ["/var/lib/kibana/workspace/kibana/.ci/entrypoint.sh"]
+ENTRYPOINT ["/var/lib/kibana/workspace/kibana/.ci/buildkite/entrypoint.sh"]

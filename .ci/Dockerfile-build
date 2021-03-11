@@ -1,0 +1,4 @@
+ARG BASE_IMAGE=kibana-bk-ci
+FROM ${BASE_IMAGE}
+
+RUN .ci/buildkite/default-build.sh

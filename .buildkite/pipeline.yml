@@ -26,6 +26,23 @@ steps:
           mount-checkout: false
     parallelism: 2
     timeout_in_minutes: 120
+  - command: |
+      export DOCKER_BUILDKIT=1 && \
+      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT -f .ci/Dockerfile-build --build-arg BASE_IMAGE=gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT' . --progress plain && \
+      docker push gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT
+    agents:
+      queue: bootstrap
+    key: default-build
+  - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'
+    label: 'Default CI Group 1'
+    agents:
+      queue: ci-group
+    artifact_paths: target/junit/**/*.xml
+    plugins:
+      - docker#v3.8.0:
+          image: 'gcr.io/elastic-kibana-184716/buildkite/ci/default-build:$BUILDKITE_COMMIT'
+          propagate-environment: true
+          mount-checkout: false
   # - command: 'CI_GROUP=1 .ci/buildkite/xpack-cigroup.sh'
   #   label: 'Default CI Group 1'
   #   agents:
