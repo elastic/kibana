@@ -6,6 +6,18 @@
 
 experimental[] Create sets of {kib} saved objects from a file created by the export API.
 
+==== Compatibility across versions
+Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of {kib}. See the table below for compatibility examples:
+
+|=======
+| Exporting version | Importing version | Compatible?
+| 6.7.0 | 6.8.1 | Yes
+| 6.8.1 | 7.3.0 | Yes
+| 7.3.0 | 7.11.1 | Yes
+| 7.11.1 | 7.6.0 | No
+| 6.8.1 | 8.0.0 | No
+|=======
+
 [[saved-objects-api-import-request]]
 ==== Request
 

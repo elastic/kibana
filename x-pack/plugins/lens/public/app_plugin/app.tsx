@@ -120,7 +120,8 @@ export function App({
   const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
     data,
     state.lastKnownDoc,
-    setState
+    setState,
+    state.searchSessionId
   );
 
   const onError = useCallback(

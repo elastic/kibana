@@ -27,7 +27,7 @@ import { WorkspacePanel, WorkspacePanelProps } from './workspace_panel';
 import { mountWithIntl as mount } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
-import { Ast } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter/common';
 import { coreMock } from 'src/core/public/mocks';
 import {
   DataPublicPluginStart,
@@ -177,42 +177,9 @@ describe('workspace_panel', () => {
     );
 
     expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-      Object {
-        "chain": Array [
-          Object {
-            "arguments": Object {},
-            "function": "kibana",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {
-              "layerIds": Array [
-                "first",
-              ],
-              "tables": Array [
-                Object {
-                  "chain": Array [
-                    Object {
-                      "arguments": Object {},
-                      "function": "datasource",
-                      "type": "function",
-                    },
-                  ],
-                  "type": "expression",
-                },
-              ],
-            },
-            "function": "lens_merge_tables",
-            "type": "function",
-          },
-          Object {
-            "arguments": Object {},
-            "function": "vis",
-            "type": "function",
-          },
-        ],
-        "type": "expression",
-      }
+      "kibana
+      | lens_merge_tables layerIds=\\"first\\" tables={datasource}
+      | vis"
     `);
   });
 
@@ -346,12 +313,10 @@ describe('workspace_panel', () => {
       />
     );
 
-    expect(
-      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[1].arguments.layerIds
-    ).toEqual(['first', 'second', 'third']);
-    expect(
-      (instance.find(expressionRendererMock).prop('expression') as Ast).chain[1].arguments.tables
-    ).toMatchInlineSnapshot(`
+    const ast = fromExpression(instance.find(expressionRendererMock).prop('expression') as string);
+
+    expect(ast.chain[1].arguments.layerIds).toEqual(['first', 'second', 'third']);
+    expect(ast.chain[1].arguments.tables).toMatchInlineSnapshot(`
                                     Array [
                                       Object {
                                         "chain": Array [

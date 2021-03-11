@@ -47,7 +47,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Finalizing signals migrations', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/94367
+  describe.skip('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;
     let createdMigrations: CreateResponse[];
@@ -221,14 +222,17 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(indicesAfter).not.to.contain(createdMigration.index);
     });
 
-    it('returns an empty array indicating a no-op for DNE migrations', async () => {
+    it('returns a 404 for DNE migrations', async () => {
       const { body } = await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
         .send({ migration_ids: ['dne-migration'] })
-        .expect(200);
+        .expect(404);
 
-      expect(body).to.eql({ migrations: [] });
+      expect(body).to.eql({
+        message: 'Saved object [security-solution-signals-migration/dne-migration] not found',
+        status_code: 404,
+      });
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {

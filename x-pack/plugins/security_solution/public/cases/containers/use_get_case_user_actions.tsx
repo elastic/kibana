@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
-import { CaseFullExternalService } from '../../../../case/common/api/cases';
+import { CaseFullExternalService } from '../../../../cases/common/api/cases';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
 import { CaseConnector, CaseExternalService, CaseUserActions, ElasticUser } from './types';
@@ -46,7 +46,7 @@ export const initialData: CaseUserActionsState = {
 };
 
 export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (caseId: string, subCaseId?: string) => void;
+  fetchCaseUserActions: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
 }
 
 const getExternalService = (value: string): CaseExternalService | null =>
@@ -249,7 +249,7 @@ export const useGetCaseUserActions = (
   const [, dispatchToaster] = useStateToaster();
 
   const fetchCaseUserActions = useCallback(
-    async (thisCaseId: string, thisSubCaseId?: string) => {
+    async (thisCaseId: string, thisCaseConnectorId: string, thisSubCaseId?: string) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -279,7 +279,7 @@ export const useGetCaseUserActions = (
 
           setCaseUserActionsState({
             caseUserActions,
-            ...getPushedInfo(caseUserActions, caseConnectorId),
+            ...getPushedInfo(caseUserActions, thisCaseConnectorId),
             isLoading: false,
             isError: false,
             participants,
@@ -307,12 +307,12 @@ export const useGetCaseUserActions = (
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseConnectorId]
+    [caseUserActionsState]
   );
 
   useEffect(() => {
     if (!isEmpty(caseId)) {
-      fetchCaseUserActions(caseId, subCaseId);
+      fetchCaseUserActions(caseId, caseConnectorId, subCaseId);
     }
 
     return () => {
