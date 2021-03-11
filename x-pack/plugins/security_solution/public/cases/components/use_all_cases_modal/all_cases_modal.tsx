@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
 import { useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common/api';
 import { Case, SubCase } from '../../containers/types';
 import { AllCases } from '../all_cases';
 import * as i18n from './translations';

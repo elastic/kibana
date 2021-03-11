@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentRequestUserType } from '../../../../../case/common/api';
+import { CommentRequestUserType } from '../../../../../cases/common/api';
 import { FIELD_TYPES, fieldValidators, FormSchema } from '../../../shared_imports';
 import * as i18n from './translations';
 
