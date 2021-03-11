@@ -2389,7 +2389,6 @@
     "home.tutorials.golangMetrics.longDescription": "Metricbeat モジュール「{moduleName}」は、Golang アプリから内部メトリックを取得します。[詳細] ({learnMoreLink}) 。",
     "home.tutorials.golangMetrics.nameTitle": "Golang メトリック",
     "home.tutorials.golangMetrics.shortDescription": "Golang アプリから内部メトリックを取得します。",
-<<<<<<< HEAD
     "home.tutorials.gcpLogs.artifacts.dashboards.linkLabel": "監査ログダッシュボード",
     "home.tutorials.gcpLogs.longDescription": "これは Google Cloud ログのモジュールです。Stackdriver から Google Pub/Sub トピックシンクにエクスポートされた監査、VPC フロー、ファイアウォールログの読み取りをサポートします。[詳細]({learnMoreLink})。",
     "home.tutorials.gcpLogs.nameTitle": "Google Cloud ログ",
