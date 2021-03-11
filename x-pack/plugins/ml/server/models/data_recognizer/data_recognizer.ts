@@ -51,6 +51,7 @@ import { MlJobsStatsResponse } from '../../../common/types/job_service';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { JobSavedObjectService } from '../../saved_objects';
 import { isDefined } from '../../../common/types/guards';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -72,22 +73,12 @@ interface FileBasedModule extends Omit<Module, 'jobs' | 'datafeeds' | 'kibana'> 
   };
 }
 
-function isModule(arg: any): arg is Module {
-  return (
-    typeof arg === 'object' &&
-    arg !== null &&
-    Array.isArray(arg.jobs) &&
-    arg.jobs[0]?.config !== undefined
-  );
+function isModule(arg: unknown): arg is Module {
+  return isPopulatedObject(arg) && Array.isArray(arg.jobs) && arg.jobs[0]?.config !== undefined;
 }
 
-function isFileBasedModule(arg: any): arg is FileBasedModule {
-  return (
-    typeof arg === 'object' &&
-    arg !== null &&
-    Array.isArray(arg.jobs) &&
-    arg.jobs[0]?.file !== undefined
-  );
+function isFileBasedModule(arg: unknown): arg is FileBasedModule {
+  return isPopulatedObject(arg) && Array.isArray(arg.jobs) && arg.jobs[0]?.file !== undefined;
 }
 
 interface Config {
