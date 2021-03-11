@@ -187,78 +187,78 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               </EuiButtonEmpty>
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
-          <Form form={form}>
-            {isNewPolicy ? null : (
-              <Fragment>
-                <EuiText>
-                  <p>
-                    <strong>
+
+          <div style={{ display: currentView.id === 'policy' ? undefined : 'none' }}>
+            <Form form={form}>
+              {isNewPolicy ? null : (
+                <Fragment>
+                  <EuiText>
+                    <p>
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
+                          defaultMessage="You are editing an existing policy"
+                        />
+                      </strong>
+                      .{' '}
                       <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyMessage"
-                        defaultMessage="You are editing an existing policy"
-                      />
-                    </strong>
-                    .{' '}
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
-                      defaultMessage="Any changes you make will affect the indices that are
+                        id="xpack.indexLifecycleMgmt.editPolicy.editingExistingPolicyExplanationMessage"
+                        defaultMessage="Any changes you make will affect the indices that are
                               attached to this policy. Alternatively, you can save these changes in
                               a new policy."
+                      />
+                    </p>
+                  </EuiText>
+                  <EuiSpacer />
+
+                  <EuiFormRow>
+                    <EuiSwitch
+                      data-test-subj="saveAsNewSwitch"
+                      style={{ maxWidth: '100%' }}
+                      checked={saveAsNew}
+                      onChange={(e) => {
+                        setSaveAsNew(e.target.checked);
+                      }}
+                      label={
+                        <span>
+                          <FormattedMessage
+                            id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
+                            defaultMessage="Save as new policy"
+                          />
+                        </span>
+                      }
                     />
-                  </p>
-                </EuiText>
-                <EuiSpacer />
+                  </EuiFormRow>
+                </Fragment>
+              )}
 
-                <EuiFormRow>
-                  <EuiSwitch
-                    data-test-subj="saveAsNewSwitch"
-                    style={{ maxWidth: '100%' }}
-                    checked={saveAsNew}
-                    onChange={(e) => {
-                      setSaveAsNew(e.target.checked);
-                    }}
-                    label={
-                      <span>
-                        <FormattedMessage
-                          id="xpack.indexLifecycleMgmt.editPolicy.saveAsNewPolicyMessage"
-                          defaultMessage="Save as new policy"
-                        />
-                      </span>
-                    }
-                  />
-                </EuiFormRow>
-              </Fragment>
-            )}
+              {saveAsNew || isNewPolicy ? (
+                <UseField<string, FormInternal>
+                  path={policyNamePath}
+                  config={{
+                    label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
+                      defaultMessage: 'Policy name',
+                    }),
+                    helpText: i18n.translate(
+                      'xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage',
+                      {
+                        defaultMessage:
+                          'A policy name cannot start with an underscore and cannot contain a comma or a space.',
+                      }
+                    ),
+                    validations: policyNameValidations,
+                  }}
+                  component={TextField}
+                  componentProps={{
+                    fullWidth: false,
+                    euiFieldProps: {
+                      'data-test-subj': 'policyNameField',
+                    },
+                  }}
+                />
+              ) : null}
 
-            {saveAsNew || isNewPolicy ? (
-              <UseField<string, FormInternal>
-                path={policyNamePath}
-                config={{
-                  label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
-                    defaultMessage: 'Policy name',
-                  }),
-                  helpText: i18n.translate(
-                    'xpack.indexLifecycleMgmt.editPolicy.validPolicyNameMessage',
-                    {
-                      defaultMessage:
-                        'A policy name cannot start with an underscore and cannot contain a comma or a space.',
-                    }
-                  ),
-                  validations: policyNameValidations,
-                }}
-                component={TextField}
-                componentProps={{
-                  fullWidth: false,
-                  euiFieldProps: {
-                    'data-test-subj': 'policyNameField',
-                  },
-                }}
-              />
-            ) : null}
-
-            <EuiHorizontalRule />
-
-            <div style={{ display: currentView.id === 'policy' ? undefined : 'none' }}>
+              <EuiHorizontalRule />
               <Timeline />
 
               <EuiSpacer size="l" />
@@ -349,8 +349,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                   close={() => setIsShowingPolicyJsonFlyout(false)}
                 />
               ) : null}
-            </div>
-          </Form>
+            </Form>
+          </div>
           {currentView.id === 'rollupAction' && hasCurrentRollupField && (
             <RollupWizard
               form={form}

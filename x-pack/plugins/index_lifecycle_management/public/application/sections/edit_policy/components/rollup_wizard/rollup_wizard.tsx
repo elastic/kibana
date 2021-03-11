@@ -322,25 +322,24 @@ export class RollupWizard extends Component<Props, State> {
     const { phase, onCancel } = this.props;
     return (
       <>
+        <EuiButtonEmpty flush="left" onClick={onCancel} iconType="arrowLeft" iconSide="left">
+          {i18n.translate('xpack.indexLifecycleMgmt.rollup.backToPolicyButtonLabel', {
+            defaultMessage: 'Back to policy',
+          })}
+        </EuiButtonEmpty>
+        <EuiHorizontalRule />
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h1>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.rollup.createTitle"
-                  defaultMessage="Configure {phase} phase rollup action"
-                  values={{
-                    phase: i18nTexts.title[phase],
-                  }}
-                />
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onCancel} iconType="cross" iconSide="left">
-              Back to policy
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+          <EuiTitle size="m">
+            <h1>
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.rollup.createTitle"
+                defaultMessage="Configure {phase} phase rollup action"
+                values={{
+                  phase: i18nTexts.title[phase],
+                }}
+              />
+            </h1>
+          </EuiTitle>
         </EuiFlexGroup>
 
         <EuiSpacer />
