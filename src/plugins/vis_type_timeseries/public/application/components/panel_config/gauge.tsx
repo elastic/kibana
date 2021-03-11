@@ -27,13 +27,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import type { Writable } from '@kbn/utility-types';
 
-import { Query } from 'src/plugins/data/public';
 // @ts-ignore
 import { SeriesEditor } from '../series_editor';
 // @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { createTextHandler } from '../lib/create_text_handler';
 import { ColorRules } from '../color_rules';
 import { ColorPicker } from '../color_picker';
 // @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
@@ -74,9 +72,13 @@ export class GaugePanelConfig extends Component<
     this.setState({ selectedTab });
   }
 
+  handleTextChange = (name: keyof TimeseriesVisParams) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => this.props.onChange({ [name]: e.target.value });
+
   render() {
     const { selectedTab } = this.state;
-    const defaults = {
+    const defaults: Partial<TimeseriesVisParams> = {
       gauge_max: '',
       filter: { query: '', language: getDefaultQueryLanguage() },
       gauge_style: 'circle',
@@ -85,7 +87,6 @@ export class GaugePanelConfig extends Component<
     };
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange);
     const styleOptions = [
       {
         label: i18n.translate('visTypeTimeseries.gauge.styleOptions.circleLabel', {
@@ -154,7 +155,9 @@ export class GaugePanelConfig extends Component<
                       language: model.filter?.language || getDefaultQueryLanguage(),
                       query: model.filter?.query || '',
                     }}
-                    onChange={(filter: Query) => this.props.onChange({ filter })}
+                    onChange={(filter: PanelConfigProps['model']['filter']) =>
+                      this.props.onChange({ filter })
+                    }
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
@@ -200,16 +203,9 @@ export class GaugePanelConfig extends Component<
                     />
                   }
                 >
-                  {/*
-                    EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-                    It accepts a null value, but is passed a empty string.
-                  */}
-                  <input
-                    id={htmlId('gaugeMax')}
-                    className="tvbAgg__input"
-                    type="number"
-                    onChange={handleTextChange('gauge_max')}
-                    value={model.gauge_max ?? ''}
+                  <EuiFieldNumber
+                    onChange={this.handleTextChange('gauge_max')}
+                    value={model.gauge_max}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -243,7 +239,7 @@ export class GaugePanelConfig extends Component<
                   }
                 >
                   <EuiFieldNumber
-                    onChange={handleTextChange('gauge_inner_width')}
+                    onChange={this.handleTextChange('gauge_inner_width')}
                     value={Number(model.gauge_inner_width)}
                   />
                 </EuiFormRow>
@@ -259,7 +255,7 @@ export class GaugePanelConfig extends Component<
                   }
                 >
                   <EuiFieldNumber
-                    onChange={handleTextChange('gauge_width')}
+                    onChange={this.handleTextChange('gauge_width')}
                     value={Number(model.gauge_width)}
                   />
                 </EuiFormRow>

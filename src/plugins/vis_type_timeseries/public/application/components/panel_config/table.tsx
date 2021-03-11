@@ -33,7 +33,6 @@ import { FieldSelect } from '../aggs/field_select';
 import { SeriesEditor } from '../series_editor';
 // @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
 import { IndexPattern } from '../index_pattern';
-import { createTextHandler } from '../lib/create_text_handler';
 import { YesNo } from '../yes_no';
 // @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
@@ -41,6 +40,7 @@ import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { BUCKET_TYPES } from '../../../../common/metric_types';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { TimeseriesVisParams } from '../../../types';
 
 export class TablePanelConfig extends Component<
   PanelConfigProps,
@@ -75,6 +75,10 @@ export class TablePanelConfig extends Component<
     });
   };
 
+  handleTextChange = (name: keyof TimeseriesVisParams) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => this.props.onChange({ [name]: e.target.value });
+
   render() {
     const { selectedTab } = this.state;
     const defaults = {
@@ -85,7 +89,6 @@ export class TablePanelConfig extends Component<
       pivot_type: '',
     };
     const model = { ...defaults, ...this.props.model };
-    const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
     let view;
     if (selectedTab === 'data') {
@@ -137,7 +140,7 @@ export class TablePanelConfig extends Component<
                   >
                     <EuiFieldText
                       data-test-subj="columnLabelName"
-                      onChange={handleTextChange('pivot_label')}
+                      onChange={this.handleTextChange('pivot_label')}
                       value={model.pivot_label ?? ''}
                       fullWidth
                     />
@@ -160,7 +163,7 @@ export class TablePanelConfig extends Component<
                     <input
                       className="tvbAgg__input"
                       type="number"
-                      onChange={handleTextChange('pivot_rows')}
+                      onChange={this.handleTextChange('pivot_rows')}
                       value={model.pivot_rows ?? ''}
                     />
                   </EuiFormRow>
@@ -208,7 +211,7 @@ export class TablePanelConfig extends Component<
               }
             >
               <EuiFieldText
-                onChange={handleTextChange('drilldown_url')}
+                onChange={this.handleTextChange('drilldown_url')}
                 value={model.drilldown_url ?? ''}
               />
             </EuiFormRow>
@@ -242,7 +245,9 @@ export class TablePanelConfig extends Component<
                         : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={(filter) => this.props.onChange({ filter })}
+                    onChange={(filter: PanelConfigProps['model']['filter']) =>
+                      this.props.onChange({ filter })
+                    }
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>

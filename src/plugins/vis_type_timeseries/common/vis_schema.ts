@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { TypeOptions } from '@kbn/config-schema/target/types/types';
 
 const stringOptionalNullable = schema.maybe(schema.nullable(schema.string()));
+const stringOptional = schema.maybe(schema.string());
 
 const stringRequired = schema.string();
 
@@ -201,23 +202,15 @@ export const panel = schema.object({
   background_color_rules: schema.maybe(schema.arrayOf(backgroundColorRulesItems)),
   default_index_pattern: stringOptionalNullable,
   default_timefield: stringOptionalNullable,
-  drilldown_url: stringOptionalNullable,
+  drilldown_url: stringOptional,
   drop_last_bucket: numberIntegerOptional,
-  filter: schema.nullable(
-    schema.oneOf([
-      stringOptionalNullable,
-      schema.object({
-        language: stringOptionalNullable,
-        query: stringOptionalNullable,
-      }),
-    ])
-  ),
+  filter: schema.maybe(queryObject),
   gauge_color_rules: schema.maybe(schema.arrayOf(gaugeColorRulesItems)),
   gauge_width: schema.nullable(schema.oneOf([stringOptionalNullable, numberOptional])),
   gauge_inner_color: stringOptionalNullable,
   gauge_inner_width: stringOrNumberOptionalNullable,
   gauge_style: stringOptionalNullable,
-  gauge_max: stringOrNumberOptionalNullable,
+  gauge_max: numberOptionalOrEmptyString,
   id: stringRequired,
   ignore_global_filters: numberOptional,
   ignore_global_filter: numberOptional,

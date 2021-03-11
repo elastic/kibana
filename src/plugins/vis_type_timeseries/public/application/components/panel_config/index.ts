@@ -6,18 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { TimeseriesPanelConfig as timeseries } from './timeseries';
-import { MetricPanelConfig as metric } from './metric';
-import { TopNPanelConfig as topN } from './top_n';
-import { TablePanelConfig as table } from './table';
-import { GaugePanelConfig as gauge } from './gauge';
-import { MarkdownPanelConfig as markdown } from './markdown';
-
-export const panelConfigTypes = {
-  timeseries,
-  table,
-  metric,
-  top_n: topN,
-  gauge,
-  markdown,
-};
+export { PanelConfig } from './panel_config';

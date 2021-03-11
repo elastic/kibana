@@ -32,13 +32,13 @@ import { AnnotationsEditor } from '../annotations_editor';
 // @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { createTextHandler } from '../lib/create_text_handler';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 // @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { TimeseriesVisParams } from '../../../types';
 
 export class TimeseriesPanelConfig extends Component<
   PanelConfigProps,
@@ -53,6 +53,10 @@ export class TimeseriesPanelConfig extends Component<
     this.setState({ selectedTab });
   }
 
+  handleTextChange = (name: keyof TimeseriesVisParams) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => this.props.onChange({ [name]: e.target.value });
+
   render() {
     const defaults = {
       filter: { query: '', language: getDefaultQueryLanguage() },
@@ -65,7 +69,6 @@ export class TimeseriesPanelConfig extends Component<
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
 
     const positionOptions = [
@@ -199,10 +202,12 @@ export class TimeseriesPanelConfig extends Component<
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter?.language || getDefaultQueryLanguage(),
-                      query: model.filter?.query || '',
+                      language: model.filter.language || getDefaultQueryLanguage(),
+                      query: model.filter.query || '',
                     }}
-                    onChange={(filter) => this.props.onChange({ filter })}
+                    onChange={(filter: PanelConfigProps['model']['filter']) =>
+                      this.props.onChange({ filter })
+                    }
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
@@ -249,7 +254,7 @@ export class TimeseriesPanelConfig extends Component<
                   }
                 >
                   <EuiFieldText
-                    onChange={handleTextChange('axis_min')}
+                    onChange={this.handleTextChange('axis_min')}
                     value={model.axis_min ?? ''}
                   />
                 </EuiFormRow>
@@ -265,7 +270,7 @@ export class TimeseriesPanelConfig extends Component<
                   }
                 >
                   <EuiFieldText
-                    onChange={handleTextChange('axis_max')}
+                    onChange={this.handleTextChange('axis_max')}
                     value={model.axis_max ?? ''}
                   />
                 </EuiFormRow>

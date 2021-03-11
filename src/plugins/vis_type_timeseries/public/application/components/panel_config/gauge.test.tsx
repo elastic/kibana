@@ -7,34 +7,35 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallow } from 'enzyme';
 
 jest.mock('../lib/get_default_query_language', () => ({
   getDefaultQueryLanguage: () => 'kuery',
 }));
 
 import { GaugePanelConfig } from './gauge';
+import { PanelConfigProps } from './types';
 
 describe('GaugePanelConfig', () => {
   it('call switch tab onChange={handleChange}', () => {
-    const props = {
+    const props = ({
       fields: {},
       model: {},
       onChange: jest.fn(),
-    };
-    const wrapper = shallowWithIntl(<GaugePanelConfig.WrappedComponent {...props} />);
+    } as unknown) as PanelConfigProps;
+    const wrapper = shallow(<GaugePanelConfig {...props} />);
 
     wrapper.find('EuiTab').first().simulate('onClick');
     expect(props.onChange).toBeCalled();
   });
 
   it('call onChange={handleChange}', () => {
-    const props = {
+    const props = ({
       fields: {},
       model: {},
       onChange: jest.fn(),
-    };
-    const wrapper = shallowWithIntl(<GaugePanelConfig.WrappedComponent {...props} />);
+    } as unknown) as PanelConfigProps;
+    const wrapper = shallow(<GaugePanelConfig {...props} />);
 
     wrapper.simulate('onClick');
     expect(props.onChange).toBeCalled();

@@ -9,20 +9,23 @@
 import { createTextHandler } from './create_text_handler';
 
 describe('createTextHandler()', () => {
-  let handleChange;
-  let changeHandler;
-  let event;
+  let handleChange: any;
+  let changeHandler: ReturnType<typeof createTextHandler>;
+  let event: React.ChangeEvent<HTMLInputElement>;
 
   beforeEach(() => {
     handleChange = jest.fn();
     changeHandler = createTextHandler(handleChange);
-    event = { preventDefault: jest.fn(), target: { value: 'foo' } };
-    const fn = changeHandler('test');
+    event = ({
+      preventDefault: jest.fn(),
+      target: { value: 'foo' },
+    } as unknown) as React.ChangeEvent<HTMLInputElement>;
+    const fn = changeHandler('axis_scale');
     fn(event);
   });
 
   test('calls handleChange() function with partial', () => {
-    expect(event.preventDefault.mock.calls.length).toEqual(1);
+    expect((event.preventDefault as jest.Mock).mock.calls.length).toEqual(1);
     expect(handleChange.mock.calls.length).toEqual(1);
     expect(handleChange.mock.calls[0][0]).toEqual({
       test: 'foo',
