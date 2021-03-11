@@ -56,7 +56,8 @@ export const getStats = async (
   function telemetryUseLastValueMode(visState: VisState) {
     if (
       visState.type === 'metrics' &&
-      visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
+      (!visState.params.time_range_mode ||
+        visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE)
     ) {
       timeseriesUsage.timeseries_use_last_value_mode_total++;
     }

@@ -16,6 +16,7 @@ import { VisPicker } from './vis_picker';
 import { PanelConfig } from './panel_config';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../../common/extract_index_patterns';
+import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/timerange_data_modes';
 import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
@@ -186,6 +187,13 @@ export class VisEditor extends Component {
 
       this.setState({
         model: {
+          // we should set default value for 'time_range_mode' in model so that when user save visualization
+          // we set right mode in savedObject
+          // ternary operator needed because old visualization have 'time_range_mode' as undefined for 'last_value'
+          // but for creating new visaulization we should use 'entire_timerange' as default.
+          [TIME_RANGE_MODE_KEY]: this.props.vis.title
+            ? TIME_RANGE_DATA_MODES.LAST_VALUE
+            : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
           ...this.props.visParams,
           /** @legacy
            *  please use IndexPatterns service instead
