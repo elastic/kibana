@@ -372,7 +372,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
         const action = await createActionManualCleanup({
           name: `index-${testRunUuid}-${0}`,
-          actionTypeId: '.index',
+          connector_type_id: '.index',
           config: {
             index: `index-${testRunUuid}-${0}`,
           },
