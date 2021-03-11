@@ -50,7 +50,7 @@ pageLoadAssetSize:
   logstash: 53548
   management: 46112
   maps: 183610
-  mapsLegacy: 116817
+  mapsLegacy: 87859
   mapsLegacyLicensing: 20214
   ml: 82187
   monitoring: 80000
