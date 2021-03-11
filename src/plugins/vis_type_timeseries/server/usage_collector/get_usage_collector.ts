@@ -53,7 +53,15 @@ export const getStats = async (
     return;
   }
 
-  const timeseriesEmbeddables: VisState[] = [];
+  function telemetryUseLastValueMode(visState: VisState) {
+    if (
+      visState.type === 'metrics' &&
+      visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE
+    ) {
+      timeseriesUsage.timeseries_use_last_value_mode_total++;
+    }
+  }
+
   for (const hit of esResponse.hits.hits) {
     const visualization = hit._source?.visualization;
     let visState: VisState = {};
@@ -63,23 +71,13 @@ export const getStats = async (
       // invalid visState
     }
 
-    if (visState.type === 'metrics') {
-      timeseriesEmbeddables.push(visState);
-    }
+    telemetryUseLastValueMode(visState);
   }
 
   const byValueVisualizations = await findByValueEmbeddables(soClient, 'visualization');
 
   for (const item of byValueVisualizations) {
-    if ((item.savedVis as { type: string }).type === 'metrics') {
-      timeseriesEmbeddables.push(item.savedVis as VisState);
-    }
-  }
-
-  for (const visState of timeseriesEmbeddables) {
-    if (visState.params.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE) {
-      timeseriesUsage.timeseries_use_last_value_mode_total++;
-    }
+    telemetryUseLastValueMode(item.savedVis as VisState);
   }
 
   return timeseriesUsage.timeseries_use_last_value_mode_total ? timeseriesUsage : undefined;
