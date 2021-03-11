@@ -21,6 +21,7 @@ import { findRulesRoute } from './find_rules';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
+import { ruleTypesRoute } from './rule_types';
 
 export function defineRoutes(
   router: IRouter<AlertingRequestHandlerContext>,
@@ -39,4 +40,5 @@ export function defineRoutes(
   getRuleAlertSummaryRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
+  ruleTypesRoute(router, licenseState);
 }
