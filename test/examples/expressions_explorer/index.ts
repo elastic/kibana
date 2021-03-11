@@ -18,7 +18,7 @@ export default function ({
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('expressions explorer', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup2');
     before(async () => {
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('expressionsExplorer');
