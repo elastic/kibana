@@ -47,6 +47,7 @@ export function AgentConfigurations() {
           })}
         </h1>
       </EuiTitle>
+      <EuiSpacer size="s" />
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.settings.agentConfig.descriptionText', {
           defaultMessage: `This allows you to fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
@@ -56,7 +57,7 @@ export function AgentConfigurations() {
       <EuiPanel>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle size="s">
               <h2>
                 {i18n.translate(
                   'xpack.apm.agentConfig.configurationsPanelTitle',
