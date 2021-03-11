@@ -11,13 +11,13 @@ import { VisEditorConstructor } from './application/types';
 const DEFAULT_NAME = 'default';
 
 export const createVisEditorsRegistry = () => {
-  const map = new Map<string, VisEditorConstructor>();
+  const map = new Map<string, VisEditorConstructor<any>>();
 
   return {
     registerDefault: (editor: VisEditorConstructor) => {
       map.set(DEFAULT_NAME, editor);
     },
-    register: (name: string, editor: VisEditorConstructor) => {
+    register: <TVisParams>(name: string, editor: VisEditorConstructor<TVisParams>) => {
       if (name) {
         map.set(name, editor);
       }

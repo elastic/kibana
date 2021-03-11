@@ -19,8 +19,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L46"
+              "lineNumber": 46
             }
           },
           {
@@ -31,8 +30,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 47,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L47"
+              "lineNumber": 47
             }
           },
           {
@@ -43,8 +41,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L48"
+              "lineNumber": 48
             },
             "signature": [
               {
@@ -65,8 +62,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L49"
+              "lineNumber": 49
             },
             "signature": [
               "Error | null"
@@ -75,8 +71,7 @@
         ],
         "source": {
           "path": "src/plugins/newsfeed/public/types.ts",
-          "lineNumber": 45,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L45"
+          "lineNumber": 45
         },
         "initialIsOpen": false
       },
@@ -95,8 +90,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L35"
+              "lineNumber": 35
             }
           },
           {
@@ -107,8 +101,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 36,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L36"
+              "lineNumber": 36
             }
           },
           {
@@ -119,8 +112,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L37"
+              "lineNumber": 37
             },
             "signature": [
               "string | null"
@@ -134,8 +126,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L38"
+              "lineNumber": 38
             }
           },
           {
@@ -146,8 +137,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L39"
+              "lineNumber": 39
             },
             "signature": [
               "string | null"
@@ -161,8 +151,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 40,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L40"
+              "lineNumber": 40
             },
             "signature": [
               "moment.Moment"
@@ -176,8 +165,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 41,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L41"
+              "lineNumber": 41
             },
             "signature": [
               "moment.Moment"
@@ -191,15 +179,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/newsfeed/public/types.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L42"
+              "lineNumber": 42
             }
           }
         ],
         "source": {
           "path": "src/plugins/newsfeed/public/types.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/types.ts#L34"
+          "lineNumber": 34
         },
         "initialIsOpen": false
       }
@@ -213,8 +199,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/newsfeed/public/lib/api.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/lib/api.ts#L25"
+          "lineNumber": 25
         },
         "initialIsOpen": false
       }
@@ -229,8 +214,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/newsfeed/public/plugin.tsx",
-        "lineNumber": 20,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/plugin.tsx#L20"
+        "lineNumber": 20
       },
       "signature": [
         "{}"
@@ -246,8 +230,7 @@
       "description": [],
       "source": {
         "path": "src/plugins/newsfeed/public/plugin.tsx",
-        "lineNumber": 21,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/newsfeed/public/plugin.tsx#L21"
+        "lineNumber": 21
       },
       "signature": [
         "{ createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => Rx.Observable<void | FetchResult | null>; }"
