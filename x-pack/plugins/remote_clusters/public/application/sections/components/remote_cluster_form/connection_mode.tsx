@@ -26,7 +26,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { SNIFF_MODE } from '../../../../../common/constants';
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
 import { useAppContext } from '../../../app_context';
 
 import {
@@ -436,7 +436,23 @@ export const ConnectionMode: FunctionComponent<Props> = ({
                 />
               </EuiCallOut>
             </>
-          ) : null}
+          ) : (
+            <EuiFormRow hasEmptyLabelSpace fullWidth>
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
+                    defaultMessage="Use proxy mode"
+                  />
+                }
+                checked={mode === PROXY_MODE}
+                data-test-subj="remoteClusterFormConnectionModeToggle"
+                onChange={(e) =>
+                  onFieldsChange({ mode: e.target.checked ? PROXY_MODE : SNIFF_MODE })
+                }
+              />
+            </EuiFormRow>
+          )}
         </>
       }
       fullWidth
