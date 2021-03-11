@@ -20,6 +20,9 @@ export function CustomizeUI() {
           })}
         </h1>
       </EuiTitle>
+        {i18n.translate('xpack.apm.settings.customizeApp.description', {
+          defaultMessage: `The following settings are available for you to extend the app experience.`,
+        })}
       <EuiSpacer size="l" />
       <CustomLinkOverview />
     </>
