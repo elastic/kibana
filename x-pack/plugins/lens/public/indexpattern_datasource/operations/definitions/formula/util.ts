@@ -246,15 +246,16 @@ Example: ${'`log(sum(bytes))`'}
 Example: ${'`log(sum(bytes), 2)`'}
     `,
   },
-  log10: {
-    positionalArguments: [
-      { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
-    ],
-    help: `
-Base 10 logarithm.
-Example: ${'`log10(sum(bytes))`'}
-    `,
-  },
+  // TODO: check if this is valid for Tinymath
+  //   log10: {
+  //     positionalArguments: [
+  //       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
+  //     ],
+  //     help: `
+  // Base 10 logarithm.
+  // Example: ${'`log10(sum(bytes))`'}
+  //     `,
+  //   },
   mod: {
     positionalArguments: [
       { name: i18n.translate('xpack.lens.formula.expression', { defaultMessage: 'expression' }) },
