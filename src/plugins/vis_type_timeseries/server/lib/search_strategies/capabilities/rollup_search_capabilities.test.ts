@@ -8,15 +8,13 @@
 
 import { Unit } from '@elastic/datemath';
 import { RollupSearchCapabilities } from './rollup_search_capabilities';
-
-import type { VisPayload } from '../../../../common/types';
-import type { ReqFacade } from '../strategies/abstract_search_strategy';
+import { VisTypeTimeseriesRequest } from '../../../types';
 
 describe('Rollup Search Capabilities', () => {
   const testTimeZone = 'time_zone';
   const testInterval = '10s';
   const rollupIndex = 'rollupIndex';
-  const request = ({} as unknown) as ReqFacade<VisPayload>;
+  const request = ({} as unknown) as VisTypeTimeseriesRequest;
 
   let fieldsCapabilities: Record<string, any>;
   let rollupSearchCaps: RollupSearchCapabilities;
