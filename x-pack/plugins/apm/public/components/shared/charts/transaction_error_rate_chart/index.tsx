@@ -124,9 +124,7 @@ export function TransactionErrorRateChart({
             color: theme.eui.euiColorLightestShade,
             title: i18n.translate(
               'xpack.apm.errorRate.chart.errorRate.previousPeriodLabel',
-              {
-                defaultMessage: 'Previous period',
-              }
+              { defaultMessage: 'Previous period' }
             ),
           },
         ]
