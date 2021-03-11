@@ -20,6 +20,7 @@ import { fieldName as descriptionFieldName } from './description';
 import { SubmitCaseButton } from './submit_button';
 import { USE_RAC_CASES_UI } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { TestComponent } from '../../../../../cases/public';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -54,19 +55,13 @@ export const Create = React.memo(() => {
     history.push('/');
   }, [history]);
 
-  const CreateCase = useMemo(
-    () =>
-      cases.getCreateCase({
-        onCancel: handleSetIsCancel,
-        onSuccess,
-      }),
-    [cases, handleSetIsCancel, onSuccess]
-  );
-
   return (
     <EuiPanel>
       {USE_RAC_CASES_UI ? (
-        <p>{'HELLO CRUEL WORLD'}</p> // <CreateCase />
+        cases.getCreateCase({
+          onCancel: handleSetIsCancel,
+          onSuccess,
+        })
       ) : (
         <FormContext onSuccess={onSuccess}>
           <CreateCaseForm />

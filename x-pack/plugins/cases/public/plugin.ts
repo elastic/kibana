@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { Plugin } from 'src/core/public';
 import { ReactElement } from 'react';
 import { TestComponent } from '.';
-import { CreateCase, CreateCaseProps } from './components/create';
-import { PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
+import { CreateCaseProps } from './components/create';
+import { SetupPlugins, StartPlugins } from './types';
+import { getCreateCaseLazy } from './get_create_case';
 
 export interface CasesUiStart {
   casesComponent: () => JSX.Element;
@@ -17,35 +18,15 @@ export interface CasesUiStart {
 }
 
 export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, StartPlugins> {
-  private readonly casesUi = {} as CasesUiStart;
+  public setup() {}
 
-  constructor(initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins): void {
-    this.casesUi.casesComponent = TestComponent;
-    this.casesUi.getCreateCase = CreateCase;
-
-    /**
-     * `StartServices` which are needed by the `renderApp` function when mounting any of the subPlugin applications.
-     * This is a promise because these aren't available until the `start` lifecycle phase but they are referenced
-     * in the `setup` lifecycle phase.
-     */
-    const startServices: Promise<StartServices> = (async () => {
-      const [coreStart, startPlugins] = await core.getStartServices();
-
-      const services: StartServices = {
-        ...coreStart,
-        ...startPlugins,
-      };
-      return services;
-    })();
-
-    // need to figure out how to put startServices in components
-    console.log('heyo startServices', startServices);
-  }
-
-  public start(core: CoreStart): CasesUiStart {
-    return this.casesUi;
+  public start(): CasesUiStart {
+    return {
+      casesComponent: TestComponent,
+      getCreateCase: (props) => {
+        return getCreateCaseLazy(props);
+      },
+    };
   }
 
   public stop() {}

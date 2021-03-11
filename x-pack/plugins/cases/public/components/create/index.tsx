@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -28,8 +28,8 @@ export interface CreateCaseProps {
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
 }
-
-export const CreateCase = ({ onCancel, onSuccess }: CreateCaseProps) => (
+type CC = (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
+export const CreateCase: CC = ({ onCancel, onSuccess }: CreateCaseProps) => (
   <FormContext onSuccess={onSuccess}>
     <CreateCaseForm />
     <Container>
@@ -52,4 +52,5 @@ export const CreateCase = ({ onCancel, onSuccess }: CreateCaseProps) => (
   </FormContext>
 );
 
-CreateCase.displayName = 'CreateCase';
+// eslint-disable-next-line import/no-default-export
+export { CreateCase as default };
