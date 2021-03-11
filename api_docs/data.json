@@ -24200,37 +24200,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-common.doesKueryExpressionHaveLuceneSyntaxError",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Any",
-            "label": "expression",
-            "isRequired": true,
-            "signature": [
-              "any"
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 60
-            }
-          }
-        ],
-        "signature": [
-          "(expression: any) => boolean"
-        ],
-        "description": [],
-        "label": "doesKueryExpressionHaveLuceneSyntaxError",
-        "source": {
-          "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-          "lineNumber": 59
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.enableFilter",
         "type": "Function",
         "children": [
@@ -26010,7 +25979,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 78
+              "lineNumber": 67
             }
           },
           {
@@ -26030,7 +25999,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 79
+              "lineNumber": 68
             }
           },
           {
@@ -26043,7 +26012,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 80
+              "lineNumber": 69
             }
           },
           {
@@ -26056,7 +26025,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-              "lineNumber": 81
+              "lineNumber": 70
             }
           }
         ],
@@ -26090,7 +26059,7 @@
         "label": "toElasticsearchQuery",
         "source": {
           "path": "src/plugins/data/common/es_query/kuery/ast/ast.ts",
-          "lineNumber": 77
+          "lineNumber": 66
         },
         "tags": [
           "params"
@@ -26646,24 +26615,13 @@
           },
           {
             "tags": [],
-            "id": "def-common.KueryParseOptions.errorOnLuceneSyntax",
-            "type": "boolean",
-            "label": "errorOnLuceneSyntax",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/es_query/kuery/types.ts",
-              "lineNumber": 24
-            }
-          },
-          {
-            "tags": [],
             "id": "def-common.KueryParseOptions.cursorSymbol",
             "type": "string",
             "label": "cursorSymbol",
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/types.ts",
-              "lineNumber": 25
+              "lineNumber": 24
             },
             "signature": [
               "string | undefined"
@@ -26677,7 +26635,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/kuery/types.ts",
-              "lineNumber": 26
+              "lineNumber": 25
             },
             "signature": [
               "boolean | undefined"
