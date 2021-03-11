@@ -42,7 +42,7 @@ On the *Traces* view, you might want to view failed transaction results from any
 `transaction.result :"FAILURE" and container.id : *`.
 
 On the *Transactions* view, you may want to list only the slower transactions than a specified time threshold: `transaction.duration.us > 2000000`.
-Or filter the list it by including the service version and the Kubernetes pod it's running on:
+Or filter the list by including the service version and the Kubernetes pod it's running on:
 `transaction.duration.us > 2000000 and service.version : "7.12.0" and kubernetes.pod.name : "pod-5468b47f57-pqk2m"`.
 
 [float]
