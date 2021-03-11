@@ -87,6 +87,8 @@ export class CiStatsReporter {
       cpuCount: Os.cpus()?.length,
       cpuModel: Os.cpus()[0]?.model,
       cpuSpeed: Os.cpus()[0]?.speed,
+      freeMem: Os.freemem(),
+      totalMem: Os.totalmem(),
       kibanaUuid,
     };
 

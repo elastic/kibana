@@ -14,4 +14,5 @@ Along with the execution time of each execution, we ship the following informati
 * https://nodejs.org/docs/latest/api/os.html#os_os_platform[Operating system platform]
 * https://nodejs.org/docs/latest/api/os.html#os_os_release[Operating system release]
 * https://nodejs.org/docs/latest/api/os.html#os_os_cpus[Count, model, and speed of the CPUs]
-* https://nodejs.org/docs/latest/api/os.html#os_os_arch[CPU Architecture]
+* https://nodejs.org/docs/latest/api/os.html#os_os_arch[CPU architecture]
+* https://nodejs.org/docs/latest/api/os.html#os_os_totalmem[Total memory] and https://nodejs.org/docs/latest/api/os.html#os_os_freemem[Free memory]
