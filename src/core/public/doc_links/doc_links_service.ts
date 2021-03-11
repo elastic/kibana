@@ -16,6 +16,7 @@ interface StartDeps {
 /** @internal */
 export class DocLinksService {
   public setup() {}
+
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
@@ -120,7 +121,6 @@ export class DocLinksService {
           luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
         },
         indexPatterns: {
-          loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
           fieldFormattersString: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/field-formatters-string.html`,
         },
@@ -373,7 +373,6 @@ export interface DocLinksStart {
       readonly luceneExpressions: string;
     };
     readonly indexPatterns: {
-      readonly loadingData: string;
       readonly introduction: string;
     };
     readonly addData: string;
