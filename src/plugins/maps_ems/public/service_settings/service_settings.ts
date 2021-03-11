@@ -70,8 +70,11 @@ export class ServiceSettings implements IServiceSettings {
     this._showZoomMessage = false;
   }
 
-  __debugStubManifestCalls(manifestRetrieval: () => Promise<any>): { removeStub: () => void } {
+  __debugStubManifestCalls(manifestRetrieval: () => Promise<unknown>): { removeStub: () => void } {
     const oldGetManifest = this._emsClient.getManifest;
+
+    // This legacy code used for debugging/testing only.
+    // @ts-expect-error
     this._emsClient.getManifest = manifestRetrieval;
     return {
       removeStub: () => {

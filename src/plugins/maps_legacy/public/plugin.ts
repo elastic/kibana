@@ -54,7 +54,10 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
   }
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
-    bindSetupCoreAndPlugins(core, plugins.mapsEms.config, plugins.mapsEms.getServiceSettings);
+    setToasts(core.notifications.toasts);
+    setUiSettings(core.uiSettings);
+    setMapsEmsConfig(plugins.mapsEms.config);
+    setGetServiceSettings(plugins.mapsEms.getServiceSettings);
 
     const getBaseMapsVis = () => new BaseMapsVisualizationProvider();
 

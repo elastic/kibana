@@ -21,15 +21,6 @@ import { getServiceSettings } from './lazy_load_bundle/get_service_settings';
  * @public
  */
 
-export const bindSetupCoreAndPlugins = (
-  core: CoreSetup,
-  config: MapsEmsConfig,
-  kibanaVersion: string
-) => {
-  setKibanaVersion(kibanaVersion);
-  setMapsEmsConfig(config);
-};
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsEmsStartDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -46,7 +37,8 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup, MapsEmsPluginSt
     const config = this._initializerContext.config.get<MapsEmsConfig>();
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
 
-    bindSetupCoreAndPlugins(core, config, kibanaVersion);
+    setKibanaVersion(kibanaVersion);
+    setMapsEmsConfig(config);
 
     return {
       getServiceSettings,
