@@ -10,5 +10,3 @@ export { ToolbarPopoverProps, ToolbarPopover } from './toolbar_popover';
 export { LegendSettingsPopover } from './legend_settings_popover';
 export { PalettePicker } from './palette_picker';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-
-export const KBN_HEADER_OFFSET = parseFloat(euiLightVars.euiHeaderHeightCompensation) * 2;

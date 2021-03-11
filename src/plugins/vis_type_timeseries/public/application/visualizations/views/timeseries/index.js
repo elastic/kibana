@@ -129,6 +129,7 @@ export const TimeSeries = ({
         tooltip={{
           snap: true,
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
+          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: tooltipFormatter,
         }}
         externalPointerEvents={{ tooltip: { visible: false } }}

@@ -22,7 +22,6 @@ import {
   setDocLinks,
   setPalettesService,
   setTrackUiMetric,
-  setIsVisible,
 } from './services';
 import { visTypesDefinitions } from './vis_types';
 import { LEGACY_CHARTS_LIBRARY } from '../common';
@@ -78,7 +77,6 @@ export class VisTypeXyPlugin
   }
 
   public start(core: CoreStart, { data }: VisTypeXyPluginStartDependencies) {
-    setIsVisible(core.chrome.getIsVisible$());
     setFormatService(data.fieldFormats);
     setDataActions(data.actions);
     setDocLinks(core.docLinks);

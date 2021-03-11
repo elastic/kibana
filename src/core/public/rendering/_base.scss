@@ -45,6 +45,10 @@
 @mixin kbnAffordForHeader($headerHeight) {
   padding-top: $headerHeight;
 
+  #app-fixed-viewport {
+    top: $headerHeight;
+  }
+
   .euiFlyout,
   .euiCollapsibleNav {
     top: $headerHeight;

@@ -22,7 +22,6 @@ import {
   Position,
   Settings,
   ElementClickListener,
-  TooltipProps,
 } from '@elastic/charts';
 import { RenderMode } from 'src/plugins/expressions';
 import { FormatFactory, LensFilterEvent } from '../types';
@@ -30,7 +29,7 @@ import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PieExpressionProps } from './types';
 import { getSliceValue, getFilterContext } from './render_helpers';
-import { EmptyPlaceholder, KBN_HEADER_OFFSET } from '../shared_components';
+import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 import { desanitizeFilterContext } from '../utils';
 import {
@@ -39,7 +38,6 @@ import {
   SeriesLayer,
 } from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
-import { CoreStart } from '../../../../../src/core/public';
 
 declare global {
   interface Window {
@@ -57,7 +55,6 @@ export function PieComponent(
     formatFactory: FormatFactory;
     chartsThemeService: ChartsPluginSetup['theme'];
     paletteService: PaletteRegistry;
-    chromeIsVisible$: ReturnType<CoreStart['chrome']['getIsVisible$']>;
     onClickValue: (data: LensFilterEvent['data']) => void;
     renderMode: RenderMode;
     syncColors: boolean;
@@ -214,20 +211,12 @@ export function PieComponent(
     },
   });
 
-  const [headerOffset, setHeaderOffset] = useState(0);
   const [state, setState] = useState({ isReady: false });
   // It takes a cycle for the chart to render. This prevents
   // reporting from printing a blank chart placeholder.
   useEffect(() => {
     setState({ isReady: true });
   }, []);
-
-  useEffect(() => {
-    const subscription = props.chromeIsVisible$.subscribe((value: boolean) => {
-      setHeaderOffset(value ? KBN_HEADER_OFFSET : 0);
-    });
-    return () => subscription.unsubscribe();
-  }, [props.chromeIsVisible$]);
 
   const hasNegative = firstTable.rows.some((row) => {
     const value = row[metricColumn.id];
@@ -263,14 +252,6 @@ export function PieComponent(
     onClickValue(desanitizeFilterContext(context));
   };
 
-  const boundary = headerOffset ? document.getElementById('app-fixed-viewport') : null;
-  const tooltipProps: TooltipProps | undefined = boundary
-    ? {
-        boundary,
-        boundaryPadding: { top: headerOffset },
-      }
-    : undefined;
-
   return (
     <VisualizationContainer
       reportTitle={props.args.title}
@@ -280,7 +261,7 @@ export function PieComponent(
     >
       <Chart>
         <Settings
-          tooltip={tooltipProps}
+          tooltip={{ boundary: document.getElementById('app-fixed-viewport') ?? undefined }}
           debugState={window._echDebugStateFlag ?? false}
           // Legend is hidden in many scenarios
           // - Tiny preview

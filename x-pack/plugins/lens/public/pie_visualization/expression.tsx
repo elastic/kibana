@@ -116,7 +116,6 @@ export const getPieRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
-  chromeIsVisible$: ReturnType<CoreStart['chrome']['getIsVisible$']>;
 }): ExpressionRenderDefinition<PieExpressionProps> => ({
   name: 'lens_pie_renderer',
   displayName: i18n.translate('xpack.lens.pie.visualizationName', {
@@ -141,7 +140,6 @@ export const getPieRenderer = (dependencies: {
           formatFactory={formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
-          chromeIsVisible$={dependencies.chromeIsVisible$}
           onClickValue={onClickValue}
           renderMode={handlers.getRenderMode()}
           syncColors={handlers.isSyncColorsEnabled()}

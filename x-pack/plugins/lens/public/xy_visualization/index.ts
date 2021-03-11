@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { CoreSetup, IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { EditorFrameSetup, FormatFactory } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { LensPluginStartDependencies } from '../plugin';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
@@ -47,7 +49,7 @@ export class XyVisualization {
         getXyChartRenderer,
         getXyVisualization,
       } = await import('../async_services');
-      const [{ chrome }, { data }] = await core.getStartServices();
+      const [, { data }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
@@ -62,7 +64,6 @@ export class XyVisualization {
           formatFactory,
           chartsThemeService: charts.theme,
           paletteService: palettes,
-          chromeIsVisible$: chrome.getIsVisible$(),
           timeZone: getTimeZone(core.uiSettings),
           getIntervalByColumn: data.search.aggs.getDateMetaByDatatableColumn,
         })
