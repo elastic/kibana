@@ -20,10 +20,8 @@ import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
 import { EmptyPlaceholder } from '../shared_components';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { coreMock } from '../../../../../src/core/public/mocks';
 import { LensIconChartDonut } from '../assets/chart_donut';
 
-const chromeIsVisible$ = coreMock.createStart().chrome.getIsVisible$();
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 
 describe('PieVisualization component', () => {
@@ -75,7 +73,6 @@ describe('PieVisualization component', () => {
         onClickValue: jest.fn(),
         chartsThemeService,
         paletteService: chartPluginMock.createPaletteRegistry(),
-        chromeIsVisible$,
         renderMode: 'display' as const,
         syncColors: false,
       };
