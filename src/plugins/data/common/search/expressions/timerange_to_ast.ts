@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildExpressionFunction } from 'src/plugins/expressions/common';
+import { buildExpressionFunction } from '../../../../expressions/common';
 import { TimeRange } from '../../query';
 import { ExpressionFunctionKibanaTimerange } from './timerange';
 
