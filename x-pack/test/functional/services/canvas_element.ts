@@ -107,8 +107,9 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
         if (exclude === undefined || !exclude.includes(color)) colors.push(color);
       }
 
+      // Percentage rounded to 4 decimal points.
       function getPixelPercentage(pixelsNum: number): number {
-        return Math.round((pixelsNum / colors.length) * 100);
+        return Math.round((pixelsNum / colors.length) * 1000000) / 10000;
       }
 
       // - d3's nest/key/entries methods will group the array of hex values so we can count

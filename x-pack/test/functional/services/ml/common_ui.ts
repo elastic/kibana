@@ -261,20 +261,25 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
     // `assertColorInCanvasElement` can be used to reduce the check to just find out
     // if a certain color is present in the canvas element.
     async assertColorInCanvasElement(dataTestSubj: string, expectedColor: string) {
-      await retry.tryForTime(30000, async () => {
+      await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(dataTestSubj);
 
         const actualColorStats = await canvasElement.getColorStats(
           `[data-test-subj="${dataTestSubj}"] canvas`,
           undefined,
           undefined,
-          1
+          0.0001
         );
-        const colorWithinTolerance = actualColorStats.some((d) =>
+        const colorsWithinTolerance = actualColorStats.filter((d) =>
           canvasElement.isColorWithinTolerance(d.key, expectedColor)
         );
+        // debugging, can be removed once we passed flaky test runner
+        log.debug(
+          `==== colorsWithinTolerance ARRAY  ==== ${JSON.stringify(colorsWithinTolerance)}`
+        );
+        log.debug(`==== colorsWithinTolerance LENGTH ==== ${colorsWithinTolerance.length}`);
 
-        expect(colorWithinTolerance).to.eql(
+        expect(colorsWithinTolerance.length > 0).to.eql(
           true,
           `Expected color '${expectedColor}' to be present within tolerance of colors (${JSON.stringify(
             actualColorStats
