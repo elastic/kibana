@@ -68,7 +68,7 @@ export async function migrateKibanaIndex(kbnClient: KbnClient) {
  * index (e.g. we don't want to remove .kibana_task_manager or the like).
  */
 async function fetchKibanaIndices(client: Client) {
-  const resp = await client.cat.indices<unknown>(
+  const resp = await client.cat.indices(
     { index: '.kibana*', format: 'json' },
     {
       headers: ES_CLIENT_HEADERS,
@@ -82,7 +82,7 @@ async function fetchKibanaIndices(client: Client) {
     throw new Error(`expected response to be an array ${inspect(resp.body)}`);
   }
 
-  return resp.body.map((x: { index: string }) => x.index).filter(isKibanaIndex);
+  return resp.body.map((x: { index?: string }) => x.index).filter(Boolean).filter(isKibanaIndex);
 }
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
