@@ -178,7 +178,8 @@ export class Embeddable
       });
 
     // Update search context and reload on changes related to search
-    input$
+    this.getUpdated$()
+      .pipe(map(() => this.getInput()))
       .pipe(
         distinctUntilChanged((a, b) =>
           isEqual(

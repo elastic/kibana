@@ -30,32 +30,32 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
         await PageObjects.lens.dragFieldToDimensionTrigger(
           'clientip',
-          'lnsDatatable_column > lns-dimensionTrigger'
+          'lnsDatatable_rows > lns-dimensionTrigger'
         );
-        expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_column')).to.eql(
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_rows')).to.eql(
           'Top values of clientip'
         );
 
         await PageObjects.lens.dragFieldToDimensionTrigger(
           'bytes',
-          'lnsDatatable_column > lns-empty-dimension'
+          'lnsDatatable_rows > lns-empty-dimension'
         );
-        expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_column', 1)).to.eql(
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_rows', 1)).to.eql(
           'bytes'
         );
         await PageObjects.lens.dragFieldToDimensionTrigger(
           '@message.raw',
-          'lnsDatatable_column > lns-empty-dimension'
+          'lnsDatatable_rows > lns-empty-dimension'
         );
-        expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_column', 2)).to.eql(
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_rows', 2)).to.eql(
           'Top values of @message.raw'
         );
       });
 
       it('should reorder the elements for the table', async () => {
-        await PageObjects.lens.reorderDimensions('lnsDatatable_column', 3, 1);
+        await PageObjects.lens.reorderDimensions('lnsDatatable_rows', 3, 1);
         await PageObjects.lens.waitForVisualization();
-        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsDatatable_column')).to.eql([
+        expect(await PageObjects.lens.getDimensionTriggersTexts('lnsDatatable_rows')).to.eql([
           'Top values of @message.raw',
           'Top values of clientip',
           'bytes',
