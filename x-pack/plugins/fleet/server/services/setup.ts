@@ -157,14 +157,7 @@ async function createSetupSideEffects(
   for (const preconfiguredPolicy of preconfiguredPolicies) {
     const { created, policy, integrations } = preconfiguredPolicy;
     if (created) {
-      const packageStrings = integrations.map((i) => i.package);
-      await addPreconfiguredPolicyPackages(
-        soClient,
-        esClient,
-        policy,
-        packageStrings,
-        defaultOutput
-      );
+      await addPreconfiguredPolicyPackages(soClient, esClient, policy, integrations, defaultOutput);
     }
   }
 
@@ -205,11 +198,11 @@ async function addPreconfiguredPolicyPackages(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
-  packages: string[],
+  integrations: Array<{ package: string; name: string }>,
   defaultOutput: Output
 ) {
   return await Promise.all(
-    packages.map(async (packageString) => {
+    integrations.map(async ({ package: packageString, name }) => {
       const installedPackage = await ensureInstalledPreconfiguredPackage(
         soClient,
         esClient,
@@ -220,7 +213,8 @@ async function addPreconfiguredPolicyPackages(
         esClient,
         installedPackage,
         agentPolicy,
-        defaultOutput
+        defaultOutput,
+        name
       );
     })
   );
@@ -338,7 +332,8 @@ async function addPackageToAgentPolicy(
   esClient: ElasticsearchClient,
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
-  defaultOutput: Output
+  defaultOutput: Output,
+  packagePolicyName?: string
 ) {
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
@@ -350,7 +345,8 @@ async function addPackageToAgentPolicy(
     packageInfo,
     agentPolicy.id,
     defaultOutput.id,
-    agentPolicy.namespace
+    agentPolicy.namespace,
+    packagePolicyName
   );
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
