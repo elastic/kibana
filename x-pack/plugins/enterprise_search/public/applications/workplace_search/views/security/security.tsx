@@ -114,7 +114,7 @@ export const Security: React.FC = () => {
   );
 
   const allSourcesToggle = (
-    <EuiPanel paddingSize="none" className={panelClass}>
+    <EuiPanel paddingSize="none" hasShadow={false} className={panelClass}>
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiSwitch
