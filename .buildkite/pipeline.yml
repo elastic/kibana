@@ -18,6 +18,7 @@ steps:
     label: 'Jest'
     agents:
       queue: bootstrap
+    artifact_paths: target/junit/**/*.xml
     plugins:
       - docker#v3.8.0:
           image: 'gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT'
@@ -91,8 +92,8 @@ steps:
   #   agents:
   #     queue: ci-group
   #   artifact_paths: target/junit/**/*.xml
-  # - wait: ~
-  #   continue_on_failure: true
-  # - plugins:
-  #     - junit-annotate#v1.9.0:
-  #         artifacts: target/junit/**/*.xml
+  - wait: ~
+    continue_on_failure: true
+  - plugins:
+      - junit-annotate#v1.9.0:
+          artifacts: target/junit/**/*.xml
