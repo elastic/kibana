@@ -50,7 +50,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
-} from '../../saved_object_types';
+} from '../../../common/constants';
 import { CasesClientHandler } from '..';
 import { createAlertUpdateRequest } from '../../common';
 import { UpdateAlertRequest } from '../types';
