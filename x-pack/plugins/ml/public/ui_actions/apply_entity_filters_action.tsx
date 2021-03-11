@@ -11,6 +11,7 @@ import { MlCoreSetup } from '../plugin';
 import { Filter, FilterStateStore } from '../../../../../src/plugins/data/common';
 import { ANOMALY_EXPLORER_EMBEDDABLE_TYPE, ExplorerFieldSelectionContext } from '../embeddables';
 import { CONTROLLED_BY_EXPLORER_FILTER } from './constants';
+import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
 
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
 
@@ -37,7 +38,7 @@ export function createApplyEntityFieldFiltersAction(
 
       filterManager.addFilters(
         data
-          .filter((d) => d.operation === '+')
+          .filter((d) => d.operation === ENTITY_FIELD_OPERATIONS.ADD)
           .map<Filter>(({ fieldName, fieldValue }) => {
             return {
               $state: {
@@ -70,7 +71,7 @@ export function createApplyEntityFieldFiltersAction(
       );
 
       data
-        .filter((field) => field.operation === '-')
+        .filter((field) => field.operation === ENTITY_FIELD_OPERATIONS.REMOVE)
         .forEach((field) => {
           const filter = filterManager
             .getFilters()

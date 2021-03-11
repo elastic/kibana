@@ -17,7 +17,7 @@ import {
   isSwimLaneEmbeddable,
   SwimLaneDrilldownContext,
 } from '../embeddables';
-import { ENTITFY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
+import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
 import { ExplorerAppState } from '../../common/types/ml_url_generator';
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
@@ -73,7 +73,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         if (
           Array.isArray(entityFields) &&
           entityFields.length === 1 &&
-          entityFields[0].operation === ENTITFY_FIELD_OPERATIONS.ADD
+          entityFields[0].operation === ENTITY_FIELD_OPERATIONS.ADD
         ) {
           const { fieldName, fieldValue } = entityFields[0];
           if (typeof fieldName === 'string' && typeof fieldValue === 'string') {
