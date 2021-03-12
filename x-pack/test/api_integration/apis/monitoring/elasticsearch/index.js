@@ -18,6 +18,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./indices_mb'));
     loadTestFile(require.resolve('./index_detail'));
+    loadTestFile(require.resolve('./index_detail_mb'));
     loadTestFile(require.resolve('./ccr'));
     loadTestFile(require.resolve('./ccr_shard'));
   });

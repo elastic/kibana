@@ -4245,25 +4245,6 @@
                 },
                 "total": {
                   "properties": {
-                    "bulk": {
-                      "properties": {
-                        "avg_size_in_bytes": {
-                          "type": "long"
-                        },
-                        "avg_time_in_millis": {
-                          "type": "long"
-                        },
-                        "total_operations": {
-                          "type": "long"
-                        },
-                        "total_size_in_bytes": {
-                          "type": "long"
-                        },
-                        "total_time_in_millis": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "docs": {
                       "properties": {
                         "count": {
@@ -4611,49 +4592,6 @@
                     },
                     "indices": {
                       "properties": {
-                        "bulk": {
-                          "properties": {
-                            "avg_size": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "avg_time": {
-                              "properties": {
-                                "ms": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "operations": {
-                              "properties": {
-                                "total": {
-                                  "properties": {
-                                    "count": {
-                                      "type": "long"
-                                    }
-                                  }
-                                }
-                              }
-                            },
-                            "total_size": {
-                              "properties": {
-                                "bytes": {
-                                  "type": "long"
-                                }
-                              }
-                            },
-                            "total_time": {
-                              "properties": {
-                                "ms": {
-                                  "type": "long"
-                                }
-                              }
-                            }
-                          }
-                        },
                         "docs": {
                           "properties": {
                             "count": {
@@ -7473,6 +7411,10 @@
                     },
                     "index_writer_memory_in_bytes": {
                       "path": "elasticsearch.index.total.segments.index_writer_memory_in_bytes",
+                      "type": "alias"
+                    },
+                    "memory_in_bytes": {
+                      "path": "elasticsearch.index.total.segments.memory_in_bytes",
                       "type": "alias"
                     },
                     "norms_memory_in_bytes": {
