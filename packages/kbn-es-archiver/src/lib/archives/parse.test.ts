@@ -62,8 +62,8 @@ describe('esArchiver createParseArchiveStreams', () => {
       it('replaces $KIBANA_PACKAGE_VERSION with the current kibana version', async () => {
         const output = await createPromiseFromStreams([
           createListStream([
-            Buffer.from('{'),
-            Buffer.from('"$KIBANA_PACKAGE_VERSION": "enabled"}'),
+            Buffer.from('{"$KIBANA'),
+            Buffer.from('_PACKAGE_VERSION": "enabled"}'),
           ]),
           ...createParseArchiveStreams({ gzip: false }),
         ]);
@@ -158,8 +158,8 @@ describe('esArchiver createParseArchiveStreams', () => {
       it('replaces $KIBANA_PACKAGE_VERSION with the current kibana version', async () => {
         const output = await createPromiseFromStreams([
           createListStream([
-            Buffer.from('{'),
-            Buffer.from('"$KIBANA_PACKAGE_VERSION": "enabled"}'),
+            Buffer.from('{"$KIBANA_PACKAGE'),
+            Buffer.from('_VERSION": "enabled"}'),
           ]),
           createGzip(),
           ...createParseArchiveStreams({ gzip: true }),
