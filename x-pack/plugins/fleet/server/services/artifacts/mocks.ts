@@ -5,10 +5,13 @@
  * 2.0.
  */
 import { URL } from 'url';
+
 import { ApiResponse } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { ESSearchHit, ESSearchResponse } from '../../../../../../typings/elasticsearch';
+
 import { Artifact, ArtifactElasticsearchProperties, ArtifactsClientInterface } from './types';
 
 export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterface> => {
