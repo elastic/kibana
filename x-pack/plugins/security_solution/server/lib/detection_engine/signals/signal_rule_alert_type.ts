@@ -11,6 +11,7 @@ import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
+import * as t from 'io-ts';
 import { validateNonExact } from '../../../../common/validate';
 import { toError, toPromise } from '../../../../common/fp_utils';
 
@@ -29,15 +30,7 @@ import {
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import {
-  SignalRuleAlertTypeDefinition,
-  RuleAlertAttributes,
-  MachineLearningRuleAttributes,
-  ThresholdRuleAttributes,
-  ThreatRuleAttributes,
-  QueryRuleAttributes,
-  EqlRuleAttributes,
-} from './types';
+import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
 import {
   getListsClient,
   getExceptions,
@@ -225,7 +218,7 @@ export const signalRulesAlertType = ({
         });
 
         if (isMlRule(type)) {
-          const mlRuleSO = asMlSO(savedObject);
+          const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
           result = await mlExecutor({
             rule: mlRuleSO,
             ml,
@@ -238,7 +231,7 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
         } else if (isThresholdRule(type)) {
-          const thresholdRuleSO = asThresholdSO(savedObject);
+          const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
           result = await thresholdExecutor({
             rule: thresholdRuleSO,
             tuples,
@@ -252,7 +245,7 @@ export const signalRulesAlertType = ({
             startedAt,
           });
         } else if (isThreatMatchRule(type)) {
-          const threatRuleSO = asThreatSO(savedObject);
+          const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
           result = await threatMatchExecutor({
             rule: threatRuleSO,
             tuples,
@@ -267,7 +260,7 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
         } else if (isQueryRule(type)) {
-          const queryRuleSO = asQuerySO(savedObject);
+          const queryRuleSO = asTypeSpecificSO(savedObject, queryRuleParams);
           result = await queryExecutor({
             rule: queryRuleSO,
             tuples,
@@ -282,7 +275,7 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
         } else if (isEqlRule(type)) {
-          const eqlRuleSO = asEqlSO(savedObject);
+          const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
           result = await eqlExecutor({
             rule: eqlRuleSO,
             exceptionItems,
@@ -389,52 +382,29 @@ export const signalRulesAlertType = ({
   };
 };
 
-export const asMlSO = (
-  ruleSO: SavedObject<RuleAlertAttributes>
-): SavedObject<MachineLearningRuleAttributes> => {
-  const [, errors] = validateNonExact(ruleSO.attributes.params, machineLearningRuleParams);
-  if (errors != null) {
-    throw new Error(`ML rule tried to execute with invalid params: ${errors}`);
+/**
+ * This function takes a generic rule SavedObject and a type-specific schema for the rule params
+ * and validates the SavedObject params against the schema. If they validate, it returns a SavedObject
+ * where the params have been replaced with the validated params. This eliminates the need for logic that
+ * checks if the required type specific fields actually exist on the SO and prevents rule executors from
+ * accessing fields that only exist on other rule types.
+ *
+ * @param ruleSO SavedObject typed as an object with all fields from all different rule types
+ * @param schema io-ts schema for the specific rule type the SavedObject claims to be
+ */
+export const asTypeSpecificSO = <T extends t.Mixed>(
+  ruleSO: SavedObject<RuleAlertAttributes>,
+  schema: T
+) => {
+  const [validated, errors] = validateNonExact(ruleSO.attributes.params, schema);
+  if (validated == null || errors != null) {
+    throw new Error(`Rule attempted to execute with invalid params: ${errors}`);
   }
-  return ruleSO as SavedObject<MachineLearningRuleAttributes>;
-};
-
-export const asThresholdSO = (
-  ruleSO: SavedObject<RuleAlertAttributes>
-): SavedObject<ThresholdRuleAttributes> => {
-  const [, errors] = validateNonExact(ruleSO.attributes.params, thresholdRuleParams);
-  if (errors != null) {
-    throw new Error(`Threshold rule tried to execute with invalid params: ${errors}`);
-  }
-  return ruleSO as SavedObject<ThresholdRuleAttributes>;
-};
-
-export const asThreatSO = (
-  ruleSO: SavedObject<RuleAlertAttributes>
-): SavedObject<ThreatRuleAttributes> => {
-  const [, errors] = validateNonExact(ruleSO.attributes.params, threatRuleParams);
-  if (errors != null) {
-    throw new Error(`Threat match rule tried to execute with invalid params: ${errors}`);
-  }
-  return ruleSO as SavedObject<ThreatRuleAttributes>;
-};
-
-export const asQuerySO = (
-  ruleSO: SavedObject<RuleAlertAttributes>
-): SavedObject<QueryRuleAttributes> => {
-  const [, errors] = validateNonExact(ruleSO.attributes.params, queryRuleParams);
-  if (errors != null) {
-    throw new Error(`Query rule tried to execute with invalid params: ${errors}`);
-  }
-  return ruleSO as SavedObject<QueryRuleAttributes>;
-};
-
-export const asEqlSO = (
-  ruleSO: SavedObject<RuleAlertAttributes>
-): SavedObject<EqlRuleAttributes> => {
-  const [, errors] = validateNonExact(ruleSO.attributes.params, eqlRuleParams);
-  if (errors != null) {
-    throw new Error(`Eql rule tried to execute with invalid params: ${errors}`);
-  }
-  return ruleSO as SavedObject<EqlRuleAttributes>;
+  return {
+    ...ruleSO,
+    attributes: {
+      ...ruleSO.attributes,
+      params: validated,
+    },
+  };
 };
