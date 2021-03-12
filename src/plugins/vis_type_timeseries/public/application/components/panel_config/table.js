@@ -265,13 +265,21 @@ export class TablePanelConfig extends Component {
     return (
       <>
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+          <EuiTab
+            data-test-subj="tableEditorDataBtn"
+            isSelected={selectedTab === 'data'}
+            onClick={() => this.switchTab('data')}
+          >
             <FormattedMessage
               id="visTypeTimeseries.table.dataTab.columnsButtonLabel"
               defaultMessage="Columns"
             />
           </EuiTab>
-          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
+          <EuiTab
+            data-test-subj="tableEditorPanelOptionsBtn"
+            isSelected={selectedTab === 'options'}
+            onClick={() => this.switchTab('options')}
+          >
             <FormattedMessage
               id="visTypeTimeseries.table.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
