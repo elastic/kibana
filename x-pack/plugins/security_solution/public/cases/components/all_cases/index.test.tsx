@@ -14,7 +14,7 @@ import { TestProviders } from '../../../common/mock';
 import { casesStatus, useGetCasesMockState, collectionCase } from '../../containers/mock';
 import * as i18n from './translations';
 
-import { CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../cases/common/api';
 import { useKibana } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
