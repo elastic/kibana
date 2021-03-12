@@ -7,18 +7,18 @@
     "kibana.d.ts",
     "typings/**/*",
 
-    "src/fixtures/**/*",
+    "src/cli/**/*",
     "src/dev/**/*",
+    "src/fixtures/**/*",
     "src/legacy/**/*",
     "src/optimize/**/*",
 
     "x-pack/mocks.ts",
     "x-pack/typings/**/*",
     "x-pack/tasks/**/*",
-    "x-pack/plugins/case/**/*",
+    "x-pack/plugins/cases/**/*",
     "x-pack/plugins/lists/**/*",
     "x-pack/plugins/security_solution/**/*",
-
   ],
   "exclude": [
     "x-pack/plugins/security_solution/cypress/**/*"
@@ -78,7 +78,6 @@
     { "path": "./src/plugins/visualize/tsconfig.json" },
     { "path": "./src/plugins/index_pattern_management/tsconfig.json" },
     { "path": "./src/plugins/index_pattern_field_editor/tsconfig.json" },
-
 
     { "path": "./x-pack/plugins/actions/tsconfig.json" },
     { "path": "./x-pack/plugins/alerting/tsconfig.json" },
