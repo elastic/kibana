@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export {
-  migratePackagePolicyToV7110,
-  migratePackagePolicyToV7120,
-} from '../../../security_solution/common';
+export { migratePackagePolicyToV7110 } from './security_solution/to_v7_11_0';
