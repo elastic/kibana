@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
   ]);
 
-  describe('tsvb super visual builder', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
     beforeEach(async () => {
       await security.testUser.setRoles([
@@ -119,6 +119,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.clickDataTab('metric');
       });
       after(async () => {
         await security.testUser.restoreDefaults();
