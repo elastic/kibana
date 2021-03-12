@@ -83,8 +83,10 @@ export const RoleMappingsTable: React.FC<Props> = ({
   });
 
   const filterResults = (result: SharedRoleMapping) => {
+    // Filter out non-alphanumeric characters, except for underscores, hyphens, and spaces
+    const sanitizedValue = filterValue.replace(/[^\w\s-]/g, '');
     const values = Object.values(result);
-    const regexp = new RegExp(filterValue, 'i');
+    const regexp = new RegExp(sanitizedValue, 'i');
     return values.filter((x) => regexp.test(x)).length > 0;
   };
 

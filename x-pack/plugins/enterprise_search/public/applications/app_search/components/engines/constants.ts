@@ -23,6 +23,17 @@ export const CREATE_AN_ENGINE_BUTTON_LABEL = i18n.translate(
   }
 );
 
+export const DELETE_ENGINE_MESSAGE = (engineName: string) =>
+  i18n.translate(
+    'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.successMessage',
+    {
+      defaultMessage: 'Successfully deleted "{engineName}"',
+      values: {
+        engineName,
+      },
+    }
+  );
+
 export const CREATE_A_META_ENGINE_BUTTON_LABEL = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engines.createAMetaEngineButton.ButtonLabel',
   {

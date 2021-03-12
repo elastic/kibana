@@ -19,8 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
-import { AGENTS_INDEX, AGENT_SAVED_OBJECT_TYPE } from '../../../../constants';
-import { useConfig } from '../../../../hooks';
+import { AGENTS_INDEX } from '../../../../constants';
 
 const statusFilters = [
   {
@@ -78,7 +77,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   showUpgradeable,
   onShowUpgradeableChange,
 }) => {
-  const config = useConfig();
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
@@ -112,13 +110,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                     onSubmitSearch(newSearch);
                   }
                 }}
-                {...(config.agents.fleetServerEnabled
-                  ? {
-                      indexPattern: AGENTS_INDEX,
-                    }
-                  : {
-                      fieldPrefix: AGENT_SAVED_OBJECT_TYPE,
-                    })}
+                indexPattern={AGENTS_INDEX}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>

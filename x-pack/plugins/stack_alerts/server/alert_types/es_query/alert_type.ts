@@ -17,14 +17,14 @@ import {
 } from './alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import { parseDuration } from '../../../../alerts/server';
+import { parseDuration } from '../../../../alerting/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { ESSearchHit } from '../../../../../../typings/elasticsearch';
 
 export const ES_QUERY_ID = '.es-query';
 
-const ActionGroupId = 'query matched';
-const ConditionMetAlertInstanceId = 'query matched';
+export const ActionGroupId = 'query matched';
+export const ConditionMetAlertInstanceId = 'query matched';
 
 export function getAlertType(
   logger: Logger
@@ -173,7 +173,7 @@ export function getAlertType(
     // of the alert, the latestTimestamp will be used to gate the query in order to
     // avoid counting a document multiple times.
 
-    let timestamp: string | undefined = previousTimestamp;
+    let timestamp: string | undefined = tryToParseAsDate(previousTimestamp);
     const filter = timestamp
       ? {
           bool: {
@@ -187,7 +187,7 @@ export function getAlertType(
                         filter: [
                           {
                             range: {
-                              [params.timeField]: { lte: new Date(timestamp).toISOString() },
+                              [params.timeField]: { lte: timestamp },
                             },
                           },
                         ],
@@ -251,12 +251,11 @@ export function getAlertType(
           .scheduleActions(ActionGroupId, actionContext);
 
         // update the timestamp based on the current search results
-        const firstHitWithSort = searchResult.hits.hits.find(
-          (hit: ESSearchHit) => hit.sort != null
+        const firstValidTimefieldSort = getValidTimefieldSort(
+          searchResult.hits.hits.find((hit: ESSearchHit) => getValidTimefieldSort(hit.sort))?.sort
         );
-        const lastTimestamp = firstHitWithSort?.sort;
-        if (lastTimestamp != null && lastTimestamp.length > 0) {
-          timestamp = lastTimestamp[0];
+        if (firstValidTimefieldSort) {
+          timestamp = firstValidTimefieldSort;
         }
       }
     }
@@ -264,6 +263,21 @@ export function getAlertType(
     return {
       latestTimestamp: timestamp,
     };
+  }
+}
+
+function getValidTimefieldSort(sortValues: Array<string | number> = []): undefined | string {
+  for (const sortValue of sortValues) {
+    const sortDate = tryToParseAsDate(sortValue);
+    if (sortDate) {
+      return sortDate;
+    }
+  }
+}
+function tryToParseAsDate(sortValue?: string | number): undefined | string {
+  const sortDate = typeof sortValue === 'string' ? Date.parse(sortValue) : sortValue;
+  if (sortDate && !isNaN(sortDate)) {
+    return new Date(sortDate).toISOString();
   }
 }
 

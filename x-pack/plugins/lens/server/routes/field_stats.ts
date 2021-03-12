@@ -93,6 +93,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           return result;
         };
 
+        if (field.type.includes('range')) {
+          return res.ok({ body: {} });
+        }
+
         if (field.type === 'histogram') {
           return res.ok({
             body: await getNumberHistogram(search, field, false),

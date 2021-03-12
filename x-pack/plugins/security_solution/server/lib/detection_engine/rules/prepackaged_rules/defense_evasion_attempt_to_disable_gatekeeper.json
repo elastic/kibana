@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Attempt to Disable Gatekeeper",
   "query": "event.category:process and event.type:(start or process_started) and process.args:(spctl and \"--master-disable\")",
   "references": [

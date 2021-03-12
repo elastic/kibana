@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Microsoft Office Sandbox Evasion",
   "query": "event.category:file and not event.type:deletion and file.name:~$*.zip",
   "references": [

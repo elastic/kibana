@@ -71,23 +71,22 @@ const expectedEndpointExceptions: WrappedTranslatedExceptionList = {
     },
   ],
 };
-const mockIngestSOResponse = {
-  page: 1,
-  per_page: 100,
-  total: 1,
-  saved_objects: [
-    {
-      id: 'agent1',
-      type: 'agent',
-      references: [],
-      score: 0,
-      attributes: {
-        active: true,
-        access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
-      },
+const mockFleetESResponse = {
+  body: {
+    hits: {
+      hits: [
+        {
+          _id: 'agent1',
+          _source: {
+            active: true,
+            access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
+          },
+        },
+      ],
     },
-  ],
+  },
 };
+
 const AuthHeader = 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==';
 
 describe('test alerts route', () => {
@@ -101,6 +100,7 @@ describe('test alerts route', () => {
   let endpointAppContextService: EndpointAppContextService;
   let cache: LRU<string, Buffer>;
   let ingestSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
+  let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient();
@@ -113,9 +113,12 @@ describe('test alerts route', () => {
     cache = new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 });
     const startContract = createMockEndpointAppContextServiceStartContract();
 
-    // The authentication with the Fleet Plugin needs a separate scoped SO Client
+    // // The authentication with the Fleet Plugin needs a separate scoped ES CLient
+    esClientMock = elasticsearchServiceMock.createInternalClient();
+    // @ts-expect-error
+    esClientMock.search.mockResolvedValue(mockFleetESResponse);
+
     ingestSavedObjectClient = savedObjectsClientMock.create();
-    ingestSavedObjectClient.find.mockReturnValue(Promise.resolve(mockIngestSOResponse));
     (startContract.savedObjectsStart.getScopedClient as jest.Mock).mockReturnValue(
       ingestSavedObjectClient
     );
@@ -162,6 +165,12 @@ describe('test alerts route', () => {
     };
     ingestSavedObjectClient.get.mockImplementationOnce(() => Promise.resolve(soFindResp));
 
+    // This workaround is only temporary. The endpoint `ArtifactClient` will be removed soon
+    // and this entire test file refactored to start using fleet's exposed FleetArtifactClient class.
+    endpointAppContextService!
+      .getManifestManager()!
+      .getArtifactsClient().getArtifact = jest.fn().mockResolvedValue(soFindResp);
+
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/artifacts/download')
     )!;
@@ -175,7 +184,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
           elasticsearch: {
-            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
+            client: { asInternalUser: esClientMock },
           },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,
@@ -222,7 +231,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
           elasticsearch: {
-            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
+            client: { asInternalUser: esClientMock },
           },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,
@@ -259,7 +268,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
           elasticsearch: {
-            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
+            client: { asInternalUser: esClientMock },
           },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,
@@ -290,7 +299,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
           elasticsearch: {
-            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
+            client: { asInternalUser: esClientMock },
           },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,
@@ -312,9 +321,8 @@ describe('test alerts route', () => {
     });
 
     // Mock the SavedObjectsClient find response for verifying the API token with no results
-    mockIngestSOResponse.saved_objects = [];
-    mockIngestSOResponse.total = 0;
-    ingestSavedObjectClient.find.mockReturnValue(Promise.resolve(mockIngestSOResponse));
+    // @ts-expect-error
+    esClientMock.search.mockResolvedValue({ body: { hits: { hits: [] } } });
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/artifacts/download')
@@ -327,7 +335,7 @@ describe('test alerts route', () => {
             client: mockSavedObjectClient,
           },
           elasticsearch: {
-            client: { asInternalUser: elasticsearchServiceMock.createInternalClient() },
+            client: { asInternalUser: esClientMock },
           },
         },
       } as unknown) as SecuritySolutionRequestHandlerContext,

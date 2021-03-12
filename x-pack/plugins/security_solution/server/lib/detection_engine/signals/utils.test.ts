@@ -9,7 +9,7 @@ import moment from 'moment';
 import sinon from 'sinon';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -69,7 +69,7 @@ const ruleStatusServiceMock = {
   find: jest.fn(),
   goingToRun: jest.fn(),
   error: jest.fn(),
-  warning: jest.fn(),
+  partialFailure: jest.fn(),
 };
 
 describe('utils', () => {
