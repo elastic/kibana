@@ -12,14 +12,14 @@ import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks
 import { affectedJobIds } from './affected_job_ids';
 import * as i18n from './translations';
 
-const mlJobUpgradeCalloutMessage: CallOutMessage = {
+const mlJobCompatibilityCalloutMessage: CallOutMessage = {
   type: 'primary',
-  id: 'ml-job-upgrade',
-  title: i18n.ML_JOB_UPGRADE_CALLOUT_TITLE,
-  description: <i18n.MlJobUpgradeCalloutBody />,
+  id: 'ml-job-compatibility',
+  title: i18n.ML_JOB_COMPATIBILITY_CALLOUT_TITLE,
+  description: <i18n.MlJobCompatibilityCalloutBody />,
 };
 
-const MlJobUpgradeCalloutComponent = () => {
+const MlJobCompatibilityCalloutComponent = () => {
   const { loading, jobs } = useInstalledSecurityJobs();
   const newJobsInstalled = jobs.some((job) => affectedJobIds.includes(job.id));
 
@@ -27,9 +27,9 @@ const MlJobUpgradeCalloutComponent = () => {
     <CallOutSwitcher
       namespace="detections"
       condition={!loading && newJobsInstalled}
-      message={mlJobUpgradeCalloutMessage}
+      message={mlJobCompatibilityCalloutMessage}
     />
   );
 };
 
-export const MlJobUpgradeCallout = memo(MlJobUpgradeCalloutComponent);
+export const MlJobCompatibilityCallout = memo(MlJobCompatibilityCalloutComponent);

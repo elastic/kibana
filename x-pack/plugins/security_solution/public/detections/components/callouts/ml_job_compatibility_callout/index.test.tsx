@@ -7,34 +7,34 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { MlJobUpgradeCallout } from './index';
+import { MlJobCompatibilityCallout } from './index';
 import { TestProviders } from '../../../../common/mock';
 
-describe('MlJobUpgradeCallout', () => {
+describe('MlJobCompatibilityCallout', () => {
   it('renders when v2 jobs are installed', () => {
     const wrapper = mount(
       <TestProviders>
-        <MlJobUpgradeCallout />
+        <MlJobCompatibilityCallout />
       </TestProviders>
     );
-    expect(wrapper.exists('[data-test-subj="callout-ml-job-upgrade"]')).toEqual(true);
+    expect(wrapper.exists('[data-test-subj="callout-ml-job-compatibility"]')).toEqual(true);
   });
 
   it('does not render if no v2 jobs are installed', () => {
     const wrapper = mount(
       <TestProviders>
-        <MlJobUpgradeCallout />
+        <MlJobCompatibilityCallout />
       </TestProviders>
     );
-    expect(wrapper.exists('[data-test-subj="callout-ml-job-upgrade"]')).toEqual(false);
+    expect(wrapper.exists('[data-test-subj="callout-ml-job-compatibility"]')).toEqual(false);
   });
 
   it('does not render while jobs are loading', () => {
     const wrapper = mount(
       <TestProviders>
-        <MlJobUpgradeCallout />
+        <MlJobCompatibilityCallout />
       </TestProviders>
     );
-    expect(wrapper.exists('[data-test-subj="callout-ml-job-upgrade"]')).toEqual(false);
+    expect(wrapper.exists('[data-test-subj="callout-ml-job-compatibility"]')).toEqual(false);
   });
 });

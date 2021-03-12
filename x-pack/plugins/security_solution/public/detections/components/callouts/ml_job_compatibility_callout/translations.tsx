@@ -10,22 +10,22 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MlJobCompatibilityLink } from '../../../../common/components/links_to_docs';
 
-export const ML_JOB_UPGRADE_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.mlJobUpgradeCallout.messageTitle',
+export const ML_JOB_COMPATIBILITY_CALLOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageTitle',
   {
     defaultMessage: 'TODO title',
   }
 );
 
-export const MlJobUpgradeCalloutBody = () => (
+export const MlJobCompatibilityCalloutBody = () => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.mlJobUpgradeCallout.messageBody"
+    id="xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageBody"
     defaultMessage="{summary} Related documentation: {docs}"
     values={{
       summary: (
         <p>
           <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.mlJobUpgradeCallout.messageBody.summary"
+            id="xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageBody.summary"
             defaultMessage="TODO summary"
           />
         </p>
