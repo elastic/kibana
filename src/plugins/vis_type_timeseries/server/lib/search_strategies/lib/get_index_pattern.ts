@@ -8,38 +8,53 @@
 
 import { IndexPatternsService, IndexPattern } from '../../../../../data/server';
 import { IndexPatternObject } from '../../../../common/types';
+import { convertIndexPatternObjectToStringRepresentation } from '../../../../common/index_patterns_utils';
 
-interface IndexPatternObjectDependencies {
-  indexPatternsService: IndexPatternsService;
+interface ParsedIndexPattern {
+  indexPattern: IndexPattern | undefined | null;
+  indexPatternString: string;
 }
-export async function getIndexPatternObject(
-  indexPattern: IndexPatternObject,
-  { indexPatternsService }: IndexPatternObjectDependencies
-) {
-  let indexPatternObject: IndexPattern | undefined | null;
-  let indexPatternString: string = '';
 
-  const getIndexPatternFromString = async (v: string) =>
-    (await indexPatternsService.find(v)).find((index) => index.title === indexPattern);
+export const getCachedIndexPatternFetcher = (indexPatternsService: IndexPatternsService) => {
+  const cache = new Map();
 
-  if (!indexPattern) {
-    indexPatternObject = await indexPatternsService.getDefault();
-  } else {
-    if (typeof indexPattern === 'string') {
-      indexPatternObject = await getIndexPatternFromString(indexPattern);
+  return async (indexPatternObject: IndexPatternObject): Promise<ParsedIndexPattern> => {
+    const key = convertIndexPatternObjectToStringRepresentation(indexPatternObject);
 
-      if (!indexPatternObject) {
-        indexPatternString = indexPattern;
-      }
-    } else if (indexPattern.id) {
-      indexPatternObject =
-        (await indexPatternsService.get(indexPattern.id)) ??
-        (await indexPatternsService.getDefault());
+    if (cache.has(key)) {
+      return cache.get(key);
     }
-  }
 
-  return {
-    indexPatternObject,
-    indexPatternString: indexPatternObject?.title ?? indexPatternString,
+    let indexPattern: ParsedIndexPattern['indexPattern'];
+    let indexPatternString: string = '';
+
+    if (!indexPatternObject) {
+      indexPattern = await indexPatternsService.getDefault();
+    } else {
+      if (typeof indexPatternObject === 'string') {
+        indexPattern = (await indexPatternsService.find(indexPatternObject)).find(
+          (index) => index.title === indexPatternObject
+        );
+
+        if (!indexPattern) {
+          indexPatternString = indexPatternObject;
+        }
+      } else if (indexPatternObject.id) {
+        indexPattern =
+          (await indexPatternsService.get(indexPatternObject.id)) ??
+          (await indexPatternsService.getDefault());
+      }
+    }
+
+    const returnObject = {
+      indexPattern,
+      indexPatternString: indexPattern?.title ?? indexPatternString,
+    };
+
+    cache.set(indexPatternObject, returnObject);
+
+    return returnObject;
   };
-}
+};
+
+export type CachedIndexPatternFetcher = ReturnType<typeof getCachedIndexPatternFetcher>;

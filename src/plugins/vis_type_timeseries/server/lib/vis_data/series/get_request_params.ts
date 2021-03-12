@@ -8,7 +8,6 @@
 
 import { PanelSchema, SeriesItemsSchema } from '../../../../common/types';
 import { buildRequestBody } from './build_request_body';
-import { getIndexPatternObject } from '../../../lib/search_strategies/lib/get_index_pattern';
 import { VisTypeTimeseriesRequestServices, VisTypeTimeseriesVisDataRequest } from '../../../types';
 import { DefaultSearchCapabilities } from '../../search_strategies';
 
@@ -21,22 +20,19 @@ export async function getSeriesRequestParams(
     esQueryConfig,
     esShardTimeout,
     uiSettings,
-    indexPatternsService,
+    cachedIndexPatternFetcher,
   }: VisTypeTimeseriesRequestServices
 ) {
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
-
-  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(indexPattern, {
-    indexPatternsService,
-  });
+  const { indexPattern, indexPatternString } = await cachedIndexPatternFetcher(
+    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern
+  );
 
   const request = await buildRequestBody(
     req,
     panel,
     series,
     esQueryConfig,
-    indexPatternObject,
+    indexPattern,
     capabilities,
     uiSettings
   );

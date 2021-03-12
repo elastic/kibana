@@ -16,7 +16,7 @@ import { buildRequestBody } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
 // @ts-expect-error
 import { processBucket } from './table/process_bucket';
-import { getIndexPatternObject } from '../search_strategies/lib/get_index_pattern';
+
 import { createFieldsFetcher } from './helpers/fields_fetcher';
 import { extractFieldLabel } from '../../../common/calculate_label';
 import type {
@@ -32,11 +32,8 @@ export async function getTableData(
   panel: PanelSchema,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(
-    panel.index_pattern,
-    {
-      indexPatternsService: services.indexPatternsService,
-    }
+  const { indexPattern, indexPatternString } = await services.cachedIndexPatternFetcher(
+    panel.index_pattern
   );
 
   const strategy = await services.searchStrategyRegistry.getViableStrategy(
@@ -57,13 +54,14 @@ export async function getTableData(
 
   const extractFields = createFieldsFetcher(req, {
     indexPatternsService: services.indexPatternsService,
+    cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
     searchStrategy,
     capabilities,
   });
 
   const calculatePivotLabel = async () => {
-    if (panel.pivot_id && indexPatternObject?.title) {
-      const fields = await extractFields(indexPatternObject.title);
+    if (panel.pivot_id && indexPattern?.title) {
+      const fields = await extractFields(indexPattern.title);
 
       return extractFieldLabel(fields, panel.pivot_id);
     }
@@ -81,7 +79,7 @@ export async function getTableData(
       req,
       panel,
       services.esQueryConfig,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       services.uiSettings
     );

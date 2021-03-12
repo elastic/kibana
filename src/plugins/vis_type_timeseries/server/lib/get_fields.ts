@@ -10,6 +10,7 @@ import { uniqBy } from 'lodash';
 
 import { Framework } from '../plugin';
 import { VisTypeTimeseriesFieldsRequest, VisTypeTimeseriesRequestHandlerContext } from '../types';
+import { getCachedIndexPatternFetcher } from './search_strategies/lib/get_index_pattern';
 
 export async function getFields(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -18,6 +19,7 @@ export async function getFields(
   indexPatternString: string
 ) {
   const indexPatternsService = await framework.getIndexPatternsService(requestContext);
+  const cachedIndexPatternFetcher = getCachedIndexPatternFetcher(indexPatternsService);
 
   if (!indexPatternString) {
     const defaultIndexPattern = await indexPatternsService.getDefault();
@@ -37,6 +39,7 @@ export async function getFields(
   const fields = await searchStrategy.getFieldsForWildcard(
     indexPatternString,
     indexPatternsService,
+    cachedIndexPatternFetcher,
     capabilities
   );
 

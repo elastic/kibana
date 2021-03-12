@@ -9,16 +9,23 @@
 import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 import { AbstractSearchStrategy, DefaultSearchCapabilities } from '../../search_strategies';
 import { IndexPatternsService } from '../../../../../data/common';
+import { CachedIndexPatternFetcher } from '../../search_strategies/lib/get_index_pattern';
 
 export interface FieldsFetcherServices {
   indexPatternsService: IndexPatternsService;
+  cachedIndexPatternFetcher: CachedIndexPatternFetcher;
   searchStrategy: AbstractSearchStrategy;
   capabilities: DefaultSearchCapabilities;
 }
 
 export const createFieldsFetcher = (
   req: VisTypeTimeseriesVisDataRequest,
-  { capabilities, indexPatternsService, searchStrategy }: FieldsFetcherServices
+  {
+    capabilities,
+    indexPatternsService,
+    searchStrategy,
+    cachedIndexPatternFetcher,
+  }: FieldsFetcherServices
 ) => {
   const fieldsCacheMap = new Map();
 
@@ -30,6 +37,7 @@ export const createFieldsFetcher = (
     const fields = await searchStrategy.getFieldsForWildcard(
       index,
       indexPatternsService,
+      cachedIndexPatternFetcher,
       capabilities
     );
 

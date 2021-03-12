@@ -16,6 +16,7 @@ import {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
+import { CachedIndexPatternFetcher } from '../lib/get_index_pattern';
 
 class FooSearchStrategy extends AbstractSearchStrategy {}
 
@@ -49,10 +50,14 @@ describe('AbstractSearchStrategy', () => {
   });
 
   test('should return fields for wildcard', async () => {
-    const fields = await abstractSearchStrategy.getFieldsForWildcard(indexPattern, ({
-      getDefault: jest.fn(),
-      getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
-    } as unknown) as IndexPatternsService);
+    const fields = await abstractSearchStrategy.getFieldsForWildcard(
+      indexPattern,
+      ({
+        getDefault: jest.fn(),
+        getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),
+      } as unknown) as IndexPatternsService,
+      (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher
+    );
 
     expect(fields).toEqual(mockedFields);
   });

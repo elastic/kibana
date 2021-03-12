@@ -23,13 +23,13 @@ export class SearchStrategyRegistry {
   async getViableStrategy(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPattern: string | IndexPatternObject
+    indexPatternObject: IndexPatternObject
   ) {
     for (const searchStrategy of this.strategies) {
       const { isViable, capabilities } = await searchStrategy.checkForViability(
         requestContext,
         req,
-        indexPattern
+        indexPatternObject
       );
 
       if (isViable) {

@@ -12,6 +12,7 @@ import {
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
 import { IndexPatternsService } from '../../../../../data/common';
+import { CachedIndexPatternFetcher } from '../lib/get_index_pattern';
 
 jest.mock('./abstract_search_strategy', () => {
   class AbstractSearchStrategyMock {
@@ -155,6 +156,7 @@ describe('Rollup Search Strategy', () => {
       const fields = await rollupSearchStrategy.getFieldsForWildcard(
         indexPattern,
         {} as IndexPatternsService,
+        (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher,
         {
           fieldsCapabilities,
           rollupIndex,

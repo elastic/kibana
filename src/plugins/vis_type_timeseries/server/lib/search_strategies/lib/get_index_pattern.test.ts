@@ -7,26 +7,29 @@
  */
 
 import { IndexPattern, IndexPatternsService } from 'src/plugins/data/server';
-import { getIndexPatternObject } from './get_index_pattern';
+import { getCachedIndexPatternFetcher, CachedIndexPatternFetcher } from './get_index_pattern';
 
 describe('getIndexPatternObject', () => {
   let mockedIndices: IndexPattern[] | [];
-
-  const indexPatternsService = ({
-    getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
-    get: jest.fn(() => Promise.resolve(mockedIndices[0])),
-    find: jest.fn(() => Promise.resolve(mockedIndices || [])),
-  } as unknown) as IndexPatternsService;
+  let cachedIndexPatternFetcher: CachedIndexPatternFetcher;
 
   beforeEach(() => {
     mockedIndices = [];
+
+    const indexPatternsService = ({
+      getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
+      get: jest.fn(() => Promise.resolve(mockedIndices[0])),
+      find: jest.fn(() => Promise.resolve(mockedIndices || [])),
+    } as unknown) as IndexPatternsService;
+
+    cachedIndexPatternFetcher = getCachedIndexPatternFetcher(indexPatternsService);
   });
 
   test('should return default index on no input value', async () => {
-    const value = await getIndexPatternObject('', { indexPatternsService });
+    const value = await cachedIndexPatternFetcher('');
     expect(value).toMatchInlineSnapshot(`
       Object {
-        "indexPatternObject": Object {
+        "indexPattern": Object {
           "id": "default",
           "title": "index",
         },
@@ -44,11 +47,11 @@ describe('getIndexPatternObject', () => {
         },
       ] as IndexPattern[];
 
-      const value = await getIndexPatternObject('indexTitle', { indexPatternsService });
+      const value = await cachedIndexPatternFetcher('indexTitle');
 
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "indexPatternObject": Object {
+          "indexPattern": Object {
             "id": "indexId",
             "title": "indexTitle",
           },
@@ -58,11 +61,11 @@ describe('getIndexPatternObject', () => {
     });
 
     test('should return only indexPatternString if Kibana index does not exist', async () => {
-      const value = await getIndexPatternObject('indexTitle', { indexPatternsService });
+      const value = await cachedIndexPatternFetcher('indexTitle');
 
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "indexPatternObject": undefined,
+          "indexPattern": undefined,
           "indexPatternString": "indexTitle",
         }
       `);
@@ -78,11 +81,11 @@ describe('getIndexPatternObject', () => {
         },
       ] as IndexPattern[];
 
-      const value = await getIndexPatternObject({ id: 'indexId' }, { indexPatternsService });
+      const value = await cachedIndexPatternFetcher({ id: 'indexId' });
 
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "indexPatternObject": Object {
+          "indexPattern": Object {
             "id": "indexId",
             "title": "indexTitle",
           },
@@ -92,14 +95,11 @@ describe('getIndexPatternObject', () => {
     });
 
     test('should return default index if Kibana index not found', async () => {
-      const value = await getIndexPatternObject(
-        { id: 'indexId', title: 'title' },
-        { indexPatternsService }
-      );
+      const value = await cachedIndexPatternFetcher({ id: 'indexId', title: 'title' });
 
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "indexPatternObject": Object {
+          "indexPattern": Object {
             "id": "default",
             "title": "index",
           },

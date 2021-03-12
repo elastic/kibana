@@ -16,11 +16,11 @@ const getPrivateField = <T>(registry: SearchStrategyRegistry, field: string) =>
   get(registry, field) as T;
 
 class MockSearchStrategy extends AbstractSearchStrategy {
-  checkForViability() {
-    return Promise.resolve({
+  async checkForViability() {
+    return {
       isViable: true,
       capabilities: {},
-    });
+    };
   }
 }
 

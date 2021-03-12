@@ -68,6 +68,7 @@ export async function getSeriesData(
 
     const handleResponseBodyFn = handleResponseBody(panel, req, {
       indexPatternsService: services.indexPatternsService,
+      cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
       searchStrategy,
       capabilities,
     });

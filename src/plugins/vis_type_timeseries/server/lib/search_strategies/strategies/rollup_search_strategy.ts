@@ -15,6 +15,8 @@ import {
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
 import { IndexPatternObject } from '../../../../common/types';
+import { CachedIndexPatternFetcher } from '../lib/get_index_pattern';
+import { convertIndexPatternObjectToStringRepresentation } from '../../../../common/index_patterns_utils';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');
@@ -50,12 +52,12 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
   async checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPattern: string | IndexPatternObject
+    indexPatternObject: IndexPatternObject
   ) {
     let isViable = false;
     let capabilities = null;
 
-    const index = typeof indexPattern === 'string' ? indexPattern : indexPattern?.title ?? '';
+    const index = convertIndexPatternObjectToStringRepresentation(indexPatternObject);
 
     if (isIndexPatternValid(index)) {
       const rollupData = await this.getRollupData(requestContext, index);
@@ -78,13 +80,20 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
   }
 
   async getFieldsForWildcard(
-    indexPattern: string,
+    indexPatternObject: IndexPatternObject,
     indexPatternsService: IndexPatternsService,
+    getCachedIndexPatternFetcher: CachedIndexPatternFetcher,
     capabilities?: unknown
   ) {
-    return super.getFieldsForWildcard(indexPattern, indexPatternsService, capabilities, {
-      type: 'rollup',
-      rollupIndex: indexPattern,
-    });
+    return super.getFieldsForWildcard(
+      indexPatternObject,
+      indexPatternsService,
+      getCachedIndexPatternFetcher,
+      capabilities,
+      {
+        type: 'rollup',
+        rollupIndex: convertIndexPatternObjectToStringRepresentation(indexPatternObject),
+      }
+    );
   }
 }
