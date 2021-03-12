@@ -10,12 +10,17 @@
   var cp = require('child_process');
 
   var preserveSymlinksOption = '--preserve-symlinks';
+  var preserveSymlinksMainOption = '--preserve-symlinks-main';
   var nodeOptions = (process && process.env && process.env.NODE_OPTIONS) || [];
   var nodeExecArgv = (process && process.execArgv) || [];
-  if (
-    nodeOptions.includes(preserveSymlinksOption) ||
-    nodeExecArgv.includes(preserveSymlinksOption)
-  ) {
+
+  var isPreserveSymlinksPresent =
+    nodeOptions.includes(preserveSymlinksOption) || nodeExecArgv.includes(preserveSymlinksOption);
+  var isPreserveSymlinksMainPresent =
+    nodeOptions.includes(preserveSymlinksMainOption) ||
+    nodeExecArgv.includes(preserveSymlinksMainOption);
+
+  if (isPreserveSymlinksPresent && isPreserveSymlinksMainPresent) {
     return;
   }
 
@@ -25,10 +30,16 @@
     return;
   }
 
-  var nodeArgs =
-    nodeExecArgv.length > 0
-      ? [preserveSymlinksOption].concat(nodeExecArgv)
-      : [preserveSymlinksOption];
+  var missingNodeArgs = [];
+  if (!isPreserveSymlinksMainPresent) {
+    missingNodeArgs.push(preserveSymlinksMainOption);
+  }
+
+  if (!isPreserveSymlinksPresent) {
+    missingNodeArgs.push(preserveSymlinksOption);
+  }
+
+  var nodeArgs = nodeExecArgv.concat(missingNodeArgs);
   var restArgs = nodeArgv.length >= 2 ? nodeArgv.slice(1, nodeArgv.length) : [];
 
   var getExitCodeFromSpawnResult = function (spawnResult) {

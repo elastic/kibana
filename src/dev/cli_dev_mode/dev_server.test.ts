@@ -123,6 +123,7 @@ describe('#run$', () => {
               "isDevCliChild": "true",
             },
             "nodeOptions": Array [
+              "--preserve-symlinks-main",
               "--preserve-symlinks",
             ],
             "stdio": "pipe",

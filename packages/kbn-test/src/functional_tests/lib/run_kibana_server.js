@@ -62,6 +62,7 @@ function collectCliArgs(config, { installDir, extraKbnOpts }) {
   const buildArgs = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs = config.get('kbnTestServer.serverArgs') || [];
+  const execArgv = process.execArgv || [];
 
   return pipe(
     serverArgs,
@@ -69,7 +70,7 @@ function collectCliArgs(config, { installDir, extraKbnOpts }) {
     (args) =>
       installDir
         ? [...buildArgs, ...args]
-        : ['--preserve-symlinks', KIBANA_EXEC_PATH, ...sourceArgs, ...args],
+        : [...execArgv, KIBANA_EXEC_PATH, ...sourceArgs, ...args],
     (args) => args.concat(extraKbnOpts || [])
   );
 }
