@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
-  describe('CSV generation from SearchSource', () => {
+  describe('CSV Generation from SearchSource', () => {
     before(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': false,
@@ -43,6 +43,115 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
+    describe('Settings set to fieldsFromSource', () => {
+      it('Exports CSV with almost all selected fields when using fieldsFromSource', async () => {
+        await esArchiver.load('reporting/ecommerce');
+        await esArchiver.load('reporting/ecommerce_kibana');
+
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCSVFromSearchSource(
+          getMockJobParams({
+            searchSource: {
+              query: { query: '', language: 'kuery' },
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+              sort: [{ order_date: 'desc' }],
+              fieldsFromSource: [
+                '_id',
+                '_index',
+                '_score',
+                '_source',
+                '_type',
+                'category',
+                'category.keyword',
+                'currency',
+                'customer_birth_date',
+                'customer_first_name',
+                'customer_first_name.keyword',
+                'customer_full_name',
+                'customer_full_name.keyword',
+                'customer_gender',
+                'customer_id',
+                'customer_last_name',
+                'customer_last_name.keyword',
+                'customer_phone',
+                'day_of_week',
+                'day_of_week_i',
+                'email',
+                'geoip.city_name',
+                'geoip.continent_name',
+                'geoip.country_iso_code',
+                'geoip.location',
+                'geoip.region_name',
+                'manufacturer',
+                'manufacturer.keyword',
+                'order_date',
+                'order_id',
+                'products._id',
+                'products._id.keyword',
+                'products.base_price',
+                'products.base_unit_price',
+                'products.category',
+                'products.category.keyword',
+                'products.created_on',
+                'products.discount_amount',
+                'products.discount_percentage',
+                'products.manufacturer',
+                'products.manufacturer.keyword',
+                'products.min_price',
+                'products.price',
+                'products.product_id',
+                'products.product_name',
+                'products.product_name.keyword',
+                'products.quantity',
+                'products.sku',
+                'products.tax_amount',
+                'products.taxful_price',
+                'products.taxless_price',
+                'products.unit_discount_amount',
+                'sku',
+                'taxful_total_price',
+                'taxless_total_price',
+                'total_quantity',
+                'total_unique_products',
+                'type',
+                'user',
+              ],
+              filter: [],
+              parent: {
+                query: { language: 'kuery', query: '' },
+                filter: [],
+                parent: {
+                  filter: [
+                    {
+                      meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+                      range: {
+                        order_date: {
+                          gte: '2019-03-23T03:06:17.785Z',
+                          lte: '2019-10-04T02:33:16.708Z',
+                          format: 'strict_date_optional_time',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            browserTimezone: 'UTC',
+            title: 'testfooyu78yt90-',
+          })
+        )) as supertest.Response;
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expectSnapshot(resText).toMatch();
+
+        await esArchiver.unload('reporting/ecommerce');
+        await esArchiver.unload('reporting/ecommerce_kibana');
+      });
+    });
+
     describe('date formatting', () => {
       before(async () => {
         // load test data that contains a saved search and documents
@@ -52,44 +161,6 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         await esArchiver.unload('reporting/logs');
         await esArchiver.unload('logstash_functional');
-      });
-
-      it('With filters and timebased data, explicit UTC format', async () => {
-        const res = (await generateAPI.getCSVFromSearchSource(
-          getMockJobParams({
-            browserTimezone: 'UTC',
-            searchSource: {
-              fields: ['@timestamp', 'clientip', 'extension'],
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: '2015-09-20T10:19:40.307Z',
-                      lt: '2015-09-20T10:26:56.221Z',
-                    },
-                  },
-                },
-                {
-                  range: {
-                    '@timestamp': {
-                      format: 'strict_date_optional_time',
-                      gte: '2015-01-12T07:00:55.654Z',
-                      lte: '2016-01-29T21:08:10.881Z',
-                    },
-                  },
-                },
-              ],
-              index: 'logstash-*',
-              query: { language: 'kuery', query: '' },
-              sort: [{ '@timestamp': 'desc' }],
-            },
-          })
-        )) as supertest.Response;
-        const { status: resStatus, text: resText, type: resType } = res;
-
-        expect(resStatus).to.eql(200);
-        expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
       });
 
       it('With filters and timebased data, default to UTC', async () => {
@@ -129,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
         expectSnapshot(resText).toMatch();
       });
 
-      it('With filters and timebased data, custom timezone (Phoenix)', async () => {
+      it('With filters and timebased data, non-default timezone', async () => {
         const res = (await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
             browserTimezone: 'America/Phoenix',
@@ -292,9 +363,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql(expectedBody);
       });
 
-      it(`Searches "huge" data, stops at Max Size Reached`, async () => {
-        // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/hugedata');
+      it(`Searches large amount of data, stops at Max Size Reached`, async () => {
+        await esArchiver.load('reporting/ecommerce');
+        await esArchiver.load('reporting/ecommerce_kibana');
 
         const {
           status: resStatus,
@@ -303,33 +374,42 @@ export default function ({ getService }: FtrProviderContext) {
         } = (await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
             searchSource: {
-              query: { query: '', language: 'lucene' },
               version: true,
-              sort: [{ date: 'desc' }],
-              index: '89655130-5013-11e9-bce7-4dabcb8bef24',
+              query: { query: '', language: 'kuery' },
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+              sort: [{ order_date: 'desc' }],
               fields: [
-                '_id',
-                'date',
-                'name',
-                'gender',
-                'value',
-                'year',
-                'years_ago',
-                'date_informal',
+                'order_date',
+                'category',
+                'currency',
+                'customer_id',
+                'order_id',
+                'day_of_week_i',
+                'products.created_on',
+                'sku',
               ],
-              filter: [
-                {
-                  meta: { index: '89655130-5013-11e9-bce7-4dabcb8bef24', params: {} },
-                  range: {
-                    date: {
-                      gte: '1960-01-01T10:00:00Z',
-                      lte: '1999-01-01T10:00:00Z',
-                      format: 'strict_date_optional_time',
+              filter: [],
+              parent: {
+                query: { language: 'kuery', query: '' },
+                filter: [],
+                parent: {
+                  filter: [
+                    {
+                      meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+                      range: {
+                        order_date: {
+                          gte: '2019-03-23T03:06:17.785Z',
+                          lte: '2019-10-04T02:33:16.708Z',
+                          format: 'strict_date_optional_time',
+                        },
+                      },
                     },
-                  },
+                  ],
                 },
-              ],
+              },
             },
+            browserTimezone: 'UTC',
+            title: 'Ecommerce Data',
           })
         )) as supertest.Response;
 
@@ -337,7 +417,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
 
-        await esArchiver.unload('reporting/hugedata');
+        await esArchiver.unload('reporting/ecommerce');
+        await esArchiver.unload('reporting/ecommerce_kibana');
       });
     });
   });

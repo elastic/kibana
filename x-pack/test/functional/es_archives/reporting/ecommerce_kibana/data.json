@@ -79,8 +79,14 @@
       ],
       "search": {
         "columns": [
-          "products",
-          "geoip"
+          "order_date",
+          "category",
+          "currency",
+          "customer_id",
+          "order_id",
+          "day_of_week_i",
+          "products.created_on",
+          "sku"
         ],
         "description": "",
         "hits": 0,

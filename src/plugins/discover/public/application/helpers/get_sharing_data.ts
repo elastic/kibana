@@ -58,10 +58,11 @@ export async function getSharingData(
     }
   }
 
-  // if search source uses fieldsFromSource, set that
-  const fieldsKey = fields.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-  const fieldsValue = columns.length > 0 ? columns : ['*'];
-  searchSource.setField(fieldsKey, fieldsValue);
+  if (columns.length > 0) {
+    // if columns were selected in the saved search, use them for the searchSource's fields
+    const fieldsKey = fields.fieldsFromSource ? 'fieldsFromSource' : 'fields';
+    searchSource.setField(fieldsKey, columns);
+  }
 
   return {
     searchSource: searchSource.getSerializedFields(true),

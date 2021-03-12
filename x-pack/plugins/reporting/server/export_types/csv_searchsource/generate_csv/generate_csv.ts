@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
-import { Datatable, DatatableColumn, DatatableRow } from 'src/plugins/expressions/server';
+import { Datatable, DatatableColumn } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
   ES_SEARCH_STRATEGY,
@@ -19,7 +19,6 @@ import {
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
-  SearchFieldValue,
   tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
 import { CancellationToken } from '../../../../common';
@@ -44,7 +43,6 @@ interface Dependencies {
 }
 
 export class CsvGenerator {
-  private _columnMap: number[] | null = null;
   private _formatters: Record<string, FieldFormat> | null = null;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
@@ -93,29 +91,6 @@ export class CsvGenerator {
   }
 
   /*
-   * Build a map for ordering the fields of search results into CSV columns
-   */
-  private getColumnMap(fields: SearchFieldValue[] | undefined, table: Datatable) {
-    if (this._columnMap) {
-      return this._columnMap;
-    }
-
-    // if there are selected fields, re-initialize columnMap with field order is set in searchSource fields
-    if (fields && fields[0] !== '*') {
-      this._columnMap = fields.map((field) =>
-        table.columns.findIndex((column) => column.id === field)
-      );
-    }
-
-    // initialize default columnMap, works if fields are asterisk and order doesn't matter
-    if (!this._columnMap) {
-      this._columnMap = table.columns.map((c, columnIndex) => columnIndex);
-    }
-
-    return this._columnMap;
-  }
-
-  /*
    * Load field formats for each field in the list
    */
   private getFormatters(table: Datatable) {
@@ -143,63 +118,41 @@ export class CsvGenerator {
     };
   }
 
-  private getFields(searchSource: ISearchSource): SearchFieldValue[] {
-    const fieldValues: Record<string, string | boolean | SearchFieldValue[] | undefined> = {
-      fields: searchSource.getField('fields'),
-      fieldsFromSource: searchSource.getField('fieldsFromSource'),
-    };
-    const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-    this.logger.info(`Getting search source fields from: '${fieldSource}'`);
+  private formatCellValues(formatters: Record<string, FieldFormat>) {
+    return ({
+      column: tableColumn,
+      data: dataTableCell,
+    }: {
+      column: DatatableColumn;
+      data: any;
+    }) => {
+      let cell: string[] | string;
+      // guard against _score, _type, etc
+      if (tableColumn && dataTableCell) {
+        try {
+          cell = formatters[tableColumn.id].convert(dataTableCell);
+        } catch (err) {
+          this.logger.error(err);
+          cell = '-';
+        }
 
-    let fields = fieldValues[fieldSource];
-    if (fields === true || typeof fields === 'string') {
-      fields = [fields.toString()];
-    }
-    if (fields == null) {
-      fields = ['undefined'];
-    }
-    if (!fields) {
-      fields = ['false'];
-    }
+        try {
+          // expected values are a string of JSON where the value(s) is in an array
+          cell = JSON.parse(cell);
+        } catch (e) {
+          // ignore
+        }
 
-    return fields;
-  }
+        // We have to strip singular array values out of their array wrapper,
+        // So that the value appears the visually the same as seen in Discover
+        if (Array.isArray(cell)) {
+          cell = cell.join(', '); // mimic Discover behavior
+        }
 
-  private getColumnName(fields: SearchFieldValue[] | undefined, table: Datatable) {
-    return (columnIndex: number, position: number) => {
-      let cell: string;
-      if (columnIndex > -1) {
-        cell = table.columns[columnIndex].name;
-      } else {
-        cell = fields && fields[position] ? (fields[position] as string) : 'unknown';
-      }
-      return cell;
-    };
-  }
-
-  private tryToParseCellValues(
-    formatters: Record<string, FieldFormat>,
-    dataTableRow: DatatableRow
-  ) {
-    return (tableColumn: DatatableColumn) => {
-      let cell: string[] | string = formatters[tableColumn.id].convert(
-        dataTableRow[tableColumn.id]
-      );
-
-      try {
-        // expected values are a string of JSON where the value(s) is in an array
-        cell = JSON.parse(cell);
-      } catch (e) {
-        // ignore
+        return cell;
       }
 
-      // We have to strip singular array values out of their array wrapper,
-      // So that the value appears the visually the same as seen in Discover
-      if (Array.isArray(cell)) {
-        cell = cell.join(', '); // mimic Discover behavior
-      }
-
-      return cell;
+      return '-'; // Unknown field: it existed in searchSource but has no value in the result
     };
   }
 
@@ -207,19 +160,17 @@ export class CsvGenerator {
    * Use the list of fields to generate the header row
    */
   private generateHeader(
-    fields: SearchFieldValue[] | undefined,
     table: Datatable,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building CSV header row...`);
-    const columnMap = this.getColumnMap(fields, table);
-
     const header =
-      columnMap
-        .map(this.getColumnName(fields, table))
+      table.columns
+        .map((column) => column.name)
+        .map(settings.escapeValue)
         .map(this.checkForFormulas(settings))
-        .join(settings.separator) + `\n`;
+        .join(settings.separator) + '\n';
 
     if (!builder.tryAppend(header)) {
       return {
@@ -235,24 +186,21 @@ export class CsvGenerator {
    * Format a Datatable into rows of CSV content
    */
   private generateRows(
-    fields: SearchFieldValue[] | undefined,
     table: Datatable,
     builder: MaxSizeStringBuilder,
     formatters: Record<string, FieldFormat>,
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building ${table.rows.length} CSV data rows...`);
-    const columnMap = this.getColumnMap(fields, table);
-
     for (const dataTableRow of table.rows) {
       if (this.cancellationToken.isCancelled()) {
         break;
       }
 
       const row =
-        columnMap
-          .map((columnIndex) => table.columns[columnIndex])
-          .map(this.tryToParseCellValues(formatters, dataTableRow))
+        table.columns
+          .map((c) => ({ column: c, data: dataTableRow[c.id] }))
+          .map(this.formatCellValues(formatters))
           .map(this.checkForFormulas(settings))
           .join(settings.separator) + '\n';
 
@@ -348,13 +296,9 @@ export class CsvGenerator {
           break;
         }
 
-        // write the header and initialize formatters / column orderings
-        // depends on the table to know what order to place the columns
-        const fields = this.getFields(searchSource);
-
         if (first) {
           first = false;
-          this.generateHeader(fields, table, builder, settings);
+          this.generateHeader(table, builder, settings);
         }
 
         if (table.rows.length < 1) {
@@ -362,7 +306,7 @@ export class CsvGenerator {
         }
 
         const formatters = this.getFormatters(table);
-        this.generateRows(fields, table, builder, formatters, settings);
+        this.generateRows(table, builder, formatters, settings);
 
         // update iterator
         currentRecord += table.rows.length;

@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.load('reporting/ecommerce');
-      await esArchiver.load('reporting/ecommerce_kibana');
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
@@ -38,9 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: new search', () => {
-      beforeEach(() => PageObjects.common.navigateToApp('discover'));
-
+    describe('Check Available', () => {
       it('is not available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
@@ -70,6 +67,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
+    });
+
+    describe('Generate CSV: new search', () => {
+      beforeEach(async () => {
+        await esArchiver.load('reporting/ecommerce_kibana'); // reload the archive to wipe out changes made by each test
+        await PageObjects.common.navigateToApp('discover');
+      });
 
       it('generates a report from a new search with data: default', async () => {
         await PageObjects.discover.clickNewSearchButton();
@@ -90,7 +94,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await setFieldsFromSource(true);
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.reporting.setTimepickerInDataRange();
-        await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
+        await PageObjects.discover.saveSearch(
+          'my search - with fieldsFromSource data - expectReportCanBeCreated'
+        );
         await PageObjects.reporting.openCsvReportingPanel();
         await PageObjects.reporting.clickGenerateReportButton();
 
