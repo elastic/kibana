@@ -14,7 +14,7 @@ import uuid from 'uuid';
 import { ElasticsearchClient } from 'kibana/server';
 
 import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
-import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { ESSearchHit, ESSearchResponse } from '../../../../../../typings/elasticsearch';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
