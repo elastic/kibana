@@ -11,15 +11,18 @@ import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import UseUnmount from 'react-use/lib/useUnmount';
+import { EuiButton, EuiContextMenu } from '@elastic/eui';
 import { VisualizeInput } from '../../../../visualizations/public';
 import {
   AddFromLibraryButton,
   PrimaryActionButton,
   QuickButtonGroup,
+  SolutionToolbarPopover,
 } from '../../../../presentation_util/public';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
+  EmbeddableFactoryDefinition,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
   isErrorEmbeddable,
@@ -108,6 +111,39 @@ export function DashboardTopNav({
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
+  const [isEditorMenuOpen, setEditorMenuOpen] = useState(false);
+
+  const toggleEditorMenu = () => setEditorMenuOpen(!isEditorMenuOpen);
+  const closeEditorMenu = () => setEditorMenuOpen(false);
+
+  const factories = embeddable
+    ? Array.from(embeddable.getEmbeddableFactories()).filter(
+        ({ isEditable, canCreateNew, isContainerType }) =>
+          isEditable() && !isContainerType && canCreateNew()
+      )
+    : [];
+
+  const editorMenuPanels = [
+    {
+      id: 0,
+      items: factories.map((factory: EmbeddableFactoryDefinition) => {
+        const onClick = async () => {
+          if (factory.getExplicitInput) {
+            const explicitInput = await factory.getExplicitInput();
+            await dashboardContainer.addNewEmbeddable(factory.type, explicitInput);
+          } else {
+            await factory.create({} as EmbeddableInput, dashboardContainer);
+          }
+        };
+
+        return {
+          name: factory.getDisplayName(),
+          icon: 'empty',
+          onClick,
+        };
+      }),
+    },
+  ];
 
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
@@ -603,6 +639,20 @@ export function DashboardTopNav({
                 data-test-subj="dashboardAddPanelButton"
               />
             ),
+            extraButtons: factories.length
+              ? [
+                  <SolutionToolbarPopover
+                    ownFocus
+                    label={i18n.translate('dashboard.panelToolbar.editorMenuButtonLabel', {
+                      defaultMessage: 'All editors',
+                    })}
+                    iconType="visualizeApp"
+                    panelPaddingSize="none"
+                  >
+                    <EuiContextMenu initialPanelId={0} panels={editorMenuPanels} />
+                  </SolutionToolbarPopover>,
+                ]
+              : undefined,
           }}
         </SolutionToolbar>
       ) : null}

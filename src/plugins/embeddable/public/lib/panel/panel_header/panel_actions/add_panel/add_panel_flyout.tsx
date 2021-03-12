@@ -8,15 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { CoreSetup } from 'src/core/public';
 
-import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
-import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
 import { SavedObjectEmbeddableInput } from '../../../../embeddables';
 
 interface Props {
@@ -30,10 +29,6 @@ interface Props {
 
 interface State {
   isCreateMenuOpen: boolean;
-}
-
-function capitalize([first, ...letters]: string) {
-  return `${first.toUpperCase()}${letters.join('')}`;
 }
 
 export class AddPanelFlyout extends React.Component<Props, State> {
@@ -100,23 +95,6 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     this.showToast(name);
   };
 
-  private getCreateMenuItems(): ReactElement[] {
-    return [...this.props.getAllFactories()]
-      .filter(
-        (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
-      )
-      .map((factory) => (
-        <EuiContextMenuItem
-          key={factory.type}
-          data-test-subj={`createNew-${factory.type}`}
-          onClick={() => this.createNewEmbeddable(factory.type)}
-          className="embPanel__addItem"
-        >
-          {capitalize(factory.getDisplayName())}
-        </EuiContextMenuItem>
-      ));
-  }
-
   public render() {
     const SavedObjectFinder = this.props.SavedObjectFinder;
     const metaData = [...this.props.getAllFactories()]
@@ -133,9 +111,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
           defaultMessage: 'No matching objects found.',
         })}
-      >
-        <SavedObjectFinderCreateNew menuItems={this.getCreateMenuItems()} />
-      </SavedObjectFinder>
+      />
     );
 
     return (
