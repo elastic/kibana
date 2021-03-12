@@ -38,6 +38,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Check Available', () => {
+      beforeEach(() => PageObjects.common.navigateToApp('discover'));
+
       it('is not available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be('true');
@@ -128,18 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Generate CSV: archived search', () => {
-      before(async () => {
-        await esArchiver.load('reporting/ecommerce');
-        await esArchiver.load('reporting/ecommerce_kibana');
-      });
-
-      after(async () => {
-        await esArchiver.unload('reporting/ecommerce');
-        await esArchiver.unload('reporting/ecommerce_kibana');
-      });
-
-      beforeEach(() => PageObjects.common.navigateToApp('discover'));
-
       const setupPage = async () => {
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
@@ -157,6 +147,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
         return res;
       };
+
+      before(async () => {
+        await esArchiver.load('reporting/ecommerce');
+        await esArchiver.load('reporting/ecommerce_kibana');
+      });
+
+      after(async () => {
+        await esArchiver.unload('reporting/ecommerce');
+        await esArchiver.unload('reporting/ecommerce_kibana');
+      });
+
+      beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
       it('generates a report with data', async () => {
         await setupPage();
