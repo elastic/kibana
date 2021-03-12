@@ -226,7 +226,7 @@ export const getExceptions = async ({
 }: {
   client: ExceptionListClient;
   lists: ListArray;
-}): Promise<ExceptionListItemSchema[] | undefined> => {
+}): Promise<ExceptionListItemSchema[]> => {
   if (lists.length > 0) {
     try {
       const listIds = lists.map(({ list_id: listId }) => listId);

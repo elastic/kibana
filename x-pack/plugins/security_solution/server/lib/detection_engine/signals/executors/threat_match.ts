@@ -37,7 +37,7 @@ export const threatMatchExecutor = async ({
   rule: SavedObject<ThreatRuleAttributes>;
   tuples: RuleRangeTuple[];
   listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[] | undefined;
+  exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
@@ -74,7 +74,7 @@ export const threatMatchExecutor = async ({
     name: rule.attributes.name,
     savedId: ruleParams.savedId,
     services,
-    exceptionItems: exceptionItems ?? [],
+    exceptionItems,
     listClient,
     logger,
     eventsTelemetry,

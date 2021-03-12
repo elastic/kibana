@@ -38,7 +38,7 @@ export const queryExecutor = async ({
   rule: SavedObject<QueryRuleAttributes>;
   tuples: RuleRangeTuple[];
   listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[] | undefined;
+  exceptionItems: ExceptionListItemSchema[];
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
@@ -57,13 +57,13 @@ export const queryExecutor = async ({
     savedId: ruleParams.savedId,
     services,
     index: inputIndex,
-    lists: exceptionItems ?? [],
+    lists: exceptionItems,
   });
 
   return searchAfterAndBulkCreate({
     tuples,
     listClient,
-    exceptionsList: exceptionItems ?? [],
+    exceptionsList: exceptionItems,
     ruleParams,
     services,
     logger,

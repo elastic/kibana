@@ -53,7 +53,7 @@ export const thresholdExecutor = async ({
 }: {
   rule: SavedObject<ThresholdRuleAttributes>;
   tuples: RuleRangeTuple[];
-  exceptionItems: ExceptionListItemSchema[] | undefined;
+  exceptionItems: ExceptionListItemSchema[];
   ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
@@ -68,7 +68,7 @@ export const thresholdExecutor = async ({
   if (ruleParams.threshold == null) {
     throw new Error('Threshold rule is missing "threshold" field');
   }
-  if (hasLargeValueItem(exceptionItems ?? [])) {
+  if (hasLargeValueItem(exceptionItems)) {
     await ruleStatusService.partialFailure(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
     );
@@ -105,7 +105,7 @@ export const thresholdExecutor = async ({
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
-      lists: exceptionItems ?? [],
+      lists: exceptionItems,
     });
 
     const {

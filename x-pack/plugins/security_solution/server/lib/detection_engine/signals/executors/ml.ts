@@ -39,7 +39,7 @@ export const mlExecutor = async ({
   rule: SavedObject<MachineLearningRuleAttributes>;
   ml: SetupPlugins['ml'];
   listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[] | undefined;
+  exceptionItems: ExceptionListItemSchema[];
   ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
@@ -92,12 +92,12 @@ export const mlExecutor = async ({
     anomalyThreshold: ruleParams.anomalyThreshold,
     from: ruleParams.from,
     to: ruleParams.to,
-    exceptionItems: exceptionItems ?? [],
+    exceptionItems,
   });
 
   const filteredAnomalyResults = await filterEventsAgainstList({
     listClient,
-    exceptionsList: exceptionItems ?? [],
+    exceptionsList: exceptionItems,
     logger,
     eventSearchResult: anomalyResults,
     buildRuleMessage,

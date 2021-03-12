@@ -43,7 +43,7 @@ export const eqlExecutor = async ({
   refresh,
 }: {
   rule: SavedObject<EqlRuleAttributes>;
-  exceptionItems: ExceptionListItemSchema[] | undefined;
+  exceptionItems: ExceptionListItemSchema[];
   ruleStatusService: RuleStatusService;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
@@ -56,7 +56,7 @@ export const eqlExecutor = async ({
   if (ruleParams.query === undefined) {
     throw new Error('EQL query rule must have a query defined');
   }
-  if (hasLargeValueItem(exceptionItems ?? [])) {
+  if (hasLargeValueItem(exceptionItems)) {
     await ruleStatusService.partialFailure(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
     );
@@ -89,7 +89,7 @@ export const eqlExecutor = async ({
     ruleParams.to,
     searchAfterSize,
     ruleParams.timestampOverride,
-    exceptionItems ?? [],
+    exceptionItems,
     ruleParams.eventCategoryOverride
   );
   const eqlSignalSearchStart = performance.now();
