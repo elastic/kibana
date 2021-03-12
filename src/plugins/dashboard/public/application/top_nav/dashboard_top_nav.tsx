@@ -102,6 +102,13 @@ export function DashboardTopNav({
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
+  const clearAddPanel = useCallback(() => {
+    if (state.addPanelOverlay) {
+      state.addPanelOverlay.close();
+      setState((s) => ({ ...s, addPanelOverlay: undefined }));
+    }
+  }, [state.addPanelOverlay]);
+
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
       setState((s) => ({ ...s, chromeIsVisible }));
@@ -114,8 +121,11 @@ export function DashboardTopNav({
         id || DASHBOARD_PANELS_UNSAVED_ID
       );
     }
-    return () => visibleSubscription.unsubscribe();
-  }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard]);
+    return () => {
+      visibleSubscription.unsubscribe();
+      clearAddPanel();
+    };
+  }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard, clearAddPanel]);
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardContainer)) {
@@ -149,13 +159,6 @@ export function DashboardTopNav({
     }
     await factory.create({} as EmbeddableInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
-
-  const clearAddPanel = useCallback(() => {
-    if (state.addPanelOverlay) {
-      state.addPanelOverlay.close();
-      setState((s) => ({ ...s, addPanelOverlay: undefined }));
-    }
-  }, [state.addPanelOverlay]);
 
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
