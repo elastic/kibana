@@ -53,6 +53,6 @@ export const esSearchStrategyProvider = (
       }
     };
 
-    return from(search()).pipe(tap(searchUsageObserver(logger, usage)));
+    return from(search()).pipe(tap(searchUsageObserver(logger, usage, options)));
   },
 });
