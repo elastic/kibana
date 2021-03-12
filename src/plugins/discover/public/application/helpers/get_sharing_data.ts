@@ -56,9 +56,7 @@ export async function getSharingData(
     if (timeFieldName) {
       columns = [timeFieldName, ...columns];
     }
-  }
 
-  if (columns.length > 0) {
     // if columns were selected in the saved search, use them for the searchSource's fields
     const fieldsKey = fields.fieldsFromSource ? 'fieldsFromSource' : 'fields';
     searchSource.setField(fieldsKey, columns);
