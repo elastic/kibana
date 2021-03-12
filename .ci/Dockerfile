@@ -27,28 +27,7 @@ RUN LATEST_VAULT_RELEASE=$(curl -s https://api.github.com/repos/hashicorp/vault/
   && chmod +x vault \
   && mv vault /usr/local/bin/vault
 
-# RUN groupadd -r kibana && useradd -r -g kibana kibana && mkdir /home/kibana && chown kibana:kibana /home/kibana
-
-# # COPY ./bash_standard_lib.sh /usr/local/bin/bash_standard_lib.sh
-# # RUN chmod +x /usr/local/bin/bash_standard_lib.sh
-
-# RUN mkdir -p /home/kibana/workspace/kibana && chown -R kibana:kibana /home/kibana/workspace
-# # RUN mkdir -p /home/kibana/yarn-offline-cache && chown -R kibana:kibana /home/kibana/workspace
-# USER kibana
-# WORKDIR /home/kibana/workspace/kibana
-# COPY package.json yarn.lock preinstall_check.js ./
-# RUN yarn config set yarn-offline-mirror "/home/kibana/yarn-offline-cache"
-# RUN --mount=type=cache,uid=999,gid=999,target=/home/kibana/yarn-offline-cache ls -alh /home/kibana/yarn-offline-cache; # Need uid/guid of kibana user
-# RUN --mount=type=cache,uid=999,gid=999,target=/home/kibana/yarn-offline-cache yarn install
-# COPY --chown=kibana:kibana . .
-# RUN ls -alh .
-# RUN mkdir ~/.npm-global && npm config set prefix '~/.npm-global'
-# RUN ls -alh /home/kibana/workspace/kibana
-# RUN yarn kbn bootstrap
-
-# ENTRYPOINT [ "yarn" ]
-
-
+RUN groupadd -r kibana && useradd -r -g kibana kibana && mkdir /home/kibana && chown kibana:kibana /home/kibana
 RUN mkdir -p /var/lib/kibana/workspace/kibana
 WORKDIR /var/lib/kibana/workspace/kibana
 COPY package.json yarn.lock preinstall_check.js ./
@@ -62,4 +41,7 @@ RUN yarn kbn bootstrap
 RUN yarn kbn run build -i @kbn/pm
 RUN node scripts/build_plugin_list_docs
 
+RUN chown -R kibana:kibana /var/lib/kibana/
+
+USER kibana
 ENTRYPOINT ["/var/lib/kibana/workspace/kibana/.ci/buildkite/entrypoint.sh"]
