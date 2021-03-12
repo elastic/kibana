@@ -184,6 +184,7 @@ export const createIndexPattern = (indexPatternType: string, fields: Fields) => 
   const { indexPatternFields, fieldFormatMap } = createIndexPatternFields(fields);
 
   return {
+    id: `${indexPatternType}-*`,
     title: `${indexPatternType}-*`,
     timeFieldName: '@timestamp',
     fields: indexPatternFields.reduce((acc, field) => {
