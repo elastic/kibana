@@ -6,3 +6,5 @@
  */
 
 export { setup, OverviewTestBed } from './overview.helpers';
+
+export { setupEnvironment } from './setup_environment';

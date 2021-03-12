@@ -7,9 +7,9 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { OverviewTestBed, setup } from './helpers';
+import { OverviewTestBed, setup, setupEnvironment } from './helpers';
 
-describe('<PageContent />', () => {
+describe('Overview page', () => {
   let testBed: OverviewTestBed;
 
   beforeEach(async () => {
@@ -27,7 +27,18 @@ describe('<PageContent />', () => {
     });
   });
 
-  describe('Tabs', () => {
+  describe('Overview content', () => {
+    const { server, httpRequestsMockHelpers } = setupEnvironment();
+
+    const upgradeStatusMockResponse = {
+      readyForUpgrade: false,
+      cluster: [],
+      indices: [],
+    };
+
+    httpRequestsMockHelpers.setLoadStatusResponse(upgradeStatusMockResponse);
+    httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
+
     beforeEach(async () => {
       await act(async () => {
         // Override the default context value to verify tab content renders as expected
@@ -36,11 +47,92 @@ describe('<PageContent />', () => {
       });
     });
 
-    test('renders the coming soon prompt by default', () => {
+    afterAll(() => {
+      server.restore();
+    });
+
+    test('renders the overview tab', () => {
       const { exists } = testBed;
 
       expect(exists('comingSoonPrompt')).toBe(false);
       expect(exists('upgradeAssistantPageContent')).toBe(true);
+    });
+
+    test('toggles deprecation logging', () => {
+      // TODO
+    });
+
+    describe('Error handling', () => {
+      test('handles network failure', async () => {
+        const error = {
+          statusCode: 500,
+          error: 'Internal server error',
+          message: 'Internal server error',
+        };
+
+        httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+
+        await act(async () => {
+          testBed = await setup({ isReadOnlyMode: false });
+        });
+
+        const { component, exists, find } = testBed;
+
+        component.update();
+
+        expect(exists('upgradeStatusError')).toBe(true);
+        expect(find('upgradeStatusError').text()).toContain(
+          'An error occurred while retrieving the checkup results.'
+        );
+      });
+
+      test('handles partially upgraded error', async () => {
+        const error = {
+          statusCode: 426,
+          error: 'Upgrade required',
+          message: 'There are some nodes running a different version of Elasticsearch',
+          attributes: {
+            allNodesUpgraded: false,
+          },
+        };
+
+        httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+
+        await act(async () => {
+          testBed = await setup({ isReadOnlyMode: false });
+        });
+
+        const { component, exists, find } = testBed;
+
+        component.update();
+
+        expect(exists('partiallyUpgradedPrompt')).toBe(true);
+        expect(find('partiallyUpgradedPrompt').text()).toContain('Your cluster is upgrading');
+      });
+
+      test('handles upgrade error', async () => {
+        const error = {
+          statusCode: 426,
+          error: 'Upgrade required',
+          message: 'There are some nodes running a different version of Elasticsearch',
+          attributes: {
+            allNodesUpgraded: true,
+          },
+        };
+
+        httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+
+        await act(async () => {
+          testBed = await setup({ isReadOnlyMode: false });
+        });
+
+        const { component, exists, find } = testBed;
+
+        component.update();
+
+        expect(exists('upgradedPrompt')).toBe(true);
+        expect(find('upgradedPrompt').text()).toContain('Your cluster has been upgraded');
+      });
     });
   });
 });

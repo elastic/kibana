@@ -24,16 +24,7 @@ import { OverviewTab } from './tabs/overview';
 import { TelemetryState, UpgradeAssistantTabProps } from './types';
 import { useAppContext } from '../app_context';
 
-enum ClusterUpgradeState {
-  needsUpgrade,
-  partiallyUpgraded,
-  upgraded,
-}
-
 export const UpgradeAssistantTabs: React.FunctionComponent = () => {
-  const [clusterUpgradeState, setClusterUpgradeState] = useState<ClusterUpgradeState>(
-    ClusterUpgradeState.needsUpgrade
-  );
   const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
   const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
@@ -98,16 +89,6 @@ export const UpgradeAssistantTabs: React.FunctionComponent = () => {
     ];
   }, [checkupData, error, isLoading, resendRequest]);
 
-  useEffect(() => {
-    if (error?.statusCode === 426) {
-      setClusterUpgradeState(
-        error.attributes?.allNodesUpgraded
-          ? ClusterUpgradeState.upgraded
-          : ClusterUpgradeState.partiallyUpgraded
-      );
-    }
-  }, [error]);
-
   const tabName = tabs[selectedTabIndex].id;
 
   useEffect(() => {
@@ -129,17 +110,18 @@ export const UpgradeAssistantTabs: React.FunctionComponent = () => {
   const onTabClick = (selectedTab: EuiTabbedContentTab) => {
     const newSelectedTabIndex = findIndex(tabs, { id: selectedTab.id });
     if (selectedTabIndex === -1) {
-      throw new Error(`Clicked tab did not exist in tabs array`);
+      throw new Error('Clicked tab did not exist in tabs array');
     }
     setSelectedTabIndex(newSelectedTabIndex);
   };
 
-  if (clusterUpgradeState === ClusterUpgradeState.partiallyUpgraded) {
+  if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === false) {
     return (
       <EuiPageContent>
         <EuiPageContentBody>
           <EuiEmptyPrompt
             iconType="logoElasticsearch"
+            data-test-subj="partiallyUpgradedPrompt"
             title={
               <h2>
                 <FormattedMessage
@@ -161,12 +143,13 @@ export const UpgradeAssistantTabs: React.FunctionComponent = () => {
         </EuiPageContentBody>
       </EuiPageContent>
     );
-  } else if (clusterUpgradeState === ClusterUpgradeState.upgraded) {
+  } else if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === true) {
     return (
       <EuiPageContent>
         <EuiPageContentBody>
           <EuiEmptyPrompt
             iconType="logoElasticsearch"
+            data-test-subj="upgradedPrompt"
             title={
               <h2>
                 <FormattedMessage

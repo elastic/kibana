@@ -22,4 +22,9 @@ export const setup = async (overrides?: any): Promise<OverviewTestBed> => {
   return testBed;
 };
 
-export type OverviewTestSubjects = 'comingSoonPrompt' | 'upgradeAssistantPageContent';
+export type OverviewTestSubjects =
+  | 'comingSoonPrompt'
+  | 'upgradeAssistantPageContent'
+  | 'upgradedPrompt'
+  | 'partiallyUpgradedPrompt'
+  | 'upgradeStatusError';

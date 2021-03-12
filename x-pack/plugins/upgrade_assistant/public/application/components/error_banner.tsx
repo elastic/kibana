@@ -41,6 +41,7 @@ export const LoadingErrorBanner: React.FunctionComponent<
       }
       color="danger"
       iconType="cross"
+      data-test-subj="upgradeStatusError"
     >
       {loadingError ? loadingError.message : null}
     </EuiCallOut>
