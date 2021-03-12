@@ -8,7 +8,13 @@ import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ActionConnector, ActionType, AlertAction, ConnectorValidationResult, GenericValidationResult } from '../../../types';
+import {
+  ActionConnector,
+  ActionType,
+  AlertAction,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { DefaultActionParams } from '../../lib/get_defaults_for_action_params';
@@ -19,13 +25,16 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('action_type_form', () => {
   const mockedActionParamsFields = React.lazy(async () => ({
     default() {
-      return <>
-        <EuiFieldText
-        data-test-subj={'dedupKeyInput'}
-        value={'test'}
-        onChange={() => true}
-      fullWidth />
-      </>;
+      return (
+        <>
+          <EuiFieldText
+            data-test-subj={'dedupKeyInput'}
+            value={'test'}
+            onChange={() => true}
+            fullWidth
+          />
+        </>
+      );
     },
   }));
 
@@ -47,20 +56,22 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = mountWithIntl(
-      getActionTypeForm(1, undefined, { id: '123',
-      actionTypeId: '.pagerduty',
-      group: 'recovered',
-      params: {
-        eventAction: 'recovered',
-        dedupKey: undefined,
-        summary: '2323',
-        source: 'source',
-        severity: '1',
-        timestamp: new Date().toISOString(),
-        component: 'test',
-        group: 'group',
-        class: 'test class',
-      }, })
+      getActionTypeForm(1, undefined, {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'recovered',
+        params: {
+          eventAction: 'recovered',
+          dedupKey: undefined,
+          summary: '2323',
+          source: 'source',
+          severity: '1',
+          timestamp: new Date().toISOString(),
+          component: 'test',
+          group: 'group',
+          class: 'test class',
+        },
+      })
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -70,9 +81,10 @@ describe('action_type_form', () => {
     });
 
     expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toBeCalledWith(
-      'dedupKey', 'test', 1
+      'dedupKey',
+      'test',
+      1
     );
-
   });
 
   it('does not call "setActionParamsProperty" because dedupKey is not empty', async () => {
@@ -93,20 +105,22 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = mountWithIntl(
-      getActionTypeForm(1, undefined, { id: '123',
-      actionTypeId: '.pagerduty',
-      group: 'recovered',
-      params: {
-        eventAction: 'recovered',
-        dedupKey: '232323',
-        summary: '2323',
-        source: 'source',
-        severity: '1',
-        timestamp: new Date().toISOString(),
-        component: 'test',
-        group: 'group',
-        class: 'test class',
-      }, })
+      getActionTypeForm(1, undefined, {
+        id: '123',
+        actionTypeId: '.pagerduty',
+        group: 'recovered',
+        params: {
+          eventAction: 'recovered',
+          dedupKey: '232323',
+          summary: '2323',
+          source: 'source',
+          severity: '1',
+          timestamp: new Date().toISOString(),
+          component: 'test',
+          group: 'group',
+          class: 'test class',
+        },
+      })
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -115,16 +129,25 @@ describe('action_type_form', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toBeCalledTimes(0);
-
+    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toBeCalledTimes(
+      0
+    );
   });
 });
 
-function getActionTypeForm(index?: number, actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>,
-  actionItem?: AlertAction, defaultActionGroupId?: string, connectors?: ActionConnector<Record<string, unknown>, Record<string, unknown>>[],
-  actionTypeIndex?: Record<string, ActionType>, defaultParams?: DefaultActionParams, onAddConnector?: () => void, onDeleteAction?: () => void, 
-  onConnectorSelected?: (id: string) => void) {
-  const actionConnectorDefault =  {
+function getActionTypeForm(
+  index?: number,
+  actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>,
+  actionItem?: AlertAction,
+  defaultActionGroupId?: string,
+  connectors?: ActionConnector<Record<string, unknown>, Record<string, unknown>>[],
+  actionTypeIndex?: Record<string, ActionType>,
+  defaultParams?: DefaultActionParams,
+  onAddConnector?: () => void,
+  onDeleteAction?: () => void,
+  onConnectorSelected?: (id: string) => void
+) {
+  const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
     config: {
       apiUrl: 'http:\\test',
@@ -189,19 +212,21 @@ function getActionTypeForm(index?: number, actionConnector?: ActionConnector<Rec
     dedupKey: `test`,
     eventAction: 'resolve',
   };
-  return (<ActionTypeForm
-    actionConnector={actionConnector ?? actionConnectorDefault}
-    actionItem={actionItem ?? actionItemDefault}
-    connectors={connectors ?? connectorsDefault}
-    onAddConnector={onAddConnector ?? jest.fn()}
-    onDeleteAction={onDeleteAction ?? jest.fn()}
-    onConnectorSelected={onConnectorSelected ?? jest.fn()}
-    actionParamsErrors={{ errors: { summary: [], timestamp: [], dedupKey: [] } }}
-    defaultActionGroupId={defaultActionGroupId ?? 'default'}
-    setActionParamsProperty={jest.fn()}
-    index={index ?? 1}
-    actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
-    defaultParams={defaultParams ?? defaultParamsDefault}
-    actionTypeRegistry={actionTypeRegistry}
-  />);
+  return (
+    <ActionTypeForm
+      actionConnector={actionConnector ?? actionConnectorDefault}
+      actionItem={actionItem ?? actionItemDefault}
+      connectors={connectors ?? connectorsDefault}
+      onAddConnector={onAddConnector ?? jest.fn()}
+      onDeleteAction={onDeleteAction ?? jest.fn()}
+      onConnectorSelected={onConnectorSelected ?? jest.fn()}
+      actionParamsErrors={{ errors: { summary: [], timestamp: [], dedupKey: [] } }}
+      defaultActionGroupId={defaultActionGroupId ?? 'default'}
+      setActionParamsProperty={jest.fn()}
+      index={index ?? 1}
+      actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
+      defaultParams={defaultParams ?? defaultParamsDefault}
+      actionTypeRegistry={actionTypeRegistry}
+    />
+  );
 }
