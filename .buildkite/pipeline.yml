@@ -14,7 +14,7 @@ steps:
     agents:
       queue: bootstrap
   - wait
-  - command: node scripts/jest --ci --verbose
+  - command: node scripts/jest --ci --verbose --maxWorkers=6
     label: 'Jest'
     agents:
       queue: bootstrap
