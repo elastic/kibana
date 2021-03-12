@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import UseUnmount from 'react-use/lib/useUnmount';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
@@ -102,13 +103,6 @@ export function DashboardTopNav({
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
-  const clearAddPanel = useCallback(() => {
-    if (state.addPanelOverlay) {
-      state.addPanelOverlay.close();
-      setState((s) => ({ ...s, addPanelOverlay: undefined }));
-    }
-  }, [state.addPanelOverlay]);
-
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
       setState((s) => ({ ...s, chromeIsVisible }));
@@ -123,9 +117,8 @@ export function DashboardTopNav({
     }
     return () => {
       visibleSubscription.unsubscribe();
-      clearAddPanel();
     };
-  }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard, clearAddPanel]);
+  }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard]);
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardContainer)) {
@@ -159,6 +152,13 @@ export function DashboardTopNav({
     }
     await factory.create({} as EmbeddableInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
+
+  const clearAddPanel = useCallback(() => {
+    if (state.addPanelOverlay) {
+      state.addPanelOverlay.close();
+      setState((s) => ({ ...s, addPanelOverlay: undefined }));
+    }
+  }, [state.addPanelOverlay]);
 
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
@@ -460,6 +460,10 @@ export function DashboardTopNav({
     runQuickSave,
     share,
   ]);
+
+  UseUnmount(() => {
+    clearAddPanel();
+  });
 
   const getNavBarProps = () => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
