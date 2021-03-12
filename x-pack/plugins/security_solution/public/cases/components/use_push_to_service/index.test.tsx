@@ -13,12 +13,12 @@ import '../../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../../common/mock';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock } from '../../containers/configure/mock';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
