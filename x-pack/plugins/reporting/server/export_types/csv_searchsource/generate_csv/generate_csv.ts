@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
 import { IScopedSearchClient } from 'src/plugins/data/server';
-import { Datatable, DatatableColumn } from 'src/plugins/expressions/server';
+import { Datatable } from 'src/plugins/expressions/server';
 import { ReportingConfig } from '../../..';
 import {
   ES_SEARCH_STRATEGY,
@@ -19,6 +19,7 @@ import {
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
+  SearchFieldValue,
   tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
 import { CancellationToken } from '../../../../common';
@@ -118,19 +119,31 @@ export class CsvGenerator {
     };
   }
 
+  // use fields/fieldsFromSource from the searchSource to get the ordering of columns
+  // otherwise use the table columns as they are
+  private getFields(searchSource: ISearchSource, table: Datatable): string[] {
+    const fieldValues: Record<string, string | boolean | SearchFieldValue[] | undefined> = {
+      fields: searchSource.getField('fields'),
+      fieldsFromSource: searchSource.getField('fieldsFromSource'),
+    };
+    const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
+    this.logger.info(`Getting search source fields from: '${fieldSource}'`);
+
+    let fields = fieldValues[fieldSource];
+    if (!fields || fields === true || typeof fields === 'string') {
+      fields = table.columns.map((c) => c.id);
+    }
+
+    return fields as string[]; // FIXME: fix TS
+  }
+
   private formatCellValues(formatters: Record<string, FieldFormat>) {
-    return ({
-      column: tableColumn,
-      data: dataTableCell,
-    }: {
-      column: DatatableColumn;
-      data: any;
-    }) => {
+    return ({ column: tableColumn, data: dataTableCell }: { column: string; data: any }) => {
       let cell: string[] | string;
       // guard against _score, _type, etc
       if (tableColumn && dataTableCell) {
         try {
-          cell = formatters[tableColumn.id].convert(dataTableCell);
+          cell = formatters[tableColumn].convert(dataTableCell);
         } catch (err) {
           this.logger.error(err);
           cell = '-';
@@ -160,14 +173,14 @@ export class CsvGenerator {
    * Use the list of fields to generate the header row
    */
   private generateHeader(
+    fields: string[],
     table: Datatable,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building CSV header row...`);
     const header =
-      table.columns
-        .map((column) => column.name)
+      fields
         .map(settings.escapeValue)
         .map(this.checkForFormulas(settings))
         .join(settings.separator) + '\n';
@@ -186,6 +199,7 @@ export class CsvGenerator {
    * Format a Datatable into rows of CSV content
    */
   private generateRows(
+    fields: string[],
     table: Datatable,
     builder: MaxSizeStringBuilder,
     formatters: Record<string, FieldFormat>,
@@ -198,8 +212,8 @@ export class CsvGenerator {
       }
 
       const row =
-        table.columns
-          .map((c) => ({ column: c, data: dataTableRow[c.id] }))
+        fields
+          .map((f) => ({ column: f, data: dataTableRow[f] }))
           .map(this.formatCellValues(formatters))
           .map(this.checkForFormulas(settings))
           .join(settings.separator) + '\n';
@@ -296,9 +310,11 @@ export class CsvGenerator {
           break;
         }
 
+        const fields = this.getFields(searchSource, table);
+
         if (first) {
           first = false;
-          this.generateHeader(table, builder, settings);
+          this.generateHeader(fields, table, builder, settings);
         }
 
         if (table.rows.length < 1) {
@@ -306,7 +322,7 @@ export class CsvGenerator {
         }
 
         const formatters = this.getFormatters(table);
-        this.generateRows(table, builder, formatters, settings);
+        this.generateRows(fields, table, builder, formatters, settings);
 
         // update iterator
         currentRecord += table.rows.length;
