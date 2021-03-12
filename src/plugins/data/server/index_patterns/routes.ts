@@ -69,8 +69,13 @@ export function registerRoutes(
       },
     },
     async (context, request, response) => {
-      const { asCurrentUser } = context.core.elasticsearch.client;
-      const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
+      const savedObjectsClient = context.core.savedObjects.client;
+      const elasticsearchClient = context.core.elasticsearch.client.asCurrentUser;
+      const [, , pluginStart] = await getStartServices();
+      const indexPatternsService = await pluginStart.indexPatterns.indexPatternsServiceFactory(
+        savedObjectsClient,
+        elasticsearchClient
+      );
       const {
         pattern,
         meta_fields: metaFields,
@@ -78,6 +83,11 @@ export function registerRoutes(
         rollup_index: rollupIndex,
         allow_no_index: allowNoIndex,
       } = request.query;
+      const indexPatterns = new IndexPatternsFetcher(
+        elasticsearchClient,
+        allowNoIndex,
+        indexPatternsService
+      );
 
       let parsedFields: string[] = [];
       try {
