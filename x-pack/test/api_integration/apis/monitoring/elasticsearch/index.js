@@ -20,6 +20,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./index_detail'));
     loadTestFile(require.resolve('./index_detail_mb'));
     loadTestFile(require.resolve('./ccr'));
+    loadTestFile(require.resolve('./ccr_mb'));
     loadTestFile(require.resolve('./ccr_shard'));
+    loadTestFile(require.resolve('./ccr_shard_mb'));
   });
 }

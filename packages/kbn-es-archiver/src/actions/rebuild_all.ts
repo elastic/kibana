@@ -74,8 +74,88 @@ function convertLegacyTypeToMetricsetName(type: string) {
   switch (type) {
     case 'shards':
       return 'shard';
+    case 'ccr_stats':
+      return 'ccr';
   }
   return type;
+}
+
+// Mimics metricbeat/module/elasticsearch/ccr/data.go
+function transformCcr(legacyDoc: any) {
+  const ccr = legacyDoc.ccr_stats;
+  return {
+    leader: {
+      index: ccr.leader_index,
+      max_seq_no: ccr.leader_max_seq_no,
+      global_checkpoint: ccr.leader_global_checkpoint,
+    },
+    total_time: {
+      read: {
+        ms: ccr.total_read_time_millis,
+        remote_exec: {
+          ms: ccr.total_read_remote_exec_time_millis,
+        },
+      },
+      write: {
+        ms: ccr.total_write_time_millis,
+      },
+    },
+    write_buffer: {
+      size: {
+        bytes: ccr.write_buffer_size_in_bytes,
+      },
+      operation: {
+        count: ccr.write_buffer_operation_count,
+      },
+    },
+    bytes_read: ccr.bytes_read,
+    follower: {
+      index: ccr.follower_index,
+      shard: {
+        number: ccr.shard_id,
+      },
+      operations_written: ccr.operations_written,
+      operations: {
+        read: {
+          count: ccr.operations_read,
+        },
+      },
+      max_seq_no: ccr.follower_max_seq_no,
+      time_since_last_read: {
+        ms: ccr.time_since_last_read_millis,
+      },
+      global_checkpoint: ccr.follower_global_checkpoint,
+      settings_version: ccr.follower_settings_version,
+      aliases_version: ccr.follower_aliases_version,
+    },
+    read_exceptions: ccr.read_exceptions,
+    requests: {
+      successful: {
+        read: {
+          count: ccr.successful_read_requests,
+        },
+        write: {
+          count: ccr.successful_write_requests,
+        },
+      },
+      failed: {
+        read: {
+          count: ccr.failed_read_requests,
+        },
+        write: {
+          count: ccr.failed_write_requests,
+        },
+      },
+      outstanding: {
+        read: {
+          count: ccr.outstanding_read_requests,
+        },
+        write: {
+          count: ccr.outstanding_write_requests,
+        },
+      },
+    },
+  };
 }
 
 const hashes: any = {};
@@ -142,6 +222,10 @@ function applyCustomRules(item: any, legacyDoc: any, mbDoc: any) {
         extraMbDocs.push(extraMbDoc);
       }
     }
+  }
+
+  if (legacyDoc.type === 'ccr_stats') {
+    set(mbDoc, 'elasticsearch.ccr', transformCcr(legacyDoc));
   }
 
   return [
