@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 
 import { Container, Nav, Wrapper } from './layouts';
@@ -38,6 +38,22 @@ export const OsqueryAppComponent = () => {
                   />
                 </EuiTab>
               </EuiTabs>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" direction="row">
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    iconType="popout"
+                    href="https://ela.st/fleet-feedback"
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.osquery.appNavigation.sendFeedbackButton"
+                      defaultMessage="Send feedback"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </Nav>

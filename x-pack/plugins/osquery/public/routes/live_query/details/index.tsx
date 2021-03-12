@@ -103,10 +103,7 @@ const LiveQueryDetailsPageComponent = () => {
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              {
-                // @ts-expect-error update types
-                data?.actionDetails?.fields?.agents?.length ?? '0'
-              }
+              {data?.actionDetails?.fields?.agents?.length ?? '0'}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
@@ -123,13 +120,10 @@ const LiveQueryDetailsPageComponent = () => {
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              {
+              {actionResultsData?.rawResponse?.aggregations?.responses?.buckets.find(
                 // @ts-expect-error update types
-                actionResultsData?.rawResponse?.aggregations?.responses?.buckets.find(
-                  // @ts-expect-error update types
-                  (bucket) => bucket.key === 'error'
-                )?.doc_count ?? '0'
-              }
+                (bucket) => bucket.key === 'error'
+              )?.doc_count ?? '0'}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
@@ -143,9 +137,7 @@ const LiveQueryDetailsPageComponent = () => {
     ),
     [
       actionId,
-      // @ts-expect-error update types
       actionResultsData?.rawResponse?.aggregations?.responses?.buckets,
-      // @ts-expect-error update types
       data?.actionDetails?.fields?.agents?.length,
     ]
   );
@@ -153,10 +145,7 @@ const LiveQueryDetailsPageComponent = () => {
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-        {
-          // @ts-expect-error update types
-          data?.actionDetails._source?.data?.query
-        }
+        {data?.actionDetails._source?.data?.query}
       </EuiCodeBlock>
       <EuiSpacer />
       <ResultTabs actionId={actionId} />

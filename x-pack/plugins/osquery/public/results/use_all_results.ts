@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
 import { createFilter } from '../common/helpers';
@@ -55,17 +53,26 @@ export const useAllResults = ({
 }: UseAllResults) => {
   const { data } = useKibana().services;
 
-  const [resultsRequest, setHostRequest] = useState<ResultsRequestOptions | null>(null);
-
-  const response = useQuery(
+  return useQuery(
     ['allActionResults', { actionId, activePage, direction, limit, sortField }],
     async () => {
-      if (!resultsRequest) return Promise.resolve();
-
       const responseData = await data.search
-        .search<ResultsRequestOptions, ResultsStrategyResponse>(resultsRequest, {
-          strategy: 'osquerySearchStrategy',
-        })
+        .search<ResultsRequestOptions, ResultsStrategyResponse>(
+          {
+            actionId,
+            agentId,
+            factoryQueryType: OsqueryQueries.results,
+            filterQuery: createFilter(filterQuery),
+            pagination: generateTablePaginationOptions(activePage, limit),
+            sort: {
+              direction,
+              field: sortField,
+            },
+          },
+          {
+            strategy: 'osquerySearchStrategy',
+          }
+        )
         .toPromise();
 
       return {
@@ -76,30 +83,7 @@ export const useAllResults = ({
     },
     {
       refetchInterval: 1000,
-      enabled: !skip && !!resultsRequest,
+      enabled: !skip,
     }
   );
-
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        actionId,
-        agentId,
-        factoryQueryType: OsqueryQueries.results,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [actionId, activePage, agentId, direction, filterQuery, limit, sortField]);
-
-  return response;
 };

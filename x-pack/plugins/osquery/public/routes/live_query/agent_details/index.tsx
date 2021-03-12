@@ -68,10 +68,7 @@ const LiveQueryAgentDetailsPageComponent = () => {
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
       <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-        {
-          // @ts-expect-error update types
-          data?.actionDetails._source?.data?.query
-        }
+        {data?.actionDetails._source?.data?.query}
       </EuiCodeBlock>
       <EuiSpacer />
       <ResultsTable actionId={actionId} agentId={agentId} />

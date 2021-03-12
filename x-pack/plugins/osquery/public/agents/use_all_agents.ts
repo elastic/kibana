@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
 import { createFilter } from '../common/helpers';
@@ -51,17 +49,24 @@ export const useAllAgents = ({
 }: UseAllAgents) => {
   const { data } = useKibana().services;
 
-  const [agentsRequest, setHostRequest] = useState<AgentsRequestOptions | null>(null);
-
-  const response = useQuery(
+  return useQuery(
     ['agents', { activePage, direction, limit, sortField }],
     async () => {
-      if (!agentsRequest) return Promise.resolve();
-
       const responseData = await data.search
-        .search<AgentsRequestOptions, AgentsStrategyResponse>(agentsRequest, {
-          strategy: 'osquerySearchStrategy',
-        })
+        .search<AgentsRequestOptions, AgentsStrategyResponse>(
+          {
+            factoryQueryType: OsqueryQueries.agents,
+            filterQuery: createFilter(filterQuery),
+            pagination: generateTablePaginationOptions(activePage, limit),
+            sort: {
+              direction,
+              field: sortField,
+            },
+          },
+          {
+            strategy: 'osquerySearchStrategy',
+          }
+        )
         .toPromise();
 
       return {
@@ -71,28 +76,7 @@ export const useAllAgents = ({
       };
     },
     {
-      enabled: !skip && !!agentsRequest,
+      enabled: !skip,
     }
   );
-
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        factoryQueryType: OsqueryQueries.agents,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [activePage, direction, filterQuery, limit, sortField]);
-
-  return response;
 };

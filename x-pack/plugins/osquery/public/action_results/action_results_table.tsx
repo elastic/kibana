@@ -128,13 +128,11 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
           direction: Direction.asc,
           sortField: '@timestamp',
         });
-        // @ts-expect-error update types
         return allResultsData?.totalCount ?? '-';
       }
 
       if (columnId === 'agent_status') {
         const agentIdValue = value.fields.agent_id[0];
-        // @ts-expect-error update types
         const agent = find(['_id', agentIdValue], agentsData?.agents);
         const online = agent?.active;
         const color = online ? 'success' : 'danger';
@@ -144,7 +142,6 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       if (columnId === 'agent') {
         const agentIdValue = value.fields.agent_id[0];
-        // @ts-expect-error update types
         const agent = find(['_id', agentIdValue], agentsData?.agents);
         const agentName = agent?.local_metadata.host.name;
 
@@ -161,7 +158,6 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       return '-';
     },
-    // @ts-expect-error update types
     [actionId, agentsData?.agents, pagination.pageIndex, pagination.pageSize]
   );
 

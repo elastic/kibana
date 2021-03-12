@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
 import { createFilter } from '../common/helpers';
@@ -53,17 +51,25 @@ export const useActionResults = ({
 }: UseActionResults) => {
   const { data } = useKibana().services;
 
-  const [resultsRequest, setHostRequest] = useState<ResultsRequestOptions | null>(null);
-
-  const response = useQuery(
+  return useQuery(
     ['actionResults', { actionId, activePage, direction, limit, sortField }],
     async () => {
-      if (!resultsRequest) return Promise.resolve();
-
       const responseData = await data.search
-        .search<ResultsRequestOptions, ResultsStrategyResponse>(resultsRequest, {
-          strategy: 'osquerySearchStrategy',
-        })
+        .search<ResultsRequestOptions, ResultsStrategyResponse>(
+          {
+            actionId,
+            factoryQueryType: OsqueryQueries.actionResults,
+            filterQuery: createFilter(filterQuery),
+            pagination: generateTablePaginationOptions(activePage, limit),
+            sort: {
+              direction,
+              field: sortField,
+            },
+          },
+          {
+            strategy: 'osquerySearchStrategy',
+          }
+        )
         .toPromise();
 
       return {
@@ -74,29 +80,7 @@ export const useActionResults = ({
     },
     {
       refetchInterval: 1000,
-      enabled: !skip && !!resultsRequest,
+      enabled: !skip,
     }
   );
-
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        actionId,
-        factoryQueryType: OsqueryQueries.actionResults,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [actionId, activePage, direction, filterQuery, limit, sortField]);
-
-  return response;
 };

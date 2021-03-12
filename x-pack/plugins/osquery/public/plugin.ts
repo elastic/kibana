@@ -26,6 +26,7 @@ import {
 } from './types';
 import { PLUGIN_NAME } from '../common';
 import {
+  LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedEmptyCreatePolicyExtension,
   LazyOsqueryManagedEmptyEditPolicyExtension,
 } from './fleet_integration';
@@ -109,7 +110,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       registerExtension({
         package: 'osquery_elastic_managed',
         view: 'package-policy-create',
-        component: LazyOsqueryManagedEmptyCreatePolicyExtension,
+        // component: LazyOsqueryManagedEmptyCreatePolicyExtension,
+        component: LazyOsqueryManagedPolicyCreateImportExtension,
       });
 
       registerExtension({
