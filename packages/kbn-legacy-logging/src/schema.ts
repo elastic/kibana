@@ -11,10 +11,15 @@ import Joi from 'joi';
 const HANDLED_IN_KIBANA_PLATFORM = Joi.any().description(
   'This key is handled in the new platform ONLY'
 );
-
+/**
+ * @deprecated
+ *
+ * Legacy logging has been deprecated and will be removed in 8.0.
+ * Set up logging from the platform logging instead
+ */
 export interface LegacyLoggingConfig {
-  silent: boolean;
-  quiet: boolean;
+  silent: boolean; // support for cli args
+  quiet?: boolean; // deprecated
   verbose: boolean;
   events: Record<string, any>;
   dest: string;
@@ -28,7 +33,7 @@ export interface LegacyLoggingConfig {
     pollingInterval: number;
     usePolling: boolean;
     pollingPolicyTestTimeout?: number;
-  };
+  }; // all deprecated
 }
 
 export const legacyLoggingConfigSchema = Joi.object()
@@ -38,27 +43,29 @@ export const legacyLoggingConfigSchema = Joi.object()
     root: HANDLED_IN_KIBANA_PLATFORM,
 
     silent: Joi.boolean().default(false),
-
+    // deprecated
     quiet: Joi.boolean().when('silent', {
       is: true,
       then: Joi.boolean().default(true).valid(true),
       otherwise: Joi.boolean().default(false),
     }),
-
     verbose: Joi.boolean().when('quiet', {
       is: true,
       then: Joi.valid(false).default(false),
       otherwise: Joi.boolean().default(false),
     }),
     events: Joi.any().default({}),
+    // deprecated
     dest: Joi.string().default('stdout'),
     filter: Joi.any().default({}),
+    // deprecated
     json: Joi.boolean().when('dest', {
       is: 'stdout',
       then: Joi.boolean().default(!process.stdout.isTTY),
       otherwise: Joi.boolean().default(true),
     }),
     timezone: Joi.string(),
+    // deprecated
     rotate: Joi.object()
       .keys({
         enabled: Joi.boolean().default(false),

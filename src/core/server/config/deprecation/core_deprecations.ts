@@ -151,17 +151,31 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
-const quietSilentVerboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if (
-    has(settings, 'logging.quiet') ||
-    has(settings, 'logging.silent') ||
-    has(settings, 'logging.verbose')
-  ) {
+const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.quiet')) {
     log(
-      '"logging.quiet", "logging.silent" and "logging.verbose" have been deprecated and will be removed ' +
-        'in 8.0. Moving forward, you can use "logging.root.level" in your logging configuration. ' +
-        'Levels "error", "off" and "all" are equivalent to "quiet", "silent" and "verbose". For more details, see ' +
-        'https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
+      '"logging.quiet" has been deprecated and will be removed ' +
+        'in 8.0. Moving forward, you can use "logging.root.level:error" in your logging configuration. '
+    );
+  }
+  return settings;
+};
+
+const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.silent')) {
+    log(
+      '"logging.silent" has been deprecated and will be removed ' +
+        'in 8.0. Moving forward, you can use "logging.root.level:off" in your logging configuration. '
+    );
+  }
+  return settings;
+};
+
+const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.verbose')) {
+    log(
+      '"logging.verbose" has been deprecated and will be removed ' +
+        'in 8.0. Moving forward, you can use "logging.root.level:all" in your logging configuration. '
     );
   }
   return settings;
@@ -235,7 +249,9 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   requestLoggingEventDeprecation,
   timezoneLoggingDeprecation,
   destLoggingDeprecation,
-  quietSilentVerboseLoggingDeprecation,
+  quietLoggingDeprecation,
+  silentLoggingDeprecation,
+  verboseLoggingDeprecation,
   jsonLoggingDeprecation,
   logRotateDeprecation,
 ];

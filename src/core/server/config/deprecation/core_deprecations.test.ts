@@ -349,7 +349,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.quiet\\", \\"logging.silent\\" and \\"logging.verbose\\" have been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level\\" in your logging configuration. Levels \\"error\\", \\"off\\" and \\"all\\" are equivalent to \\"quiet\\", \\"silent\\" and \\"verbose\\". For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+          "\\"logging.quiet\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level:error\\" in your logging configuration. ",
         ]
       `);
     });
@@ -359,7 +359,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.quiet\\", \\"logging.silent\\" and \\"logging.verbose\\" have been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level\\" in your logging configuration. Levels \\"error\\", \\"off\\" and \\"all\\" are equivalent to \\"quiet\\", \\"silent\\" and \\"verbose\\". For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+          "\\"logging.silent\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level:off\\" in your logging configuration. ",
         ]
       `);
     });
@@ -369,7 +369,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.quiet\\", \\"logging.silent\\" and \\"logging.verbose\\" have been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level\\" in your logging configuration. Levels \\"error\\", \\"off\\" and \\"all\\" are equivalent to \\"quiet\\", \\"silent\\" and \\"verbose\\". For more details, see https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+          "\\"logging.verbose\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level:all\\" in your logging configuration. ",
         ]
       `);
     });
