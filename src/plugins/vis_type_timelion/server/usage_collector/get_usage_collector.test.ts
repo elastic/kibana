@@ -60,19 +60,65 @@ const mockedSavedObjects = [
   },
 ];
 
-const getMockCollectorFetchContext = (hits?: unknown[]) => {
+const mockedSavedObjectsByValue = [
+  {
+    id: '1',
+    attributes: {
+      panelsJSON: JSON.stringify([
+        {
+          type: 'visualization',
+          embeddableConfig: {
+            savedVis: {
+              type: 'timelion',
+              params: {
+                expression: '.es(index=my-test,metric=avg:test-field)',
+              },
+            },
+          },
+        },
+      ]),
+    },
+    updated_at: new Date().toUTCString(),
+  },
+  {
+    id: '2',
+    attributes: {
+      panelsJSON: JSON.stringify([
+        {
+          type: 'visualization',
+          embeddableConfig: {
+            savedVis: {
+              type: 'timelion',
+              params: {
+                expression: '.es(index=my-test,metric=avg:scripted-test-field)',
+              },
+            },
+          },
+        },
+      ]),
+    },
+    updated_at: new Date().toUTCString(),
+  },
+];
+
+const getMockCollectorFetchContext = (hits?: unknown[], savedObjectsByValue: unknown[] = []) => {
   const fetchParamsMock = createCollectorFetchContextMock();
 
   fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: { hits: { hits } } });
-  fetchParamsMock.soClient.find = jest.fn().mockResolvedValue({
-    saved_objects: [
-      {
-        attributes: {
-          title: 'my-test',
-          fields: JSON.stringify([{ scripted: true, name: 'scripted-test-field' }]),
-        },
-      },
-    ],
+  fetchParamsMock.soClient.find = jest.fn().mockImplementation(({ type }: { type: string }) => {
+    return {
+      saved_objects:
+        type === 'index-pattern'
+          ? [
+              {
+                attributes: {
+                  title: 'my-test',
+                  fields: JSON.stringify([{ scripted: true, name: 'scripted-test-field' }]),
+                },
+              },
+            ]
+          : savedObjectsByValue,
+    };
   });
   return fetchParamsMock;
 };
@@ -80,20 +126,11 @@ const getMockCollectorFetchContext = (hits?: unknown[]) => {
 describe('Timelion visualization usage collector', () => {
   const mockIndex = 'mock_index';
 
-  test('Returns undefined when no results found (undefined)', async () => {
+  test('Returns undefined when no results found', async () => {
+    const mockCollectorFetchContext = getMockCollectorFetchContext([], []);
     const result = await getStats(
-      getMockCollectorFetchContext().esClient,
-      getMockCollectorFetchContext().soClient,
-      mockIndex
-    );
-
-    expect(result).toBeUndefined();
-  });
-
-  test('Returns undefined when no results found (0 results)', async () => {
-    const result = await getStats(
-      getMockCollectorFetchContext([]).esClient,
-      getMockCollectorFetchContext().soClient,
+      mockCollectorFetchContext.esClient,
+      mockCollectorFetchContext.soClient,
       mockIndex
     );
 
@@ -101,15 +138,31 @@ describe('Timelion visualization usage collector', () => {
   });
 
   test('Returns undefined when no timelion saved objects found', async () => {
-    const mockCollectorFetchContext = getMockCollectorFetchContext([
-      {
-        _id: 'visualization:myvis-123',
-        _source: {
-          type: 'visualization',
-          visualization: { visState: '{"type": "area"}' },
+    const mockCollectorFetchContext = getMockCollectorFetchContext(
+      [
+        {
+          _id: 'visualization:myvis-123',
+          _source: {
+            type: 'visualization',
+            visualization: { visState: '{"type": "area"}' },
+          },
         },
-      },
-    ]);
+      ],
+      [
+        {
+          attributes: {
+            panelsJSON: JSON.stringify({
+              type: 'visualization',
+              embeddableConfig: {
+                savedVis: {
+                  type: 'area',
+                },
+              },
+            }),
+          },
+        },
+      ]
+    );
     const result = await getStats(
       mockCollectorFetchContext.esClient,
       mockCollectorFetchContext.soClient,
@@ -120,7 +173,10 @@ describe('Timelion visualization usage collector', () => {
   });
 
   test('Summarizes visualizations response data', async () => {
-    const mockCollectorFetchContext = getMockCollectorFetchContext(mockedSavedObjects);
+    const mockCollectorFetchContext = getMockCollectorFetchContext(
+      mockedSavedObjects,
+      mockedSavedObjectsByValue
+    );
     const result = await getStats(
       mockCollectorFetchContext.esClient,
       mockCollectorFetchContext.soClient,
@@ -128,7 +184,7 @@ describe('Timelion visualization usage collector', () => {
     );
 
     expect(result).toMatchObject({
-      timelion_use_scripted_fields_90_days_total: 1,
+      timelion_use_scripted_fields_90_days_total: 2,
     });
   });
 });
