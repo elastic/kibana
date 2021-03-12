@@ -395,7 +395,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled log rotation using the \\"rolling-file\\" appender for a context in your logging confugration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled log rotation using the \\"rolling-file\\" appender for a context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
         ]
       `);
     });
@@ -406,7 +406,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled log rotation using the \\"rolling-file\\" appender for a context in your logging confugration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled log rotation using the \\"rolling-file\\" appender for a context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
         ]
       `);
     });
@@ -417,7 +417,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled log rotation using the \\"rolling-file\\" appender for a context in your logging confugration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled log rotation using the \\"rolling-file\\" appender for a context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
         ]
       `);
     });
@@ -428,7 +428,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled log rotation using the \\"rolling-file\\" appender for a context in your logging confugration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+          "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled log rotation using the \\"rolling-file\\" appender for a context in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
         ]
       `);
     });
