@@ -38,7 +38,7 @@ export const useDashboardContainer = ({
   history: History;
   isEmbeddedExternally?: boolean;
   timeFilter?: TimefilterContract;
-  setUnsavedChanges: (dirty: boolean) => void;
+  setUnsavedChanges?: (dirty: boolean) => void;
   dashboardStateManager: DashboardStateManager | null;
   getIncomingEmbeddable: (removeAfterFetch?: boolean) => EmbeddablePackageState | undefined;
 }) => {
@@ -133,7 +133,7 @@ export const useDashboardContainer = ({
         );
       }
       setDashboardContainer(pendingContainer);
-      setUnsavedChanges(dashboardStateManager.getIsDirty(data.query.timefilter.timefilter));
+      setUnsavedChanges?.(dashboardStateManager.getIsDirty(data.query.timefilter.timefilter));
     })();
     return () => {
       canceled = true;
