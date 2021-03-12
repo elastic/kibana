@@ -47,11 +47,6 @@ export const getStats = async (
   };
 
   const { body: esResponse } = await esClient.search<ESResponse>(searchParams);
-  const size = esResponse?.hits?.hits?.length ?? 0;
-
-  if (!size) {
-    return;
-  }
 
   function telemetryUseLastValueMode(visState: VisState) {
     if (

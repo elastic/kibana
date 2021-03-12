@@ -321,13 +321,21 @@ class GaugePanelConfigUi extends Component {
     return (
       <>
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+          <EuiTab
+            isSelected={selectedTab === 'data'}
+            onClick={() => this.switchTab('data')}
+            data-test-subj="gaugeEditorDataBtn"
+          >
             <FormattedMessage
               id="visTypeTimeseries.gauge.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
-          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
+            onClick={() => this.switchTab('options')}
+            data-test-subj="gaugeEditorPanelOptionsBtn"
+          >
             <FormattedMessage
               id="visTypeTimeseries.gauge.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"

@@ -218,13 +218,21 @@ export class TopNPanelConfig extends Component {
     return (
       <>
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+          <EuiTab
+            isSelected={selectedTab === 'data'}
+            onClick={() => this.switchTab('data')}
+            data-test-subj="topNEditorDataBtn"
+          >
             <FormattedMessage
               id="visTypeTimeseries.topN.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
-          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
+          <EuiTab
+            isSelected={selectedTab === 'options'}
+            onClick={() => this.switchTab('options')}
+            data-test-subj="topNEditorPanelOptionsBtn"
+          >
             <FormattedMessage
               id="visTypeTimeseries.topN.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"

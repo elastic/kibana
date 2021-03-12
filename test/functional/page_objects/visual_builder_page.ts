@@ -431,6 +431,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    public async clickDataTab(tabName: string) {
+      await testSubjects.click(`${tabName}EditorDataBtn`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     public async setIndexPatternValue(value: string) {
       const el = await testSubjects.find('metricsIndexPatternInput');
       await el.clearValue();
