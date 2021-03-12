@@ -88,9 +88,11 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
+      delete packageInfoRes.body.response.latestVersion;
       delete packageInfoRes.body.response.savedObject.attributes.install_started_at;
       delete packageInfoRes.body.response.savedObject.version;
       delete packageInfoRes.body.response.savedObject.updated_at;
+      delete packageInfoRes.body.response.savedObject.coreMigrationVersion;
 
       expectSnapshot(packageInfoRes.body.response).toMatch();
     });
