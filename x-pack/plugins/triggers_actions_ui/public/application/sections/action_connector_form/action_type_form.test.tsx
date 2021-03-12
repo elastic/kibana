@@ -140,7 +140,7 @@ function getActionTypeForm(
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>,
   actionItem?: AlertAction,
   defaultActionGroupId?: string,
-  connectors?: ActionConnector<Record<string, unknown>, Record<string, unknown>>[],
+  connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>,
   actionTypeIndex?: Record<string, ActionType>,
   defaultParams?: DefaultActionParams,
   onAddConnector?: () => void,
