@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { MlJobCompatibilityLink } from '../../../../common/components/links_to_docs';
 
 export const ML_JOB_UPGRADE_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.mlJobUpgradeCallout.messageTitle',
@@ -32,7 +33,7 @@ export const MlJobUpgradeCalloutBody = () => (
       docs: (
         <ul>
           <li>
-            <a href="TODO">{'TODO'}</a>
+            <MlJobCompatibilityLink />
           </li>
         </ul>
       ),
