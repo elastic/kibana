@@ -17,7 +17,7 @@ import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType, ConditionMetAlertInstanceId, ActionGroupId } from './alert_type';
 import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
 import { ActionContext } from './action_context';
-import { ESSearchResponse, ESSearchRequest } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse, ESSearchRequest } from '../../../../../../typings/elasticsearch';
 
 describe('alertType', () => {
   const logger = loggingSystemMock.create().get();
