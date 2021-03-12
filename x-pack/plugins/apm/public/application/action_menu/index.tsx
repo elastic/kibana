@@ -9,7 +9,7 @@ import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { getAlertingCapabilities } from '../../components/alerting/get_alert_capabilities';
+import { getAlertingCapabilities } from '../../components/alerting/get_alerting_capabilities';
 import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
