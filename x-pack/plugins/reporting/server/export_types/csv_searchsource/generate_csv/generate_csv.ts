@@ -130,7 +130,8 @@ export class CsvGenerator {
     this.logger.info(`Getting search source fields from: '${fieldSource}'`);
 
     let fields = fieldValues[fieldSource];
-    if (!fields || fields === true || typeof fields === 'string') {
+    // if fields != string[] then we use the table columns as the fields
+    if (!fields || fields === true || typeof fields === 'string' || typeof fields[0] !== 'string') {
       fields = table.columns.map((c) => c.id);
     }
 
