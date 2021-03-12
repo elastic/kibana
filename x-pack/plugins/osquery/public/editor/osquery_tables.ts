@@ -9,19 +9,6 @@ import { flatMap, sortBy } from 'lodash';
 
 type TablesJSON = Array<{
   name: string;
-  description: string;
-  url: string;
-  platforms: string[];
-  evented: boolean;
-  cacheable: boolean;
-  columns: Array<{
-    name: string;
-    description: string;
-    type: string;
-    hidden: boolean;
-    required: boolean;
-    index: boolean;
-  }>;
 }>;
 export const normalizeTables = (tablesJSON: TablesJSON) => {
   return sortBy(tablesJSON, (table) => {
