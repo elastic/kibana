@@ -110,7 +110,7 @@ export class CsvGenerator {
     return this._formatters;
   }
 
-  private checkForFormulas(settings: CsvExportSettings) {
+  private escapeValues(settings: CsvExportSettings) {
     return (value: string) => {
       if (settings.checkForFormulas && cellHasFormulas(value)) {
         this.csvContainsFormulas = true; // set warning if cell value has a formula
@@ -131,7 +131,13 @@ export class CsvGenerator {
 
     let fields = fieldValues[fieldSource];
     // if fields != string[] then we use the table columns as the fields
-    if (!fields || fields === true || typeof fields === 'string' || typeof fields[0] !== 'string') {
+    if (
+      !fields ||
+      fields === true ||
+      typeof fields === 'string' ||
+      typeof fields[0] !== 'string' ||
+      fields[0] === '*'
+    ) {
       fields = table.columns.map((c) => c.id);
     }
 
@@ -180,11 +186,7 @@ export class CsvGenerator {
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building CSV header row...`);
-    const header =
-      fields
-        .map(settings.escapeValue)
-        .map(this.checkForFormulas(settings))
-        .join(settings.separator) + '\n';
+    const header = fields.map(this.escapeValues(settings)).join(settings.separator) + '\n';
 
     if (!builder.tryAppend(header)) {
       return {
@@ -216,7 +218,7 @@ export class CsvGenerator {
         fields
           .map((f) => ({ column: f, data: dataTableRow[f] }))
           .map(this.formatCellValues(formatters))
-          .map(this.checkForFormulas(settings))
+          .map(this.escapeValues(settings))
           .join(settings.separator) + '\n';
 
       if (!builder.tryAppend(row)) {
