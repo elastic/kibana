@@ -47,7 +47,7 @@ describe('FieldMappingRow', () => {
   test('it pass the corrects props to mapping row', () => {
     const rows = wrapper.find(FieldMappingRowStatic);
     rows.forEach((row, index) => {
-      expect(row.prop('securitySolutionField')).toEqual(mappings[index].source);
+      expect(row.prop('casesField')).toEqual(mappings[index].source);
       expect(row.prop('selectedActionType')).toEqual(mappings[index].actionType);
       expect(row.prop('selectedThirdParty')).toEqual(mappings[index].target);
     });

@@ -58,7 +58,7 @@ const FieldMappingComponent: React.FC<FieldMappingProps> = ({
           {mappings.map((item) => (
             <FieldMappingRowStatic
               key={`${item.source}`}
-              securitySolutionField={item.source}
+              casesField={item.source}
               isLoading={isLoading}
               selectedActionType={item.actionType}
               selectedThirdParty={item.target ?? 'not_mapped'}

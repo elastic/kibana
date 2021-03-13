@@ -13,14 +13,14 @@ import { CaseField, ActionType, ThirdPartyField } from '../../containers/configu
 
 export interface RowProps {
   isLoading: boolean;
-  securitySolutionField: CaseField;
+  casesField: CaseField;
   selectedActionType: ActionType;
   selectedThirdParty: ThirdPartyField;
 }
 
 const FieldMappingRowComponent: React.FC<RowProps> = ({
   isLoading,
-  securitySolutionField,
+  casesField,
   selectedActionType,
   selectedThirdParty,
 }) => {
@@ -32,7 +32,7 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
       <EuiFlexItem>
         <EuiFlexGroup component="span" justifyContent="spaceBetween">
           <EuiFlexItem component="span" grow={false}>
-            <EuiCode data-test-subj="field-mapping-source">{securitySolutionField}</EuiCode>
+            <EuiCode data-test-subj="field-mapping-source">{casesField}</EuiCode>
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiIcon type="sortRight" />

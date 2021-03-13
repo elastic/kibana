@@ -9,30 +9,18 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
 
-export const STEP_ONE_TITLE = i18n.translate(
-  'xpack.securitySolution.components.create.stepOneTitle',
-  {
-    defaultMessage: 'Case fields',
-  }
-);
+export const STEP_ONE_TITLE = i18n.translate('xpack.components.create.stepOneTitle', {
+  defaultMessage: 'Case fields',
+});
 
-export const STEP_TWO_TITLE = i18n.translate(
-  'xpack.securitySolution.components.create.stepTwoTitle',
-  {
-    defaultMessage: 'Case settings',
-  }
-);
+export const STEP_TWO_TITLE = i18n.translate('xpack.components.create.stepTwoTitle', {
+  defaultMessage: 'Case settings',
+});
 
-export const STEP_THREE_TITLE = i18n.translate(
-  'xpack.securitySolution.components.create.stepThreeTitle',
-  {
-    defaultMessage: 'External Connector Fields',
-  }
-);
+export const STEP_THREE_TITLE = i18n.translate('xpack.components.create.stepThreeTitle', {
+  defaultMessage: 'External Connector Fields',
+});
 
-export const SYNC_ALERTS_LABEL = i18n.translate(
-  'xpack.securitySolution.components.create.syncAlertsLabel',
-  {
-    defaultMessage: 'Sync alert status with case status',
-  }
-);
+export const SYNC_ALERTS_LABEL = i18n.translate('xpack.components.create.syncAlertsLabel', {
+  defaultMessage: 'Sync alert status with case status',
+});

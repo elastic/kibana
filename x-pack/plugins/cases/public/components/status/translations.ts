@@ -8,64 +8,61 @@
 import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 
-export const ALL = i18n.translate('xpack.securitySolution.cases.status.all', {
+export const ALL = i18n.translate('xpack.cases.status.all', {
   defaultMessage: 'All',
 });
 
-export const OPEN = i18n.translate('xpack.securitySolution.cases.status.open', {
+export const OPEN = i18n.translate('xpack.cases.status.open', {
   defaultMessage: 'Open',
 });
 
-export const IN_PROGRESS = i18n.translate('xpack.securitySolution.cases.status.inProgress', {
+export const IN_PROGRESS = i18n.translate('xpack.cases.status.inProgress', {
   defaultMessage: 'In progress',
 });
 
-export const CLOSED = i18n.translate('xpack.securitySolution.cases.status.closed', {
+export const CLOSED = i18n.translate('xpack.cases.status.closed', {
   defaultMessage: 'Closed',
 });
 
-export const STATUS_ICON_ARIA = i18n.translate('xpack.securitySolution.cases.status.iconAria', {
+export const STATUS_ICON_ARIA = i18n.translate('xpack.cases.status.iconAria', {
   defaultMessage: 'Change status',
 });
 
-export const CASE_OPENED = i18n.translate('xpack.securitySolution.cases.caseView.caseOpened', {
+export const CASE_OPENED = i18n.translate('xpack.cases.caseView.caseOpened', {
   defaultMessage: 'Case opened',
 });
 
-export const CASE_IN_PROGRESS = i18n.translate(
-  'xpack.securitySolution.cases.caseView.caseInProgress',
-  {
-    defaultMessage: 'Case in progress',
-  }
-);
+export const CASE_IN_PROGRESS = i18n.translate('xpack.cases.caseView.caseInProgress', {
+  defaultMessage: 'Case in progress',
+});
 
-export const CASE_CLOSED = i18n.translate('xpack.securitySolution.cases.caseView.caseClosed', {
+export const CASE_CLOSED = i18n.translate('xpack.cases.caseView.caseClosed', {
   defaultMessage: 'Case closed',
 });
 
 export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
-  'xpack.securitySolution.cases.caseTable.bulkActions.closeSelectedTitle',
+  'xpack.cases.caseTable.bulkActions.closeSelectedTitle',
   {
     defaultMessage: 'Close selected',
   }
 );
 
 export const BULK_ACTION_OPEN_SELECTED = i18n.translate(
-  'xpack.securitySolution.cases.caseTable.bulkActions.openSelectedTitle',
+  'xpack.cases.caseTable.bulkActions.openSelectedTitle',
   {
     defaultMessage: 'Open selected',
   }
 );
 
 export const BULK_ACTION_DELETE_SELECTED = i18n.translate(
-  'xpack.securitySolution.cases.caseTable.bulkActions.deleteSelectedTitle',
+  'xpack.cases.caseTable.bulkActions.deleteSelectedTitle',
   {
     defaultMessage: 'Delete selected',
   }
 );
 
 export const BULK_ACTION_MARK_IN_PROGRESS = i18n.translate(
-  'xpack.securitySolution.cases.caseTable.bulkActions.markInProgressTitle',
+  'xpack.cases.caseTable.bulkActions.markInProgressTitle',
   {
     defaultMessage: 'Mark in progress',
   }
