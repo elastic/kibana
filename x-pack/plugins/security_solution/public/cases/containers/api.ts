@@ -8,9 +8,14 @@
 import { assign, omit } from 'lodash';
 
 import {
+  ACTION_TYPES_URL,
+  CASE_REPORTERS_URL,
+  CASE_STATUS_URL,
+  CASE_TAGS_URL,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
+  CASES_URL,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
@@ -18,26 +23,18 @@ import {
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
+  getCaseCommentsUrl,
+  getCaseDetailsUrl,
+  getCasePushUrl,
+  getCaseUserActionUrl,
+  getSubCaseDetailsUrl,
+  getSubCaseUserActionUrl,
+  SUB_CASE_DETAILS_URL,
+  SUB_CASES_PATCH_DEL_URL,
   SubCasePatchRequest,
   SubCaseResponse,
   SubCasesResponse,
   User,
-} from '../../../../cases/common/api';
-
-import {
-  ACTION_TYPES_URL,
-  CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
-  CASE_TAGS_URL,
-  CASES_URL,
-  SUB_CASE_DETAILS_URL,
-  SUB_CASES_PATCH_DEL_URL,
-  getCaseCommentsUrl,
-  getCasePushUrl,
-  getCaseDetailsUrl,
-  getCaseUserActionUrl,
-  getSubCaseDetailsUrl,
-  getSubCaseUserActionUrl,
 } from '../../../../cases/common';
 
 import { KibanaServices } from '../../common/lib/kibana';

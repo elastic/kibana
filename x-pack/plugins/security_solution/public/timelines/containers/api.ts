@@ -12,7 +12,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 // eslint-disable-next-line no-restricted-imports
 import isEmpty from 'lodash/isEmpty';
 
-import { throwErrors } from '../../../../cases/common/api';
 import {
   TimelineResponse,
   TimelineResponseType,
@@ -24,12 +23,13 @@ import {
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
-  TIMELINE_URL,
+  throwErrors,
   TIMELINE_DRAFT_URL,
-  TIMELINE_IMPORT_URL,
   TIMELINE_EXPORT_URL,
+  TIMELINE_IMPORT_URL,
   TIMELINE_PREPACKAGED_URL,
-} from '../../../common/constants';
+  TIMELINE_URL,
+} from '../../../common';
 
 import { KibanaServices } from '../../common/lib/kibana';
 import { ExportSelectedData } from '../../common/components/generic_downloader';
