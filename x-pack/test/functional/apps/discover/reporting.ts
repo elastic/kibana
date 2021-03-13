@@ -21,10 +21,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
   };
 
-  describe('Discover', () => {
+  describe('Discover CSV Export', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      await esArchiver.load('reporting/ecommerce');
+      await esArchiver.load('reporting/ecommerce_kibana');
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
