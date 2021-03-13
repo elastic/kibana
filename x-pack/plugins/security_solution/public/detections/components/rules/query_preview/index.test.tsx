@@ -284,11 +284,11 @@ describe('PreviewQuery', () => {
           query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
           index={['foo-*']}
           threshold={{
-            field: 'agent.hostname',
-            value: 200,
+            field: ['agent.hostname'],
+            value: '200',
             cardinality: {
               field: ['user.name'],
-              value: 2,
+              value: '2',
             },
           }}
           isDisabled={false}
@@ -331,11 +331,11 @@ describe('PreviewQuery', () => {
           query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
           index={['foo-*']}
           threshold={{
-            field: 'agent.hostname',
-            value: 200,
+            field: ['agent.hostname'],
+            value: '200',
             cardinality: {
               field: ['user.name'],
-              value: 2,
+              value: '2',
             },
           }}
           isDisabled={false}
@@ -365,7 +365,7 @@ describe('PreviewQuery', () => {
     expect(wrapper.find('[data-test-subj="previewQueryWarning"]').exists()).toBeTruthy();
   });
 
-  test('it renders query histogram when preview button clicked, rule type is threshold, and threshold field is not defined', () => {
+  test('it renders query histogram when preview button clicked, rule type is threshold, and threshold field is empty array', () => {
     const wrapper = mount(
       <TestProviders>
         <PreviewQuery
@@ -375,11 +375,11 @@ describe('PreviewQuery', () => {
           query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
           index={['foo-*']}
           threshold={{
-            field: undefined,
-            value: 200,
+            field: [],
+            value: '200',
             cardinality: {
               field: ['user.name'],
-              value: 2,
+              value: '2',
             },
           }}
           isDisabled={false}
@@ -407,11 +407,11 @@ describe('PreviewQuery', () => {
           query={{ query: { query: 'file where true', language: 'kuery' }, filters: [] }}
           index={['foo-*']}
           threshold={{
-            field: '   ',
-            value: 200,
+            field: ['   '],
+            value: '200',
             cardinality: {
               field: ['user.name'],
-              value: 2,
+              value: '2',
             },
           }}
           isDisabled={false}
