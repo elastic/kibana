@@ -56,17 +56,6 @@ export const fromKueryExpression = (
   }
 };
 
-export const doesKueryExpressionHaveLuceneSyntaxError = (
-  expression: string | DslQuery
-): boolean => {
-  try {
-    fromExpression(expression, { errorOnLuceneSyntax: true }, parseKuery);
-    return false;
-  } catch (e) {
-    return e.message.startsWith('Lucene');
-  }
-};
-
 /**
  * @params {String} indexPattern
  * @params {Object} config - contains the dateFormatTZ
