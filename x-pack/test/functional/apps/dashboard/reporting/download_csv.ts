@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('reporting/ecommerce_kibana');
       });
 
-      it('Downloads a CSV export of a saved search panel', async function () {
+      it('Download CSV export of a saved search panel', async function () {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
         await clickActionsMenu('EcommerceData');
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('reporting/hugedata');
       });
 
-      it('Downloads a CSV export of a saved search panel', async () => {
+      it('Download CSV export of a saved search panel', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('names dashboard');
         await PageObjects.timePicker.setAbsoluteRange(
