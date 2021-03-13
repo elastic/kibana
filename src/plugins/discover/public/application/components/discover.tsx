@@ -30,7 +30,6 @@ import { DiscoverHistogram, DiscoverUninitialized } from '../angular/directives'
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
-import { SkipBottomButton } from './skip_bottom_button';
 import { esFilters, IndexPatternField, search } from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
@@ -59,7 +58,6 @@ export function Discover({
   hits,
   indexPattern,
   minimumVisibleRows,
-  onSkipBottomButtonClick,
   opts,
   resetQuery,
   resultState,
@@ -333,7 +331,6 @@ export function Discover({
                           </EuiFlexItem>
                         )}
                       </EuiFlexGroup>
-                      {isLegacy && <SkipBottomButton onClick={onSkipBottomButtonClick} />}
                     </EuiFlexItem>
                     {!hideChart && opts.timefield && (
                       <EuiFlexItem grow={false}>

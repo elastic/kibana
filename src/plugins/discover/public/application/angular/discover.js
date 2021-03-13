@@ -339,7 +339,6 @@ function discoverController($route, $scope) {
     );
   };
 
-  $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.resultState = shouldSearchOnPageLoad() ? 'loading' : 'uninitialized';
 
@@ -420,7 +419,6 @@ function discoverController($route, $scope) {
   $scope.opts.fetch = $scope.fetch = function () {
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
-    $scope.minimumVisibleRows = 50;
     if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
       $scope.resultState = 'none';
       return;
@@ -509,22 +507,6 @@ function discoverController($route, $scope) {
       $route.current.params.id ? `/view/${encodeURIComponent($route.current.params.id)}` : '/'
     );
     $route.reload();
-  };
-
-  $scope.onSkipBottomButtonClick = async () => {
-    // show all the Rows
-    $scope.minimumVisibleRows = $scope.hits;
-
-    // delay scrolling to after the rows have been rendered
-    const bottomMarker = document.getElementById('discoverBottomMarker');
-    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    while ($scope.rows.length !== document.getElementsByClassName('kbnDocTable__row').length) {
-      await wait(50);
-    }
-    bottomMarker.focus();
-    await wait(50);
-    bottomMarker.blur();
   };
 
   $scope.newQuery = function () {
