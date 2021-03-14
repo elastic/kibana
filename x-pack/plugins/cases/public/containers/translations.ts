@@ -9,22 +9,22 @@ import { i18n } from '@kbn/i18n';
 
 export * from '../common/translations';
 
-export const ERROR_TITLE = i18n.translate('xpack.containers.cases.errorTitle', {
+export const ERROR_TITLE = i18n.translate('xpack.cases.containers.errorTitle', {
   defaultMessage: 'Error fetching data',
 });
 
-export const ERROR_DELETING = i18n.translate('xpack.containers.cases.errorDeletingTitle', {
+export const ERROR_DELETING = i18n.translate('xpack.cases.containers.errorDeletingTitle', {
   defaultMessage: 'Error deleting data',
 });
 
 export const UPDATED_CASE = (caseTitle: string) =>
-  i18n.translate('xpack.containers.cases.updatedCase', {
+  i18n.translate('xpack.cases.containers.updatedCase', {
     values: { caseTitle },
     defaultMessage: 'Updated "{caseTitle}"',
   });
 
 export const DELETED_CASES = (totalCases: number, caseTitle?: string) =>
-  i18n.translate('xpack.containers.cases.deletedCases', {
+  i18n.translate('xpack.cases.containers.deletedCases', {
     values: { caseTitle, totalCases },
     defaultMessage: 'Deleted {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
   });
@@ -36,7 +36,7 @@ export const CLOSED_CASES = ({
   totalCases: number;
   caseTitle?: string;
 }) =>
-  i18n.translate('xpack.containers.cases.closedCases', {
+  i18n.translate('xpack.cases.containers.closedCases', {
     values: { caseTitle, totalCases },
     defaultMessage: 'Closed {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
   });
@@ -48,7 +48,7 @@ export const REOPENED_CASES = ({
   totalCases: number;
   caseTitle?: string;
 }) =>
-  i18n.translate('xpack.containers.cases.reopenedCases', {
+  i18n.translate('xpack.cases.containers.reopenedCases', {
     values: { caseTitle, totalCases },
     defaultMessage: 'Opened {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
   });
@@ -60,14 +60,14 @@ export const MARK_IN_PROGRESS_CASES = ({
   totalCases: number;
   caseTitle?: string;
 }) =>
-  i18n.translate('xpack.containers.cases.markInProgressCases', {
+  i18n.translate('xpack.cases.containers.markInProgressCases', {
     values: { caseTitle, totalCases },
     defaultMessage:
       'Marked {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} as in progress',
   });
 
 export const SUCCESS_SEND_TO_EXTERNAL_SERVICE = (serviceName: string) =>
-  i18n.translate('xpack.containers.cases.pushToExternalService', {
+  i18n.translate('xpack.cases.containers.pushToExternalService', {
     values: { serviceName },
     defaultMessage: 'Successfully sent to { serviceName }',
   });
@@ -77,7 +77,7 @@ export const ERROR_GET_FIELDS = i18n.translate('xpack.cases.configure.errorGetFi
 });
 
 export const SYNC_CASE = (caseTitle: string) =>
-  i18n.translate('xpack.containers.cases.syncCase', {
+  i18n.translate('xpack.cases.containers.syncCase', {
     values: { caseTitle },
     defaultMessage: 'Alerts in "{caseTitle}" have been synced',
   });

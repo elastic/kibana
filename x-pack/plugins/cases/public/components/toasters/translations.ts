@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SEE_ALL_ERRORS = i18n.translate('xpack.modalAllErrors.seeAllErrors.button', {
+export const SEE_ALL_ERRORS = i18n.translate('xpack.cases.modalAllErrors.seeAllErrors.button', {
   defaultMessage: 'See the full error(s)',
 });
 
-export const TITLE_ERROR_MODAL = i18n.translate('xpack.modalAllErrors.title', {
+export const TITLE_ERROR_MODAL = i18n.translate('xpack.cases.modalAllErrors.title', {
   defaultMessage: 'Your visualization has error(s)',
 });
 
-export const CLOSE_ERROR_MODAL = i18n.translate('xpack.modalAllErrors.close.button', {
+export const CLOSE_ERROR_MODAL = i18n.translate('xpack.cases.modalAllErrors.close.button', {
   defaultMessage: 'Close',
 });

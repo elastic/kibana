@@ -16,15 +16,12 @@ export const createCaseConnectorsRegistry = (): CaseConnectorsRegistry => {
     register: <UIProps>(connector: CaseConnector<UIProps>) => {
       if (connectors.has(connector.id)) {
         throw new Error(
-          i18n.translate(
-            'xpack.caseConnectorsRegistry.register.duplicateCaseConnectorErrorMessage',
-            {
-              defaultMessage: 'Object type "{id}" is already registered.',
-              values: {
-                id: connector.id,
-              },
-            }
-          )
+          i18n.translate('xpack.cases.connecors.register.duplicateCaseConnectorErrorMessage', {
+            defaultMessage: 'Object type "{id}" is already registered.',
+            values: {
+              id: connector.id,
+            },
+          })
         );
       }
 
@@ -33,7 +30,7 @@ export const createCaseConnectorsRegistry = (): CaseConnectorsRegistry => {
     get: <UIProps>(id: string): CaseConnector<UIProps> => {
       if (!connectors.has(id)) {
         throw new Error(
-          i18n.translate('xpack.caseConnectorsRegistry.get.missingCaseConnectorErrorMessage', {
+          i18n.translate('xpack.cases.connecors.get.missingCaseConnectorErrorMessage', {
             defaultMessage: 'Object type "{id}" is not registered.',
             values: {
               id,

@@ -8,48 +8,48 @@
 import { i18n } from '@kbn/i18n';
 
 export const ISSUE_TYPES_API_ERROR = i18n.translate(
-  'xpack.components.connectors.jira.unableToGetIssueTypesMessage',
+  'xpack.cases.connectors.jira.unableToGetIssueTypesMessage',
   {
     defaultMessage: 'Unable to get issue types',
   }
 );
 
 export const FIELDS_API_ERROR = i18n.translate(
-  'xpack.components.connectors.jira.unableToGetFieldsMessage',
+  'xpack.cases.connectors.jira.unableToGetFieldsMessage',
   {
     defaultMessage: 'Unable to get connectors',
   }
 );
 
 export const ISSUES_API_ERROR = i18n.translate(
-  'xpack.components.connectors.jira.unableToGetIssuesMessage',
+  'xpack.cases.connectors.jira.unableToGetIssuesMessage',
   {
     defaultMessage: 'Unable to get issues',
   }
 );
 
 export const GET_ISSUE_API_ERROR = (id: string) =>
-  i18n.translate('xpack.components.connectors.jira.unableToGetIssueMessage', {
+  i18n.translate('xpack.cases.connectors.jira.unableToGetIssueMessage', {
     defaultMessage: 'Unable to get issue with id {id}',
     values: { id },
   });
 
 export const SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL = i18n.translate(
-  'xpack.components.connectors.jira.searchIssuesComboBoxAriaLabel',
+  'xpack.cases.connectors.jira.searchIssuesComboBoxAriaLabel',
   {
     defaultMessage: 'Type to search',
   }
 );
 
 export const SEARCH_ISSUES_PLACEHOLDER = i18n.translate(
-  'xpack.components.connectors.jira.searchIssuesComboBoxPlaceholder',
+  'xpack.cases.connectors.jira.searchIssuesComboBoxPlaceholder',
   {
     defaultMessage: 'Type to search',
   }
 );
 
 export const SEARCH_ISSUES_LOADING = i18n.translate(
-  'xpack.components.connectors.jira.searchIssuesLoading',
+  'xpack.cases.connectors.jira.searchIssuesLoading',
   {
     defaultMessage: 'Loading...',
   }
