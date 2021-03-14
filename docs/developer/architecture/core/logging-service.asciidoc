@@ -25,13 +25,13 @@ export class MyPlugin implements Plugin {
 }
 ----
 
-The way logging works in Kibana is inspired by `log4j 2` logging framework used by {ref-bare}/current/logging.html[Elasticsearch].
-The main idea is to have consistent logging behaviour (configuration, log format etc.) across the entire Elastic Stack
+The way logging works in {kib} is inspired by `log4j 2` logging framework used by {ref-bare}/current/logging.html[Elasticsearch].
+The main idea is to have consistent logging behaviour (configuration, log format etc.) across the entire {stack-ref}.
 where possible.
 
 === Loggers, Appenders and Layouts
 
-Kibana logging system has three main components: _loggers_, _appenders_ and _layouts_. These components allow us to log
+{kib} logging system has three main components: _loggers_, _appenders_ and _layouts_. These components allow us to log
 messages according to message type and level, and to control how these messages are formatted and where the final logs
 will be displayed or stored.
 
@@ -41,7 +41,7 @@ __<<appenders,Appenders>>__ define where log messages are displayed (eg. stdout 
 
 __<<logging-layouts,Layouts>>__ define how log messages are formatted and what type of information they include.
 
-
+[[logger-hierarchy]]
 === Logger hierarchy
 
 Every logger has its unique context name that follows a hierarchical naming rule. The logger is considered to be an
@@ -79,10 +79,11 @@ This behaviour is controlled by the layouts and configured through `appender.lay
 custom appender (see examples in <<logging-configuration,Configuration>>). Currently we don't define any default layout for the
 custom appenders, so one should always make the choice explicitly.
 
-There are two types of layout supported at the moment: <<`pattern`, pattern-layout>> and <<`json`, json-layout>>.
+There are two types of layout supported at the moment: <<pattern-layout,`pattern`>> and <<json-layout,`json`>>.
 
 [[pattern-layout]]
 ==== Pattern layout
+
 With `pattern` layout it's possible to define a string pattern with special placeholders `%conversion_pattern` (see the <<conversion-pattern-examples,table below>>) that
 will be replaced with data from the actual log message. By default the following pattern is used:
 `[%date][%level][%logger] %message`. 
@@ -92,7 +93,8 @@ and **doesn't implement** all `log4j2` capabilities.
 
 The conversions that are provided out of the box are:
 
-===== level
+**level**
+
 Outputs the <<log-level,level>> of the logging event.
 Example of `%level` output:
 [source,bash]
@@ -102,20 +104,23 @@ DEBUG
 INFO
 ----
 
-===== logger
+**logger**
+
 Outputs the name of the logger that published the logging event.
 Example of `%logger` output:
 [source,bash]
 ----
 server
 server.http
-server.http.Kibana
+server.http.kibana
 ----
 
-===== message
+**message**
+
 Outputs the application supplied message associated with the logging event.
 
-===== meta
+**meta**
+
 Outputs the entries of `meta` object data in **json** format, if one is present in the event.
 Example of `%meta` output:
 [source,bash]
@@ -128,7 +133,9 @@ Example of `%meta` output:
 ''
 ----
 
-====== date
+[[date-format]]
+**date**
+
 Outputs the date of the logging event. The date conversion specifier may be followed by a set of braces containing a name of predefined date format and canonical timezone name.
 Timezone name is expected to be one from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[TZ database name].
 Timezone defaults to the host timezone when not explicitly specified.
@@ -141,32 +148,33 @@ Example of `%date` output:
 | Conversion pattern | Example
 
 | `%date`
-^| `2012-02-01T14:30:22.011Z` uses `ISO8601` format by default
+| `2012-02-01T14:30:22.011Z` uses `ISO8601` format by default
 
 | `%date{ISO8601}`
-^| `2012-02-01T14:30:22.011Z`
+| `2012-02-01T14:30:22.011Z`
 
 | `%date{ISO8601_TZ}`
-^| `2012-02-01T09:30:22.011-05:00`   `ISO8601` with timezone
+| `2012-02-01T09:30:22.011-05:00`   `ISO8601` with timezone
 
 | `%date{ISO8601_TZ}{America/Los_Angeles}`
-^| `2012-02-01T06:30:22.011-08:00`
+| `2012-02-01T06:30:22.011-08:00`
 
 | `%date{ABSOLUTE}`
-^| `09:30:22.011`
+| `09:30:22.011`
 
 | `%date{ABSOLUTE}{America/Los_Angeles}`
-^| `06:30:22.011`
+| `06:30:22.011`
 
 | `%date{UNIX}`
-^| `1328106622`
+| `1328106622`
 
 | `%date{UNIX_MILLIS}`
-^| `1328106622011`
+| `1328106622011`
 
 |===
 
-===== pid
+**pid**
+
 Outputs the process ID.
 
 The pattern layout also offers a `highlight` option that allows you to highlight
@@ -175,8 +183,7 @@ to a terminal with color support.
 
 [[json-layout]]
 ==== JSON layout
-With `json` layout log messages will be formatted as JSON strings in [ECS format](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html) that includes a timestamp, log level, context name, message
-text and any other metadata that may be associated with the log message itself.
+With `json` layout log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, context name, message text and any other metadata that may be associated with the log message itself.
 
 [[appenders]]
 === Appenders
@@ -192,7 +199,7 @@ The triggering policy determines when a rolling should occur.
 
 There are currently two policies supported: `size-limit` and `time-interval`.
 
-====== SizeLimitTriggeringPolicy
+**SizeLimitTriggeringPolicy**
 
 This policy will rotate the file when it reaches a predetermined size.
 
@@ -216,11 +223,9 @@ The options are:
 
 - `size`
 
-the maximum size the log file should reach before a rollover should be performed.
+The maximum size the log file should reach before a rollover should be performed. The default value is `100mb`
 
-The default value is `100mb`
-
-====== TimeIntervalTriggeringPolicy
+**TimeIntervalTriggeringPolicy**
 
 This policy will rotate the file every given interval of time.
 
@@ -245,18 +250,14 @@ The options are:
 
 - `interval`
 
-How often a rollover should occur.
-
-The default value is `24h`
+How often a rollover should occur. The default value is `24h`
 
 - `modulate`
 
 Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.
 
-For example, when true, if the interval is `4h` and the current hour is 3 am then the first rollover will occur at 4 am
-and then next ones will occur at 8 am, noon, 4pm, etc.
-
-The default value is `true`.
+For example, if modulate is true and the interval is `4h`, if the current hour is 3 am then the first rollover will occur at 4 am
+and then next ones will occur at 8 am, noon, 4pm, etc. The default value is `true`.
 
 ===== Rolling strategies
 
@@ -265,7 +266,7 @@ and their retention policy.
 
 There is currently one strategy supported: `numeric`.
 
-====== NumericRollingStrategy
+**NumericRollingStrategy**
 
 This strategy will suffix the file with a given pattern when rolling,
 and will retains a fixed amount of rolled files.
@@ -303,21 +304,17 @@ The options are:
 The suffix to append to the file path when rolling. Must include `%i`, as this is the value
 that will be converted to the file index.
 
-for example, with `fileName: /var/logs/kibana.log` and `pattern: '-%i'`, the created rolling files
-will be `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on.
-
-The default value is `-%i`
+For example, with `fileName: /var/logs/kibana.log` and `pattern: '-%i'`, the rolling files created 
+will be `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on. The default value is `-%i`
 
 - `max`
 
-The maximum number of files to keep. Once this number is reached, oldest files will be deleted.
-
-The default value is `7`
+The maximum number of files to keep. Once this number is reached, oldest files will be deleted. The default value is `7`
 
 ==== Rewrite Appender
 
-*This appender is currently considered experimental and is not intended
-for public consumption. The API is subject to change at any time.*
+WARNING: This appender is currently considered experimental and is not intended
+for public consumption. The API is subject to change at any time.
 
 Similar to log4j's `RewriteAppender`, this appender serves as a sort of middleware,
 modifying the provided log events before passing them along to another
@@ -336,12 +333,13 @@ logging:
 
 The most common use case for the `RewriteAppender` is when you want to
 filter or censor sensitive data that may be contained in a log entry.
-In fact, with a default configuration, Kibana will automatically redact
+In fact, with a default configuration, {kib} will automatically redact
 any `authorization`, `cookie`, or `set-cookie` headers when logging http
 requests & responses.
 
-To configure additional rewrite rules, you'll need to specify a `RewritePolicy`.
+To configure additional rewrite rules, you'll need to specify a <<rewrite-policies,`RewritePolicy`>>.
 
+[[rewrite-policies]]
 ===== Rewrite Policies
 
 Rewrite policies exist to indicate which parts of a log record can be
@@ -382,6 +380,7 @@ logging:
 Rewrite appenders can even be passed to other rewrite appenders to apply
 multiple filter policies/modes, as long as it doesn't create a circular
 reference. Each rewrite appender is applied sequentially (one after the other).
+
 [source,yaml]
 ----
 logging:
@@ -406,6 +405,7 @@ logging:
 ----
 
 ===== Complete Example
+
 [source,yaml]
 ----
 logging:
@@ -440,7 +440,7 @@ logging:
 === Configuration
 
 As any configuration in the platform, logging configuration is validated against the predefined schema and if there are
-any issues with it, Kibana will fail to start with the detailed error message.
+any issues with it, {kib} will fail to start with the detailed error message.
 
 Once the code acquired a logger instance it should not care about any runtime changes in the configuration that may
 happen: all changes will be applied to existing logger instances under the hood.
@@ -493,17 +493,25 @@ logging:
 ----
 
 Here is what we get with the config above:
+[options="header"]
+|===
 
-| Context name     | Appenders                | Level |
-| ---------------- |:------------------------:| -----:|
-| root             | console, file            | error |
-| plugins          | custom                   | warn  |
-| plugins.myPlugin | custom                   | info  |
-| server           | console, file            | fatal |
-| optimize         | console                  | error |
-| telemetry        | json-file-appender       | all   |
-| metrics.ops      | console                  | debug |
+| Context name | Appenders | Level
 
+| root | console, file | error
+
+| plugins | custom | warn
+
+| plugins.myPlugin | custom | info
+
+| server | console, file | fatal
+
+| optimize | console | error
+
+| telemetry | json-file-appender | all
+
+| metrics.ops | console | debug
+|===
 
 The `root` logger has a dedicated configuration node since this context name is special and should always exist. By
 default `root` is configured with `info` level and `default` appender that is also always available. This is the
@@ -522,6 +530,7 @@ Or disable logging entirely with `off`:
 ----
 logging.root.level: off
 ----
+
 ==== Dedicated loggers
 
 **Metrics Logs**
@@ -529,12 +538,19 @@ logging.root.level: off
 The `metrics.ops` logger is configured with `debug` level and will automatically output sample system and process information at a regular interval.
 The metrics that are logged are a subset of the data collected and are formatted in the log message as follows:
 
+[options="header"]
+|===
+
 | Ops formatted log property | Location in metrics service | Log units
-| :------------------------- | :-------------------------- | :-------------------------- |
-| memory | process.memory.heap.used_in_bytes | [depends on the value](http://numeraljs.com/#format), typically MB or GB |
-| uptime  | process.uptime_in_millis | HH:mm:ss |
-| load  | os.load | [ "load for the last 1 min" "load for the last 5 min" "load for the last 15 min"] |
-| delay | process.event_loop_delay | ms |
+
+| memory | process.memory.heap.used_in_bytes | http://numeraljs.com/#format[depends on the value], typically MB or GB
+
+| uptime  | process.uptime_in_millis | HH:mm:ss
+
+| load  | os.load | [ "load for the last 1 min" "load for the last 5 min" "load for the last 15 min"]
+
+| delay | process.event_loop_delay | ms
+|===
 
 The log interval is the same as the interval at which system and process information is refreshed and is configurable under `ops.interval`:
 
@@ -548,23 +564,39 @@ The minimum interval is 100ms and defaults to 5000ms.
 **Request and Response Logs**
 
 The `http.server.response` logger is configured with `debug` level and will automatically output
-data about http requests and responses occurring on the Kibana server.
+data about http requests and responses occurring on the {kib} server.
 The message contains some high-level information, and the corresponding log meta contains the following:
 
+[options="header"]
+|===
+
 | Meta property | Description | Format
-| :------------------------- | :-------------------------- | :-------------------------- |
-| client.ip | IP address of the requesting client | ip |
-| http.request.method | http verb for the request (uppercase) | string |
-| http.request.mime_type | (optional) mime as specified in the headers | string |
-| http.request.referrer | (optional) referrer | string |
-| http.request.headers | request headers | object |
-| http.response.body.bytes | (optional) Calculated response payload size in bytes | number |
-| http.response.status_code | status code returned | number |
-| http.response.headers | response headers | object |
-| http.response.responseTime | (optional) Calculated response time in ms | number |
-| url.path | request path | string |
-| url.query | (optional) request query string | string |
-| user_agent.original | raw user-agent string provided in request headers | string |
+
+| client.ip | IP address of the requesting client | ip
+
+| http.request.method | http verb for the request (uppercase) | string
+
+| http.request.mime_type | (optional) mime as specified in the headers | string
+
+| http.request.referrer | (optional) referrer | string
+
+| http.request.headers | request headers | object
+
+| http.response.body.bytes | (optional) Calculated response payload size in bytes | number
+
+| http.response.status_code | status code returned | number
+
+| http.response.headers | response headers | object
+
+| http.response.responseTime | (optional) Calculated response time in ms | number
+
+| url.path | request path | string
+
+| url.query | (optional) request query string | string
+
+| user_agent.original | raw user-agent string provided in request headers | string
+
+|===
 
 === Usage
 
@@ -614,12 +646,14 @@ The log will be less verbose with `warn` level for the `server` context name:
 Compatibility with the legacy logging system is assured until the end of the `v7` version.
 All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
 root appenders, make sure that it contains `default` appender to provide backward compatibility.
-**Note**: If you define an appender for a context name, the log messages aren't handled by the
+
+NOTE: If you define an appender for a context name, the log messages aren't handled by the
 `root` context anymore and not forwarded to the legacy logging service.
 
 ===== logging.dest
-By default logs in *stdout*. With new Kibana logging you can use pre-existing `console` appender or
+By default logs in *stdout*. With new {kib} logging you can use pre-existing `console` appender or
 define a custom one.
+
 [source,yaml]
 ----
 logging:
@@ -627,7 +661,9 @@ logging:
     - name: plugins.myPlugin
       appenders: [console]
 ----
+
 Logs in a *file* if given file path. You should define a custom appender with `type: file`
+
 [source,yaml]
 ----
 
@@ -642,13 +678,15 @@ logging:
     - name: plugins.myPlugin
       appenders: [file]
 ----
+
 ===== logging.json
 Defines the format of log output. Logs in JSON if `true`. With new logging config you can adjust
-the output format with [layouts](#layouts).
+the output format with <<logging-layouts,layouts>>.
 
 ===== logging.quiet
 Suppresses all logging output other than error messages. With new logging, config can be achieved
-with adjusting minimum required [logging level](#log-level).
+with adjusting minimum required <<log-level,log level>>.
+
 [source,yaml]
 ----
   loggers:
@@ -675,7 +713,8 @@ logging.root.level: all
 
 ===== logging.timezone
 Set to the canonical timezone id to log events using that timezone. New logging config allows
-to [specify timezone](#date) for `layout: pattern`. Defaults to host timezone when not specified.
+to <<date-format,specify timezone>> for `layout: pattern`. Defaults to host timezone when not specified.
+
 [source,yaml]
 ----
 logging:
@@ -692,8 +731,8 @@ logging:
 Define a custom logger for a specific context name.
 
 **`logging.events.ops`** outputs sample system and process information at a regular interval.
-With the new logging config, these are provided by a dedicated [context name](#logger-hierarchy),
-and you can enable them by adjusting the minimum required [logging level](#log-level) to `debug`:
+With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
+and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
 [source,yaml]
 ----
   loggers:
@@ -703,8 +742,8 @@ and you can enable them by adjusting the minimum required [logging level](#log-l
 ----
 
 **`logging.events.request` and `logging.events.response`** provide logs for each request handled
-by the http service. With the new logging config, these are provided by a dedicated [context name](#logger-hierarchy),
-and you can enable them by adjusting the minimum required [logging level](#log-level) to `debug`:
+by the http service. With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
+and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
 [source,yaml]
 ----
   loggers:
@@ -716,32 +755,58 @@ and you can enable them by adjusting the minimum required [logging level](#log-l
 ===== logging.filter
 TBD
 
+
+[options="header"]
+|===
+
+| Parameter | Platform log record in **pattern** format | Legacy Platform log record **text** format
+
+| @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`
+
+| context name | `parent.child` | `['parent', 'child']`
+
+| level | `DEBUG` | `['debug']`
+
+| meta | stringified JSON object `{"to": "v8"}`| N/A
+
+| pid | can be configured as `%pid` | N/A
+
+|===
+
+
+[options="header"]
+|===
+
+| Parameter | Platform log record in **json** format | Legacy Platform log record **json** format
+
+| @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`
+
+| context name | `log.logger: parent.child` | `tags: ['parent', 'child']`
+
+| level | `log.level: DEBUG` | `tags: ['debug']`
+
+| meta | separate property `"meta": {"to": "v8"}` | merged in log record  `{... "to": "v8"}`
+
+| pid | `process.pid: 12345` | `pid: 12345`
+
+| type | N/A | `type: log`
+
+| error | `{ message, name, stack }` | `{ message, name, stack, code, signal }`
+
+|===
+
 ==== Logging configuration via CLI
 
-| legacy logging | Kibana Platform logging|
-|-|-|
-|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=console|
-|--quiet| --logging.root.level=error --logging.root.appenders[0]=default --logging.root.appenders[1]=console|
-|--silent| --logging.root.level=off|
+[options="header"]
+|===
 
-*note that you have to pass the `default` appender until the legacy logging system is removed in v8.0
+| legacy logging | {kib} Platform logging
 
-==== Log record format changes
+|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=console
 
-| Parameter       | Platform log record in **pattern** format  | Legacy Platform log record **text** format |
-| --------------- | ------------------------------------------ | ------------------------------------------ |
-| @timestamp      | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`                    |
-| context name    | `parent.child`                             | `['parent', 'child']`                      |
-| level           | `DEBUG`                                    | `['debug']`                                |
-| meta            | stringified JSON object `{"to": "v8"}`     | N/A                                        |
-| pid             | can be configured as `%pid`                | N/A                                        |
+|--quiet| --logging.root.level=error --logging.root.appenders[0]=default --logging.root.appenders[1]=console
 
-| Parameter       | Platform log record in **json** format     | Legacy Platform log record **json** format   |
-| --------------- | ------------------------------------------ | -------------------------------------------- |
-| @timestamp      | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`           |
-| context name    | `log.logger: parent.child`                 | `tags: ['parent', 'child']`                  |
-| level           | `log.level: DEBUG`                         | `tags: ['debug']`                            |
-| meta            | separate property `"meta": {"to": "v8"}`   | merged in log record  `{... "to": "v8"}`     |
-| pid             | `process.pid: 12345`                       | `pid: 12345`                                 |
-| type            | N/A                                        | `type: log`                                  |
-| error           | `{ message, name, stack }`                 | `{ message, name, stack, code, signal }`     |
+|--silent| --logging.root.level=off
+|===
+
+NOTE: you have to pass the `default` appender until the legacy logging system is removed in v8.0
