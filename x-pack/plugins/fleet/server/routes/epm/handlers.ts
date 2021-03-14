@@ -228,9 +228,15 @@ export const installPackageFromRegistryHandler: RequestHandler<
   const savedObjectsClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { pkgkey } = request.params;
-  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+
+  let pkgName: string | undefined;
+  let pkgVersion: string | undefined;
+
   try {
+    const parsedPkgKey = splitPkgKey(pkgkey);
+    pkgName = parsedPkgKey.pkgName;
+    pkgVersion = parsedPkgKey.pkgVersion;
+
     const res = await installPackage({
       installSource: 'registry',
       savedObjectsClient,
@@ -244,14 +250,17 @@ export const installPackageFromRegistryHandler: RequestHandler<
     return response.ok({ body });
   } catch (e) {
     const defaultResult = await defaultIngestErrorHandler({ error: e, response });
-    await handleInstallPackageFailure({
-      savedObjectsClient,
-      error: e,
-      pkgName,
-      pkgVersion,
-      installedPkg,
-      esClient,
-    });
+    if (pkgName && pkgVersion) {
+      const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: e,
+        pkgName,
+        pkgVersion,
+        installedPkg,
+        esClient,
+      });
+    }
 
     return defaultResult;
   }
