@@ -482,7 +482,16 @@ export class ExplorerUI extends React.Component {
                 <div className="euiText explorer-charts">
                   {showCharts && (
                     <ExplorerChartsContainer
-                      {...{ ...chartsData, severity, timefilter, mlUrlGenerator, timeBuckets }}
+                      {...{
+                        ...chartsData,
+                        severity,
+                        timefilter,
+                        mlUrlGenerator,
+                        timeBuckets,
+                        onSelectEntity: ({ fieldName, fieldValue, operation }) => {
+                          this.applyFilter(fieldName, fieldValue, operation);
+                        },
+                      }}
                     />
                   )}
                 </div>
