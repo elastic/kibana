@@ -32,7 +32,7 @@ export const loadConfiguration = (
   return apmConfig;
 };
 
-export const getConfiguration = (serviceName: string): ApmAgentConfig => {
+export const getConfiguration = (serviceName: string): ApmAgentConfig | undefined => {
   // integration test runner starts a kibana server that import the module without initializing APM.
   // so we need to check initialization of the config.
   // note that we can't just load the configuration during this module's import
@@ -41,5 +41,5 @@ export const getConfiguration = (serviceName: string): ApmAgentConfig => {
   if (apmConfig) {
     return apmConfig.getConfig(serviceName);
   }
-  return {};
+  return undefined;
 };
