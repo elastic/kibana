@@ -136,37 +136,6 @@ describe('http service', () => {
         await root.start();
         await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
       });
-
-      it('returns true if authenticated on a route with "try" auth', async () => {
-        const { http } = await root.setup();
-        const { createRouter, auth, registerAuth } = http;
-
-        registerAuth((req, res, toolkit) => toolkit.authenticated());
-        const router = createRouter('');
-        router.get(
-          { path: '/is-auth', validate: false, options: { authRequired: 'try' } },
-          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-        );
-
-        await root.start();
-        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: true });
-      });
-
-      it('returns false if not authenticated on a route with "try" auth', async () => {
-        const { http } = await root.setup();
-        const { createRouter, auth, registerAuth } = http;
-
-        registerAuth((req, res, toolkit) => toolkit.notHandled());
-
-        const router = createRouter('');
-        router.get(
-          { path: '/is-auth', validate: false, options: { authRequired: 'try' } },
-          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
-        );
-
-        await root.start();
-        await kbnTestServer.request.get(root, '/is-auth').expect(200, { isAuthenticated: false });
-      });
     });
     describe('#get()', () => {
       it('returns authenticated status and allow associate auth state with request', async () => {
