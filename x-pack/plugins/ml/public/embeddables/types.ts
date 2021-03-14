@@ -26,7 +26,10 @@ import type { AppStateSelectedCells } from '../application/explorer/explorer_uti
 import { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
 import { EntityField } from '../../common/util/anomaly_utils';
 import { isPopulatedObject } from '../../common/util/object_utils';
-import { ANOMALY_EXPLORER_EMBEDDABLE_TYPE, ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from './constants';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+} from './constants';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -126,6 +129,6 @@ export function isAnomalyExplorerEmbeddable(arg: unknown): arg is ExplorerFieldS
   return (
     isPopulatedObject(arg) &&
     arg.hasOwnProperty('embeddable') &&
-    arg.embeddable.type === ANOMALY_EXPLORER_EMBEDDABLE_TYPE
+    arg.embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
   );
 }

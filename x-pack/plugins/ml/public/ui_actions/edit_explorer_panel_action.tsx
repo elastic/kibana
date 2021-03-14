@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import { MlCoreSetup } from '../plugin';
-import { ANOMALY_EXPLORER_EMBEDDABLE_TYPE, EditExplorerPanelContext } from '../embeddables';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE, EditExplorerPanelContext } from '../embeddables';
 
 export const EDIT_EXPLORER_PANEL_ACTION = 'editExplorerPanelAction';
 
@@ -44,7 +44,7 @@ export function createEditExplorerPanelAction(getStartServices: MlCoreSetup['get
     },
     async isCompatible({ embeddable }) {
       return (
-        embeddable.type === ANOMALY_EXPLORER_EMBEDDABLE_TYPE &&
+        embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE &&
         embeddable.getInput().viewMode === ViewMode.EDIT
       );
     },

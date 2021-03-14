@@ -94,7 +94,7 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.ml.anomalyExplorerEmbeddable.errorMessage"
+            id="xpack.ml.anomalyExplorerChartsEmbeddable.errorMessage"
             defaultMessage="Unable to load the ML anomaly explorer data"
           />
         }

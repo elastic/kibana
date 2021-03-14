@@ -10,7 +10,7 @@ import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { MlCoreSetup } from '../plugin';
 import { ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
 import {
-  ANOMALY_EXPLORER_EMBEDDABLE_TYPE,
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   ExplorerFieldSelectionContext,
   isAnomalyExplorerEmbeddable,
@@ -121,7 +121,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
     async isCompatible({ embeddable }: SwimLaneDrilldownContext | ExplorerFieldSelectionContext) {
       return (
         embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE ||
-        embeddable.type === ANOMALY_EXPLORER_EMBEDDABLE_TYPE
+        embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
       );
     },
   });

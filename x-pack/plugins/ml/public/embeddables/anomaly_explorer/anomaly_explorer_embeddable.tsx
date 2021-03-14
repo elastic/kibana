@@ -16,15 +16,15 @@ import { EmbeddableExplorerContainer } from './embeddable_explorer_container_laz
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
 import {
-  ANOMALY_EXPLORER_EMBEDDABLE_TYPE,
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   AnomalyExplorerEmbeddableInput,
   AnomalyExplorerEmbeddableOutput,
   AnomalyExplorerServices,
 } from '..';
 
 export const getDefaultPanelTitle = (jobIds: JobId[]) =>
-  i18n.translate('xpack.ml.anomalyExplorerEmbeddable.title', {
-    defaultMessage: 'ML anomaly explorer for {jobIds}',
+  i18n.translate('xpack.ml.anomalyExplorerChartsEmbeddable.title', {
+    defaultMessage: 'ML anomaly explorer charts for {jobIds}',
     values: { jobIds: jobIds.join(', ') },
   });
 
@@ -36,7 +36,7 @@ export class AnomalyExplorerEmbeddable extends Embeddable<
 > {
   private node?: HTMLElement;
   private reload$ = new Subject();
-  public readonly type: string = ANOMALY_EXPLORER_EMBEDDABLE_TYPE;
+  public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   constructor(
     initialInput: AnomalyExplorerEmbeddableInput,

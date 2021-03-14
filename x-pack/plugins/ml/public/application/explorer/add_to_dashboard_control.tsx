@@ -40,7 +40,7 @@ export interface DashboardItem {
 
 export type EuiTableProps = EuiInMemoryTableProps<DashboardItem>;
 
-function getDefaultEmbeddablepaPanelConfig(jobIds: JobId[]) {
+function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
   return {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     title: getDefaultPanelTitle(jobIds),
@@ -129,7 +129,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
 
     for (const selectedDashboard of selectedItems) {
       const panelsData = swimlanes.map((swimlaneType) => {
-        const config = getDefaultEmbeddablepaPanelConfig(jobIds);
+        const config = getDefaultEmbeddablePanelConfig(jobIds);
         if (swimlaneType === SWIMLANE_TYPE.VIEW_BY) {
           return {
             ...config,

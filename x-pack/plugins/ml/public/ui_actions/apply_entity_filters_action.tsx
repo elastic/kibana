@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { MlCoreSetup } from '../plugin';
 import { Filter, FilterStateStore } from '../../../../../src/plugins/data/common';
-import { ANOMALY_EXPLORER_EMBEDDABLE_TYPE, ExplorerFieldSelectionContext } from '../embeddables';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  ExplorerFieldSelectionContext,
+} from '../embeddables';
 import { CONTROLLED_BY_EXPLORER_FILTER } from './constants';
 import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
 
@@ -83,7 +86,7 @@ export function createApplyEntityFieldFiltersAction(
         });
     },
     async isCompatible({ embeddable, data }) {
-      return embeddable.type === ANOMALY_EXPLORER_EMBEDDABLE_TYPE && data !== undefined;
+      return embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE && data !== undefined;
     },
   });
 }

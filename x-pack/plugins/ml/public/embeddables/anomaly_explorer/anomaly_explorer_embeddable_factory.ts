@@ -17,7 +17,7 @@ import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import {
-  ANOMALY_EXPLORER_EMBEDDABLE_TYPE,
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   AnomalyExplorerEmbeddableInput,
   AnomalyExplorerEmbeddableServices,
 } from '..';
@@ -25,7 +25,7 @@ import { AnomalyExplorerChartsService } from '../../application/services/anomaly
 
 export class AnomalyExplorerEmbeddableFactory
   implements EmbeddableFactoryDefinition<AnomalyExplorerEmbeddableInput> {
-  public readonly type = ANOMALY_EXPLORER_EMBEDDABLE_TYPE;
+  public readonly type = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   constructor(
     private getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>

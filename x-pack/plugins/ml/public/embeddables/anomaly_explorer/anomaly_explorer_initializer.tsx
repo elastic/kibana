@@ -47,8 +47,8 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
-            id="xpack.ml.anomalyExplorerEmbeddable.setupModal.title"
-            defaultMessage="Anomaly explorer configuration"
+            id="xpack.ml.anomalyExplorerChartsEmbeddable.setupModal.title"
+            defaultMessage="Anomaly explorer charts configuration"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -58,7 +58,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.anomalyExplorerEmbeddable.panelTitleLabel"
+                id="xpack.ml.anomalyExplorerChartsEmbeddable.panelTitleLabel"
                 defaultMessage="Panel title"
               />
             }
@@ -76,7 +76,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.anomalyExplorerEmbeddable.maxSeriesToPlotLabel"
+                id="xpack.ml.anomalyExplorerChartsEmbeddable.maxSeriesToPlotLabel"
                 defaultMessage="Max series to plot"
               />
             }
@@ -96,7 +96,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel}>
           <FormattedMessage
-            id="xpack.ml.anomalyExplorerEmbeddable.setupModal.cancelButtonLabel"
+            id="xpack.ml.anomalyExplorerChartsEmbeddable.setupModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -110,7 +110,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           fill
         >
           <FormattedMessage
-            id="xpack.ml.anomalyExplorerEmbeddable.setupModal.confirmButtonLabel"
+            id="xpack.ml.anomalyExplorerChartsEmbeddable.setupModal.confirmButtonLabel"
             defaultMessage="Confirm"
           />
         </EuiButton>
