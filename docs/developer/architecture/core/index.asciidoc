@@ -172,31 +172,8 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   ],
 };
 ----
-==== Logging service
-Allows a plugin to provide status and diagnostic information.
-For detailed instructions see the {kib-repo}blob/{branch}/src/core/server/logging/README.md[logging service documentation].
 
-[source,typescript]
-----
-import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from 'kibana/server';
-
-export class MyPlugin implements Plugin {
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
-  public setup(core: CoreSetup) {
-    try {
-      this.logger.debug('doing something...');
-      // …
-    } catch (e) {
-      this.logger.error('failed doing something...');
-    }
-  }
-}
-----
+include::logging-service.asciidoc[leveloffset=+1]
 
 ==== Elasticsearch service
 `Elasticsearch service` provides `elasticsearch.client` program API to communicate with Elasticsearch server REST API.
