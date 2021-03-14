@@ -9,18 +9,23 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 import { run } from '@kbn/dev-utils';
+interface DestField {
+  [key: string]: boolean | DestField;
+}
 
 run(
   async ({ flags }) => {
     const schemaPath = path.resolve('../../public/editor/osquery_schema/');
-    const schemaFile = path.join(schemaPath, flags.schema_version);
+    const schemaFile = path.join(schemaPath, flags.schema_version as string);
     const schemaData = await require(schemaFile);
-    function pullFields(destSchema, source) {
-      const dest = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function pullFields(destSchema: DestField, source: { [key: string]: any }) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dest: { [key: string]: any } = {};
       Object.keys(destSchema).forEach((key) => {
         switch (typeof source[key]) {
           case 'object':
-            dest[key] = pullFields(source[key], destSchema[key]);
+            dest[key] = pullFields(destSchema[key] as DestField, source[key]);
             break;
           default:
             dest[key] = source[key];
