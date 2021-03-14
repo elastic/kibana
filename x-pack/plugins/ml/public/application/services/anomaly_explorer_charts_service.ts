@@ -113,7 +113,11 @@ export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
 export class AnomalyExplorerChartsService {
   private _customTimeRange: TimeRange | undefined;
 
-  constructor(private mlApiServices: MlApiServices, private mlResultsService: MlResultsService) {}
+  constructor(
+    private timeFilter: TimefilterContract,
+    private mlApiServices: MlApiServices,
+    private mlResultsService: MlResultsService
+  ) {}
 
   public setTimeRange(timeRange: TimeRange) {
     this._customTimeRange = timeRange;

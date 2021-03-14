@@ -320,6 +320,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
       mlResultsService
     );
     const anomalyExplorerService = new AnomalyExplorerChartsService(
+      timefilter,
       mlApiServices,
       mlResultsService
     );

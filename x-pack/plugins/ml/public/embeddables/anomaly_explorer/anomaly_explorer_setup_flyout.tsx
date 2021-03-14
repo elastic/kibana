@@ -19,7 +19,7 @@ import { AnomalyExplorerInitializer } from './anomaly_explorer_initializer';
 import { JobSelectorFlyoutContent } from '../../application/components/job_selector/job_selector_flyout';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
-import { getDefaultPanelTitle } from './anomaly_explorer_embeddable';
+import { getDefaultExplorerChartsPanelTitle } from './anomaly_explorer_embeddable';
 import { getMlGlobalServices } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
 import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
@@ -63,7 +63,7 @@ export async function resolveAnomalyExplorerUserInput(
               reject();
             }}
             onSelectionConfirmed={async ({ jobIds, groups }) => {
-              const title = input?.title ?? getDefaultPanelTitle(jobIds);
+              const title = input?.title ?? getDefaultExplorerChartsPanelTitle(jobIds);
 
               const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
 

@@ -75,6 +75,7 @@ export class AnomalyExplorerEmbeddableFactory
       mlResultsService
     );
     const anomalyExplorerService = new AnomalyExplorerChartsService(
+      pluginsStart.data.query.timefilter.timefilter,
       mlApiServices,
       mlResultsService
     );

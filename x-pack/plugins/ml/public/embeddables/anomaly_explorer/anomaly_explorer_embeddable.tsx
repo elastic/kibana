@@ -22,7 +22,7 @@ import {
   AnomalyExplorerServices,
 } from '..';
 
-export const getDefaultPanelTitle = (jobIds: JobId[]) =>
+export const getDefaultExplorerChartsPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.anomalyExplorerChartsEmbeddable.title', {
     defaultMessage: 'ML anomaly explorer charts for {jobIds}',
     values: { jobIds: jobIds.join(', ') },

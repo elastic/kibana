@@ -23,7 +23,7 @@ import {
   AnomalySwimlaneServices,
 } from '..';
 
-export const getDefaultPanelTitle = (jobIds: JobId[]) =>
+export const getDefaultSwimlanePanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.swimlaneEmbeddable.title', {
     defaultMessage: 'ML anomaly swim lane for {jobIds}',
     values: { jobIds: jobIds.join(', ') },

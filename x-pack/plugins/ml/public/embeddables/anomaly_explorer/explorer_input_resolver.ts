@@ -72,7 +72,7 @@ export function useExplorerInputResolver(
   const [
     { uiSettings },
     { data: dataServices },
-    { anomalyTimelineService, anomalyDetectorService, anomalyExplorerService, mlResultsService },
+    { anomalyDetectorService, anomalyExplorerService, mlResultsService },
   ] = services;
   const { timefilter } = dataServices.query.timefilter;
 
@@ -113,7 +113,7 @@ export function useExplorerInputResolver(
 
           const viewBySwimlaneFieldName = OVERALL_LABEL;
 
-          anomalyTimelineService.setTimeRange(timeRangeInput);
+          anomalyExplorerService.setTimeRange(timeRangeInput);
 
           const explorerJobs: ExplorerJob[] = jobs.map((job) => {
             const bucketSpan = parseInterval(job.analysis_config.bucket_span);
@@ -133,7 +133,7 @@ export function useExplorerInputResolver(
             return of(undefined);
           }
 
-          const bounds = anomalyTimelineService.getTimeBounds();
+          const bounds = anomalyExplorerService.getTimeBounds();
 
           // Can be from input time range or from the timefilter bar
           const selections: AppStateSelectedCells = {

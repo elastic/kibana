@@ -104,7 +104,6 @@ export type AnomalyExplorerEmbeddableInput = EmbeddableInput & AnomalyExplorerEm
 
 export interface AnomalyExplorerServices {
   anomalyDetectorService: AnomalyDetectorService;
-  anomalyTimelineService: AnomalyTimelineService;
   anomalyExplorerService: AnomalyExplorerChartsService;
   mlResultsService: MlResultsService;
 }

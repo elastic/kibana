@@ -21,16 +21,16 @@ import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../../embeddables';
-import { getDefaultPanelTitle } from '../../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDashboardService } from '../../services/dashboard_service';
 import { SWIMLANE_TYPE } from '../explorer_constants';
 import { columns, useDashboardTable } from './dashboards_table';
+import { getDefaultExplorerChartsPanelTitle } from '../../../embeddables/anomaly_explorer/anomaly_explorer_embeddable';
 
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
   return {
     type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-    title: getDefaultPanelTitle(jobIds),
+    title: getDefaultExplorerChartsPanelTitle(jobIds),
   };
 }
 
