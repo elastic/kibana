@@ -26,6 +26,7 @@ interface Errors {
   hot: ErrorGroup;
   warm: ErrorGroup;
   cold: ErrorGroup;
+  frozen: ErrorGroup;
   delete: ErrorGroup;
   /**
    * Errors that are not specific to a phase should go here.
@@ -46,6 +47,7 @@ const createEmptyErrors = (): Errors => ({
   hot: {},
   warm: {},
   cold: {},
+  frozen: {},
   delete: {},
   other: {},
 });

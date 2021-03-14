@@ -276,7 +276,6 @@ Object {
       "type": "image/svg+xml",
     },
   ],
-  "latestVersion": "0.3.3",
   "license": "basic",
   "name": "apache",
   "owner": Object {
@@ -664,7 +663,6 @@ Object {
       "removable": true,
       "version": "0.1.4",
     },
-    "coreMigrationVersion": "8.0.0",
     "id": "apache",
     "namespaces": Array [],
     "references": Array [],

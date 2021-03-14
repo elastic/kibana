@@ -14,6 +14,7 @@ import {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
 import { useLinkProps } from '../../../hooks/use_link_props';
@@ -23,73 +24,100 @@ type VisibleFlyoutType = 'inventory' | 'threshold' | null;
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType>(null);
+  const uiCapabilities = useKibana().services.application?.capabilities;
+
+  const canCreateAlerts = useMemo(() => Boolean(uiCapabilities?.infrastructure?.save), [
+    uiCapabilities,
+  ]);
 
   const closeFlyout = useCallback(() => setVisibleFlyoutType(null), [setVisibleFlyoutType]);
+
+  const infrastructureAlertsPanel = useMemo(
+    () => ({
+      id: 1,
+      title: i18n.translate('xpack.infra.alerting.infrastructureDropdownTitle', {
+        defaultMessage: 'Infrastructure alerts',
+      }),
+      items: [
+        {
+          name: i18n.translate('xpack.infra.alerting.createInventoryAlertButton', {
+            defaultMessage: 'Create inventory alert',
+          }),
+          onClick: () => setVisibleFlyoutType('inventory'),
+        },
+      ],
+    }),
+    [setVisibleFlyoutType]
+  );
+
+  const metricsAlertsPanel = useMemo(
+    () => ({
+      id: 2,
+      title: i18n.translate('xpack.infra.alerting.metricsDropdownTitle', {
+        defaultMessage: 'Metrics alerts',
+      }),
+      items: [
+        {
+          name: i18n.translate('xpack.infra.alerting.createThresholdAlertButton', {
+            defaultMessage: 'Create threshold alert',
+          }),
+          onClick: () => setVisibleFlyoutType('threshold'),
+        },
+      ],
+    }),
+    [setVisibleFlyoutType]
+  );
 
   const manageAlertsLinkProps = useLinkProps({
     app: 'management',
     pathname: '/insightsAndAlerting/triggersActions/alerts',
   });
 
+  const manageAlertsMenuItem = useMemo(
+    () => ({
+      name: i18n.translate('xpack.infra.alerting.manageAlerts', {
+        defaultMessage: 'Manage alerts',
+      }),
+      icon: 'tableOfContents',
+      onClick: manageAlertsLinkProps.onClick,
+    }),
+    [manageAlertsLinkProps]
+  );
+
+  const firstPanelMenuItems: EuiContextMenuPanelDescriptor['items'] = useMemo(
+    () =>
+      canCreateAlerts
+        ? [
+            {
+              name: i18n.translate('xpack.infra.alerting.infrastructureDropdownMenu', {
+                defaultMessage: 'Infrastructure',
+              }),
+              panel: 1,
+            },
+            {
+              name: i18n.translate('xpack.infra.alerting.metricsDropdownMenu', {
+                defaultMessage: 'Metrics',
+              }),
+              panel: 2,
+            },
+            manageAlertsMenuItem,
+          ]
+        : [manageAlertsMenuItem],
+    [canCreateAlerts, manageAlertsMenuItem]
+  );
+
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [
-      {
-        id: 0,
-        title: i18n.translate('xpack.infra.alerting.alertDropdownTitle', {
-          defaultMessage: 'Alerts',
-        }),
-        items: [
-          {
-            name: i18n.translate('xpack.infra.alerting.infrastructureDropdownMenu', {
-              defaultMessage: 'Infrastructure',
-            }),
-            panel: 1,
-          },
-          {
-            name: i18n.translate('xpack.infra.alerting.metricsDropdownMenu', {
-              defaultMessage: 'Metrics',
-            }),
-            panel: 2,
-          },
-          {
-            name: i18n.translate('xpack.infra.alerting.manageAlerts', {
-              defaultMessage: 'Manage alerts',
-            }),
-            icon: 'tableOfContents',
-            onClick: manageAlertsLinkProps.onClick,
-          },
-        ],
-      },
-      {
-        id: 1,
-        title: i18n.translate('xpack.infra.alerting.infrastructureDropdownTitle', {
-          defaultMessage: 'Infrastructure alerts',
-        }),
-        items: [
-          {
-            name: i18n.translate('xpack.infra.alerting.createInventoryAlertButton', {
-              defaultMessage: 'Create inventory alert',
-            }),
-            onClick: () => setVisibleFlyoutType('inventory'),
-          },
-        ],
-      },
-      {
-        id: 2,
-        title: i18n.translate('xpack.infra.alerting.metricsDropdownTitle', {
-          defaultMessage: 'Metrics alerts',
-        }),
-        items: [
-          {
-            name: i18n.translate('xpack.infra.alerting.createThresholdAlertButton', {
-              defaultMessage: 'Create threshold alert',
-            }),
-            onClick: () => setVisibleFlyoutType('threshold'),
-          },
-        ],
-      },
-    ],
-    [manageAlertsLinkProps, setVisibleFlyoutType]
+    () =>
+      [
+        {
+          id: 0,
+          title: i18n.translate('xpack.infra.alerting.alertDropdownTitle', {
+            defaultMessage: 'Alerts',
+          }),
+          items: firstPanelMenuItems,
+        },
+      ].concat(canCreateAlerts ? [infrastructureAlertsPanel, metricsAlertsPanel] : []),
+    [infrastructureAlertsPanel, metricsAlertsPanel, firstPanelMenuItems, canCreateAlerts]
   );
 
   const closePopover = useCallback(() => {
