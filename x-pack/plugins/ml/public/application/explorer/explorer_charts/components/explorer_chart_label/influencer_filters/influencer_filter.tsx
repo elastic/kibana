@@ -35,6 +35,7 @@ export const InfluencerFilter: FC<InfluencerFilterProps> = ({
         }
       >
         <EuiButtonIcon
+          /* change to 'xs' after eui 31.9.0*/
           size="s"
           className="filter-button"
           onClick={() =>
@@ -59,6 +60,7 @@ export const InfluencerFilter: FC<InfluencerFilterProps> = ({
         }
       >
         <EuiButtonIcon
+          /* change to 'xs' after eui 31.9.0*/
           size="s"
           className="filter-button"
           onClick={() =>
