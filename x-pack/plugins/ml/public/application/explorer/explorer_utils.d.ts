@@ -11,6 +11,7 @@ import { SwimlaneType } from './explorer_constants';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { RecordForInfluencer } from '../services/results_service/results_service';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { MlResultsService } from '../services/results_service';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -136,6 +137,7 @@ export declare const loadAnomaliesTableData: (
 ) => Promise<AnomaliesTableData>;
 
 export declare const loadDataForCharts: (
+  mlResultsService: MlResultsService,
   jobIds: string[],
   earliestMs: number,
   latestMs: number,
@@ -157,6 +159,7 @@ export declare const loadFilteredTopInfluencers: (
 ) => Promise<any[]>;
 
 export declare const loadTopInfluencers: (
+  mlResultsService: MlResultsService,
   selectedJobIds: string[],
   earliestMs: number,
   latestMs: number,

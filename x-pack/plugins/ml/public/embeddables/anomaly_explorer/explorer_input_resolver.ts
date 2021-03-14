@@ -72,7 +72,7 @@ export function useExplorerInputResolver(
   const [
     { uiSettings },
     { data: dataServices },
-    { anomalyTimelineService, anomalyDetectorService, anomalyExplorerService },
+    { anomalyTimelineService, anomalyDetectorService, anomalyExplorerService, mlResultsService },
   ] = services;
   const { timefilter } = dataServices.query.timefilter;
 
@@ -152,6 +152,7 @@ export function useExplorerInputResolver(
           const explorer$ = forkJoin({
             combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
             anomalyChartRecords: loadDataForCharts(
+              mlResultsService,
               jobIds,
               timeRange.earliestMs,
               timeRange.latestMs,

@@ -30,6 +30,7 @@ import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
 } from './constants';
+import { MlResultsService } from '../application/services/results_service';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -105,6 +106,7 @@ export interface AnomalyExplorerServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyTimelineService: AnomalyTimelineService;
   anomalyExplorerService: AnomalyExplorerChartsService;
+  mlResultsService: MlResultsService;
 }
 
 export type AnomalyExplorerEmbeddableServices = [

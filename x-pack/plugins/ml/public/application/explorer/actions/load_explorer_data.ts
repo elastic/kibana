@@ -30,7 +30,7 @@ import {
 import { ExplorerState } from '../reducers';
 import { useMlKibana, useTimefilter } from '../../contexts/kibana';
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
-import { mlResultsServiceProvider } from '../../services/results_service';
+import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { isViewBySwimLaneData } from '../swimlane_container';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
@@ -94,6 +94,7 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
  * Fetches the data necessary for the Anomaly Explorer using observables.
  */
 const loadExplorerDataProvider = (
+  mlResultsService: MlResultsService,
   anomalyTimelineService: AnomalyTimelineService,
   anomalyExplorerService: AnomalyExplorerChartsService,
   timefilter: TimefilterContract
@@ -161,6 +162,7 @@ const loadExplorerDataProvider = (
       ),
       anomalyChartRecords: memoizedLoadDataForCharts(
         lastRefresh,
+        mlResultsService,
         jobIds,
         timerange.earliestMs,
         timerange.latestMs,
@@ -172,6 +174,7 @@ const loadExplorerDataProvider = (
         selectionInfluencers.length === 0
           ? memoizedLoadTopInfluencers(
               lastRefresh,
+              mlResultsService,
               jobIds,
               timerange.earliestMs,
               timerange.latestMs,
@@ -252,6 +255,7 @@ const loadExplorerDataProvider = (
               anomalyChartRecords.length > 0
                 ? memoizedLoadFilteredTopInfluencers(
                     lastRefresh,
+                    mlResultsService,
                     jobIds,
                     timerange.earliestMs,
                     timerange.latestMs,
@@ -309,17 +313,22 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
   } = useMlKibana();
 
   const loadExplorerData = useMemo(() => {
-    const mlResultsServices = mlResultsServiceProvider(mlApiServices);
+    const mlResultsService = mlResultsServiceProvider(mlApiServices);
     const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
       uiSettings,
-      mlResultsServices
+      mlResultsService
     );
     const anomalyExplorerService = new AnomalyExplorerChartsService(
       mlApiServices,
-      mlResultsServices
+      mlResultsService
     );
-    return loadExplorerDataProvider(anomalyTimelineService, anomalyExplorerService, timefilter);
+    return loadExplorerDataProvider(
+      mlResultsService,
+      anomalyTimelineService,
+      anomalyExplorerService,
+      timefilter
+    );
   }, []);
 
   const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);

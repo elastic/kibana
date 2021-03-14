@@ -29,7 +29,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
 import { getChartType, chartLimits } from '../util/chart_utils';
 import { CriteriaField, MlResultsService } from './results_service';
-import { TimefilterContract } from '../../../../../../src/plugins/data/public';
+import { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 import type { ChartRecord } from '../explorer/explorer_utils';
 import { RecordsForCriteria, ScheduledEventsByBucket } from './results_service/result_service_rx';
@@ -37,6 +37,7 @@ import { isPopulatedObject } from '../../../common/util/object_utils';
 import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
+import { TimeRangeBounds } from '../util/time_buckets';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -110,7 +111,19 @@ export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
  * Service for retrieving anomaly explorer charts data.
  */
 export class AnomalyExplorerChartsService {
+  private _customTimeRange: TimeRange | undefined;
+
   constructor(private mlApiServices: MlApiServices, private mlResultsService: MlResultsService) {}
+
+  public setTimeRange(timeRange: TimeRange) {
+    this._customTimeRange = timeRange;
+  }
+
+  public getTimeBounds(): TimeRangeBounds {
+    return this._customTimeRange !== undefined
+      ? this.timeFilter.calculateBounds(this._customTimeRange)
+      : this.timeFilter.getBounds();
+  }
 
   public getDefaultChartsData(): ExplorerChartsData {
     return {

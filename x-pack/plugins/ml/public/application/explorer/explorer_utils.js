@@ -26,7 +26,6 @@ import {
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
-import { mlResultsService } from '../services/results_service';
 import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
@@ -65,6 +64,7 @@ export function getDefaultSwimlaneData() {
 }
 
 export async function loadFilteredTopInfluencers(
+  mlResultsService,
   jobIds,
   earliestMs,
   latestMs,
@@ -125,6 +125,7 @@ export async function loadFilteredTopInfluencers(
   });
 
   return await loadTopInfluencers(
+    mlResultsService,
     jobIds,
     earliestMs,
     latestMs,
@@ -539,6 +540,7 @@ export async function loadAnomaliesTableData(
 // and avoid race conditions ending up with the wrong charts.
 let requestCount = 0;
 export async function loadDataForCharts(
+  mlResultsService,
   jobIds,
   earliestMs,
   latestMs,
@@ -594,6 +596,7 @@ export async function loadDataForCharts(
 }
 
 export async function loadTopInfluencers(
+  mlResultsService,
   selectedJobIds,
   earliestMs,
   latestMs,
