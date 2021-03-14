@@ -24,7 +24,7 @@ export const initApm = (
   // Filter out all user PII
   apm.addFilter((payload: Record<string, any>) => {
     try {
-      if (payload.context && payload.context.user && typeof payload.context.user === 'object') {
+      if (payload.context?.user && typeof payload.context.user === 'object') {
         Object.keys(payload.context.user).forEach((key) => {
           payload.context.user[key] = '[REDACTED]';
         });
