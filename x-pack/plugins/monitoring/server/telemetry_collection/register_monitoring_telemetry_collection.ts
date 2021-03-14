@@ -8,11 +8,11 @@
 import type { ILegacyClusterClient } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { UsageStatsPayload } from '../../../../../src/plugins/telemetry_collection_manager/server';
+import type { LogstashBaseStats } from './get_logstash_stats';
+import type { BeatsBaseStats } from './get_beats_stats';
 import { getAllStats } from './get_all_stats';
 import { getClusterUuids } from './get_cluster_uuids';
 import { getLicenses } from './get_licenses';
-import type { LogstashBaseStats } from './get_logstash_stats';
-import type { BeatsBaseStats } from './get_beats_stats';
 
 interface MonitoringStats extends UsageStatsPayload {
   stack_stats: {

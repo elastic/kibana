@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema, ObjectType, Type } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 import type { AllowedSchemaTypes } from 'src/plugins/usage_collection/server';
@@ -76,10 +76,16 @@ function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
   }
 }
 
-function objectSchemaToConfigSchema(objectSchema: TelemetrySchemaObject): ObjectType {
+function objectSchemaToConfigSchema(objectSchema: TelemetrySchemaObject): Type<unknown> {
+  const objectEntries = Object.entries(objectSchema.properties);
+
+  if (objectEntries.length === 0) {
+    return schema.any();
+  }
+
   return schema.object(
     Object.fromEntries(
-      Object.entries(objectSchema.properties).map(([key, value]) => {
+      objectEntries.map(([key, value]) => {
         try {
           return [key, schema.maybe(valueSchemaToConfigSchema(value))];
         } catch (err) {
@@ -98,7 +104,7 @@ function objectSchemaToConfigSchema(objectSchema: TelemetrySchemaObject): Object
  */
 function convertSchemaToConfigSchema(telemetrySchema: {
   properties: Record<string, TelemetrySchemaValue>;
-}): ObjectType {
+}): Type<unknown> {
   try {
     return objectSchemaToConfigSchema(telemetrySchema);
   } catch (err) {
