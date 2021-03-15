@@ -107,7 +107,7 @@ describe('rules_notification_alert_type', () => {
       find: jest.fn(),
       goingToRun: jest.fn(),
       error: jest.fn(),
-      warning: jest.fn(),
+      partialFailure: jest.fn(),
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getListsClient as jest.Mock).mockReturnValue({
@@ -211,8 +211,8 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*', 'anotherindex*'];
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'Missing required read privileges on the following indices: ["some*"]'
       );
     });
@@ -223,8 +223,8 @@ describe('rules_notification_alert_type', () => {
       ]);
       payload = getPayload(getThresholdResult(), alertServices);
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
       );
     });
@@ -235,8 +235,8 @@ describe('rules_notification_alert_type', () => {
       ]);
       payload = getPayload(getEqlResult(), alertServices);
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
       );
     });
@@ -258,8 +258,8 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*'];
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]'
       );
     });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest, Subscription, Subject } from 'rxjs';
+import { Observable, combineLatest, Subscription } from 'rxjs';
 import { map, distinctUntilChanged, shareReplay, take, debounceTime } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
@@ -25,7 +25,6 @@ import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
-import { getOverallStatusChanges } from './log_overall_status';
 
 interface SetupDeps {
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
@@ -39,9 +38,7 @@ interface SetupDeps {
 export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private readonly logger: Logger;
   private readonly config$: Observable<StatusConfigType>;
-  private readonly stop$ = new Subject<void>();
 
-  private overall$?: Observable<ServiceStatus>;
   private pluginsStatus?: PluginsStatusService;
   private overallSubscription?: Subscription;
 
@@ -62,7 +59,10 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
 
-    this.overall$ = combineLatest([core$, this.pluginsStatus.getAll$()]).pipe(
+    const overall$: Observable<ServiceStatus> = combineLatest([
+      core$,
+      this.pluginsStatus.getAll$(),
+    ]).pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
       debounceTime(500),
       map(([coreStatus, pluginsStatus]) => {
@@ -78,7 +78,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     );
 
     // Create an unused subscription to ensure all underlying lazy observables are started.
-    this.overallSubscription = this.overall$.subscribe();
+    this.overallSubscription = overall$.subscribe();
 
     const router = http.createRouter('');
     registerStatusRoute({
@@ -91,7 +91,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       },
       metrics,
       status: {
-        overall$: this.overall$,
+        overall$,
         plugins$: this.pluginsStatus.getAll$(),
         core$,
       },
@@ -99,7 +99,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
 
     return {
       core$,
-      overall$: this.overall$,
+      overall$,
       plugins: {
         set: this.pluginsStatus.set.bind(this.pluginsStatus),
         getDependenciesStatus$: this.pluginsStatus.getDependenciesStatus$.bind(this.pluginsStatus),
@@ -109,19 +109,9 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     };
   }
 
-  public start() {
-    if (!this.overall$) {
-      throw new Error('cannot call `start` before `setup`');
-    }
-    getOverallStatusChanges(this.overall$, this.stop$).subscribe((message) => {
-      this.logger.info(message);
-    });
-  }
+  public start() {}
 
   public stop() {
-    this.stop$.next();
-    this.stop$.complete();
-
     if (this.overallSubscription) {
       this.overallSubscription.unsubscribe();
       this.overallSubscription = undefined;
