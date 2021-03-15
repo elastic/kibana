@@ -14,6 +14,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
+import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample_engine_creation_cta';
+
 import { EmptyState } from './';
 
 describe('EmptyState', () => {
@@ -41,6 +43,10 @@ describe('EmptyState', () => {
 
     it('sends a user to engine creation', () => {
       expect(button.prop('to')).toEqual('/engine_creation');
+    });
+
+    it('contains a CTA to create a sample engine', () => {
+      expect(prompt.find(SampleEngineCreationCta)).toHaveLength(1);
     });
   });
 });

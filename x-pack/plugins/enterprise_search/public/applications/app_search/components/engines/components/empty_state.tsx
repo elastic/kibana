@@ -9,13 +9,15 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageContent, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import { ENGINE_CREATION_PATH } from '../../../routes';
+
+import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample_engine_creation_cta';
 
 import { EnginesOverviewHeader } from './header';
 
@@ -50,22 +52,26 @@ export const EmptyState: React.FC = () => {
             </p>
           }
           actions={
-            <EuiButtonTo
-              data-test-subj="EmptyStateCreateFirstEngineCta"
-              fill
-              to={ENGINE_CREATION_PATH}
-              onClick={() =>
-                sendAppSearchTelemetry({
-                  action: 'clicked',
-                  metric: 'create_first_engine_button',
-                })
-              }
-            >
-              <FormattedMessage
-                id="xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta"
-                defaultMessage="Create an engine"
-              />
-            </EuiButtonTo>
+            <>
+              <EuiButtonTo
+                data-test-subj="EmptyStateCreateFirstEngineCta"
+                fill
+                to={ENGINE_CREATION_PATH}
+                onClick={() =>
+                  sendAppSearchTelemetry({
+                    action: 'clicked',
+                    metric: 'create_first_engine_button',
+                  })
+                }
+              >
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta"
+                  defaultMessage="Create an engine"
+                />
+              </EuiButtonTo>
+              <EuiSpacer size="xl" />
+              <SampleEngineCreationCta />
+            </>
           }
         />
       </EuiPageContent>
