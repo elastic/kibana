@@ -14,7 +14,7 @@ import { readPrivileges } from '../../privileges/read_privileges';
 
 export const readPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,
-  usingEphemeralEncryptionKey: boolean
+  hasEncryptionKey: boolean
 ) => {
   router.get(
     {
@@ -39,7 +39,7 @@ export const readPrivilegesRoute = (
         const clusterPrivileges = await readPrivileges(clusterClient.callAsCurrentUser, index);
         const privileges = merge(clusterPrivileges, {
           is_authenticated: request.auth.isAuthenticated ?? false,
-          has_encryption_key: !usingEphemeralEncryptionKey,
+          has_encryption_key: hasEncryptionKey,
         });
 
         return response.ok({ body: privileges });

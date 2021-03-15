@@ -17,9 +17,8 @@ import styled from 'styled-components';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
 import * as i18n from '../../../pages/detection_engine/rules/translations';
-import { enableRules } from '../../../containers/detection_engine/rules';
+import { enableRules, RulesTableAction } from '../../../containers/detection_engine/rules';
 import { enableRulesAction } from '../../../pages/detection_engine/rules/all/actions';
-import { Action } from '../../../pages/detection_engine/rules/all/reducer';
 import { useStateToaster, displayErrorToast } from '../../../../common/components/toasters';
 import { bucketRulesResponse } from '../../../pages/detection_engine/rules/all/helpers';
 
@@ -33,7 +32,7 @@ const StaticSwitch = styled(EuiSwitch)`
 StaticSwitch.displayName = 'StaticSwitch';
 
 export interface RuleSwitchProps {
-  dispatch?: React.Dispatch<Action>;
+  dispatch?: React.Dispatch<RulesTableAction>;
   id: string;
   enabled: boolean;
   isDisabled?: boolean;

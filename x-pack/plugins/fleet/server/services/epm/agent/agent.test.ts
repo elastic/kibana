@@ -179,4 +179,44 @@ input: logs
       input: 'logs',
     });
   });
+
+  it('should escape string values when necessary', () => {
+    const stringTemplate = `
+my-package:
+    asteriskOnly: {{asteriskOnly}}
+    startsWithAsterisk: {{startsWithAsterisk}}
+    numeric: {{numeric}}
+    mixed: {{mixed}}
+    concatenatedEnd: {{a}}{{b}}
+    concatenatedMiddle: {{c}}{{d}}
+    mixedMultiline: |-
+        {{{ search }}} | streamstats`;
+
+    const vars = {
+      asteriskOnly: { value: '"*"', type: 'string' },
+      startsWithAsterisk: { value: '"*lala"', type: 'string' },
+      numeric: { value: '100', type: 'string' },
+      mixed: { value: '1s', type: 'string' },
+      a: { value: '/opt/package/*', type: 'string' },
+      b: { value: '/logs/my.log*', type: 'string' },
+      c: { value: '/opt/*/package/', type: 'string' },
+      d: { value: 'logs/*my.log', type: 'string' },
+      search: { value: 'search sourcetype="access*"', type: 'text' },
+    };
+
+    const targetOutput = {
+      'my-package': {
+        asteriskOnly: '*',
+        startsWithAsterisk: '*lala',
+        numeric: '100',
+        mixed: '1s',
+        concatenatedEnd: '/opt/package/*/logs/my.log*',
+        concatenatedMiddle: '/opt/*/package/logs/*my.log',
+        mixedMultiline: 'search sourcetype="access*" | streamstats',
+      },
+    };
+
+    const output = compileTemplate(vars, stringTemplate);
+    expect(output).toEqual(targetOutput);
+  });
 });

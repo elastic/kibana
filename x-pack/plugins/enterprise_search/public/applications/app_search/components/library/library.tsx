@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+
 import {
   EuiSpacer,
   EuiPageHeader,
@@ -13,11 +15,10 @@ import {
   EuiPageContentBody,
   EuiPageContent,
 } from '@elastic/eui';
-import React from 'react';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Schema } from '../../../shared/types';
-import { Result } from '../result/result';
+import { Result } from '../result';
 
 export const Library: React.FC = () => {
   const props = {
@@ -68,6 +69,16 @@ export const Library: React.FC = () => {
     size: 'number',
     length: 'number',
   };
+
+  const [isActionButtonFilled, setIsActionButtonFilled] = useState(false);
+  const actions = [
+    {
+      title: 'Fill this action button',
+      onClick: () => setIsActionButtonFilled(!isActionButtonFilled),
+      iconType: isActionButtonFilled ? 'starFilled' : 'starEmpty',
+      iconColor: 'primary',
+    },
+  ];
 
   return (
     <>
@@ -199,6 +210,22 @@ export const Library: React.FC = () => {
           </EuiTitle>
           <EuiSpacer />
           <Result {...props} shouldLinkToDetailPage />
+          <EuiSpacer />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With custom actions</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result {...props} actions={actions} />
+          <EuiSpacer />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With custom actions and a link</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <Result {...props} actions={actions} shouldLinkToDetailPage />
           <EuiSpacer />
 
           <EuiSpacer />

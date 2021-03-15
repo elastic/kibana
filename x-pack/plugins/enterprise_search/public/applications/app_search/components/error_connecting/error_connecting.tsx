@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiPageContent } from '@elastic/eui';
 
 import { ErrorStatePrompt } from '../../../shared/error_state';

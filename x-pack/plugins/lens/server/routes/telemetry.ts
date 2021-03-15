@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { CoreSetup } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
 
@@ -73,6 +73,9 @@ export async function initLensUsageRoute(setup: CoreSetup<PluginStartContract>) 
 
         return res.ok({ body: {} });
       } catch (e) {
+        if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
+          return res.forbidden();
+        }
         if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound();
         }
@@ -80,11 +83,9 @@ export async function initLensUsageRoute(setup: CoreSetup<PluginStartContract>) 
           if (e.output.statusCode === 404) {
             return res.notFound();
           }
-          return res.internalError(e.output.message);
+          throw new Error(e.output.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }

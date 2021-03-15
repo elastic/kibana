@@ -16,7 +16,10 @@ import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
 } from '../../../common/api_schemas/delete_transforms';
-import type { FieldHistogramsResponseSchema } from '../../../common/api_schemas/field_histograms';
+import type {
+  FieldHistogramsRequestSchema,
+  FieldHistogramsResponseSchema,
+} from '../../../common/api_schemas/field_histograms';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
@@ -54,6 +57,10 @@ export interface FieldHistogramRequestConfig {
   type?: KBN_FIELD_TYPES;
 }
 
+interface FetchOptions {
+  asSystemRequest?: boolean;
+}
+
 export const useApi = () => {
   const { http } = useAppDependencies();
 
@@ -68,9 +75,11 @@ export const useApi = () => {
           return e;
         }
       },
-      async getTransforms(): Promise<GetTransformsResponseSchema | HttpFetchError> {
+      async getTransforms(
+        fetchOptions: FetchOptions = {}
+      ): Promise<GetTransformsResponseSchema | HttpFetchError> {
         try {
-          return await http.get(`${API_BASE_PATH}transforms`);
+          return await http.get(`${API_BASE_PATH}transforms`, fetchOptions);
         } catch (e) {
           return e;
         }
@@ -84,9 +93,11 @@ export const useApi = () => {
           return e;
         }
       },
-      async getTransformsStats(): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
+      async getTransformsStats(
+        fetchOptions: FetchOptions = {}
+      ): Promise<GetTransformsStatsResponseSchema | HttpFetchError> {
         try {
-          return await http.get(`${API_BASE_PATH}transforms/_stats`);
+          return await http.get(`${API_BASE_PATH}transforms/_stats`, fetchOptions);
         } catch (e) {
           return e;
         }
@@ -186,6 +197,7 @@ export const useApi = () => {
         indexPatternTitle: string,
         fields: FieldHistogramRequestConfig[],
         query: string | SavedSearchQuery,
+        runtimeMappings?: FieldHistogramsRequestSchema['runtimeMappings'],
         samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
       ): Promise<FieldHistogramsResponseSchema | HttpFetchError> {
         try {
@@ -194,6 +206,7 @@ export const useApi = () => {
               query,
               fields,
               samplerShardSize,
+              ...(runtimeMappings !== undefined ? { runtimeMappings } : {}),
             }),
           });
         } catch (e) {

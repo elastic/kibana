@@ -33,6 +33,7 @@ import {
 import { useActions } from './use_actions';
 import { useMlLink } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import type { SpacesPluginStart } from '../../../../../../../../spaces/public';
 import { JobSpacesList } from '../../../../../components/job_spaces_list';
 
 enum TASK_STATE_COLOR {
@@ -150,7 +151,7 @@ export const useColumns = (
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
   isMlEnabledInSpace: boolean = true,
-  spacesEnabled: boolean = true,
+  spacesApi?: SpacesPluginStart,
   refresh: () => void = () => {}
 ) => {
   const { actions, modals } = useActions(isManagementTable);
@@ -281,7 +282,7 @@ export const useColumns = (
   ];
 
   if (isManagementTable === true) {
-    if (spacesEnabled === true) {
+    if (spacesApi) {
       // insert before last column
       columns.splice(columns.length - 1, 0, {
         name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
@@ -290,6 +291,7 @@ export const useColumns = (
         render: (item: DataFrameAnalyticsListRow) =>
           Array.isArray(item.spaceIds) ? (
             <JobSpacesList
+              spacesApi={spacesApi}
               spaceIds={item.spaceIds ?? []}
               jobId={item.id}
               jobType="data-frame-analytics"

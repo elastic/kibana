@@ -17,22 +17,20 @@ import {
 } from './alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import { parseDuration } from '../../../../alerts/server';
+import { parseDuration } from '../../../../alerting/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 export const ES_QUERY_ID = '.es-query';
 
-const DEFAULT_MAX_HITS_PER_EXECUTION = 1000;
-
-const ActionGroupId = 'query matched';
-const ConditionMetAlertInstanceId = 'query matched';
+export const ActionGroupId = 'query matched';
+export const ConditionMetAlertInstanceId = 'query matched';
 
 export function getAlertType(
   logger: Logger
 ): AlertType<EsQueryAlertParams, EsQueryAlertState, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
-    defaultMessage: 'ES query',
+    defaultMessage: 'Elasticsearch query',
   });
 
   const actionGroupName = i18n.translate('xpack.stackAlerts.esQuery.actionGroupThresholdMetTitle', {
@@ -84,7 +82,14 @@ export function getAlertType(
   const actionVariableContextQueryLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextQueryLabel',
     {
-      defaultMessage: 'The string representation of the ES query.',
+      defaultMessage: 'The string representation of the Elasticsearch query.',
+    }
+  );
+
+  const actionVariableContextSizeLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextSizeLabel',
+    {
+      defaultMessage: 'The number of hits to retrieve for each query.',
     }
   );
 
@@ -130,6 +135,7 @@ export function getAlertType(
       params: [
         { name: 'index', description: actionVariableContextIndexLabel },
         { name: 'esQuery', description: actionVariableContextQueryLabel },
+        { name: 'size', description: actionVariableContextSizeLabel },
         { name: 'threshold', description: actionVariableContextThresholdLabel },
         { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
       ],
@@ -160,14 +166,14 @@ export function getAlertType(
     }
 
     // During each alert execution, we run the configured query, get a hit count
-    // (hits.total) and retrieve up to DEFAULT_MAX_HITS_PER_EXECUTION hits. We
+    // (hits.total) and retrieve up to params.size hits. We
     // evaluate the threshold condition using the value of hits.total. If the threshold
     // condition is met, the hits are counted toward the query match and we update
     // the alert state with the timestamp of the latest hit. In the next execution
     // of the alert, the latestTimestamp will be used to gate the query in order to
     // avoid counting a document multiple times.
 
-    let timestamp: string | undefined = previousTimestamp;
+    let timestamp: string | undefined = tryToParseAsDate(previousTimestamp);
     const filter = timestamp
       ? {
           bool: {
@@ -181,7 +187,7 @@ export function getAlertType(
                         filter: [
                           {
                             range: {
-                              [params.timeField]: { lte: new Date(timestamp).toISOString() },
+                              [params.timeField]: { lte: timestamp },
                             },
                           },
                         ],
@@ -200,7 +206,7 @@ export function getAlertType(
       from: dateStart,
       to: dateEnd,
       filter,
-      size: DEFAULT_MAX_HITS_PER_EXECUTION,
+      size: params.size,
       sortOrder: 'desc',
       searchAfterSortId: undefined,
       timeField: params.timeField,
@@ -245,12 +251,11 @@ export function getAlertType(
           .scheduleActions(ActionGroupId, actionContext);
 
         // update the timestamp based on the current search results
-        const firstHitWithSort = searchResult.hits.hits.find(
-          (hit: ESSearchHit) => hit.sort != null
+        const firstValidTimefieldSort = getValidTimefieldSort(
+          searchResult.hits.hits.find((hit: ESSearchHit) => getValidTimefieldSort(hit.sort))?.sort
         );
-        const lastTimestamp = firstHitWithSort?.sort;
-        if (lastTimestamp != null && lastTimestamp.length > 0) {
-          timestamp = lastTimestamp[0];
+        if (firstValidTimefieldSort) {
+          timestamp = firstValidTimefieldSort;
         }
       }
     }
@@ -258,6 +263,21 @@ export function getAlertType(
     return {
       latestTimestamp: timestamp,
     };
+  }
+}
+
+function getValidTimefieldSort(sortValues: Array<string | number> = []): undefined | string {
+  for (const sortValue of sortValues) {
+    const sortDate = tryToParseAsDate(sortValue);
+    if (sortDate) {
+      return sortDate;
+    }
+  }
+}
+function tryToParseAsDate(sortValue?: string | number): undefined | string {
+  const sortDate = typeof sortValue === 'string' ? Date.parse(sortValue) : sortValue;
+  if (sortDate && !isNaN(sortDate)) {
+    return new Date(sortDate).toISOString();
   }
 }
 

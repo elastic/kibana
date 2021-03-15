@@ -9,8 +9,6 @@ import React, { ChangeEvent, MouseEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -26,14 +24,13 @@ import {
   EuiTableRow,
   EuiTableRowCell,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../shared/loading';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { SourceIcon } from '../../../components/shared/source_icon';
-
-import { GroupLogic } from '../group_logic';
-
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { ContentSource } from '../../../types';
+import { GroupLogic } from '../group_logic';
 
 const HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.sourceProioritization.headerTitle',

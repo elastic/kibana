@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ESFilter } from '../../../../../typings/elasticsearch';
 import { getExceptionListItemSchemaMock } from '../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getAnomalies, AnomaliesSearchParams } from '.';
 
@@ -13,8 +14,8 @@ const getFiltersFromMock = (mock: jest.Mock) => {
   return searchParams.body.query.bool.filter;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getBoolCriteriaFromFilters = (filters: any[]) => filters[1].bool.must;
+const getBoolCriteriaFromFilters = (filters: ESFilter[]) =>
+  filters.find((filter) => filter?.bool?.must)?.bool?.must;
 
 describe('getAnomalies', () => {
   let searchParams: AnomaliesSearchParams;
@@ -99,6 +100,22 @@ describe('getAnomalies', () => {
           query_string: {
             analyze_wildcard: false,
             query: 'job_id:jobId1 OR job_id:jobId2',
+          },
+        },
+      ])
+    );
+  });
+
+  it('ignores anomalies that do not have finalized scores', () => {
+    const mockMlAnomalySearch = jest.fn();
+    getAnomalies(searchParams, mockMlAnomalySearch);
+    const filters = getFiltersFromMock(mockMlAnomalySearch);
+
+    expect(filters).toEqual(
+      expect.arrayContaining([
+        {
+          term: {
+            is_interim: false,
           },
         },
       ])

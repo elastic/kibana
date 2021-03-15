@@ -24,6 +24,7 @@ import {
 
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import { RuntimeMappings } from '../../../../common/types/fields';
 import {
   Job,
   JobStats,
@@ -63,6 +64,7 @@ export interface BucketSpanEstimatorData {
   query: any;
   splitField: string | undefined;
   timeField: string | undefined;
+  runtimeMappings: RuntimeMappings | undefined;
 }
 
 export interface BucketSpanEstimatorResponse {

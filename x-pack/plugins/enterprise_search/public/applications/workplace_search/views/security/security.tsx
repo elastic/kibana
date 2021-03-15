@@ -20,18 +20,14 @@ import {
   EuiSpacer,
   EuiPanel,
   EuiConfirmModal,
-  EuiOverlayMask,
 } from '@elastic/eui';
 
-import { LicensingLogic } from '../../../shared/licensing';
 import { FlashMessages } from '../../../shared/flash_messages';
-import { LicenseCallout } from '../../components/shared/license_callout';
+import { LicensingLogic } from '../../../shared/licensing';
 import { Loading } from '../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
+import { LicenseCallout } from '../../components/shared/license_callout';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { SecurityLogic } from './security_logic';
-
-import { PrivateSourcesTable } from './components/private_sources_table';
-
 import {
   SECURITY_UNSAVED_CHANGES_MESSAGE,
   RESET_BUTTON,
@@ -45,6 +41,9 @@ import {
   CONFIRM_CHANGES_TEXT,
   PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT,
 } from '../../constants';
+
+import { PrivateSourcesTable } from './components/private_sources_table';
+import { SecurityLogic } from './security_logic';
 
 export const Security: React.FC = () => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
@@ -70,13 +69,6 @@ export const Security: React.FC = () => {
   useEffect(() => {
     initializeSourceRestrictions();
   }, []);
-
-  useEffect(() => {
-    window.onbeforeunload = unsavedChanges ? () => SECURITY_UNSAVED_CHANGES_MESSAGE : null;
-    return () => {
-      window.onbeforeunload = null;
-    };
-  }, [unsavedChanges]);
 
   if (dataLoading) return <Loading />;
 
@@ -170,23 +162,25 @@ export const Security: React.FC = () => {
   );
 
   const confirmModal = (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        title={CONFIRM_CHANGES_TEXT}
-        onConfirm={savePrivateSources}
-        onCancel={hideConfirmModal}
-        buttonColor="primary"
-        cancelButtonText={KEEP_EDITING_BUTTON}
-        confirmButtonText={SAVE_CHANGES_BUTTON}
-      >
-        {PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      title={CONFIRM_CHANGES_TEXT}
+      onConfirm={savePrivateSources}
+      onCancel={hideConfirmModal}
+      buttonColor="primary"
+      cancelButtonText={KEEP_EDITING_BUTTON}
+      confirmButtonText={SAVE_CHANGES_BUTTON}
+    >
+      {PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT}
+    </EuiConfirmModal>
   );
 
   return (
     <>
       <FlashMessages />
+      <UnsavedChangesPrompt
+        hasUnsavedChanges={unsavedChanges}
+        messageText={SECURITY_UNSAVED_CHANGES_MESSAGE}
+      />
       {header}
       {allSourcesToggle}
       {!hasPlatinumLicense && platinumLicenseCallout}

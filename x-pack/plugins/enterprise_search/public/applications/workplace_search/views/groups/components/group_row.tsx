@@ -6,21 +6,20 @@
  */
 
 import React from 'react';
-import moment from 'moment';
-import { useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
+import { useValues } from 'kea';
+import moment from 'moment';
 
 import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { TruncatedContent } from '../../../../shared/truncate';
 import { EuiLinkTo } from '../../../../shared/react_router_helpers';
-
-import { Group } from '../../../types';
-
+import { TruncatedContent } from '../../../../shared/truncate';
 import { AppLogic } from '../../../app_logic';
 import { getGroupPath } from '../../../routes';
+import { Group } from '../../../types';
 import { MAX_NAME_LENGTH } from '../group_logic';
+
 import { GroupSources } from './group_sources';
 import { GroupUsers } from './group_users';
 

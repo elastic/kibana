@@ -9,6 +9,7 @@ import '../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, mockKibanaValues, mockHistory } from '../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 jest.mock('./generate_breadcrumbs', () => ({

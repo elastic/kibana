@@ -16,10 +16,10 @@
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../../src/plugins/maps_legacy/tsconfig.json" },
+    { "path": "../../../src/plugins/maps_ems/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
-    { "path": "../maps_file_upload/tsconfig.json" },
+    { "path": "../file_upload/tsconfig.json" },
     { "path": "../saved_objects_tagging/tsconfig.json" },
   ]
 }

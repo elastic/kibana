@@ -7,13 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { memo, useEffect, useCallback } from 'react';
+import useInterval from 'react-use/lib/useInterval';
+import { SubscriptionSplashContent } from '../../../components/subscription_splash_content';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
   LogAnalysisSetupStatusUnknownPrompt,
   MissingResultsPrivilegesPrompt,
   MissingSetupPrivilegesPrompt,
-  SubscriptionSplashContent,
 } from '../../../components/logging/log_analysis_setup';
 import {
   LogAnalysisSetupFlyout,
@@ -27,7 +28,6 @@ import { useLogEntryRateModuleContext } from '../../../containers/logs/log_analy
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { LogEntryRateResultsContent } from './page_results_content';
 import { LogEntryRateSetupContent } from './page_setup_content';
-import { useInterval } from '../../../hooks/use_interval';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 

@@ -37,6 +37,7 @@ interface Props {
 
 export const StepDefineSummary: FC<Props> = ({
   formState: {
+    runtimeMappings,
     searchString,
     searchQuery,
     groupByList,
@@ -57,14 +58,16 @@ export const StepDefineSummary: FC<Props> = ({
   const previewRequest = getPreviewTransformRequestBody(
     searchItems.indexPattern.title,
     pivotQuery,
-    partialPreviewRequest
+    partialPreviewRequest,
+    runtimeMappings
   );
 
   const pivotPreviewProps = usePivotData(
     searchItems.indexPattern.title,
     pivotQuery,
     validationStatus,
-    partialPreviewRequest
+    partialPreviewRequest,
+    runtimeMappings
   );
 
   const isModifiedQuery =

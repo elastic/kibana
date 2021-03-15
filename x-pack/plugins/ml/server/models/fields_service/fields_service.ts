@@ -298,13 +298,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    interval: string | undefined
+    interval: string | undefined,
+    datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
     if (!interval) {
       throw Boom.badRequest('Interval is required to retrieve max bucket cardinalities.');
     }
 
-    const aggregatableFields = await getAggregatableFields(index, fieldNames);
+    const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
     if (aggregatableFields.length === 0) {
       return {};

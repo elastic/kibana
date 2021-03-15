@@ -50,11 +50,9 @@ export class Plugin implements InfraClientPluginClass {
       });
     }
 
-    const getCoreServices = async () => (await core.getStartServices())[0];
-
     pluginsSetup.embeddable.registerEmbeddableFactory(
       LOG_STREAM_EMBEDDABLE,
-      new LogStreamEmbeddableFactoryDefinition(getCoreServices)
+      new LogStreamEmbeddableFactoryDefinition(core.getStartServices)
     );
 
     core.application.register({

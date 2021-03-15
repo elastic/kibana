@@ -20,6 +20,7 @@ import {
   getSafeAggregationName,
   getLatestDataOrBucketTimestamp,
   getEarliestDatafeedStartTime,
+  resolveBucketSpanInSeconds,
 } from './job_utils';
 import { CombinedJob, Job } from '../types/anomaly_detection_jobs';
 import moment from 'moment';
@@ -600,6 +601,12 @@ describe('ML - job utils', () => {
 
     test('returns expected value when job has not run', () => {
       expect(getLatestDataOrBucketTimestamp(undefined, undefined)).toBe(undefined);
+    });
+  });
+
+  describe('resolveBucketSpanInSeconds', () => {
+    test('should resolve maximum bucket interval', () => {
+      expect(resolveBucketSpanInSeconds(['15m', '1h', '6h', '90s'])).toBe(21600);
     });
   });
 });

@@ -240,14 +240,15 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(1);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
-          event: {
+          panelView: 'eventDetail',
+          params: {
             eventId: '1',
             indexName: undefined,
           },
           tabType: 'query',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -263,14 +264,15 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(1);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
-          event: {
+          panelView: 'eventDetail',
+          params: {
             eventId: '1',
             indexName: undefined,
           },
           tabType: 'pinned',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -286,14 +288,15 @@ describe('Body', () => {
       expect(mockDispatch).toBeCalledTimes(1);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
-          event: {
+          panelView: 'eventDetail',
+          params: {
             eventId: '1',
             indexName: undefined,
           },
           tabType: 'notes',
           timelineId: 'timeline-test',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_EXPANDED_EVENT',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
   });

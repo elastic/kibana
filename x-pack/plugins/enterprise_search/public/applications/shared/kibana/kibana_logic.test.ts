@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { resetContext } from 'kea';
-
 import { mockKibanaValues } from '../../__mocks__';
+
+import { resetContext } from 'kea';
 
 import { KibanaLogic, mountKibanaLogic } from './kibana_logic';
 

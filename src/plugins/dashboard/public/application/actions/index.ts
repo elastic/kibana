@@ -32,6 +32,11 @@ export {
   ACTION_UNLINK_FROM_LIBRARY,
 } from './unlink_from_library_action';
 export {
+  CopyToDashboardAction,
+  CopyToDashboardActionContext,
+  ACTION_COPY_TO_DASHBOARD,
+} from './copy_to_dashboard_action';
+export {
   LibraryNotificationActionContext,
   LibraryNotificationAction,
   ACTION_LIBRARY_NOTIFICATION,

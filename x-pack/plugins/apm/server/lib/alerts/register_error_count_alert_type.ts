@@ -15,7 +15,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertTypeState,
-} from '../../../../alerts/server';
+} from '../../../../alerting/server';
 import {
   AlertType,
   ALERT_TYPES_CONFIG,
@@ -27,13 +27,13 @@ import {
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
-  alerts: AlertingPlugin['setup'];
+  alerting: AlertingPlugin['setup'];
   config$: Observable<APMConfig>;
 }
 
@@ -48,10 +48,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorCount];
 
 export function registerErrorCountAlertType({
-  alerts,
+  alerting,
   config$,
 }: RegisterAlertParams) {
-  alerts.registerType<
+  alerting.registerType<
     TypeOf<typeof paramsSchema>,
     AlertTypeState,
     AlertInstanceState,
@@ -104,7 +104,7 @@ export function registerErrorCountAlertType({
                 ...(alertParams.serviceName
                   ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
                   : []),
-                ...getEnvironmentUiFilterES(alertParams.environment),
+                ...environmentQuery(alertParams.environment),
               ],
             },
           },

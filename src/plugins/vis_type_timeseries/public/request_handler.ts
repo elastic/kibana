@@ -11,7 +11,7 @@ import { KibanaContext } from '../../data/public';
 import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
-import { TimeseriesVisParams } from './metrics_fn';
+import { TimeseriesVisParams } from './types';
 import { TimeseriesVisData } from '../common/types';
 
 interface MetricsRequestHandlerParams {
@@ -48,6 +48,7 @@ export const metricsRequestHandler = async ({
       });
 
     try {
+      const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
       return await getCoreStart().http.post(ROUTES.VIS_DATA, {
         body: JSON.stringify({
           timerange: {
@@ -58,8 +59,8 @@ export const metricsRequestHandler = async ({
           filters: input?.filters,
           panels: [visParams],
           state: uiStateObj,
-          ...(searchSessionId && {
-            searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          ...(searchSessionOptions && {
+            searchSession: searchSessionOptions,
           }),
         }),
       });

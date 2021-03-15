@@ -66,7 +66,7 @@ export type Action =
 // Actions wrapping the dispatcher exposed by the custom hook
 export interface ActionDispatchers {
   closeModal: () => void;
-  createAnalyticsJob: () => void;
+  createAnalyticsJob: () => Promise<boolean>;
   initiateWizard: () => Promise<void>;
   resetAdvancedEditorMessages: () => void;
   setAdvancedEditorRawString: (payload: State['advancedEditorRawString']) => void;

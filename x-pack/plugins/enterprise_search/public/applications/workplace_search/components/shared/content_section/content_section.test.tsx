@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiSpacer } from '@elastic/eui';
 
-import { ContentSection } from './';
 import { ViewContentHeader } from '../view_content_header';
+
+import { ContentSection } from './';
 
 const props = {
   children: <div className="children" />,

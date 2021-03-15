@@ -40,6 +40,8 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           severity: '1',
           short_description: 'a title',
           urgency: '1',
+          category: 'software',
+          subcategory: 'software',
         },
         comments: [
           {
@@ -63,11 +65,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     describe('ServiceNow - Action Creation', () => {
       it('should return 200 when creating a servicenow action successfully', async () => {
         const { body: createdAction } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            actionTypeId: '.servicenow',
+            connector_type_id: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
             },
@@ -77,23 +79,23 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
         expect(createdAction).to.eql({
           id: createdAction.id,
-          isPreconfigured: false,
+          is_preconfigured: false,
           name: 'A servicenow action',
-          actionTypeId: '.servicenow',
+          connector_type_id: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
           },
         });
 
         const { body: fetchedAction } = await supertest
-          .get(`/api/actions/action/${createdAction.id}`)
+          .get(`/api/actions/connector/${createdAction.id}`)
           .expect(200);
 
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
-          isPreconfigured: false,
+          is_preconfigured: false,
           name: 'A servicenow action',
-          actionTypeId: '.servicenow',
+          connector_type_id: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
           },
@@ -102,11 +104,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a servicenow action with no apiUrl', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            actionTypeId: '.servicenow',
+            connector_type_id: '.servicenow',
             config: {},
           })
           .expect(400)
@@ -122,11 +124,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a servicenow action with a not present in allowedHosts apiUrl', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            actionTypeId: '.servicenow',
+            connector_type_id: '.servicenow',
             config: {
               apiUrl: 'http://servicenow.mynonexistent.com',
             },
@@ -145,11 +147,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a servicenow action without secrets', async () => {
         await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
-            actionTypeId: '.servicenow',
+            connector_type_id: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
             },
@@ -172,11 +174,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       let proxyHaveBeenCalled = false;
       before(async () => {
         const { body } = await supertest
-          .post('/api/actions/action')
+          .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow simulator',
-            actionTypeId: '.servicenow',
+            connector_type_id: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
             },
@@ -196,14 +198,14 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       describe('Validation', () => {
         it('should handle failing with a simulated success without action', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql(['status', 'actionId', 'message', 'retry']);
-              expect(resp.body.actionId).to.eql(simulatedActionId);
+              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+              expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
               expect(resp.body.retry).to.eql(false);
               // Node.js 12 oddity:
@@ -237,14 +239,14 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without unsupported action', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'non-supported' },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -255,14 +257,14 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without subActionParams', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: { subAction: 'pushToService' },
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -273,7 +275,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without title', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -285,7 +287,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -296,7 +298,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without commentId', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -312,7 +314,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -323,7 +325,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
         it('should handle failing with a simulated success without comment message', async () => {
           await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -339,7 +341,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             })
             .then((resp: any) => {
               expect(resp.body).to.eql({
-                actionId: simulatedActionId,
+                connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
                 message:
@@ -351,7 +353,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         describe('getChoices', () => {
           it('should fail when field is not provided', async () => {
             await supertest
-              .post(`/api/actions/action/${simulatedActionId}/_execute`)
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: {
@@ -361,7 +363,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               })
               .then((resp: any) => {
                 expect(resp.body).to.eql({
-                  actionId: simulatedActionId,
+                  connector_id: simulatedActionId,
                   status: 'error',
                   retry: false,
                   message:
@@ -375,7 +377,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
       describe('Execution', () => {
         it('should handle creating an incident without comments', async () => {
           const { body: result } = await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -391,7 +393,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           expect(proxyHaveBeenCalled).to.equal(true);
           expect(result).to.eql({
             status: 'ok',
-            actionId: simulatedActionId,
+            connector_id: simulatedActionId,
             data: {
               id: '123',
               title: 'INC01',
@@ -404,7 +406,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
         describe('getChoices', () => {
           it('should get choices', async () => {
             const { body: result } = await supertest
-              .post(`/api/actions/action/${simulatedActionId}/_execute`)
+              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: {
@@ -417,7 +419,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             expect(proxyHaveBeenCalled).to.equal(true);
             expect(result).to.eql({
               status: 'ok',
-              actionId: simulatedActionId,
+              connector_id: simulatedActionId,
               data: [
                 {
                   dependent_value: '',

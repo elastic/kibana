@@ -22,6 +22,13 @@ const testProcessors: Pick<Pipeline, 'processors'> = {
         replacement: '$17$2',
       },
     },
+    {
+      set: {
+        field: 'test',
+        value: 'test',
+        unknown_field_foo: 'unknown_value',
+      },
+    },
   ],
 };
 
@@ -79,11 +86,37 @@ describe('Pipeline Editor', () => {
       await actions.addProcessor('processors', 'test', { if: '1 == 1' });
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
-      expect(processors.length).toBe(3);
-      const [a, b, c] = processors;
+      expect(processors.length).toBe(4);
+      const [a, b, c, d] = processors;
       expect(a).toEqual(testProcessors.processors[0]);
       expect(b).toEqual(testProcessors.processors[1]);
-      expect(c).toEqual({ test: { if: '1 == 1' } });
+      expect(c).toEqual(testProcessors.processors[2]);
+      expect(d).toEqual({ test: { if: '1 == 1' } });
+    });
+
+    it('edits a processor without removing unknown processor.options', async () => {
+      const { actions, exists, form } = testBed;
+      // Open the edit processor form for the set processor
+      actions.openProcessorEditor('processors>2');
+      expect(exists('editProcessorForm')).toBeTruthy();
+      form.setInputValue('editProcessorForm.valueFieldInput', 'test44');
+      await actions.submitProcessorForm();
+      const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
+      const {
+        processors: { 2: setProcessor },
+      } = onUpdateResult.getData();
+      // The original field should still be unchanged
+      expect(testProcessors.processors[2].set.value).toBe('test');
+      expect(setProcessor.set).toEqual({
+        description: undefined,
+        field: 'test',
+        ignore_empty_value: undefined,
+        ignore_failure: undefined,
+        override: undefined,
+        // This unknown_field is not supported in the form
+        unknown_field_foo: 'unknown_value',
+        value: 'test44',
+      });
     });
 
     it('removes a processor', () => {
@@ -92,7 +125,7 @@ describe('Pipeline Editor', () => {
       actions.removeProcessor('processors>0');
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
-      expect(processors.length).toBe(1);
+      expect(processors.length).toBe(2);
       expect(processors[0]).toEqual({
         gsub: {
           field: '_index',
@@ -107,7 +140,11 @@ describe('Pipeline Editor', () => {
       actions.moveProcessor('processors>0', 'dropButtonBelow-processors>1');
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
-      expect(processors).toEqual(testProcessors.processors.slice(0).reverse());
+      expect(processors).toEqual([
+        testProcessors.processors[1],
+        testProcessors.processors[0],
+        testProcessors.processors[2],
+      ]);
     });
 
     it('adds an on-failure processor to a processor', async () => {
@@ -121,7 +158,7 @@ describe('Pipeline Editor', () => {
       expect(exists(`${processorSelector}.addProcessor`));
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
-      expect(processors.length).toBe(2);
+      expect(processors.length).toBe(3);
       expect(processors[0]).toEqual(testProcessors.processors[0]); // should be unchanged
       expect(processors[1].gsub).toEqual({
         ...testProcessors.processors[1].gsub,
@@ -135,7 +172,7 @@ describe('Pipeline Editor', () => {
       actions.moveProcessor('processors>0', 'dropButtonBelow-processors>1>onFailure>0');
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
-      expect(processors.length).toBe(1);
+      expect(processors.length).toBe(2);
       expect(processors[0].gsub.on_failure).toEqual([
         {
           test: { if: '1 == 3' },
@@ -150,7 +187,7 @@ describe('Pipeline Editor', () => {
       actions.duplicateProcessor('processors>1');
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const { processors } = onUpdateResult.getData();
-      expect(processors.length).toBe(3);
+      expect(processors.length).toBe(4);
       const duplicatedProcessor = {
         gsub: {
           ...testProcessors.processors[1].gsub,
@@ -161,6 +198,7 @@ describe('Pipeline Editor', () => {
         testProcessors.processors[0],
         duplicatedProcessor,
         duplicatedProcessor,
+        testProcessors.processors[2],
       ]);
     });
 
@@ -182,14 +220,17 @@ describe('Pipeline Editor', () => {
       actions.moveProcessor('processors>0', 'dropButtonBelow-onFailure>0');
       const [onUpdateResult1] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const data1 = onUpdateResult1.getData();
-      expect(data1.processors.length).toBe(1);
+      expect(data1.processors.length).toBe(2);
       expect(data1.on_failure.length).toBe(2);
-      expect(data1.processors).toEqual([testProcessors.processors[1]]);
+      expect(data1.processors).toEqual([
+        testProcessors.processors[1],
+        testProcessors.processors[2],
+      ]);
       expect(data1.on_failure).toEqual([{ test: { if: '1 == 5' } }, testProcessors.processors[0]]);
       actions.moveProcessor('onFailure>1', 'dropButtonAbove-processors>0');
       const [onUpdateResult2] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const data2 = onUpdateResult2.getData();
-      expect(data2.processors.length).toBe(2);
+      expect(data2.processors.length).toBe(3);
       expect(data2.on_failure.length).toBe(1);
       expect(data2.processors).toEqual(testProcessors.processors);
       expect(data2.on_failure).toEqual([{ test: { if: '1 == 5' } }]);
@@ -208,7 +249,7 @@ describe('Pipeline Editor', () => {
       actions.moveProcessor('processors>0', 'onFailure.dropButtonEmptyTree');
       const [onUpdateResult2] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
       const data = onUpdateResult2.getData();
-      expect(data.processors).toEqual([testProcessors.processors[1]]);
+      expect(data.processors).toEqual([testProcessors.processors[1], testProcessors.processors[2]]);
       expect(data.on_failure).toEqual([testProcessors.processors[0]]);
     });
   });

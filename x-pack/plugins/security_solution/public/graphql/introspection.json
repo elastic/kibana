@@ -992,6 +992,14 @@
             "deprecationReason": null
           },
           {
+            "name": "eqlOptions",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "EqlOptionsResult", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "eventIdToNoteIds",
             "description": "",
             "args": [],
@@ -1563,6 +1571,57 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "EqlOptionsResult",
+        "description": "",
+        "fields": [
+          {
+            "name": "eventCategoryField",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tiebreakerField",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "timestampField",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "query",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "size",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "RowRendererId",
         "description": "",
@@ -1570,9 +1629,16 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          { "name": "alerts", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "auditd", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
             "name": "auditd_file",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "library",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
@@ -1584,6 +1650,12 @@
             "deprecationReason": null
           },
           { "name": "plain", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "registry",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "suricata",
             "description": "",
@@ -2491,6 +2563,12 @@
             "defaultValue": null
           },
           {
+            "name": "eqlOptions",
+            "description": "",
+            "type": { "kind": "INPUT_OBJECT", "name": "EqlOptionsInput", "ofType": null },
+            "defaultValue": null
+          },
+          {
             "name": "eventType",
             "description": "",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -2801,6 +2879,47 @@
             "name": "operator",
             "description": "",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "EqlOptionsInput",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eventCategoryField",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "tiebreakerField",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "timestampField",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "query",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "size",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
             "defaultValue": null
           }
         ],

@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { SavedObjectsClientContract, HttpSetup, SavedObjectReference } from 'kibana/public';
+import { HttpSetup, SavedObjectReference } from 'kibana/public';
 import { InitializationOptions, StateSetter } from '../types';
 import {
   IndexPattern,
@@ -30,8 +30,7 @@ import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
-type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find'>;
-type IndexPatternsService = Pick<IndexPatternsContract, 'get'>;
+type IndexPatternsService = Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
 type ErrorHandler = (err: Error) => void;
 
 export async function loadIndexPatterns({
@@ -186,7 +185,6 @@ export function injectReferences(
 export async function loadInitialState({
   persistedState,
   references,
-  savedObjectsClient,
   defaultIndexPatternId,
   storage,
   indexPatternsService,
@@ -195,7 +193,6 @@ export async function loadInitialState({
 }: {
   persistedState?: IndexPatternPersistedState;
   references?: SavedObjectReference[];
-  savedObjectsClient: SavedObjectsClient;
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
@@ -203,7 +200,7 @@ export async function loadInitialState({
   options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
   const { isFullEditor } = options ?? {};
-  const indexPatternRefs = await (isFullEditor ? loadIndexPatternRefs(savedObjectsClient) : []);
+  const indexPatternRefs = await (isFullEditor ? loadIndexPatternRefs(indexPatternsService) : []);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
 
   const state =
@@ -334,22 +331,13 @@ export async function changeLayerIndexPattern({
 }
 
 async function loadIndexPatternRefs(
-  savedObjectsClient: SavedObjectsClient
+  indexPatternsService: IndexPatternsService
 ): Promise<IndexPatternRef[]> {
-  const result = await savedObjectsClient.find<{ title: string }>({
-    type: 'index-pattern',
-    fields: ['title'],
-    perPage: 10000,
-  });
+  const indexPatterns = await indexPatternsService.getIdsWithTitle();
 
-  return result.savedObjects
-    .map((o) => ({
-      id: String(o.id),
-      title: (o.attributes as { title: string }).title,
-    }))
-    .sort((a, b) => {
-      return a.title.localeCompare(b.title);
-    });
+  return indexPatterns.sort((a, b) => {
+    return a.title.localeCompare(b.title);
+  });
 }
 
 export async function syncExistingFields({

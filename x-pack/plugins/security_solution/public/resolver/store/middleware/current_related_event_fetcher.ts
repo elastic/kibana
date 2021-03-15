@@ -32,7 +32,7 @@ export function CurrentRelatedEventFetcher(
     const state = api.getState();
 
     const newParams = selectors.panelViewAndParameters(state);
-    const indices = selectors.treeParameterIndices(state);
+    const indices = selectors.eventIndices(state);
 
     const oldParams = last;
     last = newParams;

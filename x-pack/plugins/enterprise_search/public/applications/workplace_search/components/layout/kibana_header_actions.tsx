@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 
 import { externalUrl, getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
-
 import { NAV } from '../../constants';
 
 export const WorkplaceSearchHeaderActions: React.FC = () => {

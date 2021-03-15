@@ -32,6 +32,8 @@ rules:
       - function
       - return
       - for
+      - at-root
+      - warn
   comment-no-empty: true
   no-duplicate-at-import-rules: true
   no-duplicate-selectors: true

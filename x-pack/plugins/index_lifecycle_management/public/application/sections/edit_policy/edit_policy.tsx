@@ -43,6 +43,7 @@ import {
   ColdPhase,
   DeletePhase,
   HotPhase,
+  FrozenPhase,
   PolicyJsonFlyout,
   WarmPhase,
   Timeline,
@@ -72,6 +73,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     policy: currentPolicy,
     existingPolicies,
     policyName,
+    license,
   } = useEditPolicyContext();
 
   const serializer = useMemo(() => {
@@ -80,6 +82,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
   const [saveAsNew, setSaveAsNew] = useState(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
+  const isAllowedByLicense = license.canUseSearchableSnapshot();
 
   const { form } = useForm({
     schema,
@@ -142,10 +145,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                 <h1>
                   {isNewPolicy
                     ? i18n.translate('xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage', {
-                        defaultMessage: 'Create Policy',
+                        defaultMessage: 'Create policy',
                       })
                     : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
-                        defaultMessage: 'Edit Policy {originalPolicyName}',
+                        defaultMessage: 'Edit policy {originalPolicyName}',
                         values: { originalPolicyName },
                       })}
                 </h1>
@@ -243,13 +246,21 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               <HotPhase />
 
               <EuiSpacer />
-
               <WarmPhase />
 
               <EuiSpacer />
-
               <ColdPhase />
 
+              {isAllowedByLicense && (
+                <>
+                  <EuiSpacer />
+                  <FrozenPhase />
+                </>
+              )}
+
+              {/* We can't add the <EuiSpacer /> here as it breaks the layout
+              and makes the connecting line go further that it needs to.
+              There is an issue in EUI to fix this (https://github.com/elastic/eui/issues/4492) */}
               <DeletePhase />
             </div>
 
@@ -259,32 +270,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
-                  {isShowingPolicyJsonFlyout ? (
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
-                      defaultMessage="Hide request"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
-                      defaultMessage="Show request"
-                    />
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
                 <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={backToPolicyList}>
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       data-test-subj="savePolicyButton"
@@ -307,7 +293,32 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                       )}
                     </EuiButton>
                   </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty data-test-subj="cancelTestPolicy" onClick={backToPolicyList}>
+                      <FormattedMessage
+                        id="xpack.indexLifecycleMgmt.editPolicy.cancelButton"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={togglePolicyJsonFlyout} data-test-subj="requestButton">
+                  {isShowingPolicyJsonFlyout ? (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.hidePolicyJsonButto"
+                      defaultMessage="Hide request"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.showPolicyJsonButto"
+                      defaultMessage="Show request"
+                    />
+                  )}
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
 

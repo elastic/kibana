@@ -19,21 +19,20 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
+import { clearFlashMessages } from '../../../../../shared/flash_messages';
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { Loading } from '../../../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
+import { AppLogic } from '../../../../app_logic';
+import { ViewContentHeader } from '../../../../components/shared/view_content_header';
+import { SAVE_BUTTON } from '../../../../constants';
+
 import {
   DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
   DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
   getContentSourcePath,
 } from '../../../../routes';
 
-import { clearFlashMessages } from '../../../../../shared/flash_messages';
-
-import { KibanaLogic } from '../../../../../shared/kibana';
-import { AppLogic } from '../../../../app_logic';
-
-import { Loading } from '../../../../../shared/loading';
-import { ViewContentHeader } from '../../../../components/shared/view_content_header';
-
-import { SAVE_BUTTON } from '../../../../constants';
 import {
   UNSAVED_MESSAGE,
   DISPLAY_SETTINGS_TITLE,
@@ -43,9 +42,7 @@ import {
   SEARCH_RESULTS_LABEL,
   RESULT_DETAIL_LABEL,
 } from './constants';
-
 import { DisplaySettingsLogic } from './display_settings_logic';
-
 import { FieldEditorModal } from './field_editor_modal';
 import { ResultDetail } from './result_detail';
 import { SearchResults } from './search_results';
@@ -73,13 +70,6 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
     initializeDisplaySettings();
     return clearFlashMessages;
   }, []);
-
-  useEffect(() => {
-    window.onbeforeunload = hasDocuments && unsavedChanges ? () => UNSAVED_MESSAGE : null;
-    return () => {
-      window.onbeforeunload = null;
-    };
-  }, [unsavedChanges]);
 
   if (dataLoading) return <Loading />;
 
@@ -112,6 +102,10 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
 
   return (
     <>
+      <UnsavedChangesPrompt
+        hasUnsavedChanges={hasDocuments && unsavedChanges}
+        messageText={UNSAVED_MESSAGE}
+      />
       <form onSubmit={handleFormSubmit}>
         <ViewContentHeader
           title={DISPLAY_SETTINGS_TITLE}

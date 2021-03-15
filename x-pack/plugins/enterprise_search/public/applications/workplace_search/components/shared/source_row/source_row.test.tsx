@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { contentSources } from '../../../__mocks__/content_sources.mock';
+
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiTableRow, EuiSwitch, EuiIcon } from '@elastic/eui';
-import { contentSources } from '../../../__mocks__/content_sources.mock';
 
 import { SourceIcon } from '../source_icon';
 

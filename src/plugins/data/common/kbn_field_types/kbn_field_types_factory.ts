@@ -44,16 +44,39 @@ export const createKbnFieldTypes = (): KbnFieldType[] => [
     ],
   }),
   new KbnFieldType({
+    name: KBN_FIELD_TYPES.NUMBER_RANGE,
+    sortable: true,
+    filterable: true,
+    esTypes: [
+      ES_FIELD_TYPES.FLOAT_RANGE,
+      ES_FIELD_TYPES.DOUBLE_RANGE,
+      ES_FIELD_TYPES.INTEGER_RANGE,
+      ES_FIELD_TYPES.LONG_RANGE,
+    ],
+  }),
+  new KbnFieldType({
     name: KBN_FIELD_TYPES.DATE,
     sortable: true,
     filterable: true,
     esTypes: [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.DATE_NANOS],
   }),
   new KbnFieldType({
+    name: KBN_FIELD_TYPES.DATE_RANGE,
+    sortable: true,
+    filterable: true,
+    esTypes: [ES_FIELD_TYPES.DATE_RANGE],
+  }),
+  new KbnFieldType({
     name: KBN_FIELD_TYPES.IP,
     sortable: true,
     filterable: true,
     esTypes: [ES_FIELD_TYPES.IP],
+  }),
+  new KbnFieldType({
+    name: KBN_FIELD_TYPES.IP_RANGE,
+    sortable: true,
+    filterable: true,
+    esTypes: [ES_FIELD_TYPES.IP_RANGE],
   }),
   new KbnFieldType({
     name: KBN_FIELD_TYPES.BOOLEAN,

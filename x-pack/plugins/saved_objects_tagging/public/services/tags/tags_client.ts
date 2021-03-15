@@ -6,7 +6,13 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { Tag, TagAttributes, ITagsClient, TagWithRelations } from '../../../common/types';
+import {
+  Tag,
+  TagAttributes,
+  GetAllTagsOptions,
+  ITagsClient,
+  TagWithRelations,
+} from '../../../common/types';
 import { ITagsChangeListener } from './tags_cache';
 
 export interface TagsClientOptions {
@@ -83,8 +89,12 @@ export class TagsClient implements ITagInternalClient {
     return tag;
   }
 
-  public async getAll() {
-    const { tags } = await this.http.get<{ tags: Tag[] }>('/api/saved_objects_tagging/tags');
+  public async getAll({ asSystemRequest }: GetAllTagsOptions = {}) {
+    const fetchOptions = { asSystemRequest };
+    const { tags } = await this.http.get<{ tags: Tag[] }>(
+      '/api/saved_objects_tagging/tags',
+      fetchOptions
+    );
 
     trapErrors(() => {
       if (this.changeListener) {

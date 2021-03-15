@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EncryptionKeyRotationService } from './encryption_key_rotation_service';
+import type { EncryptionKeyRotationService } from './encryption_key_rotation_service';
 
 function createEncryptionKeyRotationServiceMock() {
   return ({ rotate: jest.fn() } as unknown) as jest.Mocked<EncryptionKeyRotationService>;

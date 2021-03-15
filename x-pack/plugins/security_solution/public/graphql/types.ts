@@ -48,6 +48,8 @@ export interface TimelineInput {
 
   description?: Maybe<string>;
 
+  eqlOptions?: Maybe<EqlOptionsInput>;
+
   eventType?: Maybe<string>;
 
   excludedRowRendererIds?: Maybe<RowRendererId[]>;
@@ -129,6 +131,18 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface EqlOptionsInput {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
 }
 
 export interface FilterTimelineInput {
@@ -269,10 +283,13 @@ export enum DataProviderType {
 }
 
 export enum RowRendererId {
+  alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
+  library = 'library',
   netflow = 'netflow',
   plain = 'plain',
+  registry = 'registry',
   suricata = 'suricata',
   system = 'system',
   system_dns = 'system_dns',
@@ -462,6 +479,8 @@ export interface TimelineResult {
 
   description?: Maybe<string>;
 
+  eqlOptions?: Maybe<EqlOptionsResult>;
+
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   eventType?: Maybe<string>;
@@ -567,6 +586,18 @@ export interface DateRangePickerResult {
   start?: Maybe<ToAny>;
 
   end?: Maybe<ToAny>;
+}
+
+export interface EqlOptionsResult {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
 }
 
 export interface FavoriteTimelineResult {
@@ -1816,6 +1847,8 @@ export namespace GetOneTimeline {
 
     description: Maybe<string>;
 
+    eqlOptions: Maybe<EqlOptions>;
+
     eventType: Maybe<string>;
 
     eventIdToNoteIds: Maybe<EventIdToNoteIds[]>;
@@ -1961,6 +1994,20 @@ export namespace GetOneTimeline {
     start: Maybe<ToAny>;
 
     end: Maybe<ToAny>;
+  };
+
+  export type EqlOptions = {
+    __typename?: 'EqlOptionsResult';
+
+    eventCategoryField: Maybe<string>;
+
+    tiebreakerField: Maybe<string>;
+
+    timestampField: Maybe<string>;
+
+    query: Maybe<string>;
+
+    size: Maybe<ToAny>;
   };
 
   export type EventIdToNoteIds = {

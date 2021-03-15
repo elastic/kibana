@@ -9,21 +9,27 @@ import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { Credentials } from './credentials';
 import { EuiCopy, EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 
+import { DEFAULT_META } from '../../../shared/constants';
 import { externalUrl } from '../../../shared/enterprise_search_url';
+
+import { Credentials } from './credentials';
+
 import { CredentialsFlyout } from './credentials_flyout';
 
 describe('Credentials', () => {
   // Kea mocks
   const values = {
+    meta: DEFAULT_META,
     dataLoading: false,
   };
   const actions = {
-    initializeCredentialsData: jest.fn(),
+    fetchCredentials: jest.fn(),
+    fetchDetails: jest.fn(),
     resetCredentials: jest.fn(),
     showCredentialsForm: jest.fn(),
   };
@@ -39,9 +45,10 @@ describe('Credentials', () => {
     expect(wrapper.find(EuiPageContentBody)).toHaveLength(1);
   });
 
-  it('initializes data on mount', () => {
+  it('fetches data on mount', () => {
     shallow(<Credentials />);
-    expect(actions.initializeCredentialsData).toHaveBeenCalledTimes(1);
+    expect(actions.fetchCredentials).toHaveBeenCalledTimes(1);
+    expect(actions.fetchDetails).toHaveBeenCalledTimes(1);
   });
 
   it('calls resetCredentials on unmount', () => {
@@ -51,7 +58,7 @@ describe('Credentials', () => {
   });
 
   it('renders a limited UI if data is still loading', () => {
-    setMockValues({ dataLoading: true });
+    setMockValues({ ...values, dataLoading: true });
     const wrapper = shallow(<Credentials />);
     expect(wrapper.find('[data-test-subj="CreateAPIKeyButton"]')).toHaveLength(0);
     expect(wrapper.find(EuiLoadingContent)).toHaveLength(1);
@@ -75,13 +82,13 @@ describe('Credentials', () => {
   });
 
   it('will render CredentialsFlyout if shouldShowCredentialsForm is true', () => {
-    setMockValues({ shouldShowCredentialsForm: true });
+    setMockValues({ ...values, shouldShowCredentialsForm: true });
     const wrapper = shallow(<Credentials />);
     expect(wrapper.find(CredentialsFlyout)).toHaveLength(1);
   });
 
   it('will NOT render CredentialsFlyout if shouldShowCredentialsForm is false', () => {
-    setMockValues({ shouldShowCredentialsForm: false });
+    setMockValues({ ...values, shouldShowCredentialsForm: false });
     const wrapper = shallow(<Credentials />);
     expect(wrapper.find(CredentialsFlyout)).toHaveLength(0);
   });

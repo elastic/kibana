@@ -141,8 +141,14 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   type: 'saved_query',
   threat: getThreatMock(),
   threshold: {
-    field: 'host.name',
+    field: ['host.name'],
     value: 50,
+    cardinality: [
+      {
+        field: 'process.name',
+        value: 2,
+      },
+    ],
   },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
@@ -190,8 +196,12 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   },
   threatIndex: [],
   threshold: {
-    field: [''],
+    field: [],
     value: '100',
+    cardinality: {
+      field: ['process.name'],
+      value: '2',
+    },
   },
 });
 

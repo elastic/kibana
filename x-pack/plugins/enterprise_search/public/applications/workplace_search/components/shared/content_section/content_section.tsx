@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { SpacerSizeTypes } from '../../../types';
-
 import { ViewContentHeader } from '../view_content_header';
 
 import './content_section.scss';

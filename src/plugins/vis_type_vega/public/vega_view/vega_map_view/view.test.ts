@@ -17,8 +17,7 @@ import { SearchAPI } from '../../data_model/search_api';
 import vegaMap from '../../test_utils/vega_map_test.json';
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { IServiceSettings } from '../../../../maps_legacy/public';
-import type { MapsLegacyConfig } from '../../../../maps_legacy/config';
+import type { IServiceSettings, MapsEmsConfig } from '../../../../maps_ems/public';
 import { MapServiceSettings } from './map_service_settings';
 import { userConfiguredLayerId } from './constants';
 import {
@@ -42,6 +41,12 @@ jest.mock('mapbox-gl', () => ({
     getZoom: () => 3,
     addControl: jest.fn(),
     addLayer: jest.fn(),
+    dragRotate: {
+      disable: jest.fn(),
+    },
+    touchZoomRotate: {
+      disableRotation: jest.fn(),
+    },
   })),
   MapboxOptions: jest.fn(),
   NavigationControl: jest.fn(),
@@ -88,7 +93,7 @@ describe('vega_map_view/view', () => {
           maxZoom: 20,
         },
       },
-    } as MapsLegacyConfig;
+    } as MapsEmsConfig;
 
     function setMapService(defaultTmsLayer: string) {
       setMapServiceSettings(({
@@ -100,13 +105,18 @@ describe('vega_map_view/view', () => {
 
     async function createVegaMapView() {
       await vegaParser.parseAsync();
-      return new VegaMapView({
+      return new VegaMapView(({
         vegaParser,
         filterManager: dataPluginStart.query.filterManager,
         timefilter: dataPluginStart.query.timefilter.timefilter,
         fireEvent: (event: any) => {},
         parentEl: document.createElement('div'),
-      } as VegaViewParams);
+        vegaStateRestorer: {
+          save: jest.fn(),
+          restore: jest.fn(),
+          clear: jest.fn(),
+        },
+      } as unknown) as VegaViewParams);
     }
 
     beforeEach(() => {

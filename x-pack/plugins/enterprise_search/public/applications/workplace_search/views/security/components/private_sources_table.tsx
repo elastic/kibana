@@ -24,11 +24,10 @@ import {
   EuiTableRowCell,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LicensingLogic } from '../../../../shared/licensing';
-import { SecurityLogic, PrivateSourceSection } from '../security_logic';
 import {
   REMOTE_SOURCES_TOGGLE_TEXT,
   REMOTE_SOURCES_TABLE_DESCRIPTION,
@@ -38,6 +37,7 @@ import {
   STANDARD_SOURCES_EMPTY_TABLE_TITLE,
   SOURCE,
 } from '../../../constants';
+import { SecurityLogic, PrivateSourceSection } from '../security_logic';
 
 interface PrivateSourcesTableProps {
   sourceType: 'remote' | 'standard';

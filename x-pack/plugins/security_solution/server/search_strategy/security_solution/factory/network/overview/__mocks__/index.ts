@@ -111,6 +111,7 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignoreUnavailable: true,
+          track_total_hits: false,
           body: {
             aggregations: {
               unique_flow_count: { filter: { term: { type: 'flow' } } },
@@ -182,7 +183,6 @@ export const formattedSearchStrategyResponse = {
               },
             },
             size: 0,
-            track_total_hits: false,
           },
         },
         null,

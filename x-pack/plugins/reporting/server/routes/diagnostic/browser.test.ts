@@ -11,7 +11,11 @@ import { createInterface } from 'readline';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../..';
-import { createMockLevelLogger, createMockReportingCore } from '../../test_helpers';
+import {
+  createMockLevelLogger,
+  createMockPluginSetup,
+  createMockReportingCore,
+} from '../../test_helpers';
 import { registerDiagnoseBrowser } from './browser';
 import type { ReportingRequestHandlerContext } from '../../types';
 
@@ -55,12 +59,12 @@ describe('POST /diagnose/browser', () => {
       () => ({})
     );
 
-    const mockSetupDeps = ({
+    const mockSetupDeps = createMockPluginSetup({
       elasticsearch: {
         legacy: { client: { callAsInternalUser: jest.fn() } },
       },
       router: httpSetup.createRouter(''),
-    } as unknown) as any;
+    });
 
     core = await createMockReportingCore(config, mockSetupDeps);
 

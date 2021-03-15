@@ -9,10 +9,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started an Unusual Process",
   "query": "event.category:process and event.type:(start or process_started) and process.parent.name:MSBuild.exe and process.name:(csc.exe or iexplore.exe or powershell.exe)",
   "references": [
@@ -52,6 +53,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

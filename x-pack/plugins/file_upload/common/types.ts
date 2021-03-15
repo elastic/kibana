@@ -26,7 +26,7 @@ export interface Doc {
   message: string;
 }
 
-export type ImportDoc = Doc | string;
+export type ImportDoc = Doc | string | object;
 
 export interface Settings {
   pipeline?: string;

@@ -7,18 +7,18 @@
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../../__mocks__';
+import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiSteps, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
-import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
+import { ApiKey } from '../../../../components/shared/api_key';
 import { staticSourceData } from '../../source_data';
 
-import { ApiKey } from '../../../../components/shared/api_key';
 import { ConfigDocsLinks } from './config_docs_links';
-
 import { SaveConfig } from './save_config';
 
 describe('SaveConfig', () => {

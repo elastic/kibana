@@ -6,7 +6,9 @@
  */
 
 import React, { Fragment } from 'react';
+
 import { useValues } from 'kea';
+
 import { EuiCallOut, EuiCallOutProps, EuiSpacer } from '@elastic/eui';
 
 import { FlashMessagesLogic } from './flash_messages_logic';
@@ -15,7 +17,7 @@ const FLASH_MESSAGE_TYPES = {
   success: { color: 'success' as EuiCallOutProps['color'], icon: 'check' },
   info: { color: 'primary' as EuiCallOutProps['color'], icon: 'iInCircle' },
   warning: { color: 'warning' as EuiCallOutProps['color'], icon: 'alert' },
-  error: { color: 'danger' as EuiCallOutProps['color'], icon: 'cross' },
+  error: { color: 'danger' as EuiCallOutProps['color'], icon: 'alert' },
 };
 
 export const FlashMessages: React.FC = ({ children }) => {

@@ -25,8 +25,9 @@ jest.mock('react', () => ({
 }));
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+
 import { mount, ReactWrapper } from 'enzyme';
+import { act } from 'react-dom/test-utils';
 
 import { useSearchContextState, useSearchContextActions } from './hooks';
 

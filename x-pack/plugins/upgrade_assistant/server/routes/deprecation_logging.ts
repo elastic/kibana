@@ -30,12 +30,8 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         request,
         response
       ) => {
-        try {
-          const result = await getDeprecationLoggingStatus(client);
-          return response.ok({ body: result });
-        } catch (e) {
-          return response.internalError({ body: e });
-        }
+        const result = await getDeprecationLoggingStatus(client);
+        return response.ok({ body: result });
       }
     )
   );
@@ -59,14 +55,10 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         request,
         response
       ) => {
-        try {
-          const { isEnabled } = request.body as { isEnabled: boolean };
-          return response.ok({
-            body: await setDeprecationLogging(client, isEnabled),
-          });
-        } catch (e) {
-          return response.internalError({ body: e });
-        }
+        const { isEnabled } = request.body as { isEnabled: boolean };
+        return response.ok({
+          body: await setDeprecationLogging(client, isEnabled),
+        });
       }
     )
   );

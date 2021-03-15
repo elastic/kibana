@@ -31,7 +31,7 @@
           <a
             class="euiLink"
             data-test-subj="docTableRowAction"
-            ng-href="#/doc/{{indexPattern.id}}/{{row._index}}?id={{uriEncodedId}}"
+            ng-href="{{ getSingleDocHref() }}"
             i18n-id="discover.docTable.tableRow.viewSingleDocumentLinkText"
             i18n-default-message="View single document"
           ></a>

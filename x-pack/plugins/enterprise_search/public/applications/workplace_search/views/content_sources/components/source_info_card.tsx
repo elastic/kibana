@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 
 import { SourceIcon } from '../../../components/shared/source_icon';
-
 import { REMOTE_SOURCE_LABEL, CREATED_LABEL, STATUS_LABEL, READY_TEXT } from '../constants';
 
 interface SourceInfoCardProps {
@@ -42,7 +41,6 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
             className="content-source-meta__icon"
             serviceType={sourceType}
             name={sourceType}
-            fullBleed
             size="l"
           />
         </EuiFlexItem>

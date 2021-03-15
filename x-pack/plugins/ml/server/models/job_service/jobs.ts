@@ -39,6 +39,7 @@ import {
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 interface Results {
   [id: string]: {
@@ -172,8 +173,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     });
 
     const jobs = fullJobsList.map((job) => {
-      const hasDatafeed =
-        typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+      const hasDatafeed = isPopulatedObject(job.datafeed_config);
       const dataCounts = job.data_counts;
       const errorMessage = getSingleMetricViewerJobErrorMessage(job);
 
@@ -233,8 +233,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
 
     const jobs = fullJobsList.map((job) => {
       jobsMap[job.job_id] = job.groups || [];
-      const hasDatafeed =
-        typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+      const hasDatafeed = isPopulatedObject(job.datafeed_config);
       const timeRange: { to?: number; from?: number } = {};
 
       const dataCounts = job.data_counts;

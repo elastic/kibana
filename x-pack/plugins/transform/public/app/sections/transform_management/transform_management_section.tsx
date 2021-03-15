@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiModal,
-  EuiOverlayMask,
   EuiPageContent,
   EuiPageContentBody,
   EuiSpacer,
@@ -106,7 +105,7 @@ export const TransformManagement: FC = () => {
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.transform.transformList.transformDescription"
-              defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized or entity-centric indices."
+              defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access."
             />
           </EuiText>
         </EuiTitle>
@@ -124,15 +123,13 @@ export const TransformManagement: FC = () => {
         </EuiPageContentBody>
       </EuiPageContent>
       {isSearchSelectionVisible && (
-        <EuiOverlayMask>
-          <EuiModal
-            onClose={onCloseModal}
-            className="transformCreateTransformSearchDialog"
-            data-test-subj="transformSelectSourceModal"
-          >
-            <SearchSelection onSearchSelected={onSearchSelected} />
-          </EuiModal>
-        </EuiOverlayMask>
+        <EuiModal
+          onClose={onCloseModal}
+          className="transformCreateTransformSearchDialog"
+          data-test-subj="transformSelectSourceModal"
+        >
+          <SearchSelection onSearchSelected={onSearchSelected} />
+        </EuiModal>
       )}
     </Fragment>
   );

@@ -18,12 +18,15 @@ import {
   CasesResponse,
   CasesFindResponse,
   CommentType,
-} from '../../../../case/common/api';
+  AssociationType,
+  CaseType,
+} from '../../../../cases/common/api';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
-import { ConnectorTypes } from '../../../../case/common/api/connectors';
+import { ConnectorTypes } from '../../../../cases/common/api/connectors';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
+export const basicSubCaseId = 'basic-sub-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
@@ -38,6 +41,7 @@ export const elasticUser = {
 export const tags: string[] = ['coke', 'pepsi'];
 
 export const basicComment: Comment = {
+  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,
@@ -52,6 +56,7 @@ export const basicComment: Comment = {
 
 export const alertComment: Comment = {
   alertId: 'alert-id-1',
+  associationType: AssociationType.case,
   index: 'alert-index-1',
   type: CommentType.alert,
   id: 'alert-comment-id',
@@ -59,12 +64,17 @@ export const alertComment: Comment = {
   createdBy: elasticUser,
   pushedAt: null,
   pushedBy: null,
+  rule: {
+    id: 'rule-id-1',
+    name: 'Awesome rule',
+  },
   updatedAt: null,
   updatedBy: null,
   version: 'WzQ3LDFc',
 };
 
 export const basicCase: Case = {
+  type: CaseType.individual,
   closedAt: null,
   closedBy: null,
   id: basicCaseId,
@@ -83,12 +93,45 @@ export const basicCase: Case = {
   tags,
   title: 'Another horrible breach!!',
   totalComment: 1,
+  totalAlerts: 0,
   updatedAt: basicUpdatedAt,
   updatedBy: elasticUser,
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
   },
+  subCaseIds: [],
+};
+
+export const collectionCase: Case = {
+  type: CaseType.collection,
+  closedAt: null,
+  closedBy: null,
+  id: 'collection-id',
+  comments: [basicComment],
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  connector: {
+    id: '123',
+    name: 'My Connector',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
+  description: 'Security banana Issue',
+  externalService: null,
+  status: CaseStatuses.open,
+  tags,
+  title: 'Another horrible breach in a collection!!',
+  totalComment: 1,
+  totalAlerts: 0,
+  updatedAt: basicUpdatedAt,
+  updatedBy: elasticUser,
+  version: 'WzQ3LDFd',
+  settings: {
+    syncAlerts: true,
+  },
+  subCases: [],
+  subCaseIds: [],
 };
 
 export const basicCasePost: Case = {
@@ -181,6 +224,7 @@ export const elasticUserSnake = {
 };
 
 export const basicCommentSnake: CommentResponse = {
+  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,
@@ -210,7 +254,7 @@ export const basicCaseSnake: CaseResponse = {
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
-};
+} as CaseResponse;
 
 export const casesStatusSnake: CasesStatusResponse = {
   count_closed_cases: 130,

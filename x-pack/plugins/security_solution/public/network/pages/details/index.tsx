@@ -147,6 +147,7 @@ const NetworkDetailsComponent: React.FC = () => {
               id={id}
               inspect={inspect}
               ip={ip}
+              isInDetailsSidePanel={false}
               data={networkDetails}
               anomaliesData={anomaliesData}
               loading={loading}

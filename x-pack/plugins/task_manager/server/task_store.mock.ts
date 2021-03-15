@@ -5,38 +5,27 @@
  * 2.0.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { TaskClaim } from './task_events';
-
 import { TaskStore } from './task_store';
 
 interface TaskStoreOptions {
-  maxAttempts?: number;
   index?: string;
   taskManagerId?: string;
-  events?: Observable<TaskClaim>;
 }
 export const taskStoreMock = {
-  create({
-    maxAttempts = 0,
-    index = '',
-    taskManagerId = '',
-    events = new Subject<TaskClaim>(),
-  }: TaskStoreOptions) {
+  create({ index = '', taskManagerId = '' }: TaskStoreOptions = {}) {
     const mocked = ({
+      convertToSavedObjectIds: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),
       schedule: jest.fn(),
-      claimAvailableTasks: jest.fn(),
       bulkUpdate: jest.fn(),
       get: jest.fn(),
       getLifecycle: jest.fn(),
       fetch: jest.fn(),
       aggregate: jest.fn(),
-      maxAttempts,
+      updateByQuery: jest.fn(),
       index,
       taskManagerId,
-      events,
     } as unknown) as jest.Mocked<TaskStore>;
     return mocked;
   },

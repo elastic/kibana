@@ -8,8 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { RequirementsByServiceName, ServiceName, entries } from '../../../types';
+
+import type { RequirementsByServiceName, ServiceName } from '../../../types';
+import { entries } from '../../../types';
 import { ServiceTitleMap } from '../constants';
+
 import { Version } from './version';
 
 export interface RequirementsProps {

@@ -20,7 +20,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./agents/enroll'));
     loadTestFile(require.resolve('./agents/unenroll'));
     loadTestFile(require.resolve('./agents/checkin'));
-    loadTestFile(require.resolve('./agents/events'));
     loadTestFile(require.resolve('./agents/acks'));
     loadTestFile(require.resolve('./agents/complete_flow'));
     loadTestFile(require.resolve('./agents/actions'));
@@ -37,6 +36,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./package_policy/create'));
     loadTestFile(require.resolve('./package_policy/update'));
     loadTestFile(require.resolve('./package_policy/get'));
+    loadTestFile(require.resolve('./package_policy/delete'));
 
     // Agent policies
     loadTestFile(require.resolve('./agent_policy/index'));

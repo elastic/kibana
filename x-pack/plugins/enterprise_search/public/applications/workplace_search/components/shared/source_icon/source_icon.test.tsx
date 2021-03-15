@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiIcon } from '@elastic/eui';
@@ -24,11 +25,5 @@ describe('SourceIcon', () => {
     const wrapper = shallow(<SourceIcon name="foo" wrapped serviceType="custom" />);
 
     expect(wrapper.find('.wrapped-icon')).toHaveLength(1);
-  });
-
-  it('renders a full bleed icon', () => {
-    const wrapper = shallow(<SourceIcon name="foo" fullBleed serviceType="custom" />);
-
-    expect(wrapper.find(EuiIcon).prop('type')).toEqual('test-file-stub');
   });
 });

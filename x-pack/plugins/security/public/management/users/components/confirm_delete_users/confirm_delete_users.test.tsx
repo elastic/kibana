@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test/jest';
-import { ConfirmDeleteUsers } from './confirm_delete_users';
 import React from 'react';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
 import { userAPIClientMock } from '../../index.mock';
+import { ConfirmDeleteUsers } from './confirm_delete_users';
 
 describe('ConfirmDeleteUsers', () => {
   it('renders a warning for a single user', () => {

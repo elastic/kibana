@@ -111,11 +111,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           );
         }
 
-        contract = await withTimeout({
+        const contractMaybe = await withTimeout({
           promise: contractOrPromise,
-          timeout: 10 * Sec,
-          errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`,
+          timeoutMs: 10 * Sec,
         });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Setup lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
       } else {
         contract = contractOrPromise;
       }
@@ -158,11 +165,18 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           );
         }
 
-        contract = await withTimeout({
+        const contractMaybe = await withTimeout({
           promise: contractOrPromise,
-          timeout: 10 * Sec,
-          errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`,
+          timeoutMs: 10 * Sec,
         });
+
+        if (contractMaybe.timedout) {
+          throw new Error(
+            `Start lifecycle of "${pluginName}" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.`
+          );
+        } else {
+          contract = contractMaybe.value;
+        }
       } else {
         contract = contractOrPromise;
       }

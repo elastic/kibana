@@ -10,19 +10,17 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions } from '../../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { Route, Redirect, Switch } from 'react-router-dom';
 
-import { staticSourceData } from '../content_sources/source_data';
+import { shallow } from 'enzyme';
 
 import { FlashMessages } from '../../../shared/flash_messages';
+import { staticSourceData } from '../content_sources/source_data';
 
 import { Connectors } from './components/connectors';
 import { Customize } from './components/customize';
 import { OauthApplication } from './components/oauth_application';
 import { SourceConfig } from './components/source_config';
-
 import { SettingsRouter } from './settings_router';
 
 describe('SettingsRouter', () => {

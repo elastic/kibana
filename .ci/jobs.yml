@@ -2,7 +2,6 @@
 
 JOB:
   - kibana-intake
-  - x-pack-intake
   - kibana-firefoxSmoke
   - kibana-ciGroup1
   - kibana-ciGroup2

@@ -15,7 +15,7 @@ import {
   ExceptionListItemSchema,
   NestedEntriesArray,
 } from '../../../../../lists/common/shared_exports';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
 import { CreateExceptionListItemOptions } from '../../../../../lists/server';
 import {
   ConditionEntry,
@@ -184,7 +184,7 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
     name,
     namespaceType: 'agnostic',
     osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
-    tags: [],
+    tags: ['policy:all'],
     type: 'simple',
   };
 };

@@ -95,6 +95,7 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
@@ -113,6 +114,7 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
 export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
@@ -146,6 +148,8 @@ export {
   UI_SETTINGS,
   IndexPattern,
   IndexPatternLoadExpressionFunctionDefinition,
+  IndexPatternsService,
+  IndexPatternsService as IndexPatternsCommonService,
 } from '../common';
 
 /**
@@ -306,4 +310,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export type { IndexPatternsServiceProvider as IndexPatternsService } from './index_patterns';
+export type { IndexPatternsServiceProvider } from './index_patterns';

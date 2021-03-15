@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from 'kibana/server';
 import {
   AnalysisResult,
   FormattedOverrides,
   InputOverrides,
   FindFileStructureResponse,
 } from '../../../common/types/file_datavisualizer';
-import type { MlClient } from '../../lib/ml_client';
 
 export type InputData = any[];
 
-export function fileDataVisualizerProvider(mlClient: MlClient) {
+export function fileDataVisualizerProvider(client: IScopedClusterClient) {
   async function analyzeFile(data: InputData, overrides: InputOverrides): Promise<AnalysisResult> {
     overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
-    const { body } = await mlClient.findFileStructure<FindFileStructureResponse>({
+    const {
+      body,
+    } = await client.asInternalUser.textStructure.findStructure<FindFileStructureResponse>({
       body: data,
       ...overrides,
     });

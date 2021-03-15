@@ -7,9 +7,6 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -20,15 +17,16 @@ import {
   EuiText,
   EuiTextAlign,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
+import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import {
   getSourcesPath,
   ADD_SOURCE_PATH,
   SECURITY_PATH,
   PRIVATE_SOURCES_DOCS_URL,
 } from '../../../../routes';
-
-import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 import {
   CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK,

@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Unusual Process Execution - Temp",
   "query": "event.category:process and event.type:(start or process_started) and process.working_directory:/tmp",
   "risk_score": 47,
@@ -24,6 +24,7 @@
     "Linux",
     "Threat Detection"
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

@@ -11,6 +11,7 @@ import { fetchExceptionListsItemsByListIds } from '../api';
 import { FilterExceptionsOptions, Pagination, UseExceptionListProps } from '../types';
 import { ExceptionListItemSchema } from '../../../common/schemas';
 import { getIdsAndNamespaces } from '../utils';
+import { transformInput } from '../transforms';
 
 type Func = () => void;
 export type ReturnExceptionListAndItems = [
@@ -95,8 +96,12 @@ export const useExceptionListItems = ({
             }
             setLoading(false);
           } else {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            const { page, per_page, total, data } = await fetchExceptionListsItemsByListIds({
+            const {
+              page,
+              per_page: perPage,
+              total,
+              data,
+            } = await fetchExceptionListsItemsByListIds({
               filterOptions: filters,
               http,
               listIds: ids,
@@ -108,20 +113,24 @@ export const useExceptionListItems = ({
               signal: abortCtrl.signal,
             });
 
+            // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+            // for context around the temporary `id`
+            const transformedData = data.map((item) => transformInput(item));
+
             if (isSubscribed) {
               setPagination({
                 page,
-                perPage: per_page,
+                perPage,
                 total,
               });
-              setExceptionListItems(data);
+              setExceptionListItems(transformedData);
 
               if (onSuccess != null) {
                 onSuccess({
-                  exceptions: data,
+                  exceptions: transformedData,
                   pagination: {
                     page,
-                    perPage: per_page,
+                    perPage,
                     total,
                   },
                 });

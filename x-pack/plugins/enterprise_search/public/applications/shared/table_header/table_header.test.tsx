@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
 
 import { TableHeader } from './table_header';

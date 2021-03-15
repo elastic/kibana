@@ -8,7 +8,11 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Query } from 'src/plugins/data/public';
-import { StyleDescriptor, VectorStyleDescriptor } from './style_property_descriptor_types';
+import {
+  HeatmapStyleDescriptor,
+  StyleDescriptor,
+  VectorStyleDescriptor,
+} from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
 
@@ -23,6 +27,7 @@ export type LayerDescriptor = {
   __isPreviewLayer?: boolean;
   __errorMessage?: string;
   __trackedLayerDescriptor?: LayerDescriptor;
+  __areTilesLoaded?: boolean;
   alpha?: number;
   id: string;
   joins?: JoinDescriptor[];
@@ -39,4 +44,8 @@ export type LayerDescriptor = {
 
 export type VectorLayerDescriptor = LayerDescriptor & {
   style: VectorStyleDescriptor;
+};
+
+export type HeatmapLayerDescriptor = LayerDescriptor & {
+  style: HeatmapStyleDescriptor;
 };

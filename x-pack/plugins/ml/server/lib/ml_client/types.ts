@@ -29,7 +29,6 @@ export type MlClientParams =
   | Parameters<MlClient['estimateModelMemory']>
   | Parameters<MlClient['evaluateDataFrame']>
   | Parameters<MlClient['explainDataFrameAnalytics']>
-  | Parameters<MlClient['findFileStructure']>
   | Parameters<MlClient['flushJob']>
   | Parameters<MlClient['forecast']>
   | Parameters<MlClient['getBuckets']>

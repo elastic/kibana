@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   HttpServiceSetup,
   KibanaRequest,
   Logger,
   SessionStorageFactory,
-} from '../../../../../src/core/server';
-import { ConfigType } from '../config';
+} from 'src/core/server';
+
+import type { ConfigType } from '../config';
 
 /**
  * Represents shape of the session value stored in the cookie.

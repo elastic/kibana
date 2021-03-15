@@ -7,14 +7,15 @@
 
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
+
 import classNames from 'classnames';
 
-import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiTitle, EuiText, EuiLink } from '@elastic/eui'; // TODO: Remove EuiLink after full Kibana transition
-import { EuiLinkTo } from '../react_router_helpers';
+import { i18n } from '@kbn/i18n';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
+import { EuiLinkTo } from '../react_router_helpers';
 
 import { NavContext, INavContext } from './layout';
 

@@ -179,7 +179,7 @@ function createPlugin$(
   coreContext: CoreContext,
   instanceInfo: InstanceInfo
 ) {
-  return from(parseManifest(path, coreContext.env.packageInfo, log)).pipe(
+  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map((manifest) => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);

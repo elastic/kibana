@@ -89,6 +89,27 @@ export const getTestCases = (spaceId?: string): { [key: string]: ExportTestCase 
         .flat(),
     ],
   },
+  ...(spaceId !== SPACE_2_ID && {
+    // we do not have a multi-namespace isolated object in Space 2
+    multiNamespaceIsolatedObject: {
+      title: 'multi-namespace isolated object',
+      ...(spaceId === SPACE_1_ID
+        ? CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1
+        : CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE),
+    },
+  }),
+  multiNamespaceIsolatedType: {
+    title: 'multi-namespace isolated type',
+    type: 'sharecapabletype',
+    successResult: [
+      ...(spaceId === SPACE_1_ID
+        ? [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1]
+        : spaceId === SPACE_2_ID
+        ? []
+        : [CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE]
+      ).flat(),
+    ],
+  },
   namespaceAgnosticObject: {
     title: 'namespace-agnostic object',
     ...CASES.NAMESPACE_AGNOSTIC,

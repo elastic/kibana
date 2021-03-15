@@ -9,17 +9,15 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { HttpLogic } from '../../../shared/http';
-import { KibanaLogic } from '../../../shared/kibana';
-
+import { DEFAULT_META } from '../../../shared/constants';
 import {
   flashAPIErrors,
   setSuccessMessage,
   setQueuedSuccessMessage,
   clearFlashMessages,
 } from '../../../shared/flash_messages';
-
-import { DEFAULT_META } from '../../../shared/constants';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { AppLogic } from '../../app_logic';
 import { NOT_FOUND_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 import { ContentSourceFullData, Meta, DocumentSummaryItem, SourceContentItem } from '../../types';

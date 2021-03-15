@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-
 import { setMockValues, rerender } from '../__mocks__';
 
-import { EnterpriseSearch } from './';
-import { SetupGuide } from './components/setup_guide';
+import React from 'react';
+
+import { shallow } from 'enzyme';
+
 import { ErrorConnecting } from './components/error_connecting';
 import { ProductSelector } from './components/product_selector';
+import { SetupGuide } from './components/setup_guide';
+
+import { EnterpriseSearch } from './';
 
 describe('EnterpriseSearch', () => {
   it('renders the Setup Guide and Product Selector', () => {

@@ -8,18 +8,16 @@
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues, setMockActions } from '../../../__mocks__';
-
-import { shallow } from 'enzyme';
+import { contentSources } from '../../__mocks__/content_sources.mock';
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-import { contentSources } from '../../__mocks__/content_sources.mock';
+import { shallow } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
 import { SourcesTable } from '../../components/shared/sources_table';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
-
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import { OrganizationSources } from './organization_sources';

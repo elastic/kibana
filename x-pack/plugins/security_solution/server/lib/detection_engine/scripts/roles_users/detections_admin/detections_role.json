@@ -26,8 +26,7 @@
         "siem": ["all"],
         "actions": ["read"],
         "builtInAlerts": ["all"],
-        "dev_tools": ["all"],
-        "savedObjectsManagement": ["all"]
+        "dev_tools": ["all"]
       },
       "spaces": ["*"]
     }
