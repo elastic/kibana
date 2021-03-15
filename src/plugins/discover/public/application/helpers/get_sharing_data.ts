@@ -47,7 +47,7 @@ export async function getSharingData(
     if (!hideTimeColumn && index && index.timeFieldName) {
       timeFieldName = index.timeFieldName;
     }
-    if (timeFieldName) {
+    if (timeFieldName && !columns.includes(timeFieldName)) {
       columns = [timeFieldName, ...columns];
     }
 
