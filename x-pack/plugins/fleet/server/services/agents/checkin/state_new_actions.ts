@@ -40,6 +40,7 @@ import {
 } from '../actions';
 import { appContextService } from '../../app_context';
 import { getAgent, updateAgent } from '../crud';
+import type { FullAgentPolicyPermission } from '../../../../common';
 
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
@@ -113,14 +114,20 @@ async function getAgentDefaultOutputAPIKey(
 async function getOrCreateAgentDefaultOutputAPIKey(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  agent: Agent
+  agent: Agent,
+  permissions: FullAgentPolicyPermission[]
 ): Promise<string> {
   const defaultAPIKey = await getAgentDefaultOutputAPIKey(soClient, esClient, agent);
   if (defaultAPIKey) {
     return defaultAPIKey;
   }
 
-  const outputAPIKey = await APIKeysService.generateOutputApiKey(soClient, 'default', agent.id);
+  const outputAPIKey = await APIKeysService.generateOutputApiKey(
+    soClient,
+    'default',
+    agent.id,
+    permissions
+  );
   await updateAgent(esClient, agent.id, {
     default_api_key: outputAPIKey.key,
     default_api_key_id: outputAPIKey.id,
@@ -168,7 +175,12 @@ export async function createAgentActionFromPolicyAction(
   );
 
   // Mutate the policy to set the api token for this agent
-  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, esClient, agent);
+  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(
+    soClient,
+    esClient,
+    agent,
+    newAgentAction.data.policy.outputPermissions.default
+  );
   if (newAgentAction.data.policy) {
     newAgentAction.data.policy.outputs.default.api_key = apiKey;
   }

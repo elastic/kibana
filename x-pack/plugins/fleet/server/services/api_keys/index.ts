@@ -8,6 +8,8 @@
 import type { KibanaRequest } from 'src/core/server';
 import type { SavedObjectsClientContract } from 'src/core/server';
 
+import type { FullAgentPolicyPermission } from '../../../common';
+
 import { createAPIKey } from './security';
 
 export { invalidateAPIKeys } from './security';
@@ -16,18 +18,14 @@ export * from './enrollment_api_key';
 export async function generateOutputApiKey(
   soClient: SavedObjectsClientContract,
   outputId: string,
-  agentId: string
+  agentId: string,
+  permissions: FullAgentPolicyPermission[]
 ): Promise<{ key: string; id: string }> {
   const name = `${agentId}:${outputId}`;
   const key = await createAPIKey(soClient, name, {
     'fleet-output': {
       cluster: ['monitor'],
-      index: [
-        {
-          names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
-          privileges: ['auto_configure', 'create_doc'],
-        },
-      ],
+      index: permissions,
     },
   });
 
