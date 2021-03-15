@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import {
+import type {
   CoreSetup,
   CoreStart,
   ElasticsearchServiceStart,
@@ -20,23 +20,23 @@ import {
   RequestHandlerContext,
   KibanaRequest,
 } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { LicensingPluginSetup, ILicense } from '../../licensing/server';
-import {
+import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '../../encrypted_saved_objects/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import {
+import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type {
   EsAssetReference,
   FleetConfigType,
   NewPackagePolicy,
   UpdatePackagePolicy,
 } from '../common';
-import { CloudSetup } from '../../cloud/server';
+import type { CloudSetup } from '../../cloud/server';
 
 import {
   PLUGIN_ID,
@@ -64,16 +64,18 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
+import type {
+  ESIndexPatternService,
+  AgentService,
+  AgentPolicyServiceInterface,
+  PackageService,
+} from './services';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
-  ESIndexPatternService,
-  AgentService,
-  AgentPolicyServiceInterface,
   agentPolicyService,
   packagePolicyService,
-  PackageService,
 } from './services';
 import {
   getAgentStatusById,

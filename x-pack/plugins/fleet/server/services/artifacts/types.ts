@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ListResult } from '../../../common';
-import { ListWithKuery } from '../../types';
+import type { ListResult } from '../../../common';
+import type { ListWithKuery } from '../../types';
 
 export interface NewArtifact {
   compressionAlgorithm: 'none' | 'zlib';

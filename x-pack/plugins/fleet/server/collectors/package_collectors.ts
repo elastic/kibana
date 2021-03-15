@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from 'kibana/server';
+import type { SavedObjectsClient } from 'kibana/server';
 import _ from 'lodash';
 
 import { getPackageSavedObjects } from '../services/epm/packages/get';
