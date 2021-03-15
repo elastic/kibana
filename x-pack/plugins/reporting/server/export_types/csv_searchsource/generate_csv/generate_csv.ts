@@ -50,7 +50,7 @@ function isPlainStringArray(
   let result = true;
   if (Array.isArray(fields)) {
     fields.forEach((field) => {
-      if (typeof field !== 'string') {
+      if (typeof field !== 'string' || field === '*' || field === '_source') {
         result = false;
       }
     });
