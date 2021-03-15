@@ -1,0 +1,24 @@
+.field-value-short {
+  @include euiTextTruncate;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.field-value-long {
+  overflow-wrap: break-word;
+}
+
+.filter-button {
+  opacity: .3;
+  min-width: 14px;
+  padding-right: 0;
+
+  .euiIcon {
+    width: $euiFontSizeXS;
+    height: $euiFontSizeXS;
+  }
+}
+
+.filter-button:hover {
+  opacity: 1;
+}

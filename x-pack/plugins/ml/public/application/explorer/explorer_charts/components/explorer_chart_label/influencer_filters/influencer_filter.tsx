@@ -9,6 +9,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ENTITY_FIELD_OPERATIONS } from '../../../../../../../common/util/anomaly_utils';
+import './influencer_filter.scss';
 
 interface InfluencerFilterProps {
   onFilter: (params: {
