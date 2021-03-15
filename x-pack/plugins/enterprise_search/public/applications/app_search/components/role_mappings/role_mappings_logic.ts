@@ -93,6 +93,7 @@ export interface RoleMappingsValues {
 }
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
+  path: ['enterprise_search', 'app_search', 'role_mappings'],
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMappingData: (data: RoleMappingServerDetails) => data,
@@ -149,12 +150,14 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       [],
       {
         setRoleMappingData: (_, { availableEngines }) => availableEngines,
+        resetState: () => [],
       },
     ],
     attributes: [
       [],
       {
         setRoleMappingData: (_, { attributes }) => attributes,
+        resetState: () => [],
       },
     ],
     elasticsearchRoles: [
@@ -237,11 +240,12 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         handleAuthProviderChange: (previous, { value }) => {
           const previouslyContainedAny = previous.includes(ANY_AUTH_PROVIDER);
           const newSelectionsContainAny = value.includes(ANY_AUTH_PROVIDER);
+          const hasItems = value.length > 0;
 
-          if (value.length < 1) return [ANY_AUTH_PROVIDER];
           if (value.length === 1) return value;
-          if (!newSelectionsContainAny) return value;
-          if (previouslyContainedAny) return value.filter((v) => v !== ANY_AUTH_PROVIDER);
+          if (!newSelectionsContainAny && hasItems) return value;
+          if (previouslyContainedAny && hasItems)
+            return value.filter((v) => v !== ANY_AUTH_PROVIDER);
           return [ANY_AUTH_PROVIDER];
         },
         setRoleMappingData: (_, { roleMapping }) =>
