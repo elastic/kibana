@@ -36,7 +36,9 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
       const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
       await dashboardSelector.findByCssSelector(`input[id="new-dashboard-option"]:disabled`);
       await dashboardSelector.findByCssSelector(`input[id="existing-dashboard-option"]:disabled`);
-      await dashboardSelector.findByCssSelector(`input[id="add-to-library-option"]:disabled`);
+
+      const librarySelector = await testSubjects.find('add-to-library-checkbox');
+      await librarySelector.findByCssSelector(`input[id="add-to-library-option"]:disabled`);
     }
 
     public async resetNewDashboard() {
@@ -64,20 +66,6 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
         await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
       }
 
-      const hasSaveToLibrary = await testSubjects.exists('add-to-library-checkbox');
-      if (hasSaveToLibrary && saveToLibrary !== undefined) {
-        const state = saveToLibrary ? 'check' : 'uncheck';
-        log.debug('save to library checkbox exists. Setting its state to', state);
-        await testSubjects.setEuiSwitch('add-to-library-checkbox', state);
-      }
-
-      const hasRedirectToOrigin = await testSubjects.exists('returnToOriginModeSwitch');
-      if (hasRedirectToOrigin && redirectToOrigin !== undefined) {
-        const state = redirectToOrigin ? 'check' : 'uncheck';
-        log.debug('redirect to origin checkbox exists. Setting its state to', state);
-        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
-      }
-
       const hasDashboardSelector = await testSubjects.exists('add-to-dashboard-options');
       if (hasDashboardSelector && addToDashboard !== undefined) {
         let option: DashboardPickerOption = 'no-dashboard-option';
@@ -93,6 +81,30 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
           await testSubjects.setValue('dashboardPickerInput', dashboardId);
           await find.clickByButtonText(dashboardId);
         }
+      }
+
+      const hasSaveToLibrary = await testSubjects.exists('add-to-library-checkbox');
+      if (hasSaveToLibrary && saveToLibrary !== undefined) {
+        const libraryCheckbox = await find.byCssSelector('#add-to-library-option');
+        const isChecked = await libraryCheckbox.isSelected();
+
+        const needsClick = isChecked !== saveToLibrary;
+
+        const state = saveToLibrary ? 'check' : 'uncheck';
+        log.debug('save to library checkbox exists. Setting its state to', state);
+
+        if (needsClick) {
+          const selector = await testSubjects.find('add-to-library-checkbox');
+          const label = await selector.findByCssSelector(`label[for="add-to-library-option"]`);
+          await label.click();
+        }
+      }
+
+      const hasRedirectToOrigin = await testSubjects.exists('returnToOriginModeSwitch');
+      if (hasRedirectToOrigin && redirectToOrigin !== undefined) {
+        const state = redirectToOrigin ? 'check' : 'uncheck';
+        log.debug('redirect to origin checkbox exists. Setting its state to', state);
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
       }
     }
 

@@ -120,9 +120,8 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
           </EuiPanel>
           <EuiSpacer size="s" />
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="add-to-library-checkbox">
               <EuiCheckbox
-                data-test-subj="add-to-library-checkbox"
                 id="add-to-library-option"
                 label={i18n.translate('presentationUtil.saveModalDashboard.libraryOptionLabel', {
                   defaultMessage: 'Add to library',
