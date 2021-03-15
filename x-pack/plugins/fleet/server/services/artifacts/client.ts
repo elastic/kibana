@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 
-import { ListResult } from '../../../common';
+import type { ListResult } from '../../../common';
 
 import { ArtifactsClientAccessDeniedError, ArtifactsClientError } from '../../errors';
 
-import {
+import type {
   Artifact,
   ArtifactsClientCreateOptions,
   ArtifactEncodedMetadata,
