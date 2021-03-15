@@ -55,7 +55,7 @@ describe('Security', () => {
     });
   });
 
-  it('renders on Basic license', () => {
+  it('renders', () => {
     setMockValues({ ...mockValues, hasPlatinumLicense: false });
     const wrapper = shallow(<Security />);
 
@@ -65,11 +65,9 @@ describe('Security', () => {
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(true);
   });
 
-  it('renders on Platinum license', () => {
+  it('does not disable switch on Platinum license', () => {
     const wrapper = shallow(<Security />);
 
-    expect(wrapper.find(UnsavedChangesPrompt)).toHaveLength(1);
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(false);
   });
 
