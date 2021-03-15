@@ -2,7 +2,7 @@
 === TSVB
 
 *TSVB* enables you to visualize the data from multiple data series, supports <<aggregation-reference, 
-most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. To use *TSVB*, you must have a date field. 
+most {es} metric aggregations>>, multiple visualization types, custom functions, and some math. To use *TSVB*, your data must have a date field. 
 
 [role="screenshot"]
 image::visualize/images/tsvb-screenshot.png[TSVB overview]
@@ -31,8 +31,8 @@ Open *TSVB*, then make sure the required settings are configured.
 [[configure-the-data-series]]
 ==== Configure the series
 
-Each *TSVB* visualization shares the same options to create a *Series*. Each series can be thought of as a separate {es} aggregation, which prevents
-them from being compared with math. For each series, the *Options* control the styling and {es} options, and are inherited from *Panel options*.
+Each *TSVB* visualization shares the same options to create a *Series*. Each series can be thought of as a separate {es} aggregation. 
+For each series, the *Options* control the styling and {es} options, and are inherited from *Panel options*.
 When you have separate options for each series, you can compare different {es} indices, and view two time ranges from the same index. 
 
 To configure the value of each series, select the function, then configure the function inputs. Only the last function is displayed.
@@ -85,7 +85,7 @@ To change this behavior, click *Panel options*, then specify a URL in the *Item 
 [[tsvb-markdown]]
 ===== Markdown
 
-Supports Markdown with Handlebar (mustache) syntax to insert dynamic data, and supports custom CSS using the LESS syntax.
+The *Markdown* visualization supports Markdown with Handlebar (mustache) syntax to insert dynamic data, and supports custom CSS using the LESS syntax.
 
 [float]
 [[tsvb-function-reference]]
