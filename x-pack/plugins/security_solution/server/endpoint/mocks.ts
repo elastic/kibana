@@ -16,6 +16,7 @@ import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
+  createArtifactsClientMock,
 } from '../../../fleet/server/mocks';
 import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
@@ -113,6 +114,7 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
     agentPolicyService: createMockAgentPolicyService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
+    createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
   };
 };
 
