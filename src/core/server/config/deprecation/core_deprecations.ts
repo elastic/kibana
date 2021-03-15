@@ -186,7 +186,7 @@ const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
     log(
       '"logging.json" has been deprecated and will be removed ' +
         'in 8.0. To specify log message format moving forward, ' +
-        'you can configure the "appender.layout" property for every custom appender in your logging configuration.' +
+        'you can configure the "appender.layout" property for every custom appender in your logging configuration. ' +
         'There is currently no default layout for custom appenders and each one must be declared explicitly. ' +
         'For more details, see ' +
         'https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
