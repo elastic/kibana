@@ -20,7 +20,7 @@ import { RoleMappingsLogic } from './role_mappings_logic';
 describe('RoleMappingsLogic', () => {
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, setQueuedSuccessMessage } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(RoleMappingsLogic);
   const defaultValues = {
     attributes: [],
@@ -70,7 +70,7 @@ describe('RoleMappingsLogic', () => {
     });
 
     describe('setRoleMappingData', () => {
-      it('sets data correctly', () => {
+      it('sets state based on server response from the `mapping` (singular) endpoint', () => {
         RoleMappingsLogic.actions.setRoleMappingData(mappingServerProps);
 
         expect(RoleMappingsLogic.values.roleMapping).toEqual(asRoleMapping);
@@ -88,7 +88,7 @@ describe('RoleMappingsLogic', () => {
         );
       });
 
-      it('sets default group with new role mapping', () => {
+      it('will remove all selected engines if no roleMapping was returned from the server', () => {
         RoleMappingsLogic.actions.setRoleMappingData({
           ...mappingServerProps,
           roleMapping: undefined,
@@ -343,6 +343,7 @@ describe('RoleMappingsLogic', () => {
         await nextTick();
 
         expect(navigateToUrl).toHaveBeenCalled();
+        expect(setQueuedSuccessMessage).toHaveBeenCalled();
       });
 
       it('sends array when "accessAllEngines" is false', () => {
@@ -413,6 +414,7 @@ describe('RoleMappingsLogic', () => {
         await nextTick();
 
         expect(navigateToUrl).toHaveBeenCalled();
+        expect(setQueuedSuccessMessage).toHaveBeenCalled();
       });
 
       it('handles error', async () => {

@@ -7,7 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { clearFlashMessages, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  clearFlashMessages,
+  flashAPIErrors,
+  setQueuedSuccessMessage,
+} from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { ANY_AUTH_PROVIDER } from '../../../shared/role_mapping/constants';
@@ -17,7 +21,12 @@ import { ASRoleMapping, RoleTypes } from '../../types';
 import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 import { Engine } from '../engine/types';
 
-import { DELETE_ROLE_MAPPINGS_MESSAGE } from './constants';
+import {
+  DELETE_ROLE_MAPPING_MESSAGE,
+  ROLE_MAPPING_DELETED_MESSAGE,
+  ROLE_MAPPING_CREATED_MESSAGE,
+  ROLE_MAPPING_UPDATED_MESSAGE,
+} from './constants';
 
 interface RoleMappingsServerDetails {
   roleMappings: ASRoleMapping[];
@@ -275,9 +284,10 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       const { navigateToUrl } = KibanaLogic.values;
       const route = `/api/app_search/role_mappings/${roleMapping.id}`;
 
-      if (window.confirm(DELETE_ROLE_MAPPINGS_MESSAGE)) {
+      if (window.confirm(DELETE_ROLE_MAPPING_MESSAGE)) {
         try {
           await http.delete(route);
+          setQueuedSuccessMessage(ROLE_MAPPING_DELETED_MESSAGE);
           navigateToUrl(ROLE_MAPPINGS_PATH);
         } catch (e) {
           flashAPIErrors(e);
@@ -323,8 +333,13 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
         ? http.post('/api/app_search/role_mappings', { body })
         : http.put(`/api/app_search/role_mappings/${roleMapping.id}`, { body });
 
+      const SUCCESS_MESSAGE = !roleMapping
+        ? ROLE_MAPPING_CREATED_MESSAGE
+        : ROLE_MAPPING_UPDATED_MESSAGE;
+
       try {
         await request;
+        setQueuedSuccessMessage(SUCCESS_MESSAGE);
         navigateToUrl(ROLE_MAPPINGS_PATH);
       } catch (e) {
         flashAPIErrors(e);
