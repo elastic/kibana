@@ -21,7 +21,7 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   seriesId: string;
-  indexPattern: IIndexPattern;
+  indexPattern?: IIndexPattern | null;
 }
 
 export const useLensAttributes = ({

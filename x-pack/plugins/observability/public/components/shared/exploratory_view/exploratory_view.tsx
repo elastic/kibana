@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-} from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageContentBody, EuiPanel } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../plugin';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common';
@@ -42,34 +36,30 @@ export const ExploratoryView = ({ indexPattern }: Props) => {
   });
 
   return (
-    <EuiPage paddingSize="none">
-      <EuiPageBody style={{ maxWidth: 1600, margin: '0 auto' }}>
-        <EuiPageContent>
-          <EuiPageContentBody style={{ maxWidth: 1500, margin: '0 auto' }}>
-            {indexPattern ? (
-              <>
-                <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
-                {lensAttributes && seriesId ? (
-                  <LensComponent
-                    id=""
-                    style={{ height: 500 }}
-                    timeRange={series?.time}
-                    attributes={lensAttributes}
-                  />
-                ) : (
-                  <EmptyView />
-                )}
-                <SeriesEditor />
-              </>
+    <EuiPanel style={{ maxWidth: 1600, minWidth: 1200, margin: '0 auto' }}>
+      <EuiPageContentBody style={{ maxWidth: 1500, margin: '0 auto' }}>
+        {indexPattern ? (
+          <>
+            <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
+            {lensAttributes && seriesId ? (
+              <LensComponent
+                id=""
+                style={{ height: 500 }}
+                timeRange={series?.time}
+                attributes={lensAttributes}
+              />
             ) : (
-              <SpinnerWrap>
-                <EuiLoadingSpinner size="xl" />
-              </SpinnerWrap>
+              <EmptyView />
             )}
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+            <SeriesEditor />
+          </>
+        ) : (
+          <SpinnerWrap>
+            <EuiLoadingSpinner size="xl" />
+          </SpinnerWrap>
+        )}
+      </EuiPageContentBody>
+    </EuiPanel>
   );
 };
 

@@ -10,6 +10,7 @@ import { IIndexPattern } from '../../../../../src/plugins/data/common';
 import { AppDataType } from '../components/shared/exploratory_view/types';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../plugin';
+import { ObservabilityIndexPatterns } from '../utils/observability_Index_patterns';
 
 export interface IIndexPatternContext {
   indexPattern: IIndexPattern;
@@ -37,10 +38,9 @@ export const IndexPatternContextProvider: React.FC<ProviderProps> = ({
   } = useKibana<ObservabilityClientPluginsStart>();
 
   const loadIndexPattern = async (dataType: AppDataType) => {
-    if (dataType === 'synthetics') {
-      const newIndexPattern = await data.indexPatterns.get('df32db00-819e-11eb-87f5-d7da22b1dde3');
-      setIndexPattern(newIndexPattern);
-    }
+    const obsvIndexP = new ObservabilityIndexPatterns(data);
+    const indPattern = await obsvIndexP.getIndexPattern(dataType);
+    setIndexPattern(indPattern!);
   };
 
   const value = useMemo(() => {

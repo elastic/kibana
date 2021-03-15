@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useFetcher } from '../../../..';
 import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../../plugin';
 import { AllSeries } from './use_url_strorage';
-import { REPORT_TYPE } from '../configurations/constants';
-import { useMemo } from 'react';
-
-const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+import { REPORT_TYPE, ReportToDataTypeMap } from '../configurations/constants';
+import { ObservabilityIndexPatterns } from '../../../../utils/observability_Index_patterns';
 
 export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
   const {
@@ -31,10 +30,8 @@ export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
   const firstSeries = allSeries[firstSeriesId];
 
   const { data: indexPattern, status } = useFetcher(() => {
-    if (firstSeries?.[REPORT_TYPE] === 'upp') {
-      return data.indexPatterns.get('df32db00-819e-11eb-87f5-d7da22b1dde3');
-    }
-    return data.indexPatterns.get(APM_STATIC_INDEX_PATTERN_ID);
+    const obsvIndexP = new ObservabilityIndexPatterns(data);
+    return obsvIndexP.getIndexPattern(ReportToDataTypeMap[firstSeries?.[REPORT_TYPE]]);
   }, [firstSeries?.[REPORT_TYPE]]);
 
   return useMemo(() => {

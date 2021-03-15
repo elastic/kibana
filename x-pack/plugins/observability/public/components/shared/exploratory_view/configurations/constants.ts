@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReportViewType } from '../types';
+import { AppDataType, ReportViewType, ReportViewTypeId } from '../types';
 
 export const METRIC_TYPE = 'mt';
 export const REPORT_TYPE = 'rt';
@@ -30,4 +30,14 @@ export const DataViewLabels: Record<ReportViewType, string> = {
   'uptime-duration': 'Uptime monitor duration',
   'uptime-pings': 'Uptime pings',
   'service-latency': 'APM Service latency',
+};
+
+export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
+  upd: 'synthetics',
+  upp: 'synthetics',
+  tpt: 'apm',
+  svl: 'apm',
+  pgv: 'rum',
+  kpi: 'rum',
+  pld: 'rum',
 };
