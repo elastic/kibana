@@ -22,3 +22,22 @@ export interface IndexSourceMappings {
 export interface BodySettings {
   [key: string]: any;
 }
+
+export interface Doc {
+  message: string;
+}
+
+export type ImportDoc = Doc | string | object;
+
+export interface IndexWriteFailure {
+  item: number;
+  reason: string;
+  doc: ImportDoc;
+}
+
+export interface Settings {
+  id: string;
+  index: string;
+  body: object;
+  [key: string]: any;
+}
