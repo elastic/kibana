@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerting/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -21,12 +20,13 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDurationFormatter } from '../../../common/utils/formatters';
 import { environmentQuery } from '../../../server/utils/queries';
+import { APMRuleRegistry } from '../../plugin';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
-  alerting: AlertingPlugin['setup'];
+  registry: APMRuleRegistry;
   config$: Observable<APMConfig>;
 }
 
@@ -47,10 +47,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
-  alerting,
+  registry,
   config$,
 }: RegisterAlertParams) {
-  alerting.registerType({
+  registry.registerType({
     id: AlertType.TransactionDuration,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -122,10 +122,13 @@ export function registerTransactionDurationAlertType({
         },
       };
 
-      const response = await alertingEsClient(services, searchParams);
+      const response = await alertingEsClient(
+        services.callCluster,
+        searchParams
+      );
 
       if (!response.aggregations) {
-        return;
+        return {};
       }
 
       const { agg, environments } = response.aggregations;
@@ -143,20 +146,28 @@ export function registerTransactionDurationAlertType({
 
         environments.buckets.map((bucket) => {
           const environment = bucket.key;
-          const alertInstance = services.alertInstanceFactory(
-            `${AlertType.TransactionDuration}_${environment}`
-          );
-
-          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-            transactionType: alertParams.transactionType,
-            serviceName: alertParams.serviceName,
-            environment,
+          services.check.warning({
+            name: `${AlertType.TransactionDuration}_${environment}`,
             threshold,
-            triggerValue: transactionDurationFormatted,
-            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+            value: transactionDuration,
+            context: {
+              transactionType: alertParams.transactionType,
+              serviceName: alertParams.serviceName,
+              environment,
+              threshold,
+              triggerValue: transactionDurationFormatted,
+              interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+            },
+            fields: {
+              'service.name': alertParams.serviceName,
+              'service.environment': environment,
+              'transaction.type': alertParams.transactionType,
+            },
           });
         });
       }
+
+      return {};
     },
   });
 }

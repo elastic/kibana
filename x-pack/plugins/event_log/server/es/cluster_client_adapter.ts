@@ -10,7 +10,6 @@ import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
-import { EsContext } from '.';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 import { esKuery } from '../../../../../src/plugins/data/server';
@@ -25,10 +24,12 @@ export interface Doc {
   body: IEvent;
 }
 
+type Wait = () => Promise<boolean>;
+
 export interface ConstructorOpts {
   logger: Logger;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  context: EsContext;
+  wait: Wait;
 }
 
 export interface QueryEventsBySavedObjectResult {
@@ -38,18 +39,21 @@ export interface QueryEventsBySavedObjectResult {
   data: IValidatedEvent[];
 }
 
-export class ClusterClientAdapter {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AliasAny = any;
+
+export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
   private readonly logger: Logger;
   private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  private readonly docBuffer$: Subject<Doc>;
-  private readonly context: EsContext;
+  private readonly docBuffer$: Subject<TDoc>;
+  private readonly wait: Wait;
   private readonly docsBufferedFlushed: Promise<void>;
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
-    this.context = opts.context;
-    this.docBuffer$ = new Subject<Doc>();
+    this.wait = opts.wait;
+    this.docBuffer$ = new Subject<TDoc>();
 
     // buffer event log docs for time / buffer length, ignore empty
     // buffers, then index the buffered docs; kick things off with a
@@ -74,15 +78,15 @@ export class ClusterClientAdapter {
     await this.docsBufferedFlushed;
   }
 
-  public indexDocument(doc: Doc): void {
+  public indexDocument(doc: TDoc): void {
     this.docBuffer$.next(doc);
   }
 
-  async indexDocuments(docs: Doc[]): Promise<void> {
+  async indexDocuments(docs: TDoc[]): Promise<void> {
     // If es initialization failed, don't try to index.
     // Also, don't log here, we log the failure case in plugin startup
     // instead, otherwise we'd be spamming the log (if done here)
-    if (!(await this.context.waitTillReady())) {
+    if (!(await this.wait())) {
       return;
     }
 
@@ -156,7 +160,9 @@ export class ClusterClientAdapter {
       // instances at the same time.
       const existsNow = await this.doesIndexTemplateExist(name);
       if (!existsNow) {
-        throw new Error(`error creating index template: ${err.message}`);
+        const error = new Error(`Could not create index template: ${err.message}`);
+        Object.assign(error, { wrapped: err });
+        throw error;
       }
     }
   }

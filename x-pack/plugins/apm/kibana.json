@@ -9,7 +9,8 @@
     "licensing",
     "triggersActionsUi",
     "embeddable",
-    "infra"
+    "infra",
+    "observability"
   ],
   "optionalPlugins": [
     "cloud",
@@ -17,7 +18,6 @@
     "taskManager",
     "actions",
     "alerting",
-    "observability",
     "security",
     "ml",
     "home",

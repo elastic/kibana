@@ -17,7 +17,11 @@ export interface EsNames {
   indexTemplate: string;
 }
 
-export function getEsNames(baseName: string, kibanaVersion: string): EsNames {
+export function getEsNames(
+  baseName: string,
+  kibanaVersion: string,
+  suffix: string = EVENT_LOG_NAME_SUFFIX
+): EsNames {
   const EVENT_LOG_VERSION_SUFFIX = `-${kibanaVersion.toLocaleLowerCase()}`;
   const eventLogName = `${baseName}${EVENT_LOG_NAME_SUFFIX}`;
   const eventLogNameWithVersion = `${eventLogName}${EVENT_LOG_VERSION_SUFFIX}`;

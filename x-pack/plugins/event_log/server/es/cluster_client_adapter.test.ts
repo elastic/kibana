@@ -12,7 +12,6 @@ import {
   IClusterClientAdapter,
   EVENT_BUFFER_LENGTH,
 } from './cluster_client_adapter';
-import { contextMock } from './context.mock';
 import { findOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { times } from 'lodash';
@@ -31,7 +30,7 @@ beforeEach(() => {
   clusterClientAdapter = new ClusterClientAdapter({
     logger,
     elasticsearchClientPromise: Promise.resolve(clusterClient),
-    context: contextMock.create(),
+    wait: () => Promise.resolve(true),
   });
 });
 

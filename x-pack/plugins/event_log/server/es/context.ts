@@ -53,7 +53,7 @@ class EsContextImpl implements EsContext {
     this.esAdapter = new ClusterClientAdapter({
       logger: params.logger,
       elasticsearchClientPromise: params.elasticsearchClientPromise,
-      context: this,
+      wait: () => this.readySignal.wait(),
     });
   }
 

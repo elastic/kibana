@@ -6,38 +6,36 @@
  */
 
 import { Observable } from 'rxjs';
-import { AlertingPlugin } from '../../../../alerting/server';
-import { ActionsPlugin } from '../../../../actions/server';
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
 import { registerErrorCountAlertType } from './register_error_count_alert_type';
 import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
+import { APMRuleRegistry } from '../../plugin';
 
 interface Params {
-  alerting: AlertingPlugin['setup'];
-  actions: ActionsPlugin['setup'];
+  registry: APMRuleRegistry;
   ml?: MlPluginSetup;
   config$: Observable<APMConfig>;
 }
 
 export function registerApmAlerts(params: Params) {
   registerTransactionDurationAlertType({
-    alerting: params.alerting,
+    registry: params.registry,
     config$: params.config$,
   });
-  registerTransactionDurationAnomalyAlertType({
-    alerting: params.alerting,
-    ml: params.ml,
-    config$: params.config$,
-  });
-  registerErrorCountAlertType({
-    alerting: params.alerting,
-    config$: params.config$,
-  });
-  registerTransactionErrorRateAlertType({
-    alerting: params.alerting,
-    config$: params.config$,
-  });
+  // registerTransactionDurationAnomalyAlertType({
+  //   alerting: params.alerting,
+  //   ml: params.ml,
+  //   config$: params.config$,
+  // });
+  // registerErrorCountAlertType({
+  //   alerting: params.alerting,
+  //   config$: params.config$,
+  // });
+  // registerTransactionErrorRateAlertType({
+  //   alerting: params.alerting,
+  //   config$: params.config$,
+  // });
 }
