@@ -293,7 +293,7 @@ export function estimateBucketSpanFactory(client) {
       const NUM_PARTITIONS = 10;
       // use a partitioned search to load 10 random fields
       // load ten fields, to test that there are at least 10.
-      getFieldCardinality(index, field, indicesOptions)
+      getFieldCardinality(index, field, runtimeMappings, indicesOptions)
         .then((value) => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
           asCurrentUser
