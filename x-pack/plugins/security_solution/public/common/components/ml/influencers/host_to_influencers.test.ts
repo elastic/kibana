@@ -28,6 +28,7 @@ describe('host_to_influencer', () => {
   test('returns a null if the host.name is null', () => {
     const hostItem: HostItem = {
       host: {
+        // @ts-expect-error
         name: null,
       },
     };
