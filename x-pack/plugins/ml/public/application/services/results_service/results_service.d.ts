@@ -60,7 +60,7 @@ export function resultsServiceProvider(
     earliestMs: number,
     latestMs: number,
     intervalMs: number,
-    indicesOptions: IndicesOptions
+    indicesOptions?: IndicesOptions
   ): Promise<any>;
   getEventDistributionData(
     index: string,
