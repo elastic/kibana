@@ -18,7 +18,11 @@ import type {
   ISearchStrategy,
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
-import { LogSourceColumnConfiguration } from '../../../common/http_api/log_sources';
+import {
+  LogSourceColumnConfiguration,
+  LogSourceConfigurationProperties,
+  logSourceFieldColumnConfigurationRT,
+} from '../../../common/http_api/log_sources';
 import {
   getLogEntryCursorFromHit,
   LogColumn,
@@ -104,7 +108,7 @@ export const logEntriesSearchStrategyProvider = ({
                       params.size + 1,
                       configuration.fields.timestamp,
                       configuration.fields.tiebreaker,
-                      messageFormattingRules.requiredFields,
+                      getRequiredFields(configuration, messageFormattingRules, params.columns),
                       params.query,
                       params.highlightPhrase
                     ),
@@ -126,7 +130,12 @@ export const logEntriesSearchStrategyProvider = ({
 
             const entries = rawResponse.hits.hits
               .slice(0, request.params.size)
-              .map(getLogEntryFromHit(configuration.logColumns, messageFormattingRules));
+              .map(
+                getLogEntryFromHit(
+                  request.params.columns ? request.params.columns : configuration.logColumns,
+                  messageFormattingRules
+                )
+              );
 
             const sortDirection = getSortDirection(pickRequestCursor(request.params));
 
@@ -245,3 +254,26 @@ function getResponseCursors(entries: LogEntry[]) {
 
   return { topCursor, bottomCursor };
 }
+
+const VIEW_IN_CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
+
+const getRequiredFields = (
+  configuration: LogSourceConfigurationProperties,
+  messageFormattingRules: CompiledLogMessageFormattingRule,
+  columnOverrides?: LogSourceColumnConfiguration[]
+): string[] => {
+  const columns = columnOverrides ? columnOverrides : configuration.logColumns;
+
+  const fieldsFromColumns = columns.reduce<string[]>((accumulatedFields, logColumn) => {
+    if (logSourceFieldColumnConfigurationRT.is(logColumn)) {
+      return [...accumulatedFields, logColumn.fieldColumn.field];
+    }
+    return accumulatedFields;
+  }, []);
+
+  const fieldsFromFormattingRules = messageFormattingRules.requiredFields;
+
+  return Array.from(
+    new Set([...fieldsFromColumns, ...fieldsFromFormattingRules, ...VIEW_IN_CONTEXT_FIELDS])
+  );
+};

@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
 import {
   ENROLLMENT_API_KEYS_INDEX,
