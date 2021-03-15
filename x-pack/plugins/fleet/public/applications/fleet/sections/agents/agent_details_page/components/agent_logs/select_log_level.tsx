@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSelect, EuiFormLabel, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import { Agent } from '../../../../../types';
+import type { Agent } from '../../../../../types';
 import { sendPostAgentAction, useStartServices } from '../../../../../hooks';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from './constants';

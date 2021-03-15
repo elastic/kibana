@@ -22,20 +22,22 @@ import {
 } from '../constants';
 
 import {
-  migratePackagePolicyToV7110,
-  migratePackagePolicyToV7120,
-  // @ts-expect-error
-} from './security_solution';
-import {
-  migrateAgentToV7100,
+  migrateAgentActionToV7100,
   migrateAgentEventToV7100,
   migrateAgentPolicyToV7100,
+  migrateAgentToV7100,
   migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
-  migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
-import { migrateAgentToV7120, migrateAgentPolicyToV7120 } from './migrations/to_v7_12_0';
+
+import { migratePackagePolicyToV7110 } from './migrations/to_v7_11_0';
+
+import {
+  migrateAgentPolicyToV7120,
+  migrateAgentToV7120,
+  migratePackagePolicyToV7120,
+} from './migrations/to_v7_12_0';
 
 /*
  * Saved object types and mappings
