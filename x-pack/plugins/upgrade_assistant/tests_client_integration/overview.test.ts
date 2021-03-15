@@ -45,6 +45,8 @@ describe('Overview page', () => {
         // This will be the default behavior on the last minor before the next major release (e.g., v7.15)
         testBed = await setup({ isReadOnlyMode: false });
       });
+
+      testBed.component.update();
     });
 
     afterAll(() => {
@@ -58,8 +60,54 @@ describe('Overview page', () => {
       expect(exists('upgradeAssistantPageContent')).toBe(true);
     });
 
-    test('toggles deprecation logging', () => {
-      // TODO
+    describe('Deprecation logging', () => {
+      test('toggles deprecation logging', async () => {
+        const { form, find, component } = testBed;
+
+        httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse({ isEnabled: false });
+
+        expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
+        expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
+        expect(find('deprecationLoggingStep').find('.euiSwitch__label').text()).toContain('On');
+
+        await act(async () => {
+          form.toggleEuiSwitch('upgradeAssistantDeprecationToggle');
+        });
+
+        component.update();
+
+        expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(false);
+        expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
+        expect(find('deprecationLoggingStep').find('.euiSwitch__label').text()).toContain('Off');
+      });
+
+      test('handles network error', async () => {
+        const error = {
+          statusCode: 500,
+          error: 'Internal server error',
+          message: 'Internal server error',
+        };
+
+        const { form, find, component } = testBed;
+
+        httpRequestsMockHelpers.setUpdateDeprecationLoggingResponse(undefined, error);
+
+        expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
+        expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(false);
+        expect(find('deprecationLoggingStep').find('.euiSwitch__label').text()).toContain('On');
+
+        await act(async () => {
+          form.toggleEuiSwitch('upgradeAssistantDeprecationToggle');
+        });
+
+        component.update();
+
+        expect(find('upgradeAssistantDeprecationToggle').props()['aria-checked']).toBe(true);
+        expect(find('upgradeAssistantDeprecationToggle').props().disabled).toBe(true);
+        expect(find('deprecationLoggingStep').find('.euiSwitch__label').text()).toContain(
+          'Could not load logging state'
+        );
+      });
     });
 
     describe('Error handling', () => {

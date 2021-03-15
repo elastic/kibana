@@ -27,4 +27,6 @@ export type OverviewTestSubjects =
   | 'upgradeAssistantPageContent'
   | 'upgradedPrompt'
   | 'partiallyUpgradedPrompt'
+  | 'upgradeAssistantDeprecationToggle'
+  | 'deprecationLoggingStep'
   | 'upgradeStatusError';

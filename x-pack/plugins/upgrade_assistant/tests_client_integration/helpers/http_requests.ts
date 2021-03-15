@@ -25,12 +25,26 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 
   const setLoadDeprecationLoggingResponse = (
     response?: { isEnabled: boolean },
-    error?: { body?: Error; status: number }
+    error?: ResponseError
   ) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
 
     server.respondWith('GET', `${API_BASE_PATH}/deprecation_logging`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setUpdateDeprecationLoggingResponse = (
+    response?: { isEnabled: boolean },
+    error?: ResponseError
+  ) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('PUT', `${API_BASE_PATH}/deprecation_logging`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -40,6 +54,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   return {
     setLoadStatusResponse,
     setLoadDeprecationLoggingResponse,
+    setUpdateDeprecationLoggingResponse,
   };
 };
 

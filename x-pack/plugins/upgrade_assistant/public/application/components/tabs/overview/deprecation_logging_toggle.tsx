@@ -87,7 +87,6 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
 
   return (
     <EuiSwitch
-      id="xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch"
       data-test-subj="upgradeAssistantDeprecationToggle"
       label={renderLoggingState()}
       checked={isEnabled}
