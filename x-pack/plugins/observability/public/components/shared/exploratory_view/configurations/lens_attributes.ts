@@ -27,7 +27,7 @@ export class LensAttributes {
     reportViewConfig: DataSeries,
     seriesType: string,
     filters: UrlFilter[],
-    metricType: string
+    metricType?: string
   ) {
     this.indexPattern = indexPattern;
     this.layers = {};

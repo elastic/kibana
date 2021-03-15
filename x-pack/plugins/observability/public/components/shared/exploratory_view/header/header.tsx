@@ -6,15 +6,13 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../../plugin';
 import { ChartTemplates } from '../chart_templates/chart_templates';
 import { ChartTypes } from './chart_types';
-import { ReportViewType } from '../types';
-import { DataViewLabels } from '../configurations/constants';
+import { DataViewLabels, REPORT_TYPE } from '../configurations/constants';
 import { useUrlStorage } from '../hooks/use_url_strorage';
 import { MetricSelection } from './metric_selection';
 
@@ -28,15 +26,13 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
     services: { lens },
   } = useKibana<ObservabilityClientPluginsStart>();
 
-  const { dataViewType } = useParams<{ dataViewType: ReportViewType }>();
-
   const { series } = useUrlStorage(seriesId);
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiText>
-          <h2>{DataViewLabels[dataViewType]}</h2>
+          <h2>{DataViewLabels[series[REPORT_TYPE]]}</h2>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

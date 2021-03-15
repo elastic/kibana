@@ -31,7 +31,7 @@ export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
 
   const { data: indexPattern, status } = useFetcher(() => {
     const obsvIndexP = new ObservabilityIndexPatterns(data);
-    return obsvIndexP.getIndexPattern(ReportToDataTypeMap[firstSeries?.[REPORT_TYPE]]);
+    return obsvIndexP.getIndexPattern(ReportToDataTypeMap[firstSeries?.[REPORT_TYPE]] ?? 'apm');
   }, [firstSeries?.[REPORT_TYPE]]);
 
   return useMemo(() => {

@@ -54,7 +54,7 @@ export const ExploratoryViewPage = () => {
     >
       <IndexPatternContextProvider indexPattern={indexPattern!}>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-          <ExploratoryView indexPattern={indexPattern} />
+          <ExploratoryView />
         </UrlStorageContextProvider>
       </IndexPatternContextProvider>
     </WithHeaderLayout>

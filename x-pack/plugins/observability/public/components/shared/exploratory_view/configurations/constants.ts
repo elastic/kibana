@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppDataType, ReportViewType, ReportViewTypeId } from '../types';
+import { AppDataType, ReportViewTypeId } from '../types';
 
 export const METRIC_TYPE = 'mt';
 export const REPORT_TYPE = 'rt';
@@ -24,12 +24,14 @@ export const FieldLabels: Record<string, string> = {
   'monitor.status': 'Monitor Status',
 };
 
-export const DataViewLabels: Record<ReportViewType, string> = {
-  'page-load-dist': 'Page load distribution',
-  'page-views': 'Page views',
-  'uptime-duration': 'Uptime monitor duration',
-  'uptime-pings': 'Uptime pings',
-  'service-latency': 'APM Service latency',
+export const DataViewLabels: Record<ReportViewTypeId, string> = {
+  pld: 'Page load distribution',
+  pgv: 'Page views',
+  upd: 'Uptime monitor duration',
+  upp: 'Uptime pings',
+  svl: 'APM Service latency',
+  kpi: 'Business KPI',
+  tpt: 'APM Service throughput',
 };
 
 export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
