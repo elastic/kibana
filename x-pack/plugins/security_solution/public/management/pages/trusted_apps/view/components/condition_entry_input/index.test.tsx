@@ -71,26 +71,6 @@ describe('Condition entry input', () => {
       );
     }
   );
-  //   for (const field in ConditionEntryField) {
-  //     if (Object.prototype.hasOwnProperty.call(ConditionEntryField, field)) {
-  //       it(`should call on change for field input with value ${field}`, () => {
-  //         const element = shallow(getElement('testOnChange'));
-  //         expect(onChangeMock).toHaveBeenCalledTimes(0);
-  //         element
-  //           .find('[data-test-subj="testOnChange-field"]')
-  //           .first()
-  //           .simulate('change', { target: { value: field } });
-  //         expect(onChangeMock).toHaveBeenCalledTimes(1);
-  //         expect(onChangeMock).toHaveBeenCalledWith(
-  //           {
-  //             ...entry,
-  //             field: { target: { value: field } },
-  //           },
-  //           entry
-  //         );
-  //       });
-  //     }
-  //   }
 
   it('should call on remove for field input', () => {
     const element = mount(getElement('testOnRemove'));
