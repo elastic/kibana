@@ -59,6 +59,11 @@ export interface FullAgentPolicyInput {
   [key: string]: any;
 }
 
+export interface FullAgentPolicyPermission {
+  names: string[];
+  privileges: string[];
+}
+
 export interface FullAgentPolicy {
   id: string;
   outputs: {
@@ -67,11 +72,7 @@ export interface FullAgentPolicy {
     };
   };
   outputPermissions?: {
-    // FIXME reuse the ES types here, if they exist
-    [key: string]: Array<{
-      names: string[];
-      privileges: string[];
-    }>;
+    [key: string]: FullAgentPolicyPermission[];
   };
   fleet?: {
     kibana: FullAgentPolicyKibanaConfig;
