@@ -6,6 +6,8 @@
  */
 import { FrameworkRequest } from '../framework';
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
+import { noteSavedObjectType } from './saved_object_mappings';
+import { getAllSavedNotes } from './get_all_saved_notes';
 
 export const deleteNoteByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
@@ -13,7 +15,7 @@ export const deleteNoteByTimelineId = async (request: FrameworkRequest, timeline
     search: timelineId,
     searchFields: ['timelineId'],
   };
-  const notesToBeDeleted = await getAllSavedNote(request, options);
+  const notesToBeDeleted = await getAllSavedNotes(request, options);
   const savedObjectsClient = request.context.core.savedObjects.client;
 
   await Promise.all(

@@ -8,6 +8,7 @@ import { FrameworkRequest } from '../framework';
 import { NoteSavedObject } from '../../../common/types/timeline/note';
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { getAllSavedNotes } from './get_all_saved_notes';
+import { noteSavedObjectType } from './saved_object_mappings';
 
 export const getNotesByTimelineId = async (
   request: FrameworkRequest,

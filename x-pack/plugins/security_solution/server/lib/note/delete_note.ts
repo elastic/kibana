@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { FrameworkRequest } from '../framework';
+import { noteSavedObjectType } from './saved_object_mappings';
 
 export const deleteNote = async (request: FrameworkRequest, noteIds: string[]) => {
   const savedObjectsClient = request.context.core.savedObjects.client;

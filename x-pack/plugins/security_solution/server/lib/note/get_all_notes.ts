@@ -5,9 +5,10 @@
  * 2.0.
  */
 import { FrameworkRequest } from '../framework';
-import { ResponseNotes, SortNote } from '../../graphql/types';
+import { PageInfoNote, ResponseNotes, SortNote } from '../../graphql/types';
 import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { getAllSavedNotes } from './get_all_saved_notes';
+import { noteSavedObjectType } from './saved_object_mappings';
 
 export const getAllNotes = async (
   request: FrameworkRequest,

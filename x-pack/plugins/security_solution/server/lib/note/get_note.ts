@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { FrameworkRequest } from '../framework';
+import { convertSavedObjectToSavedNote } from './helpers';
+import { noteSavedObjectType } from './saved_object_mappings';
+
 export const getNote = async (request: FrameworkRequest, NoteId: string) => {
   const savedObjectsClient = request.context.core.savedObjects.client;
   const savedObject = await savedObjectsClient.get(noteSavedObjectType, NoteId);

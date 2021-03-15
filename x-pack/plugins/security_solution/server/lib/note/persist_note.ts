@@ -18,7 +18,7 @@ import { timelineSavedObjectType } from '../timeline/saved_object_mappings';
 import { convertSavedObjectToSavedTimeline } from '../timeline/convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from '../timeline/pick_saved_timeline';
 
-import { convertSavedObjectToSavedNote } from './saved_object';
+import { convertSavedObjectToSavedNote, getNote } from './saved_object';
 import { noteSavedObjectType } from './saved_object_mappings';
 
 // we have to use any here because the SavedObjectAttributes interface is like below

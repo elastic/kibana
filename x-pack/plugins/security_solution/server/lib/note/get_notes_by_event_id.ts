@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SavedObjectsFindOptions } from '../../../../../../src/core/server/types';
 import { NoteSavedObject } from '../../../common/types/timeline/note';
 import { FrameworkRequest } from '../framework';
 import { getAllSavedNotes } from './get_all_saved_notes';
+import { noteSavedObjectType } from './saved_object_mappings';
 
 export const getNotesByEventId = async (
   request: FrameworkRequest,
