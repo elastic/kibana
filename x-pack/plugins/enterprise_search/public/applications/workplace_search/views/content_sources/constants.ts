@@ -302,7 +302,7 @@ export const SOURCE_REMOVE_TITLE = i18n.translate(
 export const SOURCE_REMOVE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
   {
-    defaultMessage: 'Edit content source connector settings to change.',
+    defaultMessage: 'This action cannot be undone.',
   }
 );
 
