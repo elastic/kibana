@@ -27,7 +27,7 @@ describe('Constants: Messages parseMessages()', () => {
         text:
           'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character, and is no more than 64 characters long.',
         url:
-          'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-job-resource.html#ml-job-resource',
+          'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/ml-put-job.html#ml-put-job-path-parms',
       },
       {
         heading: 'Detector functions',
@@ -71,7 +71,7 @@ describe('Constants: Messages parseMessages()', () => {
         text:
           'Job ID is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores and must start and end with an alphanumeric character.',
         url:
-          'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-job-resource.html#ml-job-resource',
+          'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/ml-put-job.html#ml-put-job-path-parms',
       },
       {
         heading: 'Detector functions',
@@ -88,7 +88,7 @@ describe('Constants: Messages parseMessages()', () => {
         status: 'success',
         text: 'Format of "15m" is valid.',
         url:
-          'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-job-resource.html#ml-analysisconfig',
+          'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/ml-put-job.html#put-analysisconfig',
       },
       {
         id: 'skipped_extended_tests',
@@ -108,7 +108,7 @@ describe('Constants: Messages parseMessages()', () => {
         text:
           'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character, and is no more than 64 characters long.',
         url:
-          'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-job-resource.html#ml-job-resource',
+          'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/ml-put-job.html#ml-put-job-path-parms',
       },
       {
         heading: 'Detector functions',
