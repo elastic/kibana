@@ -32,7 +32,6 @@ describe('ES search strategy', () => {
   let mockApiCaller: jest.Mock<() => MockedTransportRequestPromise<any>>;
   const mockLogger: any = {
     debug: () => {},
-    error: () => {},
   };
 
   function getMockedDeps(err?: Record<string, any>) {

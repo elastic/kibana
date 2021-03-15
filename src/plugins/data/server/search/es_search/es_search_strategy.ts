@@ -49,9 +49,6 @@ export const esSearchStrategyProvider = (
         const response = shimHitsTotal(body, options);
         return toKibanaSearchResponse(response);
       } catch (e) {
-        if (e.body?.error) {
-          logger.error(e.body.error);
-        }
         throw getKbnServerError(e);
       }
     };
