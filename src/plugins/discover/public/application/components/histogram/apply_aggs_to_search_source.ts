@@ -8,15 +8,22 @@
 import { IndexPattern, SearchSource } from '../../../../../data/common';
 import { DataPublicPluginStart } from '../../../../../data/public';
 
+/**
+ * Helper function to apply or remove aggregations to a given search source used for gaining data
+ * for Discover's histogram vis
+ */
 export function applyAggsToSearchSource(
-  isActive: boolean,
+  enabled: boolean,
   searchSource: SearchSource,
   histogramInterval: string,
   indexPattern: IndexPattern,
   data: DataPublicPluginStart
 ) {
-  if (!isActive) {
-    searchSource.removeField('aggs');
+  if (!enabled) {
+    if (searchSource.getField('aggs')) {
+      // clean up fields in case it was set before
+      searchSource.removeField('aggs');
+    }
     return;
   }
   const visStateAggs = [

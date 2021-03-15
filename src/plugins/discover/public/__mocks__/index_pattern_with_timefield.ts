@@ -22,6 +22,7 @@ const fields = [
     type: 'date',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'message',
@@ -34,12 +35,14 @@ const fields = [
     type: 'string',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'bytes',
     type: 'number',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'scripted',
