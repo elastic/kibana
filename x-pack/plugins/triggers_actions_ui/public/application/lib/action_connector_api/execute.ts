@@ -6,9 +6,10 @@
  */
 
 import { HttpSetup } from 'kibana/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { RewriteRequestCase } from '../../../../../actions/server/routes/rewrite_request_case';
-import { ActionTypeExecutorResult } from '../../../../../../plugins/actions/common';
+import {
+  ActionTypeExecutorResult,
+  RewriteRequestCase,
+} from '../../../../../../plugins/actions/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
 
 const rewriteBodyRes: RewriteRequestCase<ActionTypeExecutorResult<unknown>> = ({

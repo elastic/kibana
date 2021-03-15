@@ -5,10 +5,7 @@
  * 2.0.
  */
 import { HttpSetup } from 'kibana/public';
-import {
-  RewriteRequestCase,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../actions/server/routes/rewrite_request_case';
+import { RewriteRequestCase } from '../../../../../actions/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
 import type {
   ActionConnector,
