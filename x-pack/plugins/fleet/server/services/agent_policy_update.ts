@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
@@ -56,6 +56,6 @@ export async function agentPolicyUpdateEventHandler(
 
   if (action === 'deleted') {
     await unenrollForAgentPolicyId(soClient, esClient, agentPolicyId);
-    await deleteEnrollmentApiKeyForAgentPolicyId(soClient, agentPolicyId);
+    await deleteEnrollmentApiKeyForAgentPolicyId(soClient, esClient, agentPolicyId);
   }
 }

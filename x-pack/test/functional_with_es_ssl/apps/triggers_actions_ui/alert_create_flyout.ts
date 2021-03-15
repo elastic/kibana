@@ -100,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('alertsTab');
+      await testSubjects.click('rulesTab');
     });
 
     it('should create an alert', async () => {
@@ -129,22 +129,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await testSubjects.setValue('messageTextArea', 'test message ');
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-alertActionGroup');
+      await testSubjects.click('variableMenuButton-alert.actionGroup');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{alertActionGroup}}'
+        'test message {{alert.actionGroup}}'
       );
       await messageTextArea.type(' some additional text ');
 
       await testSubjects.click('messageAddVariableButton');
-      await testSubjects.click('variableMenuButton-alertId');
+      await testSubjects.click('variableMenuButton-rule.id');
 
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        'test message {{alertActionGroup}} some additional text {{alertId}}'
+        'test message {{alert.actionGroup}} some additional text {{rule.id}}'
       );
 
       await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([
@@ -195,7 +195,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('saveAlertButton');
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([
@@ -228,7 +228,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('confirmAlertSaveModal');
 
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       expect(searchResultsAfterSave).to.eql([

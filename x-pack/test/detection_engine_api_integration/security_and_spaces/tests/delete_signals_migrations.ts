@@ -35,7 +35,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('deleting signals migrations', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/94367
+  describe.skip('deleting signals migrations', () => {
     let outdatedSignalsIndexName: string;
     let createdMigration: CreateResponse;
     let finalizedMigration: FinalizeResponse;
@@ -100,6 +101,19 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(indexSettings.lifecycle.name).to.eql(
         `${DEFAULT_SIGNALS_INDEX}-default-migration-cleanup`
       );
+    });
+
+    it('returns a 404 trying to delete a migration that does not exist', async () => {
+      const { body } = await supertest
+        .delete(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ migration_ids: ['dne-migration'] })
+        .expect(404);
+
+      expect(body).to.eql({
+        message: 'Saved object [security-solution-signals-migration/dne-migration] not found',
+        status_code: 404,
+      });
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {

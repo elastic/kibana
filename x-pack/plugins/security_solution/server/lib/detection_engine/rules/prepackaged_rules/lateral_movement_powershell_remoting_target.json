@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Incoming Execution via PowerShell Remoting",
   "query": "sequence by host.id with maxspan = 30s\n   [network where network.direction == \"incoming\" and destination.port in (5985, 5986) and\n    network.protocol == \"http\" and source.address != \"127.0.0.1\" and source.address != \"::1\"\n   ]\n   [process where event.type == \"start\" and process.parent.name : \"wsmprovhost.exe\" and not process.name : \"conhost.exe\"]\n",
   "references": [

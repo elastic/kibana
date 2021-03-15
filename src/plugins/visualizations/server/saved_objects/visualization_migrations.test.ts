@@ -1762,4 +1762,145 @@ describe('migration visualization', () => {
       });
     });
   });
+
+  describe('7.12.0 update "schema" in aggregations', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.12.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const testDoc = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metric',
+          title: '[Flights] Delay Type',
+          aggs: [
+            {
+              id: '1',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '1-bucket',
+                params: {
+                  orderAgg: {
+                    schema: {
+                      name: 'orderAgg',
+                    },
+                  },
+                },
+                schema: {
+                  name: 'bucketAgg',
+                },
+              },
+              customMetric: {
+                id: '1-metric',
+                schema: {
+                  name: 'metricAgg',
+                },
+                params: {
+                  customMetric: {
+                    schema: {
+                      name: 'metricAgg',
+                    },
+                  },
+                },
+              },
+            },
+            {
+              id: '2',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '2-bucket',
+                params: {
+                  orderAgg: {
+                    schema: {
+                      name: 'orderAgg',
+                    },
+                  },
+                },
+              },
+              customMetric: {
+                id: '2-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: {
+                      name: 'metricAgg',
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      },
+    };
+
+    const expectedDoc = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metric',
+          title: '[Flights] Delay Type',
+          aggs: [
+            {
+              id: '1',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '1-bucket',
+                params: {
+                  orderAgg: {
+                    schema: 'orderAgg',
+                  },
+                },
+                schema: 'bucketAgg',
+              },
+              customMetric: {
+                id: '1-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: 'metricAgg',
+                  },
+                },
+              },
+            },
+            {
+              id: '2',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '2-bucket',
+                params: {
+                  orderAgg: {
+                    schema: 'orderAgg',
+                  },
+                },
+              },
+              customMetric: {
+                id: '2-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: 'metricAgg',
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      },
+    };
+
+    it('should replace all schema object with schema name', () => {
+      const migratedTestDoc = migrate(testDoc);
+
+      expect(migratedTestDoc).toEqual(expectedDoc);
+    });
+  });
 });

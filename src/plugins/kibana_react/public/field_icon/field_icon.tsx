@@ -15,11 +15,14 @@ export interface FieldIconProps extends Omit<EuiTokenProps, 'iconType'> {
     | 'boolean'
     | 'conflict'
     | 'date'
+    | 'date_range'
     | 'geo_point'
     | 'geo_shape'
     | 'ip'
+    | 'ip_range'
     | 'murmur3'
     | 'number'
+    | 'number_range'
     | '_source'
     | 'string'
     | string
@@ -36,12 +39,15 @@ export const typeToEuiIconMap: Partial<Record<string, EuiTokenProps>> = {
   // icon for an index pattern mapping conflict in discover
   conflict: { iconType: 'alert', color: 'euiColorVis9', shape: 'square' },
   date: { iconType: 'tokenDate' },
+  date_range: { iconType: 'tokenDate' },
   geo_point: { iconType: 'tokenGeo' },
   geo_shape: { iconType: 'tokenGeo' },
   ip: { iconType: 'tokenIP' },
+  ip_range: { iconType: 'tokenIP' },
   // is a plugin's data type https://www.elastic.co/guide/en/elasticsearch/plugins/current/mapper-murmur3-usage.html
   murmur3: { iconType: 'tokenFile' },
   number: { iconType: 'tokenNumber' },
+  number_range: { iconType: 'tokenNumber' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   string: { iconType: 'tokenString' },
   nested: { iconType: 'tokenNested' },
