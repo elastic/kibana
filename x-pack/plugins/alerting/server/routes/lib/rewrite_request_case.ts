@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { JsonValue } from '../../../../../../src/plugins/kibana_utils/common';
 
 type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   ? `ruleTypeId`
@@ -17,19 +18,32 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   ? `alertId`
   : K;
 
-export type AsApiContract<T> = {
-  [K in keyof T as CamelToSnake<RenameAlertToRule<Extract<K, string>>>]: K extends `params`
-    ? T[K]
-    : T[K] extends any[]
-    ? T[K][number] extends object
-      ? Array<AsApiContract<T[K][number]>>
-      : T[K]
-    : T[K] extends Date
-    ? T[K]
-    : T[K] extends object
-    ? AsApiContract<T[K]>
-    : T[K];
-};
+type AsApiContract<
+  T,
+  ComplexPropertyKeys = `actions` | `executionStatus`,
+  OpaquePropertyKeys = `params`
+> = T extends Array<infer I>
+  ? Array<AsApiContract<I>>
+  : {
+      [K in keyof T as CamelToSnake<
+        RenameAlertToRule<Extract<K, string>>
+      >]: K extends OpaquePropertyKeys
+        ? // don't convert explciitly opaque types which we treat as a black box
+          T[K]
+        : T[K] extends undefined
+        ? AsApiContract<Exclude<T[K], undefined>> | undefined
+        : // don't convert built in types
+        T[K] extends Date | JsonValue
+        ? T[K]
+        : T[K] extends Array<infer I>
+        ? Array<AsApiContract<I>>
+        : K extends ComplexPropertyKeys
+        ? AsApiContract<T[K]>
+        : T[K] extends object
+        ? AsApiContract<T[K]>
+        : // don't convert anything else
+          T[K];
+    };
 
 export type RewriteRequestCase<T> = (requested: AsApiContract<T>) => T;
 export type RewriteResponseCase<T> = (
