@@ -35,6 +35,8 @@ export {
   getRegistryUrl,
   PackageService,
   AgentPolicyServiceInterface,
+  ArtifactsClientInterface,
+  Artifact,
 } from './services';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
 export { AgentNotFoundError } from './errors';
@@ -108,6 +110,8 @@ export const config: PluginConfigDescriptor = {
 export type FleetConfigType = TypeOf<typeof config.schema>;
 
 export { PackagePolicyServiceInterface } from './services/package_policy';
+
+export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);

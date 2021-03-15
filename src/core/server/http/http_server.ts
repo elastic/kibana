@@ -225,16 +225,15 @@ export class HttpServer {
 
   private getAuthOption(
     authRequired: RouteConfigOptions<any>['authRequired'] = true
-  ): undefined | false | { mode: 'required' | 'optional' | 'try' } {
+  ): undefined | false | { mode: 'required' | 'try' } {
     if (this.authRegistered === false) return undefined;
 
     if (authRequired === true) {
       return { mode: 'required' };
     }
     if (authRequired === 'optional') {
-      return { mode: 'optional' };
-    }
-    if (authRequired === 'try') {
+      // we want to use HAPI `try` mode and not `optional` to not throw unauthorized errors when the user
+      // has invalid or expired credentials
       return { mode: 'try' };
     }
     if (authRequired === false) {

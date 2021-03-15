@@ -7,7 +7,7 @@
 
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
-import Boom from '@hapi/boom';
+import type Boom from '@hapi/boom';
 import type { UnwrapPromise } from '@kbn/utility-types';
 import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
@@ -21,7 +21,7 @@ import {
   PackageOutdatedError,
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
-import { KibanaAssetType } from '../../../types';
+import type { KibanaAssetType } from '../../../types';
 import type {
   AssetReference,
   Installation,
