@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
             // red markers
             { key: '#D98071', value: 1 },
             // tick/grid/axis, grey markers
-            { key: '#6A717D', value: 25 },
+            { key: '#6A717D', value: 30 },
             { key: '#D3DAE6', value: 8 },
             { key: '#98A1B3', value: 25 },
             // anti-aliasing
