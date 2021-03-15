@@ -282,62 +282,66 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.fleet.settings.fleetServerUrlsLabel', {
-            defaultMessage: 'Fleet Server URL',
-          })}
-          {...inputs.fleetServerUrls.formRowProps}
-        >
-          <EuiComboBox noSuggestions {...inputs.fleetServerUrls.props} />
-        </EuiFormRow>
+
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.fleet.settings.fleetServerUrlsLabel', {
+          defaultMessage: 'Fleet Server URL',
+        })}
+        helpText={i18n.translate('xpack.fleet.settings.fleetServerUrlsHelpTect', {
+          defaultMessage:
+            'Specify the Fleet Server URLs agents will use to comunicate with Fleet. If multiple URLs exist, Fleet will use the first provided URL for enrollment.',
+        })}
+        {...inputs.fleetServerUrls.formRowProps}
+      >
+        <EuiComboBox fullWidth noSuggestions {...inputs.fleetServerUrls.props} />
       </EuiFormRow>
+
       <EuiSpacer size="m" />
       {/* // TODO remove as part of https://github.com/elastic/kibana/issues/94303 */}
-      <EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.fleet.settings.kibanaUrlLabel', {
-            defaultMessage: 'Kibana URL',
-          })}
-          {...inputs.kibanaUrls.formRowProps}
-        >
-          <EuiComboBox noSuggestions {...inputs.kibanaUrls.props} />
-        </EuiFormRow>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.fleet.settings.kibanaUrlLabel', {
+          defaultMessage: 'Kibana URL',
+        })}
+        {...inputs.kibanaUrls.formRowProps}
+      >
+        <EuiComboBox fullWidth noSuggestions {...inputs.kibanaUrls.props} />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.fleet.settings.elasticsearchUrlLabel', {
-            defaultMessage: 'Elasticsearch URL',
-          })}
-          {...inputs.elasticsearchUrl.formRowProps}
-        >
-          <EuiComboBox noSuggestions {...inputs.elasticsearchUrl.props} />
-        </EuiFormRow>
+      <EuiFormRow
+        fullWidth
+        label={i18n.translate('xpack.fleet.settings.elasticsearchUrlLabel', {
+          defaultMessage: 'Elasticsearch URL',
+        })}
+        helpText={i18n.translate('xpack.fleet.settings.elasticsearchUrlsHelpTect', {
+          defaultMessage: 'Specify the Elasticsearch URLs where agents will send data.',
+        })}
+        {...inputs.elasticsearchUrl.formRowProps}
+      >
+        <EuiComboBox fullWidth noSuggestions {...inputs.elasticsearchUrl.props} />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth>
-        <EuiFormRow
-          {...inputs.additionalYamlConfig.formRowProps}
-          label={i18n.translate('xpack.fleet.settings.additionalYamlConfig', {
-            defaultMessage: 'Elasticsearch output configuration',
-          })}
-          fullWidth={true}
-        >
-          <EuiCodeEditor
-            width="100%"
-            mode="yaml"
-            theme="textmate"
-            setOptions={{
-              minLines: 10,
-              maxLines: 30,
-              tabSize: 2,
-              showGutter: false,
-            }}
-            {...inputs.additionalYamlConfig.props}
-            onChange={inputs.additionalYamlConfig.setValue}
-          />
-        </EuiFormRow>
+      <EuiFormRow
+        {...inputs.additionalYamlConfig.formRowProps}
+        label={i18n.translate('xpack.fleet.settings.additionalYamlConfig', {
+          defaultMessage: 'Elasticsearch output configuration',
+        })}
+        fullWidth
+      >
+        <EuiCodeEditor
+          width="100%"
+          mode="yaml"
+          theme="textmate"
+          setOptions={{
+            minLines: 10,
+            maxLines: 30,
+            tabSize: 2,
+            showGutter: false,
+          }}
+          {...inputs.additionalYamlConfig.props}
+          onChange={inputs.additionalYamlConfig.setValue}
+        />
       </EuiFormRow>
     </EuiForm>
   );
