@@ -13,12 +13,13 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from '../../types';
+import { FunctionalBoost, BoostOperation, BoostType, FunctionalBoostFunction } from '../../types';
 
 import { FunctionalBoostForm } from './functional_boost_form';
 
 describe('FunctionalBoostForm', () => {
-  const boost: Boost = {
+  const boost: FunctionalBoost = {
+    value: undefined,
     factor: 2,
     type: 'functional' as BoostType,
     function: 'logarithmic' as FunctionalBoostFunction,
