@@ -14,7 +14,7 @@ import { asDuration } from '../../../../../../../common/utils/formatters';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
 import { ErrorCount } from '../../ErrorCount';
-import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
+import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
 import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
 import { SyncBadge } from './SyncBadge';
@@ -75,14 +75,14 @@ const ItemText = euiStyled.span`
 interface IWaterfallItemProps {
   timelineMargins: Margins;
   totalDuration?: number;
-  item: IWaterfallItem;
+  item: IWaterfallSpanOrTransaction;
   color: string;
   isSelected: boolean;
   errorCount: number;
   onClick: () => unknown;
 }
 
-function PrefixIcon({ item }: { item: IWaterfallItem }) {
+function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span': {
       // icon for database spans
@@ -110,7 +110,7 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
 
 interface SpanActionToolTipProps {
   children: ReactNode;
-  item?: IWaterfallItem;
+  item?: IWaterfallSpanOrTransaction;
 }
 
 function SpanActionToolTip({ item, children }: SpanActionToolTipProps) {
@@ -124,7 +124,7 @@ function SpanActionToolTip({ item, children }: SpanActionToolTipProps) {
   return <>{children}</>;
 }
 
-function Duration({ item }: { item: IWaterfallItem }) {
+function Duration({ item }: { item: IWaterfallSpanOrTransaction }) {
   return (
     <EuiText color="subdued" size="xs">
       {asDuration(item.duration)}
@@ -132,7 +132,7 @@ function Duration({ item }: { item: IWaterfallItem }) {
   );
 }
 
-function HttpStatusCode({ item }: { item: IWaterfallItem }) {
+function HttpStatusCode({ item }: { item: IWaterfallSpanOrTransaction }) {
   // http status code for transactions of type 'request'
   const httpStatusCode =
     item.docType === 'transaction' && item.doc.transaction.type === 'request'
@@ -146,7 +146,7 @@ function HttpStatusCode({ item }: { item: IWaterfallItem }) {
   return <EuiText size="xs">{httpStatusCode}</EuiText>;
 }
 
-function NameLabel({ item }: { item: IWaterfallItem }) {
+function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span':
       return <EuiText size="s">{item.doc.span.name}</EuiText>;
@@ -156,8 +156,6 @@ function NameLabel({ item }: { item: IWaterfallItem }) {
           <h5>{item.doc.transaction.name}</h5>
         </EuiTitle>
       );
-    default:
-      return null;
   }
 }
 

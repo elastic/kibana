@@ -16,9 +16,10 @@ jest.mock('./browsers/install', () => ({
 }));
 
 import { coreMock } from 'src/core/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
+import { TaskManagerSetupContract } from '../../task_manager/server';
 import { ReportingPlugin } from './plugin';
 import { createMockConfigSchema } from './test_helpers';
-import { featuresPluginMock } from '../../features/server/mocks';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -42,6 +43,9 @@ describe('Reporting Plugin', () => {
         makeUsageCollector: jest.fn(),
         registerCollector: jest.fn(),
       },
+      taskManager: ({
+        registerTaskDefinitions: jest.fn(),
+      } as unknown) as TaskManagerSetupContract,
       security: {
         authc: {
           getCurrentUser: () => ({
@@ -63,23 +67,6 @@ describe('Reporting Plugin', () => {
     const plugin = new ReportingPlugin(initContext);
 
     expect(plugin.setup(coreSetup, pluginSetup)).not.toHaveProperty('then');
-  });
-
-  it('logs setup issues', async () => {
-    initContext.config = null;
-    const plugin = new ReportingPlugin(initContext);
-    // @ts-ignore overloading error logger
-    plugin.logger.error = jest.fn();
-    plugin.setup(coreSetup, pluginSetup);
-
-    await sleep(5);
-
-    // @ts-ignore overloading error logger
-    expect(plugin.logger.error.mock.calls[0][0]).toMatch(
-      /Error in Reporting setup, reporting may not function properly/
-    );
-    // @ts-ignore overloading error logger
-    expect(plugin.logger.error).toHaveBeenCalledTimes(2);
   });
 
   it('has a sync startup process', async () => {

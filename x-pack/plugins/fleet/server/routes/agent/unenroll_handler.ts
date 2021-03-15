@@ -7,11 +7,15 @@
 
 import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+
 import type {
   PostAgentUnenrollResponse,
   PostBulkAgentUnenrollResponse,
 } from '../../../common/types';
-import { PostAgentUnenrollRequestSchema, PostBulkAgentUnenrollRequestSchema } from '../../types';
+import type {
+  PostAgentUnenrollRequestSchema,
+  PostBulkAgentUnenrollRequestSchema,
+} from '../../types';
 import { licenseService } from '../../services';
 import * as AgentService from '../../services/agents';
 import { defaultIngestErrorHandler } from '../../errors';

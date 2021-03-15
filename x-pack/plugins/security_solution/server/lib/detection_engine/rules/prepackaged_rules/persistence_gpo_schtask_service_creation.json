@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Creation or Modification of a new GPO Scheduled Task or Service",
   "query": "event.category:file and not event.type:deletion and file.path:(C\\:\\\\Windows\\\\SYSVOL\\\\domain\\\\Policies\\\\*\\\\MACHINE\\\\Preferences\\\\ScheduledTasks\\\\ScheduledTasks.xml or C\\:\\\\Windows\\\\SYSVOL\\\\domain\\\\Policies\\\\*\\\\MACHINE\\\\Preferences\\\\Preferences\\\\Services\\\\Services.xml) and not process.name:dfsrs.exe",
   "risk_score": 21,

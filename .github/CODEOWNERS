@@ -57,6 +57,7 @@
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
+/x-pack/plugins/runtime_fields @elastic/kibana-app-services
 #CC# /src/plugins/bfetch/ @elastic/kibana-app-services
 #CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-services
 #CC# /src/plugins/inspector/ @elastic/kibana-app-services
@@ -117,10 +118,12 @@
 /x-pack/plugins/ml/  @elastic/ml-ui
 /x-pack/test/functional/apps/ml/  @elastic/ml-ui
 /x-pack/test/functional/services/ml/  @elastic/ml-ui
+/x-pack/test/accessibility/apps/ml.ts  @elastic/ml-ui
 # ML team owns and maintains the transform plugin despite it living in the Elasticsearch management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
+/x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
 
@@ -205,6 +208,7 @@
 #CC# /src/legacy/server/http/ @elastic/kibana-core
 #CC# /src/legacy/ui/public/documentation_links @elastic/kibana-core
 #CC# /src/plugins/legacy_export/ @elastic/kibana-core
+#CC# /src/plugins/xpack_legacy/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
 #CC# /src/plugins/status_page/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
@@ -256,7 +260,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Kibana Alerting Services
-/x-pack/plugins/alerts/ @elastic/kibana-alerting-services
+/x-pack/plugins/alerting/ @elastic/kibana-alerting-services
 /x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services
 /x-pack/plugins/task_manager/ @elastic/kibana-alerting-services

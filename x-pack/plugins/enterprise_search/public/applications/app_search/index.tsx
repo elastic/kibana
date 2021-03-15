@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useValues } from 'kea';
 
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { InitialAppData } from '../../../common/types';
@@ -44,7 +44,11 @@ import {
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  return !config.host ? <AppSearchUnconfigured /> : <AppSearchConfigured {...props} />;
+  return !config.host ? (
+    <AppSearchUnconfigured />
+  ) : (
+    <AppSearchConfigured {...(props as Required<InitialAppData>)} />
+  );
 };
 
 export const AppSearchUnconfigured: React.FC = () => (
@@ -58,17 +62,11 @@ export const AppSearchUnconfigured: React.FC = () => (
   </Switch>
 );
 
-export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
-  const { initializeAppData } = useActions(AppLogic);
+export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
-    hasInitialized,
     myRole: { canManageEngines, canManageMetaEngines },
-  } = useValues(AppLogic);
+  } = useValues(AppLogic(props));
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
-
-  useEffect(() => {
-    if (!hasInitialized) initializeAppData(props);
-  }, [hasInitialized]);
 
   return (
     <Switch>

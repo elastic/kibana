@@ -6,6 +6,7 @@
  */
 
 import type { PackageInfo } from '../types';
+
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 
 describe('Fleet - packageToPackagePolicy', () => {

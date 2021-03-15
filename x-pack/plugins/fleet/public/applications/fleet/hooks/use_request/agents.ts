@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useRequest, sendRequest } from './use_request';
-import type { UseRequestConfig } from './use_request';
 import { agentRouteService } from '../../services';
+
 import type {
   GetOneAgentResponse,
   GetOneAgentEventsResponse,
@@ -31,6 +30,9 @@ import type {
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
 } from '../../types';
+
+import { useRequest, sendRequest } from './use_request';
+import type { UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 

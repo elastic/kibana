@@ -9,10 +9,10 @@
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { ClassDeclaration } from 'ts-morph';
 import { AnchorLink, ApiDeclaration, TypeKind } from '../types';
-import { getCommentsFromNode } from './js_doc_utils';
+import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
 import { buildApiDeclaration } from './build_api_declaration';
 import { getSourceForNode, isPrivate } from './utils';
-import { getApiSectionId } from '../utils';
+import { getApiSectionId, isInternal } from '../utils';
 import { getSignature } from './get_signature';
 
 export function buildClassDec(
@@ -24,21 +24,23 @@ export function buildClassDec(
   return {
     id: getApiSectionId(anchorLink),
     type: TypeKind.ClassKind,
+    tags: getJSDocTagNames(node),
     label: node.getName() || 'Missing label',
     description: getCommentsFromNode(node),
     signature: getSignature(node, plugins, log),
     children: node.getMembers().reduce((acc, m) => {
       if (!isPrivate(m)) {
-        acc.push(
-          buildApiDeclaration(
-            m,
-            plugins,
-            log,
-            anchorLink.pluginName,
-            anchorLink.scope,
-            anchorLink.apiName
-          )
+        const child = buildApiDeclaration(
+          m,
+          plugins,
+          log,
+          anchorLink.pluginName,
+          anchorLink.scope,
+          anchorLink.apiName
         );
+        if (!isInternal(child)) {
+          acc.push(child);
+        }
       }
       return acc;
     }, [] as ApiDeclaration[]),

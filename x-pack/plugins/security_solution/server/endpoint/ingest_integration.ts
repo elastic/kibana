@@ -6,7 +6,7 @@
  */
 
 import { ExceptionListClient } from '../../../lists/server';
-import { PluginStartContract as AlertsStartContract } from '../../../alerts/server';
+import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../fleet/server';
 import { KibanaRequest, Logger, RequestHandlerContext } from '../../../../../src/core/server';

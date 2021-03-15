@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Creation or Modification of Root Certificate",
   "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path :\n    (\n      \"HKLM\\\\Software\\\\Microsoft\\\\SystemCertificates\\\\Root\\\\Certificates\\\\*\\\\Blob\",\n      \"HKLM\\\\Software\\\\Microsoft\\\\SystemCertificates\\\\AuthRoot\\\\Certificates\\\\*\\\\Blob\",\n      \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\SystemCertificates\\\\Root\\\\Certificates\\\\*\\\\Blob\",\n      \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\SystemCertificates\\\\AuthRoot\\\\Certificates\\\\*\\\\Blob\"\n    )\n",
   "references": [

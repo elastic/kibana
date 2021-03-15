@@ -6,11 +6,9 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  QueryStringInput,
-  IFieldType,
-  esKuery,
-} from '../../../../../../../src/plugins/data/public';
+
+import type { IFieldType } from '../../../../../../../src/plugins/data/public';
+import { QueryStringInput, esKuery } from '../../../../../../../src/plugins/data/public';
 import { useStartServices } from '../hooks';
 import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
 

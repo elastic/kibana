@@ -6,8 +6,10 @@
  */
 
 import type { SavedObjectsClientContract } from 'kibana/server';
-import { getInstallation } from './epm/packages';
+
 import type { ESIndexPatternService } from '../../server';
+
+import { getInstallation } from './epm/packages';
 
 export class ESIndexPatternSavedObjectService implements ESIndexPatternService {
   public async getESIndexPattern(

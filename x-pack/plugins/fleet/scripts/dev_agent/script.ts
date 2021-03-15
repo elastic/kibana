@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { createFlagError, run, ToolingLog } from '@kbn/dev-utils';
-import fetch from 'node-fetch';
 import os from 'os';
+
+import type { ToolingLog } from '@kbn/dev-utils';
+import { createFlagError, run } from '@kbn/dev-utils';
+import fetch from 'node-fetch';
+
 import type {
   Agent as _Agent,
   PostAgentCheckinRequest,

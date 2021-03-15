@@ -10,14 +10,12 @@ import React, { PureComponent, ReactText } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FieldFormat, FieldFormatsContentType } from 'src/plugins/data/public';
-import { Sample } from '../../types';
+import { Sample, SampleInput } from '../../types';
 import { FormatSelectEditorProps } from '../../field_format_editor';
 
-export type ConverterParams = string | number | Array<string | number>;
-
 export const convertSampleInput = (
-  converter: (input: ConverterParams) => string,
-  inputs: ConverterParams[]
+  converter: (input: SampleInput) => string,
+  inputs: SampleInput[]
 ) => {
   let error;
   let samples: Sample[] = [];
@@ -55,7 +53,7 @@ export interface FormatEditorProps<P> {
 }
 
 export interface FormatEditorState {
-  sampleInputs: ReactText[];
+  sampleInputs: SampleInput[];
   sampleConverterType: FieldFormatsContentType;
   error?: string;
   samples: Sample[];
@@ -63,7 +61,7 @@ export interface FormatEditorState {
 }
 
 export const defaultState = {
-  sampleInputs: [] as ReactText[],
+  sampleInputs: [] as SampleInput[],
   sampleConverterType: 'text' as FieldFormatsContentType,
   error: undefined,
   samples: [] as Sample[],

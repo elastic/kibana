@@ -15,12 +15,13 @@ import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { getValues } from './helpers';
+import { getMockTheme } from '../../../../../common/lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiColorMediumShade: '#ece',
   },
-};
+});
 
 describe('unknown_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];

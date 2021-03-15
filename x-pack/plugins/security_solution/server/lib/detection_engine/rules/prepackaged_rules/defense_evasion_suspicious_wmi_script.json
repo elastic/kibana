@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious WMIC XSL Script Execution",
   "query": "sequence by process.entity_id with maxspan = 2m\n[process where event.type in (\"start\", \"process_started\") and\n   (process.name : \"WMIC.exe\" or process.pe.original_file_name : \"wmic.exe\") and\n   process.args : (\"format*:*\", \"/format*:*\", \"*-format*:*\") and\n   not process.command_line : \"* /format:table *\"]\n[library where event.type == \"start\" and dll.name : (\"jscript.dll\", \"vbscript.dll\")]\n",
   "risk_score": 21,

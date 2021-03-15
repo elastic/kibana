@@ -323,7 +323,6 @@ export function ServiceProfilingFlamegraph({
             config={{
               fillLabel: {
                 fontFamily: theme.eui.euiCodeFontFamily,
-                // @ts-expect-error (coming soon in Elastic charts)
                 clipText: true,
               },
               drilldown: true,

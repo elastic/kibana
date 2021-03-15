@@ -10,7 +10,7 @@ import { Node } from 'ts-morph';
 import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
 import { buildClassDec } from './build_class_dec';
 import { buildFunctionDec } from './build_function_dec';
-import { getCommentsFromNode } from './js_doc_utils';
+import { getCommentsFromNode, getJSDocTagNames } from './js_doc_utils';
 import { isNamedNode } from '../tsmorph_utils';
 import { AnchorLink, ApiDeclaration } from '../types';
 import { buildVariableDec } from './build_variable_dec';
@@ -80,6 +80,7 @@ export function buildApiDeclaration(
     id: getApiSectionId(anchorLink),
     type: getTypeKind(node),
     label: apiName,
+    tags: getJSDocTagNames(node),
     description: getCommentsFromNode(node),
     source: getSourceForNode(node),
     signature: getSignature(node, plugins, log),

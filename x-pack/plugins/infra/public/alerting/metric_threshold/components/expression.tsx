@@ -98,7 +98,7 @@ export const Expressions: React.FC<Props> = (props) => {
   const updateParams = useCallback(
     (id, e: MetricExpression) => {
       const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
-      exp[id] = { ...exp[id], ...e };
+      exp[id] = e;
       setAlertParams('criteria', exp);
     },
     [setAlertParams, alertParams.criteria]
