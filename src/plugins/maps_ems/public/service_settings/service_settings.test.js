@@ -14,12 +14,12 @@ jest.mock('../kibana_services', () => ({
 
 import url from 'url';
 
-import EMS_FILES from '../__tests__/map/ems_mocks/sample_files.json';
-import EMS_TILES from '../__tests__/map/ems_mocks/sample_tiles.json';
-import EMS_STYLE_ROAD_MAP_BRIGHT from '../__tests__/map/ems_mocks/sample_style_bright';
-import EMS_STYLE_ROAD_MAP_DESATURATED from '../__tests__/map/ems_mocks/sample_style_desaturated';
-import EMS_STYLE_DARK_MAP from '../__tests__/map/ems_mocks/sample_style_dark';
-import { ORIGIN } from '../common/constants/origin';
+import EMS_FILES from '../../__tests__/map/ems_mocks/sample_files.json';
+import EMS_TILES from '../../__tests__/map/ems_mocks/sample_tiles.json';
+import EMS_STYLE_ROAD_MAP_BRIGHT from '../../__tests__/map/ems_mocks/sample_style_bright';
+import EMS_STYLE_ROAD_MAP_DESATURATED from '../../__tests__/map/ems_mocks/sample_style_desaturated';
+import EMS_STYLE_DARK_MAP from '../../__tests__/map/ems_mocks/sample_style_dark';
+import { ORIGIN } from '../../common';
 import { ServiceSettings } from './service_settings';
 
 describe('service_settings (FKA tile_map test)', function () {

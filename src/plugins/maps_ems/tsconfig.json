@@ -7,9 +7,6 @@
     "declaration": true,
     "declarationMap": true
   },
-  "include": ["public/**/*"],
-  "references": [
-     { "path": "../licensing/tsconfig.json" },
-     { "path": "../../../src/plugins/maps_ems/tsconfig.json" }
-  ]
+  "include": ["common/**/*", "public/**/*", "server/**/*", "./config.ts"],
+  "references": [{ "path": "../../core/tsconfig.json" }]
 }
