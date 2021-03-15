@@ -1,0 +1,171 @@
+[[logging-configuration-migration]]
+==== Logging config migration
+
+Compatibility with the legacy logging system is assured until the end of the `v7` version.
+All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
+root appenders, make sure that it contains `default` appender to provide backward compatibility.
+
+NOTE: If you define an appender for a context name, the log messages aren't handled by the
+`root` context anymore and not forwarded to the legacy logging service.
+
+===== logging.dest
+By default logs in *stdout*. With new {kib} logging you can use pre-existing `console` appender or
+define a custom one.
+
+[source,yaml]
+----
+logging:
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [console]
+----
+
+Logs in a *file* if given file path. You should define a custom appender with `type: file`
+
+[source,yaml]
+----
+
+logging:
+  appenders:
+    file:
+      type: file
+      fileName: /var/log/kibana.log
+      layout:
+        type: pattern
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [file]
+----
+
+===== logging.json
+Defines the format of log output. Logs in JSON if `true`. With new logging config you can adjust
+the output format with <<logging-layouts,layouts>>.
+
+===== logging.quiet
+Suppresses all logging output other than error messages. With new logging, config can be achieved
+with adjusting minimum required <<log-level,log level>>.
+
+[source,yaml]
+----
+  loggers:
+    - name: plugins.myPlugin
+      appenders: [console]
+      level: error
+# or for all output
+logging.root.level: error
+----
+
+===== logging.silent:
+Suppresses all logging output.
+[source,yaml]
+----
+logging.root.level: off
+----
+
+===== logging.verbose:
+Logs all events
+[source,yaml]
+----
+logging.root.level: all
+----
+
+===== logging.timezone
+Set to the canonical timezone id to log events using that timezone. New logging config allows
+to <<date-format,specify timezone>> for `layout: pattern`. Defaults to host timezone when not specified.
+
+[source,yaml]
+----
+logging:
+  appenders:
+    custom-console:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+        pattern: "[%level] [%date{ISO8601_TZ}{America/Los_Angeles}][%logger] %message"
+----
+
+===== logging.events
+Define a custom logger for a specific context name.
+
+**`logging.events.ops`** outputs sample system and process information at a regular interval.
+With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
+and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
+[source,yaml]
+----
+  loggers:
+    - name: metrics.ops
+      appenders: [console]
+      level: debug
+----
+
+**`logging.events.request` and `logging.events.response`** provide logs for each request handled
+by the http service. With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
+and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
+[source,yaml]
+----
+  loggers:
+    - name: http.server.response
+      appenders: [console]
+      level: debug
+----
+
+===== logging.filter
+TBD
+
+
+[options="header"]
+|===
+
+| Parameter | Platform log record in **pattern** format | Legacy Platform log record **text** format
+
+| @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`
+
+| context name | `parent.child` | `['parent', 'child']`
+
+| level | `DEBUG` | `['debug']`
+
+| meta | stringified JSON object `{"to": "v8"}`| N/A
+
+| pid | can be configured as `%pid` | N/A
+
+|===
+
+
+[options="header"]
+|===
+
+| Parameter | Platform log record in **json** format | Legacy Platform log record **json** format
+
+| @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`
+
+| context name | `log.logger: parent.child` | `tags: ['parent', 'child']`
+
+| level | `log.level: DEBUG` | `tags: ['debug']`
+
+| meta | separate property `"meta": {"to": "v8"}` | merged in log record  `{... "to": "v8"}`
+
+| pid | `process.pid: 12345` | `pid: 12345`
+
+| type | N/A | `type: log`
+
+| error | `{ message, name, stack }` | `{ message, name, stack, code, signal }`
+
+|===
+
+==== Logging configuration via CLI migration guide
+
+NOTE: The `--verbose` and `--silent` cli flags are supported and have build-in behavior. You can override the default behavior using the following equivalent platform logging configurations:
+[options="header"]
+|===
+
+| legacy logging | {kib} Platform logging
+
+|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=console
+
+|--quiet| --logging.root.level=error --logging.root.appenders[0]=default --logging.root.appenders[1]=console
+
+|--silent| --logging.root.level=off
+|===
+
+NOTE: you have to pass the `default` appender until the legacy logging system is removed in v8.0

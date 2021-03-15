@@ -249,73 +249,71 @@ To reload the logging settings, send a SIGHUP signal to {kib}.
 [cols="2*<"]
 |===
 
-|[[logging-dest]] `logging.dest:`
- | Enables you to specify a file where {kib} stores log output.
-*Default: `stdout`*
+|[[logging-root]] `logging.root:`
+| The `root` logger has a dedicated configuration node since this context name is special and must be configured for logging. 
 
-| `logging.json:`
- | Logs output as JSON. When set to `true`, the logs are formatted as JSON
-strings that include timestamp, log level, context, message text, and any other
-metadata that may be associated with the log message.
-When <<logging-dest, `logging.dest.stdout`>> is set, and there is no interactive terminal ("TTY"),
-this setting defaults to `true`. *Default: `false`*
+|[[logging-root-appenders]] `logging.root.appenders:`
+| A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that must be included in the list. This is the configuration that all custom loggers will use unless they're re-configured explicitly. Additional appenders, if configured, can be included in the list. See the <<logging-service-configuration,guide>> on configuring {kib} logging.
 
-| `logging.quiet:`
-  | Set the value of this setting to `true` to suppress all logging output other
-than error messages. *Default: `false`*
+|[[logging-root-level]] `logging.root.level:` {ess-icon}
+| Level at which a log record should be logged. Supported levels are: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_. Levels are ordered from _all_ (highest) to _off_ and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Set to `all` to log all events, including system usage information and all
+requests. Set to `off` to silence all logs. *Default: `info`*
 
-| `logging.rotate:`
- | experimental[] Specifies the options for the logging rotate feature.
-When not defined, all the sub options defaults would be applied.
-The following example shows a valid logging rotate configuration:
-
+|[[logging-loggers]] `logging.loggers:`
+ | Enables you to specify a specific context for a logger instance. The following example shows a valid logger configuration:
 |===
 
 [source,text]
 --
- logging.rotate:
-   enabled: true
-   everyBytes: 10485760
-   keepFiles: 10
+logging:
+  loggers:
+    - name: server
+      level: fatal
+      appenders: [console]
 --
 
 [cols="2*<"]
 |===
 
-| `logging.rotate.enabled:`
- | experimental[] Set the value of this setting to `true` to
-enable log rotation. If you do not have a <<logging-dest, `logging.dest`>> set that is different from `stdout`
-that feature would not take any effect. *Default: `false`*
+| `logging.loggers.name:`
+| Context for the log record.
 
-| `logging.rotate.everyBytes:`
- | experimental[] The maximum size of a log file (that is `not an exact` limit). After the
-limit is reached, a new log file is generated. The default size limit is 10485760 (10 MB) and
-this option should be in the range of 1048576 (1 MB) to 1073741824 (1 GB). *Default: `10485760`*
+| `logging.loggers.level:`
+| Level at which a log record should be shown. The same levels as for the <<logging-root-level,root logger>> are available for custom appenders.
 
-| `logging.rotate.keepFiles:`
- | experimental[] The number of most recent rotated log files to keep
-on disk. Older files are deleted during log rotation. The default value is 7. The `logging.rotate.keepFiles`
-option has to be in the range of 2 to 1024 files. *Default: `7`*
+| `logging.loggers.appenders:`
+| Specific appender format to apply for a particular logger context.
 
-| `logging.rotate.pollingInterval:`
- | experimental[] The number of milliseconds for the polling strategy in case
-the <<logging-rotate-usePolling, `logging.rotate.usePolling`>> is enabled. `logging.rotate.usePolling` must be in the 5000 to 3600000 millisecond range. *Default: `10000`*
+| `logging.appenders:`
+| Define how and where log messages are displayed (eg. stdout or console) and stored (eg. file on the disk)
 
-|[[logging-rotate-usePolling]] `logging.rotate.usePolling:`
- | experimental[] By default we try to understand the best way to monitoring
-the log file and warning about it. Please be aware there are some systems where watch api is not accurate. In those cases, in order to get the feature working,
-the `polling` method could be used enabling that option. *Default: `false`*
+| `logging.appenders.console:`
+| Appender to use for logging records to *stdout*. By default, uses the `[%date][%level][%logger] %message` <<pattern-layout,`pattern`>> layout. To use a <<json-layout,`json` layout>>, set the layout type to `json`.
 
-| `logging.timezone`
- | Set to the canonical time zone ID
-(for example, `America/Los_Angeles`) to log events using that time zone.
-For possible values, refer to
-https://en.wikipedia.org/wiki/List_of_tz_database_time_zones[database time zones].
-When not set, log events use the host timezone
+| `logging.appenders.file:`
+| Allows you to specify a fileName to send log records to on file:
 
-| [[logging-root-level]] `logging.root.level:` {ess-icon}
- | Set to `all` to log all events, including system usage information and all
-requests. Set to `off` to silence all logs.
+|===
+[source, text]
+--
+logging:
+  appenders:
+    file:
+      type: file
+      fileName: /var/log/kibana.log
+      layout:
+        type: json
+--
+
+[cols="2*<"]
+|===
+
+| `logging.appenders.rolling-file:`
+| Similar to Log4j's `RollingFileAppender`, this appender will log into a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: <<size-limit-triggering-policy,`size-limit`>> and <<time-interval-triggering-policy,`time-interval`>>. 
+
+The size limit policy will perform a rollover when the log file reaches a maximum `size` (*Default 100mb*). 
+
+The time interval policy will rotate the log file every given interval of time (*Default 24h*). For more information on how to configure the rolling file appender, please see the <<rolling-file-appender, rolling file appender documentation>>.
 
 | [[regionmap-ES-map]] `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
