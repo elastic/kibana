@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactChild, useState } from 'react';
+import { useTheme } from '../../../../hooks/use_theme';
 import { ContainerType } from '../../../../../common/service_metadata';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -63,6 +64,8 @@ export function ServiceIcons({ serviceName }: Props) {
     setSelectedIconPopover,
   ] = useState<Icons | null>();
 
+  const theme = useTheme();
+
   const { data: icons, status: iconsFetchStatus } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
@@ -103,7 +106,7 @@ export function ServiceIcons({ serviceName }: Props) {
   const popoverItems: PopoverItem[] = [
     {
       key: 'service',
-      icon: getAgentIcon(icons?.agentName) || 'node',
+      icon: getAgentIcon(icons?.agentName, theme.darkMode) || 'node',
       isVisible: !!icons?.agentName,
       title: i18n.translate('xpack.apm.serviceIcons.service', {
         defaultMessage: 'Service',

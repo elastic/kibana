@@ -6,13 +6,13 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { ElasticsearchClient } from 'src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { securityMock } from '../mocks';
-
-import { ElasticsearchClient } from '../../../../../src/core/server';
 import { Tokens } from './tokens';
 
 describe('Tokens', () => {

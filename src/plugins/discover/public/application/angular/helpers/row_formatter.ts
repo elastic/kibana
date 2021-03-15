@@ -26,6 +26,7 @@ export const doTemplate = template(noWhiteSpace(templateHtml));
 
 export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
   const highlights = hit?.highlight ?? {};
+  // Keys are sorted in the hits object
   const formatted = indexPattern.formatHit(hit);
   const highlightPairs: Array<[string, unknown]> = [];
   const sourcePairs: Array<[string, unknown]> = [];
@@ -44,7 +45,8 @@ export const formatTopLevelObject = (
   const highlights = row.highlight ?? {};
   const highlightPairs: Array<[string, unknown]> = [];
   const sourcePairs: Array<[string, unknown]> = [];
-  Object.entries(fields).forEach(([key, values]) => {
+  const sorted = Object.entries(fields).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+  sorted.forEach(([key, values]) => {
     const field = indexPattern.getFieldByName(key);
     const formatter = field
       ? indexPattern.getFormatterForField(field)

@@ -8,15 +8,25 @@
 
 /* eslint-disable react/no-danger */
 
-import React, { FunctionComponent } from 'react';
-
-import { RenderingMetadata } from '../types';
+import React, { FC } from 'react';
 
 interface Props {
-  darkMode: RenderingMetadata['darkMode'];
+  darkMode: boolean;
+  stylesheetPaths: string[];
 }
 
-export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
+export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
+  return (
+    <>
+      <InlineStyles darkMode={darkMode} />
+      {stylesheetPaths.map((path) => (
+        <link key={path} rel="stylesheet" type="text/css" href={path} />
+      ))}
+    </>
+  );
+};
+
+const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
   return (
     <style
       dangerouslySetInnerHTML={{

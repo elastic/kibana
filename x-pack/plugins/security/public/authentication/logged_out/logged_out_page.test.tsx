@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
-import { LoggedOutPage } from './logged_out_page';
+import React from 'react';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
+import { LoggedOutPage } from './logged_out_page';
 
 describe('LoggedOutPage', () => {
   beforeAll(() => {

@@ -202,6 +202,13 @@ export const DragDrop = (props: BaseProps) => {
   return <DropInner {...dropProps} />;
 };
 
+const removeSelectionBeforeDragging = () => {
+  const selection = window.getSelection();
+  if (selection) {
+    selection.removeAllRanges();
+  }
+};
+
 const DragInner = memo(function DragInner({
   dataTestSubj,
   className,
@@ -366,6 +373,7 @@ const DragInner = memo(function DragInner({
         draggable: true,
         onDragEnd: dragEnd,
         onDragStart: dragStart,
+        onMouseDown: removeSelectionBeforeDragging,
       })}
     </div>
   );

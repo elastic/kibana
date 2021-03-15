@@ -12,7 +12,7 @@ import { IImporter, ImportFactoryOptions, ImportResults } from '../importer';
 
 export interface FileUploadComponentProps {
   isIndexingTriggered: boolean;
-  onFileUpload: (geojsonFile: FeatureCollection, name: string) => void;
+  onFileUpload: (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => void;
   onFileRemove: () => void;
   onIndexReady: (indexReady: boolean) => void;
   onIndexingComplete: (results: {

@@ -10,7 +10,7 @@ To track a sub view inside your application (ie a flyout, a tab, form step, etc)
 
 #### For a React Component
 
-For tracking an application view rendered using react the simplest way is to wrap your component with the `TrackApplicationView` Higher order component:
+For tracking an application view rendered using react the simplest way is to wrap your component with the `TrackApplicationView` Higher order component exposed from the `usageCollection` plugin. You will need to add the plugin to plugin's `kibana.json` file as an item in the `optionalPlugins` and `requiredBundles` declarations:
 
 kibana.json
 ```json
@@ -26,6 +26,7 @@ kibana.json
 
 At the application level, the application must be wrapped by the `ApplicationUsageTrackingProvider` provided in the `usageCollection`'s setup contract.
 
+For example:
 ```typescript jsx
 class MyPlugin implements Plugin {
   ...
@@ -69,7 +70,6 @@ const MyTrackedComponent = () => {
 Application Usage will automatically track the active minutes on screen and clicks for both the application and the `MyComponent` component whenever it is mounted on the screen. Application Usage pauses counting screen minutes whenever the user is tabbed to another browser window.
 
 The prop `viewId` is used as a unique identifier for your plugin. The Application Id is automatically attached to the tracked usage, based on the ID used when registering your app via `core.application.register`.
-
 ## Application Usage Telemetry Data
 
 This collector reports the number of general clicks and minutes on screen for each registered application in Kibana.

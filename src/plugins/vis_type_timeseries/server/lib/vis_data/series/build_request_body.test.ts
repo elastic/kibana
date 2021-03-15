@@ -81,7 +81,7 @@ describe('buildRequestBody(req)', () => {
     };
     const indexPatternObject = {};
     const doc = await buildRequestBody(
-      { payload: body },
+      { body },
       panel,
       series,
       config,

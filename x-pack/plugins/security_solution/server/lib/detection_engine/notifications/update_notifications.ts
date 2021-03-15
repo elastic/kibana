@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PartialAlert } from '../../../../../alerts/server';
+import { PartialAlert } from '../../../../../alerting/server';
 import { readNotifications } from './read_notifications';
 import { RuleNotificationAlertTypeParams, UpdateNotificationParams } from './types';
 import { addTags } from './add_tags';

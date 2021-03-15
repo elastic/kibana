@@ -13,3 +13,10 @@ import SemVer from 'semver/classes/semver';
  */
 export const mockKibanaVersion = '8.0.0';
 export const mockKibanaSemverVersion = new SemVer(mockKibanaVersion);
+
+/*
+ * This will be set to true up until the last minor before the next major.
+ * In readonly mode, the user will not be able to perform any actions in the UI
+ * and will be presented with a message indicating as such.
+ */
+export const UA_READONLY_MODE = true;

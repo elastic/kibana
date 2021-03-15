@@ -539,7 +539,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               'xpack.ml.dataframe.analytics.create.scatterplotMatrixLabelHelpText',
               {
                 defaultMessage:
-                  'Visualizes the relationships between pairs of selected included fields',
+                  'Visualizes the relationships between pairs of selected included fields.',
               }
             )}
             fullWidth

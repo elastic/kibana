@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '[data-test-subj="embeddablePanelHeading-lnsPieVis"]',
         'lnsPieVis'
       );
-      const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
+      const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'AL');
       expect(hasGeoDestFilter).to.be(true);
       await filterBar.addFilter('geo.src', 'is', 'US');
       await filterBar.toggleFilterPinned('geo.src');

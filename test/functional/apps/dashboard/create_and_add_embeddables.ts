@@ -69,10 +69,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
-      it('saves the saved visualization url to the app link', async () => {
+      it('saves the listing page instead of the visualization to the app link', async () => {
         await PageObjects.header.clickVisualize(true);
         const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
+        expect(currentUrl).not.to.contain(VisualizeConstants.EDIT_PATH);
       });
 
       after(async () => {

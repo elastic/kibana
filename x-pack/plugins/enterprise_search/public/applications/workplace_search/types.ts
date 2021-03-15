@@ -22,6 +22,8 @@ export interface Meta {
   page: MetaPage;
 }
 
+export type Role = 'admin' | 'user';
+
 export interface Group {
   id: string;
   name: string;

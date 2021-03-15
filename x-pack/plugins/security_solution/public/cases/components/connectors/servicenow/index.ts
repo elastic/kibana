@@ -11,7 +11,7 @@ import { CaseConnector } from '../types';
 import {
   ServiceNowITSMFieldsType,
   ServiceNowSIRFieldsType,
-} from '../../../../../../case/common/api/connectors';
+} from '../../../../../../cases/common/api/connectors';
 import * as i18n from './translations';
 
 export const getServiceNowITSMCaseConnector = (): CaseConnector<ServiceNowITSMFieldsType> => {

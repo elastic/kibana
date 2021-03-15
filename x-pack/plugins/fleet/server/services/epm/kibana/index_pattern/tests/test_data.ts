@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPatternField } from '../install';
+import type { IndexPatternField } from '../install';
 
 export const dupeFields: IndexPatternField[] = [
   {

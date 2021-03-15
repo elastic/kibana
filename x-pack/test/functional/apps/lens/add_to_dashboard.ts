@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.switchToVisualization('lnsMetric');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
       await PageObjects.lens.save('New Lens from Modal', false, false, 'new');
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.switchToVisualization('lnsMetric');
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
       await PageObjects.lens.save(
@@ -183,10 +183,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.switchToVisualization('lnsMetric');
 
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.waitForVisualization();
           await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.waitForVisualization();
           await testSubjects.click('lnsApp_saveButton');
 
           const hasOptions = await testSubjects.exists('add-to-dashboard-options');
@@ -228,10 +228,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.switchToVisualization('lnsMetric');
 
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.waitForVisualization();
           await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.lens.waitForVisualization();
           await testSubjects.click('lnsApp_saveButton');
 
           const hasOptions = await testSubjects.exists('add-to-dashboard-options');

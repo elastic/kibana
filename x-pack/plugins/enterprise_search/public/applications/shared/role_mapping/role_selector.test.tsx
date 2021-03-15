@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiRadio, EuiCallOut } from '@elastic/eui';
+import { EuiRadio } from '@elastic/eui';
 
 import { RoleSelector } from './role_selector';
 
@@ -41,9 +41,7 @@ describe('RoleSelector', () => {
 
   it('renders callout when disabled', () => {
     const wrapper = shallow(<RoleSelector {...props} disabled />);
-    const radio = wrapper.find(EuiRadio);
 
-    expect(radio.dive().find(EuiCallOut)).toHaveLength(1);
     expect(wrapper.find(EuiRadio).prop('checked')).toEqual(false);
   });
 

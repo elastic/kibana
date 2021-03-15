@@ -542,7 +542,7 @@ describe('RelevanceTuningLogic', () => {
         expect(mockEngineActions.initializeEngine).toHaveBeenCalled();
       });
 
-      it('will re-fetch the current engine after settings are updated if there were unconfirmed search fieldds', async () => {
+      it('will re-fetch the current engine after settings are updated if there were unconfirmed search fields', async () => {
         mockEngineValues.engine.unsearchedUnconfirmedFields = true;
         mount({});
         http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
@@ -719,6 +719,9 @@ describe('RelevanceTuningLogic', () => {
                 factor: 1,
                 newBoost: true,
                 type: BoostType.Functional,
+                function: 'logarithmic',
+                operation: 'multiply',
+                value: undefined,
               },
             ],
           },
@@ -744,6 +747,9 @@ describe('RelevanceTuningLogic', () => {
                 factor: 1,
                 newBoost: true,
                 type: BoostType.Functional,
+                function: 'logarithmic',
+                operation: 'multiply',
+                value: undefined,
               },
             ],
           },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UIExtensionRegistrationCallback, UIExtensionsStorage } from '../types';
+import type { UIExtensionRegistrationCallback, UIExtensionsStorage } from '../types';
 
 /** Factory that returns a callback that can be used to register UI extensions */
 export const createExtensionRegistrationCallback = (
