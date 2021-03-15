@@ -319,7 +319,7 @@ export const Expressions: React.FC<Props> = (props) => {
             >
               <ExpressionChart
                 expression={e}
-                filterQuery={alertParams.filterQueryText}
+                filterQuery={alertParams.filterQuery}
                 nodeType={alertParams.nodeType}
                 sourceId={alertParams.sourceId}
               />
