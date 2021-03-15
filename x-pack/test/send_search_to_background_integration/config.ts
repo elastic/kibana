@@ -7,8 +7,7 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { services as functionalServices } from '../functional/services';
-import { services } from './services';
+import { services } from '../functional/services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config'));
@@ -35,9 +34,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.data_enhanced.search.sessions.enabled=true', // enable WIP send to background UI
       ],
     },
-    services: {
-      ...functionalServices,
-      ...services,
-    },
+    services,
   };
 }

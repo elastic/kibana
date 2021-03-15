@@ -857,9 +857,10 @@ export function registerOauthConnectorParamsRoute({
       validate: {
         query: schema.object({
           kibana_host: schema.string(),
-          code: schema.string(),
+          code: schema.maybe(schema.string()),
           session_state: schema.maybe(schema.string()),
           state: schema.string(),
+          oauth_token: schema.maybe(schema.string()),
           oauth_verifier: schema.maybe(schema.string()),
         }),
       },

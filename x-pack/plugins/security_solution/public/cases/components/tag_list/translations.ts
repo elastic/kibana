@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../../translations';
 
 export const EDIT_TAGS_ARIA = i18n.translate(
-  'xpack.securitySolution.case.caseView.editTagsLinkAria',
+  'xpack.securitySolution.cases.caseView.editTagsLinkAria',
   {
     defaultMessage: 'click to edit tags',
   }

@@ -6,7 +6,7 @@
  */
 
 import _, { partition } from 'lodash';
-import type { OperationMetadata } from '../../types';
+import type { OperationMetadata, VisualizationDimensionGroupConfig } from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -25,6 +25,8 @@ interface ColumnChange {
   columnId: string;
   indexPattern: IndexPattern;
   field?: IndexPatternField;
+  visualizationGroups: VisualizationDimensionGroupConfig[];
+  targetGroup?: string;
 }
 
 export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
@@ -42,6 +44,8 @@ export function insertNewColumn({
   columnId,
   field,
   indexPattern,
+  visualizationGroups,
+  targetGroup,
 }: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -63,7 +67,13 @@ export function insertNewColumn({
     const isBucketed = Boolean(possibleOperation.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
     return updateDefaultLabels(
-      addOperationFn(layer, operationDefinition.buildColumn({ ...baseOptions, layer }), columnId),
+      addOperationFn(
+        layer,
+        operationDefinition.buildColumn({ ...baseOptions, layer }),
+        columnId,
+        visualizationGroups,
+        targetGroup
+      ),
       indexPattern
     );
   }
@@ -97,6 +107,8 @@ export function insertNewColumn({
             columnId: newId,
             op: def.type,
             indexPattern,
+            visualizationGroups,
+            targetGroup,
           });
         } else if (validFields.length === 1) {
           // Recursively update the layer for each new reference
@@ -106,6 +118,8 @@ export function insertNewColumn({
             op: def.type,
             indexPattern,
             field: validFields[0],
+            visualizationGroups,
+            targetGroup,
           });
         } else {
           tempLayer = {
@@ -133,7 +147,9 @@ export function insertNewColumn({
       addOperationFn(
         tempLayer,
         operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds }),
-        columnId
+        columnId,
+        visualizationGroups,
+        targetGroup
       ),
       indexPattern
     );
@@ -155,7 +171,9 @@ export function insertNewColumn({
         addBucket(
           layer,
           operationDefinition.buildColumn({ ...baseOptions, layer, field: invalidField }),
-          columnId
+          columnId,
+          visualizationGroups,
+          targetGroup
         ),
         indexPattern
       );
@@ -196,7 +214,9 @@ export function insertNewColumn({
     addOperationFn(
       layer,
       operationDefinition.buildColumn({ ...baseOptions, layer, field }),
-      columnId
+      columnId,
+      visualizationGroups,
+      targetGroup
     ),
     indexPattern
   );
@@ -208,6 +228,7 @@ export function replaceColumn({
   indexPattern,
   op,
   field,
+  visualizationGroups,
 }: ColumnChange): IndexPatternLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -240,6 +261,7 @@ export function replaceColumn({
         previousColumn,
         op,
         indexPattern,
+        visualizationGroups,
       });
     }
 
@@ -297,7 +319,11 @@ export function replaceColumn({
     // This logic comes after the transitions because they need to look at previous columns
     if (previousDefinition.input === 'fullReference') {
       (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
-        tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
+        tempLayer = deleteColumn({
+          layer: tempLayer,
+          columnId: id,
+          indexPattern,
+        });
       });
     }
 
@@ -385,6 +411,7 @@ export function canTransition({
   field,
   indexPattern,
   filterOperations,
+  visualizationGroups,
 }: ColumnChange & {
   filterOperations: (meta: OperationMetadata) => boolean;
 }): boolean {
@@ -398,7 +425,14 @@ export function canTransition({
   }
 
   try {
-    const newLayer = replaceColumn({ layer, columnId, op, field, indexPattern });
+    const newLayer = replaceColumn({
+      layer,
+      columnId,
+      op,
+      field,
+      indexPattern,
+      visualizationGroups,
+    });
     const newDefinition = operationDefinitionMap[op];
     const newColumn = newLayer.columns[columnId];
     return (
@@ -437,12 +471,14 @@ function applyReferenceTransition({
   previousColumn,
   op,
   indexPattern,
+  visualizationGroups,
 }: {
   layer: IndexPatternLayer;
   columnId: string;
   previousColumn: IndexPatternColumn;
   op: OperationType;
   indexPattern: IndexPattern;
+  visualizationGroups: VisualizationDimensionGroupConfig[];
 }): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
@@ -499,6 +535,7 @@ function applyReferenceTransition({
           columnId: newId,
           op: validOperations[0].type,
           indexPattern,
+          visualizationGroups,
         });
         return newId;
       }
@@ -536,6 +573,7 @@ function applyReferenceTransition({
           op: defWithField[0].type,
           indexPattern,
           field: indexPattern.getFieldByName(previousColumn.sourceField),
+          visualizationGroups,
         });
         return newId;
       } else if (defIgnoringfield.length === 1) {
@@ -578,6 +616,7 @@ function applyReferenceTransition({
               op: defWithField[0].type,
               indexPattern,
               field: previousField,
+              visualizationGroups,
             });
             return newId;
           }
@@ -633,7 +672,9 @@ function copyCustomLabel(newColumn: IndexPatternColumn, previousColumn: IndexPat
 function addBucket(
   layer: IndexPatternLayer,
   column: IndexPatternColumn,
-  addedColumnId: string
+  addedColumnId: string,
+  visualizationGroups: VisualizationDimensionGroupConfig[],
+  targetGroup?: string
 ): IndexPatternLayer {
   const [buckets, metrics, references] = getExistingColumnGroups(layer);
 
@@ -656,12 +697,50 @@ function addBucket(
     // they already had, with an extra level of detail.
     updatedColumnOrder = [...buckets, addedColumnId, ...metrics, ...references];
   }
+  reorderByGroups(visualizationGroups, targetGroup, updatedColumnOrder, addedColumnId);
   const tempLayer = {
     ...resetIncomplete(layer, addedColumnId),
     columns: { ...layer.columns, [addedColumnId]: column },
     columnOrder: updatedColumnOrder,
   };
   return { ...tempLayer, columnOrder: getColumnOrder(tempLayer) };
+}
+
+export function reorderByGroups(
+  visualizationGroups: VisualizationDimensionGroupConfig[],
+  targetGroup: string | undefined,
+  updatedColumnOrder: string[],
+  addedColumnId: string
+) {
+  const hidesColumnGrouping =
+    targetGroup && visualizationGroups.find((group) => group.groupId === targetGroup)?.hideGrouping;
+
+  // if column grouping is disabled, keep bucket aggregations in the same order as the groups
+  // if grouping is known
+  if (hidesColumnGrouping) {
+    const orderedVisualizationGroups = [...visualizationGroups];
+    orderedVisualizationGroups.sort((group1, group2) => {
+      if (typeof group1.nestingOrder === undefined) {
+        return -1;
+      }
+      if (typeof group2.nestingOrder === undefined) {
+        return 1;
+      }
+      return group1.nestingOrder! - group2.nestingOrder!;
+    });
+    const columnGroupIndex: Record<string, number> = {};
+    updatedColumnOrder.forEach((columnId) => {
+      columnGroupIndex[columnId] = orderedVisualizationGroups.findIndex(
+        (group) =>
+          (columnId === addedColumnId && group.groupId === targetGroup) ||
+          group.accessors.some((acc) => acc.columnId === columnId)
+      );
+    });
+
+    updatedColumnOrder.sort((a, b) => {
+      return columnGroupIndex[a] - columnGroupIndex[b];
+    });
+  }
 }
 
 function addMetric(
