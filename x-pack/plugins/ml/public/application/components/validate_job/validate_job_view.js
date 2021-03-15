@@ -134,7 +134,7 @@ export class ValidateJobUI extends Component {
         this.props.ml
           .validateJob({ duration, fields, job })
           .then((validationMessages) => {
-            const messages = parseMessages(validationMessages);
+            const messages = parseMessages(validationMessages, getDocLinks());
             shouldShowLoadingIndicator = false;
 
             const messagesContainError = messages.some((m) => m.status === VALIDATION_STATUS.ERROR);
