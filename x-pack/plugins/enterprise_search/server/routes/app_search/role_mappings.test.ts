@@ -131,7 +131,6 @@ describe('role mappings routes', () => {
         const request = {
           body: {
             ...roleMappingBaseSchema,
-            id: '123',
           },
         };
         mockRouter.shouldValidate(request);
