@@ -88,12 +88,16 @@ export interface IWaterfallLegend {
 }
 
 function getLegendValues(transactionOrSpan: Transaction | Span) {
+  const span: Span | undefined =
+    transactionOrSpan.processor.event === 'span'
+      ? (transactionOrSpan as Span)
+      : undefined;
+
   return {
     [WaterfallLegendType.ServiceName]: transactionOrSpan.service.name,
-    [WaterfallLegendType.SpanType]:
-      'span' in transactionOrSpan
-        ? transactionOrSpan.span.subtype || transactionOrSpan.span.type
-        : '',
+    [WaterfallLegendType.SpanType]: span
+      ? span.span.subtype || span.span.type
+      : '',
   };
 }
 
