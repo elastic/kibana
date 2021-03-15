@@ -1,0 +1,22 @@
+{
+  "id": "rac",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack",
+    "rac"
+  ],
+  "optionalPlugins": [
+    "spaces",
+    "security"
+  ],
+  "requiredPlugins": [
+    "taskManager",
+    "actions",
+    "alerting",
+    "data",
+    "navigation"
+  ],
+  "server": true,
+  "ui": true
+}
