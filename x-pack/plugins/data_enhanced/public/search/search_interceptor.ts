@@ -63,7 +63,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       const shaKey = await createRequestHash(request);
       const cached = this.responseCache.get(shaKey);
       if (!id && cached) {
-        return cached;
+        return Promise.resolve(cached);
       }
       return this.runSearch({ id, ...request }, searchOptions);
     };
@@ -103,10 +103,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         const shaKey = await createRequestHash(request);
         if (!this.responseCache.has(shaKey) && isCompleteResponse(response)) {
           this.responseCache.set(shaKey, response);
+          setTimeout(() => {
+            this.responseCache.delete(shaKey);
+          }, 30000);
         }
-        setTimeout(() => {
-          this.responseCache.delete(shaKey);
-        }, 30000);
       }),
       catchError((e: Error) => {
         cancel();

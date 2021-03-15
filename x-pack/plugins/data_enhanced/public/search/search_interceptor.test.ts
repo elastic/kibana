@@ -39,6 +39,12 @@ let fetchMock: jest.Mock<any>;
 
 jest.useFakeTimers();
 
+jest.mock('./utils', () => ({
+  createRequestHash: jest.fn().mockImplementation(() => {
+    return Promise.resolve('abcd');
+  }),
+}));
+
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
   fetchMock.mockImplementation(() => {
