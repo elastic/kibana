@@ -36,7 +36,6 @@ export interface IndexWriteFailure {
 }
 
 export interface Settings {
-  id: string;
   index: string;
   body: object;
   [key: string]: any;

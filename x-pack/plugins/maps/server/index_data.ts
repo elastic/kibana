@@ -14,11 +14,8 @@ export async function writeDataToIndex(
   asCurrentUser: ElasticsearchClient
 ) {
   try {
-    const settings: Settings = { index, body: data, id: '1' };
-    console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
-    console.log(settings);
-    const { body: resp } = await asCurrentUser.create(settings);
-    console.log(resp);
+    const settings: Settings = { index, body: data };
+    const { body: resp } = await asCurrentUser.index(settings);
     if (resp.errors) {
       throw resp;
     } else {
