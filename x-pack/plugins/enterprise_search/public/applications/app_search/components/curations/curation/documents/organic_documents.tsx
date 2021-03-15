@@ -35,7 +35,7 @@ export const OrganicDocuments: React.FC = () => {
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.organicDocuments.title',
             {
-              defaultMessage: 'Top 10 organic documents for "{currentQuery}" query',
+              defaultMessage: 'Top organic documents for "{currentQuery}"',
               values: { currentQuery },
             }
           )}

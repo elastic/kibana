@@ -48,7 +48,7 @@ describe('OrganicDocuments', () => {
     const wrapper = shallow(<OrganicDocuments />);
     const titleText = shallow(wrapper.find(DataPanel).prop('title')).text();
 
-    expect(titleText).toEqual('Top 10 organic documents for "world" query');
+    expect(titleText).toEqual('Top organic documents for "world"');
   });
 
   it('renders a loading state', () => {
