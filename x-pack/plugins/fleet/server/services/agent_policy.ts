@@ -698,6 +698,23 @@ class AgentPolicyService {
           }),
     };
 
+    // Only add permissions if output.type is "elasticsearch"
+    fullAgentPolicy.outputPermissions = Object.keys(fullAgentPolicy.outputs).reduce<
+      NonNullable<FullAgentPolicy['outputPermissions']>
+    >((permissions, outputName) => {
+      const output = fullAgentPolicy.outputs[outputName];
+      if (output && output.type === 'elasticsearch') {
+        // TODO Extract to a method
+        permissions[outputName] = [
+          {
+            names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+            privileges: ['auto_configure', 'create_doc'],
+          },
+        ];
+      }
+      return permissions;
+    }, {});
+
     // only add settings if not in standalone
     if (!standalone) {
       let settings: Settings;
