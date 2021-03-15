@@ -281,7 +281,7 @@ export interface ElasticsearchLegacySource {
     shard?: string;
     state?: string;
     primary?: boolean;
-    relocating_node?: string;
+    relocating_node: string | null;
     node?: string;
   };
   ccr_stats?: {

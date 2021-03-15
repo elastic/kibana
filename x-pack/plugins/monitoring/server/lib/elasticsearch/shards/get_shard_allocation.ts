@@ -11,11 +11,7 @@ import { checkParam } from '../../error_missing_required';
 import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
-import {
-  ElasticsearchResponse,
-  ElasticsearchLegacySource,
-  ElasticsearchMetricbeatSource,
-} from '../../../../common/types/es';
+import { ElasticsearchResponse, ElasticsearchLegacySource } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
 export function handleResponse(response: ElasticsearchResponse) {
   const hits = response.hits?.hits;
