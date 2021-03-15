@@ -34,5 +34,5 @@ export const getIndexVersion = async (
     return 0;
   }
   const writeIndexMapping = await readIndex(esClient, writeIndex);
-  return get(writeIndexMapping, [writeIndex, 'mappings', '_meta', 'version']) ?? 0;
+  return get(writeIndexMapping, ['body', writeIndex, 'mappings', '_meta', 'version']) ?? 0;
 };

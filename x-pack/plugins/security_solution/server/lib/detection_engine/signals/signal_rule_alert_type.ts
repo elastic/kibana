@@ -199,7 +199,7 @@ export const signalRulesAlertType = ({
           const inputIndices = await getInputIndex(services, version, index);
           const [privileges, timestampFieldCaps] = await Promise.all([
             checkPrivileges(services, inputIndices),
-            services.scopedClusterClient.fieldCaps({
+            services.scopedClusterClient.asCurrentUser.fieldCaps({
               index,
               fields: hasTimestampOverride
                 ? ['@timestamp', timestampOverride as string]
@@ -585,7 +585,7 @@ export const signalRulesAlertType = ({
           }
           try {
             const signalIndexVersion = await getIndexVersion(
-              services.scopedClusterClient,
+              services.scopedClusterClient.asCurrentUser,
               outputIndex
             );
             if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
@@ -614,7 +614,9 @@ export const signalRulesAlertType = ({
             eventCategoryOverride
           );
           const eqlSignalSearchStart = performance.now();
-          const { body: response } = (await services.scopedClusterClient.transport.request(
+          const {
+            body: response,
+          } = (await services.scopedClusterClient.asCurrentUser.transport.request(
             request
           )) as ApiResponse<EqlSignalSearchResponse>;
           const eqlSignalSearchEnd = performance.now();

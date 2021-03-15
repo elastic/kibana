@@ -156,7 +156,7 @@ export function getAlertType(
     const { alertId, name, services, params, state } = options;
     const previousTimestamp = state.latestTimestamp;
 
-    const esClient = services.scopedClusterClient;
+    const esClient = services.scopedClusterClient.asCurrentUser;
     const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);

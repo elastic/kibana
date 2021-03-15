@@ -420,7 +420,7 @@ export class AlertingPlugin {
   ): (request: KibanaRequest) => Services {
     return (request) => ({
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
-      scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
+      scopedClusterClient: elasticsearch.client.asScoped(request),
     });
   }
 

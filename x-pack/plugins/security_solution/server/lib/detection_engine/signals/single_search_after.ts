@@ -74,7 +74,9 @@ export const singleSearchAfter = async ({
     const start = performance.now();
     const {
       body: nextSearchAfterResult,
-    } = await services.scopedClusterClient.search<SignalSearchResponse>(searchAfterQuery);
+    } = await services.scopedClusterClient.asCurrentUser.search<SignalSearchResponse>(
+      searchAfterQuery
+    );
     const end = performance.now();
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],

@@ -158,7 +158,7 @@ export const singleBulkCreate = async ({
     }),
   ]);
   const start = performance.now();
-  const { body: response } = await services.scopedClusterClient.bulk<BulkResponse>({
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk<BulkResponse>({
     index: signalsIndex,
     refresh,
     body: bulkBody,
@@ -244,7 +244,7 @@ export const bulkInsertSignals = async (
     doc._source,
   ]);
   const start = performance.now();
-  const { body: response } = await services.scopedClusterClient.bulk<BulkResponse>({
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk<BulkResponse>({
     refresh,
     body: bulkBody,
   });

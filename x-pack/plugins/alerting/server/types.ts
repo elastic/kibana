@@ -13,7 +13,7 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
-  ElasticsearchClient,
+  IScopedClusterClient,
   KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
@@ -62,7 +62,7 @@ export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
-  scopedClusterClient: ElasticsearchClient;
+  scopedClusterClient: IScopedClusterClient;
 }
 
 export interface AlertServices<

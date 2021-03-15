@@ -156,7 +156,7 @@ export const checkPrivileges = async (
   indices: string[]
 ): Promise<Privilege> =>
   (
-    await services.scopedClusterClient.transport.request({
+    await services.scopedClusterClient.asCurrentUser.transport.request({
       path: '/_security/user/_has_privileges',
       method: 'POST',
       body: {
@@ -208,7 +208,7 @@ export const getListsClient = ({
   }
 
   const listClient = lists.getListClient(
-    services.scopedClusterClient,
+    services.scopedClusterClient.asCurrentUser,
     spaceId,
     updatedByUser ?? 'elastic'
   );

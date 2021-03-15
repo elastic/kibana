@@ -149,7 +149,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
           params.boundaryIndexTitle,
           params.boundaryGeoField,
           params.geoField,
-          services.scopedClusterClient,
+          services.scopedClusterClient.asCurrentUser,
           log,
           alertId,
           params.boundaryNameField,
@@ -158,7 +158,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
 
     const executeEsQuery = await executeEsQueryFactory(
       params,
-      services.scopedClusterClient,
+      services.scopedClusterClient.asCurrentUser,
       log,
       shapesFilters
     );

@@ -25,7 +25,7 @@ export function alertingEsClient<TParams extends ESSearchRequest>(
   >,
   params: TParams
 ): Promise<ApiResponse<ESSearchResponse<unknown, TParams>>> {
-  return services.scopedClusterClient.search({
+  return services.scopedClusterClient.asCurrentUser.search({
     ...params,
     ignore_unavailable: true,
   });

@@ -226,7 +226,7 @@ export class BaseAlert {
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
 
-    const esClient = services.scopedClusterClient;
+    const esClient = services.scopedClusterClient.asCurrentUser;
     const availableCcs = Globals.app.config.ui.ccs.enabled ? await fetchAvailableCcs(esClient) : [];
     const clusters = await this.fetchClusters(esClient, params as CommonAlertParams, availableCcs);
     const data = await this.fetchData(params, esClient, clusters, availableCcs);

@@ -44,7 +44,7 @@ export const createMetricThresholdExecutor = (
     );
     const config = source.configuration;
     const alertResults = await evaluateAlert(
-      services.scopedClusterClient,
+      services.scopedClusterClient.asCurrentUser,
       params as EvaluatedAlertParams,
       config
     );
