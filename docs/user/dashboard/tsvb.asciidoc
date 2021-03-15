@@ -23,7 +23,7 @@ Open *TSVB*, then make sure the required settings are configured.
 * *Time field*
 * *Interval*
 
-. Select a *Drop last bucket* option. Typically, the last bucket contains partial data.
+. Select a *Drop last bucket* option. It is dropped by default because the time filter intersects the time range of the last bucket, but can be enabled to see the partial data.
 
 . In the *Panel filter* field, specify any <<kuery-query, KQL filters>> to select specific documents.
 
@@ -43,7 +43,7 @@ To configure the value of each series, select the function, then configure the f
 
 * *Filters* &mdash; Groups the data into the specified filters. To differentiate the groups, assign a color to each filter.
 
-* *Terms* &mdash; Displays the top values in the series. To configure for the *Time Series* visualization, click *Options*, then select an option from the *Split color theme* dropdown.
+* *Terms* &mdash; Displays the top values of the field. The color is only configurable in the *Time Series* chart. To configure, click *Options*, then select an option from the *Split color theme* dropdown.
 
 . Click *Options*, then configure the inputs for the function. 
 
@@ -140,7 +140,7 @@ Performing math across data series is unsupported in *TSVB*. To calculate the di
 [float]
 ===== How do I compare the current versus previous month?
 
-While math is unsupported in *TSVB*, series with tie offsets is supported.
+*TSVB* can display two series with time offsets, but it can't perform math across series. To add a time offset:
 
 . Click *Clone Series*, then choose a color for the new series.
 +
