@@ -195,7 +195,7 @@ export const getDefaultFieldsFromJobCaps = (
       });
       // remove flattened feature influence fields
       fields = fields.filter(
-        (field: any) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
+        (field) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
       );
     }
 

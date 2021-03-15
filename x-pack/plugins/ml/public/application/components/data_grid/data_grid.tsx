@@ -167,9 +167,11 @@ export const DataGrid: FC<Props> = memo(
                 />
               );
             },
-            featureInfluence: ({ cellContentsElement }: { cellContentsElement: any }) => (
-              <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>
-            ),
+            featureInfluence: ({
+              cellContentsElement,
+            }: {
+              cellContentsElement: HTMLDivElement;
+            }) => <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>,
           }
         : undefined;
     }, [baseline, data]);
