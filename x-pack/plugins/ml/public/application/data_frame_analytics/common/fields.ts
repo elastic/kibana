@@ -193,11 +193,11 @@ export const getDefaultFieldsFromJobCaps = (
         name: `${resultsField}.${FEATURE_INFLUENCE}`,
         type: KBN_FIELD_TYPES.UNKNOWN,
       });
-      // remove flattened feature influence fields
-      fields = fields.filter(
-        (field) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
-      );
     }
+    // remove flattened feature influence fields
+    fields = fields.filter(
+      (field) => !field.name.includes(`${resultsField}.${FEATURE_INFLUENCE}.`)
+    );
 
     // Only need to add these fields if we didn't use dest index pattern to get the fields
     if (needsDestIndexFields === true) {
