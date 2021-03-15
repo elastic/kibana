@@ -655,7 +655,7 @@ class AgentPolicyService {
       id: agentPolicy.id,
       outputs: {
         // TEMPORARY as we only support a default output
-        ...[defaultOutput].reduce(
+        ...[defaultOutput].reduce<FullAgentPolicy['outputs']>(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
             const configJs = config_yaml ? safeLoad(config_yaml) : {};
@@ -675,7 +675,7 @@ class AgentPolicyService {
 
             return outputs;
           },
-          {} as FullAgentPolicy['outputs']
+          {}
         ),
       },
       inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_policies as PackagePolicy[]),
