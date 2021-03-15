@@ -14,6 +14,11 @@ export interface HumanData {
   nextLabel?: string;
 }
 
+export interface Ghost {
+  children: React.ReactElement;
+  style: React.CSSProperties;
+}
+
 export type DragDropIdentifier = Record<string, unknown> & {
   id: string;
   /**
@@ -23,10 +28,7 @@ export type DragDropIdentifier = Record<string, unknown> & {
 };
 
 export type DraggingIdentifier = DragDropIdentifier & {
-  ghost?: {
-    children: React.ReactElement;
-    style: React.CSSProperties;
-  };
+  ghost?: Ghost;
 };
 
 export type DropIdentifier = DragDropIdentifier & {

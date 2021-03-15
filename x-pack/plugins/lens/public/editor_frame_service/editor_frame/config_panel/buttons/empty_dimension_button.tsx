@@ -6,117 +6,19 @@
  */
 
 import React, { useMemo, useState, useEffect, useContext } from 'react';
-import { EuiIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { generateId } from '../../../id_generator';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../drag_drop';
+import { generateId } from '../../../../id_generator';
+import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 
-import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../types';
-import { LayerDatasourceDropProps } from './types';
+import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../../types';
+import { LayerDatasourceDropProps } from '../types';
+import { customDropTargetsMap, getAdditionalClassesOnDroppable } from './drop_targets_utils';
 
 const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
   defaultMessage: 'Empty dimension',
 });
-
-const getAdditionalClassesOnDroppable = (dropType?: string) => {
-  if (
-    dropType &&
-    [
-      'move_incompatible',
-      'replace_incompatible',
-      'swap_incompatible',
-      'duplicate_incompatible',
-      'replace_duplicate_incompatible',
-    ].includes(dropType)
-  ) {
-    return 'lnsDragDrop-notCompatible';
-  }
-};
-
-
-const customDropTargetsMap = {
-  replace_duplicate_compatible: (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="center"
-      alignItems="center"
-      className="lnsDragDrop__extraDrop"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon size="s" type="copy" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>Duplicate</EuiFlexItem>
-    </EuiFlexGroup>
-  ),
-  duplicate_compatible: (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="center"
-      alignItems="center"
-      className="lnsDragDrop__extraDrop"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon size="s" type="copy" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>Duplicate</EuiFlexItem>
-    </EuiFlexGroup>
-  ),
-  swap_compatible: (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="center"
-      alignItems="center"
-      className="lnsDragDrop__extraDrop"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon size="s" type="expand" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>Swap</EuiFlexItem>
-    </EuiFlexGroup>
-  ),
-  replace_duplicate_incompatible: (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="center"
-      alignItems="center"
-      className="lnsDragDrop__extraDrop lnsDragDrop__extraDrop-incompatible"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon size="s" type="copy" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>Duplicate</EuiFlexItem>
-    </EuiFlexGroup>
-  ),
-  duplicate_incompatible: (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="center"
-      alignItems="center"
-      className="lnsDragDrop__extraDrop lnsDragDrop__extraDrop-incompatible"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon size="s" type="copy" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>Duplicate</EuiFlexItem>
-    </EuiFlexGroup>
-  ),
-  swap_incompatible: (
-    <EuiFlexGroup
-      gutterSize="s"
-      justifyContent="center"
-      alignItems="center"
-      className="lnsDragDrop__extraDrop lnsDragDrop__extraDrop-incompatible"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon size="s" type="expand" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>Swap</EuiFlexItem>
-    </EuiFlexGroup>
-  ),
-};
-
 
 export function EmptyDimensionButton({
   group,

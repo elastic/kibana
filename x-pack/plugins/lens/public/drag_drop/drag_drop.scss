@@ -3,7 +3,8 @@
 
 .lnsDragDrop {
   user-select: none;
-  transition: background-color $euiAnimSpeedFast ease-in-out, border-color $euiAnimSpeedFast ease-in-out;
+  transition: $euiAnimSpeedFast ease-in-out;
+  transition-property: background-color, border-color, opacity;
 }
 
 .lnsDragDrop_ghost {
@@ -16,7 +17,7 @@
   left: 0;
   opacity: .9;
   transform: translate(-12px, 8px);
-  z-index: $euiZLevel2;
+  z-index: $euiZLevel3;
   pointer-events: none;
   box-shadow: 0 0 0 $euiFocusRingSize $euiFocusRingColor;
 }
@@ -76,7 +77,7 @@
   background-color: $euiColorHighlight;
   border: $euiBorderWidthThin dashed $euiBorderColor;
   &.lnsDragDrop-isActiveDropTarget {
-    background-color: #fdf3cd;
+    background-color: #FDF3CD;
     border-color: $euiColorVis5;
   }
 }
@@ -87,7 +88,7 @@
   height: 100%;
 
   &.lnsDragDrop__container-active {
-    z-index: $euiZLevel2;
+    z-index: $euiZLevel3;
   }
 }
 
@@ -109,6 +110,7 @@
 
   .lnsDragDrop-isActiveDropTarget {
     @include lnsDraggable;
+    z-index: $euiZLevel3;
   }
 }
 
@@ -136,10 +138,6 @@
 // Draggable item when it is moving
 .lnsDragDrop-isHidden {
   opacity: 0;
-}
-
-.lnsDragDrop-isHidden-noFocus {
-  opacity: 0;
   .lnsDragDrop__keyboardHandler {
     &:focus,
     &:focus-within {
@@ -150,35 +148,37 @@
 
 .lnsDragDrop__extraDrops {
   opacity: 0;
+  visibility: hidden;
   position: absolute;
-  right: 100%;
-  top: 50%;
+  z-index: $euiZLevel2;
+  right: calc(100% + 16px);
+  top: calc(50% + 4px);
   transform: translateY(-50%);
   transition: opacity $euiAnimSpeedFast ease-in-out;
 }
 
 .lnsDragDrop__extraDrops-visible {
   opacity: 1;
+  visibility: visible;
 }
 
 .lnsDragDrop__trapezoid {
+  position: absolute;
+  width: 30%;
   top: 50%;
   transform: translateY(-50%);
+  left: -$euiSize;
   // background:rgba(165, 17, 251, 0.2);
-  position: absolute;
-  width: calc(100% + 16px);
-  left: -8px;
 }
 
 .lnsDragDrop__extraDrop {
+  position: relative;
+  height: $euiSizeXS * 10;
   font-size: $euiSize;
   min-width: $euiSize * 7;
-  position:relative;
-  color: $euiColorVis0;
   color: $euiColorSuccess;
-  height: $euiSizeXS * 10;
   border-radius: $euiSizeXS;
-  &-incompatible {
+  &.lnsDragDrop-incompatibleExtraDrop {
     color: $euiColorWarningText;
   }
 }

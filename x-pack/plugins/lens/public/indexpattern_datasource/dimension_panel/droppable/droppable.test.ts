@@ -4,17 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { IndexPatternDimensionEditorProps } from './dimension_panel';
-import { onDrop, getDropProps } from './droppable';
-import { DraggingIdentifier } from '../../drag_drop';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { IndexPatternDimensionEditorProps } from '../dimension_panel';
+import { DraggingIdentifier } from '../../../drag_drop';
+import { onDrop } from './on_drop_handler';
+import { getDropProps } from './get_drop_props';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { IndexPatternPrivateState } from '../types';
-import { documentField } from '../document_field';
-import { OperationMetadata, DropType } from '../../types';
-import { IndexPatternColumn, MedianIndexPatternColumn } from '../operations';
-import { getFieldByNameFactory } from '../pure_helpers';
+import { IndexPatternPrivateState } from '../../types';
+import { documentField } from '../../document_field';
+import { OperationMetadata, DropType } from '../../../types';
+import { IndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
+import { getFieldByNameFactory } from '../../pure_helpers';
 
 const fields = [
   {
@@ -237,7 +244,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           dragging: draggingField,
           filterOperations: (op: OperationMetadata) => op.dataType === 'number',
         })
-      ).toEqual({ dropType: 'field_replace', nextLabel: 'Intervals' });
+      ).toEqual({ dropTypes: ['field_replace'], nextLabel: 'Intervals' });
     });
 
     it('returns undefined if the field belongs to another index pattern', () => {
@@ -278,7 +285,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       ).toBe(undefined);
     });
 
-    it('returns move if the dragged column is compatible', () => {
+    it('returns compatible drop types if the dragged column is compatible', () => {
       expect(
         getDropProps({
           ...defaultProps,
@@ -292,7 +299,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
           columnId: 'col2',
         })
-      ).toEqual({ dropType: 'move_compatible' });
+      ).toEqual({ dropTypes: ['move_compatible', 'duplicate_compatible'] });
     });
 
     it('returns undefined if the dragged column from different group uses the same field as the dropTarget', () => {
@@ -336,7 +343,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       ).toEqual(undefined);
     });
 
-    it('returns replace_incompatible if dropping column to existing incompatible column', () => {
+    it('returns incompatible drop target types if dropping column to existing incompatible column', () => {
       const testState = { ...state };
       testState.layers.first = {
         indexPatternId: 'foo',
@@ -370,7 +377,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columnId: 'col2',
           filterOperations: (op: OperationMetadata) => op.isBucketed === false,
         })
-      ).toEqual({ dropType: 'replace_incompatible', nextLabel: 'Unique count' });
+      ).toEqual({
+        dropTypes: ['replace_incompatible', 'replace_duplicate_incompatible', 'swap_incompatible'],
+        nextLabel: 'Unique count',
+      });
     });
   });
   describe('onDrop', () => {
@@ -613,7 +623,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
               label: 'Top values of src',
               dataType: 'string',
               isBucketed: true,
-
               // Private
               operationType: 'terms',
               params: {
@@ -922,7 +931,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         onDrop({
           ...defaultProps,
           columnId: 'newCol',
-          dropType: 'duplicate_in_group',
+          dropType: 'duplicate_compatible',
           droppedItem: draggingCol1,
           state: testState,
           groupId: 'a',
@@ -1058,7 +1067,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ...defaultProps,
         droppedItem: metricDragging,
         state: testState,
-        dropType: 'duplicate_in_group',
+        dropType: 'duplicate_compatible',
         columnId: 'newCol',
       });
       // metric is appended
@@ -1090,7 +1099,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ...defaultProps,
         droppedItem: bucketDragging,
         state: testState,
-        dropType: 'duplicate_in_group',
+        dropType: 'duplicate_compatible',
         columnId: 'newCol',
       });
 

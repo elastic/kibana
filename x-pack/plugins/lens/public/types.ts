@@ -17,7 +17,7 @@ import {
   Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
-import { DragContextState, DragDropIdentifier } from './drag_drop';
+import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
@@ -142,7 +142,6 @@ export type DropType =
   | 'field_add'
   | 'field_replace'
   | 'reorder'
-  | 'duplicate_in_group'
   | 'move_compatible'
   | 'replace_compatible'
   | 'move_incompatible'
@@ -301,7 +300,7 @@ export interface DatasourceLayerPanelProps<T> {
   activeData?: Record<string, Datatable>;
 }
 
-export interface DraggedOperation {
+export interface DraggedOperation extends DraggingIdentifier {
   layerId: string;
   groupId: string;
   columnId: string;

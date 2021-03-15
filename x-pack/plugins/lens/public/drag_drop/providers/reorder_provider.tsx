@@ -70,6 +70,7 @@ export function ReorderProvider({
   const setReorderState = useMemo(() => (dispatch: SetReorderStateDispatch) => setState(dispatch), [
     setState,
   ]);
+  // console.log('isReorderOn', state.isReorderOn);
   return (
     <div
       data-test-subj="lnsDragDrop-reorderableGroup"
