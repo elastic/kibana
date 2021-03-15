@@ -194,8 +194,6 @@ export function IndexPatternDataPanel({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        // TODO: in case of missing currentIndexPatternId,
-        // this should automatically switch to the next available one
         <MemoizedDataPanel
           currentIndexPatternId={currentIndexPatternId}
           indexPatternRefs={indexPatternRefs}
