@@ -989,6 +989,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col1',
           op: 'testReference' as OperationType,
+          visualizationGroups: [],
         });
 
         expect(operationDefinitionMap.testReference.buildColumn).toHaveBeenCalledWith(
