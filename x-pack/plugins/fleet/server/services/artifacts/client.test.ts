@@ -25,6 +25,7 @@ describe('When using the Fleet Artifacts Client', () => {
     const singleHit = generateArtifactEsGetSingleHitMock();
 
     if (withInvalidArtifact) {
+      // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
       singleHit._source.packageName = 'not endpoint';
     }
 

@@ -9,14 +9,15 @@ import type { ESSearchHit } from '../../../../../typings/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 
 export function searchHitToAgent(hit: ESSearchHit<FleetServerAgent>): Agent {
+  // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
   return {
     id: hit._id,
     ...hit._source,
-    policy_revision: hit._source.policy_revision_idx,
+    policy_revision: hit._source?.policy_revision_idx,
     current_error_events: [],
     access_api_key: undefined,
     status: undefined,
-    packages: hit._source.packages ?? [],
+    packages: hit._source?.packages ?? [],
   };
 }
 

@@ -15,6 +15,7 @@ export const esSearchHitToArtifact = <
 >(
   searchHit: T
 ): Artifact => {
+  // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
   return {
     ...searchHit._source,
     id: searchHit._id,

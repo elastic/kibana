@@ -16,7 +16,6 @@ import type { ElasticsearchClient } from 'kibana/server';
 
 import type { ListResult } from '../../../common';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
-import type { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
@@ -38,7 +37,7 @@ export const getArtifact = async (
   id: string
 ): Promise<Artifact | undefined> => {
   try {
-    const esData = await esClient.get<ESSearchHit<ArtifactElasticsearchProperties>>({
+    const esData = await esClient.get<ArtifactElasticsearchProperties>({
       index: FLEET_SERVER_ARTIFACTS_INDEX,
       id,
     });
@@ -98,10 +97,9 @@ export const listArtifacts = async (
   const { perPage = 20, page = 1, kuery = '', sortField = 'created', sortOrder = 'asc' } = options;
 
   try {
-    const searchResult = await esClient.search<
-      ESSearchResponse<ArtifactElasticsearchProperties, {}>
-    >({
+    const searchResult = await esClient.search<ArtifactElasticsearchProperties>({
       index: FLEET_SERVER_ARTIFACTS_INDEX,
+      // @ts-expect-error @elastic/elasticsearch SearchRequest.sort expected string[]
       sort: `${sortField}:${sortOrder}`,
       q: kuery,
       from: (page - 1) * perPage,
@@ -112,6 +110,7 @@ export const listArtifacts = async (
       items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
       page,
       perPage,
+      // @ts-expect-error doesn't hadnle total as number
       total: searchResult.body.hits.total.value,
     };
   } catch (e) {

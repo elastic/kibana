@@ -108,6 +108,7 @@ export const generateArtifactEsSearchResultHitsMock = (): ESSearchResponse<
         relation: 'eq',
       },
       max_score: 2,
+      // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
       hits: [generateArtifactEsGetSingleHitMock()],
     },
   };

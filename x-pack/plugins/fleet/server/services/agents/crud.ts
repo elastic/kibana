@@ -14,7 +14,6 @@ import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
-import type { ESSearchHit } from '../../../../../typings/elasticsearch';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import type { KueryNode } from '../../../../../../src/plugins/data/server';
 import { esKuery } from '../../../../../../src/plugins/data/server';
@@ -92,7 +91,7 @@ export async function listAgents(
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
 
-  const res = await esClient.search({
+  const res = await esClient.search<FleetServerAgent>({
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
@@ -166,7 +165,7 @@ export async function countInactiveAgents(
 
 export async function getAgent(esClient: ElasticsearchClient, agentId: string) {
   try {
-    const agentHit = await esClient.get<ESSearchHit<FleetServerAgent>>({
+    const agentHit = await esClient.get<FleetServerAgent>({
       index: AGENTS_INDEX,
       id: agentId,
     });
@@ -191,6 +190,7 @@ export async function getAgents(
     body,
     index: AGENTS_INDEX,
   });
+  // @ts-expect-error MultiGetHit is not assignable to Hit
   const agents = res.body.docs.map(searchHitToAgent);
   return agents;
 }
