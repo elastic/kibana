@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-
-export const configSchema = schema.object({});
-
-export type MapsLegacyConfig = TypeOf<typeof configSchema>;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/plugins/maps_ems'],
+};

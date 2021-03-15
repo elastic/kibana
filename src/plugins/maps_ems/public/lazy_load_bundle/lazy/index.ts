@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-
-export const configSchema = schema.object({});
-
-export type MapsLegacyConfig = TypeOf<typeof configSchema>;
+export { ServiceSettings } from '../../service_settings/service_settings';
