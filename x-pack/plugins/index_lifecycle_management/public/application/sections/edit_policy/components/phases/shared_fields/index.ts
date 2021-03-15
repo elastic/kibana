@@ -22,3 +22,5 @@ export { ReadonlyField } from './readonly_field';
 export { ReplicasField } from './replicas_field';
 
 export { IndexPriorityField } from './index_priority_field';
+
+export { FreezeField } from './freeze_field';
