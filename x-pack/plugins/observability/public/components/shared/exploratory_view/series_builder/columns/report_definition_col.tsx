@@ -27,7 +27,12 @@ const ReportDefinitionMap: Record<
     },
   ],
   kpi: [],
-  pgv: [],
+  pgv: [
+    {
+      field: 'service.name',
+      required: true,
+    },
+  ],
   svl: [
     {
       field: 'service.name',
