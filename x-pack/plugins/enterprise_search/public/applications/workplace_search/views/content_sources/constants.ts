@@ -300,7 +300,7 @@ export const SOURCE_REMOVE_TITLE = i18n.translate(
 );
 
 export const SOURCE_REMOVE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
+  'xpack.enterpriseSearch.workplaceSearch.sources.remove.description',
   {
     defaultMessage: 'This action cannot be undone.',
   }
