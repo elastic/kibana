@@ -62,9 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
             { key: '#D3DAE6', value: 8 },
             { key: '#98A1B3', value: 25 },
             // anti-aliasing
-            { key: '#F5F7FA', value: 30 },
-
-            // [{"key":"#CD8475","value":0,"withinTolerance":false},{"key":"#6A717D","value":25.1336,"withinTolerance":false},{"key":"#D3DAE6","value":8.307700000000002,"withinTolerance":false},{"key":"#98A1B3","value":25.111200000000014,"withinTolerance":false},{"key":"#F5F7FA","value":29.509800000000002,"withinTolerance":false}]
+            { key: '#F5F7FA', value: 27 },
           ],
           row: {
             type: 'outlier_detection',
