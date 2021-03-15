@@ -797,18 +797,26 @@ describe('Session index', () => {
     });
   });
 
-  describe('#clear', () => {
-    it('throws if call to Elasticsearch fails', async () => {
+  describe('#invalidate', () => {
+    beforeEach(() => {
+      mockElasticsearchClient.deleteByQuery.mockResolvedValue(
+        securityMock.createApiResponse({ body: { deleted: 10 } })
+      );
+    });
+
+    it('[match=sid] throws if call to Elasticsearch fails', async () => {
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
       );
       mockElasticsearchClient.delete.mockRejectedValue(failureReason);
 
-      await expect(sessionIndex.clear('some-long-sid')).rejects.toBe(failureReason);
+      await expect(sessionIndex.invalidate({ match: 'sid', sid: 'some-long-sid' })).rejects.toBe(
+        failureReason
+      );
     });
 
-    it('properly removes session value from the index', async () => {
-      await sessionIndex.clear('some-long-sid');
+    it('[match=sid] properly removes session value from the index', async () => {
+      await sessionIndex.invalidate({ match: 'sid', sid: 'some-long-sid' });
 
       expect(mockElasticsearchClient.delete).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.delete).toHaveBeenCalledWith(
@@ -816,26 +824,18 @@ describe('Session index', () => {
         { ignore: [404] }
       );
     });
-  });
 
-  describe('#clearAll', () => {
-    beforeEach(() => {
-      mockElasticsearchClient.deleteByQuery.mockResolvedValue(
-        securityMock.createApiResponse({ body: { deleted: 10 } })
-      );
-    });
-
-    it('throws if call to Elasticsearch fails', async () => {
+    it('[match=all] throws if call to Elasticsearch fails', async () => {
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
       );
       mockElasticsearchClient.deleteByQuery.mockRejectedValue(failureReason);
 
-      await expect(sessionIndex.clearAll()).rejects.toBe(failureReason);
+      await expect(sessionIndex.invalidate({ match: 'all' })).rejects.toBe(failureReason);
     });
 
-    it('when filter is not specified', async () => {
-      await expect(sessionIndex.clearAll()).resolves.toBe(10);
+    it('[match=all] properly constructs query', async () => {
+      await expect(sessionIndex.invalidate({ match: 'all' })).resolves.toBe(10);
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
@@ -845,8 +845,21 @@ describe('Session index', () => {
       });
     });
 
-    it('when only provider type is specified', async () => {
-      await expect(sessionIndex.clearAll({ provider: { type: 'basic' } })).resolves.toBe(10);
+    it('[match=query] throws if call to Elasticsearch fails', async () => {
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
+      );
+      mockElasticsearchClient.deleteByQuery.mockRejectedValue(failureReason);
+
+      await expect(
+        sessionIndex.invalidate({ match: 'query', query: { provider: { type: 'basic' } } })
+      ).rejects.toBe(failureReason);
+    });
+
+    it('[match=query] when only provider type is specified', async () => {
+      await expect(
+        sessionIndex.invalidate({ match: 'query', query: { provider: { type: 'basic' } } })
+      ).resolves.toBe(10);
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
@@ -856,9 +869,12 @@ describe('Session index', () => {
       });
     });
 
-    it('when both provider type and provider name are specified', async () => {
+    it('[match=query] when both provider type and provider name are specified', async () => {
       await expect(
-        sessionIndex.clearAll({ provider: { type: 'basic', name: 'basic1' } })
+        sessionIndex.invalidate({
+          match: 'query',
+          query: { provider: { type: 'basic', name: 'basic1' } },
+        })
       ).resolves.toBe(10);
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
@@ -878,9 +894,12 @@ describe('Session index', () => {
       });
     });
 
-    it('when both provider type and username hash are specified', async () => {
+    it('[match=query] when both provider type and username hash are specified', async () => {
       await expect(
-        sessionIndex.clearAll({ provider: { type: 'basic' }, usernameHash: 'some-hash' })
+        sessionIndex.invalidate({
+          match: 'query',
+          query: { provider: { type: 'basic' }, usernameHash: 'some-hash' },
+        })
       ).resolves.toBe(10);
 
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
@@ -900,11 +919,11 @@ describe('Session index', () => {
       });
     });
 
-    it('when provider type, provider name, and username hash are specified', async () => {
+    it('[match=query] when provider type, provider name, and username hash are specified', async () => {
       await expect(
-        sessionIndex.clearAll({
-          provider: { type: 'basic', name: 'basic1' },
-          usernameHash: 'some-hash',
+        sessionIndex.invalidate({
+          match: 'query',
+          query: { provider: { type: 'basic', name: 'basic1' }, usernameHash: 'some-hash' },
         })
       ).resolves.toBe(10);
 

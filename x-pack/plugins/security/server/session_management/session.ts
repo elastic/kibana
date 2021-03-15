@@ -80,20 +80,16 @@ export interface SessionValueContentToEncrypt {
 }
 
 /**
- * Parameters provided for the `SessionIndex.clearAll` method that determine which session index
- * values should be cleared (removed from the index).
+ * Filter provided for the `Session.invalidate` method that determines which session values should
+ * be invalidated. It can have three possible types:
+ *   - `all` means that all existing active and inactive sessions should be invalidated.
+ *   - `current` means that session associated with the current request should be invalidated.
+ *   - `query` means that only sessions that match specified query should be invalidated.
  */
-export interface ClearAllSessionFilter {
-  /**
-   * Descriptor of the authentication provider that created sessions that should be cleared. Provider
-   * name is optional.
-   */
-  provider: { type: string; name?: string };
-  /**
-   * Optional name of the user whose sessions should be cleared.
-   */
-  username?: string;
-}
+export type InvalidateSessionsFilter =
+  | { match: 'all' }
+  | { match: 'current' }
+  | { match: 'query'; query: { provider: { type: string; name?: string }; username?: string } };
 
 /**
  * The SIDs and AAD must be unpredictable to prevent guessing attacks, where an attacker is able to
@@ -149,7 +145,7 @@ export class Session {
       (sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < now)
     ) {
       sessionLogger.debug('Session has expired and will be invalidated.');
-      await this.clear(request);
+      await this.invalidate(request, { match: 'current' });
       return null;
     }
 
@@ -171,7 +167,7 @@ export class Session {
       sessionLogger.warn(
         `Unable to decrypt session content, session will be invalidated: ${err.message}`
       );
-      await this.clear(request);
+      await this.invalidate(request, { match: 'current' });
       return null;
     }
 
@@ -374,55 +370,54 @@ export class Session {
   }
 
   /**
-   * Clears session value for the specified request.
-   * @param request Request instance to clear session value for.
+   * Invalidates sessions that match the specified filter.
+   * @param request Request instance initiated invalidation.
+   * @param filter Filter that narrows down the list of the sessions that should be invalidated.
    */
-  async clear(request: KibanaRequest) {
-    const sessionCookieValue = await this.options.sessionCookie.get(request);
-    if (!sessionCookieValue) {
-      return;
-    }
-
-    const sessionLogger = this.getLoggerForSID(sessionCookieValue.sid);
-    sessionLogger.debug('Invalidating session.');
-
-    await Promise.all([
-      this.options.sessionCookie.clear(request),
-      this.options.sessionIndex.clear(sessionCookieValue.sid),
-    ]);
-
-    sessionLogger.debug('Successfully invalidated session.');
-  }
-
-  /**
-   * Clears all existing session values.
-   * @param request Request instance to clear session value for.
-   * @param [filter] Filter that narrows down the list of the sessions that should be cleared.
-   */
-  async clearAll(request: KibanaRequest, filter?: ClearAllSessionFilter) {
-    // For this case method we don't require request to have the associated session, but nevertheless
-    // we still want to log the SID if session is available.
+  async invalidate(request: KibanaRequest, filter: InvalidateSessionsFilter) {
+    // We don't require request to have the associated session, but nevertheless we still want to
+    // log the SID if session is available.
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     const sessionLogger = this.getLoggerForSID(sessionCookieValue?.sid);
-    sessionLogger.debug('Invalidating sessions.');
 
-    const clearIndexFilter = filter?.username
-      ? {
-          provider: filter.provider,
-          usernameHash: createHash('sha3-256').update(filter.username).digest('hex'),
-        }
-      : filter;
+    let invalidateIndexValueFilter;
+    if (filter.match === 'current') {
+      if (!sessionCookieValue) {
+        return;
+      }
 
-    // There are two things to be aware of here:
-    // 1. We don't clear the cookie for the current session as we cannot be sure that we removed the
-    // session index value for this session, but it's not a big deal since it will be automatically
-    // cleared as soon as it's reused anyway.
-    // 2. We only remove session index values and don't invalidate any Elasticsearch tokens that
-    // may have been stored there since we cannot decrypt the session content. To decrypt it we need
-    // AAD string that is separately stored in the user browser cookie.
-    const invalidatedSessionsCount = await this.options.sessionIndex.clearAll(clearIndexFilter);
-    sessionLogger.debug(`Successfully invalidated ${invalidatedSessionsCount} session(s).`);
-    return invalidatedSessionsCount;
+      sessionLogger.debug('Invalidating current session.');
+      await this.options.sessionCookie.clear(request);
+      invalidateIndexValueFilter = { match: 'sid' as 'sid', sid: sessionCookieValue.sid };
+    } else if (filter.match === 'all') {
+      sessionLogger.debug('Invalidating all sessions.');
+      await this.options.sessionCookie.clear(request);
+      invalidateIndexValueFilter = filter;
+    } else {
+      sessionLogger.debug(
+        `Invalidating sessions that match query: ${JSON.stringify(
+          filter.query.username ? { ...filter.query, username: '[REDACTED]' } : filter.query
+        )}.`
+      );
+
+      // We don't clear session cookie in this case since we cannot always be sure that the query
+      // will match the current session. This behavior doesn't introduce any risk since even if the
+      // current session has been affected the session cookie will be automatically invalidated as
+      // soon as client attempts to re-use it due to missing underlying session index value.
+      invalidateIndexValueFilter = filter.query.username
+        ? {
+            ...filter,
+            query: {
+              provider: filter.query.provider,
+              usernameHash: createHash('sha3-256').update(filter.query.username).digest('hex'),
+            },
+          }
+        : filter;
+    }
+
+    const invalidatedCount = await this.options.sessionIndex.invalidate(invalidateIndexValueFilter);
+    sessionLogger.debug(`Successfully invalidated ${invalidatedCount} session(s).`);
+    return invalidatedCount;
   }
 
   private calculateExpiry(
@@ -464,6 +459,6 @@ export class Session {
    * @param [sid] Session ID to create logger for.
    */
   private getLoggerForSID(sid?: string) {
-    return this.options.logger.get(sid?.slice(-10) ?? 'x'.repeat(10));
+    return this.options.logger.get(sid?.slice(-10) ?? 'no_session');
   }
 }

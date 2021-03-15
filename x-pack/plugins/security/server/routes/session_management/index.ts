@@ -6,12 +6,12 @@
  */
 
 import type { RouteDefinitionParams } from '../';
-import { defineDeleteAllSessionsRoutes } from './delete_all';
 import { defineSessionExtendRoutes } from './extend';
 import { defineSessionInfoRoutes } from './info';
+import { defineInvalidateSessionsRoutes } from './invalidate';
 
 export function defineSessionManagementRoutes(params: RouteDefinitionParams) {
   defineSessionInfoRoutes(params);
   defineSessionExtendRoutes(params);
-  defineDeleteAllSessionsRoutes(params);
+  defineInvalidateSessionsRoutes(params);
 }

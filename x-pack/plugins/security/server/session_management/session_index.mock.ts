@@ -6,6 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import type { SessionIndex, SessionIndexValue } from './session_index';
 
 export const sessionIndexMock = {
@@ -13,8 +14,7 @@ export const sessionIndexMock = {
     get: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    clear: jest.fn(),
-    clearAll: jest.fn(),
+    invalidate: jest.fn(),
     initialize: jest.fn(),
     cleanUp: jest.fn(),
   }),

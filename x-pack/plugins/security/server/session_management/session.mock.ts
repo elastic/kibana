@@ -18,8 +18,7 @@ export const sessionMock = {
     create: jest.fn(),
     update: jest.fn(),
     extend: jest.fn(),
-    clear: jest.fn(),
-    clearAll: jest.fn(),
+    invalidate: jest.fn(),
   }),
 
   createValue: (sessionValue: Partial<SessionValue> = {}): SessionValue => ({
