@@ -13,7 +13,7 @@
 +
 --
 // tag::action-def[]
-The rule-specific response that occurs when an alerting <<glossary-rule,rule>> fires.
+The rule-specific response that occurs when an alerting rule fires.
 A rule can have multiple actions.
 See
 {kibana-ref}/action-types.html[Connectors and actions].
@@ -99,7 +99,7 @@ The cluster location is the weighted centroid for all documents in the grid cell
 
 [[glossary-condition]] condition ::
 // tag::condition-def[]
-Specifies the circumstances that must be met to trigger an alerting <<glossary-rule,rule>>.
+Specifies the circumstances that must be met to trigger an alerting rule.
 // end::condition-def[]
 
 [[glossary-connector]] connector ::
