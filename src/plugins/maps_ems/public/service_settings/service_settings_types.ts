@@ -9,7 +9,7 @@
 export interface TmsLayer {
   id: string;
   origin: string;
-  minZoom: string;
+  minZoom: number;
   maxZoom: number;
   attribution: string;
 }
@@ -20,6 +20,13 @@ export interface FileLayer {
   id: string;
   format: string | { type: string };
   fields: FileLayerField[];
+  url?: string;
+  layerId?: string;
+  created_at?: string;
+  attribution?: string;
+  meta?: {
+    [key: string]: string;
+  };
 }
 
 export interface FileLayerField {
@@ -34,8 +41,16 @@ export interface VectorLayer extends FileLayer {
 }
 
 export interface IServiceSettings {
-  getEMSHotLink(layer: FileLayer): Promise<string>;
+  getEMSHotLink(layer: FileLayer): Promise<string | null>;
   getTMSServices(): Promise<TmsLayer[]>;
   getFileLayers(): Promise<FileLayer[]>;
-  getUrlForRegionLayer(layer: FileLayer): Promise<string>;
+  getUrlForRegionLayer(layer: FileLayer): Promise<string | undefined>;
+  setQueryParams(params: { [p: string]: string }): void;
+  enableZoomMessage(): void;
+  disableZoomMessage(): void;
+  getAttributesForTMSLayer(
+    tmsServiceConfig: TmsLayer,
+    isDesaturated: boolean,
+    isDarkMode: boolean
+  ): any;
 }
