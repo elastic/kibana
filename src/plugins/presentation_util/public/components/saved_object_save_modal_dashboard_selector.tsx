@@ -102,7 +102,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
               </>
               <EuiRadio
                 checked={dashboardOption === null}
-                id="no-dashboard-option"
+                id="add-to-library-option"
                 name="dashboard-option"
                 label={i18n.translate(
                   'presentationUtil.saveModalDashboard.noDashboardOptionLabel',
@@ -122,7 +122,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false} data-test-subj="add-to-library-checkbox">
               <EuiCheckbox
-                id="add-to-library-option"
+                id="add-to-library-checkbox"
                 label={i18n.translate('presentationUtil.saveModalDashboard.libraryOptionLabel', {
                   defaultMessage: 'Add to library',
                 })}
@@ -137,7 +137,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                 content={
                   <FormattedMessage
                     id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
-                    defaultMessage="Items added to the Visualize Library will be made available to all dashboards. Editing a library item will affect all instances."
+                    defaultMessage="Items added to the Visualize Library are available to all dashboards. Editing a library item affects all instances."
                   />
                 }
               />

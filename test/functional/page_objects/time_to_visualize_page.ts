@@ -17,7 +17,7 @@ interface SaveModalArgs {
 }
 
 type DashboardPickerOption =
-  | 'no-dashboard-option'
+  | 'add-to-library-option'
   | 'existing-dashboard-option'
   | 'new-dashboard-option';
 
@@ -68,7 +68,7 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
 
       const hasDashboardSelector = await testSubjects.exists('add-to-dashboard-options');
       if (hasDashboardSelector && addToDashboard !== undefined) {
-        let option: DashboardPickerOption = 'no-dashboard-option';
+        let option: DashboardPickerOption = 'add-to-library-option';
         if (addToDashboard) {
           option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
         }
@@ -85,14 +85,15 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
 
       const hasSaveToLibrary = await testSubjects.exists('add-to-library-checkbox');
       if (hasSaveToLibrary && saveToLibrary !== undefined) {
-        const libraryCheckbox = await find.byCssSelector('#add-to-library-option');
+        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
         const isChecked = await libraryCheckbox.isSelected();
         const needsClick = isChecked !== saveToLibrary;
         const state = saveToLibrary ? 'check' : 'uncheck';
+
         log.debug('save to library checkbox exists. Setting its state to', state);
         if (needsClick) {
           const selector = await testSubjects.find('add-to-library-checkbox');
-          const label = await selector.findByCssSelector(`label[for="add-to-library-option"]`);
+          const label = await selector.findByCssSelector(`label[for="add-to-library-checkbox"]`);
           await label.click();
         }
       }
