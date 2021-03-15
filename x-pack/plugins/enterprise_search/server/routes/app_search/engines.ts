@@ -69,6 +69,19 @@ export function registerEnginesRoutes({
       path: '/as/engines/:name/details',
     })
   );
+  router.delete(
+    {
+      path: '/api/app_search/engines/{name}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name',
+    })
+  );
   router.get(
     {
       path: '/api/app_search/engines/{name}/overview',
