@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { SchemaTypes } from '../../../../shared/types';
+
 import {
+  areFieldsAtDefaultSettings,
+  convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   clearAllServerFields,
   clearAllFields,
   resetAllServerFields,
   resetAllFields,
+  splitResultFields,
 } from './helpers';
 
 describe('clearAllFields', () => {
@@ -69,6 +74,32 @@ describe('resetAllServerFields', () => {
   });
 });
 
+describe('convertServerResultFieldsToResultFields', () => {
+  it('will convert a server settings object to a format that the front-end expects', () => {
+    expect(
+      convertServerResultFieldsToResultFields(
+        {
+          foo: {
+            raw: { size: 5 },
+            snippet: { size: 3, fallback: true },
+          },
+        },
+        {
+          foo: 'text' as SchemaTypes,
+        }
+      )
+    ).toEqual({
+      foo: {
+        raw: true,
+        rawSize: 5,
+        snippet: true,
+        snippetFallback: true,
+        snippetSize: 3,
+      },
+    });
+  });
+});
+
 describe('convertToServerFieldResultSetting', () => {
   it('will convert a settings object to a format that the server expects', () => {
     expect(
@@ -107,6 +138,74 @@ describe('convertToServerFieldResultSetting', () => {
     ).toEqual({
       raw: {},
       snippet: {},
+    });
+  });
+});
+
+describe('areFieldsAtDefaultSettings', () => {
+  it('will return true if all settings for all fields are at their defaults', () => {
+    expect(
+      areFieldsAtDefaultSettings({
+        foo: {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        },
+        bar: {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        },
+      })
+    ).toEqual(true);
+  });
+
+  it('will return false otherwise', () => {
+    expect(
+      areFieldsAtDefaultSettings({
+        foo: {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        },
+        bar: {
+          raw: false,
+          snippet: true,
+          snippetFallback: true,
+        },
+      })
+    ).toEqual(false);
+  });
+});
+
+describe('splitResultFields', () => {
+  it('will split results based on their schema type', () => {
+    expect(
+      splitResultFields(
+        {
+          foo: {
+            raw: true,
+            rawSize: 5,
+            snippet: false,
+            snippetFallback: false,
+          },
+          bar: {
+            raw: true,
+            rawSize: 5,
+            snippet: false,
+            snippetFallback: false,
+          },
+        },
+        {
+          foo: 'text' as SchemaTypes,
+          bar: 'number' as SchemaTypes,
+        }
+      )
+    ).toEqual({
+      nonTextResultFields: {
+        bar: { raw: true, rawSize: 5, snippet: false, snippetFallback: false },
+      },
+      textResultFields: { foo: { raw: true, rawSize: 5, snippet: false, snippetFallback: false } },
     });
   });
 });

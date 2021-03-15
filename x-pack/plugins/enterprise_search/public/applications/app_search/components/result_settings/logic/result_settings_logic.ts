@@ -7,6 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { Schema, SchemaConflicts } from '../../../../shared/types';
+
 import {
   FieldResultSetting,
   FieldResultSettingObject,
@@ -15,17 +17,32 @@ import {
 } from '../types';
 
 import {
+  areFieldsAtDefaultSettings,
   clearAllFields,
   clearAllServerFields,
+  convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   resetAllFields,
   resetAllServerFields,
+  splitResultFields,
 } from './helpers';
 
 interface ResultSettingsActions {
   openConfirmResetModal(): void;
   openConfirmSaveModal(): void;
   closeModals(): void;
+  initializeResultFields(
+    serverResultFields: ServerFieldResultSettingObject,
+    schema: Schema,
+    schemaConflicts?: SchemaConflicts
+  ): {
+    serverResultFields: ServerFieldResultSettingObject;
+    resultFields: FieldResultSettingObject;
+    schema: Schema;
+    schemaConflicts: SchemaConflicts;
+    nonTextResultFields: FieldResultSettingObject;
+    textResultFields: FieldResultSettingObject;
+  };
   clearAllFields(): void;
   resetAllFields(): void;
   updateField(
@@ -35,11 +52,16 @@ interface ResultSettingsActions {
 }
 
 interface ResultSettingsValues {
+  dataLoading: boolean;
+  saving: boolean;
   openModal: OpenModal;
   nonTextResultFields: FieldResultSettingObject;
   textResultFields: FieldResultSettingObject;
   resultFields: FieldResultSettingObject;
   serverResultFields: ServerFieldResultSettingObject;
+  lastSavedResultFields: FieldResultSettingObject;
+  schema: Schema;
+  schemaConflicts: SchemaConflicts;
 }
 
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
@@ -48,14 +70,43 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     openConfirmResetModal: () => true,
     openConfirmSaveModal: () => true,
     closeModals: () => true,
+    initializeResultFields: (serverResultFields, schema, schemaConflicts) => {
+      const resultFields = convertServerResultFieldsToResultFields(serverResultFields, schema);
+      for (const fieldName of Object.keys(schema)) {
+        if (!(fieldName in serverResultFields)) {
+          serverResultFields[fieldName] = {};
+        }
+      }
+      return {
+        serverResultFields,
+        resultFields,
+        schema,
+        schemaConflicts,
+        ...splitResultFields(resultFields, schema),
+      };
+    },
     clearAllFields: () => true,
     resetAllFields: () => true,
     updateField: (fieldName, settings) => ({ fieldName, settings }),
   }),
   reducers: () => ({
+    dataLoading: [
+      true,
+      {
+        initializeResultFields: () => false,
+      },
+    ],
+    saving: [
+      false,
+      {
+        initializeResultFields: () => false,
+      },
+    ],
     openModal: [
       OpenModal.None,
       {
+        initializeResultFields: (_, { resultFields }: { resultFields: FieldResultSettingObject }) =>
+          areFieldsAtDefaultSettings(resultFields) ? OpenModal.ConfirmModifyModal : OpenModal.None,
         closeModals: () => OpenModal.None,
         resetAllFields: () => OpenModal.None,
         openConfirmResetModal: () => OpenModal.ConfirmResetModal,
@@ -65,6 +116,10 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     nonTextResultFields: [
       {},
       {
+        initializeResultFields: (
+          _,
+          { nonTextResultFields }: { nonTextResultFields: FieldResultSettingObject }
+        ) => nonTextResultFields,
         clearAllFields: (nonTextResultFields) => clearAllFields(nonTextResultFields),
         resetAllFields: (nonTextResultFields) => resetAllFields(nonTextResultFields),
         updateField: (nonTextResultFields, { fieldName, settings }) =>
@@ -76,6 +131,10 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     textResultFields: [
       {},
       {
+        initializeResultFields: (
+          _,
+          { textResultFields }: { textResultFields: FieldResultSettingObject }
+        ) => textResultFields,
         clearAllFields: (textResultFields) => clearAllFields(textResultFields),
         resetAllFields: (textResultFields) => resetAllFields(textResultFields),
         updateField: (textResultFields, { fieldName, settings }) =>
@@ -87,6 +146,8 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     resultFields: [
       {},
       {
+        initializeResultFields: (_, { resultFields }: { resultFields: FieldResultSettingObject }) =>
+          resultFields,
         clearAllFields: (resultFields) => clearAllFields(resultFields),
         resetAllFields: (resultFields) => resetAllFields(resultFields),
         updateField: (resultFields, { fieldName, settings }) =>
@@ -96,6 +157,10 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     serverResultFields: [
       {},
       {
+        initializeResultFields: (
+          _,
+          { serverResultFields }: { serverResultFields: ServerFieldResultSettingObject }
+        ) => serverResultFields,
         clearAllFields: (serverResultFields) => clearAllServerFields(serverResultFields),
         resetAllFields: (serverResultFields) => resetAllServerFields(serverResultFields),
         updateField: (serverResultFields, { fieldName, settings }) => {
@@ -106,6 +171,25 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
               }
             : serverResultFields;
         },
+      },
+    ],
+    lastSavedResultFields: [
+      {},
+      {
+        initializeResultFields: (_, { resultFields }: { resultFields: FieldResultSettingObject }) =>
+          resultFields,
+      },
+    ],
+    schema: [
+      {},
+      {
+        initializeResultFields: (_, { schema }) => schema,
+      },
+    ],
+    schemaConflicts: [
+      {},
+      {
+        initializeResultFields: (_, { schemaConflicts }) => schemaConflicts || {},
       },
     ],
   }),

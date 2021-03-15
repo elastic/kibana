@@ -19,3 +19,9 @@ export const DEFAULT_FIELD_SETTINGS: FieldResultSetting = {
   snippet: false,
   snippetFallback: false,
 };
+
+export const DISABLED_FIELD_SETTINGS: FieldResultSetting = {
+  raw: false,
+  snippet: false,
+  snippetFallback: false,
+};

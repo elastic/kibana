@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { DEFAULT_FIELD_SETTINGS } from '../constants';
+import { isEqual } from 'lodash';
+
+import { Schema } from '../../../../shared/types';
+import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from '../constants';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
@@ -54,4 +57,71 @@ export const convertToServerFieldResultSetting = (fieldResultSetting: FieldResul
   }
 
   return serverFieldResultSetting;
+};
+
+export const splitResultFields = (resultFields: FieldResultSettingObject, schema: Schema) => {
+  const textResultFields: FieldResultSettingObject = {};
+  const nonTextResultFields: FieldResultSettingObject = {};
+  const keys = Object.keys(schema);
+  keys.forEach((fieldName) => {
+    (schema[fieldName] === 'text' ? textResultFields : nonTextResultFields)[fieldName] =
+      resultFields[fieldName];
+  });
+
+  return { textResultFields, nonTextResultFields };
+};
+
+const convertToFieldResultSetting = (serverFieldResultSetting: ServerFieldResultSetting) => {
+  const fieldResultSetting: FieldResultSetting = {
+    raw: !!serverFieldResultSetting.raw,
+    snippet: !!serverFieldResultSetting.snippet,
+    snippetFallback: !!(
+      serverFieldResultSetting.snippet &&
+      typeof serverFieldResultSetting.snippet === 'object' &&
+      serverFieldResultSetting.snippet.fallback
+    ),
+  };
+
+  if (
+    serverFieldResultSetting.raw &&
+    typeof serverFieldResultSetting.raw === 'object' &&
+    serverFieldResultSetting.raw.size
+  ) {
+    fieldResultSetting.rawSize = serverFieldResultSetting.raw.size;
+  }
+
+  if (
+    serverFieldResultSetting.snippet &&
+    typeof serverFieldResultSetting.snippet === 'object' &&
+    serverFieldResultSetting.snippet.size
+  ) {
+    fieldResultSetting.snippetSize = serverFieldResultSetting.snippet.size;
+  }
+
+  return fieldResultSetting;
+};
+
+export const convertServerResultFieldsToResultFields = (
+  serverResultFields: ServerFieldResultSettingObject,
+  schema: Schema
+) => {
+  const resultFields: FieldResultSettingObject = Object.keys(schema).reduce(
+    (acc: FieldResultSettingObject, fieldName: string) => ({
+      ...acc,
+      [fieldName]: serverResultFields[fieldName]
+        ? convertToFieldResultSetting(serverResultFields[fieldName])
+        : DISABLED_FIELD_SETTINGS,
+    }),
+    {}
+  );
+  return resultFields;
+};
+
+export const areFieldsAtDefaultSettings = (fields: FieldResultSettingObject) => {
+  for (const [, resultSettings] of Object.entries(fields)) {
+    if (!isEqual(resultSettings, DEFAULT_FIELD_SETTINGS)) {
+      return false;
+    }
+  }
+  return true;
 };

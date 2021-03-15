@@ -7,7 +7,8 @@
 
 import { LogicMounter } from '../../../../__mocks__';
 
-import { OpenModal } from '../types';
+import { Schema, SchemaConflicts, SchemaTypes } from '../../../../shared/types';
+import { OpenModal, ServerFieldResultSettingObject } from '../types';
 
 import { ResultSettingsLogic } from '.';
 
@@ -15,11 +16,16 @@ describe('ResultSettingsLogic', () => {
   const { mount } = new LogicMounter(ResultSettingsLogic);
 
   const DEFAULT_VALUES = {
+    dataLoading: true,
+    saving: false,
     openModal: OpenModal.None,
     nonTextResultFields: {},
     resultFields: {},
     serverResultFields: {},
     textResultFields: {},
+    lastSavedResultFields: {},
+    schema: {},
+    schemaConflicts: {},
   };
 
   beforeEach(() => {
@@ -45,6 +51,151 @@ describe('ResultSettingsLogic', () => {
   });
 
   describe('actions', () => {
+    describe('initializeResultFields', () => {
+      const serverResultFields: ServerFieldResultSettingObject = {
+        foo: { raw: { size: 5 } },
+        bar: { raw: { size: 5 } },
+      };
+      const schema: Schema = {
+        foo: 'text' as SchemaTypes,
+        bar: 'number' as SchemaTypes,
+        baz: 'text' as SchemaTypes,
+      };
+      const schemaConflicts: SchemaConflicts = {
+        foo: {
+          text: ['foo'],
+          number: ['foo'],
+          geolocation: [],
+          date: [],
+        },
+      };
+
+      it('will initialize all result field state within the UI, based on provided server data', () => {
+        mount({
+          dataLoading: true,
+          saving: true,
+          openModal: OpenModal.ConfirmSaveModal,
+        });
+
+        ResultSettingsLogic.actions.initializeResultFields(
+          serverResultFields,
+          schema,
+          schemaConflicts
+        );
+
+        expect(ResultSettingsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          dataLoading: false,
+          saving: false,
+          // It converts the passed server result fields to a client results field and stores it
+          // as resultFields
+          resultFields: {
+            foo: {
+              raw: true,
+              rawSize: 5,
+              snippet: false,
+              snippetFallback: false,
+            },
+            // Baz was not part of the original serverResultFields, it was injected based on the schema
+            baz: {
+              raw: false,
+              snippet: false,
+              snippetFallback: false,
+            },
+            bar: {
+              raw: true,
+              rawSize: 5,
+              snippet: false,
+              snippetFallback: false,
+            },
+          },
+          // It also saves it as lastSavedResultFields
+          lastSavedResultFields: {
+            foo: {
+              raw: true,
+              rawSize: 5,
+              snippet: false,
+              snippetFallback: false,
+            },
+            // Baz was not part of the original serverResultFields, it was injected based on the schema
+            baz: {
+              raw: false,
+              snippet: false,
+              snippetFallback: false,
+            },
+            bar: {
+              raw: true,
+              rawSize: 5,
+              snippet: false,
+              snippetFallback: false,
+            },
+          },
+          // The resultFields are also partitioned to either nonTextResultFields or textResultFields
+          // depending on their type within the passed schema
+          nonTextResultFields: {
+            bar: {
+              raw: true,
+              rawSize: 5,
+              snippet: false,
+              snippetFallback: false,
+            },
+          },
+          textResultFields: {
+            // Baz was not part of the original serverResultFields, it was injected based on the schema
+            baz: {
+              raw: false,
+              snippet: false,
+              snippetFallback: false,
+            },
+            foo: {
+              raw: true,
+              rawSize: 5,
+              snippet: false,
+              snippetFallback: false,
+            },
+          },
+          // It stores the originally passed results as serverResultFields
+          serverResultFields: {
+            foo: { raw: { size: 5 } },
+            // Baz was not part of the original serverResultFields, it was injected based on the schema
+            baz: {},
+            bar: { raw: { size: 5 } },
+          },
+          // The modal should be reset back to closed if it had been opened previously
+          openModal: OpenModal.None,
+          // Stores the provided schema details
+          schema,
+          schemaConflicts,
+        });
+      });
+
+      it('will open a modal to confirm modification if all fields are at their default settings', () => {
+        mount({
+          openModal: OpenModal.ConfirmSaveModal,
+        });
+
+        ResultSettingsLogic.actions.initializeResultFields(
+          {
+            foo: { raw: true },
+          },
+          {
+            foo: 'text' as SchemaTypes,
+          },
+          schemaConflicts
+        );
+
+        expect(ResultSettingsLogic.values.openModal).toEqual(OpenModal.ConfirmModifyModal);
+      });
+
+      it('default schema conflicts data if none was provided', () => {
+        mount();
+
+        ResultSettingsLogic.actions.initializeResultFields(serverResultFields, schema);
+
+        expect(ResultSettingsLogic.values.schemaConflicts).toEqual({});
+      });
+    });
+
     describe('openConfirmSaveModal', () => {
       mount({
         openModal: OpenModal.None,
