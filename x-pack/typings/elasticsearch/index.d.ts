@@ -13,7 +13,7 @@ import { InferSearchResponseOf, AggregateOf as AggregationResultOf } from './sea
 export type ESFilter = estypes.QueryContainer;
 export type ESSearchRequest = estypes.SearchRequest;
 export type AggregationOptionsByType = Required<estypes.AggregationContainer>;
-export type ESSearchHit<TDocument = unknown> = SearchHit<TDocument>;
+export type ESSearchHit<TDocument = unknown> = estypes.Hit<TDocument>;
 
 // Typings for Elasticsearch queries and aggregations. These are intended to be
 // moved to the Elasticsearch JS client at some point (see #77720.)
