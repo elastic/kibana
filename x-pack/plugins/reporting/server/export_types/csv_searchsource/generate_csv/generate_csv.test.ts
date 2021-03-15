@@ -431,6 +431,70 @@ describe('fields', () => {
     expect(csvResult.content).toMatchSnapshot();
     expect(csvResult.csv_contains_formulas).toBe(false);
   });
+
+  it('sorts the fields when they are to be used as table column names', async () => {
+    searchSourceMock.getField = jest.fn().mockImplementation((key: string) => {
+      if (key === 'fields') {
+        return ['*'];
+      }
+      return mockSearchSourceGetFieldDefault(key);
+    });
+    mockDataClient.search = jest.fn().mockImplementation(() =>
+      Rx.of({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                _id: 'my-cool-id',
+                _index: 'my-cool-index',
+                _version: 4,
+                fields: {
+                  date: ['2020-12-31T00:14:28.000Z'],
+                  message_z: [`test field Z`],
+                  message_y: [`test field Y`],
+                  message_x: [`test field X`],
+                  message_w: [`test field W`],
+                  message_v: [`test field V`],
+                  message_u: [`test field U`],
+                  message_t: [`test field T`],
+                },
+              },
+            ],
+            total: 1,
+          },
+        },
+      })
+    );
+
+    const generateCsv = new CsvGenerator(
+      createMockJob({
+        searchSource: {
+          query: { query: '', language: 'kuery' },
+          sort: [{ '@date': 'desc' }],
+          index: '93f4bc50-6662-11eb-98bc-f550e2308366',
+          fields: ['*'],
+          filter: [],
+        },
+      }),
+      mockConfig,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      logger
+    );
+
+    const csvResult = await generateCsv.generateData();
+
+    expect(csvResult.content).toMatchSnapshot();
+    expect(csvResult.csv_contains_formulas).toBe(false);
+  });
 });
 
 describe('formulas', () => {
