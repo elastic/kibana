@@ -38,6 +38,7 @@ describe('ManageQueriesModal', () => {
       const wrapper = shallow(<ManageQueriesModal />);
 
       expect(wrapper.find(EuiButton)).toHaveLength(1);
+      expect(wrapper.find(EuiButton).prop('onClick')).toBeTruthy();
     });
 
     it('renders the toggle button with a loading state when queriesLoading is true', () => {
