@@ -7,6 +7,7 @@
 
 import { shallow, mount } from 'enzyme';
 import React from 'react';
+import { keys } from 'lodash';
 import {
   ConditionEntry,
   ConditionEntryField,
@@ -14,13 +15,13 @@ import {
 } from '../../../../../../../common/endpoint/types';
 
 import { ConditionEntryInput } from '.';
-import { EuiSuperSelectProps } from '@elastic/eui/src/components/form/super_select/super_select';
+import { EuiSuperSelectProps } from '@elastic/eui';
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
 let onVisitedMock: jest.Mock;
 
-const entry: ConditionEntry = {
+const entry: Readonly<ConditionEntry> = {
   field: ConditionEntryField.HASH,
   type: 'match',
   operator: 'included',
@@ -51,26 +52,45 @@ describe('Condition entry input', () => {
     />
   );
 
-  for (const field in ConditionEntryField) {
-    if (Object.prototype.hasOwnProperty.call(ConditionEntryField, field)) {
-      it(`should call on change for field input with value ${field}`, () => {
-        const element = shallow(getElement('testOnChange'));
-        expect(onChangeMock).toHaveBeenCalledTimes(0);
-        element
-          .find('[data-test-subj="testOnChange-field"]')
-          .first()
-          .simulate('change', { target: { value: field } });
-        expect(onChangeMock).toHaveBeenCalledTimes(1);
-        expect(onChangeMock).toHaveBeenCalledWith(
-          {
-            ...entry,
-            field: { target: { value: field } },
-          },
-          entry
-        );
-      });
+  it.each(keys(ConditionEntryField).map((k) => [k]))(
+    'should call on change for field input with value %s',
+    (field) => {
+      const element = shallow(getElement('testOnChange'));
+      expect(onChangeMock).toHaveBeenCalledTimes(0);
+      element
+        .find('[data-test-subj="testOnChange-field"]')
+        .first()
+        .simulate('change', { target: { value: field } });
+      expect(onChangeMock).toHaveBeenCalledTimes(1);
+      expect(onChangeMock).toHaveBeenCalledWith(
+        {
+          ...entry,
+          field: { target: { value: field } },
+        },
+        entry
+      );
     }
-  }
+  );
+  //   for (const field in ConditionEntryField) {
+  //     if (Object.prototype.hasOwnProperty.call(ConditionEntryField, field)) {
+  //       it(`should call on change for field input with value ${field}`, () => {
+  //         const element = shallow(getElement('testOnChange'));
+  //         expect(onChangeMock).toHaveBeenCalledTimes(0);
+  //         element
+  //           .find('[data-test-subj="testOnChange-field"]')
+  //           .first()
+  //           .simulate('change', { target: { value: field } });
+  //         expect(onChangeMock).toHaveBeenCalledTimes(1);
+  //         expect(onChangeMock).toHaveBeenCalledWith(
+  //           {
+  //             ...entry,
+  //             field: { target: { value: field } },
+  //           },
+  //           entry
+  //         );
+  //       });
+  //     }
+  //   }
 
   it('should call on remove for field input', () => {
     const element = mount(getElement('testOnRemove'));
