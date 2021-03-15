@@ -34,7 +34,7 @@ export const DETECTIONS_REQUIREMENTS_LINK_TEXT = i18n.translate(
   }
 );
 
-export const ML_JOB_COMPATIBILITY_LINK_PATH = 'ml-job-compatibility.html';
+export const ML_JOB_COMPATIBILITY_LINK_PATH = 'alerts-ui-monitor.html#ml-job-compatibility';
 export const ML_JOB_COMPATIBILITY_LINK_TEXT = i18n.translate(
   'xpack.securitySolution.documentationLinks.mlJobCompatibility.text',
   {
