@@ -9,7 +9,7 @@ import { URL } from 'url';
 
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
-import { Response } from 'node-fetch';
+import type { Response } from 'node-fetch';
 
 import { KibanaAssetType } from '../../../types';
 import type {

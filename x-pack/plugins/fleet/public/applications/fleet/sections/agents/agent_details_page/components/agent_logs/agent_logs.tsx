@@ -28,9 +28,10 @@ import semverCoerce from 'semver/functions/coerce';
 
 import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
 import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
-import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins/data/public';
+import type { TimeRange } from '../../../../../../../../../../../src/plugins/data/public';
+import { esKuery } from '../../../../../../../../../../../src/plugins/data/public';
 import { LogStream } from '../../../../../../../../../infra/public';
-import { Agent } from '../../../../../types';
+import type { Agent } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 
 import { DEFAULT_DATE_RANGE } from './constants';
