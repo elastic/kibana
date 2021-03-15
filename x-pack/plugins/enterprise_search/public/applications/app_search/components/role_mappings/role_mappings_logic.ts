@@ -93,6 +93,7 @@ export interface RoleMappingsValues {
 }
 
 export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappingsActions>>({
+  path: ['enterprise_search', 'app_search', 'role_mappings'],
   actions: {
     setRoleMappingsData: (data: RoleMappingsServerDetails) => data,
     setRoleMappingData: (data: RoleMappingServerDetails) => data,
@@ -149,12 +150,14 @@ export const RoleMappingsLogic = kea<MakeLogicType<RoleMappingsValues, RoleMappi
       [],
       {
         setRoleMappingData: (_, { availableEngines }) => availableEngines,
+        resetState: () => [],
       },
     ],
     attributes: [
       [],
       {
         setRoleMappingData: (_, { attributes }) => attributes,
+        resetState: () => [],
       },
     ],
     elasticsearchRoles: [
