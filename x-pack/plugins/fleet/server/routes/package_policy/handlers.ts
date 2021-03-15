@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import type { RequestHandler } from '../../../../../../src/core/server';
 import { appContextService, packagePolicyService } from '../../services';
-import {
+import type {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
   CreatePackagePolicyRequestSchema,

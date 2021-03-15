@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
@@ -38,7 +38,7 @@ import type {
   PackagePolicySOAttributes,
   RegistryPackage,
 } from '../types';
-import { ExternalCallback } from '..';
+import type { ExternalCallback } from '..';
 
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
