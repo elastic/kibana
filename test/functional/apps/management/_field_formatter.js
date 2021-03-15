@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search'] });
+      await kibanaServer.importExport.load('discover');
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
     });

@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const es = getService('es');
   const retry = getService('retry');
   const security = getService('security');
@@ -19,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
       await esArchiver.loadIfNeeded('alias');
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.savedObjects.clean({ types: ['search'] });
       await es.indices.updateAliases({
         body: {
           actions: [

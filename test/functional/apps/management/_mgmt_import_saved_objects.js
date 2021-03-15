@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import path from 'path';
 
 export default function ({ getService, getPageObjects }) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
 
   //in 6.4.0 bug the Saved Search conflict would be resolved and get imported but the visualization
@@ -18,13 +18,13 @@ export default function ({ getService, getPageObjects }) {
 
   describe('mgmt saved objects', function describeIndexTests() {
     beforeEach(async function () {
-      await esArchiver.emptyKibanaIndex();
-      await esArchiver.load('discover');
+      await kibanaServer.savedObjects.clean({ types: ['search'] });
+      await kibanaServer.importExport.load('discover');
       await PageObjects.settings.navigateTo();
     });
 
     afterEach(async function () {
-      await esArchiver.unload('discover');
+      await kibanaServer.importExport.unload('discover');
     });
 
     it('should import saved objects mgmt', async function () {

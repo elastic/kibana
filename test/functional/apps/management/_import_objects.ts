@@ -27,14 +27,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        await esArchiver.load('management');
+        await kibanaServer.savedObjects.clean({ types: ['search'] });
+        await kibanaServer.importExport.load('management');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
       });
 
       afterEach(async function () {
-        await esArchiver.unload('management');
+        await kibanaServer.importExport.unload('management');
       });
 
       it('should import saved objects', async function () {
@@ -220,7 +221,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async function () {
-        await esArchiver.unload('saved_objects_imports');
+        await kibanaServer.savedObjects.clean({ types: ['search'] });
       });
 
       it('should import saved objects', async function () {
