@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { collectionActions } from './lib/collection_actions';
 import { ColorPicker, ColorPickerProps } from './color_picker';
-import { ColorRule, TimeseriesVisParams } from '../../types';
+import { TimeseriesVisParams } from '../../types';
 
 export interface ColorRulesProps {
   name: keyof TimeseriesVisParams;
@@ -34,6 +34,15 @@ export interface ColorRulesProps {
   secondaryName?: string;
   secondaryVarName?: string;
   hideSecondary?: boolean;
+}
+
+interface ColorRule {
+  value?: number;
+  id: string;
+  background_color?: string;
+  color?: string;
+  operator?: string;
+  text?: string;
 }
 
 const defaultSecondaryName = i18n.translate(
@@ -103,11 +112,9 @@ export class ColorRules extends Component<ColorRulesProps> {
     const defaults = { value: 0 };
     const model = { ...defaults, ...row };
     const handleAdd = () => collectionActions.handleAdd(this.props);
-    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-
+    const handleDelete = () => collectionActions.handleDelete(this.props, model);
     const handleColorChange: ColorPickerProps['onChange'] = (part) => {
-      const handleChange = collectionActions.handleChange.bind(null, this.props);
-      handleChange(_.assign({}, model, part));
+      collectionActions.handleChange(this.props, { ...model, ...part });
     };
     const htmlId = htmlIdGenerator(model.id);
     const selectedOperatorOption = operatorOptions.find((option) => {

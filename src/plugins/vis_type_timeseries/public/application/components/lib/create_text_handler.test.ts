@@ -28,7 +28,7 @@ describe('createTextHandler()', () => {
     expect((event.preventDefault as jest.Mock).mock.calls.length).toEqual(1);
     expect(handleChange.mock.calls.length).toEqual(1);
     expect(handleChange.mock.calls[0][0]).toEqual({
-      test: 'foo',
+      axis_scale: 'foo',
     });
   });
 });

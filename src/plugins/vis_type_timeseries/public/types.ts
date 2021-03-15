@@ -19,12 +19,3 @@ export type DragHandleProps = FirstArgumentOf<
 >['dragHandleProps'];
 
 export type TimeseriesVisParams = PanelSchema;
-
-export interface ColorRule {
-  value?: number;
-  id: string;
-  background_color?: string;
-  color?: string;
-  operator?: string;
-  text?: string;
-}

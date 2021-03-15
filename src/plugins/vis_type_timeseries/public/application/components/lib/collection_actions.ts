@@ -7,33 +7,37 @@
  */
 
 import uuid from 'uuid';
-import { ColorRule, TimeseriesVisParams } from '../../../types';
 
-const newFn = (): ColorRule => ({ id: uuid.v1() });
-
-export interface CollectionActionsProps {
-  model: TimeseriesVisParams;
-  name: keyof TimeseriesVisParams;
-  onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
+interface DocType {
+  id: string;
+  type?: string;
 }
 
-export function handleChange(props: CollectionActionsProps, doc: ColorRule) {
+const newFn = (): DocType => ({ id: uuid.v1() });
+
+export interface CollectionActionsProps<T> {
+  model: T;
+  name: keyof T;
+  onChange: (partialModel: Partial<T>) => void;
+}
+
+export function handleChange<T, P extends DocType>(props: CollectionActionsProps<T>, doc: P) {
   const { model, name } = props;
-  const collection = (model[name] as Array<{ id?: string }>) || [];
+  const collection = ((model[name] as unknown) as DocType[]) || [];
   const part = { [name]: collection.map((row) => (row.id === doc.id ? doc : row)) };
   props.onChange({ ...model, ...part });
 }
 
-export function handleDelete(props: CollectionActionsProps, doc: ColorRule) {
+export function handleDelete<T, P extends DocType>(props: CollectionActionsProps<T>, doc: P) {
   const { model, name } = props;
-  const collection = (model[name] as Array<{ id?: string }>) || [];
+  const collection = ((model[name] as unknown) as DocType[]) || [];
   const part = { [name]: collection.filter((row) => row.id !== doc.id) };
   props.onChange?.({ ...model, ...part });
 }
 
-export function handleAdd(props: CollectionActionsProps, fn = newFn) {
+export function handleAdd<T>(props: CollectionActionsProps<T>, fn = newFn) {
   const { model, name } = props;
-  const collection = (model[name] as Array<{ id?: string }>) || [];
+  const collection = ((model[name] as unknown) as DocType[]) || [];
   const part = { [name]: collection.concat([fn()]) };
   props.onChange?.({ ...model, ...part });
 }

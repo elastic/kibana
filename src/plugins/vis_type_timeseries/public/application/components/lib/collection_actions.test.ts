@@ -20,11 +20,11 @@ describe('collection actions', () => {
       model: { test: [{ id: '1', title: 'foo' }] },
       name: 'test',
       onChange: fn,
-    } as unknown) as CollectionActionsProps;
-    handleChange.call(null, props, { id: '1', text: 'bar' });
+    } as unknown) as CollectionActionsProps<any>;
+    handleChange.call(null, props, { id: '1', type: 'bar' });
     expect(fn.mock.calls.length).toEqual(1);
     expect(fn.mock.calls[0][0]).toEqual({
-      test: [{ id: '1', text: 'bar' }],
+      test: [{ id: '1', type: 'bar' }],
     });
   });
 
@@ -35,7 +35,7 @@ describe('collection actions', () => {
       model: { test: [{ id: '1', text: 'foo' }] },
       name: 'test',
       onChange: fn,
-    } as unknown) as CollectionActionsProps;
+    } as unknown) as CollectionActionsProps<any>;
     handleAdd.call(null, props, newItemFn);
     expect(fn.mock.calls.length).toEqual(1);
     expect(newItemFn.mock.calls.length).toEqual(1);
@@ -53,7 +53,7 @@ describe('collection actions', () => {
       model: { test: [{ id: '1', title: 'foo' }] },
       name: 'test',
       onChange: fn,
-    } as unknown) as CollectionActionsProps;
+    } as unknown) as CollectionActionsProps<any>;
     handleDelete.call(null, props, { id: '1' });
     expect(fn.mock.calls.length).toEqual(1);
     expect(fn.mock.calls[0][0]).toEqual({
