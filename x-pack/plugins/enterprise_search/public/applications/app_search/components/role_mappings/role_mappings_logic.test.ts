@@ -248,6 +248,7 @@ describe('RoleMappingsLogic', () => {
       RoleMappingsLogic.actions.resetState();
 
       expect(RoleMappingsLogic.values).toEqual(DEFAULT_VALUES);
+      expect(clearFlashMessages).toHaveBeenCalled();
     });
   });
 
