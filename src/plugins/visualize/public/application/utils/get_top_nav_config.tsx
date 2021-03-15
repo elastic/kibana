@@ -331,10 +331,11 @@ export const getTopNavConfig = (
                 newDescription,
                 returnToOrigin,
                 dashboardId,
-              }: OnSaveProps & { returnToOrigin?: boolean } & { dashboardId?: string | null }) => {
-                // TODO: REMOVE IN FAVOR OF ARG FROM MODAL
-                const saveToLibrary = true;
-
+                addToLibrary,
+              }: OnSaveProps & { returnToOrigin?: boolean } & {
+                dashboardId?: string | null;
+                addToLibrary?: boolean;
+              }) => {
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 embeddableHandler.updateInput({ title: newTitle });
@@ -355,7 +356,7 @@ export const getTopNavConfig = (
 
                 // If we're adding to a dashboard and not saving to library,
                 // we'll want to use a by-value operation
-                if (dashboardId && !saveToLibrary) {
+                if (dashboardId && !addToLibrary) {
                   const appPath = `${VisualizeConstants.LANDING_PAGE_PATH}`;
 
                   // Manually insert a new url so the back button will open the saved visualization.
