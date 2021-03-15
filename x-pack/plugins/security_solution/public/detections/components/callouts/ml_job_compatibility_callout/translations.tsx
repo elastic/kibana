@@ -26,10 +26,15 @@ export const MlJobCompatibilityCalloutBody = () => (
         <p>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageBody.summary"
-            defaultMessage="The ML jobs that are installed are compatible
-            with specific versions of ECS. To avoid missing alerts, ensure
-            that your ML jobs are compatible with your data sources, and that
-            your ML rules are configured with the appropriate ML jobs."
+            defaultMessage="Machine learning rules specify ML jobs that in
+            turn have dependencies on data fields populated by the Elastic
+            beats and agent integrations that were current when the ML job
+            was created. New ML jobs, prefixed with V2, have been updated to
+            operate on now-current ECS fields. If you are using multiple
+            versions of beats and agents, you need to create new machine
+            learning rules that specify the new ML (V2) jobs, and enable them
+            to run alongside your existing machine learning rules, in order
+            to ensure continued rule coverage."
           />
         </p>
       ),
