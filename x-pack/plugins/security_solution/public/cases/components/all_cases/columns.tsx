@@ -19,7 +19,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses, CaseType } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../cases/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { Case, SubCase } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
