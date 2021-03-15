@@ -10,13 +10,14 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 interface SaveModalArgs {
   addToDashboard?: 'new' | 'existing' | null;
+  saveToLibrary?: boolean;
   dashboardId?: string;
   saveAsNew?: boolean;
   redirectToOrigin?: boolean;
 }
 
 type DashboardPickerOption =
-  | 'add-to-library-option'
+  | 'no-dashboard-option'
   | 'existing-dashboard-option'
   | 'new-dashboard-option';
 
@@ -46,7 +47,13 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
 
     public async setSaveModalValues(
       vizName: string,
-      { saveAsNew, redirectToOrigin, addToDashboard, dashboardId }: SaveModalArgs = {}
+      {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard,
+        dashboardId,
+        saveToLibrary,
+      }: SaveModalArgs = {}
     ) {
       await testSubjects.setValue('savedObjectTitle', vizName);
 
@@ -55,6 +62,13 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
         const state = saveAsNew ? 'check' : 'uncheck';
         log.debug('save as new checkbox exists. Setting its state to', state);
         await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
+      }
+
+      const hasSaveToLibrary = await testSubjects.exists('add-to-library-checkbox');
+      if (hasSaveToLibrary && saveToLibrary !== undefined) {
+        const state = saveToLibrary ? 'check' : 'uncheck';
+        log.debug('save to library checkbox exists. Setting its state to', state);
+        await testSubjects.setEuiSwitch('add-to-library-checkbox', state);
       }
 
       const hasRedirectToOrigin = await testSubjects.exists('returnToOriginModeSwitch');
@@ -66,7 +80,7 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
 
       const hasDashboardSelector = await testSubjects.exists('add-to-dashboard-options');
       if (hasDashboardSelector && addToDashboard !== undefined) {
-        let option: DashboardPickerOption = 'add-to-library-option';
+        let option: DashboardPickerOption = 'no-dashboard-option';
         if (addToDashboard) {
           option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
         }
@@ -80,6 +94,18 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
           await find.clickByButtonText(dashboardId);
         }
       }
+    }
+
+    public async libraryNotificationExists(panelTitle: string) {
+      log.debug('searching for library modal on panel:', panelTitle);
+      const panel = await testSubjects.find(
+        `embeddablePanelHeading-${panelTitle.replace(/ /g, '')}`
+      );
+      const libraryActionExists = await testSubjects.descendantExists(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
+        panel
+      );
+      return libraryActionExists;
     }
 
     public async saveFromModal(

@@ -349,6 +349,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async save(
       title: string,
       saveAsNew?: boolean,
+      saveToLibrary?: boolean,
       redirectToOrigin?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
       dashboardId?: string
@@ -358,6 +359,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
+        saveToLibrary,
         redirectToOrigin,
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
