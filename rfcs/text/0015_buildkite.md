@@ -23,6 +23,10 @@
 - [Detailed design](#detailed-design)
 - [Drawbacks](#drawbacks)
 - [Alternatives](#alternatives)
+  - [Jenkins](#jenkins)
+  - [Other solutions](#other-solutions)
+    - [CircleCI](#circleci)
+    - [GitHub Actions](#github-actions)
 - [Adoption strategy](#adoption-strategy)
 - [How we teach this](#how-we-teach-this)
 - [Unresolved questions](#unresolved-questions)
@@ -126,7 +130,15 @@ There are tradeoffs to choosing any path. Attempt to identify them here.
 
 # Alternatives
 
-What other designs have been considered? What is the impact of not doing this?
+## Jenkins
+
+TODO how Jenkins stacks up against the required/desired functionality, and the kinds of things we would need to build to get there.
+
+## Other solutions
+
+### CircleCI
+
+### GitHub Actions
 
 # Adoption strategy
 
