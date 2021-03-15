@@ -49,6 +49,7 @@ interface ResultSettingsActions {
     fieldName: string,
     settings: FieldResultSetting
   ): { fieldName: string; settings: FieldResultSetting };
+  saving(): void;
 }
 
 interface ResultSettingsValues {
@@ -88,6 +89,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     clearAllFields: () => true,
     resetAllFields: () => true,
     updateField: (fieldName, settings) => ({ fieldName, settings }),
+    saving: () => true,
   }),
   reducers: () => ({
     dataLoading: [
@@ -100,6 +102,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       false,
       {
         initializeResultFields: () => false,
+        saving: () => true,
       },
     ],
     openModal: [
@@ -111,6 +114,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         resetAllFields: () => OpenModal.None,
         openConfirmResetModal: () => OpenModal.ConfirmResetModal,
         openConfirmSaveModal: () => OpenModal.ConfirmSaveModal,
+        saving: () => OpenModal.None,
       },
     ],
     nonTextResultFields: [

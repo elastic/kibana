@@ -392,5 +392,21 @@ describe('ResultSettingsLogic', () => {
         });
       });
     });
+
+    describe('saving', () => {
+      it('sets saving to true and close any open modals', () => {
+        mount({
+          saving: false,
+        });
+
+        ResultSettingsLogic.actions.saving();
+
+        expect(ResultSettingsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          saving: true,
+          openModal: OpenModal.None,
+        });
+      });
+    });
   });
 });
