@@ -43,6 +43,21 @@ interface Dependencies {
   fieldFormatsRegistry: IFieldFormatsRegistry;
 }
 
+// Function to check if the field name values can be used as the header row
+function isPlainStringArray(
+  fields: SearchFieldValue[] | string | boolean | undefined
+): fields is string[] {
+  let result = true;
+  if (Array.isArray(fields)) {
+    fields.forEach((field) => {
+      if (typeof field !== 'string') {
+        result = false;
+      }
+    });
+  }
+  return result;
+}
+
 export class CsvGenerator {
   private _formatters: Record<string, FieldFormat> | null = null;
   private csvContainsFormulas = false;
@@ -127,21 +142,19 @@ export class CsvGenerator {
       fieldsFromSource: searchSource.getField('fieldsFromSource'),
     };
     const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-    this.logger.info(`Getting search source fields from: '${fieldSource}'`);
+    this.logger.debug(`Getting search source fields from: '${fieldSource}'`);
 
-    let fields = fieldValues[fieldSource];
-    // if fields != string[] then we use the table columns as the fields
-    if (
-      !fields ||
-      fields === true ||
-      typeof fields === 'string' ||
-      typeof fields[0] !== 'string' ||
-      fields[0] === '*'
-    ) {
-      fields = table.columns.map((c) => c.id);
+    const fields = fieldValues[fieldSource];
+    // Check if field name values are string[] and if the fields are user-defined
+    if (isPlainStringArray(fields)) {
+      return fields;
     }
 
-    return fields as string[]; // FIXME: fix TS
+    // Default to using the table column IDs as the fields
+    const columnIds = table.columns.map((c) => c.id);
+    // Fields in the API response don't come sorted - they need to be sorted client-side
+    columnIds.sort();
+    return columnIds;
   }
 
   private formatCellValues(formatters: Record<string, FieldFormat>) {
