@@ -10,21 +10,18 @@ import React from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 
 import { externalUrl, getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+import { EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { NAV } from '../../constants';
+import { PERSONAL_SOURCES_PATH } from '../../routes';
 
 export const WorkplaceSearchHeaderActions: React.FC = () => {
   if (!externalUrl.enterpriseSearchUrl) return null;
 
   return (
     <>
-      <EuiButtonEmpty
-        href={getWorkplaceSearchUrl('/sources')}
-        target="_blank"
-        iconType="user"
-        style={{ marginRight: 5 }}
-      >
+      <EuiButtonEmptyTo to={PERSONAL_SOURCES_PATH} iconType="user" style={{ marginRight: 5 }}>
         <EuiText size="s">{NAV.PERSONAL_DASHBOARD}</EuiText>
-      </EuiButtonEmpty>
+      </EuiButtonEmptyTo>
       <EuiButtonEmpty
         href={getWorkplaceSearchUrl('/search')}
         target="_blank"
