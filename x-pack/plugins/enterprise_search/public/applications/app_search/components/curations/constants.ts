@@ -19,6 +19,10 @@ export const CREATE_NEW_CURATION_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.create.title',
   { defaultMessage: 'Create new curation' }
 );
+export const MANAGE_CURATION_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.manage.title',
+  { defaultMessage: 'Manage curation' }
+);
 
 export const DELETE_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteConfirmation',

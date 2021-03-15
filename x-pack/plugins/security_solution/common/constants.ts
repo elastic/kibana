@@ -180,6 +180,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.servicenow',
   '.jira',
   '.resilient',
+  '.teams',
 ];
 
 if (ENABLE_CASE_CONNECTOR) {
