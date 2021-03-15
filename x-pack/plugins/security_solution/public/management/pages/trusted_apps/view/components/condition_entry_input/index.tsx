@@ -80,16 +80,16 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       dataTestSubj,
     ]);
 
-    const getDropdownDisplay = (field: ConditionEntryField) => (
-      <>
-        {CONDITION_FIELD_TITLE[field]}
-        <EuiText size="xs" color="subdued">
-          {CONDITION_FIELD_DESCRIPTION[field]}
-        </EuiText>
-      </>
-    );
-
     const fieldOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+      const getDropdownDisplay = (field: ConditionEntryField) => (
+        <>
+          {CONDITION_FIELD_TITLE[field]}
+          <EuiText size="xs" color="subdued">
+            {CONDITION_FIELD_DESCRIPTION[field]}
+          </EuiText>
+        </>
+      );
+
       return [
         {
           dropdownDisplay: getDropdownDisplay(ConditionEntryField.HASH),
