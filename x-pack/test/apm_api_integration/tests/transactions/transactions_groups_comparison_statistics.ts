@@ -77,8 +77,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(Object.keys(currentPeriod).sort()).to.be.eql(transactionNames.sort());
 
-        const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
-        const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+        const currentPeriodItems = Object.values(currentPeriod);
+        const previousPeriodItems = Object.values(previousPeriod);
 
         expect(previousPeriodItems.length).to.be.eql(0);
 
@@ -210,8 +210,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns correct latency data', () => {
-          const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
-          const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+          const currentPeriodItems = Object.values(currentPeriod);
+          const previousPeriodItems = Object.values(previousPeriod);
 
           const currentPeriodFirstItem = currentPeriodItems[0];
           const previousPeriodFirstItem = previousPeriodItems[0];
@@ -227,8 +227,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns correct throughput data', () => {
-          const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
-          const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+          const currentPeriodItems = Object.values(currentPeriod);
+          const previousPeriodItems = Object.values(previousPeriod);
 
           const currentPeriodFirstItem = currentPeriodItems[0];
           const previousPeriodFirstItem = previousPeriodItems[0];
@@ -244,8 +244,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns correct error rate data', () => {
-          const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
-          const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+          const currentPeriodItems = Object.values(currentPeriod);
+          const previousPeriodItems = Object.values(previousPeriod);
 
           const currentPeriodFirstItem = currentPeriodItems[0];
           const previousPeriodFirstItem = previousPeriodItems[0];
@@ -256,13 +256,26 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(
             removeEmptyCoordinates(previousPeriodFirstItem.errorRate).length
           ).to.be.greaterThan(0);
+
           expectSnapshot(currentPeriodFirstItem.errorRate).toMatch();
           expectSnapshot(previousPeriodFirstItem.errorRate).toMatch();
         });
 
+        it('matches x-axis on current period and previous period', () => {
+          const currentPeriodItems = Object.values(currentPeriod);
+          const previousPeriodItems = Object.values(previousPeriod);
+
+          const currentPeriodFirstItem = currentPeriodItems[0];
+          const previousPeriodFirstItem = previousPeriodItems[0];
+
+          expect(currentPeriodFirstItem.errorRate.map(({ x }) => x)).to.be.eql(
+            previousPeriodFirstItem.errorRate.map(({ x }) => x)
+          );
+        });
+
         it('returns correct impact data', () => {
-          const currentPeriodItems = Object.values(currentPeriod).map((data) => data);
-          const previousPeriodItems = Object.values(previousPeriod).map((data) => data);
+          const currentPeriodItems = Object.values(currentPeriod);
+          const previousPeriodItems = Object.values(previousPeriod);
 
           const currentPeriodFirstItem = currentPeriodItems[0];
           const previousPeriodFirstItem = previousPeriodItems[0];

@@ -99,17 +99,19 @@ export const expectedThresholdDsl = {
     aggregations: {
       eventActionGroup: {
         terms: {
-          field: 'host.name',
+          script: {
+            lang: 'painless',
+            source: "doc['host.name'].value + ':' + doc['agent.name'].value",
+          },
           order: { _count: 'desc' },
           size: 10,
-          min_doc_count: 200,
         },
         aggs: {
           events: {
             date_histogram: {
               field: '@timestamp',
               fixed_interval: '2700000ms',
-              min_doc_count: 0,
+              min_doc_count: 200,
               extended_bounds: { min: 1599581486215, max: 1599667886215 },
             },
           },
@@ -157,14 +159,130 @@ export const expectedThresholdMissingFieldDsl = {
           missing: 'All others',
           order: { _count: 'desc' },
           size: 10,
-          min_doc_count: 200,
         },
         aggs: {
           events: {
             date_histogram: {
               field: '@timestamp',
               fixed_interval: '2700000ms',
-              min_doc_count: 0,
+              min_doc_count: 200,
+              extended_bounds: { min: 1599581486215, max: 1599667886215 },
+            },
+          },
+        },
+      },
+    },
+    query: {
+      bool: {
+        filter: [
+          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+          {
+            range: {
+              '@timestamp': {
+                gte: '2020-09-08T16:11:26.215Z',
+                lte: '2020-09-09T16:11:26.215Z',
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
+  },
+};
+
+export const expectedThresholdWithCardinalityDsl = {
+  allowNoIndices: true,
+  body: {
+    aggregations: {
+      eventActionGroup: {
+        aggs: {
+          cardinality_check: {
+            bucket_selector: {
+              buckets_path: { cardinalityCount: 'cardinality_count' },
+              script: 'params.cardinalityCount >= 10',
+            },
+          },
+          cardinality_count: { cardinality: { field: 'agent.name' } },
+          events: {
+            date_histogram: {
+              extended_bounds: { max: 1599667886215, min: 1599581486215 },
+              field: '@timestamp',
+              fixed_interval: '2700000ms',
+              min_doc_count: 200,
+            },
+          },
+        },
+        terms: {
+          field: 'event.action',
+          missing: 'All others',
+          order: { _count: 'desc' },
+          size: 10,
+        },
+      },
+    },
+    query: {
+      bool: {
+        filter: [
+          { bool: { filter: [{ match_all: {} }], must: [], must_not: [], should: [] } },
+          {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2020-09-08T16:11:26.215Z',
+                lte: '2020-09-09T16:11:26.215Z',
+              },
+            },
+          },
+        ],
+      },
+    },
+    size: 0,
+  },
+  ignoreUnavailable: true,
+  index: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'logs-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  track_total_hits: true,
+};
+
+export const expectedThresholdWithGroupFieldsAndCardinalityDsl = {
+  index: [
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'logs-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  allowNoIndices: true,
+  ignoreUnavailable: true,
+  track_total_hits: true,
+  body: {
+    aggregations: {
+      eventActionGroup: {
+        terms: {
+          script: {
+            lang: 'painless',
+            source: "doc['host.name'].value + ':' + doc['agent.name'].value",
+          },
+          order: { _count: 'desc' },
+          size: 10,
+        },
+        aggs: {
+          events: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: '2700000ms',
+              min_doc_count: 200,
               extended_bounds: { min: 1599581486215, max: 1599667886215 },
             },
           },
