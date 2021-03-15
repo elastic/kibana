@@ -322,6 +322,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 filterQuery={alertParams.filterQuery}
                 nodeType={alertParams.nodeType}
                 sourceId={alertParams.sourceId}
+                data-test-subj="preview-chart"
               />
             </ExpressionRow>
           );
