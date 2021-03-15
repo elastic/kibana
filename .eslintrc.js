@@ -92,10 +92,7 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
 module.exports = {
   root: true,
 
-  extends: [
-    require.resolve('./packages/elastic-eslint-config-kibana'),
-    'plugin:@elastic/eui/recommended',
-  ],
+  extends: ['@elastic/eslint-config-kibana', 'plugin:@elastic/eui/recommended'],
 
   overrides: [
     /**
