@@ -38,6 +38,7 @@ export const allAgents: OsqueryFactory<OsqueryQueries.agents> = {
       ...response,
       inspect,
       edges: response.rawResponse.hits.hits.map((hit) => ({ _id: hit._id, ...hit._source })),
+      aggregations: response.rawResponse.aggregations,
       totalCount: response.rawResponse.hits.total,
       pageInfo: {
         activePage: activePage ?? 0,

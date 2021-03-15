@@ -14,6 +14,7 @@ export const buildAgentsQuery = ({
   filterQuery,
   pagination: { cursorStart, querySize },
   sort,
+  aggregations,
 }: AgentsRequestOptions): ISearchRequestParams => {
   // const filter = [...createQueryFilterClauses(filterQuery)];
 
@@ -29,6 +30,7 @@ export const buildAgentsQuery = ({
           },
         },
       },
+      aggs: {},
       track_total_hits: true,
       sort: [
         {
@@ -41,6 +43,17 @@ export const buildAgentsQuery = ({
       from: cursorStart,
     },
   };
+
+  if (aggregations) {
+    Object.keys(aggregations).reduce((acc, aggKey) => {
+      acc[aggKey] = {
+        terms: {
+          field: aggregations[aggKey],
+        },
+      };
+      return acc;
+    }, dslQuery.body.aggs as { [key: string]: { terms: { field: string } } });
+  }
 
   return dslQuery;
 };
