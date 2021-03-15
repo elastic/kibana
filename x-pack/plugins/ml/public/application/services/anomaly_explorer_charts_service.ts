@@ -16,12 +16,7 @@ import {
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 import { getEntityFieldList } from '../../../common/util/anomaly_utils';
-import {
-  CombinedJob,
-  CombinedJobWithStats,
-  Datafeed,
-  JobId,
-} from '../../../common/types/anomaly_detection_jobs';
+import { CombinedJob, Datafeed, JobId } from '../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from './ml_api_service';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
@@ -38,6 +33,7 @@ import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import { TimeRangeBounds } from '../util/time_buckets';
+import { isDefined } from '../util/validation_utils';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -107,6 +103,7 @@ interface ChartRange {
 }
 
 export const DEFAULT_MAX_SERIES_TO_PLOT = 6;
+
 /**
  * Service for retrieving anomaly explorer charts data.
  */
@@ -383,8 +380,15 @@ export class AnomalyExplorerChartsService {
 
     return fullSeriesConfig;
   }
-  public async getCombinedJobs(jobIds: string[]): Promise<CombinedJobWithStats[]> {
-    return this.mlApiServices.jobs.jobs(jobIds);
+  public async getCombinedJobs(jobIds: string[]): Promise<CombinedJob[]> {
+    const jobs = await Promise.all(
+      // Getting only necessary job config and datafeed config without the stats
+      jobIds.map((jobId) => this.mlApiServices.jobs.jobForCloning(jobId))
+    );
+    const results = jobs
+      .filter(isDefined)
+      .map(({ job, datafeed }) => ({ ...job!, datafeed_config: datafeed! }));
+    return results;
   }
 
   public async getAnomalyData(
