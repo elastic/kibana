@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { routeToHome, routeToConnectors, routeToAlerts, routeToAlertDetails } from '../constants';
+import { routeToHome, routeToConnectors, routeToRules, routeToRuleDetails } from '../constants';
 
 export const getAlertingSectionBreadcrumb = (type: string): { text: string; href: string } => {
   // Home and sections
@@ -18,17 +18,17 @@ export const getAlertingSectionBreadcrumb = (type: string): { text: string; href
         }),
         href: `${routeToConnectors}`,
       };
-    case 'alerts':
+    case 'rules':
       return {
-        text: i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
-          defaultMessage: 'Alerts',
+        text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
+          defaultMessage: 'Rules',
         }),
-        href: `${routeToAlerts}`,
+        href: `${routeToRules}`,
       };
     default:
       return {
         text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
-          defaultMessage: 'Alerts and Actions',
+          defaultMessage: 'Rules and Connectors',
         }),
         href: `${routeToHome}`,
       };
@@ -41,6 +41,6 @@ export const getAlertDetailsBreadcrumb = (
 ): { text: string; href: string } => {
   return {
     text: name,
-    href: `${routeToAlertDetails.replace(':alertId', id)}`,
+    href: `${routeToRuleDetails.replace(':ruleId', id)}`,
   };
 };

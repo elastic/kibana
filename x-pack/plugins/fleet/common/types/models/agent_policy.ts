@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { agentPolicyStatuses } from '../../constants';
+import type { agentPolicyStatuses } from '../../constants';
 import type { DataType, ValueOf } from '../../types';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
