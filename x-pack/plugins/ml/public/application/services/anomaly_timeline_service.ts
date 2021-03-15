@@ -277,7 +277,7 @@ export class AnomalyTimelineService {
     }
   }
 
-  public getTimeBounds(): TimeRangeBounds {
+  private getTimeBounds(): TimeRangeBounds {
     return this._customTimeRange !== undefined
       ? this.timeFilter.calculateBounds(this._customTimeRange)
       : this.timeFilter.getBounds();
