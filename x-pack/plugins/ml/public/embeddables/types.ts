@@ -98,6 +98,7 @@ export interface AnomalyExplorerEmbeddableCustomInput {
   query: Query;
   refreshConfig: RefreshInterval;
   timeRange: TimeRange;
+  severityThreshold?: number;
 }
 
 export type AnomalyExplorerEmbeddableInput = EmbeddableInput & AnomalyExplorerEmbeddableCustomInput;
@@ -115,6 +116,7 @@ export type AnomalyExplorerEmbeddableServices = [
 ];
 export interface AnomalyExplorerCustomOutput {
   entityFields?: EntityField[];
+  severity?: number;
 }
 export type AnomalyExplorerEmbeddableOutput = EmbeddableOutput & AnomalyExplorerCustomOutput;
 export interface EditExplorerPanelContext {

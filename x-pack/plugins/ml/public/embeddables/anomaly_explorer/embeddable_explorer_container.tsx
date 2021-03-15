@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useMemo } from 'react';
+import React, { FC, useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -49,8 +49,12 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
   onOutputChange,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
-  const [severity, setSeverity] = useState(optionValueToThreshold(ANOMALY_THRESHOLD.MINOR));
-
+  const [severity, setSeverity] = useState(
+    optionValueToThreshold(
+      embeddableContext.getInput().severityThreshold ?? ANOMALY_THRESHOLD.WARNING
+    )
+  );
+  const [selectedEntities, setSelectedEntities] = useState<EntityField[] | undefined>();
   const [
     { uiSettings },
     {
@@ -73,6 +77,16 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
   }, []);
+
+  useEffect(() => {
+    onInputChange({
+      severityThreshold: severity.val,
+    });
+    onOutputChange({
+      severity: severity.val,
+      entityFields: selectedEntities,
+    });
+  }, [severity, selectedEntities]);
 
   const { chartsData, isLoading: isExplorerLoading, error } = useExplorerInputResolver(
     embeddableInput,
@@ -109,14 +123,13 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
 
   const addEntityFieldFilter = (entity: EntityField) => {
     const uniqueSelectedEntities = [entity];
+    setSelectedEntities(uniqueSelectedEntities);
     uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({
       embeddable: embeddableContext,
       data: uniqueSelectedEntities,
     });
-    onOutputChange({
-      entityFields: uniqueSelectedEntities,
-    });
   };
+
   return (
     <div
       id={`mlAnomalyExplorerEmbeddableWrapper-${id}`}
