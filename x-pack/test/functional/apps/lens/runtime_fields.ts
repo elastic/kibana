@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForField('runtimefield2');
       await PageObjects.lens.dragFieldToDimensionTrigger(
         'runtimefield2',
-        'lnsDatatable_column > lns-dimensionTrigger'
+        'lnsDatatable_rows > lns-dimensionTrigger'
       );
       await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal(
