@@ -88,7 +88,7 @@ describe('RoleMappingsLogic', () => {
         );
       });
 
-      it('sets default group with new role mapping', () => {
+      it('will remove all selected engines if no roleMapping was returned from the server', () => {
         RoleMappingsLogic.actions.setRoleMappingData({
           ...mappingServerProps,
           roleMapping: undefined,
