@@ -557,14 +557,16 @@ export function reducer(state: State, action: Action): State {
 
     case ACTION.SWITCH_TO_FORM:
       const { jobConfig: config } = state;
-      const { jobId } = state.form;
+      const { jobId, createIndexPattern, sourceIndexNameValid } = state.form;
       // @ts-ignore
       const formState = getFormStateFromJobConfig(config, false);
 
       if (typeof jobId === 'string' && jobId.trim() !== '') {
         formState.jobId = jobId;
       }
-
+      // Persist form state when switching back from advanced editor
+      formState.sourceIndexNameValid = sourceIndexNameValid;
+      formState.createIndexPattern = createIndexPattern;
       formState.jobIdEmpty = jobId === '';
       formState.jobIdValid = isJobIdValid(jobId);
       formState.jobIdInvalidMaxLength = !!maxLengthValidator(JOB_ID_MAX_LENGTH)(jobId);
