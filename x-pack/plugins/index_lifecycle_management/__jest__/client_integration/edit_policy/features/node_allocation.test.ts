@@ -380,31 +380,6 @@ describe('<EditPolicy /> node allocation', () => {
         // Do not show the call-to-action for users to migrate their cluster to use node roles
         expect(find('cloudDataTierCallout').exists()).toBeFalsy();
       });
-
-      test(`shows cloud notice when cold tier nodes do not exist`, async () => {
-        httpRequestsMockHelpers.setListNodes({
-          nodesByAttributes: {},
-          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
-          isUsingDeprecatedDataRoleConfig: false,
-        });
-        await act(async () => {
-          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
-        });
-        const { actions, component, exists, find } = testBed;
-
-        component.update();
-        await actions.cold.enable(true);
-        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-
-        expect(exists('cloudMissingTierCallout')).toBeTruthy();
-        expect(find('cloudMissingTierCallout').text()).toContain(
-          `Edit your Elastic Cloud deployment to set up a cold tier`
-        );
-
-        // Assert that other notices are not showing
-        expect(actions.cold.hasDefaultAllocationNotice()).toBeFalsy();
-        expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
-      });
     });
   });
 
