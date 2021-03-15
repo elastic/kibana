@@ -131,53 +131,52 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
   };
 
   return (
-    <div
-      id={`mlAnomalyExplorerEmbeddableWrapper-${id}`}
-      style={{
-        width: '100%',
-        overflowY: 'scroll',
-        overflowX: 'hidden',
-        padding: '8px',
-      }}
-      data-test-subj={`mlExplorerEmbeddable_${embeddableContext.id}`}
-    >
-      <EuiResizeObserver onResize={resizeHandler}>
-        {(resizeRef) => (
-          <div ref={resizeRef}>
-            {isExplorerLoading && (
-              <EuiText
-                textAlign={'center'}
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%,-50%)',
-                }}
-              >
-                <EuiLoadingChart
-                  size="xl"
-                  mono={true}
-                  data-test-subj="mlAnomalyExplorerEmbeddableLoadingIndicator"
-                />
-              </EuiText>
-            )}
-            {chartsData !== undefined && isExplorerLoading === false && (
-              <ExplorerAnomaliesContainer
-                id={id}
-                showCharts={true}
-                chartsData={chartsData}
-                severity={severity}
-                setSeverity={setSeverity}
-                mlUrlGenerator={mlUrlGenerator}
-                timeBuckets={timeBuckets}
-                timefilter={timefilter}
-                onSelectEntity={addEntityFieldFilter}
+    <EuiResizeObserver onResize={resizeHandler}>
+      {(resizeRef) => (
+        <div
+          id={`mlAnomalyExplorerEmbeddableWrapper-${id}`}
+          style={{
+            width: '100%',
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            padding: '8px',
+          }}
+          data-test-subj={`mlExplorerEmbeddable_${embeddableContext.id}`}
+          ref={resizeRef}
+        >
+          {isExplorerLoading && (
+            <EuiText
+              textAlign={'center'}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%,-50%)',
+              }}
+            >
+              <EuiLoadingChart
+                size="xl"
+                mono={true}
+                data-test-subj="mlAnomalyExplorerEmbeddableLoadingIndicator"
               />
-            )}
-          </div>
-        )}
-      </EuiResizeObserver>
-    </div>
+            </EuiText>
+          )}
+          {chartsData !== undefined && isExplorerLoading === false && (
+            <ExplorerAnomaliesContainer
+              id={id}
+              showCharts={true}
+              chartsData={chartsData}
+              severity={severity}
+              setSeverity={setSeverity}
+              mlUrlGenerator={mlUrlGenerator}
+              timeBuckets={timeBuckets}
+              timefilter={timefilter}
+              onSelectEntity={addEntityFieldFilter}
+            />
+          )}
+        </div>
+      )}
+    </EuiResizeObserver>
   );
 };
 
