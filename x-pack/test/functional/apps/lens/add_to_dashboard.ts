@@ -186,7 +186,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow new lens be added by reference to an existing dashboard', async () => {
-      await createAndSaveDashboard('My Very Cool Dashboard');
+      await createAndSaveDashboard('My Very Cool Dashboard 2');
       await createNewLens();
 
       await PageObjects.lens.save(
@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         false,
         true,
         'existing',
-        'My Very Cool Dashboard'
+        'My Very Cool Dashboard 2'
       );
 
       await PageObjects.dashboard.waitForRenderComplete();
@@ -211,16 +211,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow existing lens be added by reference to an existing dashboard', async () => {
-      await createAndSaveDashboard('My Wonderful Dashboard');
+      await createAndSaveDashboard('My Wonderful Dashboard 2');
       await loadExistingLens();
 
       await PageObjects.lens.save(
-        'Artistpreviouslyknownaslens by ref',
+        'Artistpreviouslyknownaslens by ref 2',
         true,
         false,
         true,
         'existing',
-        'My Wonderful Dashboard'
+        'My Wonderful Dashboard 2'
       );
 
       await PageObjects.dashboard.waitForRenderComplete();

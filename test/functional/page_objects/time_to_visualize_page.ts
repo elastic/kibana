@@ -64,13 +64,6 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
         await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
       }
 
-      const hasSaveToLibrary = await testSubjects.exists('add-to-library-checkbox');
-      if (hasSaveToLibrary && saveToLibrary !== undefined) {
-        const state = saveToLibrary ? 'check' : 'uncheck';
-        log.debug('save to library checkbox exists. Setting its state to', state);
-        await testSubjects.setEuiSwitch('add-to-library-checkbox', state);
-      }
-
       const hasRedirectToOrigin = await testSubjects.exists('returnToOriginModeSwitch');
       if (hasRedirectToOrigin && redirectToOrigin !== undefined) {
         const state = redirectToOrigin ? 'check' : 'uncheck';
@@ -92,6 +85,20 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
         if (dashboardId) {
           await testSubjects.setValue('dashboardPickerInput', dashboardId);
           await find.clickByButtonText(dashboardId);
+        }
+      }
+
+      const hasSaveToLibrary = await testSubjects.exists('add-to-library-checkbox');
+      if (hasSaveToLibrary && saveToLibrary !== undefined) {
+        const libraryCheckbox = await find.byCssSelector('#add-to-library-option');
+        const isChecked = await libraryCheckbox.isSelected();
+        const needsClick = isChecked !== saveToLibrary;
+        const state = saveToLibrary ? 'check' : 'uncheck';
+        log.debug('save to library checkbox exists. Setting its state to', state);
+        if (needsClick) {
+          const selector = await testSubjects.find('add-to-library-checkbox');
+          const label = await selector.findByCssSelector(`label[for="add-to-library-option"]`);
+          await label.click();
         }
       }
     }

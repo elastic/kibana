@@ -20,6 +20,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiCheckbox,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { DashboardPicker, DashboardPickerProps } from './dashboard_picker';
@@ -120,9 +121,8 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
           </EuiPanel>
           <EuiSpacer size="s" />
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="add-to-library-checkbox">
               <EuiCheckbox
-                data-test-subj="add-to-library-checkbox"
                 id="add-to-library-option"
                 label={i18n.translate('presentationUtil.saveModalDashboard.libraryOptionLabel', {
                   defaultMessage: 'Add to library',
@@ -138,7 +138,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                 content={
                   <FormattedMessage
                     id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
-                    defaultMessage="Items added to a dashboard will not appear in the library and must be edited from the dashboard."
+                    defaultMessage="Items added to the Visualize Library will be made available to all dashboards. Editing a library item will affect all instances."
                   />
                 }
               />
