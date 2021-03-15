@@ -104,7 +104,9 @@ export function DiscoverGridFlyout({
             {activePage !== -1 && (
               <EuiFlexItem grow={false}>
                 <EuiPagination
-                  aria-label="Custom pagination example"
+                  aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
+                    defaultMessage: 'Document navigation',
+                  })}
                   pageCount={pageCount}
                   activePage={activePage}
                   onPageClick={setPage}

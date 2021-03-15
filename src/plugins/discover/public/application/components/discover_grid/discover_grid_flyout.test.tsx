@@ -28,6 +28,7 @@ describe('Discover flyout', function () {
         columns={['date']}
         indexPattern={indexPatternMock}
         hit={esHits[0]}
+        hits={esHits}
         onAddColumn={jest.fn()}
         onClose={onClose}
         onFilter={jest.fn()}
@@ -38,6 +39,7 @@ describe('Discover flyout', function () {
             addBasePath: (path: string) => path,
           } as unknown) as DiscoverServices
         }
+        setExpandedDoc={jest.fn()}
       />
     );
 
@@ -54,6 +56,7 @@ describe('Discover flyout', function () {
         columns={['date']}
         indexPattern={indexPatternWithTimefieldMock}
         hit={esHits[0]}
+        hits={esHits}
         onAddColumn={jest.fn()}
         onClose={onClose}
         onFilter={jest.fn()}
@@ -64,6 +67,7 @@ describe('Discover flyout', function () {
             addBasePath: (path: string) => `/base${path}`,
           } as unknown) as DiscoverServices
         }
+        setExpandedDoc={jest.fn()}
       />
     );
 
