@@ -1,5 +1,5 @@
 - [Introduction](#introduction)
-- [Algorithm](#algorithm)
+- [Algorithm steps](#algorithm-steps)
   - [INIT](#init)
     - [Next action](#next-action)
     - [New control state](#new-control-state)
@@ -9,45 +9,57 @@
   - [LEGACY_SET_WRITE_BLOCK](#legacy_set_write_block)
     - [Next action](#next-action-2)
     - [New control state](#new-control-state-2)
-  - [SET_SOURCE_WRITE_BLOCK](#set_source_write_block)
+  - [LEGACY_CREATE_REINDEX_TARGET](#legacy_create_reindex_target)
     - [Next action](#next-action-3)
     - [New control state](#new-control-state-3)
-  - [CREATE_REINDEX_TEMP](#create_reindex_temp)
+  - [LEGACY_REINDEX](#legacy_reindex)
     - [Next action](#next-action-4)
     - [New control state](#new-control-state-4)
-  - [REINDEX_SOURCE_TO_TEMP_OPEN_PIT](#reindex_source_to_temp_open_pit)
+  - [LEGACY_REINDEX_WAIT_FOR_TASK](#legacy_reindex_wait_for_task)
     - [Next action](#next-action-5)
     - [New control state](#new-control-state-5)
-  - [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
+  - [LEGACY_DELETE](#legacy_delete)
     - [Next action](#next-action-6)
     - [New control state](#new-control-state-6)
-  - [REINDEX_SOURCE_TO_TEMP_INDEX](#reindex_source_to_temp_index)
+  - [SET_SOURCE_WRITE_BLOCK](#set_source_write_block)
     - [Next action](#next-action-7)
     - [New control state](#new-control-state-7)
-  - [REINDEX_SOURCE_TO_TEMP_CLOSE_PIT](#reindex_source_to_temp_close_pit)
+  - [CREATE_REINDEX_TEMP](#create_reindex_temp)
     - [Next action](#next-action-8)
     - [New control state](#new-control-state-8)
-  - [SET_TEMP_WRITE_BLOCK](#set_temp_write_block)
+  - [REINDEX_SOURCE_TO_TEMP_OPEN_PIT](#reindex_source_to_temp_open_pit)
     - [Next action](#next-action-9)
     - [New control state](#new-control-state-9)
-  - [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
+  - [REINDEX_SOURCE_TO_TEMP_READ](#reindex_source_to_temp_read)
     - [Next action](#next-action-10)
     - [New control state](#new-control-state-10)
-  - [OUTDATED_DOCUMENTS_SEARCH](#outdated_documents_search)
+  - [REINDEX_SOURCE_TO_TEMP_INDEX](#reindex_source_to_temp_index)
     - [Next action](#next-action-11)
     - [New control state](#new-control-state-11)
-  - [OUTDATED_DOCUMENTS_TRANSFORM](#outdated_documents_transform)
+  - [REINDEX_SOURCE_TO_TEMP_CLOSE_PIT](#reindex_source_to_temp_close_pit)
     - [Next action](#next-action-12)
     - [New control state](#new-control-state-12)
-  - [UPDATE_TARGET_MAPPINGS](#update_target_mappings)
+  - [SET_TEMP_WRITE_BLOCK](#set_temp_write_block)
     - [Next action](#next-action-13)
     - [New control state](#new-control-state-13)
-  - [UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK](#update_target_mappings_wait_for_task)
+  - [CLONE_TEMP_TO_TARGET](#clone_temp_to_target)
     - [Next action](#next-action-14)
     - [New control state](#new-control-state-14)
-  - [MARK_VERSION_INDEX_READY_CONFLICT](#mark_version_index_ready_conflict)
+  - [OUTDATED_DOCUMENTS_SEARCH](#outdated_documents_search)
     - [Next action](#next-action-15)
     - [New control state](#new-control-state-15)
+  - [OUTDATED_DOCUMENTS_TRANSFORM](#outdated_documents_transform)
+    - [Next action](#next-action-16)
+    - [New control state](#new-control-state-16)
+  - [UPDATE_TARGET_MAPPINGS](#update_target_mappings)
+    - [Next action](#next-action-17)
+    - [New control state](#new-control-state-17)
+  - [UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK](#update_target_mappings_wait_for_task)
+    - [Next action](#next-action-18)
+    - [New control state](#new-control-state-18)
+  - [MARK_VERSION_INDEX_READY_CONFLICT](#mark_version_index_ready_conflict)
+    - [Next action](#next-action-19)
+    - [New control state](#new-control-state-19)
 - [Manual QA Test Plan](#manual-qa-test-plan)
   - [1. Legacy pre-migration](#1-legacy-pre-migration)
   - [2. Plugins enabled/disabled](#2-plugins-enableddisabled)
@@ -74,7 +86,44 @@ For more background information on the problem see the [saved object
 migrations
 RFC](https://github.com/elastic/kibana/blob/master/rfcs/text/0013_saved_object_migrations.md).
 
-# Algorithm
+# Algorithm steps
+The design goals for the algorithm was to keep downtime below 10 minutes for
+100k saved objects while guaranteeing no data loss and keeping steps as simple
+and explicit as possible.
+
+The algorithm is implemented as a state-action machine based on https://www.microsoft.com/en-us/research/uploads/prod/2016/12/Computation-and-State-Machines.pdf
+ 
+The state-action machine defines it's behaviour in steps. Each step is a
+transition from a control state s_i to the contral state s_i+1 caused by an
+action a_i.
+
+```
+s_i   -> a_i -> s_i+1
+s_i+1 -> a_i+1 -> s_i+2
+```
+
+Given a control state s1, `next(s1)` returns the next action to execute.
+Actions are asynchronous, once the action resolves, we can use the action
+response to determine the next state to transition to as defined by the
+function `model(state, response)`.
+
+We can then loosely define a step as:
+```
+s_i+1 = model(s_i, await next(s_i)())
+```
+
+When there are no more actions returned by `next` the state-action machine
+terminates such as in the DONE and FATAL control states.
+
+What follows is a list of all control states. For each control state the
+following is described:
+ -  _next action_: the next action triggered by the current control state
+ -  _new control state_: based on the action response, the possible new control states that the machine will transition to
+
+Since the algorithm runs once for each saved object index the steps below
+always reference a single saved object index `.kibana`. When Kibana starts up,
+all the steps are also repeated for the `.kibana_task_manager` index but this
+is left out of the description for brevity.
 
 ## INIT
 ### Next action
@@ -103,7 +152,8 @@ and the migration source index is the index the `.kibana` alias points to.
 4. If `.kibana` is a concrete index, we’re migrating from a legacy index
   → `LEGACY_SET_WRITE_BLOCK`
 
-5. If there are no `.kibana` indices initialize a new saved objects indices
+5. If there are no `.kibana` indices, this is a fresh deployment. Initialize a
+   new saved objects index
   → `CREATE_NEW_TARGET`
 
 ## CREATE_NEW_TARGET
@@ -119,13 +169,68 @@ Create the target index. This operation is idempotent, if the index already exis
 ### Next action
 `setWriteBlock`
 
-Set a write block on the legacy index to prevent any older Kibana instances from writing to the index while the migration is in progress which could cause lost acknowledged writes.
+Set a write block on the legacy index to prevent any older Kibana instances
+from writing to the index while the migration is in progress which could cause
+lost acknowledged writes.
+
+This is the first of a series of `LEGACY_*` control states that will:
+ - reindex the concrete legacy `.kibana` index into a `.kibana_pre6.5.0_001` index
+ - delete the concrete `.kibana` _index_ so that we're able to create a `.kibana` _alias_
 
 ### New control state
 1. If the write block was successfully added
  → `LEGACY_CREATE_REINDEX_TARGET`
 2. If the write block failed because the index doesn't exist, it means another instance already completed the legacy pre-migration. Proceed to the next step.
   → `LEGACY_CREATE_REINDEX_TARGET`
+
+## LEGACY_CREATE_REINDEX_TARGET
+### Next action
+`createIndex`
+
+Create a new `.kibana_pre6.5.0_001` index into which we can reindex the legacy
+index. (Since the task manager index was converted from a data index into a
+saved objects index in 7.4 it will be reindexed into `.kibana_pre7.4.0_001`)
+### New control state
+  → `LEGACY_REINDEX`
+
+## LEGACY_REINDEX
+### Next action
+`reindex`
+
+Let Elasticsearch reindex the legacy index into `.kibana_pre6.5.0_001`. (For
+the task manager index we specify a `preMigrationScript` to convert the
+original task manager documents into valid saved objects)
+### New control state
+  → `LEGACY_REINDEX_WAIT_FOR_TASK`
+
+
+## LEGACY_REINDEX_WAIT_FOR_TASK
+### Next action
+`waitForReindexTask`
+
+Wait for up to 60s for the reindex task to complete.
+### New control state
+1. If the reindex task completed
+  → `LEGACY_DELETE`
+2. If the reindex task failed with a `target_index_had_write_block` or
+   `index_not_found_exception` another instance already completed this step
+  → `LEGACY_DELETE`
+3. If the reindex task is still in progress
+  → `LEGACY_REINDEX_WAIT_FOR_TASK`
+
+## LEGACY_DELETE
+### Next action
+`updateAliases`
+
+Use the updateAliases API to atomically remove the legacy index and create a
+new `.kibana` alias that points to `.kibana_pre6.5.0_001`.
+### New control state
+1. If the action succeeds
+  → `SET_SOURCE_WRITE_BLOCK`
+2. If the action fails with `remove_index_not_a_concrete_index` or
+   `index_not_found_exception` another instance has already completed this step.
+  → `SET_SOURCE_WRITE_BLOCK`
+
 
 ## SET_SOURCE_WRITE_BLOCK
 ### Next action
@@ -174,6 +279,11 @@ Read the next batch of outdated documents from the source index by using search 
 
 1. Transform the current batch of documents
 2. Use the bulk API create action to write a batch of up-to-date documents. The create action ensures that there will be only one write per reindexed document even if multiple Kibana instances are performing this step. Ignore any create errors because of documents that already exist in the temporary index. Use `refresh=false` to speed up the create actions, the `UPDATE_TARGET_MAPPINGS` step will ensure that the index is refreshed before we start serving traffic.
+
+In order to support sharing saved objects to multiple spaces in 8.0, the
+transforms will also regenerate document `_id`'s. To ensure that this step
+remains idempotent, the new `_id` is deterministically generated using UUIDv5
+ensuring that each Kibana instance generates the same new `_id` for the same document.
 ### New control state
   → `REINDEX_SOURCE_TO_TEMP_READ`
    
@@ -201,14 +311,20 @@ Ask elasticsearch to clone the temporary index into the target index. If the tar
 We can’t use the temporary index as our target index because one instance can complete the migration, delete a document, and then a second instance starts the reindex operation and re-creates the deleted document. By cloning the temporary index and only accepting writes/deletes from the cloned target index, we prevent lost acknowledged deletes.
 
 ### New control state
-If another instance has some plugins disabled it will reindex that plugin's documents without transforming them. Search for outdated documents to ensure that everything is up to date.
   → `OUTDATED_DOCUMENTS_SEARCH`
 
 ## OUTDATED_DOCUMENTS_SEARCH
 ### Next action
 `searchForOutdatedDocuments`
 
-Search for outdated saved object documents. Will return one batch of documents.
+Search for outdated saved object documents. Will return one batch of
+documents.
+
+If another instance has a disabled plugin it will reindex that plugin's
+documents without transforming them. Because this instance doesn't know which
+plugins were disabled by the instance that performed the
+`REINDEX_SOURCE_TO_TEMP_INDEX` step, we need to search for outdated documents
+and transform them to ensure that everything is up to date.
 
 ### New control state
 1. Found outdated documents?
