@@ -6,13 +6,23 @@
  */
 
 import { filter } from 'lodash/fp';
-import { AssociationType, CaseStatuses } from '../../../../../case/common/api';
+import { AssociationType, CaseStatuses, CaseType } from '../../../../../cases/common/api';
 import { Case, SubCase } from '../../containers/types';
 import { statuses } from '../status';
+
+export const isSelectedCasesIncludeCollections = (selectedCases: Case[]) =>
+  selectedCases.length > 0 &&
+  selectedCases.some((caseObj: Case) => caseObj.type === CaseType.collection);
 
 export const isSubCase = (theCase: Case | SubCase): theCase is SubCase =>
   (theCase as SubCase).caseParentId !== undefined &&
   (theCase as SubCase).associationType === AssociationType.subCase;
+
+export const isCollection = (theCase: Case | SubCase | null | undefined) =>
+  theCase != null && (theCase as Case).type === CaseType.collection;
+
+export const isIndividual = (theCase: Case | SubCase | null | undefined) =>
+  theCase != null && (theCase as Case).type === CaseType.individual;
 
 export const getSubCasesStatusCountsBadges = (
   subCases: SubCase[]

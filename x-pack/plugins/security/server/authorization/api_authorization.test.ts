@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { initAPIAuthorization } from './api_authorization';
-
 import {
   coreMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
+
+import { initAPIAuthorization } from './api_authorization';
 import { authorizationMock } from './index.mock';
 
 describe('initAPIAuthorization', () => {

@@ -165,7 +165,6 @@ export function DiscoverSidebar({
           indexPatterns={indexPatterns}
           state={state}
           setAppState={setAppState}
-          useNewFieldsApi={useNewFieldsApi}
         />
       </section>
     );
@@ -195,7 +194,6 @@ export function DiscoverSidebar({
             indexPatterns={indexPatterns}
             state={state}
             setAppState={setAppState}
-            useNewFieldsApi={useNewFieldsApi}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

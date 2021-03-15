@@ -41,6 +41,7 @@ export function registerCredentialsRoutes({
       validate: {
         query: schema.object({
           'page[current]': schema.number(),
+          'page[size]': schema.number(),
         }),
       },
     },

@@ -55,7 +55,6 @@ export function registerDownloadArtifactRoute(
       try {
         scopedSOClient = endpointContext.service.getScopedSavedObjectsClient(req);
         await authenticateAgentWithAccessToken(
-          scopedSOClient,
           context.core.elasticsearch.client.asInternalUser,
           req
         );

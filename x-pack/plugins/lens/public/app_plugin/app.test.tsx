@@ -83,6 +83,7 @@ function createMockSearchService() {
     session: {
       start: jest.fn(() => `sessionId-${sessionIdCounter++}`),
       clear: jest.fn(),
+      getSessionId: jest.fn(() => `sessionId-${sessionIdCounter}`),
     },
   };
 }

@@ -6,6 +6,7 @@
  */
 
 import { IconType } from '@elastic/eui';
+
 import { AssetType, ElasticsearchAssetType, KibanaAssetType, ServiceName } from '../../types';
 
 // only allow Kibana assets for the kibana key, ES asssets for elasticsearch, etc

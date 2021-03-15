@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/server';
-import { ElasticsearchAssetType, Installation, KibanaSavedObjectType } from '../../../types';
+import type { SavedObject } from 'src/core/server';
+
+import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
+import type { Installation } from '../../../types';
+
 import { getInstallType } from './install';
 
 const mockInstallation: SavedObject<Installation> = {

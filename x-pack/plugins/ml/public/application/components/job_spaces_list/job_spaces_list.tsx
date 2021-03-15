@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -66,7 +66,11 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
     });
   }
 
-  const { SpaceList, ShareToSpaceFlyout } = spacesApi.ui.components;
+  const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
+  const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [
+    spacesApi,
+  ]);
+
   const shareToSpaceFlyoutProps: ShareToSpaceFlyoutProps = {
     savedObjectTarget: {
       type: ML_SAVED_OBJECT_TYPE,
@@ -83,9 +87,9 @@ export const JobSpacesList: FC<Props> = ({ spacesApi, spaceIds, jobId, jobType, 
   return (
     <>
       <EuiButtonEmpty onClick={() => setShowFlyout(true)} style={{ height: 'auto' }}>
-        <SpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
+        <LazySpaceList namespaces={spaceIds} displayLimit={0} behaviorContext="outside-space" />
       </EuiButtonEmpty>
-      {showFlyout && <ShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
+      {showFlyout && <LazyShareToSpaceFlyout {...shareToSpaceFlyoutProps} />}
     </>
   );
 };

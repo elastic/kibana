@@ -16,3 +16,9 @@ export const Loading: React.FC = () => (
     <EuiLoadingSpinner size="xl" />
   </div>
 );
+
+export const LoadingOverlay: React.FC = () => (
+  <div className="enterpriseSearchLoadingOverlay">
+    <Loading />
+  </div>
+);

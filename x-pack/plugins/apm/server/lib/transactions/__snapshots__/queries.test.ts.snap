@@ -160,11 +160,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
             "bool": Object {
               "minimum_should_match": 1,
               "should": Array [
@@ -311,11 +306,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
             "bool": Object {
               "minimum_should_match": 1,
               "should": Array [
@@ -385,11 +375,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
         ],

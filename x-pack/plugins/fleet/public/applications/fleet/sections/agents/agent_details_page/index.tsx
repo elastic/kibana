@@ -21,6 +21,7 @@ import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
+
 import { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
@@ -34,10 +35,11 @@ import {
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
-import { AgentRefreshContext } from './hooks';
-import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { isAgentUpgradeable } from '../../../services';
+
+import { AgentRefreshContext } from './hooks';
+import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {

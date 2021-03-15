@@ -18,7 +18,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./list_action_types'));
+    loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));

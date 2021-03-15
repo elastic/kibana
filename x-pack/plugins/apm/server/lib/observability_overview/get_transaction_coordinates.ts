@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rangeQuery } from '../../../common/utils/queries';
+import { rangeQuery } from '../../../server/utils/queries';
 import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';

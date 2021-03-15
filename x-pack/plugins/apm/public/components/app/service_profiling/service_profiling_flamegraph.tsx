@@ -42,7 +42,6 @@ import {
   asDynamicBytes,
   asInteger,
 } from '../../../../common/utils/formatters';
-import { UIFilters } from '../../../../typings/ui_filters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { px, unit } from '../../../style/variables';
@@ -124,17 +123,17 @@ function CustomTooltip({
 export function ServiceProfilingFlamegraph({
   serviceName,
   environment,
+  kuery,
   valueType,
   start,
   end,
-  uiFilters,
 }: {
   serviceName: string;
   environment?: string;
+  kuery?: string;
   valueType?: ProfilingValueType;
   start?: string;
   end?: string;
-  uiFilters: UIFilters;
 }) {
   const theme = useTheme();
 
@@ -154,16 +153,16 @@ export function ServiceProfilingFlamegraph({
             serviceName,
           },
           query: {
+            kuery,
             start,
             end,
             environment,
             valueType,
-            uiFilters: JSON.stringify(uiFilters),
           },
         },
       });
     },
-    [start, end, environment, serviceName, valueType, uiFilters]
+    [kuery, start, end, environment, serviceName, valueType]
   );
 
   const points = useMemo(() => {
@@ -324,7 +323,6 @@ export function ServiceProfilingFlamegraph({
             config={{
               fillLabel: {
                 fontFamily: theme.eui.euiCodeFontFamily,
-                // @ts-expect-error (coming soon in Elastic charts)
                 clipText: true,
               },
               drilldown: true,

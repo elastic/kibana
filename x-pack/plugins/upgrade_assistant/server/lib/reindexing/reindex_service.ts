@@ -219,7 +219,7 @@ export const reindexServiceFactory = (
         .cancel({
           task_id: reindexOp.attributes.reindexTaskId ?? undefined,
         })
-        .catch((e) => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
+        .catch(() => undefined); // Ignore any exceptions trying to cancel (it may have already completed).
     }
 
     // Set index back to writable if we ever got past this point.
@@ -345,6 +345,11 @@ export const reindexServiceFactory = (
     if (shouldOpenAndClose) {
       log.debug(`Detected closed index ${indexName}, opening...`);
       await esClient.indices.open({ index: indexName });
+    }
+
+    const flatSettings = await actions.getFlatSettings(indexName);
+    if (!flatSettings) {
+      throw error.indexNotFound(`Index ${indexName} does not exist.`);
     }
 
     const { body: startReindexResponse } = await esClient.reindex({

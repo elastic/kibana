@@ -7,9 +7,10 @@
 
 import { SavedObjectsClient } from 'kibana/server';
 import _ from 'lodash';
+
 import { getPackageSavedObjects } from '../services/epm/packages/get';
 import { agentPolicyService } from '../services';
-import { NewPackagePolicy } from '../types';
+import type { NewPackagePolicy } from '../types';
 
 export interface PackageUsage {
   name: string;

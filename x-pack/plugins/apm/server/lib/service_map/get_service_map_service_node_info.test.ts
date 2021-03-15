@@ -19,7 +19,6 @@ describe('getServiceMapServiceNodeInfo', () => {
               hits: { total: { value: 0 } },
             }),
         },
-        esFilter: [],
         indices: {},
         uiFilters: {},
       } as unknown) as Setup & SetupTimeRange;

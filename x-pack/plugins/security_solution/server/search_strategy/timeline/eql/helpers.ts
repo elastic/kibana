@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { EqlSearchStrategyResponse } from '../../../../../data_enhanced/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-import { EqlSearchResponse } from '../../../../common/detection_engine/types';
+import { EqlSearchResponse, EqlSequence } from '../../../../common/detection_engine/types';
 import { EventHit, TimelineEdges } from '../../../../common/search_strategy';
 import {
   TimelineEqlRequestOptions,
@@ -46,7 +47,7 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
         },
       },
       query: options.filterQuery,
-      ...(options.tiebreakerField != null
+      ...(!isEmpty(options.tiebreakerField)
         ? {
             tiebreaker_field: options.tiebreakerField,
           }
@@ -56,51 +57,53 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
     },
   };
 };
+const parseSequences = async (sequences: Array<EqlSequence<unknown>>, fieldRequested: string[]) =>
+  sequences.reduce<Promise<TimelineEdges[]>>(async (acc, sequence, sequenceIndex) => {
+    const sequenceParentId = sequence.events[0]?._id ?? null;
+    const data = await acc;
+    const allData = await Promise.all(
+      sequence.events.map(async (event, eventIndex) => {
+        const item = await formatTimelineData(
+          fieldRequested,
+          TIMELINE_EVENTS_FIELDS,
+          event as EventHit
+        );
+        return Promise.resolve({
+          ...item,
+          node: {
+            ...item.node,
+            ecs: {
+              ...item.node.ecs,
+              ...(sequenceParentId != null
+                ? {
+                    eql: {
+                      parentId: sequenceParentId,
+                      sequenceNumber: `${sequenceIndex}-${eventIndex}`,
+                    },
+                  }
+                : {}),
+            },
+          },
+        });
+      })
+    );
+    return Promise.resolve([...data, ...allData]);
+  }, Promise.resolve([]));
 
-export const parseEqlResponse = (
+export const parseEqlResponse = async (
   options: TimelineEqlRequestOptions,
   response: EqlSearchStrategyResponse<EqlSearchResponse<unknown>>
 ): Promise<TimelineEqlResponse> => {
   const { activePage, querySize } = options.pagination;
-  // const totalCount = response.rawResponse?.body?.hits?.total?.value ?? 0;
   let edges: TimelineEdges[] = [];
+
   if (response.rawResponse.body.hits.sequences !== undefined) {
-    edges = response.rawResponse.body.hits.sequences.reduce<TimelineEdges[]>(
-      (data, sequence, sequenceIndex) => {
-        const sequenceParentId = sequence.events[0]?._id ?? null;
-        return [
-          ...data,
-          ...sequence.events.map((event, eventIndex) => {
-            const item = formatTimelineData(
-              options.fieldRequested,
-              TIMELINE_EVENTS_FIELDS,
-              event as EventHit
-            );
-            return {
-              ...item,
-              node: {
-                ...item.node,
-                ecs: {
-                  ...item.node.ecs,
-                  ...(sequenceParentId != null
-                    ? {
-                        eql: {
-                          parentId: sequenceParentId,
-                          sequenceNumber: `${sequenceIndex}-${eventIndex}`,
-                        },
-                      }
-                    : {}),
-                },
-              },
-            };
-          }),
-        ];
-      },
-      []
-    );
+    edges = await parseSequences(response.rawResponse.body.hits.sequences, options.fieldRequested);
   } else if (response.rawResponse.body.hits.events !== undefined) {
-    edges = response.rawResponse.body.hits.events.map((event) =>
-      formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, event as EventHit)
+    edges = await Promise.all(
+      response.rawResponse.body.hits.events.map(async (event) =>
+        formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, event as EventHit)
+      )
     );
   }
 

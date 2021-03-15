@@ -17,7 +17,7 @@ import {
 } from './alert_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import { parseDuration } from '../../../../alerts/server';
+import { parseDuration } from '../../../../alerting/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
@@ -30,7 +30,7 @@ export function getAlertType(
   logger: Logger
 ): AlertType<EsQueryAlertParams, EsQueryAlertState, {}, ActionContext, typeof ActionGroupId> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
-    defaultMessage: 'ES query',
+    defaultMessage: 'Elasticsearch query',
   });
 
   const actionGroupName = i18n.translate('xpack.stackAlerts.esQuery.actionGroupThresholdMetTitle', {
@@ -82,7 +82,7 @@ export function getAlertType(
   const actionVariableContextQueryLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextQueryLabel',
     {
-      defaultMessage: 'The string representation of the ES query.',
+      defaultMessage: 'The string representation of the Elasticsearch query.',
     }
   );
 

@@ -20,7 +20,8 @@ import { joinByKey } from '../../../../../common/utils/join_by_key';
 import {
   environmentQuery,
   rangeQuery,
-} from '../../../../../common/utils/queries';
+  kqlQuery,
+} from '../../../../../server/utils/queries';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -50,6 +51,7 @@ function getHistogramAggOptions({
 
 export async function getBuckets({
   environment,
+  kuery,
   serviceName,
   transactionName,
   transactionType,
@@ -61,6 +63,7 @@ export async function getBuckets({
   searchAggregatedTransactions,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -74,7 +77,7 @@ export async function getBuckets({
   return withApmSpan(
     'get_latency_distribution_buckets_with_samples',
     async () => {
-      const { start, end, esFilter, apmEventClient } = setup;
+      const { start, end, apmEventClient } = setup;
 
       const commonFilters = [
         { term: { [SERVICE_NAME]: serviceName } },
@@ -82,7 +85,7 @@ export async function getBuckets({
         { term: { [TRANSACTION_NAME]: transactionName } },
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
-        ...esFilter,
+        ...kqlQuery(kuery),
       ];
 
       async function getSamplesForDistributionBuckets() {

@@ -99,7 +99,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/managing-alerts-and-actions.html`}
+                href={docLinks.links.alerting.guide}
                 target="_blank"
                 iconType="help"
                 data-test-subj="documentationLink"

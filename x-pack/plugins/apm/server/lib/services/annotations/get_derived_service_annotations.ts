@@ -12,7 +12,7 @@ import {
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,

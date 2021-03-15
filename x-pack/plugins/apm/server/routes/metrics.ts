@@ -9,10 +9,10 @@ import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_data_by_agent';
 import { createRoute } from './create_route';
-import { environmentRt, uiFiltersRt, rangeRt } from './default_api_types';
+import { environmentRt, kueryRt, rangeRt } from './default_api_types';
 
 export const metricsChartsRoute = createRoute({
-  endpoint: `GET /api/apm/services/{serviceName}/metrics/charts`,
+  endpoint: 'GET /api/apm/services/{serviceName}/metrics/charts',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -25,7 +25,7 @@ export const metricsChartsRoute = createRoute({
         serviceNodeName: t.string,
       }),
       environmentRt,
-      uiFiltersRt,
+      kueryRt,
       rangeRt,
     ]),
   }),
@@ -34,9 +34,10 @@ export const metricsChartsRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { params } = context;
     const { serviceName } = params.path;
-    const { agentName, environment, serviceNodeName } = params.query;
+    const { agentName, environment, kuery, serviceNodeName } = params.query;
     return await getMetricsChartDataByAgent({
       environment,
+      kuery,
       setup,
       serviceName,
       agentName,

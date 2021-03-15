@@ -7,6 +7,7 @@
 
 import { Search as LocalSearch } from 'js-search';
 import { useEffect, useRef } from 'react';
+
 import { PackageList, PackageListItem } from '../../../types';
 
 export type SearchField = keyof PackageListItem;

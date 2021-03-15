@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiLink,
 } from '@elastic/eui';
+
 import { Error } from '../../../components';
 import { AgentPolicy, PackageInfo, GetAgentPoliciesResponseItem } from '../../../types';
 import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../services';

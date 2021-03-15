@@ -182,7 +182,7 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
     .map((threat) => {
       return {
         ...threat,
-        technique: trimThreatsWithNoName(threat.technique).map((technique) => {
+        technique: trimThreatsWithNoName(threat.technique ?? []).map((technique) => {
           return {
             ...technique,
             subtechnique:
@@ -221,8 +221,16 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
           threshold: {
             field: ruleFields.threshold?.field ?? [],
             value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
-            cardinality_field: ruleFields.threshold.cardinality_field[0] ?? '',
-            cardinality_value: parseInt(ruleFields.threshold?.cardinality_value, 10) ?? 0,
+            cardinality:
+              !isEmpty(ruleFields.threshold.cardinality?.field) &&
+              ruleFields.threshold.cardinality?.value != null
+                ? [
+                    {
+                      field: ruleFields.threshold.cardinality.field[0],
+                      value: parseInt(ruleFields.threshold.cardinality.value, 10),
+                    },
+                  ]
+                : [],
           },
         }),
       }

@@ -19,11 +19,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { Loading } from '../../../components';
 import { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../hooks';
-import { PackageCard } from './package_card';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+
+import { PackageCard } from './package_card';
 
 interface ListProps {
   isLoading?: boolean;

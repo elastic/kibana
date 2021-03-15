@@ -69,6 +69,26 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    test('should not nest same-level "and"', () => {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+        nodeTypes.function.buildNode('is', null, 'baz'),
+      ]);
+      const actual = fromKueryExpression('foo and bar and baz');
+      expect(actual).toEqual(expected);
+    });
+
+    test('should not nest same-level "or"', () => {
+      const expected = nodeTypes.function.buildNode('or', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+        nodeTypes.function.buildNode('is', null, 'baz'),
+      ]);
+      const actual = fromKueryExpression('foo or bar or baz');
+      expect(actual).toEqual(expected);
+    });
+
     test('should support negation of queries with a "not" prefix', () => {
       const expected = nodeTypes.function.buildNode(
         'not',
@@ -84,13 +104,11 @@ describe('kuery AST API', () => {
     test('"and" should have a higher precedence than "or"', () => {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.function.buildNode('is', null, 'foo'),
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.function.buildNode('and', [
-            nodeTypes.function.buildNode('is', null, 'bar'),
-            nodeTypes.function.buildNode('is', null, 'baz'),
-          ]),
-          nodeTypes.function.buildNode('is', null, 'qux'),
+        nodeTypes.function.buildNode('and', [
+          nodeTypes.function.buildNode('is', null, 'bar'),
+          nodeTypes.function.buildNode('is', null, 'baz'),
         ]),
+        nodeTypes.function.buildNode('is', null, 'qux'),
       ]);
       const actual = fromKueryExpression('foo or bar and baz or qux');
       expect(actual).toEqual(expected);
@@ -150,10 +168,10 @@ describe('kuery AST API', () => {
     test('should support exclusive range operators', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('range', 'bytes', {
-          gt: 1000,
+          gt: '1000',
         }),
         nodeTypes.function.buildNode('range', 'bytes', {
-          lt: 8000,
+          lt: '8000',
         }),
       ]);
       const actual = fromKueryExpression('bytes > 1000 and bytes < 8000');
@@ -163,10 +181,10 @@ describe('kuery AST API', () => {
     test('should support inclusive range operators', () => {
       const expected = nodeTypes.function.buildNode('and', [
         nodeTypes.function.buildNode('range', 'bytes', {
-          gte: 1000,
+          gte: '1000',
         }),
         nodeTypes.function.buildNode('range', 'bytes', {
-          lte: 8000,
+          lte: '8000',
         }),
       ]);
       const actual = fromKueryExpression('bytes >= 1000 and bytes <= 8000');
@@ -261,25 +279,24 @@ describe('kuery AST API', () => {
       const stringLiteral = nodeTypes.literal.buildNode('foo');
       const booleanFalseLiteral = nodeTypes.literal.buildNode(false);
       const booleanTrueLiteral = nodeTypes.literal.buildNode(true);
-      const numberLiteral = nodeTypes.literal.buildNode(42);
 
       expect(fromLiteralExpression('foo')).toEqual(stringLiteral);
       expect(fromLiteralExpression('true')).toEqual(booleanTrueLiteral);
       expect(fromLiteralExpression('false')).toEqual(booleanFalseLiteral);
-      expect(fromLiteralExpression('42')).toEqual(numberLiteral);
 
-      expect(fromLiteralExpression('.3').value).toEqual(0.3);
-      expect(fromLiteralExpression('.36').value).toEqual(0.36);
-      expect(fromLiteralExpression('.00001').value).toEqual(0.00001);
-      expect(fromLiteralExpression('3').value).toEqual(3);
-      expect(fromLiteralExpression('-4').value).toEqual(-4);
-      expect(fromLiteralExpression('0').value).toEqual(0);
-      expect(fromLiteralExpression('0.0').value).toEqual(0);
-      expect(fromLiteralExpression('2.0').value).toEqual(2.0);
-      expect(fromLiteralExpression('0.8').value).toEqual(0.8);
-      expect(fromLiteralExpression('790.9').value).toEqual(790.9);
-      expect(fromLiteralExpression('0.0001').value).toEqual(0.0001);
-      expect(fromLiteralExpression('96565646732345').value).toEqual(96565646732345);
+      expect(fromLiteralExpression('.3').value).toEqual('.3');
+      expect(fromLiteralExpression('.36').value).toEqual('.36');
+      expect(fromLiteralExpression('.00001').value).toEqual('.00001');
+      expect(fromLiteralExpression('3').value).toEqual('3');
+      expect(fromLiteralExpression('-4').value).toEqual('-4');
+      expect(fromLiteralExpression('0').value).toEqual('0');
+      expect(fromLiteralExpression('0.0').value).toEqual('0.0');
+      expect(fromLiteralExpression('2.0').value).toEqual('2.0');
+      expect(fromLiteralExpression('0.8').value).toEqual('0.8');
+      expect(fromLiteralExpression('790.9').value).toEqual('790.9');
+      expect(fromLiteralExpression('0.0001').value).toEqual('0.0001');
+      expect(fromLiteralExpression('96565646732345').value).toEqual('96565646732345');
+      expect(fromLiteralExpression('070').value).toEqual('070');
 
       expect(fromLiteralExpression('..4').value).toEqual('..4');
       expect(fromLiteralExpression('.3text').value).toEqual('.3text');

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { routeDefinitionParamsMock } from '../index.mock';
+import { kibanaResponseFactory } from 'src/core/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
+
+import { routeDefinitionParamsMock } from '../index.mock';
 import { defineRoleMappingDeleteRoutes } from './delete';
 
 describe('DELETE role mappings', () => {

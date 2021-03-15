@@ -65,4 +65,12 @@ export const stubFields: IFieldType[] = [
     searchable: true,
     filterable: true,
   },
+  {
+    name: 'bytes_range',
+    type: 'number_range',
+    esTypes: ['integer_range'],
+    aggregatable: true,
+    searchable: true,
+    filterable: true,
+  },
 ];

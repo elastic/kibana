@@ -54,7 +54,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       it('should reorder the elements for the table', async () => {
         await PageObjects.lens.reorderDimensions('lnsDatatable_column', 3, 1);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.waitForVisualization();
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsDatatable_column')).to.eql([
           'Top values of @message.raw',
           'Top values of clientip',
@@ -224,9 +224,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.goToTimeRange();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.lens.dragFieldToWorkspace('@timestamp');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.waitForVisualization();
         await PageObjects.lens.dragFieldToWorkspace('clientip');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.waitForVisualization();
         expect(
           await PageObjects.lens.getDimensionTriggersTexts('lnsXY_splitDimensionPanel')
         ).to.eql(['Top values of clientip']);
@@ -239,9 +239,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       it('overwrite existing time dimension if one exists already', async () => {
         await PageObjects.lens.dragFieldToWorkspace('utc_time');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.waitForVisualization();
         await PageObjects.lens.dragFieldToWorkspace('clientip');
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.lens.waitForVisualization();
         expect(await PageObjects.lens.getDimensionTriggersTexts('lnsXY_xDimensionPanel')).to.eql([
           'utc_time',
         ]);

@@ -8,10 +8,12 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { MockedKeys } from '@kbn/utility-types/jest';
+
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { createStartDepsMock } from './plugin_dependencies';
 import { IStorage, Storage } from '../../../../../../../src/plugins/kibana_utils/public';
 import { setHttpClient } from '../hooks/use_request';
+
+import { createStartDepsMock } from './plugin_dependencies';
 import { MockedFleetStartServices } from './types';
 
 // Taken from core. See: src/plugins/kibana_utils/public/storage/storage.test.ts

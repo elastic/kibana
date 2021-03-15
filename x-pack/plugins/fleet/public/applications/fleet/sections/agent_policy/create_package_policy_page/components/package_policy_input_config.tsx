@@ -16,12 +16,14 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
+
 import { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../types';
 import {
   isAdvancedVar,
   PackagePolicyConfigValidationResults,
   validationHasErrors,
 } from '../services';
+
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`

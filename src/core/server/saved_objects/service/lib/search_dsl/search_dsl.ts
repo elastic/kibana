@@ -78,7 +78,7 @@ export function getSearchDsl(
       hasReferenceOperator,
       kueryNode,
     }),
-    ...getSortingParams(mappings, type, sortField, sortOrder, pit),
+    ...getSortingParams(mappings, type, sortField, sortOrder),
     ...(pit ? getPitParams(pit) : {}),
     ...(searchAfter ? { search_after: searchAfter } : {}),
   };

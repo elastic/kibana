@@ -25,12 +25,12 @@ import {
 import {
   getCaseCommentsUrl,
   getSubCaseDetailsUrl,
-} from '../../../../../../plugins/case/common/api/helpers';
+} from '../../../../../../plugins/cases/common/api/helpers';
 import {
   AssociationType,
-  CollectionWithSubCaseResponse,
+  CaseResponse,
   SubCaseResponse,
-} from '../../../../../../plugins/case/common/api';
+} from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -53,14 +53,14 @@ export default ({ getService }: FtrProviderContext): void => {
       const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
 
       const { body }: { body: SubCaseResponse } = await supertest
-        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCase!.id))
+        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
 
       expect(removeServerGeneratedPropertiesFromComments(body.comments)).to.eql(
         commentsResp({
-          comments: [{ comment: defaultCreateSubComment, id: caseInfo.subCase!.comments![0].id }],
+          comments: [{ comment: defaultCreateSubComment, id: caseInfo.comments![0].id }],
           associationType: AssociationType.subCase,
         })
       );
@@ -73,15 +73,15 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should return the correct number of alerts with multiple types of alerts', async () => {
       const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
 
-      const { body: singleAlert }: { body: CollectionWithSubCaseResponse } = await supertest
+      const { body: singleAlert }: { body: CaseResponse } = await supertest
         .post(getCaseCommentsUrl(caseInfo.id))
-        .query({ subCaseID: caseInfo.subCase!.id })
+        .query({ subCaseId: caseInfo.subCases![0].id })
         .set('kbn-xsrf', 'true')
         .send(postCommentAlertReq)
         .expect(200);
 
       const { body }: { body: SubCaseResponse } = await supertest
-        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCase!.id))
+        .get(getSubCaseDetailsUrl(caseInfo.id, caseInfo.subCases![0].id))
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
@@ -89,10 +89,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(removeServerGeneratedPropertiesFromComments(body.comments)).to.eql(
         commentsResp({
           comments: [
-            { comment: defaultCreateSubComment, id: caseInfo.subCase!.comments![0].id },
+            { comment: defaultCreateSubComment, id: caseInfo.comments![0].id },
             {
               comment: postCommentAlertReq,
-              id: singleAlert.subCase!.comments![1].id,
+              id: singleAlert.comments![1].id,
             },
           ],
           associationType: AssociationType.subCase,

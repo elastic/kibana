@@ -20,6 +20,14 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Package Policy - create', async function () {
     let agentPolicyId: string;
+    before(async () => {
+      await getService('esArchiver').load('empty_kibana');
+      await getService('esArchiver').load('fleet/empty_fleet_server');
+    });
+    after(async () => {
+      await getService('esArchiver').unload('empty_kibana');
+      await getService('esArchiver').unload('fleet/empty_fleet_server');
+    });
 
     before(async function () {
       const { body: agentPolicyResponse } = await supertest

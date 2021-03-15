@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -17,12 +17,15 @@ import {
   EuiSwitch,
   EuiTextArea,
 } from '@elastic/eui';
+import _ from 'lodash';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import { RoleIndexPrivilege } from '../../../../../../common/model';
-import { RoleValidator } from '../../validate_role';
+
+import type { RoleIndexPrivilege } from '../../../../../../common/model';
+import type { RoleValidator } from '../../validate_role';
 
 const fromOption = (option: any) => option.label;
 const toOption = (value: string) => ({ label: value });

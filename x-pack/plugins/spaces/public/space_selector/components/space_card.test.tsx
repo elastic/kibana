@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { EuiCard } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+
 import { SpaceCard } from './space_card';
-import { EuiCard } from '@elastic/eui';
 
 test('it renders without crashing', () => {
   const space = {

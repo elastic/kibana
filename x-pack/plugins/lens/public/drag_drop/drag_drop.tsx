@@ -202,6 +202,13 @@ export const DragDrop = (props: BaseProps) => {
   return <DropInner {...dropProps} />;
 };
 
+const removeSelectionBeforeDragging = () => {
+  const selection = window.getSelection();
+  if (selection) {
+    selection.removeAllRanges();
+  }
+};
+
 const DragInner = memo(function DragInner({
   dataTestSubj,
   className,
@@ -366,6 +373,7 @@ const DragInner = memo(function DragInner({
         draggable: true,
         onDragEnd: dragEnd,
         onDragStart: dragStart,
+        onMouseDown: removeSelectionBeforeDragging,
       })}
     </div>
   );
@@ -456,7 +464,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
     isActiveDropTarget && dropType !== 'reorder' && dragging?.ghost ? dragging.ghost : undefined;
 
   return (
-    <div className="lnsDragDrop__container">
+    <>
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || 'lnsDragDrop',
         className: classNames(children.props.className, classes, className),
@@ -471,7 +479,7 @@ const DropInner = memo(function DropInner(props: DropInnerProps) {
             style: ghost.style,
           })
         : null}
-    </div>
+    </>
   );
 });
 

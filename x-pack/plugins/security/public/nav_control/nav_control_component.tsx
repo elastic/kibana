@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Component } from 'react';
-import { Observable, Subscription } from 'rxjs';
+import './nav_control_component.scss';
+
+import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
 import {
   EuiAvatar,
-  EuiHeaderSectionItemButton,
-  EuiPopover,
-  EuiLoadingSpinner,
-  EuiIcon,
   EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
-  IconType,
+  EuiHeaderSectionItemButton,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { AuthenticatedUser } from '../../common/model';
+import React, { Component } from 'react';
+import type { Observable, Subscription } from 'rxjs';
 
-import './nav_control_component.scss';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { AuthenticatedUser } from '../../common/model';
 
 export interface UserMenuLink {
   label: string;

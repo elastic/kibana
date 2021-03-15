@@ -11,30 +11,36 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({
   environment,
+  kuery,
   serviceName,
   groupId,
   bucketSize,
   setup,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   groupId?: string;
   bucketSize: number;
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_error_distribution_buckets', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+    const { start, end, apmEventClient } = setup;
     const filter: ESFilter[] = [
       { term: { [SERVICE_NAME]: serviceName } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...esFilter,
+      ...kqlQuery(kuery),
     ];
 
     if (groupId) {

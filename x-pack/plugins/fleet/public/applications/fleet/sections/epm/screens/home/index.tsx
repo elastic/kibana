@@ -9,12 +9,14 @@ import React, { useState } from 'react';
 import { useRouteMatch, Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
+
 import { installationStatuses } from '../../../../../../../common/constants';
 import { PAGE_ROUTING_PATHS } from '../../../../constants';
 import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 import { CategorySummaryItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
+
 import { CategoryFacets } from './category_facets';
 import { HeroCopy, HeroImage } from './header';
 

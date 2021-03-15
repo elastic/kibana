@@ -13,7 +13,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
 
-  describe('overview page', function () {
+  const testSubjects = getService('testSubjects');
+
+  // FLAKY: https://github.com/elastic/kibana/issues/89072
+  describe.skip('overview page', function () {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
 
@@ -180,6 +183,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const counts = await uptime.getSnapshotCount();
           expect(counts).to.eql({ up: '93', down: '7' });
         });
+      });
+
+      it('can change query syntax to kql', async () => {
+        await testSubjects.click('syntaxChangeToKql');
+        await testSubjects.click('toggleKqlSyntax');
+        await testSubjects.exists('syntaxChangeToSimple');
       });
 
       it('runs filter query without issues', async () => {

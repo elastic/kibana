@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../../mock';
-import { Detail } from './index';
 import React, { lazy, memo } from 'react';
-import { PAGE_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import { Route } from 'react-router-dom';
+import { act, cleanup } from '@testing-library/react';
+
+import { PAGE_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import {
   GetAgentPoliciesResponse,
   GetFleetStatusResponse,
@@ -24,7 +24,9 @@ import {
   fleetSetupRouteService,
   packagePolicyRouteService,
 } from '../../../../../../../common/services';
-import { act, cleanup } from '@testing-library/react';
+import { createTestRendererMock, MockedFleetStartServices, TestRenderer } from '../../../../mock';
+
+import { Detail } from './index';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';

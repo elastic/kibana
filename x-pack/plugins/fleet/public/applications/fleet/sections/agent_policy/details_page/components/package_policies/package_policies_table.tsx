@@ -16,7 +16,9 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
+
 import { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, ContextMenuActions } from '../../../../../components';
 import { PackagePolicyDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
@@ -132,6 +134,17 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
+              {packagePolicy.package && (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                    <FormattedMessage
+                      id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
+                      defaultMessage="v{version}"
+                      values={{ version: packagePolicy.package.version }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           );
         },

@@ -14,7 +14,10 @@ export const SETUP_GUIDE_PATH = '/setup_guide';
 export const LIBRARY_PATH = '/library';
 export const SETTINGS_PATH = '/settings/account';
 export const CREDENTIALS_PATH = '/credentials';
-export const ROLE_MAPPINGS_PATH = '#/role-mappings'; // This page seems to 404 if the # isn't included
+
+export const ROLE_MAPPINGS_PATH = '/role_mappings';
+export const ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/:roleId`;
+export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 
 export const ENGINES_PATH = '/engines';
 export const ENGINE_CREATION_PATH = '/engine_creation';
@@ -40,6 +43,7 @@ export const ENGINE_REINDEX_JOB_PATH = `${ENGINE_PATH}/reindex-job/:activeReinde
 export const ENGINE_CRAWLER_PATH = `${ENGINE_PATH}/crawler`;
 // TODO: Crawler sub-pages
 
+export const META_ENGINE_CREATION_PATH = '/meta_engine_creation';
 export const META_ENGINE_SOURCE_ENGINES_PATH = `${ENGINE_PATH}/engines`;
 
 export const ENGINE_RELEVANCE_TUNING_PATH = `${ENGINE_PATH}/relevance_tuning`;

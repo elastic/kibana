@@ -35,27 +35,27 @@ export const useGetIssueTypes = ({
 }: Props): UseGetIssueTypes => {
   const [isLoading, setIsLoading] = useState(true);
   const [issueTypes, setIssueTypes] = useState<IssueTypes>([]);
+  const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {
-    let didCancel = false;
     const fetchData = async () => {
       if (!connector) {
         setIsLoading(false);
         return;
       }
 
-      abortCtrl.current = new AbortController();
-      setIsLoading(true);
-
       try {
+        abortCtrl.current = new AbortController();
+        setIsLoading(true);
+
         const res = await getIssueTypes({
           http,
           signal: abortCtrl.current.signal,
           connectorId: connector.id,
         });
 
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
           const asOptions = (res.data ?? []).map((type) => ({
             text: type.name ?? '',
@@ -71,25 +71,29 @@ export const useGetIssueTypes = ({
           }
         }
       } catch (error) {
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
-          toastNotifications.addDanger({
-            title: i18n.ISSUE_TYPES_API_ERROR,
-            text: error.message,
-          });
+          if (error.name !== 'AbortError') {
+            toastNotifications.addDanger({
+              title: i18n.ISSUE_TYPES_API_ERROR,
+              text: error.message,
+            });
+          }
         }
       }
     };
 
+    didCancel.current = false;
     abortCtrl.current.abort();
     fetchData();
 
     return () => {
-      didCancel = true;
-      setIsLoading(false);
+      didCancel.current = true;
       abortCtrl.current.abort();
     };
-  }, [http, connector, toastNotifications, handleIssueType]);
+    // handleIssueType unmounts the component at init causing the request to be aborted
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [http, connector, toastNotifications]);
 
   return {
     issueTypes,

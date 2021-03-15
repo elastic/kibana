@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 import { Agent, SimplifiedAgentStatus } from '../../../../types';
 
 import { AgentStatusBar } from './status_bar';

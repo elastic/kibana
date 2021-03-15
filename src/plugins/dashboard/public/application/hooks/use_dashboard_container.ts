@@ -14,6 +14,7 @@ import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
+  EmbeddablePackageState,
   ErrorEmbeddable,
   isErrorEmbeddable,
   ViewMode,
@@ -21,7 +22,7 @@ import {
 
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardContainerInput, getSearchSessionIdFromURL } from '../dashboard_app_functions';
-import { DashboardConstants, DashboardContainer, DashboardContainerInput } from '../..';
+import { DashboardContainer, DashboardContainerInput } from '../..';
 import { DashboardAppServices } from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { TimefilterContract } from '../../services/data';
@@ -30,6 +31,7 @@ export const useDashboardContainer = ({
   history,
   timeFilter,
   setUnsavedChanges,
+  getIncomingEmbeddable,
   dashboardStateManager,
   isEmbeddedExternally,
 }: {
@@ -38,6 +40,7 @@ export const useDashboardContainer = ({
   timeFilter?: TimefilterContract;
   setUnsavedChanges?: (dirty: boolean) => void;
   dashboardStateManager: DashboardStateManager | null;
+  getIncomingEmbeddable: (removeAfterFetch?: boolean) => EmbeddablePackageState | undefined;
 }) => {
   const {
     dashboardCapabilities,
@@ -77,11 +80,8 @@ export const useDashboardContainer = ({
       searchSession.restore(searchSessionIdFromURL);
     }
 
-    const incomingEmbeddable = embeddable
-      .getStateTransfer()
-      .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, true);
-
     // when dashboard state manager initially loads, determine whether or not there are unsaved changes
+    const incomingEmbeddable = getIncomingEmbeddable(true);
     setUnsavedChanges?.(
       Boolean(incomingEmbeddable) || dashboardStateManager.hasUnsavedPanelState()
     );
@@ -131,7 +131,6 @@ export const useDashboardContainer = ({
           (incomingEmbeddable.embeddableId &&
             !pendingContainer.getInput().panels[incomingEmbeddable.embeddableId]))
       ) {
-        dashboardStateManager.switchViewMode(ViewMode.EDIT);
         pendingContainer.addNewEmbeddable<EmbeddableInput>(
           incomingEmbeddable.type,
           incomingEmbeddable.input
@@ -154,6 +153,7 @@ export const useDashboardContainer = ({
   }, [
     dashboardCapabilities,
     dashboardStateManager,
+    getIncomingEmbeddable,
     isEmbeddedExternally,
     setUnsavedChanges,
     searchSession,

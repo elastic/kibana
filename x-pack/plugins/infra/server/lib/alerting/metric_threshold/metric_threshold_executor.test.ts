@@ -8,12 +8,12 @@
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator } from './types';
 import * as mocks from './test_mocks';
-// import { RecoveredActionGroup } from '../../../../../alerts/common';
+// import { RecoveredActionGroup } from '../../../../../alerting/common';
 import {
   alertsMock,
   AlertServicesMock,
   AlertInstanceMock,
-} from '../../../../../alerts/server/mocks';
+} from '../../../../../alerting/server/mocks';
 import { InfraSources } from '../../sources';
 import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
 

@@ -41,10 +41,22 @@ export const signalSchema = schema.object({
   threat: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threshold: schema.maybe(
     schema.object({
-      field: schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      // Can be an empty string (pre-7.12) or empty array (7.12+)
+      field: schema.nullable(
+        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 3 })])
+      ),
+      // Always required
       value: schema.number(),
-      cardinality_field: schema.nullable(schema.string()), // TODO: depends on `field` being defined?
-      cardinality_value: schema.nullable(schema.number()),
+      // Can be null (pre-7.12) or empty array (7.12+)
+      cardinality: schema.nullable(
+        schema.arrayOf(
+          schema.object({
+            field: schema.string(),
+            value: schema.number(),
+          }),
+          { maxSize: 1 }
+        )
+      ),
     })
   ),
   timestampOverride: schema.nullable(schema.string()),

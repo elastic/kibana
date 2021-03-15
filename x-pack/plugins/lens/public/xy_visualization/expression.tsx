@@ -388,11 +388,15 @@ export function XYChart({
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
   const isHistogramViz = filteredLayers.every((l) => l.isHistogram);
 
-  const xDomain = {
-    min: isTimeViz ? data.dateRange?.fromDate.getTime() : undefined,
-    max: isTimeViz ? data.dateRange?.toDate.getTime() : undefined,
-    minInterval,
-  };
+  const xDomain = isTimeViz
+    ? {
+        min: data.dateRange?.fromDate.getTime(),
+        max: data.dateRange?.toDate.getTime(),
+        minInterval,
+      }
+    : isHistogramViz
+    ? { minInterval }
+    : undefined;
 
   const getYAxesTitles = (
     axisSeries: Array<{ layer: string; accessor: string }>,

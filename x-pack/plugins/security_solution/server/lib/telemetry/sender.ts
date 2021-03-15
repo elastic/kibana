@@ -364,73 +364,93 @@ const allowlistEventFields: AllowlistFields = {
       pid: true,
       ppid: true,
     },
-    Target: {
-      process: {
-        Ext: {
-          architecture: true,
-          code_signature: true,
-          dll: true,
-          token: {
-            integrity_level_name: true,
-          },
+    token: {
+      integrity_level_name: true,
+    },
+    thread: true,
+  },
+  Target: {
+    process: {
+      Ext: {
+        architecture: true,
+        code_signature: true,
+        dll: true,
+        token: {
+          integrity_level_name: true,
         },
-        parent: {
-          process: {
-            Ext: {
-              architecture: true,
-              code_signature: true,
-              dll: true,
-              token: {
-                integrity_level_name: true,
-              },
-            },
-          },
-        },
-        thread: {
+      },
+      parent: {
+        process: {
           Ext: {
-            call_stack: true,
-            start_address: true,
-            start_address_details: {
-              address_offset: true,
-              allocation_base: true,
-              allocation_protection: true,
-              allocation_size: true,
-              allocation_type: true,
-              base_address: true,
-              bytes_start_address: true,
-              compressed_bytes: true,
-              dest_bytes: true,
-              dest_bytes_disasm: true,
-              dest_bytes_disasm_hash: true,
-              pe: {
-                Ext: {
-                  legal_copyright: true,
-                  product_version: true,
-                  code_signature: {
-                    status: true,
-                    subject_name: true,
-                    trusted: true,
-                  },
-                },
-                company: true,
-                description: true,
-                file_version: true,
-                imphash: true,
-                original_file_name: true,
-                product: true,
-              },
-              pe_detected: true,
-              region_protection: true,
-              region_size: true,
-              region_state: true,
-              strings: true,
+            architecture: true,
+            code_signature: true,
+            dll: true,
+            token: {
+              integrity_level_name: true,
             },
           },
         },
       },
-    },
-    token: {
-      integrity_level_name: true,
+      thread: {
+        Ext: {
+          call_stack: true,
+          start_address: true,
+          start_address_allocation_offset: true,
+          start_address_bytes: true,
+          start_address_bytes_disasm: true,
+          start_address_bytes_disasm_hash: true,
+          start_address_details: {
+            allocation_base: true,
+            allocation_protection: true,
+            allocation_size: true,
+            allocation_type: true,
+            bytes_address: true,
+            bytes_allocation_offset: true,
+            bytes_compressed: true,
+            mapped_pe: {
+              Ext: {
+                code_signature: {
+                  status: true,
+                  subject_name: true,
+                  trusted: true,
+                },
+                legal_copyright: true,
+                product_version: true,
+              },
+              company: true,
+              description: true,
+              file_version: true,
+              imphash: true,
+              original_file_name: true,
+              product: true,
+            },
+            mapped_pe_path: true,
+            memory_pe: {
+              Ext: {
+                code_signature: {
+                  status: true,
+                  subject_name: true,
+                  trusted: true,
+                },
+                legal_copyright: true,
+                product_version: true,
+              },
+              company: true,
+              description: true,
+              file_version: true,
+              imphash: true,
+              original_file_name: true,
+              product: true,
+            },
+            memory_pe_detected: true,
+            region_base: true,
+            region_protection: true,
+            region_size: true,
+            region_state: true,
+            strings: true,
+          },
+        },
+      },
     },
   },
 };
