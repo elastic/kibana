@@ -163,8 +163,8 @@ const getSummary = ({
         }
 
         if (item.id === 'signal.threshold_result.cardinality') {
-          const parsedValue = JSON.parse(value);
           try {
+            const parsedValue = JSON.parse(value);
             return [
               ...acc,
               {
