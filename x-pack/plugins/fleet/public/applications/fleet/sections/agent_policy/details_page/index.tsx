@@ -20,10 +20,10 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
 
-import { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
+import type { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import {
   useGetOneAgentPolicy,

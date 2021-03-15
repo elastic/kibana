@@ -92,7 +92,8 @@ describe('timeline data providers', () => {
     }
   });
 
-  it('sets the background to euiColorSuccess with a 20% alpha channel and renders the dashed border color as euiColorSuccess when the user starts dragging a host AND is hovering over the data providers', () => {
+  // https://github.com/elastic/kibana/issues/94576
+  it.skip('sets the background to euiColorSuccess with a 20% alpha channel and renders the dashed border color as euiColorSuccess when the user starts dragging a host AND is hovering over the data providers', () => {
     dragFirstHostToEmptyTimelineDataProviders();
 
     if (Cypress.browser.name === 'firefox') {

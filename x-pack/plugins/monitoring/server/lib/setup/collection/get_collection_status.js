@@ -234,7 +234,8 @@ function isBeatFromAPM(bucket) {
 }
 
 async function hasNecessaryPermissions(req) {
-  const securityFeature = req.server.plugins.monitoring.info.getSecurityFeature();
+  const licenseService = await req.server.plugins.monitoring.info.getLicenseService();
+  const securityFeature = licenseService.getSecurityFeature();
   if (!securityFeature.isAvailable || !securityFeature.isEnabled) {
     return true;
   }
