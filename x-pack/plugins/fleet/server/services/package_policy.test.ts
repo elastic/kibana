@@ -12,7 +12,7 @@ import {
 } from 'src/core/server/mocks';
 
 import type { SavedObjectsUpdateResponse } from 'src/core/server';
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from 'kibana/server';
 
 import type { PackageInfo, PackagePolicySOAttributes } from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
