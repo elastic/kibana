@@ -166,7 +166,7 @@ export class DocLinksService {
           anomalyDetectionDetectors: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#detectors`,
           anomalyDetectionInfluencers: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-influencers.html`,
           anomalyDetectionJobResource: `${ELASTICSEARCH_DOCS}ml-put-job.html#ml-put-job-path-parms`,
-          anomalyDetectionJobResourceAnalysisConfig: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-job-resource.html#ml-analysisconfig`,
+          anomalyDetectionJobResourceAnalysisConfig: `${ELASTICSEARCH_DOCS}ml-put-job.html#put-analysisconfig`,
           anomalyDetectionJobTips: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#job-tips`,
           anomalyDetectionModelMemoryLimits: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/create-jobs.html#model-memory-limits`,
           calendars: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-calendars.html`,
