@@ -168,7 +168,9 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
           metrics,
           stat: mbStat ?? legacyStat,
           formattedLeader: getFormattedLeaderIndex(leaderIndex ?? ''),
-          timestamp: ccrResponse.hits?.hits[0]?._source.timestamp,
+          timestamp:
+            ccrResponse.hits?.hits[0]?._source['@timestamp'] ??
+            ccrResponse.hits?.hits[0]?._source.timestamp,
           oldestStat: oldestMBStat ?? oldestLegacyStat,
         };
       } catch (err) {
