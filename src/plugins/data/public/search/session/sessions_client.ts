@@ -68,6 +68,10 @@ export class SessionsClient {
     });
   }
 
+  public rename(sessionId: string, newName: string): Promise<SavedObject> {
+    return this.update(sessionId, { name: newName });
+  }
+
   public extend(sessionId: string, expires: string): Promise<SavedObjectsFindResponse> {
     return this.http!.post(`/internal/session/${encodeURIComponent(sessionId)}/_extend`, {
       body: JSON.stringify({ expires }),
