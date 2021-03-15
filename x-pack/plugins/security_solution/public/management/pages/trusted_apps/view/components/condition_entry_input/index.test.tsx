@@ -15,7 +15,6 @@ import {
 
 import { ConditionEntryInput } from '.';
 import { EuiSuperSelectProps } from '@elastic/eui/src/components/form/super_select/super_select';
-import { Any } from 'io-ts';
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;
