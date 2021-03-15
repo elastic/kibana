@@ -23,9 +23,12 @@ import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks
 import { BehaviorSubject } from 'rxjs';
 import * as xpackResourceNotFoundException from '../../common/search/test_data/search_phase_execution_exception.json';
 
-const timeTravel = (msToRun = 0) => {
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
+const timeTravel = async (msToRun = 0) => {
+  await flushPromises();
   jest.advanceTimersByTime(msToRun);
-  return new Promise((resolve) => setImmediate(resolve));
+  return flushPromises();
 };
 
 const next = jest.fn();
@@ -40,8 +43,8 @@ let fetchMock: jest.Mock<any>;
 jest.useFakeTimers();
 
 jest.mock('./utils', () => ({
-  createRequestHash: jest.fn().mockImplementation(() => {
-    return Promise.resolve('abcd');
+  createRequestHash: jest.fn().mockImplementation((input) => {
+    return Promise.resolve(JSON.stringify(input));
   }),
 }));
 

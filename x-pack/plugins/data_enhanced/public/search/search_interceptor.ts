@@ -6,8 +6,8 @@
  */
 
 import { once } from 'lodash';
-import { throwError, Subscription } from 'rxjs';
-import { tap, finalize, catchError, filter, take, skip } from 'rxjs/operators';
+import { throwError, Subscription, from, of } from 'rxjs';
+import { tap, finalize, catchError, filter, take, skip, switchMap } from 'rxjs/operators';
 import {
   TimeoutErrorMode,
   SearchInterceptor,
@@ -59,14 +59,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     });
     const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
     const searchOptions = { ...options, strategy, abortSignal: combinedSignal };
-    const search = async () => {
-      const shaKey = await createRequestHash(request);
-      const cached = this.responseCache.get(shaKey);
-      if (!id && cached) {
-        return Promise.resolve(cached);
-      }
-      return this.runSearch({ id, ...request }, searchOptions);
-    };
+    const search = () => this.runSearch({ id, ...request }, searchOptions);
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
@@ -97,31 +90,39 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
     });
 
-    return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
-      tap((response) => (id = response.id)),
-      tap(async (response) => {
-        const shaKey = await createRequestHash(request);
-        if (!this.responseCache.has(shaKey) && isCompleteResponse(response)) {
-          this.responseCache.set(shaKey, response);
-          setTimeout(() => {
-            this.responseCache.delete(shaKey);
-          }, 30000);
+    return from(createRequestHash(request)).pipe(
+      switchMap((shaKey) => {
+        const cached = this.responseCache.get(shaKey);
+        if (!id && cached) {
+          return of(cached);
         }
-      }),
-      catchError((e: Error) => {
-        cancel();
-        return throwError(this.handleSearchError(e, timeoutSignal, options));
-      }),
-      finalize(() => {
-        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-        cleanup();
-        if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
-          // untrack if this search still belongs to current session
-          untrackSearch();
-        }
-        if (savedToBackgroundSub) {
-          savedToBackgroundSub.unsubscribe();
-        }
+
+        return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
+          tap((response) => (id = response.id)),
+          tap((response) => {
+            if (!this.responseCache.has(shaKey) && isCompleteResponse(response)) {
+              this.responseCache.set(shaKey, response);
+              setTimeout(() => {
+                this.responseCache.delete(shaKey);
+              }, 30000);
+            }
+          }),
+          catchError((e: Error) => {
+            cancel();
+            return throwError(this.handleSearchError(e, timeoutSignal, options));
+          }),
+          finalize(() => {
+            this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+            cleanup();
+            if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
+              // untrack if this search still belongs to current session
+              untrackSearch();
+            }
+            if (savedToBackgroundSub) {
+              savedToBackgroundSub.unsubscribe();
+            }
+          })
+        );
       })
     );
   }
