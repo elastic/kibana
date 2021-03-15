@@ -144,6 +144,7 @@ export const MlPopover = React.memo(() => {
             iconSide="right"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
+              dispatch({ type: 'refresh' });
             }}
           >
             {i18n.ML_JOB_SETTINGS}
