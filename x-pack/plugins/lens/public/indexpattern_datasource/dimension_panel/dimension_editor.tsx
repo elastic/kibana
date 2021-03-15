@@ -119,6 +119,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     currentIndexPattern,
     hideGrouping,
     dateRange,
+    dimensionGroups,
   } = props;
   const services = {
     data: props.data,
@@ -178,6 +179,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         indexPattern: currentIndexPattern,
         field: currentField || undefined,
         filterOperations: props.filterOperations,
+        visualizationGroups: dimensionGroups,
       }),
       disabledStatus:
         definition.getDisabledStatus &&
@@ -255,6 +257,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
               indexPattern: currentIndexPattern,
               columnId,
               op: operationType,
+              visualizationGroups: dimensionGroups,
+              targetGroup: props.groupId,
             });
             setStateWrapper(newLayer);
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
@@ -270,6 +274,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   columnId,
                   op: operationType,
                   field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
+                  visualizationGroups: dimensionGroups,
+                  targetGroup: props.groupId,
                 })
               );
             } else {
@@ -280,6 +286,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   columnId,
                   op: operationType,
                   field: undefined,
+                  visualizationGroups: dimensionGroups,
+                  targetGroup: props.groupId,
                 })
               );
             }
@@ -302,6 +310,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             field: hasField(selectedColumn)
               ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
               : undefined,
+            visualizationGroups: dimensionGroups,
           });
           setStateWrapper(newLayer);
         },
@@ -368,6 +377,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     uiSettings: props.uiSettings,
                     currentColumn: state.layers[layerId].columns[columnId],
                   })}
+                  dimensionGroups={dimensionGroups}
                   {...services}
                 />
               );
@@ -429,6 +439,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     indexPattern: currentIndexPattern,
                     op: choice.operationType,
                     field: currentIndexPattern.getFieldByName(choice.field),
+                    visualizationGroups: dimensionGroups,
+                    targetGroup: props.groupId,
                   })
                 );
               }}
