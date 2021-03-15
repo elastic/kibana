@@ -9,6 +9,8 @@ import { once } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from './validation';
 
+import { renderTemplate } from '../util/string_utils';
+
 export type MessageId = keyof ReturnType<typeof getMessages>;
 
 export interface JobValidationMessageDef {
@@ -640,3 +642,38 @@ export const getMessages = once(() => {
     },
   };
 });
+
+export const parseMessages = (
+  validationMessages: JobValidationMessage[],
+  kbnVersion = 'current'
+) => {
+  const messages = getMessages();
+
+  return validationMessages.map((message) => {
+    const messageId = message.id as MessageId;
+    const messageDef = messages[messageId] as JobValidationMessageDef;
+    if (typeof messageDef !== 'undefined') {
+      // render the message template with the provided metadata
+      if (typeof messageDef.heading !== 'undefined') {
+        message.heading = renderTemplate(messageDef.heading, message);
+      }
+      message.text = renderTemplate(messageDef.text, message);
+      // check if the error message provides a link with further information
+      // if so, add it to the message to be returned with it
+      if (typeof messageDef.url !== 'undefined') {
+        // the link is also treated as a template so we're able to dynamically link to
+        // documentation links matching the running version of Kibana.
+        message.url = renderTemplate(messageDef.url, { version: kbnVersion! });
+      }
+
+      message.status = messageDef.status;
+    } else {
+      message.text = i18n.translate('xpack.ml.models.jobValidation.unknownMessageIdErrorMessage', {
+        defaultMessage: '{messageId} (unknown message id)',
+        values: { messageId },
+      });
+    }
+
+    return message;
+  });
+};
