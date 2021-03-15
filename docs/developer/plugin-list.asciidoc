@@ -138,6 +138,10 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/maps_ems/README.md[mapsEms]
+|Configuration of kibana-wide EMS settings and some higher level utilities.
+
+
 |{kib-repo}blob/{branch}/src/plugins/maps_legacy/README.md[mapsLegacy]
 |Internal objects used by the Coordinate, Region, and Vega visualizations.
 

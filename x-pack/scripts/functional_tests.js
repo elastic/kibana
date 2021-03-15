@@ -78,4 +78,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
   require.resolve('../test/usage_collection/config.ts'),
   require.resolve('../test/fleet_functional/config.ts'),
+  require.resolve('../test/examples/config.ts'),
 ]);
