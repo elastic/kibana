@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema, Type } from '@kbn/config-schema';
+import type { ObjectType, Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 import type { AllowedSchemaTypes } from 'src/plugins/usage_collection/server';
@@ -38,6 +39,11 @@ function isOneOfCandidate(
  * @param value
  */
 function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
+  // We need to check the pass_through type on top of everything
+  if ((value as { type: 'pass_through' }).type === 'pass_through') {
+    return schema.any();
+  }
+
   if ('properties' in value) {
     const { DYNAMIC_KEY, ...properties } = value.properties;
     const schemas: Array<Type<unknown>> = [objectSchemaToConfigSchema({ properties })];
@@ -48,8 +54,6 @@ function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
   } else {
     const valueType = value.type; // Copied in here because of TS reasons, it's not available in the `default` case
     switch (value.type) {
-      case 'pass_through':
-        return schema.any();
       case 'boolean':
         return schema.boolean();
       case 'keyword':
@@ -76,12 +80,8 @@ function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
   }
 }
 
-function objectSchemaToConfigSchema(objectSchema: TelemetrySchemaObject): Type<unknown> {
+function objectSchemaToConfigSchema(objectSchema: TelemetrySchemaObject): ObjectType {
   const objectEntries = Object.entries(objectSchema.properties);
-
-  if (objectEntries.length === 0) {
-    return schema.any();
-  }
 
   return schema.object(
     Object.fromEntries(
@@ -104,7 +104,7 @@ function objectSchemaToConfigSchema(objectSchema: TelemetrySchemaObject): Type<u
  */
 function convertSchemaToConfigSchema(telemetrySchema: {
   properties: Record<string, TelemetrySchemaValue>;
-}): Type<unknown> {
+}): ObjectType {
   try {
     return objectSchemaToConfigSchema(telemetrySchema);
   } catch (err) {
