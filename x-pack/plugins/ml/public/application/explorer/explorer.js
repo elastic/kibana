@@ -73,7 +73,6 @@ import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
 import { getTimeBucketsFromCache } from '../util/time_buckets';
-import { AnomaliesContextMenu } from './anomalies_context_menu';
 
 const ExplorerPage = ({
   children,
@@ -427,22 +426,14 @@ export class ExplorerUI extends React.Component {
             )}
             {loading === false && (
               <EuiPanel>
-                <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle className="panel-title">
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.ml.explorer.anomaliesTitle"
-                          defaultMessage="Anomalies"
-                        />
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
-                    <AnomaliesContextMenu selectedJobs={selectedJobs} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiTitle className="panel-title">
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.explorer.anomaliesTitle"
+                      defaultMessage="Anomalies"
+                    />
+                  </h2>
+                </EuiTitle>
 
                 <EuiFlexGroup
                   direction="row"
