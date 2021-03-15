@@ -365,9 +365,9 @@ describe('<EditPolicy /> node allocation', () => {
         await act(async () => {
           testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
         });
-        const { actions, component, exists, find } = testBed;
+        testBed.component.update();
 
-        component.update();
+        const { actions, component, exists, find } = testBed;
         await actions.warm.enable(true);
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
@@ -375,10 +375,29 @@ describe('<EditPolicy /> node allocation', () => {
         expect(exists('defaultDataAllocationOption')).toBeTruthy();
         expect(exists('customDataAllocationOption')).toBeTruthy();
         expect(exists('noneDataAllocationOption')).toBeTruthy();
-        // We should not be showing the call-to-action for users to activate data tier in cloud
-        expect(exists('cloudDataTierCallout')).toBeFalsy();
         // Do not show the call-to-action for users to migrate their cluster to use node roles
         expect(find('cloudDataTierCallout').exists()).toBeFalsy();
+      });
+      test('do not show node allocation specific warnings on cloud', async () => {
+        httpRequestsMockHelpers.setListNodes({
+          nodesByAttributes: { test: ['123'] },
+          // No nodes with node roles like "data_hot" or "data_warm"
+          nodesByRoles: {},
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        await act(async () => {
+          testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
+        });
+        testBed.component.update();
+
+        const { actions, component, exists } = testBed;
+        await actions.warm.enable(true);
+        await actions.cold.enable(true);
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+
+        expect(exists('cloudDataTierCallout')).toBeFalsy();
+        expect(exists('defaultAllocationNotice')).toBeFalsy();
+        expect(exists('defaultAllocationWarning')).toBeFalsy();
       });
     });
   });
