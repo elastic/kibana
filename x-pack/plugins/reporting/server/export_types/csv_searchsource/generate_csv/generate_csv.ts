@@ -158,9 +158,15 @@ export class CsvGenerator {
   }
 
   private formatCellValues(formatters: Record<string, FieldFormat>) {
-    return ({ column: tableColumn, data: dataTableCell }: { column: string; data: any }) => {
-      let cell: string[] | string;
-      // guard against _score, _type, etc
+    return ({
+      column: tableColumn,
+      data: dataTableCell,
+    }: {
+      column: string;
+      data: any;
+    }): string => {
+      let cell: string[] | string | object;
+      // check truthiness to guard against _score, _type, etc
       if (tableColumn && dataTableCell) {
         try {
           cell = formatters[tableColumn].convert(dataTableCell);
@@ -179,7 +185,12 @@ export class CsvGenerator {
         // We have to strip singular array values out of their array wrapper,
         // So that the value appears the visually the same as seen in Discover
         if (Array.isArray(cell)) {
-          cell = cell.join(', '); // mimic Discover behavior
+          cell = cell.map((c) => (typeof c === 'object' ? JSON.stringify(c) : c)).join(', ');
+        }
+
+        // Check for object-type value (geoip)
+        if (typeof cell === 'object') {
+          cell = JSON.stringify(cell);
         }
 
         return cell;
@@ -235,7 +246,7 @@ export class CsvGenerator {
           .join(settings.separator) + '\n';
 
       if (!builder.tryAppend(row)) {
-        this.logger.warn('max Size Reached');
+        this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
         this.maxSizeReached = true;
         if (this.cancellationToken) {
           this.cancellationToken.cancel();
