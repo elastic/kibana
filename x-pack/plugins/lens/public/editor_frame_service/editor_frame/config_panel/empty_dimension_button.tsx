@@ -48,8 +48,8 @@ export function EmptyDimensionButton({
   group: VisualizationDimensionGroupConfig;
   groups: VisualizationDimensionGroupConfig[];
 
-  layerDatasource: Datasource<unknown, unknown>;
-  layerDatasourceDropProps: LayerDatasourceDropProps;
+  layerDatasource?: Datasource<unknown, unknown>;
+  layerDatasourceDropProps?: LayerDatasourceDropProps;
 }) {
   const { dragging } = useContext(DragContext);
 
@@ -60,14 +60,17 @@ export function EmptyDimensionButton({
     setNewColumnId(generateId());
   }, [itemIndex]);
 
-  const dropProps = layerDatasource.getDropProps({
-    ...layerDatasourceDropProps,
-    dragging,
-    columnId: newColumnId,
-    filterOperations: group.filterOperations,
-    groupId: group.groupId,
-    dimensionGroups: groups,
-  });
+  const dropProps =
+    layerDatasource && layerDatasourceDropProps
+      ? layerDatasource.getDropProps({
+          ...layerDatasourceDropProps,
+          dragging,
+          columnId: newColumnId,
+          filterOperations: group.filterOperations,
+          groupId: group.groupId,
+          dimensionGroups: groups,
+        })
+      : undefined;
 
   const dropType = dropProps?.dropType;
   const nextLabel = dropProps?.nextLabel;
@@ -121,10 +124,14 @@ export function EmptyDimensionButton({
               onClick(value.columnId);
             }}
           >
-            <FormattedMessage
-              id="xpack.lens.configure.emptyConfig"
-              defaultMessage="Drop a field or click to add"
-            />
+            {layerDatasourceDropProps ? (
+              <FormattedMessage
+                id="xpack.lens.configure.emptyConfig"
+                defaultMessage="Drop a field or click to add"
+              />
+            ) : (
+              'Add'
+            )}
           </EuiButtonEmpty>
         </div>
       </DragDrop>

@@ -338,6 +338,7 @@ export function XYChart({
 
   const filteredLayers = getFilteredLayers(layers, data);
   const thresholdLayers = layers.filter((layer) => layer.layerType === 'threshold');
+  const constantThresholdLayers = layers.filter((layer) => layer.layerType === 'threshold_const');
 
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
@@ -444,7 +445,11 @@ export function XYChart({
   const valueLabelsStyling =
     shouldShowValueLabels && valueLabels !== 'hide' && getValueLabelsStyling(shouldRotate);
 
-  const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
+  const colorAssignments = getColorAssignments(
+    args.layers.filter((l) => l.layerType !== 'threshold' && l.layerType !== 'threshold_const'),
+    data,
+    formatFactory
+  );
 
   const clickHandler: ElementClickListener = ([[geometry, series]]) => {
     // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
@@ -852,6 +857,38 @@ export function XYChart({
           />
         );
       })}
+
+      {constantThresholdLayers.map((thresholdLayer) => {
+        return (
+          <LineAnnotation
+            id={thresholdLayer.layerId}
+            key={thresholdLayer.layerId}
+            domainType={
+              thresholdLayer.thresholdAxis === 'bottom'
+                ? AnnotationDomainTypes.XDomain
+                : AnnotationDomainTypes.YDomain
+            }
+            dataValues={(thresholdLayer.yConfig || []).map((val) => ({
+              dataValue: val.thresholdValue!,
+            }))}
+            groupId={
+              thresholdLayer.thresholdAxis === 'bottom'
+                ? undefined
+                : thresholdLayer.thresholdAxis === 'right'
+                ? 'right'
+                : 'left'
+            }
+            style={{
+              line: {
+                strokeWidth: 3,
+                stroke: '#f00',
+                opacity: 1,
+              },
+            }}
+            marker={<EuiIcon type="alert" />}
+          />
+        );
+      })}
     </Chart>
   );
 }
@@ -860,6 +897,7 @@ function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
   return layers.filter(({ layerId, layerType, xAccessor, accessors, splitAccessor }) => {
     return !(
       layerType === 'threshold' ||
+      layerType === 'threshold_const' ||
       !accessors.length ||
       !data.tables[layerId] ||
       data.tables[layerId].rows.length === 0 ||

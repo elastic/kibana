@@ -59,22 +59,25 @@ export function DraggableDimensionButton({
   groups: VisualizationDimensionGroupConfig[];
   label: string;
   children: React.ReactElement;
-  layerDatasource: Datasource<unknown, unknown>;
-  layerDatasourceDropProps: LayerDatasourceDropProps;
+  layerDatasource?: Datasource<unknown, unknown>;
+  layerDatasourceDropProps?: LayerDatasourceDropProps;
   accessorIndex: number;
   columnId: string;
   registerNewButtonRef: (id: string, instance: HTMLDivElement | null) => void;
 }) {
   const { dragging } = useContext(DragContext);
 
-  const dropProps = layerDatasource.getDropProps({
-    ...layerDatasourceDropProps,
-    dragging,
-    columnId,
-    filterOperations: group.filterOperations,
-    groupId: group.groupId,
-    dimensionGroups: groups,
-  });
+  const dropProps =
+    layerDatasource && layerDatasourceDropProps
+      ? layerDatasource.getDropProps({
+          ...layerDatasourceDropProps,
+          dragging,
+          columnId,
+          filterOperations: group.filterOperations,
+          groupId: group.groupId,
+          dimensionGroups: groups,
+        })
+      : undefined;
 
   const dropType = dropProps?.dropType;
   const nextLabel = dropProps?.nextLabel;

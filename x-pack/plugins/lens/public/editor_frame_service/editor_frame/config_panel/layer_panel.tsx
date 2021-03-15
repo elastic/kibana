@@ -18,7 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../../../native_renderer';
-import { StateSetter, Visualization, DraggedOperation, DropType } from '../../../types';
+import {
+  StateSetter,
+  Visualization,
+  DraggedOperation,
+  DropType,
+  DatasourcePublicAPI,
+} from '../../../types';
 import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -66,7 +72,9 @@ export function LayerPanel(
     updateVisualization,
     updateDatasource,
   } = props;
-  const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
+  const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId] as
+    | DatasourcePublicAPI
+    | undefined;
 
   useEffect(() => {
     setActiveDimension(initialActiveDimensionState);
@@ -85,28 +93,33 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
-  const datasourceId = datasourcePublicAPI.datasourceId;
-  const layerDatasourceState = props.datasourceStates[datasourceId].state;
+  const datasourceId = datasourcePublicAPI?.datasourceId;
+  const layerDatasourceState = datasourceId && props.datasourceStates[datasourceId].state;
 
   const layerDatasourceDropProps = useMemo(
-    () => ({
-      layerId,
-      state: layerDatasourceState,
-      setState: (newState: unknown) => {
-        updateDatasource(datasourceId, newState);
-      },
-    }),
+    () =>
+      datasourceId
+        ? {
+            layerId,
+            state: layerDatasourceState,
+            setState: (newState: unknown) => {
+              updateDatasource(datasourceId, newState);
+            },
+          }
+        : undefined,
     [layerId, layerDatasourceState, datasourceId, updateDatasource]
   );
 
-  const layerDatasource = props.datasourceMap[datasourceId];
+  const layerDatasource = datasourceId ? props.datasourceMap[datasourceId] : undefined;
 
-  const layerDatasourceConfigProps = {
-    ...layerDatasourceDropProps,
-    frame: props.framePublicAPI,
-    dateRange: props.framePublicAPI.dateRange,
-    activeData: props.framePublicAPI.activeData,
-  };
+  const layerDatasourceConfigProps = layerDatasourceDropProps
+    ? {
+        ...layerDatasourceDropProps,
+        frame: props.framePublicAPI,
+        dateRange: props.framePublicAPI.dateRange,
+        activeData: props.framePublicAPI.activeData,
+      }
+    : undefined;
 
   const { groups, isConstant } = activeVisualization.getConfiguration(
     layerVisualizationConfigProps
@@ -114,7 +127,7 @@ export function LayerPanel(
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
 
-  const columnLabelMap = layerDatasource.uniqueLabels(layerDatasourceConfigProps.state);
+  const columnLabelMap = layerDatasource?.uniqueLabels(layerDatasourceConfigProps?.state);
 
   const { setDimension, removeDimension } = activeVisualization;
 
@@ -128,7 +141,7 @@ export function LayerPanel(
     registerNewRef: registerNewButtonRef,
   } = useFocusUpdate(allAccessors);
 
-  const layerDatasourceOnDrop = layerDatasource.onDrop;
+  const layerDatasourceOnDrop = layerDatasource?.onDrop;
 
   const onDrop = useMemo(() => {
     return (
@@ -139,6 +152,7 @@ export function LayerPanel(
       if (!dropType) {
         return;
       }
+      if (!layerDatasourceOnDrop || !layerDatasourceDropProps) return;
       const {
         columnId,
         groupId,
@@ -214,7 +228,7 @@ export function LayerPanel(
               />
             </EuiFlexItem>
 
-            {layerDatasource && (
+            {datasourcePublicAPI && datasourceId && layerDatasource && (
               <EuiFlexItem className="lnsLayerPanel__sourceFlexItem">
                 <NativeRenderer
                   render={layerDatasource.renderLayerPanel}
@@ -316,7 +330,11 @@ export function LayerPanel(
                           groupIndex={groupIndex}
                           key={columnId}
                           layerDatasourceDropProps={layerDatasourceDropProps}
-                          label={columnLabelMap[columnId]}
+                          label={
+                            columnLabelMap
+                              ? columnLabelMap[columnId]
+                              : accessorConfig.labelOverride || ''
+                          }
                           layerDatasource={layerDatasource}
                           layerIndex={layerIndex}
                           layerId={layerId}
@@ -325,7 +343,11 @@ export function LayerPanel(
                           <div className="lnsLayerPanel__dimension">
                             <DimensionButton
                               accessorConfig={accessorConfig}
-                              label={columnLabelMap[accessorConfig.columnId]}
+                              label={
+                                columnLabelMap
+                                  ? columnLabelMap[columnId]
+                                  : accessorConfig.labelOverride || ''
+                              }
                               group={group}
                               onClick={(id: string) => {
                                 setActiveDimension({
@@ -336,31 +358,45 @@ export function LayerPanel(
                               }}
                               onRemoveClick={(id: string) => {
                                 trackUiEvent('indexpattern_dimension_removed');
-                                props.updateAll(
-                                  datasourceId,
-                                  layerDatasource.removeColumn({
-                                    layerId,
-                                    columnId: id,
-                                    prevState: layerDatasourceState,
-                                  }),
-                                  activeVisualization.removeDimension({
-                                    layerId,
-                                    columnId: id,
-                                    prevState: props.visualizationState,
-                                  })
-                                );
+                                if (datasourceId && layerDatasource) {
+                                  props.updateAll(
+                                    datasourceId,
+                                    layerDatasource.removeColumn({
+                                      layerId,
+                                      columnId: id,
+                                      prevState: layerDatasourceState,
+                                    }),
+                                    activeVisualization.removeDimension({
+                                      layerId,
+                                      columnId: id,
+                                      prevState: props.visualizationState,
+                                    })
+                                  );
+                                } else {
+                                  props.updateVisualization(
+                                    activeVisualization.removeDimension({
+                                      layerId,
+                                      columnId: id,
+                                      prevState: props.visualizationState,
+                                    })
+                                  );
+                                }
                                 removeButtonRef(id);
                               }}
                             >
-                              <NativeRenderer
-                                render={layerDatasource.renderDimensionTrigger}
-                                nativeProps={{
-                                  ...layerDatasourceConfigProps,
-                                  columnId: accessorConfig.columnId,
-                                  groupId: group.groupId,
-                                  filterOperations: group.filterOperations,
-                                }}
-                              />
+                              {layerDatasource && layerDatasourceConfigProps ? (
+                                <NativeRenderer
+                                  render={layerDatasource.renderDimensionTrigger}
+                                  nativeProps={{
+                                    ...layerDatasourceConfigProps,
+                                    columnId: accessorConfig.columnId,
+                                    groupId: group.groupId,
+                                    filterOperations: group.filterOperations,
+                                  }}
+                                />
+                              ) : (
+                                <span>{accessorConfig.labelOverride || ''}</span>
+                              )}
                             </DimensionButton>
                           </div>
                         </DraggableDimensionButton>
@@ -377,10 +413,20 @@ export function LayerPanel(
                       layerDatasource={layerDatasource}
                       layerDatasourceDropProps={layerDatasourceDropProps}
                       onClick={(id) => {
+                        if (isConstant) {
+                          props.updateVisualization(
+                            activeVisualization.setDimension({
+                              layerId,
+                              groupId: group.groupId,
+                              columnId: id,
+                              prevState: props.visualizationState,
+                            })
+                          );
+                        }
                         setActiveDimension({
                           activeGroup: group,
                           activeId: id,
-                          isNew: true,
+                          isNew: !isConstant,
                         });
                       }}
                       onDrop={onDrop}
@@ -409,7 +455,7 @@ export function LayerPanel(
         isOpen={!!activeId}
         groupLabel={activeGroup?.groupLabel || ''}
         handleClose={() => {
-          if (layerDatasource.updateStateOnCloseDimension) {
+          if (layerDatasource && datasourceId && layerDatasource.updateStateOnCloseDimension) {
             const newState = layerDatasource.updateStateOnCloseDimension({
               state: layerDatasourceState,
               layerId,
@@ -423,55 +469,59 @@ export function LayerPanel(
         }}
         panel={
           <>
-            {activeGroup && activeId && (
-              <NativeRenderer
-                render={layerDatasource.renderDimensionEditor}
-                nativeProps={{
-                  ...layerDatasourceConfigProps,
-                  core: props.core,
-                  columnId: activeId,
-                  groupId: activeGroup.groupId,
-                  hideGrouping: activeGroup.hideGrouping,
-                  filterOperations: activeGroup.filterOperations,
-                  dimensionGroups: groups,
-                  setState: (
-                    newState: unknown,
-                    {
-                      shouldReplaceDimension,
-                      shouldRemoveDimension,
-                    }: {
-                      shouldReplaceDimension?: boolean;
-                      shouldRemoveDimension?: boolean;
-                    } = {}
-                  ) => {
-                    if (shouldReplaceDimension || shouldRemoveDimension) {
-                      props.updateAll(
-                        datasourceId,
-                        newState,
-                        shouldRemoveDimension
-                          ? activeVisualization.removeDimension({
-                              layerId,
-                              columnId: activeId,
-                              prevState: props.visualizationState,
-                            })
-                          : activeVisualization.setDimension({
-                              layerId,
-                              groupId: activeGroup.groupId,
-                              columnId: activeId,
-                              prevState: props.visualizationState,
-                            })
-                      );
-                    } else {
-                      props.updateDatasource(datasourceId, newState);
-                    }
-                    setActiveDimension({
-                      ...activeDimension,
-                      isNew: false,
-                    });
-                  },
-                }}
-              />
-            )}
+            {activeGroup &&
+              activeId &&
+              layerDatasourceConfigProps &&
+              datasourceId &&
+              layerDatasource && (
+                <NativeRenderer
+                  render={layerDatasource.renderDimensionEditor}
+                  nativeProps={{
+                    ...layerDatasourceConfigProps,
+                    core: props.core,
+                    columnId: activeId,
+                    groupId: activeGroup.groupId,
+                    hideGrouping: activeGroup.hideGrouping,
+                    filterOperations: activeGroup.filterOperations,
+                    dimensionGroups: groups,
+                    setState: (
+                      newState: unknown,
+                      {
+                        shouldReplaceDimension,
+                        shouldRemoveDimension,
+                      }: {
+                        shouldReplaceDimension?: boolean;
+                        shouldRemoveDimension?: boolean;
+                      } = {}
+                    ) => {
+                      if (shouldReplaceDimension || shouldRemoveDimension) {
+                        props.updateAll(
+                          datasourceId,
+                          newState,
+                          shouldRemoveDimension
+                            ? activeVisualization.removeDimension({
+                                layerId,
+                                columnId: activeId,
+                                prevState: props.visualizationState,
+                              })
+                            : activeVisualization.setDimension({
+                                layerId,
+                                groupId: activeGroup.groupId,
+                                columnId: activeId,
+                                prevState: props.visualizationState,
+                              })
+                        );
+                      } else {
+                        props.updateDatasource(datasourceId, newState);
+                      }
+                      setActiveDimension({
+                        ...activeDimension,
+                        isNew: false,
+                      });
+                    },
+                  }}
+                />
+              )}
             {activeGroup &&
               activeId &&
               !activeDimension.isNew &&

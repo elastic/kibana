@@ -608,14 +608,24 @@ export function DimensionEditor(
         <EuiFormRow display="columnCompressed" label="Threhshold value">
           <EuiFieldNumber
             value={
-              layer.constantThresholdValues
-                ? layer.constantThresholdValues[Number(props.accessor)]
+              layer.yConfig
+                ? layer.yConfig.find((y) => y.forAccessor === props.accessor)?.thresholdValue
                 : 0
             }
             onChange={(e) => {
-              const vals = [...(layer.constantThresholdValues || [])];
-              vals[Number(props.accessor)] = Number(e.target.value);
-              setState(updateLayer(state, { ...layer, constantThresholdValues: vals }, index));
+              const newYAxisConfigs = [...(layer.yConfig || [])];
+              const existingIndex = newYAxisConfigs.findIndex(
+                (yAxisConfig) => yAxisConfig.forAccessor === accessor
+              );
+              if (existingIndex !== -1) {
+                newYAxisConfigs[existingIndex].thresholdValue = Number(e.target.value);
+              } else {
+                newYAxisConfigs.push({
+                  forAccessor: accessor,
+                  thresholdValue: Number(e.target.value),
+                });
+              }
+              setState(updateLayer(state, { ...layer, yConfig: newYAxisConfigs }, index));
             }}
           />
         </EuiFormRow>

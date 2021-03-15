@@ -175,7 +175,8 @@ export const getXyVisualization = ({
 
     const datasource = frame.datasourceLayers[layer.layerId];
 
-    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+    const sortedAccessors: string[] =
+      layer.layerType !== 'threshold_const' ? getSortedAccessors(datasource, layer) : [];
     let mappedAccessors: AccessorConfig[] = sortedAccessors.map((accessor) => ({
       columnId: accessor,
     }));
@@ -253,9 +254,10 @@ export const getXyVisualization = ({
               accessors:
                 layer.layerType === 'threshold'
                   ? layer.accessors.map((a) => ({ columnId: a }))
-                  : layer.constantThresholdValues
-                  ? layer.constantThresholdValues.map((_a, index) => ({
-                      columnId: String(index),
+                  : layer.yConfig
+                  ? layer.yConfig.map((yConfig, index) => ({
+                      columnId: yConfig.forAccessor,
+                      labelOverride: `Treshold ${index}`,
                     }))
                   : [],
               filterOperations: isNumericMetric,
@@ -265,6 +267,7 @@ export const getXyVisualization = ({
               enableDimensionEditor: true,
             },
           ],
+          isConstant: layer.layerType === 'threshold_const',
         };
   },
 
@@ -282,8 +285,14 @@ export const getXyVisualization = ({
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
-    if (groupId === 'y' || groupId === 'threshold') {
+    if (groupId === 'y' || (newLayer.layerType === 'threshold' && groupId === 'threshold')) {
       newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
+    }
+    if (newLayer.layerType === 'threshold_const' && groupId === 'threshold') {
+      newLayer.yConfig = [
+        ...(newLayer.yConfig || []).filter((y) => y.forAccessor !== columnId),
+        { forAccessor: columnId },
+      ];
     }
     if (groupId === 'breakdown') {
       newLayer.splitAccessor = columnId;

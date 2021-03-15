@@ -257,6 +257,10 @@ export const yAxisConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'The color of the series',
     },
+    thresholdValue: {
+      types: ['number'],
+      help: '',
+    },
   },
   fn: function fn(input: unknown, args: YConfig) {
     return {
@@ -379,6 +383,7 @@ export interface YConfig {
   forAccessor: string;
   axisMode?: YAxisMode;
   color?: string;
+  thresholdValue?: number;
 }
 
 export interface XYLayerConfig {
@@ -388,7 +393,6 @@ export interface XYLayerConfig {
   accessors: string[];
   yConfig?: YConfig[];
   thresholdAxis?: 'left' | 'right' | 'bottom';
-  constantThresholdValues?: number[];
   seriesType: SeriesType;
   splitAccessor?: string;
   palette?: PaletteOutput;

@@ -33,6 +33,7 @@ export const toExpression = (
 
   const metadata: Record<string, Record<string, OperationMetadata | null>> = {};
   state.layers.forEach((layer) => {
+    if (layer.layerType === 'threshold_const') return;
     metadata[layer.layerId] = {};
     const datasource = datasourceLayers[layer.layerId];
     datasource.getTableSpec().forEach((column) => {
@@ -100,9 +101,12 @@ export const buildExpression = (
   attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   const validLayers = state.layers
-    .filter((layer): layer is ValidLayer => Boolean(layer.accessors.length))
+    .filter(
+      (layer): layer is ValidLayer =>
+        Boolean(layer.accessors.length) || layer.layerType === 'threshold_const'
+    )
     .map((layer) => {
-      if (!datasourceLayers) {
+      if (!datasourceLayers || !datasourceLayers[layer.layerId]) {
         return layer;
       }
       const sortedAccessors = getSortedAccessors(datasourceLayers[layer.layerId], layer);
@@ -198,10 +202,14 @@ export const buildExpression = (
           ],
           valueLabels: [state?.valueLabels || 'hide'],
           layers: validLayers.map((layer) => {
-            const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
+            const columnToLabel =
+              layer.layerType === 'threshold_const'
+                ? {}
+                : getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
 
             const xAxisOperation =
               datasourceLayers &&
+              datasourceLayers[layer.layerId] &&
               datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
 
             const isHistogramDimension = Boolean(
@@ -224,10 +232,17 @@ export const buildExpression = (
 
                     xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
                     yScaleType: [
-                      getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
+                      layer.layerType === 'threshold_const'
+                        ? ScaleType.Ordinal
+                        : getScaleType(
+                            metadata[layer.layerId][layer.accessors[0]],
+                            ScaleType.Ordinal
+                          ),
                     ],
                     xScaleType: [
-                      getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear),
+                      layer.layerType === 'threshold_const'
+                        ? ScaleType.Linear
+                        : getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear),
                     ],
                     isHistogram: [isHistogramDimension],
                     splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
@@ -242,6 +257,9 @@ export const buildExpression = (
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
                                 color: yConfig.color ? [yConfig.color] : [],
+                                thresholdValue: yConfig.thresholdValue
+                                  ? [yConfig.thresholdValue]
+                                  : [],
                               },
                             },
                           ],

@@ -387,6 +387,7 @@ export interface AccessorConfig {
   triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
   color?: string;
   palette?: string[];
+  labelOverride?: string;
 }
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
