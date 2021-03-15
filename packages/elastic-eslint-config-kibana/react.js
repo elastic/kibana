@@ -1,9 +1,5 @@
-const { REPO_ROOT } = require('@kbn/utils');
-const { join } = require('path');
-const loadJsonFile = require('load-json-file');
-const semver = require('semver')
-
-const PKG = loadJsonFile.sync(join(REPO_ROOT, 'package.json'));
+const semver = require('semver');
+const { kibanaPackageJson: PKG } = require('@kbn/dev-utils');
 
 module.exports = {
   plugins: [
