@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useImperativeHandle } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonEmptyProps,
   EuiButtonIcon,
   EuiButtonIconProps,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -38,6 +39,9 @@ export interface SearchSessionIndicatorProps {
   saveDisabledReasonText?: string;
 
   onOpened?: (openedState: SearchSessionState) => void;
+
+  searchSessionName?: string;
+  saveSearchSessionName?: (newName: string) => Promise<unknown>;
 }
 
 type ActionButtonProps = SearchSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
@@ -336,6 +340,18 @@ export const SearchSessionIndicator = React.forwardRef<
     [openPopover, closePopover]
   );
 
+  const showSearchSessionName = Boolean(props.searchSessionName);
+  const [isRenameInputActive, setIsRenameInputActive] = React.useState(false);
+  const [isRenaming, setIsRenaming] = React.useState(false);
+  const [newSessionName, setNewSessionName] = React.useState(props.searchSessionName);
+  const isNewSessionNameValid = !!newSessionName;
+
+  useEffect(() => {
+    if (!isRenameInputActive) {
+      setNewSessionName(props.searchSessionName);
+    }
+  }, [isRenameInputActive, props.searchSessionName]);
+
   if (!searchSessionIndicatorViewStateToProps[props.state]) return null;
 
   const { button, popover } = searchSessionIndicatorViewStateToProps[props.state]!;
@@ -365,7 +381,71 @@ export const SearchSessionIndicator = React.forwardRef<
       }
     >
       <div data-test-subj="searchSessionIndicatorPopoverContainer">
-        <EuiText size="s">
+        {showSearchSessionName ? (
+          <>
+            {!isRenameInputActive ? (
+              <EuiFlexGroup
+                wrap={false}
+                responsive={false}
+                alignItems={'center'}
+                justifyContent={'spaceBetween'}
+                gutterSize={'none'}
+                // padding to align with compressed input size
+                style={{ paddingTop: 4, paddingBottom: 4 }}
+              >
+                <EuiText size={'m'} className={'eui-textTruncate'}>
+                  <h4 className={'eui-textTruncate'}>{props.searchSessionName}</h4>
+                </EuiText>
+                <EuiButtonIcon
+                  iconType={'pencil'}
+                  color={'text'}
+                  aria-label={'Edit search session name'}
+                  onClick={() => setIsRenameInputActive(true)}
+                />
+              </EuiFlexGroup>
+            ) : (
+              <EuiFieldText
+                autoFocus={true}
+                compressed={true}
+                placeholder={props.searchSessionName}
+                value={newSessionName}
+                onChange={(e) => {
+                  setNewSessionName(e.target.value);
+                }}
+                aria-label="Search session name"
+                append={
+                  <EuiButtonEmpty
+                    size={'xs'}
+                    color={'text'}
+                    onClick={async () => {
+                      if (!isNewSessionNameValid) return;
+                      if (
+                        newSessionName !== props.searchSessionName &&
+                        props.saveSearchSessionName
+                      ) {
+                        setIsRenaming(true);
+                        try {
+                          await props.saveSearchSessionName(newSessionName!);
+                        } catch (e) {
+                          // handled by the service
+                        }
+                      }
+
+                      setIsRenaming(false);
+                      setIsRenameInputActive(false);
+                    }}
+                    disabled={!isNewSessionNameValid}
+                    isLoading={isRenaming}
+                  >
+                    Save
+                  </EuiButtonEmpty>
+                }
+              />
+            )}
+            <EuiSpacer size={'xs'} />
+          </>
+        ) : null}
+        <EuiText size={'s'}>
           <p>{popover.title}</p>
         </EuiText>
         <EuiSpacer size={'xs'} />

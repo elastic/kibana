@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import { PublicContract } from '@kbn/utility-types';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
@@ -37,6 +38,7 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
    * e.g. will be displayed in saved Search Sessions management list
    */
   getName: () => Promise<string>;
+  appendSessionStartToName?: boolean;
   getUrlGeneratorData: () => Promise<{
     urlGeneratorId: ID;
     initialState: UrlGeneratorStateMapping[ID]['State'];
@@ -65,6 +67,7 @@ export class SessionService {
   public readonly state$: Observable<SearchSessionState>;
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
+  public readonly searchSessionName$: Observable<string | undefined>;
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
@@ -82,11 +85,13 @@ export class SessionService {
       stateContainer,
       sessionState$,
       sessionStartTime$,
+      searchSessionName$,
     } = createSessionStateContainer<TrackSearchDescriptor>({
       freeze: freezeState,
     });
     this.state$ = sessionState$;
     this.state = stateContainer;
+    this.searchSessionName$ = searchSessionName$;
 
     this.subscription.add(
       sessionStartTime$.subscribe((startTime) => {
@@ -198,6 +203,7 @@ export class SessionService {
    */
   public restore(sessionId: string) {
     this.state.transitions.restore(sessionId);
+    this.refreshSearchSessionSavedObject();
   }
 
   /**
@@ -252,8 +258,16 @@ export class SessionService {
       currentSessionInfoProvider.getUrlGeneratorData(),
     ]);
 
-    await this.sessionsClient.create({
-      name,
+    let formattedName = name;
+
+    if (currentSessionInfoProvider.appendSessionStartToName) {
+      if (this.state.get().startTime) {
+        formattedName = `${name} - ${moment(this.state.get().startTime).format(`L @ LT`)}`;
+      }
+    }
+
+    const searchSessionSavedObject = await this.sessionsClient.create({
+      name: formattedName,
       appId: currentSessionApp,
       restoreState: (restoreState as unknown) as Record<string, unknown>,
       initialState: (initialState as unknown) as Record<string, unknown>,
@@ -263,7 +277,26 @@ export class SessionService {
 
     // if we are still interested in this result
     if (this.getSessionId() === sessionId) {
-      this.state.transitions.store();
+      this.state.transitions.store(searchSessionSavedObject);
+    }
+  }
+
+  public async renameCurrentSession(newName: string) {
+    const sessionId = this.getSessionId();
+    if (sessionId && this.state.get().isStored) {
+      let renamed = false;
+      try {
+        await this.sessionsClient.rename(sessionId, newName);
+        renamed = true;
+      } catch (e) {
+        // TODO: failed to rename toast
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
+
+      if (renamed && sessionId === this.getSessionId()) {
+        await this.refreshSearchSessionSavedObject();
+      }
     }
   }
 
@@ -315,7 +348,10 @@ export class SessionService {
     searchSessionInfoProvider: SearchSessionInfoProvider<ID>,
     searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig
   ) {
-    this.searchSessionInfoProvider = searchSessionInfoProvider;
+    this.searchSessionInfoProvider = {
+      appendSessionStartToName: true,
+      ...searchSessionInfoProvider,
+    };
     this.searchSessionIndicatorUiConfig = searchSessionIndicatorUiConfig;
   }
 
@@ -332,5 +368,22 @@ export class SessionService {
       isDisabled: () => ({ disabled: false }),
       ...this.searchSessionIndicatorUiConfig,
     };
+  }
+
+  private async refreshSearchSessionSavedObject() {
+    const sessionId = this.getSessionId();
+    if (sessionId && this.state.get().isStored) {
+      try {
+        const savedObject = await this.sessionsClient.get(sessionId);
+        if (this.getSessionId() === sessionId) {
+          // still interested in this result
+          this.state.transitions.setSearchSessionSavedObject(savedObject);
+        }
+      } catch (e) {
+        // TODO: toast
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
+    }
   }
 }

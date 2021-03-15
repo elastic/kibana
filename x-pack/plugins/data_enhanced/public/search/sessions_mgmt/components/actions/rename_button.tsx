@@ -37,10 +37,10 @@ const RenameDialog = ({ onDismiss, ...props }: RenameButtonProps & { onDismiss: 
   const [newName, setNewName] = useState(originalName);
 
   const title = i18n.translate('xpack.data.mgmt.searchSessions.renameModal.title', {
-    defaultMessage: 'Rename search session',
+    defaultMessage: 'Edit search session name',
   });
   const confirm = i18n.translate('xpack.data.mgmt.searchSessions.renameModal.renameButton', {
-    defaultMessage: 'Rename',
+    defaultMessage: 'Save',
   });
   const cancel = i18n.translate('xpack.data.mgmt.searchSessions.renameModal.cancelButton', {
     defaultMessage: 'Cancel',
@@ -113,7 +113,7 @@ export const RenameButton = (props: RenameButtonProps) => {
       <TableText onClick={onClick}>
         <FormattedMessage
           id="xpack.data.mgmt.searchSessions.actionRename"
-          defaultMessage="Rename"
+          defaultMessage="Edit name"
         />
       </TableText>
       {showRenameDialog ? <RenameDialog {...props} onDismiss={onDismiss} /> : null}

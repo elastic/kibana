@@ -10,34 +10,58 @@ import { storiesOf } from '@storybook/react';
 import { SearchSessionIndicator } from './search_session_indicator';
 import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
 
-storiesOf('components/SearchSessionIndicator', module).add('default', () => (
-  <>
-    <div>
-      <SearchSessionIndicator state={SearchSessionState.Loading} />
-    </div>
-    <div>
-      <SearchSessionIndicator state={SearchSessionState.Completed} />
-    </div>
-    <div>
-      <SearchSessionIndicator state={SearchSessionState.BackgroundLoading} />
-    </div>
-    <div>
-      <SearchSessionIndicator state={SearchSessionState.BackgroundCompleted} />
-    </div>
-    <div>
-      <SearchSessionIndicator state={SearchSessionState.Restored} />
-    </div>
-    <div>
-      <SearchSessionIndicator state={SearchSessionState.Canceled} />
-    </div>
-    <div>
-      <SearchSessionIndicator
-        state={SearchSessionState.Completed}
-        saveDisabled={true}
-        saveDisabledReasonText={
-          'Search results have expired and it is no longer possible to save this search session'
-        }
-      />
-    </div>
-  </>
-));
+storiesOf('components/SearchSessionIndicator', module).add('default', () => {
+  const [searchSessionName, setSearchSessionName] = React.useState('Discover session');
+
+  const saveSearchSessionName = (newName: string) =>
+    new Promise((resolve) => {
+      setTimeout(() => {
+        setSearchSessionName(newName);
+        resolve(void 0);
+      }, 1000);
+    });
+
+  return (
+    <>
+      <div>
+        <SearchSessionIndicator state={SearchSessionState.Loading} />
+      </div>
+      <div>
+        <SearchSessionIndicator state={SearchSessionState.Completed} />
+      </div>
+      <div>
+        <SearchSessionIndicator
+          state={SearchSessionState.BackgroundLoading}
+          searchSessionName={searchSessionName}
+          saveSearchSessionName={saveSearchSessionName}
+        />
+      </div>
+      <div>
+        <SearchSessionIndicator
+          state={SearchSessionState.BackgroundCompleted}
+          searchSessionName={searchSessionName}
+          saveSearchSessionName={saveSearchSessionName}
+        />
+      </div>
+      <div>
+        <SearchSessionIndicator
+          state={SearchSessionState.Restored}
+          searchSessionName={searchSessionName}
+          saveSearchSessionName={saveSearchSessionName}
+        />
+      </div>
+      <div>
+        <SearchSessionIndicator state={SearchSessionState.Canceled} />
+      </div>
+      <div>
+        <SearchSessionIndicator
+          state={SearchSessionState.Completed}
+          saveDisabled={true}
+          saveDisabledReasonText={
+            'Search results have expired and it is no longer possible to save this search session'
+          }
+        />
+      </div>
+    </>
+  );
+});
