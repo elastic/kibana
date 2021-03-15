@@ -11,7 +11,7 @@ import {
   createAlertsString,
   isCommentGeneratedAlert,
   transformConnectorComment,
-} from '../../../../plugins/case/server/connectors';
+} from '../../../../plugins/cases/server/connectors';
 import {
   CasePostRequest,
   CaseResponse,
@@ -23,12 +23,12 @@ import {
   CommentType,
   CaseStatuses,
   CaseType,
-  CaseClientPostRequest,
+  CasesClientPostRequest,
   SubCaseResponse,
   AssociationType,
   SubCasesFindResponse,
   CommentRequest,
-} from '../../../../plugins/case/common/api';
+} from '../../../../plugins/cases/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
@@ -57,7 +57,7 @@ export const postCollectionReq: CasePostRequest = {
 /**
  * This is needed because the post api does not allow specifying the case type. But the response will include the type.
  */
-export const userActionPostResp: CaseClientPostRequest = {
+export const userActionPostResp: CasesClientPostRequest = {
   ...postCaseReq,
   type: CaseType.individual,
 };
