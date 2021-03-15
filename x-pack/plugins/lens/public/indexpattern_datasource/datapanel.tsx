@@ -566,7 +566,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             alignItems="center"
             className="lnsInnerIndexPatternDataPanel__header"
           >
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={true} className="lnsInnerIndexPatternDataPanel__switcher">
               <ChangeIndexPattern
                 data-test-subj="indexPattern-switcher"
                 trigger={{
@@ -594,7 +594,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   data-test-subj="lnsIndexPatternActions-popover"
                   button={
                     <EuiButtonIcon
-                      iconType="boxesVertical"
+                      color="text"
+                      iconType="boxesHorizontal"
                       data-test-subj="lnsIndexPatternActions"
                       onClick={() => {
                         setPopoverOpen(!popoverOpen);

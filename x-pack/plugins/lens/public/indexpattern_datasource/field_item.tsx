@@ -315,17 +315,20 @@ function FieldPanelHeader({
         field={draggableField}
       />
       {editField && (
-        <EuiButtonIcon
-          onClick={() => editField(field.name)}
-          iconType="pencil"
-          data-test-subj="lnsFieldListPanelEdit"
-          title={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-            defaultMessage: 'Edit field in index pattern',
+        <EuiToolTip
+          content={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+            defaultMessage: 'Edit index pattern field',
           })}
-          aria-label={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
-            defaultMessage: 'Edit field in index pattern',
-          })}
-        />
+        >
+          <EuiButtonIcon
+            onClick={() => editField(field.name)}
+            iconType="pencil"
+            data-test-subj="lnsFieldListPanelEdit"
+            aria-label={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+              defaultMessage: 'Edit index pattern field',
+            })}
+          />
+        </EuiToolTip>
       )}
     </EuiFlexGroup>
   );
