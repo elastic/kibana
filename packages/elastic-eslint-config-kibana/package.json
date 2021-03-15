@@ -18,6 +18,6 @@
   },
   "homepage": "https://github.com/elastic/kibana/tree/master/packages/elastic-eslint-config-kibana",
   "dependencies": {
-    "@kbn/utils": "link:../kbn-utils"
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }
