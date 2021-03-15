@@ -59569,6 +59569,8 @@ async function runCommand(command, config) {
         const reporter = _kbn_dev_utils_ci_stats_reporter__WEBPACK_IMPORTED_MODULE_0__["CiStatsReporter"].fromEnv(_utils_log__WEBPACK_IMPORTED_MODULE_2__["log"]);
         await reporter.timings({
           upstreamBranch: kbn.kibanaProject.json.branch,
+          // prevent loading @kbn/utils by passing null
+          kibanaUuid: kbn.getUuid() || null,
           timings: [{
             group: command.reportTiming.group,
             id: command.reportTiming.id,
