@@ -9,7 +9,6 @@ import d3 from 'd3';
 import { calculateTextWidth } from './string_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import moment from 'moment';
-import { getTimefilter } from './dependency_cache';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 
