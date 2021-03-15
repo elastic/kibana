@@ -140,7 +140,7 @@ Performing math across data series is unsupported in *TSVB*. To calculate the di
 [float]
 ===== How do I compare the current versus previous month?
 
-While math is unsupported in *TSVB*, series with tie offsets is supported.
+*TSVB* can display two series with time offsets, but it can't perform math across series. To add a time offset:
 
 . Click *Clone Series*, then choose a color for the new series.
 +
