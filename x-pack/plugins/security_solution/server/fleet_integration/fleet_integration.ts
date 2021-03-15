@@ -10,56 +10,15 @@ import { ExceptionListClient } from '../../../lists/server';
 import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ExternalCallback } from '../../../fleet/server';
-import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common/types/models';
-import {
-  policyFactory as policyConfigFactory,
-  policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
-} from '../../common/endpoint/models/policy_config';
-import { NewPolicyData } from '../../common/endpoint/types';
-import { ManifestManager } from '../endpoint/services/artifacts';
-import { Manifest } from '../endpoint/lib/artifacts';
-import { reportErrors } from '../endpoint/lib/artifacts/common';
-import { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
-import { manifestDispatchSchema } from '../../common/endpoint/schema/manifest';
+import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
+import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
+import { ManifestManager } from '../endpoint/services';
 import { AppClientFactory } from '../client';
-import { createDetectionIndex } from '../lib/detection_engine/routes/index/create_index_route';
-import { createPrepackagedRules } from '../lib/detection_engine/routes/rules/add_prepackaged_rules_route';
-import { buildFrameworkRequest } from '../lib/timeline/routes/utils/common';
-import { isEndpointPolicyValidForLicense } from '../../common/license/policy_config';
-import { isAtLeast, LicenseService } from '../../common/license/license';
-
-const getManifest = async (logger: Logger, manifestManager: ManifestManager): Promise<Manifest> => {
-  let manifest: Manifest | null = null;
-
-  try {
-    manifest = await manifestManager.getLastComputedManifest();
-
-    // If we have not yet computed a manifest, then we have to do so now. This should only happen
-    // once.
-    if (manifest == null) {
-      // New computed manifest based on current state of exception list
-      const newManifest = await manifestManager.buildNewManifest();
-
-      // Persist new artifacts
-      const persistErrors = await manifestManager.pushArtifacts(
-        newManifest.getAllArtifacts() as InternalArtifactCompleteSchema[]
-      );
-      if (persistErrors.length) {
-        reportErrors(logger, persistErrors);
-        throw new Error('Unable to persist new artifacts.');
-      }
-
-      // Commit the manifest state
-      await manifestManager.commit(newManifest);
-
-      manifest = newManifest;
-    }
-  } catch (err) {
-    logger.error(err);
-  }
-
-  return manifest ?? ManifestManager.createDefaultManifest();
-};
+import { LicenseService } from '../../common/license/license';
+import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
+import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
+import { createDefaultPolicy } from './handlers/create_default_policy';
+import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -90,64 +49,32 @@ export const getPackagePolicyCreateCallback = (
       return newPackagePolicy;
     }
 
-    // prep for detection rules creation
-    const appClient = appClientFactory.create(request);
-    // This callback is called by fleet plugin.
-    // It doesn't have access to SecuritySolutionRequestHandlerContext in runtime.
-    // Muting the error to have green CI.
-    // @ts-expect-error
-    const frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
+    // perform these operations in parallel in order to help in not delaying the API response too much
+    const [, manifestValue] = await Promise.all([
+      // Install Detection Engine prepackaged rules
+      exceptionsClient &&
+        installPrepackagedRules({
+          logger,
+          appClientFactory,
+          context,
+          request,
+          securitySetup,
+          alerts,
+          maxTimelineImportExportSize,
+          exceptionsClient,
+        }),
 
-    // Create detection index & rules (if necessary). move past any failure, this is just a convenience
-    try {
-      // @ts-expect-error
-      await createDetectionIndex(context, appClient);
-    } catch (err) {
-      if (err.statusCode !== 409) {
-        // 409 -> detection index already exists, which is fine
-        logger.warn(
-          `Possible problem creating detection signals index (${err.statusCode}): ${err.message}`
-        );
-      }
-    }
-    try {
-      // this checks to make sure index exists first, safe to try in case of failure above
-      // may be able to recover from minor errors
-      await createPrepackagedRules(
-        // @ts-expect-error
-        context,
-        appClient,
-        alerts.getAlertsClientWithRequest(request),
-        frameworkRequest,
-        maxTimelineImportExportSize,
-        exceptionsClient
-      );
-    } catch (err) {
-      logger.error(
-        `Unable to create detection rules automatically (${err.statusCode}): ${err.message}`
-      );
-    }
+      // create the Artifact Manifest for this policy
+      createPolicyArtifactManifest(logger, manifestManager),
+    ]);
 
-    // Get most recent manifest
-    const manifest = await getManifest(logger, manifestManager);
-    const serializedManifest = manifest.toPackagePolicyManifest();
-    if (!manifestDispatchSchema.is(serializedManifest)) {
-      // This should not happen.
-      // But if it does, we log it and return it anyway.
-      logger.error('Invalid manifest');
-    }
+    // Add the default endpoint security policy
+    const defaultPolicyValue = createDefaultPolicy(licenseService);
 
-    // We cast the type here so that any changes to the Endpoint specific data
-    // follow the types/schema expected
-    let updatedPackagePolicy = newPackagePolicy as NewPolicyData;
-
-    // generate the correct default policy depending on the license
-    const defaultPolicy = isAtLeast(licenseService.getLicenseInformation(), 'platinum')
-      ? policyConfigFactory()
-      : policyConfigFactoryWithoutPaidFeatures();
-
-    updatedPackagePolicy = {
-      ...newPackagePolicy,
+    return {
+      // We cast the type here so that any changes to the Endpoint
+      // specific data follow the types/schema expected
+      ...(newPackagePolicy as NewPolicyData),
       inputs: [
         {
           type: 'endpoint',
@@ -155,17 +82,15 @@ export const getPackagePolicyCreateCallback = (
           streams: [],
           config: {
             artifact_manifest: {
-              value: serializedManifest,
+              value: manifestValue,
             },
             policy: {
-              value: defaultPolicy,
+              value: defaultPolicyValue,
             },
           },
         },
       ],
     };
-
-    return updatedPackagePolicy;
   };
 };
 
@@ -174,25 +99,23 @@ export const getPackagePolicyUpdateCallback = (
   licenseService: LicenseService
 ): ExternalCallback[1] => {
   return async (
-    newPackagePolicy: NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
+    newPackagePolicy: NewPackagePolicy
+    // context: RequestHandlerContext,
+    // request: KibanaRequest
   ): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
 
-    if (
-      !isEndpointPolicyValidForLicense(
-        newPackagePolicy.inputs[0].config?.policy?.value,
-        licenseService.getLicenseInformation()
-      )
-    ) {
-      logger.warn('Incorrect license tier for paid policy fields');
-      const licenseError: Error & { statusCode?: number } = new Error('Requires Platinum license');
-      licenseError.statusCode = 403;
-      throw licenseError;
-    }
+    // Validate that Endpoint Security policy is valid against current license
+    validatePolicyAgainstLicense(
+      // The cast below is needed in order to ensure proper typing for
+      // the policy configuration specific for endpoint
+      newPackagePolicy.inputs[0].config?.policy?.value as PolicyConfig,
+      licenseService,
+      logger
+    );
+
     return newPackagePolicy;
   };
 };

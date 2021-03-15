@@ -15,9 +15,7 @@ import { PolicyConfig } from '../../../common/endpoint/types';
 /**
  * Create the default endpoint policy based on the current license
  */
-export const createDefaultPolicy = async (
-  licenseService: LicenseService
-): Promise<PolicyConfig> => {
+export const createDefaultPolicy = (licenseService: LicenseService): PolicyConfig => {
   return isAtLeast(licenseService.getLicenseInformation(), 'platinum')
     ? policyConfigFactory()
     : policyConfigFactoryWithoutPaidFeatures();
