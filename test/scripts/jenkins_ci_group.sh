@@ -14,7 +14,6 @@ if [[ -z "$CODE_COVERAGE" ]]; then
   if [[ ! "$TASK_QUEUE_PROCESS_ID" && "$CI_GROUP" == "1" ]]; then
     source test/scripts/jenkins_build_kbn_sample_panel_action.sh
     ./test/scripts/test/plugin_functional.sh
-    ./test/scripts/test/example_functional.sh
     ./test/scripts/test/interpreter_functional.sh
   fi
 else

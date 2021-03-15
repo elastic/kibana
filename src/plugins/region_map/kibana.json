@@ -2,13 +2,13 @@
   "id": "regionMap",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["map", "regionmap"],
   "ui": true,
   "server": true,
   "requiredPlugins": [
     "visualizations",
     "expressions",
     "mapsLegacy",
+    "mapsEms",
     "kibanaLegacy",
     "data",
     "share"
