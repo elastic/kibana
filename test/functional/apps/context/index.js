@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
     before(async function () {
       await browser.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('visualize');
+      await kibanaServer.importExport.load('visualize');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });
