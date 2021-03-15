@@ -41,6 +41,8 @@
       - [First-class support for test results](#first-class-support-for-test-results-1)
       - [Advanced Pipeline features](#advanced-pipeline-features-1)
       - [GitHub Integration](#github-integration-1)
+  - [Elastic Buildkite Agent Manager](#elastic-buildkite-agent-manager)
+  - [Elastic Buildkite PR Bot](#elastic-buildkite-pr-bot)
 - [Drawbacks](#drawbacks)
 - [Alternatives](#alternatives)
   - [Jenkins](#jenkins)
@@ -279,6 +281,14 @@ TODO
 
 - Ability to trigger jobs based on webhooks
 - Integrate GitHub-specific information into UI, e.g. a build for a PR should link back to the PR
+
+## Elastic Buildkite Agent Manager
+
+TODO
+
+## Elastic Buildkite PR Bot
+
+TODO
 
 # Drawbacks
 
