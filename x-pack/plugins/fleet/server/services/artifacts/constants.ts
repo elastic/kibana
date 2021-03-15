@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export {
-  migratePackagePolicyToV7110,
-  migratePackagePolicyToV7120,
-} from '../../../security_solution/common';
+export const ARTIFACT_DOWNLOAD_RELATIVE_PATH = '/api/fleet/artifacts/{identifier}/{decodedSha256}';
