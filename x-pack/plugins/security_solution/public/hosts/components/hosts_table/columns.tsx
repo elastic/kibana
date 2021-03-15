@@ -78,7 +78,7 @@ export const getHostsColumns = (): HostsTableColumns => [
     sortable: true,
     render: (lastSeen) => {
       if (lastSeen != null) {
-        return <FormattedRelativePreferenceDate value={lastSeen} />;
+        return <FormattedRelativePreferenceDate value={lastSeen[0]} />;
       }
       return getEmptyTagValue();
     },

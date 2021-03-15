@@ -27,7 +27,7 @@ import {
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostsDetailsQuery';
+export const ID = 'hostsDetailsQuery';
 
 export interface HostDetailsArgs {
   id: string;

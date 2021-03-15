@@ -19,7 +19,7 @@ import { HostItem } from '../../../../../common/search_strategy';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { HostOverviewByNameQuery } from '../../../../hosts/containers/hosts/details';
+import { useHostDetails, ID } from '../../../../hosts/containers/hosts/details';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 interface ExpandableHostProps {
@@ -71,48 +71,42 @@ export const ExpandableHostDetails = ({
     []
   );
   const allPatterns = useDeepEqualSelector<string[]>(allExistingIndexNamesSelector);
-
+  const [loading, { hostDetails: hostOverview }] = useHostDetails({
+    endDate: to,
+    hostName,
+    indexNames: allPatterns,
+    startDate: from,
+  });
   return (
-    <HostOverviewByNameQuery
-      indexNames={allPatterns}
-      sourceId="default"
-      hostName={hostName}
-      skip={isInitializing}
+    <AnomalyTableProvider
+      criteriaFields={hostToCriteria(hostOverview)}
       startDate={from}
       endDate={to}
+      skip={isInitializing}
     >
-      {({ hostOverview, loading, id }) => (
-        <AnomalyTableProvider
-          criteriaFields={hostToCriteria(hostOverview)}
+      {({ isLoadingAnomaliesData, anomaliesData }) => (
+        <HostOverview
+          contextID={contextID}
+          docValueFields={docValueFields}
+          id={ID}
+          isInDetailsSidePanel
+          data={hostOverview as HostItem}
+          anomaliesData={anomaliesData}
+          isLoadingAnomaliesData={isLoadingAnomaliesData}
+          indexNames={allPatterns}
+          loading={loading}
           startDate={from}
           endDate={to}
-          skip={isInitializing}
-        >
-          {({ isLoadingAnomaliesData, anomaliesData }) => (
-            <HostOverview
-              contextID={contextID}
-              docValueFields={docValueFields}
-              id={id}
-              isInDetailsSidePanel
-              data={hostOverview as HostItem}
-              anomaliesData={anomaliesData}
-              isLoadingAnomaliesData={isLoadingAnomaliesData}
-              indexNames={allPatterns}
-              loading={loading}
-              startDate={from}
-              endDate={to}
-              narrowDateRange={(score, interval) => {
-                const fromTo = scoreIntervalToDateTime(score, interval);
-                setAbsoluteRangeDatePicker({
-                  id: 'global',
-                  from: fromTo.from,
-                  to: fromTo.to,
-                });
-              }}
-            />
-          )}
-        </AnomalyTableProvider>
+          narrowDateRange={(score, interval) => {
+            const fromTo = scoreIntervalToDateTime(score, interval);
+            setAbsoluteRangeDatePicker({
+              id: 'global',
+              from: fromTo.from,
+              to: fromTo.to,
+            });
+          }}
+        />
       )}
-    </HostOverviewByNameQuery>
+    </AnomalyTableProvider>
   );
 };
