@@ -27,6 +27,7 @@ const getAdditionalClassesOnDroppable = (dropType?: string) => {
 
 export function EmptyDimensionButton({
   group,
+  groups,
   layerDatasource,
   layerDatasourceDropProps,
   layerId,
@@ -45,6 +46,8 @@ export function EmptyDimensionButton({
     dropType?: DropType
   ) => void;
   group: VisualizationDimensionGroupConfig;
+  groups: VisualizationDimensionGroupConfig[];
+
   layerDatasource: Datasource<unknown, unknown>;
   layerDatasourceDropProps: LayerDatasourceDropProps;
 }) {
@@ -63,6 +66,7 @@ export function EmptyDimensionButton({
     columnId: newColumnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
+    dimensionGroups: groups,
   });
 
   const dropType = dropProps?.dropType;

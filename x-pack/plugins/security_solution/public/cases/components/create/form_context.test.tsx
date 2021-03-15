@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes } from '../../../../../case/common/api';
+import { ConnectorTypes } from '../../../../../cases/common/api';
 import { TestProviders } from '../../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
