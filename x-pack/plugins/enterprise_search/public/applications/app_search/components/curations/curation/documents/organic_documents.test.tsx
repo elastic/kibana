@@ -9,7 +9,7 @@ import { setMockValues } from '../../../../../__mocks__';
 
 import React from 'react';
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 
