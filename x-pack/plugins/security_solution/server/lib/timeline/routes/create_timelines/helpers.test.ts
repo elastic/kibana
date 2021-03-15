@@ -12,8 +12,14 @@ import { getNote, persistNotes } from '../../../note/saved_object';
 import { FrameworkRequest } from '../../../framework';
 import { SavedTimeline } from '../../../../../common/types/timeline';
 import { mockTemplate, mockTimeline } from '../__mocks__/create_timelines';
+import { buildFrameworkRequest } from '../utils/common';
+import { SecurityPluginSetup } from '../../../../../../security/server';
+import { requestContextMock } from '../../../detection_engine/routes/__mocks__';
+import {
+  getCreateTimelinesRequest,
+  createTimelineWithoutTimelineId,
+} from '../__mocks__/request_responses';
 
-const frameworkRequest = {} as FrameworkRequest;
 const template = { ...mockTemplate } as SavedTimeline;
 const timeline = { ...mockTimeline } as SavedTimeline;
 const timelineSavedObjectId = null;
@@ -50,13 +56,36 @@ jest.mock('../../../pinned_event/saved_object', () => ({
   savePinnedEvents: jest.fn(),
 }));
 
-jest.mock('../../../note/saved_object', () => ({
+jest.mock('../../../note/get_note', () => ({
   getNote: jest.fn(),
+}));
+
+jest.mock('../../../note/persist_note', () => ({
   persistNote: jest.fn(),
+}));
+
+jest.mock('../../../note/persist_notes', () => ({
   persistNotes: jest.fn(),
 }));
 
 describe('createTimelines', () => {
+  let securitySetup: SecurityPluginSetup;
+  let frameworkRequest: FrameworkRequest;
+
+  beforeAll(async () => {
+    securitySetup = ({
+      authc: {
+        getCurrentUser: jest.fn(),
+      },
+      authz: {},
+    } as unknown) as SecurityPluginSetup;
+
+    const { context } = requestContextMock.createTools();
+    const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
+
+    frameworkRequest = await buildFrameworkRequest(context, securitySetup, mockRequest);
+  });
+
   describe('create timelines', () => {
     beforeAll(async () => {
       await module.createTimelines({
