@@ -98,19 +98,12 @@ export default class KbnServer {
   async listen() {
     await this.ready();
 
-    const { server, config } = this;
+    const { server } = this;
 
     if (process.env.isDevCliChild) {
       // help parent process know when we are ready
       process.send(['SERVER_LISTENING']);
     }
-
-    server.log(
-      ['listening', 'info'],
-      `Server running at ${server.info.uri}${
-        config.get('server.rewriteBasePath') ? config.get('server.basePath') : ''
-      }`
-    );
 
     return server;
   }
@@ -136,13 +129,6 @@ export default class KbnServer {
 
     const loggingConfig = config.get('logging');
     const opsConfig = config.get('ops');
-
-    const subset = {
-      ops: opsConfig,
-      logging: loggingConfig,
-    };
-    const plain = JSON.stringify(subset, null, 2);
-    this.server.log(['info', 'config'], 'New logging configuration:\n' + plain);
 
     reconfigureLogging(this.server, loggingConfig, opsConfig.interval);
   }
