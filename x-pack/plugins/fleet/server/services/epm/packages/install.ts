@@ -109,7 +109,7 @@ export async function ensureInstalledPackage(options: {
     return installedPackage;
   }
   // if the requested packaged was not found to be installed, install
-  if (version && version !== 'latest') {
+  if (version) {
     const pkgkey = Registry.pkgToPkgKey({
       name: pkgName,
       version,
