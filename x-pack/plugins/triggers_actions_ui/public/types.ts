@@ -12,7 +12,6 @@ import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ActionType } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
-import { AlertType as CommonAlertType } from '../../alerting/common';
 import {
   ActionGroup,
   AlertActionParam,
@@ -26,6 +25,8 @@ import {
   AlertingFrameworkHealth,
   AlertNotifyWhenType,
   AlertTypeParams,
+  ActionVariable,
+  AlertType as CommonAlertType,
 } from '../../alerting/common';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedAlert<AlertTypeParams>`
@@ -156,12 +157,6 @@ export type ActionConnectorWithoutId<
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
 };
-
-export interface ActionVariable {
-  name: string;
-  description: string;
-  useWithTripleBracesInTemplates?: boolean;
-}
 
 type AsActionVariables<Keys extends string> = {
   [Req in Keys]: ActionVariable[];
