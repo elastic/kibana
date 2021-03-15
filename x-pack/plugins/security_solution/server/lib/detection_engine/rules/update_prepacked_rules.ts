@@ -8,7 +8,7 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 import { chunk } from 'lodash/fp';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
+import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { patchRules } from './patch_rules';
 import { readRules } from './read_rules';
 import { PartialFilter, RuleTypeParams } from '../types';
