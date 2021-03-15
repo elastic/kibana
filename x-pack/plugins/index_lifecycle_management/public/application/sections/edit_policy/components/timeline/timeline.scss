@@ -80,4 +80,12 @@ $ilmTimelineBarHeight: $euiSizeS;
       background-color: $euiColorVis1;
     }
   }
+
+  &__frozenPhase {
+    width: var(--ilm-timeline-frozen-phase-width);
+
+    &__colorBar {
+      background-color: $euiColorVis4;
+    }
+  }
 }

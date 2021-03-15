@@ -105,6 +105,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       label: ofName(field.displayName),
       sourceField: field.name,
       params: newParams,
+      scale: field.type === 'string' ? 'ordinal' : 'ratio',
     };
   },
   getPossibleOperationForField: ({ aggregationRestrictions, type }) => {
