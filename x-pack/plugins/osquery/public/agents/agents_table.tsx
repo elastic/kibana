@@ -42,7 +42,7 @@ interface AgentsTableProps {
   onChange: (payload: AgentsSelection) => void;
 }
 
-type GroupOption = EuiSelectableOption<{ type: string }>;
+type GroupOption = EuiSelectableOption<{ type?: string }>;
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
   const [pageIndex, setPageIndex] = useState(0);

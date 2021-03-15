@@ -35,11 +35,16 @@ export const createActionRoute = (router: IRouter) => {
       const {
         agentSelection: { allAgentsSelected, platformsSelected, policiesSelected, agents },
       } = request.body as { agentSelection: AgentsSelection };
-      const extractIds = ({ body }) =>
-        body.hits.hits.map((o) => o._source.local_metadata?.elastic.agent.id).filter((e) => e);
+      // TODO: fix up the types here
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const extractIds = ({ body }: Record<string, any>) =>
+        body.hits.hits
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((o: Record<string, any>) => o._source.local_metadata?.elastic.agent.id)
+          .filter((e: string) => e);
       if (allAgentsSelected) {
         // make a query for all agent ids
-        const idRes = await esClient.search<{}, {}>({
+        const idRes = await esClient.search({
           index: '.fleet-agents',
           body: {
             _source: 'local_metadata.elastic.agent.id',
@@ -129,7 +134,6 @@ export const createActionRoute = (router: IRouter) => {
           expiration: moment().add(2, 'days').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
-          // @ts-expect-error update validation
           agents: selectedAgents,
           data: {
             id: query.id,
