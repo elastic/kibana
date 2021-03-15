@@ -6,6 +6,11 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  basicValidJobMessages,
+  basicInvalidJobMessages,
+  nonBasicIssuesMessages,
+} from '../../../../../../x-pack/plugins/ml/common/constants/messages.test.mock';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
@@ -72,24 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
         .send(requestBody)
         .expect(200);
 
-      expect(body).to.eql([
-        {
-          id: 'job_id_valid',
-        },
-        {
-          id: 'detectors_function_not_empty',
-        },
-        {
-          id: 'success_bucket_span',
-          bucketSpan: '15m',
-        },
-        {
-          id: 'success_time_range',
-        },
-        {
-          id: 'success_mml',
-        },
-      ]);
+      expect(body).to.eql(basicValidJobMessages);
     });
 
     it('should recognize a basic invalid job configuration and skip advanced checks', async () => {
@@ -133,21 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
         .send(requestBody)
         .expect(200);
 
-      expect(body).to.eql([
-        {
-          id: 'job_id_invalid',
-        },
-        {
-          id: 'detectors_function_not_empty',
-        },
-        {
-          id: 'bucket_span_valid',
-          bucketSpan: '15m',
-        },
-        {
-          id: 'skipped_extended_tests',
-        },
-      ]);
+      expect(body).to.eql(basicInvalidJobMessages);
     });
 
     it('should recognize non-basic issues in job configuration', async () => {
@@ -206,39 +180,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
       });
 
-      const expectedResponse = [
-        {
-          id: 'job_id_valid',
-        },
-        {
-          id: 'detectors_function_not_empty',
-        },
-        {
-          id: 'cardinality_model_plot_high',
-        },
-        {
-          id: 'cardinality_partition_field',
-          fieldName: 'order_id',
-        },
-        {
-          id: 'bucket_span_high',
-        },
-        {
-          bucketSpanCompareFactor: 25,
-          id: 'time_range_short',
-          minTimeSpanReadable: '2 hours',
-        },
-        {
-          id: 'success_influencers',
-        },
-        {
-          id: 'half_estimated_mml_greater_than_mml',
-          mml: '1MB',
-        },
-        {
-          id: 'missing_summary_count_field_name',
-        },
-      ];
+      const expectedResponse = nonBasicIssuesMessages;
 
       expect(body.length).to.eql(
         expectedResponse.length,
