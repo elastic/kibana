@@ -8,18 +8,20 @@
 import { deflate } from 'zlib';
 import { promisify } from 'util';
 
-import { createHash, BinaryLike } from 'crypto';
+import type { BinaryLike } from 'crypto';
+import { createHash } from 'crypto';
 
 import uuid from 'uuid';
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 
-import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
-import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import type { ListResult } from '../../../common';
+import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
+import type { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
 import { isElasticsearchItemNotFoundError } from './utils';
-import {
+import type {
   Artifact,
   ArtifactElasticsearchProperties,
   ArtifactEncodedMetadata,

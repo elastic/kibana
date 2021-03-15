@@ -797,6 +797,7 @@ module.exports = {
     {
       files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
       rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
         'import/order': [
           'warn',
           {
