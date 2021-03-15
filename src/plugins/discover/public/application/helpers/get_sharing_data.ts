@@ -40,12 +40,6 @@ export async function getSharingData(
   // fields get re-set to match the saved search columns
   let columns = state.columns || [];
 
-  // NOTE: A newly saved search with no columns selected will return a
-  // column array as a single '_source' value which is invalid for CSV export
-  if (columns && columns.length === 1 && /^_source$/.test(columns.join())) {
-    columns = [];
-  }
-
   if (columns && columns.length > 0) {
     // conditionally add the time field column:
     let timeFieldName: string | undefined;
