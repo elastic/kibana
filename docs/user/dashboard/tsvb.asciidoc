@@ -23,7 +23,7 @@ Open *TSVB*, then make sure the required settings are configured.
 * *Time field*
 * *Interval*
 
-. Select a *Drop last bucket* option. Typically, the last bucket contains partial data.
+. Select a *Drop last bucket* option. It is dropped by default because the time filter intersects the time range of the last bucket, but can be enabled to see the partial data.
 
 . In the *Panel filter* field, specify any <<kuery-query, KQL filters>> to select specific documents.
 
