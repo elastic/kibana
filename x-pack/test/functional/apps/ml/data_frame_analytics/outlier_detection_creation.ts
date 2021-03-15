@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
           ],
           scatterplotMatrixColorsWizard: [
-            { key: '#6A717D', value: 25 },
+            { key: '#6A717D', value: 30 },
             { key: '#52B398', value: 25 },
           ],
           scatterplotMatrixColorStatsResults: [
