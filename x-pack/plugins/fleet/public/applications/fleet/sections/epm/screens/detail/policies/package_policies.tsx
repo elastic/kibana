@@ -5,30 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
-import {
-  CriteriaWithPagination,
-  EuiBasicTable,
-  EuiLink,
-  EuiTableFieldDataColumnType,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiBasicTable, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n/react';
 
 import { InstallStatus } from '../../../../../types';
 import { useLink, useUrlPagination } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import { LinkAndRevision, LinkAndRevisionProps } from '../../../../../components';
+import type { LinkAndRevisionProps } from '../../../../../components';
+import { LinkAndRevision } from '../../../../../components';
 import { LinkedAgentCount } from '../../../../../components/linked_agent_count';
 import { useGetPackageInstallStatus } from '../../../hooks';
 
-import {
-  PackagePolicyAndAgentPolicy,
-  usePackagePoliciesWithAgentPolicy,
-} from './use_package_policies_with_agent_policy';
+import type { PackagePolicyAndAgentPolicy } from './use_package_policies_with_agent_policy';
+import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
 
 const IntegrationDetailsLink = memo<{
