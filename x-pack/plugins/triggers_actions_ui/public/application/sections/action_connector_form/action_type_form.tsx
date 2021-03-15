@@ -26,15 +26,14 @@ import {
   EuiBadge,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import { pick } from 'lodash';
-import { AlertActionParam } from '../../../../../alerts/common';
+import { partition, pick } from 'lodash';
+import { ActionVariable, AlertActionParam } from '../../../../../alerting/common';
 import {
   IErrorObject,
   AlertAction,
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
-  ActionVariable,
   ActionTypeRegistryContract,
   REQUIRED_ACTION_VARIABLES,
 } from '../../../types';
@@ -382,9 +381,21 @@ function getAvailableActionVariables(
   actionVariables: ActionVariables,
   actionGroup?: ActionGroupWithMessageVariables
 ) {
-  return transformActionVariables(
+  const transformedActionVariables: ActionVariable[] = transformActionVariables(
     actionGroup?.omitOptionalMessageVariables
       ? pick(actionVariables, ...REQUIRED_ACTION_VARIABLES)
       : actionVariables
-  ).sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()));
+  );
+
+  // partition deprecated items so they show up last
+  const partitionedActionVariables = partition(
+    transformedActionVariables,
+    (v) => v.deprecated !== true
+  );
+  return partitionedActionVariables.reduce((acc, curr) => {
+    return [
+      ...acc,
+      ...curr.sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase())),
+    ];
+  }, []);
 }

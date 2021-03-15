@@ -6,7 +6,7 @@
  */
 
 import { Logger, Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { PluginSetupContract as AlertsPluginSetup } from '../../alerts/server';
+import { PluginSetupContract as AlertsPluginSetup } from '../../alerting/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute } from './routes/health';
@@ -18,7 +18,7 @@ export interface PluginStartContract {
 
 interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
-  alerts?: AlertsPluginSetup;
+  alerting?: AlertsPluginSetup;
 }
 
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
@@ -39,7 +39,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       baseRoute: BASE_ROUTE,
     });
 
-    createHealthRoute(this.logger, router, BASE_ROUTE, plugins.alerts !== undefined);
+    createHealthRoute(this.logger, router, BASE_ROUTE, plugins.alerting !== undefined);
   }
 
   public start(): PluginStartContract {

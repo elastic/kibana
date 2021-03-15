@@ -40,7 +40,7 @@ describe('Monitoring plugin', () => {
       makeStatsCollector: jest.fn(),
       registerCollector: jest.fn(),
     },
-    alerts: {
+    alerting: {
       registerType: jest.fn(),
     },
   };
@@ -59,7 +59,7 @@ describe('Monitoring plugin', () => {
   const initializerContext = coreMock.createPluginInitializerContext(defaultConfig);
 
   afterEach(() => {
-    (setupPlugins.alerts.registerType as jest.Mock).mockReset();
+    (setupPlugins.alerting.registerType as jest.Mock).mockReset();
     (coreSetup.status.overall$.subscribe as jest.Mock).mockReset();
   });
 
@@ -73,6 +73,6 @@ describe('Monitoring plugin', () => {
     const alerts = AlertsFactory.getAll();
     const plugin = new MonitoringPlugin(initializerContext as any);
     await plugin.setup(coreSetup as any, setupPlugins as any);
-    expect(setupPlugins.alerts.registerType).toHaveBeenCalledTimes(alerts.length);
+    expect(setupPlugins.alerting.registerType).toHaveBeenCalledTimes(alerts.length);
   });
 });

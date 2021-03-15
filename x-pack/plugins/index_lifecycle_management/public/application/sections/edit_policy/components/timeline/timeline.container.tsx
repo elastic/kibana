@@ -26,6 +26,7 @@ export const Timeline: FunctionComponent = () => {
       hotPhaseMinAge={timings.hot.min_age}
       warmPhaseMinAge={timings.warm?.min_age}
       coldPhaseMinAge={timings.cold?.min_age}
+      frozenPhaseMinAge={timings.frozen?.min_age}
       deletePhaseMinAge={timings.delete?.min_age}
       isUsingRollover={isUsingRollover}
       hasDeletePhase={Boolean(formData._meta?.delete?.enabled)}

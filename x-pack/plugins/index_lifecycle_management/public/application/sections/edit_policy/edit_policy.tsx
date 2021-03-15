@@ -39,6 +39,7 @@ import {
   ColdPhase,
   DeletePhase,
   HotPhase,
+  FrozenPhase,
   PolicyJsonFlyout,
   WarmPhase,
   Timeline,
@@ -71,6 +72,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     policy: currentPolicy,
     existingPolicies,
     policyName,
+    license,
   } = useEditPolicyContext();
 
   const {
@@ -79,6 +81,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
   const [saveAsNew, setSaveAsNew] = useState(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
+  const isAllowedByLicense = license.canUseSearchableSnapshot();
 
   const serializer = useMemo(() => {
     return createSerializer(isNewPolicy ? undefined : currentPolicy);
@@ -255,13 +258,21 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               <HotPhase />
 
               <EuiSpacer />
-
               <WarmPhase />
 
               <EuiSpacer />
-
               <ColdPhase />
 
+              {isAllowedByLicense && (
+                <>
+                  <EuiSpacer />
+                  <FrozenPhase />
+                </>
+              )}
+
+              {/* We can't add the <EuiSpacer /> here as it breaks the layout
+              and makes the connecting line go further that it needs to.
+              There is an issue in EUI to fix this (https://github.com/elastic/eui/issues/4492) */}
               <DeletePhase />
             </div>
 

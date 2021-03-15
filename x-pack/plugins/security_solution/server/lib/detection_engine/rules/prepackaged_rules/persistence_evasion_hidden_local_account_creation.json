@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Creation of a Hidden Local User Account",
   "query": "registry where registry.path : \"HKLM\\\\SAM\\\\SAM\\\\Domains\\\\Account\\\\Users\\\\Names\\\\*$\\\\\"\n",
   "references": [
@@ -25,7 +25,6 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Defense Evasion",
     "Persistence"
   ],
   "threat": [
