@@ -260,7 +260,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/
 #CC# /x-pack/plugins/security/ @elastic/kibana-security
 
 # Kibana Alerting Services
-/x-pack/plugins/alerts/ @elastic/kibana-alerting-services
+/x-pack/plugins/alerting/ @elastic/kibana-alerting-services
 /x-pack/plugins/actions/ @elastic/kibana-alerting-services
 /x-pack/plugins/event_log/ @elastic/kibana-alerting-services
 /x-pack/plugins/task_manager/ @elastic/kibana-alerting-services

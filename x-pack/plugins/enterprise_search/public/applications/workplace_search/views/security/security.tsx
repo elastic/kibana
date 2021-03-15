@@ -25,6 +25,7 @@ import {
 import { FlashMessages } from '../../../shared/flash_messages';
 import { LicensingLogic } from '../../../shared/licensing';
 import { Loading } from '../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { LicenseCallout } from '../../components/shared/license_callout';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 import {
@@ -68,13 +69,6 @@ export const Security: React.FC = () => {
   useEffect(() => {
     initializeSourceRestrictions();
   }, []);
-
-  useEffect(() => {
-    window.onbeforeunload = unsavedChanges ? () => SECURITY_UNSAVED_CHANGES_MESSAGE : null;
-    return () => {
-      window.onbeforeunload = null;
-    };
-  }, [unsavedChanges]);
 
   if (dataLoading) return <Loading />;
 
@@ -183,6 +177,10 @@ export const Security: React.FC = () => {
   return (
     <>
       <FlashMessages />
+      <UnsavedChangesPrompt
+        hasUnsavedChanges={unsavedChanges}
+        messageText={SECURITY_UNSAVED_CHANGES_MESSAGE}
+      />
       {header}
       {allSourcesToggle}
       {!hasPlatinumLicense && platinumLicenseCallout}

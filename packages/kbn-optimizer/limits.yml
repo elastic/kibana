@@ -1,6 +1,6 @@
 pageLoadAssetSize:
   advancedSettings: 27596
-  alerts: 106936
+  alerting: 106936
   apm: 64385
   apmOss: 18996
   beatsManagement: 188135
@@ -50,7 +50,7 @@ pageLoadAssetSize:
   logstash: 53548
   management: 46112
   maps: 183610
-  mapsLegacy: 116817
+  mapsLegacy: 87859
   mapsLegacyLicensing: 20214
   ml: 82187
   monitoring: 80000
@@ -107,3 +107,4 @@ pageLoadAssetSize:
   osquery: 107090
   fileUpload: 25664
   banners: 17946
+  mapsEms: 26072

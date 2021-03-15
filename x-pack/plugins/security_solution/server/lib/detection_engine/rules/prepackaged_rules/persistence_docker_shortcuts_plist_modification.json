@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Persistence via Docker Shortcut Modification",
   "query": "event.category : file and event.action : modification and file.path : /Users/*/Library/Preferences/com.apple.dock.plist and not process.name : (xpcproxy or cfprefsd or plutil or jamf or PlistBuddy or InstallerRemotePluginService)",
   "references": [

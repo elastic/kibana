@@ -34,7 +34,7 @@ import {
   AlertTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
 import { validateExpression } from './validation';
-import { parseDuration } from '../../../../alerts/common';
+import { parseDuration } from '../../../../alerting/common';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
 import { EsQueryAlertParams } from './types';
 import { IndexSelectPopover } from '../components/index_select_popover';

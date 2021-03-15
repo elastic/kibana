@@ -8,7 +8,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Startup Folder Persistence via Unsigned Process",
   "query": "sequence by host.id, process.entity_id with maxspan=5s\n  [process where event.type in (\"start\", \"process_started\") and process.code_signature.trusted == false and\n  /* suspicious paths can be added here  */\n   process.executable : (\"C:\\\\Users\\\\*.exe\", \n                         \"C:\\\\ProgramData\\\\*.exe\", \n                         \"C:\\\\Windows\\\\Temp\\\\*.exe\", \n                         \"C:\\\\Windows\\\\Tasks\\\\*.exe\", \n                         \"C:\\\\Intel\\\\*.exe\", \n                         \"C:\\\\PerfLogs\\\\*.exe\")\n   ]\n   [file where event.type != \"deletion\" and user.domain != \"NT AUTHORITY\" and\n    file.path : (\"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\Startup\\\\*\", \n                 \"C:\\\\ProgramData\\\\Microsoft\\\\Windows\\\\Start Menu\\\\Programs\\\\StartUp\\\\*\")\n   ]\n",
   "risk_score": 41,

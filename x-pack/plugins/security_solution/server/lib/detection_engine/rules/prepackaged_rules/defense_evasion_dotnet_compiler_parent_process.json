@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious .NET Code Compilation",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"csc.exe\", \"vbc.exe\") and\n  process.parent.name : (\"wscript.exe\", \"mshta.exe\", \"cscript.exe\", \"wmic.exe\", \"svchost.exe\", \"rundll32.exe\", \"cmstp.exe\", \"regsvr32.exe\")\n",
   "risk_score": 47,
