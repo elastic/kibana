@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
 
 import type { PackagePolicy } from '../../../../common';
 

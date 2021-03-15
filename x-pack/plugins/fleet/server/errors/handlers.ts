@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import Boom, { isBoom } from '@hapi/boom';
+import type Boom from '@hapi/boom';
+import { isBoom } from '@hapi/boom';
+import { errors as LegacyESErrors } from 'elasticsearch';
+
 import type {
   IKibanaResponse,
   KibanaResponseFactory,
   RequestHandlerContext,
 } from 'src/core/server';
-import { KibanaRequest } from 'src/core/server';
-import { errors as LegacyESErrors } from 'elasticsearch';
+import type { KibanaRequest } from 'src/core/server';
 
 import { appContextService } from '../services';
 
