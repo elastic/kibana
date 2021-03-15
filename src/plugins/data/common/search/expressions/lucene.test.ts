@@ -29,12 +29,12 @@ describe('interpreter/functions#lucene', () => {
   });
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(input, { q: 'test' }, context);
+    const actual = fn(input, { q: '{ "test": 1 }' }, context);
     expect(actual).toMatchInlineSnapshot(
       `
       Object {
         "language": "lucene",
-        "query": "test",
+        "query": { "test": 1 },
         "type": "kibana_query",
       }
     `

@@ -43,7 +43,7 @@ export const luceneFunction: ExpressionFunctionLucene = {
     return {
       type: 'kibana_query',
       language: 'lucene',
-      query: args.q,
+      query: JSON.parse(args.q),
     };
   },
 };

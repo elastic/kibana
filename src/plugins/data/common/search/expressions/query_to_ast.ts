@@ -18,6 +18,6 @@ export const queryToAst = (query: Query) => {
     ]);
   }
   return buildExpression([
-    buildExpressionFunction<ExpressionFunctionLucene>('lucene', { q: query.query as string }),
+    buildExpressionFunction<ExpressionFunctionLucene>('lucene', { q: JSON.stringify(query.query) }),
   ]);
 };
