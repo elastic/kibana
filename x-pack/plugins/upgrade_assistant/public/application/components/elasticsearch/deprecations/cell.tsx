@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ReindexButton } from './reindex';
-import { AppContext } from '../../../../app_context';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { AppContext } from '../../../app_context';
+import { EnrichedDeprecationInfo } from '../../../../../common/types';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;

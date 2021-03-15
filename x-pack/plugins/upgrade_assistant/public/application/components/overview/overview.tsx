@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { useAppContext } from '../../../app_context';
-import { LoadingErrorBanner } from '../../error_banner';
-import { LoadingState, UpgradeAssistantTabProps } from '../../types';
+import { useAppContext } from '../../app_context';
+import { LoadingErrorBanner } from '../error_banner';
+import { LoadingState, UpgradeAssistantTabProps } from '../types';
 import { Steps } from './steps';
 
 export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) => {

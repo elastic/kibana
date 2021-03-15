@@ -22,8 +22,8 @@ import { HttpSetup } from 'src/core/public';
 
 import { UpgradeAssistantStatus } from '../../../common/types';
 import { LatestMinorBanner } from './latest_minor_banner';
-import { CheckupTab } from './tabs/checkup';
-import { OverviewTab } from './tabs/overview';
+import { DeprecationTab } from './elasticsearch';
+import { OverviewTab } from './overview';
 import { LoadingState, TelemetryState, UpgradeAssistantTabProps } from './types';
 
 enum ClusterUpgradeState {
@@ -203,7 +203,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
           defaultMessage: 'Cluster',
         }),
         content: (
-          <CheckupTab
+          <DeprecationTab
             key="cluster"
             deprecations={checkupData ? checkupData.cluster : undefined}
             checkupLabel={i18n.translate('xpack.upgradeAssistant.tabs.checkupTab.clusterLabel', {
@@ -220,7 +220,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
           defaultMessage: 'Indices',
         }),
         content: (
-          <CheckupTab
+          <DeprecationTab
             key="indices"
             deprecations={checkupData ? checkupData.indices : undefined}
             checkupLabel={i18n.translate('xpack.upgradeAssistant.checkupTab.indexLabel', {

@@ -7,9 +7,9 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { DeprecationInfo } from '../../../../../common/types';
+import { DeprecationInfo } from '../../../../common/types';
 
-import { LevelFilterOption } from '../../types';
+import { LevelFilterOption } from '../types';
 import { FilterBar } from './filter_bar';
 
 const defaultProps = {

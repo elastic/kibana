@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { GroupByOption, LevelFilterOption } from '../../../types';
+import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../common/types';
+import { GroupByOption, LevelFilterOption } from '../../types';
 
 import { DeprecationCountSummary } from './count_summary';
 import { DeprecationHealth } from './health';

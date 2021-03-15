@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { HttpSetup } from 'src/core/public';
 
-import { LoadingState } from '../../types';
+import { LoadingState } from '../types';
 
 interface DeprecationLoggingTabProps {
   http: HttpSetup;

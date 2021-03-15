@@ -19,14 +19,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { LoadingErrorBanner } from '../../error_banner';
-import { useAppContext } from '../../../app_context';
-import {
-  GroupByOption,
-  LevelFilterOption,
-  LoadingState,
-  UpgradeAssistantTabProps,
-} from '../../types';
+import { LoadingErrorBanner } from '../error_banner';
+import { useAppContext } from '../../app_context';
+import { GroupByOption, LevelFilterOption, LoadingState, UpgradeAssistantTabProps } from '../types';
 import { CheckupControls } from './controls';
 import { GroupedDeprecations } from './deprecations/grouped';
 
@@ -39,7 +34,7 @@ export interface CheckupTabProps extends UpgradeAssistantTabProps {
  * Displays a list of deprecations that filterable and groupable. Can be used for cluster,
  * nodes, or indices checkups.
  */
-export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
+export const DeprecationTab: FunctionComponent<CheckupTabProps> = ({
   alertBanner,
   checkupLabel,
   deprecations,

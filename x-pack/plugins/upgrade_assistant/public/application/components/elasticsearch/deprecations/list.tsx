@@ -7,8 +7,8 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { GroupByOption } from '../../../types';
+import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../common/types';
+import { GroupByOption } from '../../types';
 
 import { COLOR_MAP, LEVEL_MAP } from '../constants';
 import { DeprecationCell } from './cell';

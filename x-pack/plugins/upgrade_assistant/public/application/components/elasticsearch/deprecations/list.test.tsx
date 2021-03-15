@@ -8,8 +8,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { GroupByOption } from '../../../types';
+import { EnrichedDeprecationInfo } from '../../../../../common/types';
+import { GroupByOption } from '../../types';
 import { DeprecationList } from './list';
 
 describe('DeprecationList', () => {

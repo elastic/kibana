@@ -7,16 +7,18 @@
 
 import { IconColor } from '@elastic/eui';
 import { invert } from 'lodash';
-import { DeprecationInfo } from '../../../../../common/types';
+import { DeprecationInfo } from '../../../../common/types';
 
 export const LEVEL_MAP: { [level: string]: number } = {
   warning: 0,
   critical: 1,
 };
 
-export const REVERSE_LEVEL_MAP: { [idx: number]: DeprecationInfo['level'] } = invert(
-  LEVEL_MAP
-) as any;
+interface ReverseLevelMap {
+  [idx: number]: DeprecationInfo['level'];
+}
+
+export const REVERSE_LEVEL_MAP: ReverseLevelMap = invert(LEVEL_MAP) as ReverseLevelMap;
 
 export const COLOR_MAP: { [level: string]: IconColor } = {
   warning: 'default',

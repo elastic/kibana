@@ -11,7 +11,7 @@ import React, { FunctionComponent } from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationInfo } from '../../../../../../common/types';
+import { DeprecationInfo } from '../../../../../common/types';
 import { COLOR_MAP, LEVEL_MAP, REVERSE_LEVEL_MAP } from '../constants';
 
 const LocalizedLevels: { [level: string]: string } = {

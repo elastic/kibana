@@ -10,8 +10,8 @@ import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { EuiBadge, EuiPagination } from '@elastic/eui';
 
-import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { GroupByOption, LevelFilterOption } from '../../../types';
+import { DeprecationInfo, EnrichedDeprecationInfo } from '../../../../../common/types';
+import { GroupByOption, LevelFilterOption } from '../../types';
 import { DeprecationAccordion, filterDeps, GroupedDeprecations } from './grouped';
 
 describe('filterDeps', () => {

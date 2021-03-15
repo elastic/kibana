@@ -8,7 +8,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { GroupByOption } from '../../types';
+import { GroupByOption } from '../types';
 import { GroupByBar } from './group_by_bar';
 
 const defaultProps = {

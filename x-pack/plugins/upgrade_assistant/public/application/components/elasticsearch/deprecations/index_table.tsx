@@ -11,8 +11,8 @@ import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ReindexButton } from './reindex';
-import { AppContext } from '../../../../app_context';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { AppContext } from '../../../app_context';
+import { EnrichedDeprecationInfo } from '../../../../../common/types';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 

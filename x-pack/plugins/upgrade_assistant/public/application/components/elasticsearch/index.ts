@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CheckupTab } from './checkup_tab';
+export { DeprecationTab } from './deprecation_tab';

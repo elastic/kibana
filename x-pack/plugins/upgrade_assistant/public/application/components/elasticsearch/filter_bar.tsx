@@ -11,8 +11,8 @@ import React from 'react';
 import { EuiFilterButton, EuiFilterGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationInfo } from '../../../../../common/types';
-import { LevelFilterOption } from '../../types';
+import { DeprecationInfo } from '../../../../common/types';
+import { LevelFilterOption } from '../types';
 
 const LocalizedOptions: { [option: string]: string } = {
   all: i18n.translate('xpack.upgradeAssistant.checkupTab.controls.filterBar.allButtonLabel', {

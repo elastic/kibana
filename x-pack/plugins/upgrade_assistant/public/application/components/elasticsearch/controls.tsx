@@ -9,12 +9,11 @@ import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { DeprecationInfo } from '../../../../../common/types';
-import { GroupByOption, LevelFilterOption, LoadingState } from '../../types';
+import { DeprecationInfo } from '../../../../common/types';
+import { validateRegExpString } from '../../lib/utils';
+import { GroupByOption, LevelFilterOption, LoadingState } from '../types';
 import { FilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';
-
-import { validateRegExpString } from '../../../utils';
 
 interface CheckupControlsProps {
   allDeprecations?: DeprecationInfo[];
