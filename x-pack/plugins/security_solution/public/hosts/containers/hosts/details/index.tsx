@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// REPLACE WHEN HOST ENDPOINT DATA IS AVAILABLE
-
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
