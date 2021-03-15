@@ -78,7 +78,9 @@ describe('ServiceNow', () => {
           services,
         } as unknown) as ServiceNowActionTypeExecutorOptions;
         await actionType.executor(executorOptions);
-        expect((api.pushToService as jest.Mock).mock.calls[0][0].commentFieldKey).toBe('comments');
+        expect((api.pushToService as jest.Mock).mock.calls[0][0].commentFieldKey).toBe(
+          'work_notes'
+        );
       });
     });
   });

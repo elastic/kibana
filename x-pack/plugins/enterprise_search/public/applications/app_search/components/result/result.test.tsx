@@ -96,6 +96,39 @@ describe('Result', () => {
     });
   });
 
+  describe('actions', () => {
+    const actions = [
+      {
+        title: 'Hide',
+        onClick: jest.fn(),
+        iconType: 'eyeClosed',
+        iconColor: 'danger',
+      },
+      {
+        title: 'Bookmark',
+        onClick: jest.fn(),
+        iconType: 'starFilled',
+        iconColor: 'primary',
+      },
+    ];
+
+    it('will render an action button for each action passed', () => {
+      const wrapper = shallow(<Result {...props} actions={actions} />);
+      expect(wrapper.find('.appSearchResult__actionButton')).toHaveLength(2);
+
+      wrapper.find('.appSearchResult__actionButton').first().simulate('click');
+      expect(actions[0].onClick).toHaveBeenCalled();
+
+      wrapper.find('.appSearchResult__actionButton').last().simulate('click');
+      expect(actions[1].onClick).toHaveBeenCalled();
+    });
+
+    it('will render custom actions seamlessly next to the document detail link', () => {
+      const wrapper = shallow(<Result {...props} actions={actions} shouldLinkToDetailPage />);
+      expect(wrapper.find('.appSearchResult__actionButton')).toHaveLength(3);
+    });
+  });
+
   it('will render field details with type highlights if schemaForTypeHighlights has been provided', () => {
     const wrapper = shallow(
       <Result {...props} shouldLinkToDetailPage schemaForTypeHighlights={schema} />

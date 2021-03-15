@@ -27,7 +27,7 @@ For domain-specific alerts, refer to the documentation for that app.
 * {observability-guide}/create-alerts.html[Observability alerts]
 * {security-guide}/prebuilt-rules.html[Security alerts]
 * <<geo-alerting, Maps alerts>>
-* {ml-docs}/ml-configuring-alerts.html[{ml-cap} alerts]
+* {ml-docs}/ml-configuring-alerts.html[{ml-cap} alerts] beta:[]
 
 [NOTE]
 ==============================================

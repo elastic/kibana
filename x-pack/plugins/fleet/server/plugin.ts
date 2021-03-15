@@ -299,10 +299,7 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
     agentCheckinState.start();
 
-    if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
-      // Break the promise chain, the error handling is done in startFleetServerSetup
-      startFleetServerSetup();
-    }
+    startFleetServerSetup();
 
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),

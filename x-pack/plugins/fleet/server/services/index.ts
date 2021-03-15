@@ -51,18 +51,13 @@ export interface AgentService {
    * Authenticate an agent with access toekn
    */
   authenticateAgentWithAccessToken(
-    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     request: KibanaRequest
   ): Promise<Agent>;
   /**
    * Return the status by the Agent's id
    */
-  getAgentStatusById(
-    soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
-    agentId: string
-  ): Promise<AgentStatus>;
+  getAgentStatusById(esClient: ElasticsearchClient, agentId: string): Promise<AgentStatus>;
   /**
    * List agents
    */

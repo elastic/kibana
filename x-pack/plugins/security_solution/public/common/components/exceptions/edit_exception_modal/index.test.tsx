@@ -27,8 +27,9 @@ import {
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiBreakpoints: {
       l: '1200px',
@@ -37,7 +38,7 @@ const mockTheme = {
       m: '10px',
     },
   },
-};
+});
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/rules');

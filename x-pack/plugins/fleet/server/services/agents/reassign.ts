@@ -33,7 +33,7 @@ export async function reassignAgent(
 
   await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
 
-  await updateAgent(soClient, esClient, agentId, {
+  await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
   });
@@ -79,7 +79,7 @@ export async function reassignAgents(
         kuery: string;
       },
   newAgentPolicyId: string
-): Promise<{ items: Array<{ id: string; sucess: boolean; error?: Error }> }> {
+): Promise<{ items: Array<{ id: string; success: boolean; error?: Error }> }> {
   const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!agentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
@@ -88,9 +88,9 @@ export async function reassignAgents(
   // Filter to agents that do not already use the new agent policy ID
   const agents =
     'agentIds' in options
-      ? await getAgents(soClient, esClient, options.agentIds)
+      ? await getAgents(esClient, options.agentIds)
       : (
-          await listAllAgents(soClient, esClient, {
+          await listAllAgents(esClient, {
             kuery: options.kuery,
             showInactive: false,
           })
@@ -106,7 +106,6 @@ export async function reassignAgents(
   );
 
   const res = await bulkUpdateAgents(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,

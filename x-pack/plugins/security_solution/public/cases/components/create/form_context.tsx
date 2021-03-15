@@ -19,7 +19,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
-import { CaseType, ConnectorTypes } from '../../../../../case/common/api';
+import { CaseType, ConnectorTypes } from '../../../../../cases/common/api';
 
 const initialCaseValue: FormProps = {
   description: '',

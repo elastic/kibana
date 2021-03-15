@@ -13,6 +13,7 @@ running in no time. If you have any problems, file an issue in the https://githu
 * <<advanced>>
 * <<plugin-list>>
 * <<plugin-api-changes>>
+* <<development-telemetry>>
 
 --
 
@@ -30,4 +31,7 @@ include::advanced/index.asciidoc[]
 
 include::plugin-list.asciidoc[]
 
-include::plugin-api-changes/index.asciidoc[]
+include::plugin-api-changes/plugin-api-changes-7_12.asciidoc[]
+
+include::telemetry.asciidoc[]
+

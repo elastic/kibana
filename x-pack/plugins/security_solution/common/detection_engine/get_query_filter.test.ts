@@ -1028,7 +1028,7 @@ describe('get_filter', () => {
                               "should": Array [
                                 Object {
                                   "match": Object {
-                                    "suricata.eve.alert.signature_id": 2610182,
+                                    "suricata.eve.alert.signature_id": "2610182",
                                   },
                                 },
                               ],
@@ -1040,7 +1040,7 @@ describe('get_filter', () => {
                               "should": Array [
                                 Object {
                                   "match": Object {
-                                    "suricata.eve.alert.signature_id": 2610183,
+                                    "suricata.eve.alert.signature_id": "2610183",
                                   },
                                 },
                               ],
@@ -1052,7 +1052,7 @@ describe('get_filter', () => {
                               "should": Array [
                                 Object {
                                   "match": Object {
-                                    "suricata.eve.alert.signature_id": 2610184,
+                                    "suricata.eve.alert.signature_id": "2610184",
                                   },
                                 },
                               ],
@@ -1064,7 +1064,7 @@ describe('get_filter', () => {
                               "should": Array [
                                 Object {
                                   "match": Object {
-                                    "suricata.eve.alert.signature_id": 2610185,
+                                    "suricata.eve.alert.signature_id": "2610185",
                                   },
                                 },
                               ],
@@ -1076,7 +1076,7 @@ describe('get_filter', () => {
                               "should": Array [
                                 Object {
                                   "match": Object {
-                                    "suricata.eve.alert.signature_id": 2610186,
+                                    "suricata.eve.alert.signature_id": "2610186",
                                   },
                                 },
                               ],
@@ -1088,7 +1088,7 @@ describe('get_filter', () => {
                               "should": Array [
                                 Object {
                                   "match": Object {
-                                    "suricata.eve.alert.signature_id": 2610187,
+                                    "suricata.eve.alert.signature_id": "2610187",
                                   },
                                 },
                               ],

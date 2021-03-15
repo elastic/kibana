@@ -46,6 +46,7 @@ const fieldsWithData = [
   'machine.os',
   'machine.os.raw',
   'machine.ram',
+  'machine.ram_range',
   'memory',
   'phpmemory',
   'referer',

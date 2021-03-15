@@ -226,16 +226,22 @@ export const installPackageFromRegistryHandler: RequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { pkgkey } = request.params;
-  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+
+  let pkgName: string | undefined;
+  let pkgVersion: string | undefined;
+
   try {
+    const parsedPkgKey = splitPkgKey(pkgkey);
+    pkgName = parsedPkgKey.pkgName;
+    pkgVersion = parsedPkgKey.pkgVersion;
+
     const res = await installPackage({
       installSource: 'registry',
       savedObjectsClient,
       pkgkey,
-      callCluster,
+      esClient,
       force: request.body?.force,
     });
     const body: InstallPackageResponse = {
@@ -244,14 +250,17 @@ export const installPackageFromRegistryHandler: RequestHandler<
     return response.ok({ body });
   } catch (e) {
     const defaultResult = await defaultIngestErrorHandler({ error: e, response });
-    await handleInstallPackageFailure({
-      savedObjectsClient,
-      error: e,
-      pkgName,
-      pkgVersion,
-      installedPkg,
-      callCluster,
-    });
+    if (pkgName && pkgVersion) {
+      const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: e,
+        pkgName,
+        pkgVersion,
+        installedPkg,
+        esClient,
+      });
+    }
 
     return defaultResult;
   }
@@ -278,10 +287,10 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
-    callCluster,
+    esClient,
     packagesToUpgrade: request.body.packages,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
@@ -303,14 +312,14 @@ export const installPackageByUploadHandler: RequestHandler<
     });
   }
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   try {
     const res = await installPackage({
       installSource: 'upload',
       savedObjectsClient,
-      callCluster,
+      esClient,
       archiveBuffer,
       contentType,
     });
@@ -329,8 +338,8 @@ export const deletePackageHandler: RequestHandler<
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-    const res = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const res = await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     const body: DeletePackageResponse = {
       response: res,
     };

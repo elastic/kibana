@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "UAC Bypass via Windows Firewall Snap-In Hijack",
   "query": "process where event.type in (\"start\", \"process_started\") and\n process.parent.name == \"mmc.exe\" and\n /* process.Ext.token.integrity_level_name == \"high\" can be added in future for tuning */\n /* args of the Windows Firewall SnapIn */\n  process.parent.args == \"WF.msc\" and process.name != \"WerFault.exe\"\n",
   "references": [
