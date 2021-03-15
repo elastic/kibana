@@ -14,22 +14,21 @@ import { Margins } from '../../../../../shared/charts/Timeline';
 import { WaterfallItem } from './WaterfallItem';
 import {
   IWaterfall,
-  IWaterfallItem,
+  IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
-  item: IWaterfallItem;
+  item: IWaterfallSpanOrTransaction;
   level: number;
-  serviceColors: IWaterfall['serviceColors'];
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
   location: Location;
   errorsPerTransaction: IWaterfall['errorsPerTransaction'];
-  childrenByParentId: Record<string, IWaterfallItem[]>;
+  childrenByParentId: Record<string, IWaterfallSpanOrTransaction[]>;
   onToggleEntryTransaction?: () => void;
   timelineMargins: Margins;
-  onClickWaterfallItem: (item: IWaterfallItem) => void;
+  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
 }
 
 const StyledAccordion = euiStyled(EuiAccordion).withConfig({
@@ -98,7 +97,6 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
   const {
     item,
     level,
-    serviceColors,
     duration,
     childrenByParentId,
     waterfallItemId,
@@ -134,7 +132,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
           <WaterfallItem
             key={item.id}
             timelineMargins={timelineMargins}
-            color={serviceColors[item.doc.service.name]}
+            color={item.color}
             item={item}
             totalDuration={duration}
             isSelected={item.id === waterfallItemId}
@@ -161,7 +159,6 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
           isOpen={isOpen}
           item={child}
           level={nextLevel}
-          serviceColors={serviceColors}
           waterfallItemId={waterfallItemId}
           location={location}
           errorsPerTransaction={errorsPerTransaction}
