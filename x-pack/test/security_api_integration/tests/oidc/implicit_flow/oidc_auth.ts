@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
           'private, no-cache, no-store, must-revalidate'
         );
         expect(response.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
 
         // Check that script that forwards URL fragment worked correctly.
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
         expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
         expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });

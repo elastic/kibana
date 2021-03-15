@@ -27,9 +27,9 @@ describe('CspConfig', () => {
     expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
       CspConfig {
         "disableEmbedding": false,
-        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "header": "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "rules": Array [
-          "script-src 'unsafe-eval' 'self'",
+          "script-src 'self'",
           "worker-src blob: 'self'",
           "style-src 'unsafe-inline' 'self'",
         ],
@@ -73,7 +73,7 @@ describe('CspConfig', () => {
         expect(config.disableEmbedding).not.toEqual(CspConfig.DEFAULT.disableEmbedding);
         expect(config.rules).toEqual(expect.arrayContaining([FRAME_ANCESTORS_RULE]));
         expect(config.header).toMatchInlineSnapshot(
-          `"script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'"`
+          `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'"`
         );
       });
 

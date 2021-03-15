@@ -20,7 +20,7 @@ export const config = {
   schema: schema.object({
     rules: schema.arrayOf(schema.string(), {
       defaultValue: [
-        `script-src 'unsafe-eval' 'self'`,
+        `script-src 'self'`,
         `worker-src blob: 'self'`,
         `style-src 'unsafe-inline' 'self'`,
       ],

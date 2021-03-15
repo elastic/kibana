@@ -440,7 +440,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -465,7 +465,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
               '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -492,7 +492,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
@@ -538,7 +538,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -563,7 +563,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
               '0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2Fapp%2Fsome',
           },
@@ -590,7 +590,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: '<div/>',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
             Refresh:
               '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
@@ -635,7 +635,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: 'rendered-view',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
           },
         });
 
@@ -667,7 +667,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: 'rendered-view',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
           },
         });
 
@@ -702,7 +702,7 @@ describe('AuthenticationService', () => {
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
           body: 'rendered-view',
           headers: {
-            'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+            'Content-Security-Policy': `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
           },
         });
 
