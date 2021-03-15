@@ -31,6 +31,7 @@ import {
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
 } from './constants';
 import { MlResultsService } from '../application/services/results_service';
+import { IndexPattern } from '../../../../../src/plugins/data/common/index_patterns/index_patterns';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -117,6 +118,7 @@ export type AnomalyExplorerEmbeddableServices = [
 export interface AnomalyExplorerCustomOutput {
   entityFields?: EntityField[];
   severity?: number;
+  indexPatterns?: IndexPattern[];
 }
 export type AnomalyExplorerEmbeddableOutput = EmbeddableOutput & AnomalyExplorerCustomOutput;
 export interface EditExplorerPanelContext {

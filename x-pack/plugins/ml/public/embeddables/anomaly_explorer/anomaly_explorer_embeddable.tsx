@@ -21,6 +21,7 @@ import {
   AnomalyExplorerEmbeddableOutput,
   AnomalyExplorerServices,
 } from '..';
+import type { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
 export const getDefaultExplorerChartsPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.anomalyExplorerChartsEmbeddable.title', {
@@ -50,6 +51,50 @@ export class AnomalyExplorerEmbeddable extends Embeddable<
       },
       parent
     );
+    this.initializeOutput(initialInput);
+  }
+
+  private async initializeOutput(initialInput: AnomalyExplorerEmbeddableInput) {
+    const { anomalyExplorerService } = this.services[2];
+    const { jobIds } = initialInput;
+
+    try {
+      const jobs = await anomalyExplorerService.getCombinedJobs(jobIds);
+      const indexPatternsService = this.services[1].data.indexPatterns;
+
+      // First get list of unique indices from the selected jobs
+      const indices = new Set<string>();
+      jobs.forEach((j) => {
+        j.datafeed_config.indices.forEach((index) => {
+          if (!indices.has(index)) {
+            indices.add(index);
+          }
+        });
+      });
+
+      // Then find the index patterns assuming the index pattern title matches the index name
+      const indexPatterns: Record<string, IndexPattern> = {};
+      for (const indexName of indices) {
+        const response = await indexPatternsService.find(`"${indexName}"`);
+
+        const ip = response.find((obj) => obj.title.toLowerCase() === indexName.toLowerCase());
+        if (ip !== undefined) {
+          indexPatterns[ip.id!] = ip;
+        }
+      }
+
+      this.updateOutput({
+        ...this.getOutput(),
+        indexPatterns: Object.values(indexPatterns),
+      });
+    } catch (e) {
+      // Unable to find and load index pattern but we can ignore the error
+      // as we only load it to support the filter & query bar
+      // the visualizations should still work correctly
+
+      // eslint-disable-next-line no-console
+      console.error(`Unable to load index patterns for ${jobIds}`, e);
+    }
   }
 
   public render(node: HTMLElement) {
