@@ -236,6 +236,7 @@ export class DocLinksService {
         },
         ccs: {
           guide: `${ELASTICSEARCH_DOCS}modules-cross-cluster-search.html`,
+          skippingDisconnectedClusters: `${ELASTICSEARCH_DOCS}modules-cross-cluster-search.html#skip-unavailable-clusters`,
         },
         apis: {
           createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
