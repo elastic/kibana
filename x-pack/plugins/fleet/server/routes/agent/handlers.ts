@@ -10,6 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { AbortController } from 'abort-controller';
 
 import type {
+  Agent,
   GetAgentsResponse,
   GetOneAgentResponse,
   GetOneAgentEventsResponse,
@@ -42,9 +43,15 @@ export const getAgentHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const notFound = response.notFound({
+    body: { message: `Agent ${request.params.agentId} not found` },
+  });
 
   try {
-    const agent = await AgentService.getAgent(esClient, request.params.agentId);
+    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
+    if (!agent) {
+      return notFound;
+    }
 
     const body: GetOneAgentResponse = {
       item: {
@@ -56,9 +63,7 @@ export const getAgentHandler: RequestHandler<
     return response.ok({ body });
   } catch (error) {
     if (soClient.errors.isNotFoundError(error)) {
-      return response.notFound({
-        body: { message: `Agent ${request.params.agentId} not found` },
-      });
+      return notFound;
     }
 
     return defaultIngestErrorHandler({ error, response });
@@ -129,12 +134,18 @@ export const updateAgentHandler: RequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const notFound = response.notFound({
+    body: { message: `Agent ${request.params.agentId} not found` },
+  });
 
   try {
     await AgentService.updateAgent(esClient, request.params.agentId, {
       user_provided_metadata: request.body.user_provided_metadata,
     });
-    const agent = await AgentService.getAgent(esClient, request.params.agentId);
+    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
+    if (!agent) {
+      return notFound;
+    }
 
     const body = {
       item: {
@@ -146,9 +157,7 @@ export const updateAgentHandler: RequestHandler<
     return response.ok({ body });
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `Agent ${request.params.agentId} not found` },
-      });
+      return notFound;
     }
 
     return defaultIngestErrorHandler({ error, response });
@@ -245,7 +254,7 @@ export const getAgentsHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
-    const { agents, total, page, perPage } = await AgentService.listAgents(esClient, {
+    const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -259,10 +268,12 @@ export const getAgentsHandler: RequestHandler<
       : 0;
 
     const body: GetAgentsResponse = {
-      list: agents.map((agent) => ({
-        ...agent,
-        status: AgentService.getAgentStatus(agent),
-      })),
+      list: agents
+        .filter((agent): agent is Agent => !!agent)
+        .map((agent) => ({
+          ...agent,
+          status: AgentService.getAgentStatus(agent),
+        })),
       total,
       totalInactive,
       page,
@@ -310,6 +321,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
 
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
+
   try {
     const results = await AgentService.reassignAgents(
       soClient,
