@@ -35,6 +35,7 @@ import {
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/LicensePrompt';
+import { IUrlParams } from '../../../context/url_params_context/types';
 
 const latencyTab = {
   key: 'latency',
@@ -129,30 +130,7 @@ export function Correlations() {
             <EuiFlyoutBody>
               {hasActivePlatinumLicense ? (
                 <>
-                  {urlParams.kuery && (
-                    <>
-                      <EuiCallOut size="s">
-                        <span>
-                          {i18n.translate(
-                            'xpack.apm.correlations.filteringByLabel',
-                            { defaultMessage: 'Filtering by' }
-                          )}
-                        </span>
-                        <EuiCode>{urlParams.kuery}</EuiCode>
-                        <EuiLink
-                          href={createHref(history, { query: { kuery: '' } })}
-                        >
-                          <EuiButtonEmpty size="xs" iconType="cross">
-                            {i18n.translate(
-                              'xpack.apm.correlations.clearFiltersLabel',
-                              { defaultMessage: 'Clear' }
-                            )}
-                          </EuiButtonEmpty>
-                        </EuiLink>
-                      </EuiCallOut>
-                      <EuiSpacer />
-                    </>
-                  )}
+                  <Filters urlParams={urlParams} history={history} />
                   <TabContent onClose={() => setIsFlyoutVisible(false)} />
                 </>
               ) : (
@@ -169,6 +147,39 @@ export function Correlations() {
           </EuiFlyout>
         </EuiPortal>
       )}
+    </>
+  );
+}
+
+function Filters({
+  urlParams,
+  history,
+}: {
+  urlParams: IUrlParams;
+  history: ReturnType<typeof useHistory>;
+}) {
+  if (!urlParams.kuery) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiCallOut size="s">
+        <span>
+          {i18n.translate('xpack.apm.correlations.filteringByLabel', {
+            defaultMessage: 'Filtering by',
+          })}
+        </span>
+        <EuiCode>{urlParams.kuery}</EuiCode>
+        <EuiLink href={createHref(history, { query: { kuery: '' } })}>
+          <EuiButtonEmpty size="xs" iconType="cross">
+            {i18n.translate('xpack.apm.correlations.clearFiltersLabel', {
+              defaultMessage: 'Clear',
+            })}
+          </EuiButtonEmpty>
+        </EuiLink>
+      </EuiCallOut>
+      <EuiSpacer />
     </>
   );
 }
