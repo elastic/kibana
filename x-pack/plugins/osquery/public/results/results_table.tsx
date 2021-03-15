@@ -6,20 +6,22 @@
  */
 
 import { isEmpty, isEqual, keys, map } from 'lodash/fp';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps, EuiDataGridColumn, EuiLink } from '@elastic/eui';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { EuiDataGridSorting } from '@elastic/eui';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
+import { useRouterNavigate } from '../common/lib/kibana';
 
 const DataContext = createContext<ResultEdges>([]);
 
 interface ResultsTableComponentProps {
   actionId: string;
+  agentId?: string;
 }
 
-const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId }) => {
+const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId, agentId }) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
@@ -46,8 +48,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
     [setSortingColumns]
   );
 
-  const [, { results, totalCount }] = useAllResults({
+  const { data: allResultsData = [] } = useAllResults({
     actionId,
+    agentId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     direction: Direction.asc,
@@ -61,15 +64,22 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
   ]);
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
-    () => ({ rowIndex, columnId, setCellProps }) => {
+    () => ({ rowIndex, columnId }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
       const value = data[rowIndex].fields[columnId];
 
+      if (columnId === 'agent.name') {
+        const agentIdValue = data[rowIndex].fields['agent.id'];
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const linkProps = useRouterNavigate(`/live_query/${actionId}/results/${agentIdValue}`);
+        return <EuiLink {...linkProps}>{value}</EuiLink>;
+      }
+
       return !isEmpty(value) ? value : '-';
     },
-    []
+    [actionId]
   );
 
   const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort }), [
@@ -88,30 +98,59 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId 
   );
 
   useEffect(() => {
-    const newColumns: EuiDataGridColumn[] = keys(results[0]?.fields)
+    // @ts-expect-error update types
+    if (!allResultsData?.results) {
+      return;
+    }
+    // @ts-expect-error update types
+    const newColumns = keys(allResultsData?.results[0]?.fields)
       .sort()
-      .map((fieldName) => ({
-        id: fieldName,
-        displayAsText: fieldName.split('.')[1],
-        defaultSortDirection: 'asc',
-      }));
+      .reduce((acc, fieldName) => {
+        if (fieldName === 'agent.name') {
+          return [
+            ...acc,
+            {
+              id: fieldName,
+              displayAsText: 'agent',
+              defaultSortDirection: Direction.asc,
+            },
+          ];
+        }
+
+        if (fieldName.startsWith('osquery.')) {
+          return [
+            ...acc,
+            {
+              id: fieldName,
+              displayAsText: fieldName.split('.')[1],
+              defaultSortDirection: Direction.asc,
+            },
+          ];
+        }
+
+        return acc;
+      }, [] as EuiDataGridColumn[]);
 
     if (!isEqual(columns, newColumns)) {
       setColumns(newColumns);
       setVisibleColumns(map('id', newColumns));
     }
-  }, [columns, results]);
+    // @ts-expect-error update types
+  }, [columns, allResultsData?.results]);
 
   return (
-    <DataContext.Provider value={results}>
+    // @ts-expect-error update types
+    <DataContext.Provider value={allResultsData?.results}>
       <EuiDataGrid
         aria-label="Osquery results"
         columns={columns}
         columnVisibility={columnVisibility}
-        rowCount={totalCount}
+        // @ts-expect-error update types
+        rowCount={allResultsData?.totalCount ?? 0}
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}
+        height="300px"
       />
     </DataContext.Provider>
   );

@@ -7,13 +7,13 @@
 
 import { KibanaRequest } from 'src/core/server';
 import { CancellationToken } from '../../../common';
-import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
+import { CONTENT_TYPE_CSV } from '../../../common/constants';
 import { TaskRunResult } from '../../lib/tasks';
+import type { ReportingRequestHandlerContext } from '../../types';
 import { RunTaskFnFactory } from '../../types';
 import { createGenerateCsv } from '../csv/generate_csv';
 import { getGenerateCsvParams } from './lib/get_csv_job';
 import { JobPayloadPanelCsv } from './types';
-import type { ReportingRequestHandlerContext } from '../../types';
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -31,7 +31,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
   parentLogger
 ) {
   const config = reporting.getConfig();
-  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
+  const logger = parentLogger.clone(['execute-job']);
 
   return async function runTask(jobId, jobPayload, context, req) {
     const generateCsv = createGenerateCsv(logger);

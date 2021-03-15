@@ -217,7 +217,7 @@ describe('Header', () => {
     );
 
     expect(wrapper.find('[data-test-subj="categories-count"]').first().text()).toEqual(
-      '9 categories'
+      '10 categories'
     );
   });
 
@@ -254,6 +254,6 @@ describe('Header', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('25 fields');
+    expect(wrapper.find('[data-test-subj="fields-count"]').first().text()).toEqual('27 fields');
   });
 });
