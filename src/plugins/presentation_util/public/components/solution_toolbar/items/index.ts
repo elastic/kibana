@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { PanelToolbar } from './panel_toolbar';
+export { SolutionToolbarButton } from './button';
+export { SolutionToolbarPopover } from './popover';
+export { AddFromLibraryButton } from './add_from_library';
+export { QuickButton, QuickButtonGroup } from './quick_group';
+export { PrimaryActionButton, PrimaryActionPopover } from './primary';

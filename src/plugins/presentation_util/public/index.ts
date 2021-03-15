@@ -14,7 +14,7 @@ export {
 } from './components/saved_object_save_modal_dashboard';
 
 export { DashboardPicker } from './components/dashboard_picker';
-export { PanelToolbar } from './components/panel_toolbar';
+export { SolutionToolbar } from './components/solution_toolbar';
 
 export function plugin() {
   return new PresentationUtilPlugin();

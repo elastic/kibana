@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ComponentStrings = {
-  PanelToolbar: {
+  SolutionToolbar: {
     getEditorMenuButtonLabel: () =>
       i18n.translate('presentationUtil.panelToolbar.editorMenuButtonLabel', {
         defaultMessage: 'All editors',
@@ -17,6 +17,19 @@ export const ComponentStrings = {
     getLibraryButtonLabel: () =>
       i18n.translate('presentationUtil.panelToolbar.libraryButtonLabel', {
         defaultMessage: 'Add from library',
+      }),
+  },
+  QuickButtonGroup: {
+    getAriaButtonLabel: (createType: string) =>
+      i18n.translate('presentationUtil.panelToolbar.quickButton.ariaButtonLabel', {
+        defaultMessage: `Create new {createType}`,
+        values: {
+          createType,
+        },
+      }),
+    getLegend: () =>
+      i18n.translate('presentationUtil.panelToolbar.quickButton.legendLabel', {
+        defaultMessage: 'Quick create',
       }),
   },
 };
