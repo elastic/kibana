@@ -42,7 +42,7 @@ export const AnomaliesContextMenu: FC<AnomaliesContextMenuProps> = ({ selectedJo
           data-test-subj="mlAnomalyAddChartsToDashboardButton"
         >
           <FormattedMessage
-            id="xpack.ml.explorer.addToDashboardLabel"
+            id="xpack.ml.explorer.anomalies.addToDashboardLabel"
             defaultMessage="Add anomaly charts to dashboard"
           />
         </EuiContextMenuItem>
@@ -59,7 +59,7 @@ export const AnomaliesContextMenu: FC<AnomaliesContextMenuProps> = ({ selectedJo
             button={
               <EuiButtonIcon
                 size="s"
-                aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
                   defaultMessage: 'Actions',
                 })}
                 color="subdued"

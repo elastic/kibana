@@ -84,7 +84,7 @@ export const AddExplorerChartsToDashboardControl: FC<AddToDashboardControlProps>
         toasts.success({
           title: (
             <FormattedMessage
-              id="xpack.ml.explorer.dashboardsTable.savedSuccessfullyTitle"
+              id="xpack.ml.explorer.anomalies.dashboardsTable.savedSuccessfullyTitle"
               defaultMessage='Dashboard "{dashboardTitle}" updated successfully'
               values={{ dashboardTitle: selectedDashboard.title }}
             />
@@ -108,7 +108,7 @@ export const AddExplorerChartsToDashboardControl: FC<AddToDashboardControlProps>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
-            id="xpack.ml.explorer.dashboardsTitle"
+            id="xpack.ml.explorer.anomalies.dashboardsTitle"
             defaultMessage="Add anomaly charts to dashboards"
           />
         </EuiModalHeaderTitle>
@@ -120,7 +120,7 @@ export const AddExplorerChartsToDashboardControl: FC<AddToDashboardControlProps>
           fullWidth
           label={
             <FormattedMessage
-              id="xpack.ml.explorer.addToDashboard.selectDashboardsLabel"
+              id="xpack.ml.explorer.anomalies.addToDashboard.selectDashboardsLabel"
               defaultMessage="Select dashboards:"
             />
           }
@@ -143,7 +143,7 @@ export const AddExplorerChartsToDashboardControl: FC<AddToDashboardControlProps>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose.bind(null, undefined)}>
           <FormattedMessage
-            id="xpack.ml.explorer.addToDashboard.cancelButtonLabel"
+            id="xpack.ml.explorer.anomalies.addToDashboard.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -159,7 +159,7 @@ export const AddExplorerChartsToDashboardControl: FC<AddToDashboardControlProps>
           data-test-subj="mlAddAndEditDashboardButton"
         >
           <FormattedMessage
-            id="xpack.ml.explorer.dashboardsTable.addAndEditDashboardLabel"
+            id="xpack.ml.explorer.anomalies.dashboardsTable.addAndEditDashboardLabel"
             defaultMessage="Add and edit dashboard"
           />
         </EuiButton>
@@ -170,7 +170,7 @@ export const AddExplorerChartsToDashboardControl: FC<AddToDashboardControlProps>
           data-test-subj="mlAddToDashboardsButton"
         >
           <FormattedMessage
-            id="xpack.ml.explorer.dashboardsTable.addToDashboardLabel"
+            id="xpack.ml.explorer.anomalies.dashboardsTable.addToDashboardLabel"
             defaultMessage="Add to dashboards"
           />
         </EuiButton>
