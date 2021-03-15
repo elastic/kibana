@@ -2,6 +2,8 @@
 - RFC PR: (leave this empty)
 - Kibana Issue: (leave this empty)
 
+---
+
 - [Summary](#summary)
 - [Motivation](#motivation)
   - [Required and Desired Capabilities](#required-and-desired-capabilities)
