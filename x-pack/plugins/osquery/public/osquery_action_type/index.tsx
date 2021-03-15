@@ -12,6 +12,7 @@ import { ActionTypeModel, ValidationResult } from '../../../triggers_actions_ui/
 
 interface ExampleActionParams {
   message: string;
+  query: string;
 }
 
 export function getActionType(): ActionTypeModel {
@@ -53,6 +54,7 @@ export function getActionType(): ActionTypeModel {
       const validationResult = { errors: {} };
       const errors = {
         message: new Array<string>(),
+        query: new Array<string>(),
       };
       validationResult.errors = errors;
       // if (!actionParams.message?.length) {

@@ -27,8 +27,10 @@ import {
 import { PLUGIN_NAME } from '../common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
-  // LazyOsqueryManagedEmptyCreatePolicyExtension,
+  LazyOsqueryManagedPolicyEditExtension,
+  LazyOsqueryManagedEmptyCreatePolicyExtension,
   LazyOsqueryManagedEmptyEditPolicyExtension,
+  LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
 import { getActionType } from './osquery_action_type';
 import { getLazyCasesIntegration } from './cases_integration/lazy_index';
@@ -60,6 +62,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     const config = this.initializerContext.config.get<{
       enabled: boolean;
       actionEnabled: boolean;
+      scheduledQueries: boolean;
+      savedQueries: boolean;
+      packs: boolean;
     }>();
 
     if (!config.enabled) {
@@ -100,7 +105,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   }
 
   public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
-    const config = this.initializerContext.config.get<{ enabled: boolean }>();
+    const config = this.initializerContext.config.get<{
+      enabled: boolean;
+      actionEnabled: boolean;
+      scheduledQueries: boolean;
+      savedQueries: boolean;
+      packs: boolean;
+    }>();
 
     if (!config.enabled) {
       return {};
@@ -114,21 +125,25 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       registerExtension({
         package: 'osquery_elastic_managed',
         view: 'package-policy-create',
-        // component: LazyOsqueryManagedEmptyCreatePolicyExtension,
-        component: LazyOsqueryManagedPolicyCreateImportExtension,
+        component: config.scheduledQueries
+          ? LazyOsqueryManagedPolicyCreateImportExtension
+          : LazyOsqueryManagedEmptyCreatePolicyExtension,
       });
 
       registerExtension({
         package: 'osquery_elastic_managed',
         view: 'package-policy-edit',
-        component: LazyOsqueryManagedEmptyEditPolicyExtension,
+        component: config.scheduledQueries
+          ? LazyOsqueryManagedPolicyEditExtension
+          : LazyOsqueryManagedEmptyEditPolicyExtension,
       });
 
-      // registerExtension({
-      //   package: 'osquery_elastic_managed',
-      //   view: 'package-detail-custom',
-      //   component: LazyOsqueryManagedCustomExtension,
-      // });
+      registerExtension({
+        package: 'osquery_elastic_managed',
+        view: 'package-detail-custom',
+        // component: LazyOsqueryManagedCustomExtension,
+        component: LazyOsqueryManagedCustomButtonExtension,
+      });
     } else {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,

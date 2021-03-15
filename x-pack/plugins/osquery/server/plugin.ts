@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { curry, uniq, mapKeys, some } from 'lodash';
+import { curry, find, uniq, mapKeys, map, some } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionTypeExecutorResult } from '../../actions/server/types';
 import {
@@ -20,7 +20,7 @@ import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
-// import { initSavedObjects } from './saved_objects';
+import { initSavedObjects } from './saved_objects';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
 import { createActionHandler } from './handlers';
@@ -48,10 +48,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     const osqueryContext: OsqueryAppContext = {
       logFactory: this.context.logger,
       service: this.osqueryAppContextService,
-      config: (): Promise<ConfigType> => Promise.resolve(config),
+      config: (): ConfigType => config,
     };
 
-    // initSavedObjects(core.savedObjects);
+    initSavedObjects(core.savedObjects, osqueryContext);
     defineRoutes(router, osqueryContext);
 
     if (config.actionEnabled) {
@@ -77,6 +77,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public start(core: CoreStart, plugins: StartPlugins) {
     this.logger.debug('osquery: Started');
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
+
+    console.log('casss', Object.keys(plugins.cases));
 
     this.osqueryAppContextService.start({
       ...plugins.fleet,
@@ -106,6 +108,7 @@ async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<
     Object.keys(execOptions),
     Object.keys(execOptions.services),
     Object.keys(execOptions.params)
+    // execOptions.params
   );
   // console.log(
   //   'execOptions.params.message.alerts',
@@ -117,12 +120,12 @@ async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<
   // @ts-expect-error update types
   const agentIds = uniq(parsedAlerts.map((alert) => alert.agent?.id));
 
-  console.log('affectedHosts', affectedHosts);
-  console.log('agentIds', agentIds);
+  // console.log('affectedHosts', affectedHosts);
+  // console.log('agentIds', agentIds);
 
   const agentsService = payload.osqueryContext.service.getAgentService();
   const policyService = payload.osqueryContext.service.getAgentPolicyService();
-  const caseClient = payload.osqueryContext.service.getCasesClient(
+  const casesClient = payload.osqueryContext.service.getCasesClient(
     execOptions.services.scopedClusterClient,
     execOptions.services.savedObjectsClient,
     {
@@ -131,14 +134,10 @@ async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<
       username: '',
     }
   );
-  console.log(agentsService);
+  // console.log('agentsService', agentsService);
 
-  const agents = await agentsService.getAgents(
-    execOptions.services.savedObjectsClient,
-    execOptions.services.scopedClusterClient,
-    ['b64923ff-e12c-40bf-a42e-159c8f12a5e8']
-  );
-  console.log('agents', JSON.stringify(agents, null, 2));
+  const agents = await agentsService.getAgents(execOptions.services.scopedClusterClient, agentIds);
+  // console.log('agents', JSON.stringify(agents, null, 2));
   const agentsById = mapKeys(agents, 'id');
 
   // console.log('agentsById', JSON.stringify(agentsById, null, 2));
@@ -154,12 +153,6 @@ async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<
     )
   );
   const policiesById = mapKeys(policies, 'id');
-
-  // console.log(
-  //   'policiesById',
-  //   Object.keys(policiesById),
-  //   Object.keys(policiesById['fde75890-7551-11eb-b738-97756114a699'])
-  // );
 
   const agentsWithOsqueryPolicy = agents.filter((agent) => {
     if (!agent.policy_id) {
@@ -178,38 +171,44 @@ async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<
     );
   });
 
-  console.log('agentsWithOsqueryPolicy', agentsWithOsqueryPolicy.length);
+  const agentsWithOsqueryPolicyIds = map(agentsWithOsqueryPolicy, 'id');
 
+  const caseId = find(parsedAlerts[0].signal.rule.actions, ['actionTypeId', '.case']).params
+    ?.subActionParams?.caseId;
+
+  console.log('caseId', caseId);
+
+  // console.log('caseAction', JSON.stringify(caseAction, null, 2));
   // console.log('caseClient', caseClient, Object.keys(caseClient));
 
   // console.log('policies', JSON.stringify(policies, null, 2));
 
-  const response = await createActionHandler(
-    execOptions.services.scopedClusterClient,
-    execOptions.services.savedObjectsClient,
-    {
-      agents: ['b64923ff-e12c-40bf-a42e-159c8f12a5e8'],
-      query: {
-        query: 'select * from uptime',
-      },
-    }
-  );
-
-  const caseId = '53428a60-7aae-11eb-a532-0f6743084623';
-
-  if (caseClient && caseId) {
-    caseClient.addComment({
-      caseId,
-      comment: {
-        type: 'osquery_alert',
-        alertId: response.actions[0].action_id,
-        index: '.fleet-actions',
-        rule: {
-          id: '',
-          name: '',
+  if (agentsWithOsqueryPolicyIds.length) {
+    const response = await createActionHandler(
+      execOptions.services.scopedClusterClient,
+      execOptions.services.savedObjectsClient,
+      {
+        agents: agentsWithOsqueryPolicyIds,
+        query: {
+          query: execOptions.params.query,
         },
-      },
-    });
+      }
+    );
+
+    if (casesClient && caseId) {
+      casesClient.addComment({
+        caseId,
+        comment: {
+          type: 'osquery_alert',
+          alertId: response.actions[0].action_id,
+          index: '.fleet-actions',
+          rule: {
+            id: '',
+            name: '',
+          },
+        },
+      });
+    }
   }
 
   // console.log('response', JSON.stringify(response, null, 2));

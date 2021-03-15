@@ -71,7 +71,7 @@ const ActionsTableComponent = () => {
         actions: [
           {
             name: 'Results',
-            description: 'See action deta',
+            description: 'View action results',
             type: 'icon',
             icon: 'copy',
             onClick: () => '',

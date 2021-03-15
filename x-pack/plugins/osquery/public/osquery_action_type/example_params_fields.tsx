@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionParamsProps } from '../../../triggers_actions_ui/public/types';
+import { OsqueryEditor } from '../editor';
 
 interface ExampleActionParams {
   message: string;
@@ -19,6 +20,7 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
   index,
   errors,
 }) => {
+  const { query } = actionParams;
   console.error('actionParams', actionParams, index, errors);
 
   useEffect(() => {
@@ -32,22 +34,20 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
   }, []);
 
   return (
-    <>
-      {/* <EuiTextArea
-        fullWidth
-        isInvalid={errors.message.length > 0 && message !== undefined}
-        name="message"
-        value={message || ''}
-        onChange={(e) => {
-          editAction('message', e.target.value, index);
-        }}
-        onBlur={() => {
-          if (!message) {
-            editAction('message', '', index);
-          }
-        }}
-      /> */}
-    </>
+    <OsqueryEditor
+      fullWidth
+      isInvalid={errors.query.length > 0 && query !== undefined}
+      name="query"
+      defaultValue={query || ''}
+      onChange={(newQueryValue) => {
+        editAction('query', newQueryValue, index);
+      }}
+      onBlur={() => {
+        if (!query) {
+          editAction('query', '', index);
+        }
+      }}
+    />
   );
 };
 

@@ -29,7 +29,7 @@ const LiveQueriesPageComponent = () => {
             </h1>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
+        {/* <EuiFlexItem>
           <EuiText color="subdued">
             <p>
               <FormattedMessage
@@ -38,7 +38,7 @@ const LiveQueriesPageComponent = () => {
               />
             </p>
           </EuiText>
-        </EuiFlexItem>
+        </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
     []

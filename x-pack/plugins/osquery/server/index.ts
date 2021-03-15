@@ -14,6 +14,9 @@ export const config = {
   exposeToBrowser: {
     enabled: true,
     actionEnabled: true,
+    scheduledQueries: true,
+    savedQueries: true,
+    packs: true,
   },
 };
 export function plugin(initializerContext: PluginInitializerContext) {

@@ -22,9 +22,6 @@ const ScheduledQueriesComponent = () => {
       <Route path={`${match.url}/new`}>
         <NewScheduledQueryPage />
       </Route>
-      {/* <Route path={`${match.url}/:savedQueryId/results/:agentId`}>
-        <QueryAgentResults />
-      </Route> */}
       <Route path={`${match.url}/:scheduledQueryId`}>
         <EditScheduledQueryPage />
       </Route>

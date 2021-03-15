@@ -9,6 +9,7 @@
   "id": "osquery",
   "kibanaVersion": "kibana",
   "optionalPlugins": [
+    "cases",
     "home"
   ],
   "requiredBundles": [

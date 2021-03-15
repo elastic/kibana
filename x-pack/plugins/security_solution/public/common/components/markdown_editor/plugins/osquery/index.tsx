@@ -7,14 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { Chart, Settings, Axis, BarSeries, DataGenerator } from '@elastic/charts';
-
 import {
-  getDefaultEuiMarkdownUiPlugins,
-  getDefaultEuiMarkdownParsingPlugins,
-  getDefaultEuiMarkdownProcessingPlugins,
-  EuiMarkdownEditor,
-  EuiMarkdownFormat,
   EuiSpacer,
   EuiCodeBlock,
   EuiModalHeader,
@@ -23,28 +16,18 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiForm,
-  EuiFormRow,
-  EuiColorPalettePicker,
-  EuiRange,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { useKibana } from '../../../../lib/kibana';
 import { DraggableBadge } from '../../../draggables';
 
 const OsqueryEditorComponent = ({ node, onSave, onCancel }) => {
   const [actionId, setActionId] = useState<string | null>(null);
-  const osqueryPlugin = useKibana().services;
-  console.error('node', node);
-  console.error('osqueryPlugin', osqueryPlugin);
+  const { getCreateOsqueryActionForm } = useKibana().services.osquery;
 
   const OsqueryActionForm = useMemo(
     () =>
-      osqueryPlugin.osquery.getCreateOsqueryActionForm({
+      getCreateOsqueryActionForm({
         onSuccess: (data, variables, context) => {
-          console.error('payload', data, variables, context);
           if (data.actions[0]?.action_id) {
             setActionId(data.actions[0]?.action_id);
           }
@@ -66,7 +49,7 @@ const OsqueryEditorComponent = ({ node, onSave, onCancel }) => {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
         <EuiButton
           disabled={!actionId}
           onClick={() =>
@@ -108,7 +91,6 @@ export function parser() {
   const methods = Parser.prototype.blockMethods;
 
   function tokenizeOsquery(eat, value, silent) {
-    console.error('tokenizer', eat, value, silent);
     if (value.startsWith('!{osquery') === false) return false;
 
     const nextChar = value[9];
@@ -172,7 +154,7 @@ export function parser() {
 
 // receives the configuration from the parser and renders
 const ChartMarkdownRenderer = (props) => {
-  console.error('props', props);
+  // console.error('props', props);
 
   return (
     <>

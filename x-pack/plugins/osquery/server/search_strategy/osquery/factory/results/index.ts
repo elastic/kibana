@@ -32,8 +32,6 @@ export const allResults: OsqueryFactory<OsqueryQueries.results> = {
       dsl: [inspectStringifyObject(buildResultsQuery(options))],
     };
 
-    console.log(response.rawResponse);
-
     return {
       ...response,
       inspect,

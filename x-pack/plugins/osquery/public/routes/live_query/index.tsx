@@ -11,7 +11,6 @@ import { Switch, Route, useRouteMatch } from 'react-router-dom';
 import { LiveQueriesPage } from './list';
 import { NewLiveQueryPage } from './new';
 import { LiveQueryDetailsPage } from './details';
-import { LiveQueryAgentDetailsPage } from './agent_details';
 
 const LiveQueriesComponent = () => {
   const match = useRouteMatch();
@@ -20,9 +19,6 @@ const LiveQueriesComponent = () => {
     <Switch>
       <Route path={`${match.url}/new`}>
         <NewLiveQueryPage />
-      </Route>
-      <Route path={`${match.url}/:actionId/results/:agentId`}>
-        <LiveQueryAgentDetailsPage />
       </Route>
       <Route path={`${match.url}/:actionId`}>
         <LiveQueryDetailsPage />

@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash/fp';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { QueryClientProvider, QueryClient } from 'react-query';
-
-import { useAlertsHosts } from './use_alerts_hosts';
 
 import { LiveQuery } from '../../live_query';
 
 // @ts-expect-error update types
-const CreateOsqueryActionFormComponent = (props) => {
-  console.error('rpops', props);
-
-  return <LiveQuery {...props} />;
-};
+const CreateOsqueryActionFormComponent = (props) => <LiveQuery {...props} />;
 
 export const CreateOsqueryActionForm = React.memo(CreateOsqueryActionFormComponent);
 

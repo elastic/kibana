@@ -40,7 +40,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
         draft.inputs[0].streams = map(queriesJSON?.queries, (queryConfig, queryName) => ({
           data_stream: {
             type: 'logs',
-            dataset: 'osquery_elastic_managed.osquery',
+            dataset: 'osquery_managed.result',
           },
           vars: {
             query: {
@@ -85,16 +85,17 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
       <>
         {isEmpty(files) ? (
           <EuiFlexGroup>
-            <EuiFlexItem grow={2}>
+            <EuiFlexItem>
+              <EuiSpacer size="xl" />
               <EuiFilePicker
-                id="asdf2"
-                multiple
-                initialPromptText="Select or drag and drop multiple files"
+                id="osquery_pack_picker"
+                initialPromptText="Select or drag and drop osquery pack config file"
                 onChange={handleInputChange}
                 display="large"
                 aria-label="Use aria labels when no actual label is in use"
+                fullWidth
               />
-              <EuiSpacer />
+              <EuiSpacer size="xl" />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (

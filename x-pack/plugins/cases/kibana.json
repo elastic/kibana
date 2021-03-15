@@ -1,11 +1,16 @@
 {
-  "configPath": ["xpack", "cases"],
+  "configPath": [
+    "xpack",
+    "cases"
+  ],
   "id": "cases",
   "kibanaVersion": "kibana",
-  "requiredPlugins": ["actions", "securitySolution"],
   "optionalPlugins": [
     "spaces",
     "security"
+  ],
+  "requiredPlugins": [
+    "actions"
   ],
   "server": true,
   "ui": false,
