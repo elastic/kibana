@@ -23,7 +23,7 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
 } from '../../../common';
-import {
+import type {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
