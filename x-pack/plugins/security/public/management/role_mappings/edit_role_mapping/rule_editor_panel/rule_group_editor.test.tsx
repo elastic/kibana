@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { RuleGroupEditor } from './rule_group_editor';
-import { shallowWithIntl, mountWithIntl, nextTick } from '@kbn/test/jest';
-import { AllRule, FieldRule, AnyRule, ExceptAnyRule } from '../../model';
-import { FieldRuleEditor } from './field_rule_editor';
-import { AddRuleButton } from './add_rule_button';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { findTestSubject } from '@kbn/test/jest';
+import React from 'react';
+
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+
+import { AllRule, AnyRule, ExceptAnyRule, FieldRule } from '../../model';
+import { AddRuleButton } from './add_rule_button';
+import { FieldRuleEditor } from './field_rule_editor';
+import { RuleGroupEditor } from './rule_group_editor';
 
 describe('RuleGroupEditor', () => {
   it('renders an empty group', () => {

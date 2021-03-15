@@ -29,6 +29,8 @@ as uiSettings within the code.
 
 
 |{kib-repo}blob/{branch}/src/plugins/apm_oss/README.asciidoc[apmOss]
+|undefined
+
 
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
@@ -163,7 +165,7 @@ Content is fetched from the remote (https://feeds.elastic.co and https://feeds-s
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects/README.md[savedObjects]
-|The savedObjects plugin exposes utilities to manipulate saved objects on the client side.
+|NOTE: This plugin is deprecated and will be removed in 8.0. See https://github.com/elastic/kibana/issues/46435 for more information.
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects_management/README.md[savedObjectsManagement]
@@ -224,7 +226,7 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 |This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
 
 
-|{kib-repo}blob/{branch}/src/plugins/usage_collection/README.md[usageCollection]
+|{kib-repo}blob/{branch}/src/plugins/usage_collection/README.mdx[usageCollection]
 |The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
 
 
@@ -297,7 +299,7 @@ which will load the visualization's editor.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/alerts/README.md[alerts]
+|{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
 |The Kibana alerting plugin provides a common place to set up alerts. You can:
 
 
@@ -318,7 +320,7 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 |"Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/case/README.md[case]
+|{kib-repo}blob/{branch}/x-pack/plugins/cases/README.md[cases]
 |Experimental Feature
 
 
@@ -365,9 +367,8 @@ security and spaces filtering as well as performing audit logging.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
-|The purpose of this plugin is to provide a way to persist a history of events
-occuring in Kibana, initially just for the Make It Action project - alerts
-and actions.
+|The event log plugin provides a persistent history of alerting and action
+actitivies.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
@@ -518,13 +519,14 @@ Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/stack_alerts/README.md[stackAlerts]
 |This plugin provides alertTypes shipped with Kibana for use with the
-the alerts plugin.  When enabled, it will register
+the alerting plugin.  When enabled, it will register
 the alertTypes by the Stack in the alerting plugin, register associated HTTP
 routes, etc.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[taskManager]
 |The task manager is a generic system for running background tasks.
+Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-production-considerations.html
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/telemetry_collection_xpack/README.md[telemetryCollectionXpack]

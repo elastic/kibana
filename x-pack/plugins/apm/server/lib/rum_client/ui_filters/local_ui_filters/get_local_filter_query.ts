@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { mergeProjection } from '../../../../projections/util/merge_projection';
 import { Projection } from '../../../../projections/typings';
 import { UIFilters } from '../../../../../typings/ui_filters';
-import { getEsFilter } from '../../../helpers/convert_ui_filters/get_es_filter';
+import { getEsFilter } from '../get_es_filter';
 import { localUIFilters } from './config';
 import { LocalUIFilterName } from '../../../../../common/ui_filter';
 

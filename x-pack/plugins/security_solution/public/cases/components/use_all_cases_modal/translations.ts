@@ -6,6 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-export const SELECT_CASE_TITLE = i18n.translate('xpack.securitySolution.case.caseModal.title', {
+export const SELECT_CASE_TITLE = i18n.translate('xpack.securitySolution.cases.caseModal.title', {
   defaultMessage: 'Select case',
 });

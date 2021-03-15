@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { ClientInstanciator, setupSavedObjects } from '.';
-
+import type {
+  ISavedObjectsRepository,
+  ISavedObjectTypeRegistry,
+  SavedObject,
+} from 'src/core/server';
 import {
   coreMock,
   httpServerMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
-} from '../../../../../src/core/server/mocks';
+} from 'src/core/server/mocks';
+
 import { securityMock } from '../../../security/server/mocks';
+import type { EncryptedSavedObjectsService } from '../crypto';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
+import type { ClientInstanciator } from './';
+import { setupSavedObjects } from './';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
-import {
-  ISavedObjectsRepository,
-  ISavedObjectTypeRegistry,
-  SavedObject,
-} from '../../../../../src/core/server';
-import { EncryptedSavedObjectsService } from '../crypto';
 
 describe('#setupSavedObjects', () => {
   let setupContract: ClientInstanciator;

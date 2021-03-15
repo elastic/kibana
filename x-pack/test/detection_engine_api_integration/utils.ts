@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
@@ -226,7 +226,8 @@ export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
  * created from that rule's regular id.
  * @param ruleIds The rule_id to search for signals
  */
-export const getQuerySignalsId = (ids: string[]) => ({
+export const getQuerySignalsId = (ids: string[], size = 10) => ({
+  size,
   query: {
     terms: {
       'signal.rule.id': ids,
@@ -1009,7 +1010,7 @@ export const waitForSignalsToBePresent = async (
   signalIds: string[]
 ): Promise<void> => {
   await waitFor(async () => {
-    const signalsOpen = await getSignalsByIds(supertest, signalIds);
+    const signalsOpen = await getSignalsByIds(supertest, signalIds, numberOfSignals);
     return signalsOpen.hits.hits.length >= numberOfSignals;
   }, 'waitForSignalsToBePresent');
 };
@@ -1043,7 +1044,8 @@ export const getSignalsByRuleIds = async (
  */
 export const getSignalsByIds = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  ids: string[]
+  ids: string[],
+  size?: number
 ): Promise<
   SearchResponse<{
     signal: Signal;
@@ -1053,7 +1055,7 @@ export const getSignalsByIds = async (
   const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId(ids))
+    .send(getQuerySignalsId(ids, size))
     .expect(200);
   return signalsOpen;
 };

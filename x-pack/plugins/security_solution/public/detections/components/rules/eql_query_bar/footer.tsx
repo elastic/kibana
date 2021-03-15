@@ -75,8 +75,14 @@ export const EqlQueryBarFooter: FC<Props> = ({
   const [openEqlSettings, setIsOpenEqlSettings] = useState(false);
   const [localSize, setLocalSize] = useState(optionsSelected?.size ?? 100);
   const debounceSize = useRef<Cancelable & SizeVoidFunc>();
-  const openEqlSettingsHandler = useCallback(() => setIsOpenEqlSettings(true), []);
-  const closeEqlSettingsHandler = useCallback(() => setIsOpenEqlSettings(false), []);
+
+  const openEqlSettingsHandler = useCallback(() => {
+    setIsOpenEqlSettings(true);
+  }, []);
+  const closeEqlSettingsHandler = useCallback(() => {
+    setIsOpenEqlSettings(false);
+  }, []);
+
   const handleEventCategoryField = useCallback(
     (opt: EuiComboBoxOptionOption[]) => {
       if (onOptionsChange) {
@@ -174,13 +180,15 @@ export const EqlQueryBarFooter: FC<Props> = ({
                   <EuiButtonIcon
                     onClick={openEqlSettingsHandler}
                     iconType="controlsVertical"
+                    isDisabled={openEqlSettings}
                     aria-label="eql settings"
+                    data-test-subj="eql-settings-trigger"
                   />
                 }
                 isOpen={openEqlSettings}
                 closePopover={closeEqlSettingsHandler}
                 anchorPosition="downCenter"
-                ownFocus={true}
+                ownFocus={false}
               >
                 <EuiPopoverTitle>{i18n.EQL_SETTINGS_TITLE}</EuiPopoverTitle>
                 <div style={{ width: '300px' }}>

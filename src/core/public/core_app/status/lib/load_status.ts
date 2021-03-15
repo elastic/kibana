@@ -57,7 +57,7 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
         defaultMessage: 'Load',
       }),
       value: [metrics.os.load['1m'], metrics.os.load['5m'], metrics.os.load['15m']],
-      type: 'time',
+      type: 'float',
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeAvgHeader', {

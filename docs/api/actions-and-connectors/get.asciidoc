@@ -1,21 +1,26 @@
 [[actions-and-connectors-api-get]]
-=== Get action API
+=== Get connector API
 ++++
-<titleabbrev>Get action API</titleabbrev>
+<titleabbrev>Get connector API</titleabbrev>
 ++++
 
-Retrieves an action by ID.
+Retrieves a connector by ID.
 
 [[actions-and-connectors-api-get-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/actions/action/<id>`
+`GET <kibana host>:<port>/api/actions/connector/<id>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
 [[actions-and-connectors-api-get-params]]
 ==== Path parameters
 
 `id`::
-  (Required, string) The ID of the action.
+  (Required, string) The ID of the connector.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[actions-and-connectors-api-get-codes]]
 ==== Response code
@@ -28,7 +33,7 @@ Retrieves an action by ID.
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/actions/action/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
+$ curl -X GET api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
 --------------------------------------------------
 // KIBANA
 
@@ -38,13 +43,13 @@ The API returns the following:
 --------------------------------------------------
 {
   "id": "c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad",
-  "actionTypeId": ".index",
-  "name": "my-action",
+  "connector_type_id": ".index",
+  "name": "my-connector",
   "config": {
     "index": "test-index",
     "refresh": false,
     "executionTimeField": null
   },
-  "isPreconfigured": false
+  "is_preconfigured": false
 }
 --------------------------------------------------

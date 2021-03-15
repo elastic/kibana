@@ -28,6 +28,10 @@ import { flattenHit } from './util';
 import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
 
+function isAbortError(error: Error) {
+  return error.message === 'Request aborted' || error.message === 'Aborted';
+}
+
 export async function getGridTile({
   logger,
   context,
@@ -40,6 +44,7 @@ export async function getGridTile({
   requestType = RENDER_AS.POINT,
   geoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT,
   searchSessionId,
+  abortSignal,
 }: {
   x: number;
   y: number;
@@ -52,6 +57,7 @@ export async function getGridTile({
   requestType: RENDER_AS;
   geoFieldType: ES_GEO_FIELD_TYPE;
   searchSessionId?: string;
+  abortSignal: AbortSignal;
 }): Promise<Buffer | null> {
   try {
     const tileBounds: ESBounds = tileToESBbox(x, y, z);
@@ -72,6 +78,7 @@ export async function getGridTile({
         },
         {
           sessionId: searchSessionId,
+          abortSignal,
         }
       )
       .toPromise();
@@ -83,7 +90,9 @@ export async function getGridTile({
 
     return createMvtTile(featureCollection, z, x, y);
   } catch (e) {
-    logger.warn(`Cannot generate grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    if (!isAbortError(e)) {
+      logger.warn(`Cannot generate grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    }
     return null;
   }
 }
@@ -99,6 +108,7 @@ export async function getTile({
   requestBody = {},
   geoFieldType,
   searchSessionId,
+  abortSignal,
 }: {
   x: number;
   y: number;
@@ -110,6 +120,7 @@ export async function getTile({
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
   searchSessionId?: string;
+  abortSignal: AbortSignal;
 }): Promise<Buffer | null> {
   let features: Feature[];
   try {
@@ -119,6 +130,7 @@ export async function getTile({
 
     const searchOptions = {
       sessionId: searchSessionId,
+      abortSignal,
     };
 
     const countResponse = await context
@@ -214,7 +226,9 @@ export async function getTile({
 
     return createMvtTile(featureCollection, z, x, y);
   } catch (e) {
-    logger.warn(`Cannot generate tile for ${z}/${x}/${y}: ${e.message}`);
+    if (!isAbortError(e)) {
+      logger.warn(`Cannot generate tile for ${z}/${x}/${y}: ${e.message}`);
+    }
     return null;
   }
 }

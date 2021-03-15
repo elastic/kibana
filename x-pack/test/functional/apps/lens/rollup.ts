@@ -84,12 +84,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'sum',
         field: 'bytes',
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       await PageObjects.lens.assertMetric('Sum of bytes', '16,788');
 
       await PageObjects.lens.switchFirstLayerIndexPattern('lens_rolled_up_data');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
 
       await PageObjects.lens.assertMetric('Sum of bytes', '16,788');
     });

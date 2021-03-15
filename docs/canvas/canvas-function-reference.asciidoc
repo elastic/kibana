@@ -1697,6 +1697,16 @@ Aliases: `column`, `name`
 Aliases: `exp`, `fn`, `function`
 |`boolean`, `number`, `string`, `null`
 |A Canvas expression that is passed to each row as a single row `datatable`.
+
+|`id`
+
+|`string`, `null`
+|An optional id of the resulting column. When not specified or `null` the name argument is used as id.
+
+|`copyMetaFrom`
+
+|`string`, `null`
+|If set, the meta object from the specified column id is copied over to the specified target column. Throws an exception if the column doesn't exist
 |===
 
 *Returns:* `datatable`
@@ -1755,9 +1765,16 @@ Interprets a `TinyMath` math expression using a `number` or `datatable` as _cont
 Alias: `expression`
 |`string`
 |An evaluated `TinyMath` expression. See https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html.
+
+|`onError` 
+
+|`string`
+|In case the `TinyMath` evaluation fails or returns NaN, the return value is specified by onError. For example, `"null"`, `"zero"`, `"false"`, `"throw"`. When `"throw"`, it will throw an exception, terminating expression execution.
+
+Default: `"throw"`
 |===
 
-*Returns:* `number`
+*Returns:* `number` | `boolean` | `null`
 
 
 [float]

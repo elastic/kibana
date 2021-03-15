@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiHealth, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
+
 import {
   AGENT_STATUSES,
   getColorForAgentStatus,

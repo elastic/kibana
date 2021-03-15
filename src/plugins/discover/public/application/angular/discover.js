@@ -239,7 +239,8 @@ function discoverController($route, $scope, Promise) {
 
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
-        if (oldStatePartial.index !== newStatePartial.index) {
+        // NOTE: this is also called when navigating from discover app to context app
+        if (newStatePartial.index && oldStatePartial.index !== newStatePartial.index) {
           //in case of index pattern switch the route has currently to be reloaded, legacy
           isChangingIndexPattern = true;
           $route.reload();

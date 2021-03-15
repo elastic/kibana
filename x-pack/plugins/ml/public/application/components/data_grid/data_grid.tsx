@@ -312,15 +312,16 @@ export const DataGrid: FC<Props> = memo(
                         })}
                       >
                         <EuiButtonEmpty
-                          aria-pressed={chartsVisible}
+                          aria-pressed={chartsVisible === true}
                           className={`euiDataGrid__controlBtn${
-                            chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
+                            chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
                           }`}
                           data-test-subj={`${dataTestSubj}HistogramButton`}
                           size="xs"
                           iconType="visBarVertical"
                           color="text"
                           onClick={toggleChartVisibility}
+                          disabled={chartsVisible === undefined}
                         >
                           {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
                             defaultMessage: 'Histogram charts',

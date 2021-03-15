@@ -9,6 +9,7 @@
 import { createSessionStateContainer, SearchSessionState } from './search_session_state';
 
 describe('Session state container', () => {
+  const appName = 'appName';
   const { stateContainer: state } = createSessionStateContainer();
 
   afterEach(() => {
@@ -17,23 +18,24 @@ describe('Session state container', () => {
 
   describe('transitions', () => {
     test('start', () => {
-      state.transitions.start();
+      state.transitions.start({ appName });
       expect(state.selectors.getState()).toBe(SearchSessionState.None);
       expect(state.get().sessionId).not.toBeUndefined();
       expect(state.get().startTime).not.toBeUndefined();
+      expect(state.get().appName).toBe(appName);
     });
 
     test('track', () => {
       expect(() => state.transitions.trackSearch({})).toThrowError();
 
-      state.transitions.start();
+      state.transitions.start({ appName });
       state.transitions.trackSearch({});
 
       expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
     });
 
     test('untrack', () => {
-      state.transitions.start();
+      state.transitions.start({ appName });
       const search = {};
       state.transitions.trackSearch(search);
       expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
@@ -42,17 +44,18 @@ describe('Session state container', () => {
     });
 
     test('clear', () => {
-      state.transitions.start();
+      state.transitions.start({ appName });
       state.transitions.clear();
       expect(state.selectors.getState()).toBe(SearchSessionState.None);
       expect(state.get().sessionId).toBeUndefined();
       expect(state.get().startTime).toBeUndefined();
+      expect(state.get().appName).toBeUndefined();
     });
 
     test('cancel', () => {
       expect(() => state.transitions.cancel()).toThrowError();
 
-      state.transitions.start();
+      state.transitions.start({ appName });
       const search = {};
       state.transitions.trackSearch(search);
       expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
@@ -65,7 +68,7 @@ describe('Session state container', () => {
     test('store -> completed', () => {
       expect(() => state.transitions.store()).toThrowError();
 
-      state.transitions.start();
+      state.transitions.start({ appName });
       const search = {};
       state.transitions.trackSearch(search);
       expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
@@ -77,7 +80,7 @@ describe('Session state container', () => {
       expect(state.selectors.getState()).toBe(SearchSessionState.None);
     });
     test('store -> cancel', () => {
-      state.transitions.start();
+      state.transitions.start({ appName });
       const search = {};
       state.transitions.trackSearch(search);
       expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
@@ -89,7 +92,7 @@ describe('Session state container', () => {
       state.transitions.trackSearch(search);
       expect(state.selectors.getState()).toBe(SearchSessionState.Canceled);
 
-      state.transitions.start();
+      state.transitions.start({ appName });
       expect(state.selectors.getState()).toBe(SearchSessionState.None);
     });
 
@@ -108,7 +111,7 @@ describe('Session state container', () => {
       expect(() => state.transitions.cancel()).toThrowError();
       expect(state.selectors.getState()).toBe(SearchSessionState.Restored);
 
-      state.transitions.start();
+      state.transitions.start({ appName });
       expect(state.selectors.getState()).toBe(SearchSessionState.None);
     });
   });

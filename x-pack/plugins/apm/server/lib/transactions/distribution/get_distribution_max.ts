@@ -15,11 +15,16 @@ import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export async function getDistributionMax({
   environment,
+  kuery,
   serviceName,
   transactionName,
   transactionType,
@@ -27,6 +32,7 @@ export async function getDistributionMax({
   searchAggregatedTransactions,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -34,7 +40,7 @@ export async function getDistributionMax({
   searchAggregatedTransactions: boolean;
 }) {
   return withApmSpan('get_latency_distribution_max', async () => {
-    const { start, end, esFilter, apmEventClient } = setup;
+    const { start, end, apmEventClient } = setup;
 
     const params = {
       apm: {
@@ -54,7 +60,7 @@ export async function getDistributionMax({
               { term: { [TRANSACTION_NAME]: transactionName } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...esFilter,
+              ...kqlQuery(kuery),
             ],
           },
         },

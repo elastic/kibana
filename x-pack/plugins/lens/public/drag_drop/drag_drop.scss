@@ -81,13 +81,6 @@
   }
 }
 
-.lnsDragDrop__container {
-  position: relative;
-  overflow: visible !important; // sass-lint:disable-line no-important
-  width: 100%;
-  height: 100%;
-}
-
 .lnsDragDrop__reorderableDrop {
   position: absolute;
   width: 100%;

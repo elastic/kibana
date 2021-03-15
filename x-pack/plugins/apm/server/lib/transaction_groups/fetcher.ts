@@ -28,6 +28,7 @@ import {
 
 interface TopTransactionOptions {
   environment?: string;
+  kuery?: string;
   type: 'top_transactions';
   serviceName: string;
   transactionType: string;
@@ -37,6 +38,7 @@ interface TopTransactionOptions {
 
 interface TopTraceOptions {
   environment?: string;
+  kuery?: string;
   type: 'top_traces';
   transactionName?: string;
   searchAggregatedTransactions: boolean;

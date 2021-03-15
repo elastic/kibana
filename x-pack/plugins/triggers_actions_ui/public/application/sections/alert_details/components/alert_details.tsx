@@ -27,7 +27,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AlertExecutionStatusErrorReasons } from '../../../../../../alerts/common';
+import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -158,7 +158,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           }}
                           actionTypeRegistry={actionTypeRegistry}
                           alertTypeRegistry={alertTypeRegistry}
-                          reloadAlerts={setAlert}
+                          onSave={setAlert}
                         />
                       )}
                     </Fragment>

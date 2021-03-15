@@ -132,11 +132,9 @@ export const EndpointDetailsFlyout = memo(() => {
 
 EndpointDetailsFlyout.displayName = 'EndpointDetailsFlyout';
 
-const PolicyResponseFlyout = styled.div`
-  .endpointDetailsPolicyResponseFlyoutBody {
-    .euiFlyoutBody__overflowContent {
-      padding-top: 0;
-    }
+const PolicyResponseFlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflowContent {
+    padding-top: 0;
   }
 `;
 
@@ -180,12 +178,12 @@ const PolicyResponseFlyoutPanel = memo<{
   }, [backToDetailsClickHandler, detailsUri]);
 
   return (
-    <PolicyResponseFlyout>
+    <>
       <FlyoutSubHeader
         backButton={backButtonProp}
         data-test-subj="endpointDetailsPolicyResponseFlyoutHeader"
       />
-      <EuiFlyoutBody
+      <PolicyResponseFlyoutBody
         data-test-subj="endpointDetailsPolicyResponseFlyoutBody"
         className="endpointDetailsPolicyResponseFlyoutBody"
       >
@@ -220,8 +218,8 @@ const PolicyResponseFlyoutPanel = memo<{
             responseAttentionCount={responseAttentionCount}
           />
         )}
-      </EuiFlyoutBody>
-    </PolicyResponseFlyout>
+      </PolicyResponseFlyoutBody>
+    </>
   );
 });
 

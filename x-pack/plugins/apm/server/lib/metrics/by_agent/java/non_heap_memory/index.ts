@@ -51,11 +51,13 @@ const chartBase: ChartBase = {
 
 export async function getNonHeapMemoryChart({
   environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
   environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -63,6 +65,7 @@ export async function getNonHeapMemoryChart({
   return withApmSpan('get_non_heap_memory_charts', () =>
     fetchAndTransformMetrics({
       environment,
+      kuery,
       setup,
       serviceName,
       serviceNodeName,

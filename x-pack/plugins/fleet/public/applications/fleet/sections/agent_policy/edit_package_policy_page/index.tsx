@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { AgentPolicy, PackageInfo, UpdatePackagePolicy } from '../../../types';
 import {
   useLink,

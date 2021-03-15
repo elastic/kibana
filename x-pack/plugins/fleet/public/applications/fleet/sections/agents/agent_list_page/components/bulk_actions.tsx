@@ -18,6 +18,7 @@ import {
   EuiPortal,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { Agent } from '../../../../types';
 import {

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { AgentAction, AgentActionSOAttributes } from '../../types';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
+import type { AgentAction, AgentActionSOAttributes } from '../../types';
 import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
 import { agentPolicyService } from '../../services';
 import { IngestManagerError } from '../../errors';
+import { isAgentUpgradeable } from '../../../common/services';
+import { appContextService } from '../app_context';
+
 import { bulkCreateAgentActions, createAgentAction } from './actions';
 import {
   getAgents,
@@ -18,8 +22,6 @@ import {
   bulkUpdateAgents,
   getAgentPolicyForAgent,
 } from './crud';
-import { isAgentUpgradeable } from '../../../common/services';
-import { appContextService } from '../app_context';
 
 export async function sendUpgradeAgentAction({
   soClient,
@@ -54,7 +56,7 @@ export async function sendUpgradeAgentAction({
     ack_data: data,
     type: 'UPGRADE',
   });
-  await updateAgent(soClient, esClient, agentId, {
+  await updateAgent(esClient, agentId, {
     upgraded_at: null,
     upgrade_started_at: now,
   });
@@ -71,7 +73,7 @@ export async function ackAgentUpgraded(
   if (!ackData) throw new Error('data missing from UPGRADE action');
   const { version } = JSON.parse(ackData);
   if (!version) throw new Error('version missing from UPGRADE action');
-  await updateAgent(soClient, esClient, agentAction.agent_id, {
+  await updateAgent(esClient, agentAction.agent_id, {
     upgraded_at: new Date().toISOString(),
     upgrade_started_at: null,
   });
@@ -98,9 +100,9 @@ export async function sendUpgradeAgentsActions(
   // Filter out agents currently unenrolling, agents unenrolled, and agents not upgradeable
   const agents =
     'agentIds' in options
-      ? await getAgents(soClient, esClient, options.agentIds)
+      ? await getAgents(esClient, options.agentIds)
       : (
-          await listAllAgents(soClient, esClient, {
+          await listAllAgents(esClient, {
             kuery: options.kuery,
             showInactive: false,
           })
@@ -148,7 +150,6 @@ export async function sendUpgradeAgentsActions(
   );
 
   return await bulkUpdateAgents(
-    soClient,
     esClient,
     upgradeableAgents.map((agent) => ({
       agentId: agent.id,

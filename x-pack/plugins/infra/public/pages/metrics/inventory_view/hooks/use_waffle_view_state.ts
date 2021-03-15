@@ -78,6 +78,7 @@ export const useWaffleViewState = () => {
         region: newState.region,
         legend: newState.legend,
       });
+
       if (newState.time) {
         setWaffleTimeState({
           currentTime: newState.time,

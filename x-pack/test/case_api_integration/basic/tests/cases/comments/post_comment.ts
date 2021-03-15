@@ -9,9 +9,9 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
-import { CommentsResponse, CommentType } from '../../../../../../plugins/case/common/api';
+import { CommentsResponse, CommentType } from '../../../../../../plugins/cases/common/api';
 import {
   defaultUser,
   postCaseReq,
@@ -393,13 +393,13 @@ export default ({ getService }: FtrProviderContext): void => {
         // create another sub case just to make sure we get the right comments
         await createSubCase({ supertest, actionID });
         await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`)
+          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send(postCommentUserReq)
           .expect(200);
 
         const { body: subCaseComments }: { body: CommentsResponse } = await supertest
-          .get(`${CASES_URL}/${caseInfo.id}/comments/_find?subCaseID=${caseInfo.subCase!.id}`)
+          .get(`${CASES_URL}/${caseInfo.id}/comments/_find?subCaseId=${caseInfo.subCases![0].id}`)
           .send()
           .expect(200);
         expect(subCaseComments.total).to.be(2);

@@ -7,6 +7,9 @@
 
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import hash from 'object-hash';
+
+import { FLEET_SERVER_INDICES } from '../../../common';
+
 import { setupFleetServerIndexes } from './elastic_index';
 import ESFleetAgentIndex from './elasticsearch/fleet_agents.json';
 import ESFleetPoliciesIndex from './elasticsearch/fleet_policies.json';
@@ -14,14 +17,26 @@ import ESFleetPoliciesLeaderIndex from './elasticsearch/fleet_policies_leader.js
 import ESFleetServersIndex from './elasticsearch/fleet_servers.json';
 import ESFleetEnrollmentApiKeysIndex from './elasticsearch/fleet_enrollment_api_keys.json';
 import EsFleetActionsIndex from './elasticsearch/fleet_actions.json';
+import EsFleetArtifactsIndex from './elasticsearch/fleet_artifacts.json';
 
-const FLEET_INDEXES_MIGRATION_HASH = {
+const FLEET_INDEXES_MIGRATION_HASH: Record<typeof FLEET_SERVER_INDICES[number], string> = {
   '.fleet-actions': hash(EsFleetActionsIndex),
   '.fleet-agents': hash(ESFleetAgentIndex),
+  '.fleet-artifacts': hash(EsFleetArtifactsIndex),
   '.fleet-enrollment-apy-keys': hash(ESFleetEnrollmentApiKeysIndex),
   '.fleet-policies': hash(ESFleetPoliciesIndex),
   '.fleet-policies-leader': hash(ESFleetPoliciesLeaderIndex),
   '.fleet-servers': hash(ESFleetServersIndex),
+};
+
+const getIndexList = (returnAliases: boolean = false): string[] => {
+  const response = [...FLEET_SERVER_INDICES];
+
+  if (returnAliases) {
+    return response.sort();
+  }
+
+  return response.map((index) => `${index}_1`).sort();
 };
 
 describe('setupFleetServerIndexes ', () => {
@@ -30,26 +45,12 @@ describe('setupFleetServerIndexes ', () => {
     await setupFleetServerIndexes(esMock);
 
     const indexesCreated = esMock.indices.create.mock.calls.map((call) => call[0].index).sort();
-    expect(indexesCreated).toEqual([
-      '.fleet-actions_1',
-      '.fleet-agents_1',
-      '.fleet-enrollment-api-keys_1',
-      '.fleet-policies-leader_1',
-      '.fleet-policies_1',
-      '.fleet-servers_1',
-    ]);
+    expect(indexesCreated).toEqual(getIndexList());
     const aliasesCreated = esMock.indices.updateAliases.mock.calls
       .map((call) => (call[0].body as any)?.actions[0].add.alias)
       .sort();
 
-    expect(aliasesCreated).toEqual([
-      '.fleet-actions',
-      '.fleet-agents',
-      '.fleet-enrollment-api-keys',
-      '.fleet-policies',
-      '.fleet-policies-leader',
-      '.fleet-servers',
-    ]);
+    expect(aliasesCreated).toEqual(getIndexList(true));
   });
 
   it('should not create any indices and create aliases if indices exists but not the aliases', async () => {
@@ -63,7 +64,6 @@ describe('setupFleetServerIndexes ', () => {
           [params.index]: {
             mappings: {
               _meta: {
-                // @ts-expect-error
                 migrationHash: FLEET_INDEXES_MIGRATION_HASH[params.index.replace(/_1$/, '')],
               },
             },
@@ -79,14 +79,7 @@ describe('setupFleetServerIndexes ', () => {
       .map((call) => (call[0].body as any)?.actions[0].add.alias)
       .sort();
 
-    expect(aliasesCreated).toEqual([
-      '.fleet-actions',
-      '.fleet-agents',
-      '.fleet-enrollment-api-keys',
-      '.fleet-policies',
-      '.fleet-policies-leader',
-      '.fleet-servers',
-    ]);
+    expect(aliasesCreated).toEqual(getIndexList(true));
   });
 
   it('should put new indices mapping if the mapping has been updated ', async () => {
@@ -115,14 +108,7 @@ describe('setupFleetServerIndexes ', () => {
       .map((call) => call[0].index)
       .sort();
 
-    expect(indexesMappingUpdated).toEqual([
-      '.fleet-actions_1',
-      '.fleet-agents_1',
-      '.fleet-enrollment-api-keys_1',
-      '.fleet-policies-leader_1',
-      '.fleet-policies_1',
-      '.fleet-servers_1',
-    ]);
+    expect(indexesMappingUpdated).toEqual(getIndexList());
   });
 
   it('should not create any indices or aliases if indices and aliases already exists', async () => {
@@ -137,7 +123,6 @@ describe('setupFleetServerIndexes ', () => {
           [params.index]: {
             mappings: {
               _meta: {
-                // @ts-expect-error
                 migrationHash: FLEET_INDEXES_MIGRATION_HASH[params.index.replace(/_1$/, '')],
               },
             },

@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
+
 import { useLink } from '../hooks';
 import { AGENT_SAVED_OBJECT_TYPE } from '../constants';
 

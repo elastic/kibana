@@ -33,8 +33,7 @@ export function ServiceProfiling({
   environment,
 }: ServiceProfilingProps) {
   const {
-    urlParams: { start, end },
-    uiFilters,
+    urlParams: { kuery, start, end },
   } = useUrlParams();
 
   const { data = [] } = useFetcher(
@@ -48,15 +47,15 @@ export function ServiceProfiling({
         params: {
           path: { serviceName },
           query: {
+            kuery,
             start,
             end,
             environment,
-            uiFilters: JSON.stringify(uiFilters),
           },
         },
       });
     },
-    [start, end, serviceName, environment, uiFilters]
+    [kuery, start, end, serviceName, environment]
   );
 
   const [valueType, setValueType] = useState<ProfilingValueType | undefined>();
@@ -125,7 +124,7 @@ export function ServiceProfiling({
                     valueType={valueType}
                     start={start}
                     end={end}
-                    uiFilters={uiFilters}
+                    kuery={kuery}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

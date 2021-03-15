@@ -23,6 +23,7 @@ import {
   EuiFlyoutProps,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { dataTypes } from '../../../../../../../common';
 import { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useCapabilities, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { Rule } from './rule';
 
 /** The allowed types for field rule values */

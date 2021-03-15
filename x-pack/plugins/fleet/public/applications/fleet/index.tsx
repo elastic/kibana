@@ -9,7 +9,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect, Route, RouteProps } from 'react-router-dom';
 import { CoreStart, AppMountParameters } from 'src/core/public';
+
 import { FleetConfigType, FleetStartServices } from '../../plugin';
+
 import { licenseService } from './hooks';
 import { UIExtensionsStorage } from './types';
 import { AppRoutes, FleetAppContext, WithPermissionsAndSetup } from './app';

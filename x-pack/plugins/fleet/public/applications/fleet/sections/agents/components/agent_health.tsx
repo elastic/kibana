@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
+
 import { Agent } from '../../../types';
 
 interface Props {

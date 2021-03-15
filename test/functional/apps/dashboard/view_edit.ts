@@ -68,7 +68,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             storeTimeWithDashboard: true,
           });
 
-          await PageObjects.dashboard.switchToEditMode();
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
@@ -210,7 +209,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
-        await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setAbsoluteRange(
           'Oct 19, 2014 @ 06:31:44.000',
           'Dec 19, 2014 @ 06:31:44.000'

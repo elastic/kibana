@@ -63,6 +63,13 @@ const fieldsOne = [
     aggregatable: true,
     searchable: true,
   },
+  {
+    name: 'bytes_range',
+    displayName: 'bytes_range',
+    type: 'number_range',
+    aggregatable: true,
+    searchable: true,
+  },
   documentField,
 ];
 

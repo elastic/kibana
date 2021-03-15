@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiIcon, EuiIconProps } from '@elastic/eui';
+
 import { usePackageIconType, UsePackageIconType } from '../hooks';
 
 export const PackageIcon: React.FunctionComponent<

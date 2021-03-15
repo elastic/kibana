@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-require('@kbn/optimizer/target/cli');
+require('@kbn/optimizer').runKbnOptimizerCli({
+  defaultLimitsPath: require.resolve('../packages/kbn-optimizer/limits.yml'),
+});

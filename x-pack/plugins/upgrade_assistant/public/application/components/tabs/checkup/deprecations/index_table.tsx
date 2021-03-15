@@ -143,9 +143,11 @@ export class IndexDeprecationTable extends React.Component<
 
   private generateActionsColumn() {
     // NOTE: this naive implementation assumes all indices in the table are
-    // should show the reindex button. This should work for known usecases.
+    // should show the reindex button. This should work for known use cases.
     const { indices } = this.props;
-    if (!indices.find((i) => i.reindex === true)) {
+    const hasActionsColumn = Boolean(indices.find((i) => i.reindex === true));
+
+    if (hasActionsColumn === false) {
       return null;
     }
 

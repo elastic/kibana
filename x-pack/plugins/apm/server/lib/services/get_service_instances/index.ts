@@ -14,6 +14,7 @@ import { getServiceInstanceTransactionStats } from './get_service_instance_trans
 
 export interface ServiceInstanceParams {
   environment?: string;
+  kuery?: string;
   latencyAggregationType: LatencyAggregationType;
   setup: Setup & SetupTimeRange;
   serviceName: string;

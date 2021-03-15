@@ -19,7 +19,10 @@ const getSharingDataFields = async (
   timeFieldName: string,
   hideTimeColumn: boolean
 ) => {
-  if (selectedFields.length === 1 && selectedFields[0] === '_source') {
+  if (
+    selectedFields.length === 0 ||
+    (selectedFields.length === 1 && selectedFields[0] === '_source')
+  ) {
     const fieldCounts = await getFieldCounts();
     return {
       searchFields: undefined,

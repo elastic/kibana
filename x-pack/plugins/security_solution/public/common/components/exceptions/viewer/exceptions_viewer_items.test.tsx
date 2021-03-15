@@ -8,27 +8,33 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import * as i18n from '../translations';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionsViewerItems } from './exceptions_viewer_items';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: {
+    euiSize: '10px',
+    euiColorPrimary: '#ece',
+    euiColorDanger: '#ece',
+  },
+});
 
 describe('ExceptionsViewerItems', () => {
   it('it renders empty prompt if "showEmpty" is "true"', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <ExceptionsViewerItems
-          showEmpty
-          showNoResults={false}
-          isInitLoading={false}
-          exceptions={[]}
-          loadingItemIds={[]}
-          commentsAccordionId="comments-accordion-id"
-          onDeleteException={jest.fn()}
-          onEditExceptionItem={jest.fn()}
-        />
-      </ThemeProvider>
+      <ExceptionsViewerItems
+        showEmpty
+        showNoResults={false}
+        isInitLoading={false}
+        exceptions={[]}
+        loadingItemIds={[]}
+        commentsAccordionId="comments-accordion-id"
+        onDeleteException={jest.fn()}
+        onEditExceptionItem={jest.fn()}
+      />
     );
 
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
@@ -43,7 +49,7 @@ describe('ExceptionsViewerItems', () => {
 
   it('it renders no search results found prompt if "showNoResults" is "true"', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerItems
           showEmpty={false}
           showNoResults
@@ -67,7 +73,7 @@ describe('ExceptionsViewerItems', () => {
 
   it('it renders exceptions if "showEmpty" and "isInitLoading" is "false", and exceptions exist', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerItems
           showEmpty={false}
           showNoResults={false}
@@ -87,7 +93,7 @@ describe('ExceptionsViewerItems', () => {
 
   it('it does not render exceptions if "isInitLoading" is "true"', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerItems
           showEmpty={false}
           showNoResults={false}
@@ -111,7 +117,7 @@ describe('ExceptionsViewerItems', () => {
     exception2.id = 'newId';
 
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerItems
           showEmpty={false}
           showNoResults={false}
@@ -136,7 +142,7 @@ describe('ExceptionsViewerItems', () => {
     exception2.id = 'newId';
 
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerItems
           showEmpty={false}
           showNoResults={false}
@@ -161,7 +167,7 @@ describe('ExceptionsViewerItems', () => {
     const mockOnDeleteException = jest.fn();
 
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionsViewerItems
           showEmpty={false}
           showNoResults={false}

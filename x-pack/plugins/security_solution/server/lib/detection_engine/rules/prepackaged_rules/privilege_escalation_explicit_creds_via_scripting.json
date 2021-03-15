@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Execution with Explicit Credentials via Scripting",
   "query": "event.category:process and event.type:(start or process_started) and process.name:\"security_authtrampoline\" and process.parent.name:(osascript or com.apple.automator.runner or sh or bash or dash or zsh or python* or perl* or php* or ruby or pwsh)",
   "references": [

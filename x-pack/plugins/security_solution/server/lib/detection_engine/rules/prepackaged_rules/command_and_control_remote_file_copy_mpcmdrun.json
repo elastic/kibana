@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Remote File Download via MpCmdRun",
   "note": "### Investigating Remote File Download via MpCmdRun\nVerify details such as the parent process, URL reputation, and downloaded file details. Additionally, `MpCmdRun` logs this information in the Appdata Temp folder in `MpCmdRun.log`.",
   "query": "event.category:process and event.type:(start or process_started) and (process.name:MpCmdRun.exe or process.pe.original_file_name:MpCmdRun.exe) and process.args:((\"-DownloadFile\" or \"-downloadfile\") and \"-url\" and \"-path\")",

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,11 +15,14 @@ import {
   EuiModalHeaderTitle,
   EuiText,
 } from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart } from 'src/core/public';
-import { RolesAPIClient } from '../../roles_api_client';
+import type { NotificationsStart } from 'src/core/public';
+
+import type { RolesAPIClient } from '../../roles_api_client';
 
 interface Props {
   rolesToDelete: string[];

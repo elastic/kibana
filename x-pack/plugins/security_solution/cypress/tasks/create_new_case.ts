@@ -11,6 +11,7 @@ import {
   ServiceNowconnectorOptions,
   TestCase,
 } from '../objects/case';
+import { ALL_CASES_OPEN_CASES_COUNT, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
 
 import {
   BACK_TO_CASES_BTN,
@@ -38,6 +39,11 @@ import {
 
 export const backToCases = () => {
   cy.get(BACK_TO_CASES_BTN).click({ force: true });
+};
+
+export const filterStatusOpen = () => {
+  cy.get(ALL_CASES_OPEN_CASES_COUNT).click();
+  cy.get(ALL_CASES_OPEN_FILTER).click();
 };
 
 export const fillCasesMandatoryfields = (newCase: TestCase) => {

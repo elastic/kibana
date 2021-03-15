@@ -8,7 +8,7 @@
 import { Plugin, CoreSetup } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerts/server';
+import { PluginSetupContract as AlertingSetup } from '../../../plugins/alerting/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
 
 import { alertType as alwaysFiringAlert } from './alert_types/always_firing';
@@ -18,14 +18,14 @@ import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   features: FeaturesPluginSetup;
 }
 
 export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
-    alerts.registerType(alwaysFiringAlert);
-    alerts.registerType(peopleInSpaceAlert);
+  public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
+    alerting.registerType(alwaysFiringAlert);
+    alerting.registerType(peopleInSpaceAlert);
 
     features.registerKibanaFeature({
       id: ALERTING_EXAMPLE_APP_ID,

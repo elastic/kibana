@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 import hash from 'object-hash';
 
 import { FLEET_SERVER_INDICES, FLEET_SERVER_INDICES_VERSION } from '../../../common';
 import { appContextService } from '../app_context';
+
 import ESFleetAgentIndex from './elasticsearch/fleet_agents.json';
 import ESFleetPoliciesIndex from './elasticsearch/fleet_policies.json';
 import ESFleetPoliciesLeaderIndex from './elasticsearch/fleet_policies_leader.json';
 import ESFleetServersIndex from './elasticsearch/fleet_servers.json';
 import ESFleetEnrollmentApiKeysIndex from './elasticsearch/fleet_enrollment_api_keys.json';
 import EsFleetActionsIndex from './elasticsearch/fleet_actions.json';
+import EsFleetArtifactsIndex from './elasticsearch/fleet_artifacts.json';
 
 const FLEET_INDEXES: Array<[typeof FLEET_SERVER_INDICES[number], any]> = [
   ['.fleet-actions', EsFleetActionsIndex],
   ['.fleet-agents', ESFleetAgentIndex],
+  ['.fleet-artifacts', EsFleetArtifactsIndex],
   ['.fleet-enrollment-api-keys', ESFleetEnrollmentApiKeysIndex],
   ['.fleet-policies', ESFleetPoliciesIndex],
   ['.fleet-policies-leader', ESFleetPoliciesLeaderIndex],

@@ -21,7 +21,11 @@ import {
   PROFILE_TOP_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery, environmentQuery } from '../../../../common/utils/queries';
+import {
+  rangeQuery,
+  environmentQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -184,12 +188,14 @@ function getProfilesWithStacks({
 }
 
 export async function getServiceProfilingStatistics({
+  kuery,
   serviceName,
   setup,
   environment,
   valueType,
   logger,
 }: {
+  kuery?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   environment?: string;
@@ -202,11 +208,11 @@ export async function getServiceProfilingStatistics({
     const valueTypeField = getValueTypeConfig(valueType).field;
 
     const filter: ESFilter[] = [
-      ...rangeQuery(start, end),
       { term: { [SERVICE_NAME]: serviceName } },
-      ...environmentQuery(environment),
       { exists: { field: valueTypeField } },
-      ...setup.esFilter,
+      ...rangeQuery(start, end),
+      ...environmentQuery(environment),
+      ...kqlQuery(kuery),
     ];
 
     const [profileStats, profileStacks] = await Promise.all([

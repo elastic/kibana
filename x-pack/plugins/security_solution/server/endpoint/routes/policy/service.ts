@@ -15,7 +15,6 @@ import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/en
 import { INITIAL_POLICY_ID } from './index';
 import { Agent } from '../../../../../fleet/common/types/models';
 import { EndpointAppContext } from '../../types';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../../../fleet/common/constants';
 
 export function getESQueryPolicyResponseByAgentID(agentID: string, index: string) {
   return {
@@ -83,14 +82,14 @@ export async function getAgentPolicySummary(
   policyId?: string,
   pageSize: number = 1000
 ): Promise<{ [key: string]: number }> {
-  const agentQuery = `${AGENT_SAVED_OBJECT_TYPE}.packages:"${packageName}"`;
+  const agentQuery = `packages:"${packageName}"`;
   if (policyId) {
     return transformAgentVersionMap(
       await agentVersionsMap(
         endpointAppContext,
         soClient,
         esClient,
-        `${agentQuery} AND ${AGENT_SAVED_OBJECT_TYPE}.policy_id:${policyId}`,
+        `${agentQuery} AND policy_id:${policyId}`,
         pageSize
       )
     );
@@ -123,7 +122,7 @@ export async function agentVersionsMap(
   while (hasMore) {
     const queryResult = await endpointAppContext.service
       .getAgentService()!
-      .listAgents(soClient, esClient, searchOptions(page++));
+      .listAgents(esClient, searchOptions(page++));
     queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {

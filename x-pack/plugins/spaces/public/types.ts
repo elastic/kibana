@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetSpaceResult } from '../common';
+import type { GetSpaceResult } from '../common';
 
 /**
  * The structure for all of the space data that must be loaded for share-to-space components to function.

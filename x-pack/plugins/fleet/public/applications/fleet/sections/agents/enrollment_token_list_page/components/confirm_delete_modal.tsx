@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiCallOut } from '@elastic/eui';
+
 import { EnrollmentAPIKey } from '../../../../types';
 
 interface Props {

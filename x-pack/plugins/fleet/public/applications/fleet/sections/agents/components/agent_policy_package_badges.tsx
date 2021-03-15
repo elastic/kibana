@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+
 import { PackagePolicy, PackagePolicyPackage } from '../../../types';
 import { useGetOneAgentPolicy } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';

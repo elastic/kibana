@@ -8,6 +8,7 @@
 import { IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
 import { EsQueryConfig } from 'src/plugins/data/server';
 import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/server';
+import { LevelLogger } from '../../../lib';
 import { TimeRangeParams } from '../../common';
 import { GenerateCsvParams } from '../../csv/generate_csv';
 import {
@@ -44,7 +45,8 @@ export const getGenerateCsvParams = async (
   jobParams: JobParamsPanelCsv,
   panel: SearchPanel,
   savedObjectsClient: SavedObjectsClientContract,
-  uiConfig: IUiSettingsClient
+  uiConfig: IUiSettingsClient,
+  logger: LevelLogger
 ): Promise<GenerateCsvParams> => {
   let timerange: TimeRangeParams | null;
   if (jobParams.post?.timerange) {
@@ -74,6 +76,14 @@ export const getGenerateCsvParams = async (
     title: esIndex,
     fields: indexPatternFields,
   } = indexPatternSavedObject;
+
+  if (!indexPatternFields || indexPatternFields.length === 0) {
+    logger.error(
+      new Error(
+        `No fields are selected in the saved search! Please select fields as columns in the saved search and try again.`
+      )
+    );
+  }
 
   let payloadQuery: QueryFilter | undefined;
   let payloadSort: any[] = [];

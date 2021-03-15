@@ -48,6 +48,12 @@ const BAZ_TYPE: SavedObjectsType = {
   namespaceType: 'single',
   mappings: { properties: {} },
 };
+const FLEET_AGENT_EVENT_TYPE: SavedObjectsType = {
+  name: 'fleet-agent-event',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+};
 
 function getLogMock() {
   return {
@@ -325,6 +331,80 @@ export default ({ getService }: FtrProviderContext) => {
           type: 'foo',
           migrationVersion: { foo: '2.0.1' },
           foo: { name: 'FOOEYv2' },
+          references: [],
+          coreMigrationVersion: KIBANA_VERSION,
+        },
+      ]);
+    });
+
+    it('drops fleet-agent-event saved object types when doing a migration', async () => {
+      const index = '.migration-b';
+      const originalDocs = [
+        {
+          id: 'fleet-agent-event:a',
+          type: 'fleet-agent-event',
+          'fleet-agent-event': { name: 'Foo A' },
+        },
+        {
+          id: 'fleet-agent-event:e',
+          type: 'fleet-agent-event',
+          'fleet-agent-event': { name: 'Fooey' },
+        },
+        { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
+        { id: 'bar:o', type: 'bar', bar: { nomnom: 2 } },
+      ];
+
+      const mappingProperties = {
+        'fleet-agent-event': { properties: { name: { type: 'text' } } },
+        bar: { properties: { mynum: { type: 'integer' } } },
+      };
+
+      let savedObjectTypes: SavedObjectsType[] = [
+        FLEET_AGENT_EVENT_TYPE,
+        {
+          ...BAR_TYPE,
+          migrations: {
+            '1.0.0': (doc) => set(doc, 'attributes.nomnom', doc.attributes.nomnom + 1),
+            '1.3.0': (doc) => set(doc, 'attributes', { mynum: doc.attributes.nomnom }),
+            '1.9.0': (doc) => set(doc, 'attributes.mynum', doc.attributes.mynum * 2),
+          },
+        },
+      ];
+
+      await createIndex({ esClient, index, esDeleteAllIndices });
+      await createDocs({ esClient, index, docs: originalDocs });
+
+      await migrateIndex({ esClient, index, savedObjectTypes, mappingProperties });
+
+      // @ts-expect-error name doesn't exist on mynum type
+      mappingProperties.bar.properties.name = { type: 'keyword' };
+      savedObjectTypes = [
+        FLEET_AGENT_EVENT_TYPE,
+        {
+          ...BAR_TYPE,
+          migrations: {
+            '2.3.4': (doc) => set(doc, 'attributes.name', `NAME ${doc.id}`),
+          },
+        },
+      ];
+
+      await migrateIndex({ esClient, index, savedObjectTypes, mappingProperties });
+
+      // Assert that fleet-agent-events were dropped
+      expect(await fetchDocs(esClient, index)).to.eql([
+        {
+          id: 'bar:i',
+          type: 'bar',
+          migrationVersion: { bar: '2.3.4' },
+          bar: { mynum: 68, name: 'NAME i' },
+          references: [],
+          coreMigrationVersion: KIBANA_VERSION,
+        },
+        {
+          id: 'bar:o',
+          type: 'bar',
+          migrationVersion: { bar: '2.3.4' },
+          bar: { mynum: 6, name: 'NAME o' },
           references: [],
           coreMigrationVersion: KIBANA_VERSION,
         },

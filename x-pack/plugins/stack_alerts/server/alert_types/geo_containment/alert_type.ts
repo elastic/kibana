@@ -16,7 +16,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   AlertTypeParams,
-} from '../../../../alerts/server';
+} from '../../../../alerting/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';

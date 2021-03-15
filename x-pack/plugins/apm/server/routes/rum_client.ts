@@ -6,10 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { omit } from 'lodash';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { LocalUIFilterName } from '../../common/ui_filter';
-import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
 import {
   Setup,
   setupRequest,
@@ -31,13 +29,15 @@ import { localUIFilterNames } from '../lib/rum_client/ui_filters/local_ui_filter
 import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
 import { Projection } from '../projections/typings';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { rangeRt } from './default_api_types';
 import { APMRequestHandlerContext } from './typings';
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
   maxPercentile: t.string,
 });
+
+const uiFiltersRt = t.type({ uiFilters: t.string });
 
 const uxQueryRt = t.intersection([
   uiFiltersRt,
@@ -319,10 +319,7 @@ function createLocalFiltersRoute<
       const projection = await getProjection({
         query,
         context,
-        setup: {
-          ...setup,
-          esFilter: getEsFilter(omit(uiFilters, filterNames)),
-        },
+        setup,
       });
 
       return getLocalUIFilters({

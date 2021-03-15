@@ -7,3 +7,4 @@
 
 export { CURATIONS_TITLE } from './constants';
 export { CurationsRouter } from './curations_router';
+export { CurationsLogic } from './curations_logic';
