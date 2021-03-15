@@ -24,6 +24,8 @@ export {
   getRegistryUrl,
   PackageService,
   AgentPolicyServiceInterface,
+  ArtifactsClientInterface,
+  Artifact,
 } from './services';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
 export { AgentNotFoundError } from './errors';
