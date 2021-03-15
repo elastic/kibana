@@ -149,8 +149,8 @@ export class IndexDeprecationTable extends React.Component<
   }
 
   private generateActionsColumn() {
-    // NOTE: this naive implementation assumes all indices in the table are
-    // should show the reindex button. This should work for known use cases.
+    // NOTE: this naive implementation assumes all indices in the table
+    // should show the reindex button or fix indices button. This should work for known use cases.
     const { indices } = this.props;
     const showReindexButton = Boolean(indices.find((i) => i.reindex === true));
     const showFixSettingsButton = Boolean(
