@@ -35,6 +35,7 @@ import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
 import { createDocSource } from './create_doc_source';
+import { writeDataToIndex } from './index_data';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -600,10 +601,11 @@ export async function initRoutes(
   if (drawingFeatureEnabled) {
     router.post(
       {
-        path: `/${INDEX_SOURCE_API_PATH}/{indexName}/feature`,
+        path: `/${GIS_API_PATH}/feature`,
         validate: {
           body: schema.object({
-            data: schema.arrayOf(schema.any(), { minSize: 1 }),
+            index: schema.string(),
+            data: schema.any(),
           }),
         },
         options: {
@@ -614,23 +616,17 @@ export async function initRoutes(
         },
       },
       async (context, request, response) => {
-        const { index, mappings } = request.body;
-        const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser
-        );
-        const result = await createIndexSource(
-          index,
-          mappings,
-          context.core.elasticsearch.client,
-          indexPatternsService
-        );
-        if (result.success) {
+        try {
+          const result = await writeDataToIndex(
+            request.body.index,
+            request.body.data,
+            context.core.elasticsearch.client.asCurrentUser
+          );
           return response.ok({ body: result });
-        } else {
-          logger.error(result.error);
+        } catch (error) {
+          logger.error(error.message);
           return response.custom({
-            body: result.error.message,
+            body: error.message,
             statusCode: 500,
           });
         }
