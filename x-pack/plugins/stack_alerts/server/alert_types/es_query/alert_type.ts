@@ -266,7 +266,7 @@ export function getAlertType(
   }
 }
 
-function getValidTimefieldSort(sortValues: Array<string | number> = []): undefined | string {
+function getValidTimefieldSort(sortValues: Array<string | number | null> = []): undefined | string {
   for (const sortValue of sortValues) {
     const sortDate = tryToParseAsDate(sortValue);
     if (sortDate) {
@@ -274,7 +274,7 @@ function getValidTimefieldSort(sortValues: Array<string | number> = []): undefin
     }
   }
 }
-function tryToParseAsDate(sortValue?: string | number): undefined | string {
+function tryToParseAsDate(sortValue?: string | number | null): undefined | string {
   const sortDate = typeof sortValue === 'string' ? Date.parse(sortValue) : sortValue;
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
