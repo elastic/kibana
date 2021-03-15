@@ -104,7 +104,7 @@ export const getXyVisualization = ({
     };
   },
 
-  appendLayer(state, layerId) {
+  appendLayer(state, layerId, layerType) {
     const usedSeriesTypes = _.uniq(state.layers.map((layer) => layer.seriesType));
     return {
       ...state,
@@ -112,7 +112,8 @@ export const getXyVisualization = ({
         ...state.layers,
         newLayerState(
           usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
-          layerId
+          layerId,
+          layerType as 'data' | 'threshold' | 'threshold_const'
         ),
       ],
     };
@@ -196,51 +197,75 @@ export const getXyVisualization = ({
       );
     }
 
+    const isDataLayer = !layer.layerType || layer.layerType === 'data';
+
     const isHorizontal = isHorizontalChart(state.layers);
-    return {
-      groups: [
-        {
-          groupId: 'x',
-          groupLabel: getAxisName('x', { isHorizontal }),
-          accessors: layer.xAccessor ? [{ columnId: layer.xAccessor }] : [],
-          filterOperations: isBucketed,
-          supportsMoreColumns: !layer.xAccessor,
-          dataTestSubj: 'lnsXY_xDimensionPanel',
-        },
-        {
-          groupId: 'y',
-          groupLabel: getAxisName('y', { isHorizontal }),
-          accessors: mappedAccessors,
-          filterOperations: isNumericMetric,
-          supportsMoreColumns: true,
-          required: true,
-          dataTestSubj: 'lnsXY_yDimensionPanel',
-          enableDimensionEditor: true,
-        },
-        {
-          groupId: 'breakdown',
-          groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
-            defaultMessage: 'Break down by',
-          }),
-          accessors: layer.splitAccessor
-            ? [
-                {
-                  columnId: layer.splitAccessor,
-                  triggerIcon: 'colorBy',
-                  palette: paletteService
-                    .get(layer.palette?.name || 'default')
-                    .getColors(10, layer.palette?.params),
-                },
-              ]
-            : [],
-          filterOperations: isBucketed,
-          supportsMoreColumns: !layer.splitAccessor,
-          dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: layer.seriesType.includes('percentage'),
-          enableDimensionEditor: true,
-        },
-      ],
-    };
+    return isDataLayer
+      ? {
+          groups: [
+            {
+              groupId: 'x',
+              groupLabel: getAxisName('x', { isHorizontal }),
+              accessors: layer.xAccessor ? [{ columnId: layer.xAccessor }] : [],
+              filterOperations: isBucketed,
+              supportsMoreColumns: !layer.xAccessor,
+              dataTestSubj: 'lnsXY_xDimensionPanel',
+            },
+            {
+              groupId: 'y',
+              groupLabel: getAxisName('y', { isHorizontal }),
+              accessors: mappedAccessors,
+              filterOperations: isNumericMetric,
+              supportsMoreColumns: true,
+              required: true,
+              dataTestSubj: 'lnsXY_yDimensionPanel',
+              enableDimensionEditor: true,
+            },
+            {
+              groupId: 'breakdown',
+              groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
+                defaultMessage: 'Break down by',
+              }),
+              accessors: layer.splitAccessor
+                ? [
+                    {
+                      columnId: layer.splitAccessor,
+                      triggerIcon: 'colorBy',
+                      palette: paletteService
+                        .get(layer.palette?.name || 'default')
+                        .getColors(10, layer.palette?.params),
+                    },
+                  ]
+                : [],
+              filterOperations: isBucketed,
+              supportsMoreColumns: !layer.splitAccessor,
+              dataTestSubj: 'lnsXY_splitDimensionPanel',
+              required: layer.seriesType.includes('percentage'),
+              enableDimensionEditor: true,
+            },
+          ],
+        }
+      : {
+          groups: [
+            {
+              groupId: 'threshold',
+              groupLabel: 'Threshold value',
+              accessors:
+                layer.layerType === 'threshold'
+                  ? layer.accessors.map((a) => ({ columnId: a }))
+                  : layer.constantThresholdValues
+                  ? layer.constantThresholdValues.map((_a, index) => ({
+                      columnId: String(index),
+                    }))
+                  : [],
+              filterOperations: isNumericMetric,
+              supportsMoreColumns: true,
+              required: false,
+              dataTestSubj: '',
+              enableDimensionEditor: true,
+            },
+          ],
+        };
   },
 
   getMainPalette: (state) => {
@@ -257,7 +282,7 @@ export const getXyVisualization = ({
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
-    if (groupId === 'y') {
+    if (groupId === 'y' || groupId === 'threshold') {
       newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
     }
     if (groupId === 'breakdown') {
@@ -295,6 +320,12 @@ export const getXyVisualization = ({
       layers: prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l)),
     };
   },
+
+  getLayerTypes: () => [
+    { name: 'data', dataBacked: true },
+    { name: 'threshold', dataBacked: true },
+    { name: 'threshold_const', dataBacked: false },
+  ],
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
@@ -510,10 +541,15 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
   return { shortMessage: '', longMessage: '' };
 }
 
-function newLayerState(seriesType: SeriesType, layerId: string): XYLayerConfig {
+function newLayerState(
+  seriesType: SeriesType,
+  layerId: string,
+  layerType: 'data' | 'threshold' | 'threshold_const' = 'data'
+): XYLayerConfig {
   return {
     layerId,
     seriesType,
     accessors: [],
+    layerType,
   };
 }

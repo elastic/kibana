@@ -108,7 +108,9 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
-  const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
+  const { groups, isConstant } = activeVisualization.getConfiguration(
+    layerVisualizationConfigProps
+  );
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
 

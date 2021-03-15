@@ -302,6 +302,14 @@ export const layerConfig: ExpressionFunctionDefinition<
       ],
       help: 'The type of chart to display.',
     },
+    layerType: {
+      types: ['string'],
+      options: ['data', 'threshold', 'threshold_const'],
+    },
+    thresholdAxis: {
+      types: ['string'],
+      options: ['bottom', 'left', 'right'],
+    },
     xScaleType: {
       options: ['ordinal', 'linear', 'time'],
       help: 'The scale type of the x axis',
@@ -379,9 +387,12 @@ export interface XYLayerConfig {
   xAccessor?: string;
   accessors: string[];
   yConfig?: YConfig[];
+  thresholdAxis?: 'left' | 'right' | 'bottom';
+  constantThresholdValues?: number[];
   seriesType: SeriesType;
   splitAccessor?: string;
   palette?: PaletteOutput;
+  layerType?: 'data' | 'threshold' | 'threshold_const';
 }
 
 export interface ValidLayer extends XYLayerConfig {

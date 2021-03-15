@@ -568,14 +568,16 @@ export interface Visualization<T = unknown> {
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string) => T;
+  appendLayer?: (state: T, layerId: string, layerType?: string) => T;
+  /* if set, allows adding of multiple types of layers */
+  getLayerTypes?: (state: T) => Array<{ name: string; dataBacked: boolean }>;
 
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
   getConfiguration: (
     props: VisualizationConfigProps<T>
-  ) => { groups: VisualizationDimensionGroupConfig[] };
+  ) => { groups: VisualizationDimensionGroupConfig[]; isConstant?: boolean };
 
   /**
    * Popover contents that open when the user clicks the contextMenuIcon. This can be used

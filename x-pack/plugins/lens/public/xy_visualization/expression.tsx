@@ -24,6 +24,8 @@ import {
   HorizontalAlignment,
   ElementClickListener,
   BrushEndListener,
+  LineAnnotation,
+  AnnotationDomainTypes,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -32,7 +34,7 @@ import {
   Datatable,
   DatatableRow,
 } from 'src/plugins/expressions/public';
-import { IconType } from '@elastic/eui';
+import { EuiIcon, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RenderMode } from 'src/plugins/expressions';
 import {
@@ -335,6 +337,7 @@ export function XYChart({
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
   const filteredLayers = getFilteredLayers(layers, data);
+  const thresholdLayers = layers.filter((layer) => layer.layerType === 'threshold');
 
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
@@ -815,13 +818,48 @@ export function XYChart({
           }
         })
       )}
+
+      {thresholdLayers.map((thresholdLayer) => {
+        return (
+          <LineAnnotation
+            id={thresholdLayer.layerId}
+            key={thresholdLayer.layerId}
+            domainType={
+              thresholdLayer.thresholdAxis === 'bottom'
+                ? AnnotationDomainTypes.XDomain
+                : AnnotationDomainTypes.YDomain
+            }
+            dataValues={thresholdLayer.accessors.flatMap((accessor) =>
+              data.tables[thresholdLayer.layerId].rows.map((row) => ({
+                dataValue: row[accessor],
+              }))
+            )}
+            groupId={
+              thresholdLayer.thresholdAxis === 'bottom'
+                ? undefined
+                : thresholdLayer.thresholdAxis === 'right'
+                ? 'right'
+                : 'left'
+            }
+            style={{
+              line: {
+                strokeWidth: 3,
+                stroke: '#f00',
+                opacity: 1,
+              },
+            }}
+            marker={<EuiIcon type="alert" />}
+          />
+        );
+      })}
     </Chart>
   );
 }
 
 function getFilteredLayers(layers: LayerArgs[], data: LensMultiTable) {
-  return layers.filter(({ layerId, xAccessor, accessors, splitAccessor }) => {
+  return layers.filter(({ layerId, layerType, xAccessor, accessors, splitAccessor }) => {
     return !(
+      layerType === 'threshold' ||
       !accessors.length ||
       !data.tables[layerId] ||
       data.tables[layerId].rows.length === 0 ||

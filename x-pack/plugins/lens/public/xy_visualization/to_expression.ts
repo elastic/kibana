@@ -248,6 +248,8 @@ export const buildExpression = (
                         }))
                       : [],
                     seriesType: [layer.seriesType],
+                    layerType: [layer.layerType || 'data'],
+                    thresholdAxis: layer.thresholdAxis ? [layer.thresholdAxis] : [],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],
                     ...(layer.palette

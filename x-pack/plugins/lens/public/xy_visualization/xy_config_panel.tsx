@@ -23,6 +23,7 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiIconTip,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
@@ -514,6 +515,110 @@ export function DimensionEditor(
             setState(updateLayer(state, { ...layer, palette: newPalette }, index));
           }}
         />
+      </>
+    );
+  }
+
+  if (layer.layerType === 'threshold' && props.groupId === 'threshold') {
+    return (
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+          defaultMessage: 'Axis side',
+        })}
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+            defaultMessage: 'Axis side',
+          })}
+          data-test-subj="lnsXY_axisSide_groups"
+          name="axisSide"
+          buttonSize="compressed"
+          options={[
+            {
+              id: `${idPrefix}left`,
+              label: 'Left',
+              'data-test-subj': 'lnsXY_axisSide_groups_auto',
+            },
+            {
+              id: `${idPrefix}right`,
+              label: 'Right',
+              'data-test-subj': 'lnsXY_axisSide_groups_left',
+            },
+            {
+              id: `${idPrefix}bottom`,
+              label: 'Bottom',
+              'data-test-subj': 'lnsXY_axisSide_groups_right',
+            },
+          ]}
+          idSelected={`${idPrefix}${layer.thresholdAxis || 'left'}`}
+          onChange={(id) => {
+            const newMode = id.replace(idPrefix, '') as 'left' | 'right' | 'bottom';
+            setState(updateLayer(state, { ...layer, thresholdAxis: newMode }, index));
+          }}
+        />
+      </EuiFormRow>
+    );
+  }
+
+  if (layer.layerType === 'threshold_const' && props.groupId === 'threshold') {
+    return (
+      <>
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+            defaultMessage: 'Axis side',
+          })}
+        >
+          <EuiButtonGroup
+            isFullWidth
+            legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
+              defaultMessage: 'Axis side',
+            })}
+            data-test-subj="lnsXY_axisSide_groups"
+            name="axisSide"
+            buttonSize="compressed"
+            options={[
+              {
+                id: `${idPrefix}left`,
+                label: 'Left',
+                'data-test-subj': 'lnsXY_axisSide_groups_auto',
+              },
+              {
+                id: `${idPrefix}right`,
+                label: 'Right',
+                'data-test-subj': 'lnsXY_axisSide_groups_left',
+              },
+              {
+                id: `${idPrefix}bottom`,
+                label: 'Bottom',
+                'data-test-subj': 'lnsXY_axisSide_groups_right',
+              },
+            ]}
+            idSelected={`${idPrefix}${layer.thresholdAxis || 'left'}`}
+            onChange={(id) => {
+              const newMode = id.replace(idPrefix, '') as 'left' | 'right' | 'bottom';
+              setState(updateLayer(state, { ...layer, thresholdAxis: newMode }, index));
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow display="columnCompressed" label="Threhshold value">
+          <EuiFieldNumber
+            value={
+              layer.constantThresholdValues
+                ? layer.constantThresholdValues[Number(props.accessor)]
+                : 0
+            }
+            onChange={(e) => {
+              const vals = [...(layer.constantThresholdValues || [])];
+              vals[Number(props.accessor)] = Number(e.target.value);
+              setState(updateLayer(state, { ...layer, constantThresholdValues: vals }, index));
+            }}
+          />
+        </EuiFormRow>
       </>
     );
   }

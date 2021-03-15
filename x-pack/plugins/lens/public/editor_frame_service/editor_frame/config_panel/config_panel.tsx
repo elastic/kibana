@@ -133,48 +133,59 @@ export function LayerPanels(
           />
         ) : null
       )}
-      {activeVisualization.appendLayer && visualizationState && (
-        <EuiFlexItem grow={true}>
-          <EuiToolTip
-            className="eui-fullWidth"
-            title={i18n.translate('xpack.lens.xyChart.addLayer', {
-              defaultMessage: 'Add a layer',
-            })}
-            content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
-              defaultMessage:
-                'Use multiple layers to combine chart types or visualize different index patterns.',
-            })}
-            position="bottom"
-          >
-            <EuiButton
-              className="lnsConfigPanel__addLayerBtn"
-              fullWidth
-              size="s"
-              data-test-subj="lnsLayerAddButton"
-              aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
-                defaultMessage: 'Add layer',
+      {activeVisualization.appendLayer &&
+        visualizationState &&
+        (
+          (activeVisualization.getLayerTypes &&
+            activeVisualization?.getLayerTypes(visualizationState)) || [
+            { name: 'default', dataBacked: true },
+          ]
+        ).map(({ name: layerType, dataBacked }) => (
+          <EuiFlexItem grow={true} key={layerType}>
+            <EuiToolTip
+              className="eui-fullWidth"
+              title={i18n.translate('xpack.lens.xyChart.addLayer', {
+                defaultMessage: 'Add a layer',
               })}
-              onClick={() => {
-                const id = generateId();
-                dispatch({
-                  type: 'UPDATE_STATE',
-                  subType: 'ADD_LAYER',
-                  updater: (state) =>
-                    appendLayer({
-                      activeVisualization,
-                      generateId: () => id,
-                      trackUiEvent,
-                      activeDatasource: datasourceMap[activeDatasourceId],
-                      state,
-                    }),
-                });
-                setNextFocusedLayerId(id);
-              }}
-              iconType="plusInCircleFilled"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+              content={i18n.translate('xpack.lens.xyChart.addLayerTooltip', {
+                defaultMessage:
+                  'Use multiple layers to combine chart types or visualize different index patterns.',
+              })}
+              position="bottom"
+            >
+              <EuiButton
+                className="lnsConfigPanel__addLayerBtn"
+                fullWidth
+                size="s"
+                data-test-subj="lnsLayerAddButton"
+                aria-label={i18n.translate('xpack.lens.xyChart.addLayerButton', {
+                  defaultMessage: 'Add layer',
+                })}
+                onClick={() => {
+                  const id = generateId();
+                  dispatch({
+                    type: 'UPDATE_STATE',
+                    subType: 'ADD_LAYER',
+                    updater: (state) =>
+                      appendLayer({
+                        activeVisualization,
+                        generateId: () => id,
+                        trackUiEvent,
+                        activeDatasource: datasourceMap[activeDatasourceId],
+                        state,
+                        layerType: activeVisualization.getLayerTypes ? layerType : undefined,
+                        dataBacked,
+                      }),
+                  });
+                  setNextFocusedLayerId(id);
+                }}
+                iconType="plusInCircleFilled"
+              >
+                {layerType}
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+        ))}
     </EuiForm>
   );
 }
