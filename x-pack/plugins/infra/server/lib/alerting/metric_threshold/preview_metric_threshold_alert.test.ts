@@ -166,7 +166,7 @@ describe('Previewing the metric threshold alert type', () => {
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
 
-services.scopedClusterClient.search.mockImplementation((params?: any): any => {
+services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
   const metric = params?.body.query.bool.filter[1]?.exists.field;
   if (params?.body.aggs.groupings) {
     if (params?.body.aggs.groupings.composite.after) {
@@ -210,7 +210,7 @@ const config = {
 } as any;
 
 const baseParams = {
-  esClient: services.scopedClusterClient,
+  esClient: services.scopedClusterClient.asCurrentUser,
   params: {
     criteria: [baseCriterion],
     groupBy: undefined,

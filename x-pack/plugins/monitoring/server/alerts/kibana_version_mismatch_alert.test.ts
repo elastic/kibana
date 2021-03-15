@@ -88,7 +88,7 @@ describe('KibanaVersionMismatchAlert', () => {
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,

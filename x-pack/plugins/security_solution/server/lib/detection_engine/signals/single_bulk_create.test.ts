@@ -141,7 +141,7 @@ describe('singleBulkCreate', () => {
 
   test('create successful bulk create', async () => {
     const sampleParams = sampleRuleAlertParams();
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -178,7 +178,7 @@ describe('singleBulkCreate', () => {
 
   test('create successful bulk create with docs with no versioning', async () => {
     const sampleParams = sampleRuleAlertParams();
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -215,7 +215,7 @@ describe('singleBulkCreate', () => {
 
   test('create unsuccessful bulk create due to empty search results', async () => {
     const sampleParams = sampleRuleAlertParams();
-    mockService.scopedClusterClient.bulk.mockResolvedValue(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(false)
     );
     const { success, createdItemsCount } = await singleBulkCreate({
@@ -245,7 +245,7 @@ describe('singleBulkCreate', () => {
   test('create successful bulk create when bulk create has duplicate errors', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
-    mockService.scopedClusterClient.bulk.mockResolvedValue(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleBulkCreateDuplicateResult)
     );
     const { success, createdItemsCount } = await singleBulkCreate({
@@ -277,7 +277,7 @@ describe('singleBulkCreate', () => {
   test('create failed bulk create when bulk create has multiple error statuses', async () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
-    mockService.scopedClusterClient.bulk.mockResolvedValue(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleBulkCreateErrorResult)
     );
     const { success, createdItemsCount, errors } = await singleBulkCreate({
@@ -347,7 +347,7 @@ describe('singleBulkCreate', () => {
 
   test('create successful and returns proper createdItemsCount', async () => {
     const sampleParams = sampleRuleAlertParams();
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleBulkCreateDuplicateResult)
     );
     const { success, createdItemsCount } = await singleBulkCreate({

@@ -44,13 +44,12 @@ describe('Transaction error rate alert', () => {
     expect(alertExecutor).toBeDefined();
 
     const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient()
-        .asCurrentUser,
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
       alertInstanceFactory: jest.fn(),
     };
     const params = { threshold: 1 };
 
-    services.scopedClusterClient.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
@@ -80,13 +79,12 @@ describe('Transaction error rate alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient()
-        .asCurrentUser,
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
     const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 
-    services.scopedClusterClient.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
@@ -190,13 +188,12 @@ describe('Transaction error rate alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient()
-        .asCurrentUser,
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
     const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 
-    services.scopedClusterClient.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
@@ -269,13 +266,12 @@ describe('Transaction error rate alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient()
-        .asCurrentUser,
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
     const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 
-    services.scopedClusterClient.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {

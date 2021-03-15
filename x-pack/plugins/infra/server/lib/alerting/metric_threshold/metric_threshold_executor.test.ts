@@ -441,7 +441,7 @@ const mockLibs: any = {
 const executor = createMetricThresholdExecutor(mockLibs);
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
-services.scopedClusterClient.search.mockImplementation((params?: any): any => {
+services.scopedClusterClient.asCurrentUser.search.mockImplementation((params?: any): any => {
   if (params.index === 'alternatebeat-*') return mocks.changedSourceIdResponse;
   const metric = params?.body.query.bool.filter[1]?.exists.field;
   if (params?.body.aggs.groupings) {

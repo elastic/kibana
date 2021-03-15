@@ -46,13 +46,12 @@ describe('Error count alert', () => {
     expect(alertExecutor).toBeDefined();
 
     const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient()
-        .asCurrentUser,
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
       alertInstanceFactory: jest.fn(),
     };
     const params = { threshold: 1 };
 
-    services.scopedClusterClient.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
@@ -82,13 +81,12 @@ describe('Error count alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient()
-        .asCurrentUser,
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
     const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
 
-    services.scopedClusterClient.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
@@ -171,13 +169,12 @@ describe('Error count alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient()
-        .asCurrentUser,
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
       alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
     };
     const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
 
-    services.scopedClusterClient.search.mockReturnValue(
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {

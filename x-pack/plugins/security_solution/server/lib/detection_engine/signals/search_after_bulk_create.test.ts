@@ -61,13 +61,13 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success with number of searches less than max signals', async () => {
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -81,13 +81,13 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -101,13 +101,13 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -121,13 +121,13 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -141,7 +141,7 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsNoSortIdNoHits()
       )
@@ -186,18 +186,18 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.scopedClusterClient.search).toHaveBeenCalledTimes(5);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
     expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success with number of searches less than max signals with gap', async () => {
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
       )
     );
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -211,13 +211,13 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -231,13 +231,13 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -251,7 +251,7 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsNoSortIdNoHits()
       )
@@ -296,19 +296,19 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.scopedClusterClient.search).toHaveBeenCalledTimes(4);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
     expect(createdSignalsCount).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success when no search results are in the allowlist', async () => {
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -337,7 +337,7 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsNoSortIdNoHits()
       )
@@ -382,7 +382,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.scopedClusterClient.search).toHaveBeenCalledTimes(2);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
@@ -394,7 +394,7 @@ describe('searchAfterAndBulkCreate', () => {
       { ...getSearchListItemResponseMock(), value: ['3.3.3.3'] },
     ];
     listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
-    mockService.scopedClusterClient.search
+    mockService.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
@@ -450,7 +450,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.scopedClusterClient.search).toHaveBeenCalledTimes(2);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
@@ -464,7 +464,7 @@ describe('searchAfterAndBulkCreate', () => {
     ];
 
     listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3), [
           '1.1.1.1',
@@ -514,7 +514,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.scopedClusterClient.search).toHaveBeenCalledTimes(1);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
     expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
     // I don't like testing log statements since logs change but this is the best
@@ -525,13 +525,13 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success when no sortId present but search results are in the allowlist', async () => {
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -599,7 +599,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.scopedClusterClient.search).toHaveBeenCalledTimes(1);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
     expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
     // I don't like testing log statements since logs change but this is the best
@@ -610,13 +610,13 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('should return success when no exceptions list provided', async () => {
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -645,7 +645,7 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsNoSortIdNoHits()
       )
@@ -686,7 +686,7 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.scopedClusterClient.search).toHaveBeenCalledTimes(2);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
@@ -704,12 +704,12 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
       )
     );
-    mockService.scopedClusterClient.bulk.mockRejectedValue(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockRejectedValue(
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error('bulk failed'))
     ); // Added this recently
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
@@ -757,7 +757,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
     );
     listClient.searchListItemByValues = jest.fn(({ value }) =>
@@ -800,7 +800,7 @@ describe('searchAfterAndBulkCreate', () => {
   });
 
   test('if returns false when singleSearchAfter throws an exception', async () => {
-    mockService.scopedClusterClient.search
+    mockService.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           took: 100,
@@ -889,23 +889,23 @@ describe('searchAfterAndBulkCreate', () => {
         },
       ],
     };
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(bulkItem)
     ); // adds the response with errors we are testing
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -919,13 +919,13 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -939,13 +939,13 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -959,7 +959,7 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsNoSortIdNoHits()
       )
@@ -997,19 +997,19 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
-    expect(mockService.scopedClusterClient.search).toHaveBeenCalledTimes(5);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
     expect(createdSignalsCount).toEqual(4);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   it('invokes the enrichment callback with signal search results', async () => {
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -1023,13 +1023,13 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -1043,13 +1043,13 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
       )
     );
 
-    mockService.scopedClusterClient.bulk.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 100,
         errors: false,
@@ -1063,7 +1063,7 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
 
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsNoSortIdNoHits()
       )
@@ -1111,7 +1111,7 @@ describe('searchAfterAndBulkCreate', () => {
       })
     );
     expect(success).toEqual(true);
-    expect(mockService.scopedClusterClient.search).toHaveBeenCalledTimes(4);
+    expect(mockService.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
     expect(createdSignalsCount).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });

@@ -31,7 +31,7 @@ describe('singleSearchAfter', () => {
   });
 
   test('if singleSearchAfter works without a given sort id', async () => {
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
     );
     const { searchResult } = await singleSearchAfter({
@@ -50,7 +50,7 @@ describe('singleSearchAfter', () => {
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
   test('if singleSearchAfter returns an empty failure array', async () => {
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleDocSearchResultsNoSortId())
     );
     const { searchErrors } = await singleSearchAfter({
@@ -86,7 +86,7 @@ describe('singleSearchAfter', () => {
         },
       },
     ];
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         took: 10,
         timed_out: false,
@@ -123,7 +123,7 @@ describe('singleSearchAfter', () => {
   });
   test('if singleSearchAfter works with a given sort id', async () => {
     const searchAfterSortId = '1234567891111';
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsWithSortId()
       )
@@ -145,7 +145,7 @@ describe('singleSearchAfter', () => {
   });
   test('if singleSearchAfter throws error', async () => {
     const searchAfterSortId = '1234567891111';
-    mockService.scopedClusterClient.search.mockResolvedValueOnce(
+    mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Fake Error'))
     );
     await expect(

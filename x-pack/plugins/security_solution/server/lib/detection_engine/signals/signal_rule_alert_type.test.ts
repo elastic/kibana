@@ -142,7 +142,7 @@ describe('rules_notification_alert_type', () => {
         ),
       };
     });
-    alertServices.scopedClusterClient.transport.request.mockResolvedValue(
+    alertServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: { value: 10 },
@@ -164,7 +164,9 @@ describe('rules_notification_alert_type', () => {
         },
       },
     };
-    alertServices.scopedClusterClient.fieldCaps.mockResolvedValue(value as ApiResponse);
+    alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
+      value as ApiResponse
+    );
     const ruleAlert = getResult();
     alertServices.savedObjectsClient.get.mockResolvedValue({
       id: 'id',

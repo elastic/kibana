@@ -71,7 +71,7 @@ const createAlertServicesMock = <
       .fn<jest.Mocked<AlertInstance<InstanceState, InstanceContext>>, [string]>()
       .mockReturnValue(alertInstanceFactoryMock),
     savedObjectsClient: savedObjectsClientMock.create(),
-    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;
