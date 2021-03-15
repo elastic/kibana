@@ -52,11 +52,11 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           scatterplotMatrixColorsWizard: [
             { key: '#6A717D', value: 25 },
-            { key: '#54B39A', value: 25 },
+            { key: '#52B398', value: 25 },
           ],
           scatterplotMatrixColorStatsResults: [
             // red markers
-            { key: '#B47775', value: 1 },
+            { key: '#D98071', value: 1 },
             // tick/grid/axis, grey markers
             { key: '#6A717D', value: 25 },
             { key: '#D3DAE6', value: 8 },

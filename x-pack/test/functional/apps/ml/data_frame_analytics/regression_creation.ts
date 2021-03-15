@@ -42,8 +42,8 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           scatterplotMatrixColorStats: [
             // some marker colors of the continuous color scale
-            { key: '#72ADA2', value: 2 },
-            { key: '#CBDFDA', value: 2 },
+            { key: '#61AFA3', value: 2 },
+            { key: '#D1E5E0', value: 2 },
             // tick/grid/axis
             { key: '#6A717D', value: 10 },
             { key: '#F5F7FA', value: 12 },

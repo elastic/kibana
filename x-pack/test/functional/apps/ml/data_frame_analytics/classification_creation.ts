@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
             // lines
             { key: '#98A2B3', value: 32 },
             { key: '#6092C0', value: 10 },
-            { key: '#54B399', value: 6 },
+            { key: '#5F92C0', value: 6 },
           ],
           scatterplotMatrixColorStats: [
             // marker colors
@@ -57,9 +57,6 @@ export default function ({ getService }: FtrProviderContext) {
             { key: '#DDDDDD', value: 8 },
             { key: '#D3DAE6', value: 8 },
             { key: '#F5F7FA', value: 20 },
-            // scatterplot circles
-            { key: '#6A717D', value: 28 },
-            { key: '#54B39A', value: 25 },
           ],
           row: {
             type: 'classification',
