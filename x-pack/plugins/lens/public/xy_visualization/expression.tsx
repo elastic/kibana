@@ -24,6 +24,7 @@ import {
   HorizontalAlignment,
   ElementClickListener,
   BrushEndListener,
+  CurveType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -773,7 +774,12 @@ export function XYChart({
           switch (seriesType) {
             case 'line':
               return (
-                <LineSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+                <LineSeries
+                  key={index}
+                  {...seriesProps}
+                  fit={getFitOptions(fittingFunction)}
+                  curve={CurveType.CURVE_CATMULL_ROM}
+                />
               );
             case 'bar':
             case 'bar_stacked':

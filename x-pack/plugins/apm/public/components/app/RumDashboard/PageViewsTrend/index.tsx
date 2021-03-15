@@ -6,7 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import rison from 'rison-node';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
@@ -17,7 +24,7 @@ import { BreakdownItem } from '../../../../../typings/ui_filters';
 export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, searchTerm } = urlParams;
+  const { start, end, searchTerm, serviceName } = urlParams;
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
@@ -48,6 +55,14 @@ export function PageViewsTrend() {
     [end, start, uiFilters, breakdown, searchTerm]
   );
 
+  const analyzeHref = {
+    [serviceName + '-pgv']: {
+      rt: 'pgv',
+      serviceName,
+      time: { from: start, to: end },
+    },
+  };
+
   return (
     <div>
       <EuiFlexGroup responsive={false}>
@@ -62,6 +77,16 @@ export function PageViewsTrend() {
             onBreakdownChange={setBreakdown}
             dataTestSubj={'pvBreakdownFilter'}
           />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            href={`/app/observability/exploratory-view#?sr=${rison.encode(
+              analyzeHref
+            )}`}
+          >
+            Analyze
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

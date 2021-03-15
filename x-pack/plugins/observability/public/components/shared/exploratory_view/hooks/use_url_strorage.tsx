@@ -19,7 +19,7 @@ export const UrlStorageContextProvider: React.FC<ProviderProps> = ({ children, s
   return <UrlStorageContext.Provider value={storage}>{children}</UrlStorageContext.Provider>;
 };
 
-type AllSeries = Record<string, SeriesUrl>;
+export type AllSeries = Record<string, SeriesUrl>;
 
 export const useUrlStorage = (seriesId?: string) => {
   const allSeriesKey = 'sr';
@@ -43,7 +43,16 @@ export const useUrlStorage = (seriesId?: string) => {
 
   const allSeriesIds = Object.keys(allSeries);
 
-  const firstSeries = allSeriesIds?.[0];
+  const firstSeriesId = allSeriesIds?.[0];
 
-  return { storage, setSeries, removeSeries, series, firstSeries, allSeries, allSeriesIds };
+  return {
+    storage,
+    setSeries,
+    removeSeries,
+    series,
+    firstSeriesId,
+    allSeries,
+    allSeriesIds,
+    firstSeries: allSeries?.[firstSeriesId],
+  };
 };

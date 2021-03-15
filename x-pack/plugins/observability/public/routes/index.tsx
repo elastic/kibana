@@ -8,13 +8,11 @@
 import React from 'react';
 import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
-import { useParams } from 'react-router-dom';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { ExploratoryViewPage } from '../components/shared/exploratory_view';
-import { DataViewType } from '../components/shared/exploratory_view/types';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -75,10 +73,9 @@ export const routes = {
       },
     ],
   },
-  '/exploratory-view/:dataViewType': {
+  '/exploratory-view': {
     handler: () => {
-      const { dataViewType } = useParams<{ dataViewType: DataViewType }>();
-      return <ExploratoryViewPage dataViewType={dataViewType} />;
+      return <ExploratoryViewPage />;
     },
     params: {
       query: t.partial({

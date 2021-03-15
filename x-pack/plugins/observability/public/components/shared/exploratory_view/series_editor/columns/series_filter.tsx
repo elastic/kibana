@@ -18,6 +18,10 @@ import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../../configurations/constants';
 import { SelectedFilters } from '../selected_filters';
+import { DefaultFilters } from '../default_filters';
+import { usePluginContext } from '../../../../../hooks/use_plugin_context';
+import { StatefulSearchBarProps } from '../../../../../../../../../src/plugins/data/public';
+import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 
 interface Props {
   seriesId: string;
@@ -38,6 +42,7 @@ export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
 
   const button = (
     <EuiButtonEmpty
+      flush="left"
       iconType="plus"
       onClick={() => {
         setIsPopoverVisible(true);
@@ -46,6 +51,14 @@ export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
       Add filter
     </EuiButtonEmpty>
   );
+
+  const {
+    plugins: { data },
+  } = usePluginContext();
+
+  const SearchBar: React.ComponentType<StatefulSearchBarProps> = data.ui.SearchBar;
+
+  const { indexPattern } = useIndexPatternContext();
 
   const mainPanel = (
     <>
@@ -65,11 +78,20 @@ export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
           <EuiSpacer size="s" />
         </Fragment>
       ))}
+      <SearchBar
+        showDatePicker={false}
+        showFilterBar={true}
+        showQueryBar={true}
+        appName="observability"
+        useDefaultBehaviors={false}
+        indexPatterns={[indexPattern]}
+      />
     </>
   );
 
   const childPanel = selectedField ? (
     <FilterExpanded
+      seriesId={seriesId}
       field={selectedField.field}
       label={selectedField.label}
       goBack={() => {
@@ -85,18 +107,25 @@ export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
 
   return (
     <EuiFlexGroup wrap direction="column" gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={button}
-          isOpen={isPopoverVisible}
-          closePopover={closePopover}
-          anchorPosition="rightCenter"
-        >
-          {!selectedField ? mainPanel : childPanel}
-        </EuiPopover>
-      </EuiFlexItem>
       <EuiFlexItem>
         <SelectedFilters seriesId={seriesId} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              button={button}
+              isOpen={isPopoverVisible}
+              closePopover={closePopover}
+              anchorPosition="rightCenter"
+            >
+              {!selectedField ? mainPanel : childPanel}
+            </EuiPopover>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <DefaultFilters seriesId={seriesId} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

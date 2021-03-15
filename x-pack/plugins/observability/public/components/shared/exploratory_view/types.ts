@@ -11,8 +11,27 @@ import {
   DateHistogramIndexPatternColumn,
   LastValueIndexPatternColumn,
 } from '../../../../../lens/public';
+import {
+  BREAK_DOWN,
+  FILTERS,
+  METRIC_TYPE,
+  REPORT_TYPE,
+  SERIES_TYPE,
+} from './configurations/constants';
 
-export type DataViewType =
+export const ReportViewTypes = {
+  pld: 'page-load-dist',
+  pgv: 'page-views',
+  upd: 'uptime-duration',
+  upp: 'uptime-pings',
+  svl: 'service-latency',
+  kpi: 'service-latency',
+  tpt: 'service-throughput',
+};
+
+export type ReportViewTypeId = keyof typeof ReportViewTypes;
+
+export type ReportViewType =
   | 'page-load-dist'
   | 'page-views'
   | 'uptime-duration'
@@ -20,7 +39,7 @@ export type DataViewType =
   | 'service-latency';
 
 export interface DataSeries {
-  dataViewType: DataViewType;
+  reportType: ReportViewType;
   indexPattern: string;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
@@ -32,18 +51,20 @@ export interface DataSeries {
   defaultSeriesType: string;
   defaultFilters: string[];
   seriesTypes?: string[];
-  filters?: Record<string, any>;
+  filters?: Array<Record<string, any>>;
 }
 
 export interface SeriesUrl {
-  id: string;
   time: {
     to: string;
     from: string;
   };
-  breakdown?: string;
-  filters?: UrlFilter[];
-  seriesType: string;
+  [BREAK_DOWN]?: string;
+  [FILTERS]?: UrlFilter[];
+  [SERIES_TYPE]?: string;
+  [REPORT_TYPE]: ReportViewTypeId;
+  serviceName: string;
+  [METRIC_TYPE]?: string;
 }
 
 export interface UrlFilter {

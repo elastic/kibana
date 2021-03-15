@@ -31,17 +31,6 @@ export function getRumPageLoadTransactionsProjection({
     filter: [
       ...rangeQuery(start, end),
       { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-      ...(checkFetchStartFieldExists
-        ? [
-            {
-              // Adding this filter to cater for some inconsistent rum data
-              // not available on aggregated transactions
-              exists: {
-                field: 'transaction.marks.navigationTiming.fetchStart',
-              },
-            },
-          ]
-        : []),
       ...(urlQuery
         ? [
             {

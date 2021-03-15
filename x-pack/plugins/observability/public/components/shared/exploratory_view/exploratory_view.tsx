@@ -12,58 +12,53 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
 } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../plugin';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common';
-import { ExploratoryViewHeader } from './header';
+import { ExploratoryViewHeader } from './header/header';
 import { SeriesEditor } from './series_editor/series_editor';
 import { useUrlStorage } from './hooks/use_url_strorage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import styled from 'styled-components';
+import { EmptyView } from './components/empty_view';
 
 export interface Props {
-  seriesId: string;
-  defaultIndexPattern?: IndexPattern | null;
+  indexPattern?: IndexPattern | null;
 }
 
-export const ExploratoryView = ({ defaultIndexPattern }: Props) => {
+export const ExploratoryView = ({ indexPattern }: Props) => {
   const {
     services: { lens },
   } = useKibana<ObservabilityClientPluginsStart>();
 
   const LensComponent = lens.EmbeddableComponent;
 
-  const { firstSeries: seriesId } = useUrlStorage();
-
-  const { series } = useUrlStorage(seriesId);
+  const { firstSeriesId: seriesId, firstSeries: series } = useUrlStorage();
 
   const lensAttributes = useLensAttributes({
     seriesId,
+    indexPattern,
   });
 
   return (
-    <EuiPage>
+    <EuiPage paddingSize="none">
       <EuiPageBody style={{ maxWidth: 1600, margin: '0 auto' }}>
         <EuiPageContent>
-          <EuiPageContentBody style={{ maxWidth: 1400, margin: '0 auto' }}>
-            {defaultIndexPattern ? (
+          <EuiPageContentBody style={{ maxWidth: 1500, margin: '0 auto' }}>
+            {indexPattern ? (
               <>
-                <ExploratoryViewHeader lensAttributes={lensAttributes} />
-                <LensComponent
-                  id=""
-                  style={{ height: 500 }}
-                  timeRange={
-                    series?.time || {
-                      from: 'now-1h',
-                      to: 'now',
-                    }
-                  }
-                  attributes={seriesId ? lensAttributes : undefined}
-                />
+                <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
+                {lensAttributes && seriesId ? (
+                  <LensComponent
+                    id=""
+                    style={{ height: 500 }}
+                    timeRange={series?.time}
+                    attributes={lensAttributes}
+                  />
+                ) : (
+                  <EmptyView />
+                )}
                 <SeriesEditor />
               </>
             ) : (

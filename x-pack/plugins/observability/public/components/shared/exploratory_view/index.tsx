@@ -5,43 +5,36 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { ExploratoryView } from './exploratory_view';
-import { useFetcher } from '../../..';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { i18n } from '@kbn/i18n';
 import { IndexPatternContextProvider } from '../../../hooks/use_default_index_pattern';
 import { useHistory } from 'react-router-dom';
+import { ThemeContext } from 'styled-components';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
 } from '../../../../../../../src/plugins/kibana_utils/public/';
 import { UrlStorageContextProvider } from './hooks/use_url_strorage';
-import { DataViewType } from './types';
-import { getDefaultConfigs } from './configurations/default_configs';
+import { useInitExploratoryView } from './hooks/use_init_exploratory_view';
+import { WithHeaderLayout } from '../../app/layout/with_header';
 
-export interface Props {
-  dataViewType: DataViewType;
-}
-
-export const ExploratoryViewPage = ({ dataViewType }: Props) => {
+export const ExploratoryViewPage = () => {
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.overview.exploratoryView', {
         defaultMessage: 'Exploratory view',
       }),
     },
-    {
-      text: i18n.translate('xpack.observability.overview.exploratoryView.dataViewType', {
-        defaultMessage: dataViewType,
-      }),
-    },
   ]);
 
+  const theme = useContext(ThemeContext);
+
   const {
-    services: { data, uiSettings, notifications },
+    services: { uiSettings, notifications },
   } = useKibana<ObservabilityClientPluginsStart>();
 
   const history = useHistory();
@@ -52,18 +45,18 @@ export const ExploratoryViewPage = ({ dataViewType }: Props) => {
     ...withNotifyOnErrors(notifications!.toasts),
   });
 
-  const dataViewConfig = getDefaultConfigs({ dataViewType });
-
-  const { data: defaultIndexPattern } = useFetcher(
-    () => data.indexPatterns.get(dataViewConfig.indexPattern),
-    [dataViewConfig.indexPattern]
-  );
+  const indexPattern = useInitExploratoryView(kbnUrlStateStorage);
 
   return (
-    <IndexPatternContextProvider indexPattern={defaultIndexPattern!}>
-      <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-        <ExploratoryView seriesId={dataViewType!} defaultIndexPattern={defaultIndexPattern} />
-      </UrlStorageContextProvider>
-    </IndexPatternContextProvider>
+    <WithHeaderLayout
+      headerColor={theme.eui.euiColorEmptyShade}
+      bodyColor={theme.eui.euiPageBackgroundColor}
+    >
+      <IndexPatternContextProvider indexPattern={indexPattern!}>
+        <UrlStorageContextProvider storage={kbnUrlStateStorage}>
+          <ExploratoryView indexPattern={indexPattern} />
+        </UrlStorageContextProvider>
+      </IndexPatternContextProvider>
+    </WithHeaderLayout>
   );
 };

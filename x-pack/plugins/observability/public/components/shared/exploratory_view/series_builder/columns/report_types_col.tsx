@@ -7,17 +7,18 @@
 
 import React, { Dispatch, SetStateAction } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { ReportViewTypeId } from '../../types';
 
 interface Props {
-  selectedReportType: string | null;
-  reportTypes: string[];
-  onChange: Dispatch<SetStateAction<string | null>>;
+  selectedReportType: ReportViewTypeId | null;
+  reportTypes: { id: ReportViewTypeId; label: string }[];
+  onChange: Dispatch<SetStateAction<ReportViewTypeId | null>>;
 }
 
 export const ReportTypesCol = ({ selectedReportType, reportTypes, onChange }: Props) => {
   return reportTypes?.length > 0 ? (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {reportTypes.map((reportType) => (
+      {reportTypes.map(({ id: reportType, label }) => (
         <EuiFlexItem key={reportType}>
           <EuiButton
             size="s"
@@ -27,7 +28,7 @@ export const ReportTypesCol = ({ selectedReportType, reportTypes, onChange }: Pr
             fill={selectedReportType === reportType}
             onClick={() => onChange(reportType === selectedReportType ? null : reportType)}
           >
-            {reportType}
+            {label}
           </EuiButton>
         </EuiFlexItem>
       ))}

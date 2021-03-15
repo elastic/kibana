@@ -12,18 +12,20 @@ interface Props {
   serviceName: string;
 }
 
-export function getPageLoadDistLensConfig({ seriesId, serviceName }: Props): DataSeries {
+export function getServiceThroughputLensConfig({ seriesId, serviceName }: Props): DataSeries {
   return {
-    id: seriesId ?? 'unique-key',
-    reportType: 'page-load-dist',
+    id: seriesId,
+    reportType: 'service-latency',
     defaultSeriesType: 'line',
     indexPattern: 'apm_static_index_pattern_id',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
-      sourceField: 'transaction.duration.us',
+      sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'count',
+      operationType: 'avg',
+      sourceField: 'transaction.duration.us',
+      label: 'Throughput',
     },
     defaultFilters: [
       'user_agent.name',
@@ -38,8 +40,7 @@ export function getPageLoadDistLensConfig({ seriesId, serviceName }: Props): Dat
       'user_agent.device.name',
     ],
     filters: [
-      { query: { match_phrase: { 'transaction.type': 'page-load' } } },
-      { query: { match_phrase: { 'processor.event': 'transaction' } } },
+      { query: { match_phrase: { 'transaction.type': 'request' } } },
       ...(serviceName ? [{ query: { match_phrase: { 'service.name': serviceName } } }] : []),
     ],
   };

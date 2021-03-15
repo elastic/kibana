@@ -7,11 +7,15 @@
 
 import { DataSeries } from '../types';
 
-export function getServiceLatencyLensConfig(): DataSeries {
+interface Props {
+  seriesId: string;
+  serviceName: string;
+}
+
+export function getServiceLatencyLensConfig({ seriesId, serviceName }: Props): DataSeries {
   return {
-    name: 'elastic.co',
-    id: 'elastic-co',
-    dataViewType: 'service-latency',
+    id: seriesId,
+    reportType: 'service-latency',
     defaultSeriesType: 'line',
     indexPattern: 'apm_static_index_pattern_id',
     seriesTypes: ['line', 'bar'],
@@ -35,8 +39,9 @@ export function getServiceLatencyLensConfig(): DataSeries {
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: {
-      query: { match_phrase: { 'transaction.type': 'request' } },
-    },
+    filters: [
+      { query: { match_phrase: { 'transaction.type': 'request' } } },
+      ...(serviceName ? [{ query: { match_phrase: { 'service.name': serviceName } } }] : []),
+    ],
   };
 }

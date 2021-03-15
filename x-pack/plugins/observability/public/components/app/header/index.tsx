@@ -19,6 +19,7 @@ import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import HeaderMenuPortal from '../../shared/header_menu_portal';
+import { Tabs } from './tabs';
 
 const Container = styled.div<{ color: string }>`
   background: ${(props) => props.color};
@@ -59,13 +60,13 @@ export function Header({ color, datePicker = null, restrictWidth }: Props) {
       </HeaderMenuPortal>
       <Wrapper restrictWidth={restrictWidth}>
         <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="logoObservability" size="xxl" data-test-subj="observability-logo" />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                 <EuiTitle>
                   <h1>
                     {i18n.translate('xpack.observability.home.title', {
@@ -73,6 +74,9 @@ export function Header({ color, datePicker = null, restrictWidth }: Props) {
                     })}
                   </h1>
                 </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Tabs />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

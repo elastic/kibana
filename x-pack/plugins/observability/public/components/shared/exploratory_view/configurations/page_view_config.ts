@@ -7,12 +7,16 @@
 
 import { DataSeries } from '../types';
 
-export function getPageViewLensConfig(): DataSeries {
+interface Props {
+  seriesId: string;
+  serviceName: string;
+}
+
+export function getPageViewLensConfig({ seriesId, serviceName }: Props): DataSeries {
   return {
-    name: 'elastic.co',
-    id: 'elastic-co',
-    defaultSeriesType: 'bar',
-    dataViewType: 'page-views',
+    id: seriesId,
+    defaultSeriesType: 'bar_stacked',
+    reportType: 'page-views',
     indexPattern: 'apm_static_index_pattern_id',
     seriesTypes: ['bar', 'bar_stacked'],
     xAxisColumn: {
@@ -33,8 +37,11 @@ export function getPageViewLensConfig(): DataSeries {
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: {
-      query: { match_phrase: { 'transaction.type': 'page-load' } },
-    },
+    filters: [
+      {
+        query: { match_phrase: { 'transaction.type': 'page-load' } },
+      },
+      ...(serviceName ? [{ query: { match_phrase: { 'service.name': serviceName } } }] : []),
+    ],
   };
 }

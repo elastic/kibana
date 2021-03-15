@@ -20,19 +20,24 @@ export class LensAttributes {
   visualization: XYState;
   filters: UrlFilter[];
   seriesType: string;
-  dataViewConfig: DataSeries;
+  reportViewConfig: DataSeries;
 
   constructor(
     indexPattern: IIndexPattern,
-    dataViewConfig: DataSeries,
+    reportViewConfig: DataSeries,
     seriesType: string,
-    filters: UrlFilter[]
+    filters: UrlFilter[],
+    metricType: string
   ) {
     this.indexPattern = indexPattern;
     this.layers = {};
     this.filters = filters ?? [];
-    this.seriesType = seriesType ?? dataViewConfig.defaultSeriesType;
-    this.dataViewConfig = dataViewConfig;
+
+    if (typeof reportViewConfig.yAxisColumn.operationType !== undefined && metricType) {
+      reportViewConfig.yAxisColumn.operationType = metricType;
+    }
+    this.seriesType = seriesType ?? reportViewConfig.defaultSeriesType;
+    this.reportViewConfig = reportViewConfig;
     this.addLayer();
     this.visualization = this.getXyState();
   }
@@ -96,7 +101,7 @@ export class LensAttributes {
   }
 
   getXAxis() {
-    const { xAxisColumn } = this.dataViewConfig;
+    const { xAxisColumn } = this.reportViewConfig;
 
     if (xAxisColumn.sourceField) {
       const fieldMeta = this.indexPattern.fields.find(
@@ -132,7 +137,7 @@ export class LensAttributes {
       operationType: 'count',
       scale: 'ratio',
       sourceField: 'Records',
-      ...this.dataViewConfig.yAxisColumn,
+      ...this.reportViewConfig.yAxisColumn,
     };
   }
 
@@ -171,8 +176,8 @@ export class LensAttributes {
   }
 
   parseFilters() {
-    const defaultFilters = this.dataViewConfig.filters ?? [];
-    const parsedFilters = this.dataViewConfig.filters ? [...defaultFilters] : [];
+    const defaultFilters = this.reportViewConfig.filters ?? [];
+    const parsedFilters = this.reportViewConfig.filters ? [...defaultFilters] : [];
 
     this.filters.forEach(({ field, values = [], notValues = [] }) => {
       values?.forEach((value) => {

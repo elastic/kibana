@@ -20,6 +20,7 @@ import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/p
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
 import { UrlFilter } from '../../types';
+import { FILTERS } from '../../configurations/constants';
 
 interface Props {
   seriesId: string;
@@ -39,7 +40,7 @@ export const FilterExpanded = ({ seriesId, field, label, goBack }: Props) => {
 
   const { series, setSeries } = useUrlStorage(seriesId);
 
-  const { data: values, status } = useFetcher(() => {
+  const { data: values, status } = useFetcher<Promise<string[]>>(() => {
     return data.autocomplete.getValueSuggestions({
       indexPattern,
       query: '',
@@ -48,19 +49,26 @@ export const FilterExpanded = ({ seriesId, field, label, goBack }: Props) => {
     });
   }, [field]);
 
-  const filters = series?.filters ?? [];
+  const filters = series?.[FILTERS] ?? [];
 
   let currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
 
   const onChange = (id: string, not?: boolean) => {
-    if (!currFilter && filters.length === 0) {
+    if (!currFilter) {
       currFilter = { field };
       if (not) {
         currFilter.notValues = [id];
       } else {
         currFilter.values = [id];
       }
-      setSeries(seriesId, { ...series, filters: [currFilter] });
+      if (filters.length === 0) {
+        setSeries(seriesId, { ...series, [FILTERS]: [currFilter] });
+      } else {
+        setSeries(seriesId, {
+          ...series,
+          [FILTERS]: [currFilter, ...filters.filter((ft) => ft.field != field)],
+        });
+      }
       return;
     }
 
@@ -81,9 +89,9 @@ export const FilterExpanded = ({ seriesId, field, label, goBack }: Props) => {
       currFilter.values = values.length > 0 ? values : undefined;
 
       if (notValues.length > 0 || values.length > 0) {
-        setSeries(seriesId, { ...series, filters: [currFilter] });
+        setSeries(seriesId, { ...series, [FILTERS]: [currFilter] });
       } else {
-        setSeries(seriesId, { ...series, filters: undefined });
+        setSeries(seriesId, { ...series, [FILTERS]: undefined });
       }
     }
   };

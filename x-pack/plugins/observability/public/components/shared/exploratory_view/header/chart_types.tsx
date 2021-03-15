@@ -22,6 +22,7 @@ import { LensIconChartLine } from '../assets/chart_line';
 import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
 import styled from 'styled-components';
 import { useUrlStorage } from '../hooks/use_url_strorage';
+import { SERIES_TYPE } from '../configurations/constants';
 
 const ButtonGroup = styled(EuiButtonGroup)`
   &&& {
@@ -31,8 +32,8 @@ const ButtonGroup = styled(EuiButtonGroup)`
   }
 `;
 
-export const ChartTypes = () => {
-  const { series, setSeries, allSeries } = useUrlStorage();
+export const ChartTypes = ({ seriesId }: { seriesId: string }) => {
+  const { series, setSeries, allSeries } = useUrlStorage(seriesId);
 
   return (
     <ButtonGroup
@@ -49,12 +50,12 @@ export const ChartTypes = () => {
         iconType: t.icon || 'empty',
         'data-test-subj': `lnsXY_seriesType-${t.id}`,
       }))}
-      idSelected={series?.seriesType ?? 'line'}
+      idSelected={series?.[SERIES_TYPE] ?? 'line'}
       onChange={(seriesType: string) => {
         Object.keys(allSeries).forEach((seriesKey) => {
           const series = allSeries[seriesKey];
 
-          setSeries(seriesKey, { ...series, seriesType });
+          setSeries(seriesKey, { ...series, [SERIES_TYPE]: seriesType });
         });
       }}
     />

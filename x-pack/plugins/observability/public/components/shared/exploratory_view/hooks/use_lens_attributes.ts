@@ -6,47 +6,60 @@
  */
 
 import { TypedLensByValueInput } from '../../../../../../lens/public';
-import { useIndexPatternContext } from '../../../../hooks/use_default_index_pattern';
 import { LensAttributes } from '../configurations/lens_attributes';
 import { useUrlStorage } from './use_url_strorage';
-import { DataViewType, SeriesUrl } from '../types';
 import { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
 import { getDefaultConfigs } from '../configurations/default_configs';
+import {
+  BREAK_DOWN,
+  FILTERS,
+  METRIC_TYPE,
+  REPORT_TYPE,
+  SERIES_TYPE,
+} from '../configurations/constants';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   seriesId: string;
+  indexPattern: IIndexPattern;
 }
 
 export const useLensAttributes = ({
   seriesId,
+  indexPattern,
 }: Props): TypedLensByValueInput['attributes'] | null => {
-  const { dataViewType } = useParams<{ dataViewType: DataViewType }>();
-
-  const dataViewConfig = getDefaultConfigs({ dataViewType });
-
-  const { indexPattern: defaultIndexPattern } = useIndexPatternContext(dataViewConfig.indexPattern);
-
   const { series } = useUrlStorage(seriesId);
 
-  const { filters = [] } = series ?? {};
+  const dataViewConfig = getDefaultConfigs({
+    reportType: series[REPORT_TYPE],
+    serviceName: series.serviceName,
+    seriesId,
+  });
+
+  const {
+    [FILTERS]: filters = [],
+    [BREAK_DOWN]: breakdown,
+    [SERIES_TYPE]: seriesType,
+    [METRIC_TYPE]: metricType,
+  } = series ?? {};
 
   return useMemo(() => {
-    if (!defaultIndexPattern) {
+    if (!indexPattern) {
       return null;
     }
 
     const lensAttributes = new LensAttributes(
-      defaultIndexPattern,
+      indexPattern,
       dataViewConfig,
-      series?.seriesType!,
-      filters
+      seriesType!,
+      filters,
+      metricType
     );
 
-    if (series?.breakdown) {
-      lensAttributes.addBreakdown(series.breakdown);
+    if (breakdown) {
+      lensAttributes.addBreakdown(breakdown);
     }
 
     return lensAttributes.getJSON();
-  }, [defaultIndexPattern, series?.breakdown, series?.seriesType, filters]);
+  }, [indexPattern, breakdown, seriesType, filters, metricType]);
 };

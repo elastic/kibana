@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { DataViewType } from '../types';
+import { ReportViewType } from '../types';
+
+export const METRIC_TYPE = 'mt';
+export const REPORT_TYPE = 'rt';
+export const SERIES_TYPE = 'st';
+export const BREAK_DOWN = 'bd';
+export const FILTERS = 'ft';
 
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': 'Browser family',
@@ -14,9 +20,11 @@ export const FieldLabels: Record<string, string> = {
   'user_agent.device.name': 'Device',
   'observer.geo.name': 'Observer location',
   'service.name': 'Service',
+  'monitor.id': 'Monitor Id',
+  'monitor.status': 'Monitor Status',
 };
 
-export const DataViewLabels: Record<DataViewType, string> = {
+export const DataViewLabels: Record<ReportViewType, string> = {
   'page-load-dist': 'Page load distribution',
   'page-views': 'Page views',
   'uptime-duration': 'Uptime monitor duration',

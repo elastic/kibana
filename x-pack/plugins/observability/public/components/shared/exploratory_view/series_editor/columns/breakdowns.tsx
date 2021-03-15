@@ -7,9 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
-import { FieldLabels } from '../../configurations/constants';
+import { BREAK_DOWN, FieldLabels } from '../../configurations/constants';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
-import { SeriesUrl } from '../../types';
 
 interface Props {
   seriesId: string;
@@ -28,7 +27,7 @@ export const Breakdowns = ({ seriesId, breakdowns = [] }: Props) => {
   const { setSeries, series } = useUrlStorage(seriesId);
 
   useEffect(() => {
-    setSeries(seriesId, { ...series, breakdown: selectedBreakdown });
+    setSeries(seriesId, { ...series, [BREAK_DOWN]: selectedBreakdown });
   }, [selectedBreakdown]);
 
   return (

@@ -54,6 +54,7 @@ import {
 // Filter helpers namespace:
 export const esFilters = {
   FilterLabel,
+  FilterItem,
 
   FILTERS,
   FilterStateStore,
@@ -92,7 +93,7 @@ export const esFilters = {
   extractTimeRange,
 };
 
-export {
+export type {
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -484,6 +485,7 @@ export { APPLY_FILTER_TRIGGER } from './triggers';
  */
 
 import { DataPublicPlugin } from './plugin';
+import { FilterItem } from './ui/filter_bar';
 
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new DataPublicPlugin(initializerContext);

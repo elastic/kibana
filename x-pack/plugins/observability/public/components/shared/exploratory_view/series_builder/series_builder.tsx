@@ -9,18 +9,29 @@ import React, { useState } from 'react';
 
 import { EuiButton, EuiBasicTable, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { AppDataType, SeriesUrl } from '../types';
+import { AppDataType, ReportViewTypeId, SeriesUrl } from '../types';
 import { DataTypesCol } from './columns/data_types_col';
 import { ReportTypesCol } from './columns/report_types_col';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
 import { useUrlStorage } from '../hooks/use_url_strorage';
+import { REPORT_TYPE } from '../configurations/constants';
 
-export const ReportTypes = {
-  synthetics: ['Monitor duration', 'Pings histogram'],
-  rum: ['Performance distribution', 'Page views', 'KPI over time'],
-  apm: ['Latency', 'Throughput'],
+export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
+  synthetics: [
+    { id: 'upd', label: 'Monitor duration' },
+    { id: 'upp', label: 'Pings histogram' },
+  ],
+  rum: [
+    { id: 'pld', label: 'Performance distribution' },
+    { id: 'pgv', label: 'Page views' },
+    { id: 'kpi', label: 'KPI over time' },
+  ],
+  apm: [
+    { id: 'svl', label: 'Latency' },
+    { id: 'tpt', label: 'Throughput' },
+  ],
   logs: [],
   metrics: [],
 };
@@ -29,7 +40,7 @@ export const SeriesBuilder = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const [dataType, setDataType] = useState<AppDataType | null>(null);
-  const [reportType, setReportType] = useState<string | null>(null);
+  const [reportType, setReportType] = useState<ReportViewTypeId | null>(null);
   const [serviceName, setServiceName] = useState<string | null>(null);
 
   const columns = [
@@ -58,8 +69,9 @@ export const SeriesBuilder = () => {
       render: (val: string) =>
         reportType ? (
           <ReportDefinitionCol
+            dataType={dataType}
+            selectedReportDefinitions={null}
             reportType={reportType}
-            selectedServiceName={serviceName}
             onChange={setServiceName}
           />
         ) : null,
@@ -81,16 +93,22 @@ export const SeriesBuilder = () => {
   const { setSeries, allSeriesIds } = useUrlStorage();
 
   const addSeries = () => {
-    const newSeriesId = `${serviceName!}-pd`;
+    if (reportType) {
+      const newSeriesId = `${serviceName!}-${reportType}`;
 
-    const newSeries = { reportType: 'pd', serviceName } as SeriesUrl;
-    setSeries(newSeriesId, newSeries);
+      const newSeries = {
+        [REPORT_TYPE]: reportType,
+        serviceName,
+        time: { from: 'now-30m', to: 'now' },
+      } as SeriesUrl;
+      setSeries(newSeriesId, newSeries);
 
-    // reset state
-    setDataType(null);
-    setReportType(null);
-    setServiceName(null);
-    setIsFlyoutVisible(false);
+      // reset state
+      setDataType(null);
+      setReportType(null);
+      setServiceName(null);
+      setIsFlyoutVisible(false);
+    }
   };
 
   const items = [{ dataTypes: ['APM'] }];

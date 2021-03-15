@@ -8,6 +8,7 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AppDataType } from '../../types';
+import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 
 interface Props {
   selectedDataType: AppDataType | null;
@@ -18,10 +19,19 @@ const dataTypes: { id: AppDataType; label: string }[] = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
   { id: 'rum', label: 'User Experience(RUM)' },
   { id: 'logs', label: 'Logs' },
-  { id: 'metrics', label: 'Logs' },
+  { id: 'metrics', label: 'Metrics' },
   { id: 'apm', label: 'APM' },
 ];
 export const DataTypesCol = ({ selectedDataType, onChange }: Props) => {
+  const { loadIndexPattern } = useIndexPatternContext();
+
+  const onDataTypeChange = (dataType: AppDataType | null) => {
+    onChange(dataType);
+    if (dataType) {
+      loadIndexPattern(dataType);
+    }
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       {dataTypes.map(({ id: dt, label }) => (
@@ -32,7 +42,7 @@ export const DataTypesCol = ({ selectedDataType, onChange }: Props) => {
             iconType="arrowRight"
             color={selectedDataType === dt ? 'primary' : 'text'}
             fill={selectedDataType === dt}
-            onClick={() => onChange(dt === selectedDataType ? null : dt)}
+            onClick={() => onDataTypeChange(dt === selectedDataType ? null : dt)}
           >
             {label}
           </EuiButton>

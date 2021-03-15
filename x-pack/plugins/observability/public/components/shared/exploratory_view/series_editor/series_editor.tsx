@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { SeriesFilter } from './columns/series_filter';
 import { ActionsCol } from './columns/actions_col';
 import { Breakdowns } from './columns/breakdowns';
-import { DataSeries, DataViewType } from '../types';
+import { DataSeries } from '../types';
 import { SeriesBuilder } from '../series_builder/series_builder';
 import { useUrlStorage } from '../hooks/use_url_strorage';
-import { getPageLoadDistLensConfig } from '../configurations/page_load_dist_config';
 import { RemoveSeries } from './columns/remove_series';
+import { getDefaultConfigs } from '../configurations/default_configs';
+import { REPORT_TYPE } from '../configurations/constants';
 
 export const SeriesEditor = () => {
   const columns = [
@@ -59,19 +59,16 @@ export const SeriesEditor = () => {
     },
   ];
 
-  const { dataViewType } = useParams<{ dataViewType: DataViewType }>();
-
   const { allSeries } = useUrlStorage();
-
-  console.log(allSeries);
 
   const allSeriesKeys = Object.keys(allSeries);
 
   const items: DataSeries[] = allSeriesKeys.map((seriesKey) => {
     const series = allSeries[seriesKey];
-    return getPageLoadDistLensConfig({
-      seriesId: seriesKey,
+    return getDefaultConfigs({
+      reportType: series[REPORT_TYPE],
       serviceName: series.serviceName,
+      seriesId: seriesKey,
     });
   });
 
@@ -83,6 +80,7 @@ export const SeriesEditor = () => {
         rowHeader="firstName"
         columns={columns}
         rowProps={() => ({ height: 100 })}
+        noItemsMessage={'No series found, please add a series.'}
       />
       <EuiSpacer />
       <SeriesBuilder />

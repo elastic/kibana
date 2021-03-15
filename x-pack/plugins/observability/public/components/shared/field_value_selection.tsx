@@ -66,7 +66,7 @@ export const FieldValueSelection = ({
 
   const button = (
     <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-      Web Application
+      {FieldLabels[sourceField]}
     </EuiButton>
   );
 
