@@ -29,7 +29,7 @@ import {
   listArtifacts,
 } from './artifacts';
 
-import { NewArtifact } from './types';
+import type { NewArtifact } from './types';
 
 describe('When using the artifacts services', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
