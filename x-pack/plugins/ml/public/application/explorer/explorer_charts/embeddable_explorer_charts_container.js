@@ -6,7 +6,7 @@
  */
 import './_index.scss';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -33,6 +33,7 @@ import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
+import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
@@ -67,6 +68,7 @@ function ExplorerChartContainer({
   timeBuckets,
   timefilter,
   onSelectEntity,
+  recentlyAccessed,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
@@ -88,9 +90,16 @@ function ExplorerChartContainer({
     };
   }, [mlUrlGenerator, series]);
 
-  // const addToRecentlyAccessed = useCallback(() => {
-  //   addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, explorerSeriesLink);
-  // }, [explorerSeriesLink]);
+  const addToRecentlyAccessed = useCallback(() => {
+    if (recentlyAccessed) {
+      addItemToRecentlyAccessed(
+        'timeseriesexplorer',
+        series.jobId,
+        explorerSeriesLink,
+        recentlyAccessed
+      );
+    }
+  }, [explorerSeriesLink, recentlyAccessed]);
   const { detectorLabel, entityFields } = series;
 
   const chartType = getChartType(series);
@@ -152,7 +161,7 @@ function ExplorerChartContainer({
                   size="xs"
                   href={`${basePath}/app/ml${explorerSeriesLink}`}
                   // @TODO: renable onClick, remove addToRecentlyAccessed dependency cache
-                  // onClick={addToRecentlyAccessed}
+                  onClick={addToRecentlyAccessed}
                 >
                   <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
                 </EuiButtonEmpty>
@@ -215,6 +224,7 @@ export const ExplorerChartsContainerUI = ({
 }) => {
   const {
     services: {
+      chrome: { recentlyAccessed },
       http: { basePath },
       embeddable: embeddablePlugin,
       maps: mapsPlugin,
@@ -268,6 +278,7 @@ export const ExplorerChartsContainerUI = ({
                 timeBuckets={timeBuckets}
                 timefilter={timefilter}
                 onSelectEntity={onSelectEntity}
+                recentlyAccessed={recentlyAccessed}
               />
             </EuiFlexItem>
           ))}
