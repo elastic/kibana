@@ -112,19 +112,17 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
   if (opts.port) set('server.port', opts.port);
   if (opts.host) set('server.host', opts.host);
-  // if (opts.quiet) set('logging.quiet', true); // deprecated
-
-  // retain support for cli flag `--silent`
   if (opts.silent) {
-    // set('logging.level', 'off') && set('logging.root.level', 'off');
     set('logging.silent', true) && set('logging.root.level', 'off');
   }
-  // retain support for cli flag `--verbose`
   if (opts.verbose) {
-    // set('logging.level', 'all') && set('logging.root.level', 'all');
-    set('logging.verbose', true) && set('logging.root.level', 'all');
+    // Only set logging.verbose to true when KP logging isn't configured.
+    if (!has('rawConfig.logging.root.appenders')) {
+      set('logging.verbose', true);
+    } else {
+      set('logging.root.level', 'all');
+    }
   }
-  // if (opts.logFile) set('logging.dest', opts.logFile); // deprecated
 
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));

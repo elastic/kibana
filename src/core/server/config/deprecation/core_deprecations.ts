@@ -182,11 +182,13 @@ const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) =
 };
 
 const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if (has(settings, 'logging.json')) {
+  if (has(settings, 'logging.json') && settings.env !== 'development') {
     log(
       '"logging.json" has been deprecated and will be removed ' +
         'in 8.0. To specify log message format moving forward, ' +
-        'you can configure the "appender.layout" property for every custom appender in your logging configuration. There is currently no default layout for custom appenders and each one must be declared explicitly. For more details, see ' +
+        'you can configure the "appender.layout" property for every custom appender in your logging configuration.' +
+        'There is currently no default layout for custom appenders and each one must be declared explicitly. ' +
+        'For more details, see ' +
         'https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
     );
   }
@@ -202,9 +204,9 @@ const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
     has(settings, 'logging.rotate.keepFiles')
   ) {
     log(
-      '"logging.rotate" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enabled ' +
-        'log rotation using the "rolling-file" appender for a context in your logging configuration. ' +
-        'For more details, see ' +
+      '"logging.rotate" and sub-options have been deprecated and will be removed in 8.0. ' +
+        'Moving forward, you can enabled log rotation using the "rolling-file" appender for a context ' +
+        'in your logging configuration. For more details, see ' +
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender'
     );
   }
