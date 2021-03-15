@@ -70,7 +70,7 @@ describe('RoleMappingsLogic', () => {
     });
 
     describe('setRoleMappingData', () => {
-      it('sets data correctly', () => {
+      it('sets state based on server response from the `mapping` (singular) endpoint', () => {
         RoleMappingsLogic.actions.setRoleMappingData(mappingServerProps);
 
         expect(RoleMappingsLogic.values.roleMapping).toEqual(asRoleMapping);
