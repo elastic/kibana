@@ -22,6 +22,7 @@ import {
   SearchFieldValue,
   tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
+import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
 import { CancellationToken } from '../../../../common';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
@@ -365,6 +366,9 @@ export class CsvGenerator {
       }
     } catch (err) {
       this.logger.error(err);
+      if (err instanceof KbnServerError && err.errBody) {
+        throw JSON.stringify(err.errBody.error);
+      }
     } finally {
       // clear scrollID
       if (scrollId) {
