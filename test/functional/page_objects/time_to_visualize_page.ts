@@ -36,7 +36,9 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
       const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
       await dashboardSelector.findByCssSelector(`input[id="new-dashboard-option"]:disabled`);
       await dashboardSelector.findByCssSelector(`input[id="existing-dashboard-option"]:disabled`);
-      await dashboardSelector.findByCssSelector(`input[id="add-to-library-option"]:disabled`);
+
+      const librarySelector = await testSubjects.find('add-to-library-checkbox');
+      await librarySelector.findByCssSelector(`input[id="add-to-library-option"]:disabled`);
     }
 
     public async resetNewDashboard() {
@@ -62,13 +64,6 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
         const state = saveAsNew ? 'check' : 'uncheck';
         log.debug('save as new checkbox exists. Setting its state to', state);
         await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
-      }
-
-      const hasRedirectToOrigin = await testSubjects.exists('returnToOriginModeSwitch');
-      if (hasRedirectToOrigin && redirectToOrigin !== undefined) {
-        const state = redirectToOrigin ? 'check' : 'uncheck';
-        log.debug('redirect to origin checkbox exists. Setting its state to', state);
-        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
       }
 
       const hasDashboardSelector = await testSubjects.exists('add-to-dashboard-options');
@@ -100,6 +95,13 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
           const label = await selector.findByCssSelector(`label[for="add-to-library-option"]`);
           await label.click();
         }
+      }
+
+      const hasRedirectToOrigin = await testSubjects.exists('returnToOriginModeSwitch');
+      if (hasRedirectToOrigin && redirectToOrigin !== undefined) {
+        const state = redirectToOrigin ? 'check' : 'uncheck';
+        log.debug('redirect to origin checkbox exists. Setting its state to', state);
+        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
       }
     }
 
