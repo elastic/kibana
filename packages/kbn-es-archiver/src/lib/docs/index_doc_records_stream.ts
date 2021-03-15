@@ -46,6 +46,7 @@ export function createIndexDocRecordsStream(
           errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
         },
       },
+      // @ts-expect-error @elastic/elasticsearch helpers.bulk doesn't support TransportRequestOptions as the second argument
       {
         headers: ES_CLIENT_HEADERS,
       }

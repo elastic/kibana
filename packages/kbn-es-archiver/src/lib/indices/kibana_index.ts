@@ -67,7 +67,7 @@ export async function migrateKibanaIndex(kbnClient: KbnClient) {
  * with .kibana, then filters out any that aren't actually Kibana's core
  * index (e.g. we don't want to remove .kibana_task_manager or the like).
  */
-function isKibanaIndex(index?: string): boolean {
+function isKibanaIndex(index?: string): index is string {
   return Boolean(
     index &&
       (/^\.kibana(:?_\d*)?$/.test(index) ||
