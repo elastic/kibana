@@ -76,7 +76,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
           entityFields[0].operation === ENTITY_FIELD_OPERATIONS.ADD
         ) {
           const { fieldName, fieldValue } = entityFields[0];
-          if (typeof fieldName === 'string' && fieldValue !== undefined) {
+          if (fieldName !== undefined && fieldValue !== undefined) {
             const influencersFilterQuery = {
               bool: {
                 should: [
@@ -104,6 +104,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
             jobIds,
             timeRange,
             ...(mlExplorerFilter ? { mlExplorerFilter } : {}),
+            query: {},
           },
         });
       }
