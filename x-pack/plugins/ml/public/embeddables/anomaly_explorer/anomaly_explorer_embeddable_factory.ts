@@ -58,9 +58,6 @@ export class AnomalyExplorerEmbeddableFactory
     const { AnomalyDetectorService } = await import(
       '../../application/services/anomaly_detector_service'
     );
-    const { AnomalyTimelineService } = await import(
-      '../../application/services/anomaly_timeline_service'
-    );
     const { mlApiServicesProvider } = await import('../../application/services/ml_api_service');
     const { mlResultsServiceProvider } = await import('../../application/services/results_service');
 
@@ -69,11 +66,6 @@ export class AnomalyExplorerEmbeddableFactory
     const mlApiServices = mlApiServicesProvider(httpService);
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
 
-    const anomalyTimelineService = new AnomalyTimelineService(
-      pluginsStart.data.query.timefilter.timefilter,
-      coreStart.uiSettings,
-      mlResultsService
-    );
     const anomalyExplorerService = new AnomalyExplorerChartsService(
       pluginsStart.data.query.timefilter.timefilter,
       mlApiServices,
@@ -83,7 +75,7 @@ export class AnomalyExplorerEmbeddableFactory
     return [
       coreStart,
       pluginsStart as MlDependencies,
-      { anomalyDetectorService, anomalyTimelineService, anomalyExplorerService, mlResultsService },
+      { anomalyDetectorService, anomalyExplorerService, mlResultsService },
     ];
   }
 

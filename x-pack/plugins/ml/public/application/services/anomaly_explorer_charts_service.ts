@@ -117,7 +117,9 @@ export class AnomalyExplorerChartsService {
     private timeFilter: TimefilterContract,
     private mlApiServices: MlApiServices,
     private mlResultsService: MlResultsService
-  ) {}
+  ) {
+    this.timeFilter.enableTimeRangeSelector();
+  }
 
   public setTimeRange(timeRange: TimeRange) {
     this._customTimeRange = timeRange;
