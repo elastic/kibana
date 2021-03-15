@@ -16,6 +16,7 @@ const POLICY_KEYS_ORDER = [
   'dataset',
   'type',
   'outputs',
+  'outputPermissions',
   'agent',
   'inputs',
   'enabled',
