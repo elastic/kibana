@@ -20,7 +20,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiCheckbox,
-  EuiSwitch,
 } from '@elastic/eui';
 
 import { DashboardPicker, DashboardPickerProps } from './dashboard_picker';
