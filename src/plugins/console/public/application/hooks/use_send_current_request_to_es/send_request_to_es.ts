@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { extractDeprecationMessages } from '../../../lib/utils';
+import { extractWarningMessages } from '../../../lib/utils';
 import { XJson } from '../../../../../es_ui_shared/public';
 const { collapseLiteralStrings } = XJson;
 // @ts-ignore
@@ -88,8 +88,8 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
 
             const warnings = xhr.getResponseHeader('warning');
             if (warnings) {
-              const deprecationMessages = extractDeprecationMessages(warnings);
-              value = deprecationMessages.join('\n') + '\n' + value;
+              const warningMessages = extractWarningMessages(warnings);
+              value = warningMessages.join('\n') + '\n' + value;
             }
 
             if (isMultiRequest) {

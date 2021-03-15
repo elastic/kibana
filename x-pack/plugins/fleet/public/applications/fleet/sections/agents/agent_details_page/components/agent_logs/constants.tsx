@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentLogsState } from './agent_logs';
+import type { AgentLogsState } from './agent_logs';
 
 export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
 export const AGENT_DATASET = 'elastic_agent';

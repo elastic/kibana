@@ -13,7 +13,7 @@ import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
 import { listAgents } from '../../services/agents';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import {
+import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
   CreateAgentPolicyRequestSchema,
