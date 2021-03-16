@@ -41,12 +41,11 @@ export const getSplitByTermsColor = ({
       ? 'custom'
       : seriesPalette.name;
 
-  const gradientFinalColor = computeGradientFinalColor(baseColor);
   const paletteParams =
     seriesPalette.name === PALETTES.GRADIENT
       ? {
           ...seriesPalette.params,
-          colors: [baseColor, gradientFinalColor],
+          colors: [baseColor, computeGradientFinalColor(baseColor)],
         }
       : seriesPalette.params;
 

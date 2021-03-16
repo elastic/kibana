@@ -42,7 +42,6 @@ export const TimeseriesConfig = injectI18n(function (props) {
     point_size: '',
     value_template: '{{value}}',
     offset_time: '',
-    split_color_mode: '',
     axis_min: '',
     axis_max: '',
     stacked: STACKED_OPTIONS.NONE,
@@ -138,7 +137,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
   const handlePaletteChange = (val) => {
     props.onChange({
-      split_color_mode: val.name,
+      split_color_mode: null,
       palette: val,
     });
   };
