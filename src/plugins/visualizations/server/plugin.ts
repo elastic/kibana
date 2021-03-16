@@ -56,13 +56,16 @@ export class VisualizationsPlugin
       // TODO: Remove this when vis_type_vislib is removed
       // https://github.com/elastic/kibana/issues/56143
       [LEGACY_CHARTS_LIBRARY]: {
-        name: i18n.translate('visTypeXy.advancedSettings.visualization.legacyChartsLibrary.name', {
-          defaultMessage: 'Legacy charts library',
-        }),
+        name: i18n.translate(
+          'visualizations.advancedSettings.visualization.legacyChartsLibrary.name',
+          {
+            defaultMessage: 'Legacy charts library',
+          }
+        ),
         requiresPageReload: true,
         value: false,
         description: i18n.translate(
-          'visTypeXy.advancedSettings.visualization.legacyChartsLibrary.description',
+          'visualizations.advancedSettings.visualization.legacyChartsLibrary.description',
           {
             defaultMessage:
               'Enables legacy charts library for area, line, bar, pie charts in visualize.',
@@ -70,7 +73,7 @@ export class VisualizationsPlugin
         ),
         category: ['visualization'],
         schema: schema.boolean(),
-      }
+      },
     });
 
     if (plugins.usageCollection) {
