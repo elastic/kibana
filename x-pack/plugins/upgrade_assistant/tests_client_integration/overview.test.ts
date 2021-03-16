@@ -7,14 +7,14 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { OverviewTestBed, setup, setupEnvironment } from './helpers';
+import { OverviewTestBed, setupOverviewPage, setupEnvironment } from './helpers';
 
 describe('Overview page', () => {
   let testBed: OverviewTestBed;
 
   beforeEach(async () => {
     await act(async () => {
-      testBed = await setup();
+      testBed = await setupOverviewPage();
     });
   });
 
@@ -43,7 +43,7 @@ describe('Overview page', () => {
       await act(async () => {
         // Override the default context value to verify tab content renders as expected
         // This will be the default behavior on the last minor before the next major release (e.g., v7.15)
-        testBed = await setup({ isReadOnlyMode: false });
+        testBed = await setupOverviewPage({ isReadOnlyMode: false });
       });
 
       testBed.component.update();
@@ -121,7 +121,7 @@ describe('Overview page', () => {
         httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
 
         await act(async () => {
-          testBed = await setup({ isReadOnlyMode: false });
+          testBed = await setupOverviewPage({ isReadOnlyMode: false });
         });
 
         const { component, exists, find } = testBed;
@@ -147,7 +147,7 @@ describe('Overview page', () => {
         httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
 
         await act(async () => {
-          testBed = await setup({ isReadOnlyMode: false });
+          testBed = await setupOverviewPage({ isReadOnlyMode: false });
         });
 
         const { component, exists, find } = testBed;
@@ -171,7 +171,7 @@ describe('Overview page', () => {
         httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
 
         await act(async () => {
-          testBed = await setup({ isReadOnlyMode: false });
+          testBed = await setupOverviewPage({ isReadOnlyMode: false });
         });
 
         const { component, exists, find } = testBed;

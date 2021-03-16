@@ -51,10 +51,19 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setUpdateIndexSettingsResponse = (response?: object) => {
+    server.respondWith('POST', `${API_BASE_PATH}/:indexName/index_settings`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   return {
     setLoadStatusResponse,
     setLoadDeprecationLoggingResponse,
     setUpdateDeprecationLoggingResponse,
+    setUpdateIndexSettingsResponse,
   };
 };
 

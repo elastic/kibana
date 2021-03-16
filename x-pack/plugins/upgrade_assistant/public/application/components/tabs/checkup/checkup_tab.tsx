@@ -157,7 +157,7 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
           {loadingError ? (
             <LoadingErrorBanner loadingError={loadingError} />
           ) : deprecations && deprecations.length > 0 ? (
-            <>
+            <div data-test-subj="deprecationsContainer">
               <CheckupControls
                 allDeprecations={deprecations}
                 isLoading={isLoading}
@@ -171,7 +171,7 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
               />
               <EuiSpacer />
               {renderCheckupData()}
-            </>
+            </div>
           ) : (
             <EuiEmptyPrompt
               iconType="faceHappy"
