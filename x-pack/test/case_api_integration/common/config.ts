@@ -17,6 +17,7 @@ interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
+  testFiles?: string[];
 }
 
 // test.not-enabled is specifically not enabled
@@ -39,7 +40,7 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license = 'trial', disabledPlugins = [], ssl = false } = options;
+  const { license = 'trial', disabledPlugins = [], ssl = false, testFiles = [] } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -83,7 +84,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
       servers,
       services,
       junit: {
