@@ -407,6 +407,7 @@ const allowlistEventFields: AllowlistFields = {
             bytes_address: true,
             bytes_allocation_offset: true,
             bytes_compressed: true,
+            bytes_compressed_present: true,
             mapped_pe: {
               Ext: {
                 code_signature: {
