@@ -18,11 +18,13 @@ import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { findRules } from '../../rules/find_rules';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
+import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
-import { checkTimelinesStatus } from '../../../timeline/routes/utils/check_timelines_status';
-import { checkTimelineStatusRt } from '../../../timeline/routes/schemas/check_timelines_status_schema';
+import {
+  checkTimelinesStatus,
+  checkTimelineStatusRt,
+} from '../../../timeline/utils/check_timelines_status';
 
 export const getPrepackagedRulesStatusRoute = (
   router: SecuritySolutionPluginRouter,

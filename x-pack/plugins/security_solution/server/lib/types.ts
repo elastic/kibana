@@ -14,8 +14,8 @@ import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
 import { SourceStatus } from './source_status';
 import { Sources } from './sources';
-import { Note } from './note/saved_object';
-import { PinnedEvent } from './pinned_event/saved_object';
+import { Note } from './timeline/saved_object/note';
+import { PinnedEvent } from './timeline/saved_object/pinned_event';
 import { Timeline } from './timeline/saved_object';
 import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
 

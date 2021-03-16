@@ -33,16 +33,16 @@ import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_ru
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
-import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines';
-import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines';
-import { createTimelinesRoute } from '../lib/timeline/routes/create_timelines';
-import { updateTimelinesRoute } from '../lib/timeline/routes/update_timelines';
-import { getDraftTimelinesRoute } from '../lib/timeline/routes/get_draft_timelines';
-import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/clean_draft_timelines';
+import { importTimelinesRoute } from '../lib/timeline/routes/timelines/import_timelines';
+import { exportTimelinesRoute } from '../lib/timeline/routes/timelines/export_timelines';
+import { createTimelinesRoute } from '../lib/timeline/routes/timelines/create_timelines';
+import { updateTimelinesRoute } from '../lib/timeline/routes/timelines/patch_timelines';
+import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
+import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
-import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_prepackaged_timelines';
-import { getTimelineRoute } from '../lib/timeline/routes/get_timeline';
+import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { getTimelineRoute } from '../lib/timeline/routes/timelines/get_timeline';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,

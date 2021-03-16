@@ -16,8 +16,8 @@ import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs } from '../types';
-import * as note from '../note/saved_object';
-import * as pinnedEvent from '../pinned_event/saved_object';
+import * as note from '../timeline/saved_object/note';
+import * as pinnedEvent from '../timeline/saved_object/pinned_event';
 import * as timeline from '../timeline/saved_object';
 import { EndpointAppContext } from '../../endpoint/types';
 
