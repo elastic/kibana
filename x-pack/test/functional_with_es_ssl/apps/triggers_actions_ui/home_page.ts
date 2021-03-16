@@ -84,7 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('navigates to an alert details page', async () => {
           const { body: createdAction } = await supertest
-            .post(`/api/actions/action`)
+            .post(`/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send(getTestActionData())
             .expect(200);
