@@ -79,22 +79,23 @@ export function getDropProps(props: GetDropProps) {
     const isSameGroup = groupId === dragging.groupId;
     if (isSameGroup) {
       return getDropPropsForSameGroup(targetColumn);
-    }
-    // else if (
-    //   !sourceColumn ||
-    //   (targetColumn &&
-    //     hasField(targetColumn) &&
-    //     hasField(sourceColumn) &&
-    //     targetColumn.sourceField === sourceColumn.sourceField)
-    // ) {
-    //   return;
-    // }
-    else if (filterOperations(sourceColumn)) {
+    } else if (hasTheSameField(sourceColumn, targetColumn)) {
+      return;
+    } else if (filterOperations(sourceColumn)) {
       return getDropPropsForCompatibleGroup(targetColumn);
     } else {
       return getDropPropsFromIncompatibleGroup({ ...props, dragging });
     }
   }
+}
+
+function hasTheSameField(sourceColumn: IndexPatternColumn, targetColumn?: IndexPatternColumn) {
+  return (
+    targetColumn &&
+    hasField(targetColumn) &&
+    hasField(sourceColumn) &&
+    targetColumn.sourceField === sourceColumn.sourceField
+  );
 }
 
 function getDropPropsForField({

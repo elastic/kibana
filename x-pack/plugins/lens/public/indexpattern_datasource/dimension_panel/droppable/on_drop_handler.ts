@@ -39,16 +39,20 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 const operationOnDropMap = {
   field_add: onFieldDrop,
   field_replace: onFieldDrop,
+
   reorder: onReorder,
-  duplicate_compatible: onDuplicateCompatible,
-  move_compatible: onMoveCompatible,
-  replace_compatible: onMoveCompatible,
+
+  move_compatible: (props: DropHandlerProps<DraggedOperation>) => onMoveCompatible(props, true),
+  replace_compatible: (props: DropHandlerProps<DraggedOperation>) => onMoveCompatible(props, true),
+  duplicate_compatible: onMoveCompatible,
+  replace_duplicate_compatible: onMoveCompatible,
+
   move_incompatible: (props: DropHandlerProps<DraggedOperation>) => onMoveIncompatible(props, true),
   replace_incompatible: (props: DropHandlerProps<DraggedOperation>) =>
     onMoveIncompatible(props, true),
   duplicate_incompatible: onMoveIncompatible,
   replace_duplicate_incompatible: onMoveIncompatible,
-  replace_duplicate_compatible: onDuplicateCompatible,
+
   swap_compatible: onSwapCompatible,
   swap_incompatible: onSwapIncompatible,
 };
@@ -91,15 +95,18 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>) {
   return true;
 }
 
-function onDuplicateCompatible({
-  columnId,
-  setState,
-  state,
-  layerId,
-  droppedItem,
-  dimensionGroups,
-  groupId,
-}: DropHandlerProps<DraggedOperation>) {
+function onMoveCompatible(
+  {
+    columnId,
+    setState,
+    state,
+    layerId,
+    droppedItem,
+    dimensionGroups,
+    groupId,
+  }: DropHandlerProps<DraggedOperation>,
+  shouldDeleteSource?: boolean
+) {
   const layer = state.layers[layerId];
   const sourceColumn = layer.columns[droppedItem.columnId];
 
@@ -107,68 +114,31 @@ function onDuplicateCompatible({
     ...layer.columns,
     [columnId]: { ...sourceColumn },
   };
+  if (shouldDeleteSource) {
+    delete newColumns[droppedItem.columnId];
+  }
 
   const newColumnOrder = [...layer.columnOrder];
-  // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
-  // then reorder based on dimension groups if necessary
-  const insertionIndex = sourceColumn.isBucketed
-    ? newColumnOrder.findIndex((id) => !newColumns[id].isBucketed)
-    : newColumnOrder.length;
-  newColumnOrder.splice(insertionIndex, 0, columnId);
 
-  const newLayer = {
-    ...layer,
-    columnOrder: newColumnOrder,
-    columns: newColumns,
-  };
+  if (shouldDeleteSource) {
+    const sourceIndex = newColumnOrder.findIndex((c) => c === droppedItem.columnId);
+    const targetIndex = newColumnOrder.findIndex((c) => c === columnId);
 
-  const updatedColumnOrder = getColumnOrder(newLayer);
-
-  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
-
-  // Time to replace
-  setState(
-    mergeLayer({
-      state,
-      layerId,
-      newLayer: {
-        columnOrder: updatedColumnOrder,
-        columns: newColumns,
-      },
-    })
-  );
-  return true;
-}
-
-function onMoveCompatible({
-  columnId,
-  setState,
-  state,
-  layerId,
-  droppedItem,
-  dimensionGroups,
-  groupId,
-}: DropHandlerProps<DraggedOperation>) {
-  const layer = state.layers[layerId];
-  const sourceColumn = layer.columns[droppedItem.columnId];
-
-  const newColumns = {
-    ...layer.columns,
-    [columnId]: { ...sourceColumn },
-  };
-  delete newColumns[droppedItem.columnId];
-
-  const newColumnOrder = [...layer.columnOrder];
-  const sourceIndex = newColumnOrder.findIndex((c) => c === droppedItem.columnId);
-  const targetIndex = newColumnOrder.findIndex((c) => c === columnId);
-
-  if (targetIndex === -1) {
-    // for newly created columns, remove the old entry and add the last one to the end
-    newColumnOrder.splice(sourceIndex, 1);
-    newColumnOrder.push(columnId);
+    if (targetIndex === -1) {
+      // for newly created columns, remove the old entry and add the last one to the end
+      newColumnOrder.splice(sourceIndex, 1);
+      newColumnOrder.push(columnId);
+    } else {
+      // for drop to replace, reuse the same index
+      newColumnOrder[sourceIndex] = columnId;
+    }
   } else {
-    // for drop to replace, reuse the same index
-    newColumnOrder[sourceIndex] = columnId;
+    // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
+    // then reorder based on dimension groups if necessary
+    const insertionIndex = sourceColumn.isBucketed
+      ? newColumnOrder.findIndex((id) => !newColumns[id].isBucketed)
+      : newColumnOrder.length;
+    newColumnOrder.splice(insertionIndex, 0, columnId);
   }
 
   const newLayer = {
@@ -192,44 +162,7 @@ function onMoveCompatible({
       },
     })
   );
-  return { deleted: droppedItem.columnId };
-}
-
-function onSwapCompatible({
-  columnId,
-  setState,
-  state,
-  layerId,
-  droppedItem,
-}: DropHandlerProps<DraggedOperation>) {
-  const layer = state.layers[layerId];
-  const sourceId = droppedItem.columnId;
-  const targetId = columnId;
-
-  const sourceColumn = { ...layer.columns[sourceId] };
-  const targetColumn = { ...layer.columns[targetId] };
-  const newColumns = { ...layer.columns };
-  newColumns[targetId] = sourceColumn;
-  newColumns[sourceId] = targetColumn;
-
-  const newColumnOrder = [...layer.columnOrder];
-  const sourceIndex = newColumnOrder.findIndex((c) => c === sourceId);
-  const targetIndex = newColumnOrder.findIndex((c) => c === targetId);
-
-  newColumnOrder[sourceIndex] = targetId;
-  newColumnOrder[targetIndex] = sourceId;
-
-  setState(
-    mergeLayer({
-      state,
-      layerId,
-      newLayer: {
-        columnOrder: newColumnOrder,
-        columns: newColumns,
-      },
-    })
-  );
-  return true;
+  return shouldDeleteSource ? { deleted: droppedItem.columnId } : true;
 }
 
 function onReorder({
@@ -244,8 +177,8 @@ function onReorder({
     const targetIndex = items.findIndex((c) => c === src);
     const sourceIndex = items.findIndex((c) => c === dest);
 
-    const destPosition = result.indexOf(dest);
-    result.splice(targetIndex < sourceIndex ? destPosition + 1 : destPosition, 0, src);
+    const targetPosition = result.indexOf(dest);
+    result.splice(targetIndex < sourceIndex ? targetPosition + 1 : targetPosition, 0, src);
     return result;
   }
 
@@ -351,11 +284,11 @@ function onSwapIncompatible({
     layer: insertOrReplaceColumn({
       layer,
       columnId,
+      targetGroup: groupId,
       indexPattern,
       op: newOperationForSource,
       field: sourceField,
       visualizationGroups: dimensionGroups,
-      targetGroup: groupId,
     }),
     columnId: droppedItem.columnId,
     indexPattern,
@@ -375,3 +308,46 @@ function onSwapIncompatible({
   );
   return true;
 }
+
+function onSwapCompatible({
+  columnId,
+  setState,
+  state,
+  layerId,
+  droppedItem,
+}: DropHandlerProps<DraggedOperation>) {
+  const layer = state.layers[layerId];
+  const sourceId = droppedItem.columnId;
+  const targetId = columnId;
+
+  const sourceColumn = { ...layer.columns[sourceId] };
+  const targetColumn = { ...layer.columns[targetId] };
+  const newColumns = { ...layer.columns };
+  newColumns[targetId] = sourceColumn;
+  newColumns[sourceId] = targetColumn;
+
+  const swapColumnOrder = (columnOrder: string[], sourceId: string, targetId: string) => {
+    const newColumnOrder = [...columnOrder];
+    const sourceIndex = newColumnOrder.findIndex((c) => c === sourceId);
+    const targetIndex = newColumnOrder.findIndex((c) => c === targetId);
+  
+    newColumnOrder[sourceIndex] = targetId;
+    newColumnOrder[targetIndex] = sourceId;
+    return newColumnOrder
+  }
+
+  const newColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
+
+  setState(
+    mergeLayer({
+      state,
+      layerId,
+      newLayer: {
+        columnOrder: newColumnOrder,
+        columns: newColumns,
+      },
+    })
+  );
+  return true;
+}
+
