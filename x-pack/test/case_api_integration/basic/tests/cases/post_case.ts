@@ -12,6 +12,7 @@ import { CASES_URL } from '../../../../../plugins/case/common/constants';
 import {
   postCaseReq,
   postCaseResp,
+  postCollectionReq,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../common/lib/mock';
 import { deleteCases } from '../../../common/lib/utils';
@@ -42,6 +43,18 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send({ ...postCaseReq, badKey: true })
+        .expect(400);
+    });
+
+    it('unhappy path - 400s when using collection as the case type', async () => {
+      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(postCollectionReq).expect(400);
+    });
+
+    it('unhappy path - 400s when using a type other than individual', async () => {
+      await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ ...postCaseReq, type: 'blah' })
         .expect(400);
     });
 

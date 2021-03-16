@@ -260,6 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
           await es.deleteByQuery({
             index: '.kibana',
             body: { query: { term: { type: 'application_usage_transactional' } } },
+            conflicts: 'proceed',
           });
         });
 

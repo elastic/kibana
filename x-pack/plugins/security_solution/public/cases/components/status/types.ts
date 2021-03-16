@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { CaseStatuses } from '../../../../../case/common/api';
+
+export const StatusAll = 'all' as const;
+type StatusAllType = typeof StatusAll;
+
+export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
+
+export type AllCaseStatus = Record<StatusAllType, { color: string; label: string }>;
+
+export type Statuses = Record<
+  CaseStatuses,
+  {
+    color: string;
+    label: string;
+    actionBar: {
+      title: string;
+    };
+    button: {
+      label: string;
+      icon: EuiIconType;
+    };
+    stats: {
+      title: string;
+    };
+  }
+>;

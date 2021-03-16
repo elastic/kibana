@@ -7,44 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { SavedObjectsClientContract } from 'src/core/server';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 import { CASES_URL } from '../../../../common/constants';
-import { CaseServiceSetup } from '../../../services';
-
-async function deleteSubCases({
-  caseService,
-  client,
-  caseIds,
-}: {
-  caseService: CaseServiceSetup;
-  client: SavedObjectsClientContract;
-  caseIds: string[];
-}) {
-  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ client, ids: caseIds });
-
-  const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
-  const commentsForSubCases = await caseService.getAllSubCaseComments({
-    client,
-    id: subCaseIDs,
-  });
-
-  // This shouldn't actually delete anything because all the comments should be deleted when comments are deleted
-  // per case ID
-  await Promise.all(
-    commentsForSubCases.saved_objects.map((commentSO) =>
-      caseService.deleteComment({ client, commentId: commentSO.id })
-    )
-  );
-
-  await Promise.all(
-    subCasesForCaseIds.saved_objects.map((subCaseSO) =>
-      caseService.deleteSubCase(client, subCaseSO.id)
-    )
-  );
-}
 
 export function initDeleteCasesApi({ caseService, router, userActionService, logger }: RouteDeps) {
   router.delete(
@@ -91,7 +57,6 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
           );
         }
 
-        await deleteSubCases({ caseService, client, caseIds: request.query.ids });
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();

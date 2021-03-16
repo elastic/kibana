@@ -9,8 +9,6 @@ import {
   CommentSchemaType,
   ContextTypeGeneratedAlertType,
   createAlertsString,
-  isCommentGeneratedAlert,
-  transformConnectorComment,
 } from '../../../../plugins/case/server/connectors';
 import {
   CasePostRequest,
@@ -120,19 +118,11 @@ export const commentsResp = ({
       updated_by: null,
     };
 
-    if (isCommentGeneratedAlert(comment)) {
-      return {
-        associationType,
-        ...transformConnectorComment(comment),
-        ...baseFields,
-      };
-    } else {
-      return {
-        associationType,
-        ...comment,
-        ...baseFields,
-      };
-    }
+    return {
+      associationType,
+      ...comment,
+      ...baseFields,
+    };
   });
 };
 

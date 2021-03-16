@@ -137,7 +137,6 @@ describe('Case Configuration API', () => {
           ...DEFAULT_QUERY_PARAMS,
           reporters: [],
           tags: [],
-          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });

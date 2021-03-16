@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Deleting Backup Catalogs with Wbadmin",
   "query": "event.category:process and event.type:(start or process_started) and process.name:wbadmin.exe and process.args:(catalog and delete)",
   "risk_score": 21,

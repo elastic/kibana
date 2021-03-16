@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -17,21 +16,10 @@ import {
   removeServerGeneratedPropertiesFromCase,
   removeServerGeneratedPropertiesFromComments,
 } from '../../../common/lib/mock';
-import {
-  createRule,
-  createSignalsIndex,
-  deleteAllAlerts,
-  deleteSignalsIndex,
-  getRuleForSignalTesting,
-  getSignalsByIds,
-  waitForRuleSuccessOrStatus,
-  waitForSignalsToBePresent,
-} from '../../../../detection_engine_api_integration/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('case_connector', () => {
     let createdActionId = '';
@@ -693,137 +681,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      describe('adding alerts using a connector', () => {
-        beforeEach(async () => {
-          await esArchiver.load('auditbeat/hosts');
-          await createSignalsIndex(supertest);
-        });
-
-        afterEach(async () => {
-          await deleteSignalsIndex(supertest);
-          await deleteAllAlerts(supertest);
-          await esArchiver.unload('auditbeat/hosts');
-        });
-
-        it('should add a comment of type alert', async () => {
-          // TODO: don't do all this stuff
-          const rule = getRuleForSignalTesting(['auditbeat-*']);
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
-          const alert = signals.hits.hits[0];
-
-          const { body: createdAction } = await supertest
-            .post('/api/actions/action')
-            .set('kbn-xsrf', 'foo')
-            .send({
-              name: 'A case connector',
-              actionTypeId: '.case',
-              config: {},
-            })
-            .expect(200);
-
-          createdActionId = createdAction.id;
-
-          const caseRes = await supertest
-            .post(CASES_URL)
-            .set('kbn-xsrf', 'true')
-            .send(postCaseReq)
-            .expect(200);
-
-          const params = {
-            subAction: 'addComment',
-            subActionParams: {
-              caseId: caseRes.body.id,
-              comment: {
-                alertId: alert._id,
-                index: alert._index,
-                type: CommentType.alert,
-                rule: { id: 'id', name: 'name' },
-              },
-            },
-          };
-
-          const caseConnector = await supertest
-            .post(`/api/actions/action/${createdActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({ params })
-            .expect(200);
-
-          expect(caseConnector.body.status).to.eql('ok');
-
-          const { body } = await supertest
-            .get(`${CASES_URL}/${caseRes.body.id}`)
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(200);
-
-          const data = removeServerGeneratedPropertiesFromCase(body);
-          const comments = removeServerGeneratedPropertiesFromComments(data.comments ?? []);
-          expect({ ...data, comments }).to.eql({
-            ...postCaseResp(caseRes.body.id),
-            comments,
-            totalAlerts: 1,
-            totalComment: 1,
-            updated_by: {
-              email: null,
-              full_name: null,
-              username: null,
-            },
-          });
-        });
-      });
-
-      it('should respond with a 400 Bad Request when missing attributes of type alert', async () => {
-        const { body: createdAction } = await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A case connector',
-            actionTypeId: '.case',
-            config: {},
-          })
-          .expect(200);
-
-        createdActionId = createdAction.id;
-        const comment = {
-          alertId: 'test-id',
-          index: 'test-index',
-          type: CommentType.alert,
-          rule: { id: 'id', name: 'name' },
-        };
-        const params = {
-          subAction: 'addComment',
-          subActionParams: {
-            caseId: '123',
-            comment,
-          },
-        };
-
-        // only omitting alertId here since the type for alertId and index differ, the messages will be different
-        for (const attribute of ['alertId']) {
-          const requestAttributes = omit(attribute, comment);
-          const caseConnector = await supertest
-            .post(`/api/actions/action/${createdActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...params,
-                subActionParams: { ...params.subActionParams, comment: requestAttributes },
-              },
-            })
-            .expect(200);
-
-          expect(caseConnector.body).to.eql({
-            status: 'error',
-            actionId: createdActionId,
-            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.type]: expected value to equal [user]\n - [subActionParams.comment.1.${attribute}]: expected at least one defined value but got [undefined]\n - [subActionParams.comment.2.type]: expected value to equal [generated_alert]`,
-            retry: false,
-          });
-        }
-      });
-
       it('should respond with a 400 Bad Request when adding excess attributes for type user', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
@@ -861,56 +718,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseConnector.body).to.eql({
             status: 'error',
             actionId: createdActionId,
-            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing\n - [subActionParams.comment.1.type]: expected value to equal [alert]\n - [subActionParams.comment.2.type]: expected value to equal [generated_alert]`,
-            retry: false,
-          });
-        }
-      });
-
-      it('should respond with a 400 Bad Request when adding excess attributes for type alert', async () => {
-        const { body: createdAction } = await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A case connector',
-            actionTypeId: '.case',
-            config: {},
-          })
-          .expect(200);
-
-        createdActionId = createdAction.id;
-        const params = {
-          subAction: 'addComment',
-          subActionParams: {
-            caseId: '123',
-            comment: {
-              alertId: 'test-id',
-              index: 'test-index',
-              type: CommentType.alert,
-              rule: { id: 'id', name: 'name' },
-            },
-          },
-        };
-
-        for (const attribute of ['comment']) {
-          const caseConnector = await supertest
-            .post(`/api/actions/action/${createdActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: {
-                ...params,
-                subActionParams: {
-                  ...params.subActionParams,
-                  comment: { ...params.subActionParams.comment, [attribute]: attribute },
-                },
-              },
-            })
-            .expect(200);
-
-          expect(caseConnector.body).to.eql({
-            status: 'error',
-            actionId: createdActionId,
-            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.type]: expected value to equal [user]\n - [subActionParams.comment.1.${attribute}]: definition for this key is missing\n - [subActionParams.comment.2.type]: expected value to equal [generated_alert]`,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.${attribute}]: definition for this key is missing`,
             retry: false,
           });
         }
@@ -1004,7 +812,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should add a comment of type alert', async () => {
+      it('should not add a comment of type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -1036,31 +844,13 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         };
 
-        await supertest
+        const caseConnector = await supertest
           .post(`/api/actions/action/${createdActionId}/_execute`)
           .set('kbn-xsrf', 'foo')
           .send({ params })
           .expect(200);
 
-        const { body } = await supertest
-          .get(`${CASES_URL}/${caseRes.body.id}`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        const data = removeServerGeneratedPropertiesFromCase(body);
-        const comments = removeServerGeneratedPropertiesFromComments(data.comments ?? []);
-        expect({ ...data, comments }).to.eql({
-          ...postCaseResp(caseRes.body.id),
-          comments,
-          totalComment: 1,
-          totalAlerts: 1,
-          updated_by: {
-            email: null,
-            full_name: null,
-            username: null,
-          },
-        });
+        expect(caseConnector.body.status).to.eql('error');
       });
     });
   });

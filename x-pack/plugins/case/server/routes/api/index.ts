@@ -14,10 +14,7 @@ import { initPushCaseApi } from './cases/push_case';
 import { initGetReportersApi } from './cases/reporters/get_reporters';
 import { initGetCasesStatusApi } from './cases/status/get_status';
 import { initGetTagsApi } from './cases/tags/get_tags';
-import {
-  initGetAllCaseUserActionsApi,
-  initGetAllSubCaseUserActionsApi,
-} from './cases/user_actions/get_all_user_actions';
+import { initGetAllCaseUserActionsApi } from './cases/user_actions/get_all_user_actions';
 
 import { initDeleteCommentApi } from './cases/comments/delete_comment';
 import { initDeleteAllCommentsApi } from './cases/comments/delete_all_comments';
@@ -33,10 +30,6 @@ import { initPatchCaseConfigure } from './cases/configure/patch_configure';
 import { initPostCaseConfigure } from './cases/configure/post_configure';
 
 import { RouteDeps } from './types';
-import { initGetSubCaseApi } from './cases/sub_case/get_sub_case';
-import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
-import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
-import { initDeleteSubCasesApi } from './cases/sub_case/delete_sub_cases';
 
 /**
  * Default page number when interacting with the saved objects API.
@@ -56,12 +49,6 @@ export function initCaseApi(deps: RouteDeps) {
   initPostCaseApi(deps);
   initPushCaseApi(deps);
   initGetAllCaseUserActionsApi(deps);
-  initGetAllSubCaseUserActionsApi(deps);
-  // Sub cases
-  initGetSubCaseApi(deps);
-  initPatchSubCasesApi(deps);
-  initFindSubCasesApi(deps);
-  initDeleteSubCasesApi(deps);
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);

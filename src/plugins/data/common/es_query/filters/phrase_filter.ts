@@ -97,6 +97,7 @@ export const getPhraseScript = (field: IFieldType, value: string) => {
 };
 
 /**
+ * @internal
  * See issues bellow for the reason behind this change.
  * Values need to be converted to correct types for boolean \ numeric fields.
  * https://github.com/elastic/kibana/issues/74301
@@ -122,6 +123,7 @@ export const getConvertedValueForField = (field: IFieldType, value: any) => {
 };
 
 /**
+ * @internal
  * Takes a scripted field and returns an inline script appropriate for use in a script query.
  * Handles lucene expression and Painless scripts. Other langs aren't guaranteed to generate valid
  * scripts.

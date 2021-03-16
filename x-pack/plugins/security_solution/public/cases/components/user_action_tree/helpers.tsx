@@ -219,8 +219,8 @@ export const getAlertAttachment = ({
   alertId: string;
   index: string;
   loadingAlertData: boolean;
-  ruleId: string;
-  ruleName: string;
+  ruleId?: string | null;
+  ruleName?: string | null;
 }): EuiCommentProps => {
   return {
     username: (

@@ -14,18 +14,15 @@ import {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
-import { PrefilledAnomalyAlertFlyout } from '../../metric_anomaly/components/alert_flyout';
 import { useLinkProps } from '../../../hooks/use_link_props';
 
-type VisibleFlyoutType = 'inventory' | 'threshold' | 'anomaly' | null;
+type VisibleFlyoutType = 'inventory' | 'threshold' | null;
 
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType>(null);
-  const { hasInfraMLCapabilities } = useInfraMLCapabilities();
 
   const closeFlyout = useCallback(() => setVisibleFlyoutType(null), [setVisibleFlyoutType]);
 
@@ -75,16 +72,7 @@ export const MetricsAlertDropdown = () => {
             }),
             onClick: () => setVisibleFlyoutType('inventory'),
           },
-        ].concat(
-          hasInfraMLCapabilities
-            ? {
-                name: i18n.translate('xpack.infra.alerting.createAnomalyAlertButton', {
-                  defaultMessage: 'Create anomaly alert',
-                }),
-                onClick: () => setVisibleFlyoutType('anomaly'),
-              }
-            : []
-        ),
+        ],
       },
       {
         id: 2,
@@ -101,7 +89,7 @@ export const MetricsAlertDropdown = () => {
         ],
       },
     ],
-    [manageAlertsLinkProps, setVisibleFlyoutType, hasInfraMLCapabilities]
+    [manageAlertsLinkProps, setVisibleFlyoutType]
   );
 
   const closePopover = useCallback(() => {
@@ -143,8 +131,6 @@ const AlertFlyout = ({ visibleFlyoutType, onClose }: AlertFlyoutProps) => {
       return <PrefilledInventoryAlertFlyout onClose={onClose} />;
     case 'threshold':
       return <PrefilledThresholdAlertFlyout onClose={onClose} />;
-    case 'anomaly':
-      return <PrefilledAnomalyAlertFlyout onClose={onClose} />;
     default:
       return null;
   }

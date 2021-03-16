@@ -107,6 +107,7 @@ import * as statusI18n from '../../../../components/rules/rule_status/translatio
 import * as i18n from './translations';
 import { isTab } from '../../../../../common/components/accessibility/helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -328,7 +329,10 @@ const RuleDetailsPageComponent = () => {
       </EuiFlexItem>
     ) : (
       <>
-        <RuleStatus status={currentStatus?.status} statusDate={currentStatus?.status_date}>
+        <RuleStatus
+          status={getRuleStatusText(currentStatus?.status)}
+          statusDate={currentStatus?.status_date}
+        >
           <EuiButtonIcon
             data-test-subj="refreshButton"
             color="primary"

@@ -102,6 +102,19 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
+    it('returns a 404 trying to delete a migration that does not exist', async () => {
+      const { body } = await supertest
+        .delete(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ migration_ids: ['dne-migration'] })
+        .expect(404);
+
+      expect(body).to.eql({
+        message: 'Saved object [security-solution-signals-migration/dne-migration] not found',
+        status_code: 404,
+      });
+    });
+
     it('rejects the request if the user does not have sufficient privileges', async () => {
       await createUserAndRole(getService, ROLES.t1_analyst);
 

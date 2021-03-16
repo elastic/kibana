@@ -15,6 +15,7 @@ import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
+import { CaseStatusWithAllStatus, StatusAll } from '../status';
 import { StatusFilter } from './status_filter';
 
 import * as i18n from './translations';
@@ -42,7 +43,12 @@ const StatusFilterWrapper = styled(EuiFlexItem)`
  * @param onFilterChanged change listener to be notified on filter changes
  */
 
-const defaultInitial = { search: '', reporters: [], status: CaseStatuses.open, tags: [] };
+const defaultInitial = {
+  search: '',
+  reporters: [],
+  status: StatusAll,
+  tags: [],
+};
 
 const CasesTableFiltersComponent = ({
   countClosedCases,
@@ -126,7 +132,7 @@ const CasesTableFiltersComponent = ({
   );
 
   const onStatusChanged = useCallback(
-    (status: CaseStatuses) => {
+    (status: CaseStatusWithAllStatus) => {
       onFilterChanged({ status });
     },
     [onFilterChanged]
@@ -134,6 +140,7 @@ const CasesTableFiltersComponent = ({
 
   const stats = useMemo(
     () => ({
+      [StatusAll]: null,
       [CaseStatuses.open]: countOpenCases ?? 0,
       [CaseStatuses['in-progress']]: countInProgressCases ?? 0,
       [CaseStatuses.closed]: countClosedCases ?? 0,

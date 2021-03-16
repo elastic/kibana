@@ -13,7 +13,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "PPTP (Point to Point Tunneling Protocol) Activity",
   "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port:1723",
   "risk_score": 21,

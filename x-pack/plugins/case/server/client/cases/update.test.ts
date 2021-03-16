@@ -430,9 +430,13 @@ describe('update', () => {
       await caseClient.client.update(patchCases);
 
       expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
-        ids: ['test-id'],
-        status: 'closed',
-        indices: new Set<string>(['test-index']),
+        alerts: [
+          {
+            id: 'test-id',
+            index: 'test-index',
+            status: 'closed',
+          },
+        ],
       });
     });
 
@@ -458,11 +462,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.updateAlertsStatus = jest.fn();
 
       await caseClient.client.update(patchCases);
 
-      expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
+      expect(caseClient.esClient.bulk).not.toHaveBeenCalled();
     });
 
     test('it updates alert status when syncAlerts is turned on', async () => {
@@ -492,9 +495,7 @@ describe('update', () => {
       await caseClient.client.update(patchCases);
 
       expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
-        ids: ['test-id'],
-        status: 'open',
-        indices: new Set<string>(['test-index']),
+        alerts: [{ id: 'test-id', index: 'test-index', status: 'open' }],
       });
     });
 
@@ -515,11 +516,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.updateAlertsStatus = jest.fn();
 
       await caseClient.client.update(patchCases);
 
-      expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
+      expect(caseClient.esClient.bulk).not.toHaveBeenCalled();
     });
 
     test('it updates alert status for multiple cases', async () => {
@@ -576,22 +576,12 @@ describe('update', () => {
       caseClient.client.updateAlertsStatus = jest.fn();
 
       await caseClient.client.update(patchCases);
-      /**
-       * the update code will put each comment into a status bucket and then make at most 1 call
-       * to ES for each status bucket
-       * Now instead of doing a call per case to get the comments, it will do a single call with all the cases
-       * and sub cases and get all the comments in one go
-       */
-      expect(caseClient.client.updateAlertsStatus).toHaveBeenNthCalledWith(1, {
-        ids: ['test-id'],
-        status: 'open',
-        indices: new Set<string>(['test-index']),
-      });
 
-      expect(caseClient.client.updateAlertsStatus).toHaveBeenNthCalledWith(2, {
-        ids: ['test-id-2'],
-        status: 'closed',
-        indices: new Set<string>(['test-index-2']),
+      expect(caseClient.client.updateAlertsStatus).toHaveBeenCalledWith({
+        alerts: [
+          { id: 'test-id', index: 'test-index', status: 'open' },
+          { id: 'test-id-2', index: 'test-index-2', status: 'closed' },
+        ],
       });
     });
 
@@ -611,11 +601,10 @@ describe('update', () => {
       });
 
       const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
-      caseClient.client.updateAlertsStatus = jest.fn();
 
       await caseClient.client.update(patchCases);
 
-      expect(caseClient.client.updateAlertsStatus).not.toHaveBeenCalled();
+      expect(caseClient.esClient.bulk).not.toHaveBeenCalled();
     });
   });
 

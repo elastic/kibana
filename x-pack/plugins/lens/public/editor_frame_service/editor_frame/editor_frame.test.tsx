@@ -13,6 +13,7 @@ import { EditorFrame } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
+import { fromExpression } from '@kbn/interpreter/common';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -427,42 +428,9 @@ describe('editor_frame', () => {
       instance.update();
 
       expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
-        Object {
-          "chain": Array [
-            Object {
-              "arguments": Object {},
-              "function": "kibana",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "layerIds": Array [
-                  "first",
-                ],
-                "tables": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {},
-                        "function": "datasource",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
-                ],
-              },
-              "function": "lens_merge_tables",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {},
-              "function": "vis",
-              "type": "function",
-            },
-          ],
-          "type": "expression",
-        }
+        "kibana
+        | lens_merge_tables layerIds=\\"first\\" tables={datasource}
+        | vis"
       `);
     });
 
@@ -510,7 +478,9 @@ describe('editor_frame', () => {
 
       instance.update();
 
-      expect(instance.find(expressionRendererMock).prop('expression')).toEqual({
+      expect(
+        fromExpression(instance.find(expressionRendererMock).prop('expression') as string)
+      ).toEqual({
         type: 'expression',
         chain: expect.arrayContaining([
           expect.objectContaining({
@@ -518,7 +488,8 @@ describe('editor_frame', () => {
           }),
         ]),
       });
-      expect(instance.find(expressionRendererMock).prop('expression')).toMatchInlineSnapshot(`
+      expect(fromExpression(instance.find(expressionRendererMock).prop('expression') as string))
+        .toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {

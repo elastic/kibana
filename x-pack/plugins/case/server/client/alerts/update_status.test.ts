@@ -15,17 +15,13 @@ describe('updateAlertsStatus', () => {
 
     const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
     await caseClient.client.updateAlertsStatus({
-      ids: ['alert-id-1'],
-      status: CaseStatuses.closed,
-      indices: new Set<string>(['.siem-signals']),
+      alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
     });
 
     expect(caseClient.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith({
-      scopedClusterClient: expect.anything(),
       logger: expect.anything(),
-      ids: ['alert-id-1'],
-      indices: new Set<string>(['.siem-signals']),
-      status: CaseStatuses.closed,
+      scopedClusterClient: expect.anything(),
+      alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
     });
   });
 });

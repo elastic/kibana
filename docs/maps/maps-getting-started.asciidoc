@@ -34,7 +34,7 @@ refer to <<xpack-security-authorization,Granting access to {kib}>>.
 . Open the main menu, and then click *Dashboard*.
 . Click **Create dashboard**.
 . Set the time range to *Last 7 days*.
-. Click **Create new**.
+. Click **Create panel**.
 . Click **Maps**.
 
 [float]
@@ -152,10 +152,7 @@ image::maps/images/sample_data_web_logs.png[]
 === Step 4. Save the map
 Now that your map is complete, save it and return to the dashboard.
 
-. In the toolbar, click *Save*.
-. Enter `Tutorial web logs map` for the title.
-. Ensure *Add to Dashboard after saving* is enabled.
-. Click *Save and return*.
+. In the toolbar, click *Save and return*.
 
 [float]
 [[maps-embedding]]
@@ -164,8 +161,7 @@ Now that your map is complete, save it and return to the dashboard.
 View your geospatial data alongside a heat map and pie chart, and then filter the data.
 When you apply a filter in one panel, it is applied to all panels on the dashboard.
 
-. In the toolbar, click **Add** to open a list of objects that you can add to the dashboard.
-. Set the **Types** select to **Visualization**.
+. Click **Add from library** to open a list of panels that you can add to the dashboard.
 . Add **[Logs] Heatmap** and **[Logs] Visitors by OS** to the dashboard.
 +
 [role="screenshot"]
