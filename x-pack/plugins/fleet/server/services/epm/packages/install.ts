@@ -328,17 +328,10 @@ export async function installPackage(args: InstallPackageParams) {
     throw new Error('installSource is required');
   }
   const logger = appContextService.getLogger();
+  const { savedObjectsClient, esClient, skipPostInstall = false, installSource } = args;
 
   if (args.installSource === 'registry') {
-    const {
-      savedObjectsClient,
-      pkgkey,
-      esClient,
-      force,
-      skipPostInstall = false,
-      installSource,
-      allowedInstallTypes,
-    } = args;
+    const { pkgkey, force, allowedInstallTypes } = args;
     const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
     logger.debug(`kicking off install of ${pkgkey} from registry`);
     const response = installPackageFromRegistry({
@@ -362,14 +355,25 @@ export async function installPackage(args: InstallPackageParams) {
     });
     return response;
   } else if (args.installSource === 'upload') {
-    const { savedObjectsClient, esClient, archiveBuffer, contentType } = args;
+    const { archiveBuffer, contentType } = args;
     logger.debug(`kicking off install of uploaded package`);
-    return installPackageByUpload({
+    const response = installPackageByUpload({
       savedObjectsClient,
       esClient,
       archiveBuffer,
       contentType,
+    }).then(async (installResult) => {
+      if (skipPostInstall) {
+        return installResult;
+      }
+      logger.debug(`install of uploaded package finished, running post-install`);
+      return installIndexPatterns({
+        savedObjectsClient,
+        esClient,
+        installSource,
+      }).then(() => installResult);
     });
+    return response;
   }
   // @ts-expect-error s/b impossibe b/c `never` by this point, but just in case
   throw new Error(`Unknown installSource: ${args.installSource}`);
