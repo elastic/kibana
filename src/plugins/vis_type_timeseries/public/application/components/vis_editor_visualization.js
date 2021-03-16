@@ -14,8 +14,9 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { getInterval } from './lib/get_interval';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { PANEL_TYPES } from '../../../common/panel_types';
-import { DataTimeRangeModeLabel } from './data_time_range_mode_label';
+import { LastValueTimeRangeModeLabel } from './last_value_time_range_mode_label';
 import { isVisSeriesData } from '../../../common/types';
+import { TIME_RANGE_DATA_MODES } from '../../../common/timerange_data_modes';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -182,14 +183,15 @@ class VisEditorVisualizationUI extends Component {
           />
         </EuiFlexItem>
 
-        {this.isAnyPanelTypeExceptTimeseries() && (
-          <DataTimeRangeModeLabel
-            seriesData={seriesData}
-            panelInterval={panelInterval}
-            modelInterval={model.interval ?? AUTO_INTERVAL}
-            modelTimeRangeMode={model.time_range_mode}
-          />
-        )}
+        {this.isAnyPanelTypeExceptTimeseries() &&
+          (!model.time_range_mode ||
+            model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE) && (
+            <LastValueTimeRangeModeLabel
+              seriesData={seriesData}
+              panelInterval={panelInterval}
+              modelInterval={model.interval ?? AUTO_INTERVAL}
+            />
+          )}
 
         <EuiFlexItem grow={false}>
           <EuiText color={dirty ? 'default' : 'subdued'} size="xs">

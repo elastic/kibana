@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import './data_time_range_mode_label.scss';
+import './last_value_time_range_mode_label.scss';
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexItem, EuiText, EuiToolTip, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiToolTip, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 import { getUISettings } from '../../services';
 import { convertIntervalIntoUnit, isAutoInterval, isGteInterval } from './lib/get_interval';
 import { createIntervalBasedFormatter } from './lib/create_interval_based_formatter';
-import { TIME_RANGE_DATA_MODES } from '../../../common/timerange_data_modes';
 import { PanelData } from '../../../common/types';
 
 const lastValueFormattedMessage = i18n.translate(
@@ -25,19 +24,17 @@ const lastValueFormattedMessage = i18n.translate(
   }
 );
 
-interface DataTimeRangeModeLabelProps {
+interface LastValueTimeRangeModeLabelProps {
   seriesData?: PanelData['data'];
   panelInterval: number;
   modelInterval: string;
-  modelTimeRangeMode: TIME_RANGE_DATA_MODES;
 }
 
-export const DataTimeRangeModeLabel = ({
+export const LastValueTimeRangeModeLabel = ({
   seriesData,
   panelInterval,
   modelInterval,
-  modelTimeRangeMode,
-}: DataTimeRangeModeLabelProps) => {
+}: LastValueTimeRangeModeLabelProps) => {
   const dateFormat = getUISettings().get('dateFormat');
   const scaledDataFormat = getUISettings().get('dateFormat:scaled');
 
@@ -62,46 +59,44 @@ export const DataTimeRangeModeLabel = ({
             values={{ lastBucketDate }}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="visTypeTimeseries.dataTimeRangeModeLabel.panelInterval"
-            defaultMessage="Interval: {formattedPanelInterval}"
-            values={{ formattedPanelInterval }}
-          />
-        </EuiFlexItem>
+        {formattedPanelInterval && (
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="visTypeTimeseries.dataTimeRangeModeLabel.panelInterval"
+              defaultMessage="Interval: {formattedPanelInterval}"
+              values={{ formattedPanelInterval }}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
 
     return (
       <EuiToolTip position="top" content={tooltipContent}>
-        <EuiText className="tvbLastValueLabel" color="subdued" size="xs">
-          {lastValueFormattedMessage}
-        </EuiText>
+        <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText className="tvbLastValueLabel" color="subdued" size="xs">
+              {lastValueFormattedMessage}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="iInCircle" size="s" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiToolTip>
     );
   };
-
-  const lastValueLabel =
-    seriesData?.length && panelInterval
-      ? getLastValueLabelWithTooltip()
-      : lastValueFormattedMessage;
 
   return (
     <EuiFlexItem grow={false}>
       <EuiText color="default" size="xs">
         <FormattedMessage
-          id="visTypeTimeseries.dataTimeRangeModeLabel.dataTimeRangeMode"
-          defaultMessage="Data timerange mode: {timeRangeMode}"
+          id="visTypeTimeseries.dataTimeRangeModeLabel.lastValueDataTimeRangeMode"
+          defaultMessage="Data timerange mode: {lastValueLabel}"
           values={{
-            timeRangeMode:
-              modelTimeRangeMode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE ? (
-                <FormattedMessage
-                  id="visTypeTimeseries.dataTimeRangeModeLabel.entireTimeRangeMode"
-                  defaultMessage="Entire time range"
-                />
-              ) : (
-                lastValueLabel
-              ),
+            lastValueLabel: seriesData?.length
+              ? getLastValueLabelWithTooltip()
+              : lastValueFormattedMessage,
           }}
         />
       </EuiText>
