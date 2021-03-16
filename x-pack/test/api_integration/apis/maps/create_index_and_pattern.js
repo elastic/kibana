@@ -13,7 +13,7 @@ export default function ({ getService }) {
   describe('index and pattern creation', () => {
     it('should create an index and pattern', async () => {
       const resp = await supertest
-        .post(`/api/maps/indexSource`)
+        .post(`/api/maps/docSource`)
         .set('kbn-xsrf', 'kibana')
         .send({
           index: 'testing123',
@@ -26,7 +26,7 @@ export default function ({ getService }) {
 
     it('should fail to create index and pattern with invalid index', async () => {
       await supertest
-        .post(`/api/maps/indexSource`)
+        .post(`/api/maps/docSource`)
         .set('kbn-xsrf', 'kibana')
         .send({
           index: '_testing456',
