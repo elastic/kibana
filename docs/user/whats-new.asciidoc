@@ -95,7 +95,7 @@ simply navigate back to *Dashboard*.
 [[alerting-7-12]]
 === {es} query alert
 
-*Alerting* adds a number of new alert types, including the {kibana-ref}/rule-type-es-query.html.html[{es} query alert],
+*Alerting* adds a number of new alert types, including the {kibana-ref}/rule-type-es-query.html[{es} query alert],
 which allows you to create alerts using Search DSL queries.
 Use the {es} query alert with any of your indices and be alerted on the number of matching documents.
 This alert is designed for
