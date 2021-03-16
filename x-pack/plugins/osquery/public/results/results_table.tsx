@@ -12,7 +12,7 @@ import React, { createContext, useEffect, useState, useCallback, useContext, use
 import { EuiDataGridSorting } from '@elastic/eui';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -22,6 +22,13 @@ interface ResultsTableComponentProps {
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId, agentId }) => {
+  const { getUrlForApp } = useKibana().services.application;
+
+  const getFleetAppUrl = useCallback(
+    (agentId) => getUrlForApp('fleet', { path: `#/fleet/agents/${agentId}` }),
+    [getUrlForApp]
+  );
+
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
@@ -65,14 +72,17 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
 
       if (columnId === 'agent.name') {
         const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const linkProps = useRouterNavigate(`/live_query/${actionId}/results/${agentIdValue}`);
-        return <EuiLink {...linkProps}>{value}</EuiLink>;
+
+        return (
+          <EuiLink href={getFleetAppUrl(agentIdValue)} target="_blank">
+            {value}
+          </EuiLink>
+        );
       }
 
       return !isEmpty(value) ? value : '-';
     },
-    [actionId, pagination.pageSize]
+    [getFleetAppUrl, pagination.pageSize]
   );
 
   const tableSorting = useMemo(() => ({ columns: sortingColumns, onSort: setSortingColumns }), [

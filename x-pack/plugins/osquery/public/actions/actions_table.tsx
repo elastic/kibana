@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiCodeBlock, formatDate } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
 import React, { createContext, useState, useCallback, useMemo } from 'react';
 
 import { useAllActions } from './use_all_actions';
 import { ActionEdges, Direction } from '../../common/search_strategy';
 import { useRouterNavigate } from '../common/lib/kibana';
+
+interface ActionTableResultsButtonProps {
+  actionId: string;
+}
+
+const ActionTableResultsButton = React.memo<ActionTableResultsButtonProps>(({ actionId }) => {
+  const navProps = useRouterNavigate(`live_query/${actionId}`);
+
+  return <EuiButtonIcon iconType="visTable" {...navProps} />;
+});
+
+ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -39,10 +51,15 @@ const ActionsTableComponent = () => {
     []
   );
 
-  const renderAgentsColumn = useCallback((_, item) => <>{item.fields.agents.length}</>, []);
+  const renderAgentsColumn = useCallback((_, item) => <>{item.fields.agents?.length ?? 0}</>, []);
 
   const renderTimestampColumn = useCallback(
     (_, item) => <>{formatDate(item.fields['@timestamp'][0])}</>,
+    []
+  );
+
+  const renderActionsColumn = useCallback(
+    (item) => <ActionTableResultsButton actionId={item.fields.action_id[0]} />,
     []
   );
 
@@ -70,16 +87,12 @@ const ActionsTableComponent = () => {
         name: 'Actions',
         actions: [
           {
-            name: 'Results',
-            description: 'View action results',
-            type: 'icon',
-            icon: 'copy',
-            onClick: () => '',
+            render: renderActionsColumn,
           },
         ],
       },
     ],
-    [renderAgentsColumn, renderQueryColumn, renderTimestampColumn]
+    [renderActionsColumn, renderAgentsColumn, renderQueryColumn, renderTimestampColumn]
   );
 
   const pagination = useMemo(
@@ -96,7 +109,6 @@ const ActionsTableComponent = () => {
     <EuiBasicTable
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={actionsData?.actions ?? []}
-      // @ts-expect-error update types
       columns={columns}
       // @ts-expect-error update types
       pagination={pagination}

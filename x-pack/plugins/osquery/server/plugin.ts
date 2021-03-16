@@ -176,7 +176,7 @@ async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<
   const caseId = find(parsedAlerts[0].signal.rule.actions, ['actionTypeId', '.case']).params
     ?.subActionParams?.caseId;
 
-  console.log('caseId', caseId);
+  // console.log('caseId', caseId);
 
   // console.log('caseAction', JSON.stringify(caseAction, null, 2));
   // console.log('caseClient', caseClient, Object.keys(caseClient));
@@ -188,7 +188,9 @@ async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<
       execOptions.services.scopedClusterClient,
       execOptions.services.savedObjectsClient,
       {
-        agents: agentsWithOsqueryPolicyIds,
+        agentSelection: {
+          agents: agentsWithOsqueryPolicyIds,
+        },
         query: {
           query: execOptions.params.query,
         },

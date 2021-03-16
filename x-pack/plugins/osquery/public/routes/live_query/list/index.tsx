@@ -24,7 +24,7 @@ const LiveQueriesPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.liveQueryList.pageTitle"
-                defaultMessage="Live queries"
+                defaultMessage="Live queries history"
               />
             </h1>
           </EuiText>

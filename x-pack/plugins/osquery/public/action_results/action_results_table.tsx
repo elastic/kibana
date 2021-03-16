@@ -14,6 +14,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import React, { createContext, useState, useCallback, useContext, useMemo } from 'react';
 
@@ -21,7 +22,7 @@ import { useAllAgents } from './../agents/use_all_agents';
 import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useKibana } from '../common/lib/kibana';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -30,6 +31,13 @@ interface ActionResultsTableProps {
 }
 
 const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ actionId }) => {
+  const { getUrlForApp } = useKibana().services.application;
+
+  const getFleetAppUrl = useCallback(
+    (agentId) => getUrlForApp('fleet', { path: `#/fleet/agents/${agentId}` }),
+    [getUrlForApp]
+  );
+
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
     (pageSize) =>
@@ -105,15 +113,14 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       const value = data[rowIndex % pagination.pageSize];
 
       if (columnId === 'status') {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const linkProps = useRouterNavigate(
-          `/live_query/${actionId}/results/${value.fields.agent_id[0]}`
-        );
+        // const linkProps = useRouterNavigate(
+        //   `/live_query/${actionId}/results/${value.fields.agent_id[0]}`
+        // );
 
         return (
           <>
-            <EuiIcon type="checkInCircleFilled" />
-            <EuiLink {...linkProps}>{'View results'}</EuiLink>
+            <EuiIcon type="checkInCircleFilled" color="green" />
+            {/* <EuiLink {...linkProps}>{'View results'}</EuiLink> */}
           </>
         );
       }
@@ -145,10 +152,11 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
         const agent = find(['_id', agentIdValue], agentsData?.agents);
         const agentName = agent?.local_metadata.host.name;
 
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const linkProps = useRouterNavigate(`/live_query/${actionId}/results/${agentIdValue}`);
         return (
-          <EuiLink {...linkProps}>{`(${agent?.local_metadata.os.name}) ${agentName}`}</EuiLink>
+          <EuiLink
+            href={getFleetAppUrl(agentIdValue)}
+            target="_blank"
+          >{`(${agent?.local_metadata.os.name}) ${agentName}`}</EuiLink>
         );
       }
 
@@ -158,7 +166,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       return '-';
     },
-    [actionId, agentsData?.agents, pagination.pageIndex, pagination.pageSize]
+    [actionId, agentsData?.agents, getFleetAppUrl, pagination.pageIndex, pagination.pageSize]
   );
 
   const tableSorting: EuiDataGridSorting = useMemo(
@@ -175,6 +183,14 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     }),
     [onChangeItemsPerPage, onChangePage, pagination]
   );
+
+  if (!actionResultsData?.results?.length && actionResultsData?.totalCount < 1) {
+    return (
+      <div>
+        <EuiLoadingContent lines={8} />
+      </div>
+    );
+  }
 
   return (
     // @ts-expect-error update types

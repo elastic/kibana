@@ -22,7 +22,12 @@ export interface AgentsSelection {
 export const createActionHandler = async (esClient, soClient, params) => {
   const selectedAgents: string[] = [];
   const {
-    agentSelection: { allAgentsSelected, platformsSelected, policiesSelected, agents },
+    agentSelection: {
+      allAgentsSelected = false,
+      platformsSelected = [],
+      policiesSelected = [],
+      agents = [],
+    },
   } = params as { agentSelection: AgentsSelection };
   // TODO: fix up the types here
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
