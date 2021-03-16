@@ -53,6 +53,7 @@ export interface QueryStringInputProps {
   onChange?: (query: Query) => void;
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query) => void;
+  submitOnBlur?: boolean;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -505,6 +506,15 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
     if (isFunction(this.props.onBlur)) {
       this.props.onBlur();
+    }
+    if (this.props.submitOnBlur) {
+      // Input blur triggers when the user selects something from autocomplete, so wait a bit to ensure that
+      // the entire QueryStringInput component has actually blurred (e.g. from user clicking or tabbing away)
+      setTimeout(() => {
+        if (document.activeElement !== this.inputRef) {
+          this.onSubmit(this.props.query);
+        }
+      }, 200);
     }
   };
 
