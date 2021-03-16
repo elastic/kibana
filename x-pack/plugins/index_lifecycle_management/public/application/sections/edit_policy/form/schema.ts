@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
-import { ROLLOVER_FORM_PATHS } from '../constants';
+import { ROLLOVER_FORM_PATHS, CLOUD_DEFAULT_REPO } from '../constants';
 import { i18nTexts } from '../i18n_texts';
 import {
   ifExistsNumberGreaterThanZero,
@@ -19,12 +19,6 @@ import {
 } from './validations';
 
 const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
-
-/**
- * This repository is provisioned by Elastic Cloud and will always
- * exist as a "managed" repository.
- */
-const CLOUD_DEFAULT_REPO = 'found-snapshots';
 
 const { emptyField, numberGreaterThanField } = fieldValidators;
 

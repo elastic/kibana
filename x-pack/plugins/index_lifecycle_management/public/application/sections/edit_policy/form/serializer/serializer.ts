@@ -261,7 +261,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       /**
        * FROZEN PHASE SEARCHABLE SNAPSHOT
        */
-      if (!updatedPolicy.phases.frozen?.actions?.searchable_snapshot) {
+      if (updatedPolicy.phases.frozen?.actions?.searchable_snapshot) {
+        frozenPhase.actions.searchable_snapshot = {
+          ...frozenPhase.actions.searchable_snapshot,
+          snapshot_repository: _meta.searchableSnapshot.repository,
+        };
+      } else {
         delete frozenPhase.actions.searchable_snapshot;
       }
     } else {

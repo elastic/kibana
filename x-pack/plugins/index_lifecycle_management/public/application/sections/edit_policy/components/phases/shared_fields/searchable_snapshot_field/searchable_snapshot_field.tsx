@@ -62,14 +62,13 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
-  const searchableSnapshotRepoGlobalPath = `_meta.searchableSnapshot.repository`;
+  const searchableSnapshotRepoGlobalPath = '_meta.searchableSnapshot.repository';
 
   const [formData] = useFormData({
-    watch: [searchableSnapshotRepoGlobalPath],
+    watch: searchableSnapshotRepoGlobalPath,
   });
 
   const searchableSnapshotGlobalRepo = get(formData, searchableSnapshotRepoGlobalPath);
-
   const isColdPhase = phase === 'cold';
   const isFrozenPhase = phase === 'frozen';
   const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;

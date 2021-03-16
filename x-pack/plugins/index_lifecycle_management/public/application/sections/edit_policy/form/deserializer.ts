@@ -12,16 +12,24 @@ import { splitSizeAndUnits } from '../../../lib/policies';
 import { determineDataTierAllocationType, isUsingDefaultRollover } from '../../../lib';
 import { getDefaultRepository } from '../lib';
 import { FormInternal } from '../types';
+import { CLOUD_DEFAULT_REPO } from '../constants';
 
-export const deserializer = (policy: SerializedPolicy): FormInternal => {
+export const createDeserializer = (isCloudEnabled: boolean) => (
+  policy: SerializedPolicy
+): FormInternal => {
   const {
     phases: { hot, warm, cold, frozen, delete: deletePhase },
   } = policy;
 
-  const defaultRepository = getDefaultRepository([
+  let defaultRepository = getDefaultRepository([
     hot?.actions.searchable_snapshot,
     cold?.actions.searchable_snapshot,
+    frozen?.actions.searchable_snapshot,
   ]);
+
+  if (!defaultRepository && isCloudEnabled) {
+    defaultRepository = CLOUD_DEFAULT_REPO;
+  }
 
   const _meta: FormInternal['_meta'] = {
     hot: {

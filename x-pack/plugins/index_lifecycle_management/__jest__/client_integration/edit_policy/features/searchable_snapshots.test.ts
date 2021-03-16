@@ -86,6 +86,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
         const { component } = testBed;
         component.update();
       });
+
       test('defaults searchable snapshot to true on cloud', async () => {
         const { find, actions } = testBed;
         await actions.cold.enable(true);
@@ -112,14 +113,17 @@ describe('<EditPolicy /> searchable snapshots', () => {
         const { component } = testBed;
         component.update();
       });
+
       test('correctly sets snapshot repository default to "found-snapshots"', async () => {
         const { actions } = testBed;
         await actions.cold.enable(true);
         await actions.cold.toggleSearchableSnapshot(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
-        const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-        expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+        expect(latestRequest.method).toBe('POST');
+        expect(latestRequest.url).toBe('/api/index_lifecycle_management/policies');
+        const reqBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(reqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
           'found-snapshots'
         );
       });

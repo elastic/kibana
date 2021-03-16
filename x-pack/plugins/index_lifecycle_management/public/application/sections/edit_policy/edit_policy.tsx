@@ -48,7 +48,7 @@ import {
 import {
   createPolicyNameValidations,
   createSerializer,
-  deserializer,
+  createDeserializer,
   Form,
   getSchema,
 } from './form';
@@ -82,10 +82,15 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   const [saveAsNew, setSaveAsNew] = useState(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
   const isAllowedByLicense = license.canUseSearchableSnapshot();
+  const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
   const serializer = useMemo(() => {
     return createSerializer(isNewPolicy ? undefined : currentPolicy);
   }, [isNewPolicy, currentPolicy]);
+
+  const deserializer = useMemo(() => {
+    return createDeserializer(isCloudEnabled);
+  }, [isCloudEnabled]);
 
   const defaultValue = useMemo(
     () => ({
@@ -96,8 +101,8 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   );
 
   const schema = useMemo(() => {
-    return getSchema(Boolean(cloud?.isCloudEnabled));
-  }, [cloud?.isCloudEnabled]);
+    return getSchema(isCloudEnabled);
+  }, [isCloudEnabled]);
 
   const { form } = useForm({
     schema,

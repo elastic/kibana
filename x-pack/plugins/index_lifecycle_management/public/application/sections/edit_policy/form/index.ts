@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { deserializer } from './deserializer';
+export { createDeserializer } from './deserializer';
 
 export { createSerializer } from './serializer';
 
