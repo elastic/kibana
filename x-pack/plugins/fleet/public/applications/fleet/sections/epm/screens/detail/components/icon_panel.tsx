@@ -9,7 +9,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiIcon, EuiPanel } from '@elastic/eui';
 
-import { usePackageIconType, UsePackageIconType } from '../../../../../hooks';
+import type { UsePackageIconType } from '../../../../../hooks';
+import { usePackageIconType } from '../../../../../hooks';
 import { Loading } from '../../../../../components';
 
 const PanelWrapper = styled.div`
