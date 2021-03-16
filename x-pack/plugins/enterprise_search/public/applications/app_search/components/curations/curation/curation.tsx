@@ -20,7 +20,7 @@ import { Loading } from '../../../../shared/loading';
 import { MANAGE_CURATION_TITLE } from '../constants';
 
 import { CurationLogic } from './curation_logic';
-import { OrganicDocuments, HiddenDocuments } from './documents';
+import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 
 interface Props {
@@ -59,7 +59,8 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
       <EuiSpacer size="xl" />
       <FlashMessages />
 
-      {/* TODO: PromotedDocuments section */}
+      <PromotedDocuments />
+      <EuiSpacer />
       <OrganicDocuments />
       <EuiSpacer />
       <HiddenDocuments />

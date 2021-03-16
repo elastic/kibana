@@ -37,6 +37,20 @@ export const RESULT_ACTIONS_DIRECTIONS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.resultActionsDescription',
   { defaultMessage: 'Promote results by clicking the star, hide them by clicking the eye.' }
 );
+export const PROMOTE_DOCUMENT_ACTION = {
+  title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.promoteButtonLabel', {
+    defaultMessage: 'Promote this result',
+  }),
+  iconType: 'starPlusEmpty',
+  iconColor: 'primary',
+};
+export const DEMOTE_DOCUMENT_ACTION = {
+  title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.demoteButtonLabel', {
+    defaultMessage: 'Demote this result',
+  }),
+  iconType: 'starMinusFilled',
+  iconColor: 'primary',
+};
 export const HIDE_DOCUMENT_ACTION = {
   title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.hideButtonLabel', {
     defaultMessage: 'Hide this result',

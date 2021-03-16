@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export { PromotedDocuments } from './promoted_documents';
 export { OrganicDocuments } from './organic_documents';
 export { HiddenDocuments } from './hidden_documents';
