@@ -143,8 +143,9 @@ These include dashboards, visualizations, maps, index patterns, Canvas workpads,
 |Create, manage, and assign tags to your saved objects.
 
 | <<search-sessions, Search Sessions>>
-| Create and manage search sessions, groups of queries that run in the background.
-Search sessions are useful when your queries take longer than usual to process.
+| Manage your saved search sessions, groups of queries that run in the background.
+Search sessions are useful when your queries take longer than usual to process,
+for example, when you have a large volume of data or when the performance of your storage location is slow.
 
 
 | <<xpack-spaces, Spaces>>

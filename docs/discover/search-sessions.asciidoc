@@ -1,14 +1,16 @@
 [role="xpack"]
 [[search-sessions]]
-=== Long-running searches
+=== Run a search in the background
 
-Search sessions are useful when your queries take longer than usual to process,
-for example, when you have a large volume of data or when the performance of your storage location is slow.
+Sometimes you might need to search through large amounts of data no matter
+how long the search takes. While this might not happen often,
+there are times that long-running queries are required.
 Consider a threat hunting scenario, where you need to search through years of data.
-Instead of waiting for your query to finish, you can allow {es} to continue processing in the
-background and view the results when they are ready.
 
-Search sessions are available from *Discover* and *Dashboard*.
+If your query is running long, you can save your search session, which
+allows {kib} to continue processing your request in the
+background.  Save your search session from *Discover* or *Dashboard*,
+and when your session is complete, view and manage it in *Stack Management*.
 
 [role="screenshot"]
 image::images/search-session.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session ]
@@ -19,11 +21,11 @@ refer to {ref}/async-search-intro.html[long-running searches].
 [float]
 ==== Requirements
 
-Search Sessions are enabled by default in your `kibana.yml` file.  Refer to
-<<search-session-settings-kb>>.
+Search sessions are enabled by default in your `kibana.yml` file.  For additional
+settings, refer to <<search-session-settings-kb>>.
 
 * To save a session, you must have permissions for *Discover* and *Dashboard*,
-and the sub-feature search sessions for either app.
+and the <<spaces-control-feature-visibility, search sessions subfeature>>.
 
 * To view and restore a saved session, you must have access to *Stack Management*.
 
@@ -31,10 +33,6 @@ and the sub-feature search sessions for either app.
 +
 [role="screenshot"]
 image::images/disable-time-filter.png[Time filter showing how to turn off auto refresh]
-
-
-
-
 
 [float]
 ==== Example: Save and manage a search session
@@ -51,7 +49,7 @@ Your search session begins automatically. The icon after the dashboard title
 displays the current state of the search. A clock indicates the session is in progress.
 A checkmark indicates that the search session is complete.
 
-. To instruct {kib} to continue a search in the background, click the clock icon,
+. To instruct {kib} to continue the search in the background, click the clock icon,
 and then click *Save session*.
 +
 [role="screenshot"]
@@ -62,7 +60,7 @@ image::images/search-session-awhile.png[Search Session indicator displaying the 
 [role="screenshot"]
 image::images/search-session-complete.png[Popup with link to go directly to Search Sessions in Stack Management]
 +
-. In the *Search Sessions view* in *Stack Management*, use the edit menu to:
+. In the *Search Sessions* view in *Stack Management*, use the edit menu to:
 .. *Inspect* the queries and filters that makeup the session.
 .. *Extend* the expiration of a completed session.
 .. *Delete* a session.
