@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { SerializedPolicy } from '../../../../common/types';
 
 export type DataTierAllocationType = 'node_roles' | 'node_attrs' | 'none';
@@ -76,5 +75,8 @@ export interface FormInternal extends SerializedPolicy {
     cold: ColdPhaseMetaFields;
     frozen: FrozenPhaseMetaFields;
     delete: DeletePhaseMetaFields;
+    searchableSnapshot: {
+      repository: string;
+    };
   };
 }
