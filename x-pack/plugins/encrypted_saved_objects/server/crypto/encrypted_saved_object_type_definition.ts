@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
+import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 
 /**
  * Represents the definition of the attributes of the specific saved object that are supposed to be

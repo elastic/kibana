@@ -23,7 +23,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Agent } from '../../../../types';
+
+import type { Agent } from '../../../../types';
 import {
   sendPutAgentReassign,
   sendPostBulkAgentReassign,

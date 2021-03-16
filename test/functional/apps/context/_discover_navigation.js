@@ -18,8 +18,18 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'settings',
+    'dashboard',
+    'context',
+    'header',
+  ]);
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const browser = getService('browser');
 
   describe('context link in discover', () => {
     before(async () => {
@@ -93,6 +103,29 @@ export default function ({ getService, getPageObjects }) {
       await testSubjects.click('breadcrumb first');
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       await PageObjects.discover.waitForDocTableLoadingComplete();
+    });
+
+    it('navigates to doc view from embeddable', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.addSavedSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await docTable.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+      await rowActions[1].click();
+      await PageObjects.common.sleep(250);
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      expect(await browser.getCurrentUrl()).to.contain('#/doc');
+      expect(await PageObjects.discover.isShowingDocViewer()).to.be(true);
     });
   });
 }

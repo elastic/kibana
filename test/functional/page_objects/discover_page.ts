@@ -222,6 +222,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await find.clickByCssSelector('.fa-sort-up');
     }
 
+    public async isShowingDocViewer() {
+      return await testSubjects.exists('kbnDocViewer');
+    }
+
     public async getMarks() {
       const table = await docTable.getTable();
       const $ = await table.parseDomContent();

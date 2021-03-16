@@ -78,7 +78,10 @@ export const toExpressionAst = async <TVisParams extends VisParams>(
       }
     }
     if (visConfig?.gauge?.percentageMode === true) {
-      yDimension.format = { id: 'percent' };
+      yDimension.format = {
+        id: 'percent',
+        params: { pattern: visConfig?.gauge?.percentageFormatPattern },
+      };
     }
   });
 

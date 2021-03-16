@@ -68,6 +68,7 @@ describe('Vislib Heatmap Chart Test Suite', function () {
         colorSchema: 'Greens',
         setColorRange: false,
         percentageMode: true,
+        percentageFormatPattern: '0.0%',
         invertColors: false,
         colorsRange: [],
       };

@@ -6,7 +6,7 @@
  */
 
 import { fromNullable, Option } from 'fp-ts/lib/Option';
-import { ActionVariable } from '../../../types';
+import { ActionVariable } from '../../../../../alerting/common';
 
 export function extractActionVariable(
   actionVariables: ActionVariable[],

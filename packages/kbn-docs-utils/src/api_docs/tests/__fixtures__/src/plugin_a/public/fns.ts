@@ -76,3 +76,8 @@ interface ImNotExported {
 export const fnWithNonExportedRef = (a: ImNotExported) => 'shi';
 
 export type NotAnArrowFnType = typeof notAnArrowFn;
+
+/**
+ * @internal
+ */
+export const iShouldBeInternalFn = () => 'hi';

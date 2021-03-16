@@ -1696,13 +1696,6 @@ describe('migration visualization', () => {
       },
     });
 
-    it('should decorate existing docs with the kibana legacy palette - pie', () => {
-      const migratedTestDoc = migrate(getTestDoc('pie'));
-      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
-
-      expect(palette.name).toEqual('kibana_palette');
-    });
-
     it('should decorate existing docs with isVislibVis flag', () => {
       const migratedTestDoc = migrate(getTestDoc());
       const { isVislibVis } = JSON.parse(migratedTestDoc.attributes.visState).params;
@@ -1761,6 +1754,175 @@ describe('migration visualization', () => {
 
         expect(result.labels.filter).toEqual(true);
       });
+    });
+  });
+
+  describe('7.13.0 update pie visualization defaults', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.13.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = (categoryAxes?: object[], valueAxes?: object[]) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'pie',
+          title: '[Flights] Delay Type',
+          params: {
+            type: 'pie',
+          },
+        }),
+      },
+    });
+
+    it('should decorate existing docs with the kibana legacy palette - pie', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
+    });
+  });
+
+  describe('7.12.0 update "schema" in aggregations', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.12.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const testDoc = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metric',
+          title: '[Flights] Delay Type',
+          aggs: [
+            {
+              id: '1',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '1-bucket',
+                params: {
+                  orderAgg: {
+                    schema: {
+                      name: 'orderAgg',
+                    },
+                  },
+                },
+                schema: {
+                  name: 'bucketAgg',
+                },
+              },
+              customMetric: {
+                id: '1-metric',
+                schema: {
+                  name: 'metricAgg',
+                },
+                params: {
+                  customMetric: {
+                    schema: {
+                      name: 'metricAgg',
+                    },
+                  },
+                },
+              },
+            },
+            {
+              id: '2',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '2-bucket',
+                params: {
+                  orderAgg: {
+                    schema: {
+                      name: 'orderAgg',
+                    },
+                  },
+                },
+              },
+              customMetric: {
+                id: '2-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: {
+                      name: 'metricAgg',
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      },
+    };
+
+    const expectedDoc = {
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'metric',
+          title: '[Flights] Delay Type',
+          aggs: [
+            {
+              id: '1',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '1-bucket',
+                params: {
+                  orderAgg: {
+                    schema: 'orderAgg',
+                  },
+                },
+                schema: 'bucketAgg',
+              },
+              customMetric: {
+                id: '1-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: 'metricAgg',
+                  },
+                },
+              },
+            },
+            {
+              id: '2',
+              type: 'avg_bucket',
+              schema: 'metric',
+              customBucket: {
+                id: '2-bucket',
+                params: {
+                  orderAgg: {
+                    schema: 'orderAgg',
+                  },
+                },
+              },
+              customMetric: {
+                id: '2-metric',
+                schema: 'metricAgg',
+                params: {
+                  customMetric: {
+                    schema: 'metricAgg',
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      },
+    };
+
+    it('should replace all schema object with schema name', () => {
+      const migratedTestDoc = migrate(testDoc);
+
+      expect(migratedTestDoc).toEqual(expectedDoc);
     });
   });
 });

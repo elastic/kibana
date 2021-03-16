@@ -6,11 +6,14 @@
  */
 
 import './share_to_space_form.scss';
+
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ShareToSpaceTarget } from '../../types';
-import { ShareOptions } from '../types';
+
+import type { ShareToSpaceTarget } from '../../types';
+import type { ShareOptions } from '../types';
 import { ShareModeControl } from './share_mode_control';
 
 interface Props {

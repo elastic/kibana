@@ -88,7 +88,12 @@ describe('buildMatchedIndicator', () => {
       }),
     ];
     queries = [
-      getNamedQueryMock({ id: '123', field: 'event.field', value: 'threat.indicator.domain' }),
+      getNamedQueryMock({
+        id: '123',
+        index: 'threat-index',
+        field: 'event.field',
+        value: 'threat.indicator.domain',
+      }),
     ];
   });
 
@@ -110,6 +115,26 @@ describe('buildMatchedIndicator', () => {
     });
 
     expect(get(indicator, 'matched.atomic')).toEqual('domain_1');
+  });
+
+  it('returns the _id of the matched indicator as matched.id', () => {
+    const [indicator] = buildMatchedIndicator({
+      queries,
+      threats,
+      indicatorPath,
+    });
+
+    expect(get(indicator, 'matched.id')).toEqual('123');
+  });
+
+  it('returns the _index of the matched indicator as matched.index', () => {
+    const [indicator] = buildMatchedIndicator({
+      queries,
+      threats,
+      indicatorPath,
+    });
+
+    expect(get(indicator, 'matched.index')).toEqual('threat-index');
   });
 
   it('returns the field of the matched indicator as matched.field', () => {
@@ -173,6 +198,8 @@ describe('buildMatchedIndicator', () => {
         domain: 'domain_1',
         matched: {
           atomic: 'domain_1',
+          id: '123',
+          index: 'threat-index',
           field: 'event.field',
           type: 'type_1',
         },
@@ -211,6 +238,8 @@ describe('buildMatchedIndicator', () => {
         indicator_field: 'indicator_field_1',
         matched: {
           atomic: 'domain_1',
+          id: '123',
+          index: 'threat-index',
           field: 'event.field',
           type: 'indicator_type',
         },
@@ -237,6 +266,8 @@ describe('buildMatchedIndicator', () => {
       {
         matched: {
           atomic: undefined,
+          id: '123',
+          index: 'threat-index',
           field: 'event.field',
           type: undefined,
         },
@@ -262,6 +293,8 @@ describe('buildMatchedIndicator', () => {
       {
         matched: {
           atomic: undefined,
+          id: '123',
+          index: 'threat-index',
           field: 'event.field',
           type: undefined,
         },
@@ -295,6 +328,8 @@ describe('buildMatchedIndicator', () => {
         domain: 'foo',
         matched: {
           atomic: undefined,
+          id: '123',
+          index: 'threat-index',
           field: 'event.field',
           type: 'first',
         },
@@ -362,7 +397,12 @@ describe('enrichSignalThreatMatches', () => {
       }),
     ];
     matchedQuery = encodeThreatMatchNamedQuery(
-      getNamedQueryMock({ id: '123', field: 'event.field', value: 'threat.indicator.domain' })
+      getNamedQueryMock({
+        id: '123',
+        index: 'indicator_index',
+        field: 'event.field',
+        value: 'threat.indicator.domain',
+      })
     );
   });
 
@@ -395,7 +435,13 @@ describe('enrichSignalThreatMatches', () => {
       { existing: 'indicator' },
       {
         domain: 'domain_1',
-        matched: { atomic: 'domain_1', field: 'event.field', type: 'type_1' },
+        matched: {
+          atomic: 'domain_1',
+          id: '123',
+          index: 'indicator_index',
+          field: 'event.field',
+          type: 'type_1',
+        },
         other: 'other_1',
         type: 'type_1',
       },
@@ -418,7 +464,13 @@ describe('enrichSignalThreatMatches', () => {
 
     expect(indicators).toEqual([
       {
-        matched: { atomic: undefined, field: 'event.field', type: undefined },
+        matched: {
+          atomic: undefined,
+          id: '123',
+          index: 'indicator_index',
+          field: 'event.field',
+          type: undefined,
+        },
       },
     ]);
   });
@@ -441,7 +493,13 @@ describe('enrichSignalThreatMatches', () => {
       { existing: 'indicator' },
       {
         domain: 'domain_1',
-        matched: { atomic: 'domain_1', field: 'event.field', type: 'type_1' },
+        matched: {
+          atomic: 'domain_1',
+          id: '123',
+          index: 'indicator_index',
+          field: 'event.field',
+          type: 'type_1',
+        },
         other: 'other_1',
         type: 'type_1',
       },
@@ -477,6 +535,7 @@ describe('enrichSignalThreatMatches', () => {
     matchedQuery = encodeThreatMatchNamedQuery(
       getNamedQueryMock({
         id: '123',
+        index: 'custom_index',
         field: 'event.field',
         value: 'custom_threat.custom_indicator.domain',
       })
@@ -496,7 +555,13 @@ describe('enrichSignalThreatMatches', () => {
     expect(indicators).toEqual([
       {
         domain: 'custom_domain',
-        matched: { atomic: 'custom_domain', field: 'event.field', type: 'custom_type' },
+        matched: {
+          atomic: 'custom_domain',
+          id: '123',
+          index: 'custom_index',
+          field: 'event.field',
+          type: 'custom_type',
+        },
         other: 'custom_other',
         type: 'custom_type',
       },
@@ -526,7 +591,12 @@ describe('enrichSignalThreatMatches', () => {
       _id: 'signal123',
       matched_queries: [
         encodeThreatMatchNamedQuery(
-          getNamedQueryMock({ id: '456', field: 'event.other', value: 'threat.indicator.domain' })
+          getNamedQueryMock({
+            id: '456',
+            index: 'other_custom_index',
+            field: 'event.other',
+            value: 'threat.indicator.domain',
+          })
         ),
       ],
     });
@@ -545,7 +615,13 @@ describe('enrichSignalThreatMatches', () => {
     expect(indicators).toEqual([
       {
         domain: 'domain_1',
-        matched: { atomic: 'domain_1', field: 'event.field', type: 'type_1' },
+        matched: {
+          atomic: 'domain_1',
+          id: '123',
+          index: 'indicator_index',
+          field: 'event.field',
+          type: 'type_1',
+        },
         other: 'other_1',
         type: 'type_1',
       },
@@ -553,6 +629,8 @@ describe('enrichSignalThreatMatches', () => {
         domain: 'domain_2',
         matched: {
           atomic: 'domain_2',
+          id: '456',
+          index: 'other_custom_index',
           field: 'event.other',
           type: 'type_2',
         },

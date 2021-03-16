@@ -23,6 +23,7 @@ describe('RelevanceTuningForm', () => {
     filterInputValue: '',
     schemaFields: ['foo', 'bar', 'baz'],
     filteredSchemaFields: ['foo', 'bar'],
+    filteredSchemaFieldsWithConflicts: [],
     schema: {
       foo: 'text',
       bar: 'number',
@@ -95,6 +96,27 @@ describe('RelevanceTuningForm', () => {
         weight: 1,
       });
     });
+
+    it('wont show disabled fields section if there are no fields with schema conflicts', () => {
+      expect(wrapper.find('[data-test-subj="DisabledFieldsSection"]').exists()).toBe(false);
+    });
+  });
+
+  it('will show a disabled fields section if there are fields that have schema conflicts', () => {
+    // There will only ever be fields with schema conflicts if this is the relevance tuning
+    // page for a meta engine
+    setMockValues({
+      ...values,
+      filteredSchemaFieldsWithConflicts: ['fe', 'fi', 'fo'],
+    });
+
+    const wrapper = mount(<RelevanceTuningForm />);
+    expect(wrapper.find('[data-test-subj="DisabledFieldsSection"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="DisabledField"]').map((f) => f.text())).toEqual([
+      'fe',
+      'fi',
+      'fo',
+    ]);
   });
 
   describe('field filtering', () => {

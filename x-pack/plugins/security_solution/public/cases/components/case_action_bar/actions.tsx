@@ -42,7 +42,9 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
         isModalVisible={isDisplayConfirmDeleteModal}
         isPlural={false}
         onCancel={handleToggleModal}
-        onConfirm={handleOnDeleteConfirm.bind(null, [{ id: caseData.id, title: caseData.title }])}
+        onConfirm={handleOnDeleteConfirm.bind(null, [
+          { id: caseData.id, title: caseData.title, type: caseData.type },
+        ])}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps

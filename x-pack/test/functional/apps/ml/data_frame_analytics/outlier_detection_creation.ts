@@ -168,6 +168,13 @@ export default function ({ getService }: FtrProviderContext) {
             testData.createIndexPattern
           );
 
+          await ml.testExecution.logTestStep('continues to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('checks validation callouts exist');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(1);
+
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
         });
@@ -249,6 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
           await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
             'mlDFExpandableSection-splom',
             testData.expected.scatterplotMatrixColorStatsResults

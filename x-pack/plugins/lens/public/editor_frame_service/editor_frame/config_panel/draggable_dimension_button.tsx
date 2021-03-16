@@ -40,6 +40,7 @@ export function DraggableDimensionButton({
   layerIndex,
   columnId,
   group,
+  groups,
   onDrop,
   children,
   layerDatasourceDropProps,
@@ -55,6 +56,7 @@ export function DraggableDimensionButton({
     dropType?: DropType
   ) => void;
   group: VisualizationDimensionGroupConfig;
+  groups: VisualizationDimensionGroupConfig[];
   label: string;
   children: React.ReactElement;
   layerDatasource: Datasource<unknown, unknown>;
@@ -71,6 +73,7 @@ export function DraggableDimensionButton({
     columnId,
     filterOperations: group.filterOperations,
     groupId: group.groupId,
+    dimensionGroups: groups,
   });
 
   const dropType = dropProps?.dropType;

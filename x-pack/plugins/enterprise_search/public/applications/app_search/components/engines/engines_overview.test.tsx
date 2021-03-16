@@ -12,6 +12,8 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { EuiEmptyPrompt } from '@elastic/eui';
+
 import { LoadingState, EmptyState } from './components';
 import { EnginesTable } from './engines_table';
 
@@ -19,7 +21,6 @@ import { EnginesOverview } from './';
 
 describe('EnginesOverview', () => {
   const values = {
-    hasPlatinumLicense: false,
     dataLoading: false,
     engines: [],
     enginesMeta: {
@@ -39,6 +40,7 @@ describe('EnginesOverview', () => {
       },
     },
     metaEnginesLoading: false,
+    hasPlatinumLicense: false,
   };
   const actions = {
     loadEngines: jest.fn(),
@@ -73,7 +75,7 @@ describe('EnginesOverview', () => {
     const valuesWithEngines = {
       ...values,
       dataLoading: false,
-      engines: ['dummy-engine'],
+      engines: ['test-engine'],
       enginesMeta: {
         page: {
           current: 1,
@@ -84,6 +86,7 @@ describe('EnginesOverview', () => {
     };
 
     beforeEach(() => {
+      jest.clearAllMocks();
       setMockValues(valuesWithEngines);
     });
 
@@ -102,17 +105,46 @@ describe('EnginesOverview', () => {
       ).toEqual('/engine_creation');
     });
 
-    describe('when on a platinum license', () => {
-      it('renders a 2nd meta engines table & makes a 2nd meta engines API call', async () => {
+    describe('when user has a platinum license', () => {
+      let wrapper: ShallowWrapper;
+
+      beforeEach(() => {
         setMockValues({
           ...valuesWithEngines,
           hasPlatinumLicense: true,
-          metaEngines: ['dummy-meta-engine'],
         });
-        const wrapper = shallow(<EnginesOverview />);
+        wrapper = shallow(<EnginesOverview />);
+      });
 
+      it('renders a 2nd meta engines table ', async () => {
         expect(wrapper.find(EnginesTable)).toHaveLength(2);
+      });
+
+      it('makes a 2nd meta engines call', () => {
         expect(actions.loadMetaEngines).toHaveBeenCalled();
+      });
+
+      it('renders a create engine button which takes users to the create meta engine page', () => {
+        expect(
+          wrapper.find('[data-test-subj="appSearchEnginesMetaEngineCreationButton"]').prop('to')
+        ).toEqual('/meta_engine_creation');
+      });
+
+      it('contains an EuiEmptyPrompt that takes users to the create meta when metaEngines is empty', () => {
+        setMockValues({
+          ...valuesWithEngines,
+          hasPlatinumLicense: true,
+          metaEngines: [],
+        });
+        wrapper = shallow(<EnginesOverview />);
+        const metaEnginesTable = wrapper.find(EnginesTable).last().dive();
+        const emptyPrompt = metaEnginesTable.dive().find(EuiEmptyPrompt).dive();
+
+        expect(
+          emptyPrompt
+            .find('[data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"]')
+            .prop('to')
+        ).toEqual('/meta_engine_creation');
       });
     });
 
@@ -150,7 +182,7 @@ describe('EnginesOverview', () => {
         setMockValues({
           ...valuesWithEngines,
           hasPlatinumLicense: true,
-          metaEngines: ['dummy-meta-engine'],
+          metaEngines: ['test-meta-engine'],
         });
         const wrapper = shallow(<EnginesOverview />);
         const pageEvent = { page: { index: 0 } };

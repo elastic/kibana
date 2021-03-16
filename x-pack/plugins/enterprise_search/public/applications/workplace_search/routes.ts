@@ -133,3 +133,4 @@ export const getReindexJobRoute = (
   isOrganization: boolean
 ) =>
   getSourcesPath(generatePath(REINDEX_JOB_PATH, { sourceId, activeReindexJobId }), isOrganization);
+export const getRoleMappingPath = (roleId: string) => generatePath(ROLE_MAPPING_PATH, { roleId });

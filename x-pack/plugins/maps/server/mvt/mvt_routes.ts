@@ -10,6 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+// @ts-ignore not typed
+import { AbortController } from 'abortcontroller-polyfill/dist/cjs-ponyfill';
 import {
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
@@ -50,6 +52,12 @@ export function initMVTRoutes({
       response: KibanaResponseFactory
     ) => {
       const { query } = request;
+
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe(() => {
+        abortController.abort();
+      });
+
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const tile = await getTile({
@@ -63,6 +71,7 @@ export function initMVTRoutes({
         requestBody: requestBodyDSL as any,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
         searchSessionId: query.searchSessionId,
+        abortSignal: abortController.signal,
       });
 
       return sendResponse(response, tile);
@@ -92,6 +101,11 @@ export function initMVTRoutes({
       response: KibanaResponseFactory
     ) => {
       const { query } = request;
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe(() => {
+        abortController.abort();
+      });
+
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
       const tile = await getGridTile({
@@ -106,6 +120,7 @@ export function initMVTRoutes({
         requestType: query.requestType as RENDER_AS,
         geoFieldType: query.geoFieldType as ES_GEO_FIELD_TYPE,
         searchSessionId: query.searchSessionId,
+        abortSignal: abortController.signal,
       });
 
       return sendResponse(response, tile);

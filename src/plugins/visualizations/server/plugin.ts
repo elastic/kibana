@@ -56,24 +56,21 @@ export class VisualizationsPlugin
       // TODO: Remove this when vis_type_vislib is removed
       // https://github.com/elastic/kibana/issues/56143
       [LEGACY_CHARTS_LIBRARY]: {
-        name: i18n.translate(
-          'visualizations.advancedSettings.visualization.legacyChartsLibrary.name',
-          {
-            defaultMessage: 'Legacy charts library',
-          }
-        ),
-        value: false,
+        name: i18n.translate('visTypeXy.advancedSettings.visualization.legacyChartsLibrary.name', {
+          defaultMessage: 'Legacy charts library',
+        }),
         requiresPageReload: true,
+        value: false,
         description: i18n.translate(
-          'visualizations.advancedSettings.visualization.legacyChartsLibrary.description',
+          'visTypeXy.advancedSettings.visualization.legacyChartsLibrary.description',
           {
             defaultMessage:
-              'Enables legacy charts library for area, line and bar charts in visualize. Currently, only legacy charts library supports split chart aggregation.',
+              'Enables legacy charts library for area, line, bar, pie charts in visualize.',
           }
         ),
         category: ['visualization'],
         schema: schema.boolean(),
-      },
+      }
     });
 
     if (plugins.usageCollection) {

@@ -18,12 +18,12 @@ jest.mock('./edit_space', () => ({
   },
 }));
 
-import { spacesManagementApp } from './spaces_management_app';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { coreMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
-import { spacesManagerMock } from '../spaces_manager/mocks';
 import { featuresPluginMock } from '../../../features/public/mocks';
-import { PluginsStart } from '../plugin';
+import type { PluginsStart } from '../plugin';
+import { spacesManagerMock } from '../spaces_manager/mocks';
+import { spacesManagementApp } from './spaces_management_app';
 
 async function mountApp(basePath: string, pathname: string, spaceId?: string) {
   const container = document.createElement('div');

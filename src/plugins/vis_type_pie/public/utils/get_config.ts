@@ -18,7 +18,6 @@ export const getConfig = (
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,
-    clockwiseSectors: false,
     minFontSize: 10,
     maxFontSize: 16,
     linkLabel: {

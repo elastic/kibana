@@ -90,7 +90,7 @@ export const saved_object_attributes: t.Type<SavedObjectAttributes> = t.recursio
 
 /**
  * Params is an "object", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerts/common/alert.ts
+ * @see x-pack/plugins/alerting/common/alert.ts
  */
 export const action_group = t.string;
 export const action_id = t.string;
@@ -325,6 +325,7 @@ export const job_status = t.keyof({
   succeeded: null,
   failed: null,
   'going to run': null,
+  'partial failure': null,
   warning: null,
 });
 export type JobStatus = t.TypeOf<typeof job_status>;
@@ -465,25 +466,55 @@ export type Threats = t.TypeOf<typeof threats>;
 export const threatsOrUndefined = t.union([threats, t.undefined]);
 export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
+export const thresholdField = t.exact(
+  t.type({
+    field: t.union([t.string, t.array(t.string)]), // Covers pre- and post-7.12
+    value: PositiveIntegerGreaterThanZero,
+  })
+);
+export type ThresholdField = t.TypeOf<typeof thresholdField>;
+
+export const thresholdFieldNormalized = t.exact(
+  t.type({
+    field: t.array(t.string),
+    value: PositiveIntegerGreaterThanZero,
+  })
+);
+export type ThresholdFieldNormalized = t.TypeOf<typeof thresholdFieldNormalized>;
+
+export const thresholdCardinalityField = t.exact(
+  t.type({
+    field: t.string,
+    value: PositiveInteger,
+  })
+);
+export type ThresholdCardinalityField = t.TypeOf<typeof thresholdCardinalityField>;
+
 export const threshold = t.intersection([
-  t.exact(
-    t.type({
-      field: t.union([t.string, t.array(t.string)]),
-      value: PositiveIntegerGreaterThanZero,
-    })
-  ),
+  thresholdField,
   t.exact(
     t.partial({
-      cardinality_field: t.union([t.string, t.array(t.string), t.undefined, t.null]),
-      cardinality_value: t.union([PositiveInteger, t.undefined, t.null]), // TODO: cardinality_value should be set if cardinality_field is set
+      cardinality: t.union([t.array(thresholdCardinalityField), t.null]),
     })
   ),
 ]);
-// TODO: codec to transform threshold field string to string[] ?
 export type Threshold = t.TypeOf<typeof threshold>;
 
 export const thresholdOrUndefined = t.union([threshold, t.undefined]);
 export type ThresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
+
+export const thresholdNormalized = t.intersection([
+  thresholdFieldNormalized,
+  t.exact(
+    t.partial({
+      cardinality: t.union([t.array(thresholdCardinalityField), t.null]),
+    })
+  ),
+]);
+export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
+
+export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.undefined]);
+export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
 
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;

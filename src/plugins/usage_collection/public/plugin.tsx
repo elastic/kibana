@@ -35,16 +35,11 @@ export interface UsageCollectionSetup {
   components: {
     ApplicationUsageTrackingProvider: React.FC;
   };
-  applicationUsageTracker: IApplicationUsageTracker;
   reportUiCounter: Reporter['reportUiCounter'];
 }
 
 export interface UsageCollectionStart {
   reportUiCounter: Reporter['reportUiCounter'];
-  applicationUsageTracker: Pick<
-    ApplicationUsageTracker,
-    'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
-  >;
 }
 
 export function isUnauthenticated(http: HttpSetup) {
@@ -83,7 +78,6 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
           </ApplicationUsageContext.Provider>
         ),
       },
-      applicationUsageTracker,
       reportUiCounter: this.reporter.reportUiCounter,
     };
   }
@@ -105,7 +99,6 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     this.reporter.reportUserAgent('kibana');
 
     return {
-      applicationUsageTracker: this.getPublicApplicationUsageTracker(),
       reportUiCounter: this.reporter.reportUiCounter,
     };
   }

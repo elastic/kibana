@@ -23,14 +23,15 @@ export function getMigrations(
 ): SavedObjectMigrationMap {
   const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email',
+      doc.attributes.config?.hasOwnProperty('casesConfiguration') ||
+      doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
   const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
-      !!doc.attributes.config?.isCaseOwned ||
-      !!doc.attributes.config?.incidentConfiguration ||
+      doc.attributes.config?.hasOwnProperty('isCaseOwned') ||
+      doc.attributes.config?.hasOwnProperty('incidentConfiguration') ||
       doc.attributes.actionTypeId === '.webhook',
     pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );

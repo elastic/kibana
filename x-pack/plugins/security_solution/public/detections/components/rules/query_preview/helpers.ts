@@ -166,7 +166,7 @@ export const getThresholdHistogramConfig = (): ChartSeriesConfigs => {
       yTickFormatter: (value: string | number): string => value.toLocaleString(),
       tickSize: 8,
     },
-    yAxisTitle: i18n.QUERY_GRAPH_COUNT,
+    yAxisTitle: i18n.THRESHOLD_QUERY_GRAPH_COUNT,
     settings: {
       legendPosition: Position.Right,
       showLegend: true,

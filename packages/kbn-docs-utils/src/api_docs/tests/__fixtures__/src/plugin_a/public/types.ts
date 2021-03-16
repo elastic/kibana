@@ -43,3 +43,6 @@ export type IRefANotExportedType = ImNotExportedFromIndex | { zed: 'hi' };
 export interface ImAnObject {
   foo: FnWithGeneric;
 }
+
+/** @internal */
+export type IShouldBeInternal = string | { foo: string };

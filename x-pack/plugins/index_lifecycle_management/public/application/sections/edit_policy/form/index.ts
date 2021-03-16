@@ -9,7 +9,7 @@ export { deserializer } from './deserializer';
 
 export { createSerializer } from './serializer';
 
-export { schema } from './schema';
+export { schema, searchableSnapshotFields } from './schema';
 
 export * from './validations';
 
