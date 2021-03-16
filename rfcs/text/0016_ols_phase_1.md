@@ -234,7 +234,7 @@ This first phase also does not allow a public object to become private. Search s
 
 # 5. Alternatives
 
-OLS can be thought of as a Kibana-specific implementation of [Document level security](https://www.elastic.co/guide/en/elasticsearch/reference/current/document-level-security.html) ("DLS"). As such, we could consider enhancing the existing DLS feature to fit our needs. This would involve considerable work from the Elasticsearch security team before we could consider this, and may not scale to subsequent phases of OLS.
+OLS can be thought of as a Kibana-specific implementation of [Document level security](https://www.elastic.co/guide/en/elasticsearch/reference/current/document-level-security.html) ("DLS"). As such, we could consider enhancing the existing DLS feature to fit our needs (DLS doesn't prevent writes at the moment, only reads). This would involve considerable work from the Elasticsearch security team before we could consider this, and may not scale to subsequent phases of OLS.
 
 # 6. Adoption strategy
 
