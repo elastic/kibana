@@ -18,7 +18,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
   const config = reporting.getConfig();
 
   return async function runTask(jobId, job, cancellationToken) {
-    const logger = parentLogger.clone([jobId]);
+    const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job', jobId]);
 
     const encryptionKey = config.get('encryptionKey');
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
