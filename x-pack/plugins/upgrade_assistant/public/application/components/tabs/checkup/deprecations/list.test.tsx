@@ -73,6 +73,7 @@ describe('DeprecationList', () => {
             Array [
               Object {
                 "blockerForReindexing": undefined,
+                "deprecatedIndexSettings": undefined,
                 "details": undefined,
                 "index": "0",
                 "needsDefaultFields": false,
@@ -80,6 +81,7 @@ describe('DeprecationList', () => {
               },
               Object {
                 "blockerForReindexing": undefined,
+                "deprecatedIndexSettings": undefined,
                 "details": undefined,
                 "index": "1",
                 "needsDefaultFields": false,

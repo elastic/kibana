@@ -84,7 +84,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
       >
         <EuiButton
           color="danger"
-          disabled={true}
+          disabled={false}
           fill={true}
           onClick={[MockFunction]}
         >
