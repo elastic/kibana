@@ -12,6 +12,7 @@ steps:
       - text: 'Number of Runs'
         key: 'run-count'
         required: true
-
+        default: 75
+  - wait
   - command: .buildkite/scripts/flaky-test-suite-runner.sh | buildkite-agent pipeline upload
     label: ':pipeline: Upload'
