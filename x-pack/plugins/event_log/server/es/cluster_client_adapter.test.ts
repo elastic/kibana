@@ -217,14 +217,12 @@ describe('doesIndexTemplateExist', () => {
   });
 
   test('should return true when call cluster returns true', async () => {
-    // @ts-expect-error
-    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse({ exists: true }));
+    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(true));
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(true);
   });
 
   test('should return false when call cluster returns false', async () => {
-    // @ts-expect-error
-    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse({ exists: false }));
+    clusterClient.indices.existsTemplate.mockResolvedValue(asApiResponse(false));
     await expect(clusterClientAdapter.doesIndexTemplateExist('foo')).resolves.toEqual(false);
   });
 
@@ -250,8 +248,7 @@ describe('createIndexTemplate', () => {
 
   test(`should throw error if index template still doesn't exist after error is thrown`, async () => {
     clusterClient.indices.putTemplate.mockRejectedValueOnce(new Error('Fail'));
-    // @ts-expect-error
-    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse({ exists: false }));
+    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse(false));
     await expect(
       clusterClientAdapter.createIndexTemplate('foo', { args: true })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"error creating index template: Fail"`);
@@ -259,8 +256,7 @@ describe('createIndexTemplate', () => {
 
   test('should not throw error if index template exists after error is thrown', async () => {
     clusterClient.indices.putTemplate.mockRejectedValueOnce(new Error('Fail'));
-    // @ts-expect-error
-    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse({ exists: true }));
+    clusterClient.indices.existsTemplate.mockResolvedValueOnce(asApiResponse(true));
     await clusterClientAdapter.createIndexTemplate('foo', { args: true });
   });
 });
@@ -274,14 +270,12 @@ describe('doesAliasExist', () => {
   });
 
   test('should return true when call cluster returns true', async () => {
-    // @ts-expect-error
-    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse({ exists: true }));
+    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse(true));
     await expect(clusterClientAdapter.doesAliasExist('foo')).resolves.toEqual(true);
   });
 
   test('should return false when call cluster returns false', async () => {
-    // @ts-expect-error
-    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse({ exists: false }));
+    clusterClient.indices.existsAlias.mockResolvedValueOnce(asApiResponse(false));
     await expect(clusterClientAdapter.doesAliasExist('foo')).resolves.toEqual(false);
   });
 
