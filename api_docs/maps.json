@@ -16,7 +16,7 @@
             "type": "Function",
             "label": "addFilters",
             "signature": [
-              "(filter: object) => void"
+              "(filter: object, actionId: string) => void"
             ],
             "description": [],
             "children": [
@@ -26,6 +26,19 @@
                 "isRequired": true,
                 "signature": [
                   "object"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 32
+                }
+              },
+              {
+                "type": "string",
+                "label": "actionId",
+                "isRequired": true,
+                "signature": [
+                  "string"
                 ],
                 "description": [],
                 "source": {

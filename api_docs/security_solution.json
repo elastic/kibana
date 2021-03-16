@@ -362,7 +362,7 @@
                 "label": "config",
                 "isRequired": true,
                 "signature": [
-                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; packagerTaskInterval: string; validateArtifactDownloads: boolean; }>"
+                  "Readonly<{} & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; fleetServerEnabled: boolean; endpointResultListDefaultFirstPageIndex: number; endpointResultListDefaultPageSize: number; alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; packagerTaskInterval: string; validateArtifactDownloads: boolean; }>"
                 ],
                 "description": [],
                 "source": {
@@ -650,7 +650,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 398
+              "lineNumber": 400
             }
           }
         ],
@@ -1463,10 +1463,10 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/security_solution/server/config.ts",
-          "lineNumber": 43
+          "lineNumber": 47
         },
         "signature": [
-          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; readonly packagerTaskInterval: string; readonly validateArtifactDownloads: boolean; }"
+          "{ readonly enabled: boolean; readonly signalsIndex: string; readonly maxRuleImportExportSize: number; readonly maxRuleImportPayloadBytes: number; readonly maxTimelineImportExportSize: number; readonly maxTimelineImportPayloadBytes: number; readonly fleetServerEnabled: boolean; readonly endpointResultListDefaultFirstPageIndex: number; readonly endpointResultListDefaultPageSize: number; readonly alertResultListDefaultDateRange: Readonly<{} & { from: string; to: string; }>; readonly packagerTaskInterval: string; readonly validateArtifactDownloads: boolean; }"
         ],
         "initialIsOpen": false
       }
@@ -1720,162 +1720,6 @@
         "source": {
           "path": "x-pack/plugins/security_solution/common/test_utils.ts",
           "lineNumber": 36
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.migratePackagePolicyToV7110",
-        "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "packagePolicyDoc",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
-              "<",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicy",
-                "text": "PackagePolicy"
-              },
-              ">"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_11_0.ts",
-              "lineNumber": 13
-            }
-          }
-        ],
-        "signature": [
-          "(packagePolicyDoc: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
-          "<",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          ">) => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
-          "<",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          ">"
-        ],
-        "description": [],
-        "label": "migratePackagePolicyToV7110",
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_11_0.ts",
-          "lineNumber": 12
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.migratePackagePolicyToV7120",
-        "type": "Function",
-        "children": [
-          {
-            "type": "CompoundType",
-            "label": "packagePolicyDoc",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
-              "<",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicy",
-                "text": "PackagePolicy"
-              },
-              ">"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_12_0.ts",
-              "lineNumber": 14
-            }
-          }
-        ],
-        "signature": [
-          "(packagePolicyDoc: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
-          "<",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          ">) => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
-          "<",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          ">"
-        ],
-        "description": [],
-        "label": "migratePackagePolicyToV7120",
-        "source": {
-          "path": "x-pack/plugins/security_solution/common/endpoint/policy/migrations/to_v7_12_0.ts",
-          "lineNumber": 13
         },
         "tags": [],
         "returnComment": [],
