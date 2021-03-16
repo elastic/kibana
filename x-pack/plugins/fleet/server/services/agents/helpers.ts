@@ -13,14 +13,7 @@ type FleetServerAgentESResponse =
   | GetResponse<FleetServerAgent>
   | SearchResponse<FleetServerAgent>['hits']['hits'][0];
 
-export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent | undefined {
-  if (!(hit._id && hit._source)) {
-    return;
-  }
-  if ('found' in hit && hit.found === false) {
-    return;
-  }
-
+export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
   return {
     id: hit._id,
     ...hit._source,

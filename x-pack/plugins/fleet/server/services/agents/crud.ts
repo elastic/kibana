@@ -92,7 +92,7 @@ export async function getAgentsByKuery(
     showInactive: boolean;
   }
 ): Promise<{
-  agents: Array<Agent | undefined>;
+  agents: Agent[];
   total: number;
   page: number;
   perPage: number;
@@ -137,7 +137,7 @@ export async function getAgentsByKuery(
   }
 
   return {
-    agents: agents || [],
+    agents,
     total: agents.length,
     page,
     perPage,
@@ -156,7 +156,7 @@ export async function getAllAgentsByKuery(
   const res = await getAgentsByKuery(esClient, { ...options, page: 1, perPage: SO_SEARCH_LIMIT });
 
   return {
-    agents: res.agents.filter((agent): agent is Agent => !!agent),
+    agents: res.agents,
     total: res.total,
   };
 }
@@ -220,17 +220,16 @@ async function getAgentDocuments(
 
 export async function getAgentsById(
   esClient: ElasticsearchClient,
-  agentIds: string[]
-): Promise<
-  Agent[]
-  // | GetResponse<FleetServerAgent>
-> {
-  const agentDocs = await getAgentDocuments(esClient, agentIds);
-  const results = agentDocs
-    .map((doc) => searchHitToAgent(doc))
-    .filter((agent): agent is Agent => !!agent);
+  agentIds: string[],
+  options: { includeMissing?: boolean } = { includeMissing: false }
+): Promise<Agent[]> {
+  const allDocs = await getAgentDocuments(esClient, agentIds);
+  const agentDocs = options.includeMissing
+    ? allDocs
+    : allDocs.filter((res) => res._id && res._source);
+  const agents = agentDocs.map((doc) => searchHitToAgent(doc));
 
-  return results;
+  return agents;
 }
 
 export async function getAgentByAccessAPIKeyId(

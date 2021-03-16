@@ -10,7 +10,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import { AbortController } from 'abort-controller';
 
 import type {
-  Agent,
   GetAgentsResponse,
   GetOneAgentResponse,
   GetOneAgentEventsResponse,
@@ -268,12 +267,10 @@ export const getAgentsHandler: RequestHandler<
       : 0;
 
     const body: GetAgentsResponse = {
-      list: agents
-        .filter((agent): agent is Agent => !!agent)
-        .map((agent) => ({
-          ...agent,
-          status: AgentService.getAgentStatus(agent),
-        })),
+      list: agents.map((agent) => ({
+        ...agent,
+        status: AgentService.getAgentStatus(agent),
+      })),
       total,
       totalInactive,
       page,
