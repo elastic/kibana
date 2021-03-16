@@ -14,7 +14,7 @@ interface PaletteParams {
   gradient: boolean;
 }
 
-interface SplitByTermsColorProps {
+export interface SplitByTermsColorProps {
   seriesById: PanelData[];
   seriesName: string;
   seriesId: string;
@@ -33,10 +33,9 @@ export const getSplitByTermsColor = ({
   palettesRegistry,
   syncColors,
 }: SplitByTermsColorProps) => {
-  if (!seriesName) {
+  if (!seriesName || !seriesPalette) {
     return null;
   }
-  if (!seriesPalette) return null;
   const paletteName =
     seriesPalette.name === PALETTES.RAINBOW || seriesPalette.name === PALETTES.GRADIENT
       ? 'custom'
