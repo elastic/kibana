@@ -13,6 +13,7 @@ interface Props {
   id?: string;
   language: 'html' | 'javascript';
   overflowHeight: number;
+  initialIsOpen?: boolean;
 }
 
 /**
@@ -25,9 +26,10 @@ export const CodeBlockAccordion: FC<Props> = ({
   id,
   language,
   overflowHeight,
+  initialIsOpen = false,
 }) => {
   return children && id ? (
-    <EuiAccordion id={id} buttonContent={buttonContent}>
+    <EuiAccordion id={id} buttonContent={buttonContent} initialIsOpen={initialIsOpen}>
       <EuiCodeBlock isCopyable={true} overflowHeight={overflowHeight} language={language}>
         {children}
       </EuiCodeBlock>
