@@ -19,7 +19,7 @@ type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U> ? Array<DeepPartial<U>> : DeepPartial<T[P]>;
 };
 
-export const ECS_VERSION = '1.6.0';
+export const ECS_VERSION = '1.8.0';
 
 // types and config-schema describing the es structures
 export type IValidatedEvent = TypeOf<typeof EventSchema>;
@@ -28,57 +28,6 @@ export type IEvent = DeepPartial<DeepWriteable<IValidatedEvent>>;
 export const EventSchema = schema.maybe(
   schema.object({
     '@timestamp': ecsDate(),
-    tags: ecsStringMulti(),
-    message: ecsString(),
-    ecs: schema.maybe(
-      schema.object({
-        version: ecsString(),
-      })
-    ),
-    event: schema.maybe(
-      schema.object({
-        action: ecsString(),
-        provider: ecsString(),
-        start: ecsDate(),
-        duration: ecsNumber(),
-        end: ecsDate(),
-        outcome: ecsString(),
-        reason: ecsString(),
-      })
-    ),
-    error: schema.maybe(
-      schema.object({
-        message: ecsString(),
-      })
-    ),
-    user: schema.maybe(
-      schema.object({
-        name: ecsString(),
-      })
-    ),
-    kibana: schema.maybe(
-      schema.object({
-        server_uuid: ecsString(),
-        alerting: schema.maybe(
-          schema.object({
-            instance_id: ecsString(),
-            action_group_id: ecsString(),
-            action_subgroup: ecsString(),
-            status: ecsString(),
-          })
-        ),
-        saved_objects: schema.maybe(
-          schema.arrayOf(
-            schema.object({
-              rel: ecsString(),
-              namespace: ecsString(),
-              id: ecsString(),
-              type: ecsString(),
-            })
-          )
-        ),
-      })
-    ),
   })
 );
 
