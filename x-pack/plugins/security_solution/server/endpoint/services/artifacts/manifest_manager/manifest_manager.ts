@@ -100,7 +100,10 @@ export class ManifestManager {
   protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
 
-  constructor(context: ManifestManagerContext) {
+  constructor(
+    context: ManifestManagerContext,
+    private readonly isFleetServerEnabled: boolean = false
+  ) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
     this.packagePolicyService = context.packagePolicyService;
@@ -277,11 +280,14 @@ export class ManifestManager {
         throw new Error('No version returned for manifest.');
       }
 
-      const manifest = new Manifest({
-        schemaVersion: this.schemaVersion,
-        semanticVersion: manifestSo.attributes.semanticVersion,
-        soVersion: manifestSo.version,
-      });
+      const manifest = new Manifest(
+        {
+          schemaVersion: this.schemaVersion,
+          semanticVersion: manifestSo.attributes.semanticVersion,
+          soVersion: manifestSo.version,
+        },
+        this.isFleetServerEnabled
+      );
 
       for (const entry of manifestSo.attributes.artifacts) {
         manifest.addEntry(
@@ -300,24 +306,40 @@ export class ManifestManager {
   }
 
   /**
+   * creates a new default Manifest
+   */
+  public static createDefaultManifest(
+    schemaVersion?: ManifestSchemaVersion,
+    isFleetServerEnabled?: boolean
+  ): Manifest {
+    return Manifest.getDefault(schemaVersion, isFleetServerEnabled);
+  }
+
+  /**
    * Builds a new manifest based on the current user exception list.
    *
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
    * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
   public async buildNewManifest(
-    baselineManifest: Manifest = Manifest.getDefault(this.schemaVersion)
+    baselineManifest: Manifest = ManifestManager.createDefaultManifest(
+      this.schemaVersion,
+      this.isFleetServerEnabled
+    )
   ): Promise<Manifest> {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(),
       this.buildTrustedAppsArtifacts(),
     ]);
 
-    const manifest = new Manifest({
-      schemaVersion: this.schemaVersion,
-      semanticVersion: baselineManifest.getSemanticVersion(),
-      soVersion: baselineManifest.getSavedObjectVersion(),
-    });
+    const manifest = new Manifest(
+      {
+        schemaVersion: this.schemaVersion,
+        semanticVersion: baselineManifest.getSemanticVersion(),
+        soVersion: baselineManifest.getSavedObjectVersion(),
+      },
+      this.isFleetServerEnabled
+    );
 
     for (const result of results) {
       await iterateArtifactsBuildResult(result, async (artifact, policyId) => {
@@ -438,5 +460,9 @@ export class ManifestManager {
       perPage: 20,
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
+  }
+
+  public getArtifactsClient(): ArtifactClient {
+    return this.artifactClient;
   }
 }

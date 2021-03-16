@@ -216,6 +216,7 @@ export const PingType = t.intersection([
         type: t.string,
         url: t.string,
         end: t.number,
+        text: t.string,
       }),
     }),
     tags: t.array(t.string),
@@ -251,6 +252,7 @@ export const SyntheticsJourneyApiResponseType = t.intersection([
       t.intersection([
         t.type({
           timestamp: t.string,
+          journey: PingType,
         }),
         t.partial({
           next: t.type({

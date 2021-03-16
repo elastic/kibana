@@ -19,6 +19,10 @@ export const CREATE_NEW_CURATION_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.create.title',
   { defaultMessage: 'Create new curation' }
 );
+export const MANAGE_CURATION_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.manage.title',
+  { defaultMessage: 'Manage curation' }
+);
 
 export const DELETE_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteConfirmation',
@@ -27,4 +31,9 @@ export const DELETE_MESSAGE = i18n.translate(
 export const SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteSuccessMessage',
   { defaultMessage: 'Successfully removed curation.' }
+);
+
+export const RESULT_ACTIONS_DIRECTIONS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.resultActionsDescription',
+  { defaultMessage: 'Promote results by clicking the star, hide them by clicking the eye.' }
 );
