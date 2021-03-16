@@ -94,6 +94,11 @@ export class DrilldownState {
   public readonly triggers$: BehaviorSubject<string[]>;
 
   /**
+   * Error identifier, in case `triggers$` is in an error state.
+   */
+  public readonly triggersError$: Observable<string | undefined>;
+
+  /**
    * Current action factory (drilldown) configuration, i.e. drilldown
    * configuration object, which will be serialized and persisted in storage.
    */
@@ -137,6 +142,13 @@ export class DrilldownState {
       })
     );
 
+    this.triggersError$ = this.triggers$.pipe(
+      map((currentTriggers) => {
+        if (!currentTriggers.length) return 'NO_TRIGGERS_SELECTED';
+        return undefined;
+      })
+    );
+
     this.configError$ = this.config$.pipe(
       map((conf) => {
         if (!this.factory.isConfigValid(conf, this.getFactoryContext())) return 'INVALID_CONFIG';
@@ -144,8 +156,11 @@ export class DrilldownState {
       })
     );
 
-    this.error$ = combineLatest([this.nameError$, this.configError$]).pipe(
-      map(([nameError, configError]) => nameError || configError || undefined)
+    this.error$ = combineLatest([this.nameError$, this.triggersError$, this.configError$]).pipe(
+      map(
+        ([nameError, configError, triggersError]) =>
+          nameError || triggersError || configError || undefined
+      )
     );
   }
 
