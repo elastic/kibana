@@ -94,18 +94,12 @@ export const Connectors: React.FC = () => {
               <EuiFlexItem grow={1}>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <SourceIcon
-                      serviceType={serviceType}
-                      name={name}
-                      className="source-row__icon"
-                    />
+                    <SourceIcon serviceType={serviceType} name={name} />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <span className="source-row__name">
-                      {name}
-                      &nbsp;&nbsp;
-                      {accountContextOnly && <EuiBadge color="hollow">{PRIVATE_SOURCE}</EuiBadge>}
-                    </span>
+                    {name}
+                    &nbsp;&nbsp;
+                    {accountContextOnly && <EuiBadge color="hollow">{PRIVATE_SOURCE}</EuiBadge>}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
