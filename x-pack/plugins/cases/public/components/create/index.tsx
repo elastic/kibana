@@ -25,12 +25,13 @@ const Container = styled.div`
 `;
 
 export interface CreateCaseProps {
+  afterCaseCreated?: (theCase: Case) => Promise<void>;
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
 }
 
-export const CreateCase = ({ onCancel, onSuccess }: CreateCaseProps) => (
-  <FormContext onSuccess={onSuccess}>
+export const CreateCase = ({ afterCaseCreated, onCancel, onSuccess }: CreateCaseProps) => (
+  <FormContext afterCaseCreated={afterCaseCreated} onSuccess={onSuccess}>
     <CreateCaseForm />
     <Container>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" responsive={false}>
