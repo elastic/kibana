@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { kibanaPackageJson } from '@kbn/utils';
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
