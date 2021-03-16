@@ -71,18 +71,18 @@ function determineFieldType(fieldCap: FieldCapability): CheckIndexPatternFieldRe
 }
 
 /**
- * Returns information on validity of an index pattern to support creating a rollup action:
+ * Returns information on fields of an index pattern to support creating a rollup action:
  *  - Does the index pattern match any indices?
  *  - Which date fields, numeric fields, and keyword fields are available in the matching indices?
  */
-export const registerValidateIndexPatternRoute = ({
+export const registerLoadIndexPatternFieldsRoute = ({
   router,
   license,
   lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {
-      path: addBasePath('/index_pattern_validity/{indexPattern}'),
+      path: addBasePath('/load_index_pattern_fields/{indexPattern}'),
       validate: {
         params: schema.object({
           indexPattern: schema.string(),

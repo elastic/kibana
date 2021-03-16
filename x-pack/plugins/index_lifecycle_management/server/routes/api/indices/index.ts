@@ -6,8 +6,8 @@
  */
 
 import { RouteDependencies } from '../../../types';
-import { registerValidateIndexPatternRoute } from './register_validate_index_pattern_route';
+import { registerLoadIndexPatternFieldsRoute } from './load_index_pattern_fields';
 
 export function registerIndicesRoutes(dependencies: RouteDependencies) {
-  registerValidateIndexPatternRoute(dependencies);
+  registerLoadIndexPatternFieldsRoute(dependencies);
 }

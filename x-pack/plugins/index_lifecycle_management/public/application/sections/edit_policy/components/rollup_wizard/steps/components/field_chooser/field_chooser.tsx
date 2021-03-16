@@ -32,7 +32,7 @@ import {
 
 import { indexPatterns } from '../../../../../../../../../../../../src/plugins/data/public';
 
-import { checkIndexPatternResults } from '../../../../../../../services/api';
+import { loadIndexPatternFields } from '../../../../../../../services/api';
 
 import {
   Form,
@@ -161,7 +161,7 @@ export class FieldChooser extends Component<Props, State> {
         }
         this.setState({ isLoadingFields: true, fields: [] });
         try {
-          let { fields } = await checkIndexPatternResults({ indexPattern });
+          let { fields } = await loadIndexPatternFields({ indexPattern });
           if (excludeFields) {
             fields = fields.filter(
               ({ name }) => !excludeFields.some((fieldName) => fieldName === name)

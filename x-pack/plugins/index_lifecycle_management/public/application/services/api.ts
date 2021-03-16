@@ -87,9 +87,9 @@ export const removeLifecycleForIndex = async (indexNames: string[]) => {
   return response;
 };
 
-export const checkIndexPatternResults = async ({ indexPattern }: { indexPattern: string }) => {
+export const loadIndexPatternFields = async ({ indexPattern }: { indexPattern: string }) => {
   return await sendGet<CheckIndexPatternResponse>(
-    `index_pattern_validity/${encodeURIComponent(indexPattern)}`
+    `load_index_pattern_fields/${encodeURIComponent(indexPattern)}`
   );
 };
 
