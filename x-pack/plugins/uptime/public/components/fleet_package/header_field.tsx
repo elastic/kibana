@@ -5,41 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import {
-  EuiFieldText,
-  EuiCheckbox,
-  htmlIdGenerator,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormControlLayoutDelimited,
-  EuiFormLabel,
-  EuiFormFieldset,
-  EuiSpacer,
-  EuiFormRow,
-} from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFormRow } from '@elastic/eui';
 import { ConfigKeys, ContentType, Mode, IHTTPAdvancedFields } from './types';
 
-const StyledFieldset = styled(EuiFormFieldset)`
-  &&& {
-    legend {
-      width: calc(100% - 40px);
-      margin-left: 40px;
-    }
-    .euiFlexGroup {
-      margin-left: 0;
-    }
-    .euiFlexItem {
-      margin-left: 0;
-      padding-left: 12px;
-    }
-  }
-`;
-
-const StyledField = styled(EuiFieldText)`
-  text-align: left;
-`;
+import { KeyValuePairsField, Pair } from './key_value_field';
 
 interface Props {
   configKey: ConfigKeys;
@@ -49,39 +20,16 @@ interface Props {
 }
 
 export const HeaderField = ({ configKey, contentMode, label, setFields }: Props) => {
-  const [headers, setHeaders] = useState<Array<[string, string, boolean]>>([['', '', false]]);
-  const handleOnCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const checked = event.target.checked;
-    setHeaders((prevHeaders) => {
-      const newHeaders = [...prevHeaders];
-      const [key, value] = prevHeaders[index];
-      newHeaders[index] = [key, value, checked];
-      return newHeaders;
-    });
-  };
-
-  const handleOnChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>, index: number, isKey: boolean) => {
-      const targetValue = event.target.value;
-
-      setHeaders((prevHeaders) => {
-        const newHeaders = [...prevHeaders];
-        const [prevKey, prevValue, prevChecked] = prevHeaders[index];
-        const checked = !prevKey ? true : prevChecked;
-        newHeaders[index] = isKey
-          ? [targetValue, prevValue, checked]
-          : [prevKey, targetValue, checked];
-        const isLastRow = prevHeaders.length - 1 === index;
-
-        // automatically add a new row if the current is the last row and previously did not contain a key
-        if (isLastRow && !prevHeaders[index][0]) {
-          newHeaders.push(['', '', false]);
-        }
-        return newHeaders;
-      });
-    },
-    [setHeaders]
-  );
+  const [headers, setHeaders] = useState<Pair[]>([['', '', false]]);
+  const isInvalid = headers.some((header) => {
+    const [key] = header;
+    if (key) {
+      const whiteSpaceRegEx = /[\s]/g;
+      return whiteSpaceRegEx.test(key);
+    } else {
+      return false;
+    }
+  });
 
   useEffect(() => {
     setFields((prevFields) => {
@@ -110,53 +58,22 @@ export const HeaderField = ({ configKey, contentMode, label, setFields }: Props)
   }, [configKey, contentMode, headers, setFields]);
 
   return (
-    <EuiFormRow fullWidth label={label}>
-      <>
-        <EuiSpacer size="s" />
-        <StyledFieldset
-          legend={{
-            children: (
-              <EuiFlexGroup responsive={false}>
-                <EuiFlexItem>Key</EuiFlexItem>
-                <EuiFlexItem>Value</EuiFlexItem>
-              </EuiFlexGroup>
-            ),
-          }}
-        >
-          {headers.map((header, index) => {
-            const [key, value, checked] = header;
-            return (
-              <EuiFormControlLayoutDelimited
-                key={index}
-                fullWidth
-                prepend={
-                  <EuiFormLabel>
-                    <EuiCheckbox
-                      id={htmlIdGenerator()()}
-                      checked={checked}
-                      disabled={!key}
-                      onChange={(event) => handleOnCheckboxChange(event, index)}
-                    />
-                  </EuiFormLabel>
-                }
-                startControl={
-                  <StyledField
-                    value={key}
-                    onChange={(event) => handleOnChange(event, index, true)}
-                  />
-                }
-                endControl={
-                  <StyledField
-                    value={value}
-                    onChange={(event) => handleOnChange(event, index, false)}
-                  />
-                }
-                delimiter=":"
-              />
-            );
-          })}
-        </StyledFieldset>
-      </>
+    <EuiFormRow
+      fullWidth
+      label={label}
+      isInvalid={isInvalid}
+      error={
+        isInvalid
+          ? [
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.headersField.error"
+                defaultMessage="Header key must be a valid HTTP token"
+              />,
+            ]
+          : undefined
+      }
+    >
+      <KeyValuePairsField configKey={configKey} defaultPairs={headers} onChange={setHeaders} />
     </EuiFormRow>
   );
 };
@@ -165,4 +82,5 @@ export const contentTypes: Record<Mode, ContentType> = {
   [Mode.JSON]: ContentType.JSON,
   [Mode.TEXT]: ContentType.TEXT,
   [Mode.XML]: ContentType.XML,
+  [Mode.FORM]: ContentType.FORM,
 };
