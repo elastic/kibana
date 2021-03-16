@@ -1768,7 +1768,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 342
+                  "lineNumber": 340
                 }
               }
             ],
@@ -1776,7 +1776,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 341
+              "lineNumber": 339
             }
           },
           {
@@ -1810,7 +1810,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 362
+                  "lineNumber": 360
                 }
               },
               {
@@ -1831,7 +1831,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 362
+                  "lineNumber": 360
                 }
               }
             ],
@@ -1839,7 +1839,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 362
+              "lineNumber": 360
             }
           },
           {
@@ -1865,7 +1865,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 386
+                  "lineNumber": 384
                 }
               }
             ],
@@ -1873,7 +1873,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 386
+              "lineNumber": 384
             }
           },
           {
@@ -1905,7 +1905,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 406
+                  "lineNumber": 404
                 }
               }
             ],
@@ -1913,7 +1913,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 406
+              "lineNumber": 404
             }
           },
           {
@@ -1943,7 +1943,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 414
+                  "lineNumber": 412
                 }
               },
               {
@@ -1956,7 +1956,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 415
+                  "lineNumber": 413
                 }
               },
               {
@@ -1976,7 +1976,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 416
+                  "lineNumber": 414
                 }
               }
             ],
@@ -1984,7 +1984,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 413
+              "lineNumber": 411
             }
           },
           {
@@ -2006,7 +2006,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 424
+                  "lineNumber": 422
                 }
               },
               {
@@ -2019,7 +2019,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 424
+                  "lineNumber": 422
                 }
               }
             ],
@@ -2027,7 +2027,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 424
+              "lineNumber": 422
             }
           },
           {
@@ -2049,7 +2049,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 435
+                  "lineNumber": 433
                 }
               },
               {
@@ -2062,7 +2062,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 435
+                  "lineNumber": 433
                 }
               }
             ],
@@ -2070,7 +2070,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 435
+              "lineNumber": 433
             }
           },
           {
@@ -2087,7 +2087,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 448
+                  "lineNumber": 446
                 }
               },
               {
@@ -2107,7 +2107,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 448
+                  "lineNumber": 446
                 }
               }
             ],
@@ -2126,7 +2126,7 @@
             "label": "setFieldFormat",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 448
+              "lineNumber": 446
             },
             "tags": [],
             "returnComment": []
@@ -2145,7 +2145,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 452
+                  "lineNumber": 450
                 }
               }
             ],
@@ -2156,7 +2156,7 @@
             "label": "deleteFieldFormat",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 452
+              "lineNumber": 450
             },
             "tags": [],
             "returnComment": []
