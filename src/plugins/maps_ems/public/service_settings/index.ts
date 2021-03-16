@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './ems_defaults';
+export * from './service_settings_types';
