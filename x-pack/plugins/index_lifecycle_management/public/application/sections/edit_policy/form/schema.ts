@@ -54,7 +54,7 @@ export const searchableSnapshotFields = {
     helpText: i18n.translate(
       'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.repositoryHelpText',
       {
-        defaultMessage: 'Note: the repository is common for every phase.',
+        defaultMessage: 'Each phase uses the same snapshot repository.',
       }
     ),
   },
