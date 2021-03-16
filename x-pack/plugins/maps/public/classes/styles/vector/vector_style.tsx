@@ -89,6 +89,7 @@ export interface IVectorStyle extends IStyle {
     previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
+  pluckStyleMetaFromTileMeta(foobar: any): Promise<StyleMetaDescriptor>;
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
   isTimeAware: () => boolean;
   getIcon: () => ReactElement<any>;
@@ -488,12 +489,59 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
+  async pluckStyleMetaFromTileMeta(foobar: any): Promise<StyleMetaDescriptor> {
+    console.log('get it from the tilemeta!', foobar);
+    const styleMeta = {
+      geometryTypes: {
+        isPointsOnly: false,
+        isLinesOnly: false,
+        isPolygonsOnly: false,
+      },
+      fieldMeta: {},
+    } as StyleMetaDescriptor;
 
+    const dynamicProperties = this.getDynamicPropertiesArray();
+    if (dynamicProperties.length === 0 || !foobar) {
+      // no additional meta data to pull from source data request.
+      return styleMeta;
+    }
+
+    dynamicProperties.forEach((dynamicProperty) => {
+      const name = dynamicProperty.getFieldName();
+      console.log('na', name);
+      if (!styleMeta.fieldMeta[name]) {
+        styleMeta.fieldMeta[name] = {};
+      }
+      if (name === 'doc_count') {
+        styleMeta.fieldMeta[name] = {};
+
+        let min = Infinity;
+        let max = -Infinity;
+        for (let i = 0; i < foobar.length; i++) {
+          const metaFromTiles = JSON.parse(foobar[i].properties.doc_count);
+          console.log('must parse', foobar[i], metaFromTiles);
+
+          min = Math.min(metaFromTiles.min, min);
+          max = Math.max(metaFromTiles.max, max);
+        }
+
+        styleMeta.fieldMeta.doc_count = {
+          range: {
+            min,
+            max,
+            delta: max - min,
+          },
+        };
+      }
+    });
+
+    console.log('form da tile', styleMeta);
+    return styleMeta;
+  }
 
   async pluckStyleMetaFromSourceDataRequest(
     sourceDataRequest: DataRequest
   ): Promise<StyleMetaDescriptor> {
-
     console.log('pluck style meta', sourceDataRequest);
 
     const features = _.get(sourceDataRequest.getData(), 'features', []);
@@ -561,6 +609,7 @@ export class VectorStyle implements IVectorStyle {
       const categoricalStyleMeta = dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
       const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
       const name = dynamicProperty.getFieldName();
+      console.log('name', name);
       if (!styleMeta.fieldMeta[name]) {
         styleMeta.fieldMeta[name] = {};
       }

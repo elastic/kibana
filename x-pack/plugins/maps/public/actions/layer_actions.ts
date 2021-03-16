@@ -48,7 +48,6 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
-import { string } from '../../../security_solution/public/resolver/models/schema';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -550,17 +549,29 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
   };
 }
 
-export function updateCounts(layerId: string, foobar: any) {
+export function updateCounts(layerId: string, mbMetaFeatures: any) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
+
+    if (!mbMetaFeatures) {
+      return;
+    }
+
     console.log('update counts', layerId);
     const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
     }
 
-    console.log('l', layer);
+    await dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__metaFromTiles',
+      newValue: mbMetaFeatures,
+    });
+    await dispatch(updateStyleMeta(layerId));
+
   };
 }

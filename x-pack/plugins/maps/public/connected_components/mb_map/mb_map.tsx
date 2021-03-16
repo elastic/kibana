@@ -138,10 +138,8 @@ export class MbMap extends Component<Props, State> {
 
   _queryForMeta = _.debounce((layerId, layer) => {
     console.log('query for da meta!!!', layerId, layer);
-    const meta = layer.queryForTileMeta(this.state.mbMap);
-    console.log(meta);
-
-    // this.props.updateCounts(layerId, 'foobar');
+    const mbFeatures = layer.queryForTileMeta(this.state.mbMap);
+    this.props.updateCounts(layerId, mbFeatures);
   }, 512);
 
   _debouncedSync = _.debounce(() => {

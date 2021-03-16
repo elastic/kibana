@@ -160,7 +160,7 @@ export class TiledVectorLayer extends VectorLayer {
     this._setMbCentroidProperties(mbMap, sourceMeta.layerName);
   }
 
-  queryForTileMeta(mbMap: MbMap) {
+  queryForTileMeta(mbMap: MbMap) : any {
     console.log('query for tile meta!', mbMap);
 
     // @ts-ignore
@@ -179,14 +179,15 @@ export class TiledVectorLayer extends VectorLayer {
     }
 
     console.log('going to queyr', this._getMbSourceId(), sourceMeta.layerName);
-    const features = mbMap.querySourceFeatures(this._getMbSourceId(), {
+    const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
       sourceLayer: sourceMeta.layerName,
       filter: ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true],
     });
 
-    console.log('metdata features', features);
+    console.log('f', mbFeatures);
 
-    return null;
+
+    return mbFeatures;
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {

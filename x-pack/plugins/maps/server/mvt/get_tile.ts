@@ -23,7 +23,11 @@ import {
   SUPER_FINE_ZOOM_DELTA,
 } from '../../common/constants';
 
-import {convertRegularRespToGeoJson, formatEnvelopeAsPolygon, hitsToGeoJson} from '../../common/elasticsearch_util';
+import {
+  convertRegularRespToGeoJson,
+  formatEnvelopeAsPolygon,
+  hitsToGeoJson,
+} from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
 import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
@@ -83,7 +87,6 @@ export async function getGridTile({
       .toPromise();
     const features: Feature[] = convertRegularRespToGeoJson(response.rawResponse, requestType);
 
-
     if (features.length) {
       const bounds = formatEnvelopeAsPolygon({
         maxLat: tileBounds.top_left.lat,
@@ -91,11 +94,28 @@ export async function getGridTile({
         maxLon: tileBounds.bottom_right.lon,
         minLon: tileBounds.top_left.lon,
       });
+
+      const rangeMeta = {
+        doc_count: {
+          min: Infinity,
+          max: -Infinity,
+        },
+      };
+      for (let i = 0; i < features.length; i++) {
+        const feature = features[i];
+        const newValue = parseFloat(feature.properties ? feature.properties['doc_count'] : null);
+        if (!isNaN(newValue)) {
+          rangeMeta.doc_count.min = Math.min(rangeMeta.doc_count.min, newValue);
+          rangeMeta.doc_count.max = Math.max(rangeMeta.doc_count.max, newValue);
+        }
+      }
+
       const metaDataFeature = {
         type: 'Feature',
         properties: {
           [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
           isComplete: true,
+          ...rangeMeta,
         },
         geometry: bounds,
       };
