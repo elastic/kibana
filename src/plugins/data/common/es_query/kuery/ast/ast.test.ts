@@ -55,6 +55,15 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    test('nbsp should be recognised as whitespace', () => {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+      ]);
+      const actual = fromKueryExpression('foo and\u00A0bar');
+      expect(actual).toEqual(expected);
+    });
+
     test('should support "or" as a binary operator', () => {
       const expected = nodeTypes.function.buildNode('or', [
         nodeTypes.function.buildNode('is', null, 'foo'),

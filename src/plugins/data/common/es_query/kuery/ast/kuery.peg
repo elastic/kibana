@@ -278,6 +278,7 @@ EscapedWhitespace
   = '\\t' { return '\t'; }
   / '\\r' { return '\r'; }
   / '\\n' { return '\n'; }
+  / '\\u00A0' { return '\u00A0'; }
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
@@ -298,7 +299,7 @@ RangeOperator
   / '>' { return 'gt'; }
 
 Space "whitespace"
-  = [\ \t\r\n]
+  = [\ \t\r\n\u00A0]
 
 Cursor
   = &{ return parseCursor; } '@kuery-cursor@' { return cursorSymbol; }
