@@ -43,6 +43,15 @@ const successfulSearchResponse = {
   },
 };
 
+const partialSearchResponse = {
+  rawResponse: {
+    hits: {
+      total: 2,
+      hits: [],
+    },
+  },
+};
+
 const getIndexTags = () => [];
 const searchClient = () =>
   new Observable((observer) => {
@@ -91,6 +100,22 @@ describe('getIndices', () => {
     expect(
       (await getIndices({ http, getIndexTags, pattern: ',foobar', searchClient })).length
     ).toBe(0);
+  });
+
+  it('should work with partial responses', async () => {
+    const searchClientPartialResponse = () =>
+      new Observable((observer) => {
+        observer.next(partialSearchResponse);
+        observer.next(successfulSearchResponse);
+        observer.complete();
+      }) as any;
+    const result = await getIndices({
+      http,
+      getIndexTags,
+      pattern: '*:kibana',
+      searchClient: searchClientPartialResponse,
+    });
+    expect(result.length).toBe(4);
   });
 
   it('response object to item array', () => {
