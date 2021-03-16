@@ -50,6 +50,7 @@ const getUtilityProps = () => {
   };
   const kibanaContextMock = {
     services: {
+      chrome: { recentlyAccessed: { add: jest.fn() } },
       application: { navigateToApp: jest.fn() },
       http: {
         basePath: {
