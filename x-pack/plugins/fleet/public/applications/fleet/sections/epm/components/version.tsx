@@ -8,7 +8,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { RequirementVersion } from '../../../types';
+import type { RequirementVersion } from '../../../types';
 
 const CodeText = styled.span`
   font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
