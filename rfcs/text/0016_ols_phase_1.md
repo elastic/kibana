@@ -76,7 +76,7 @@ class MyPlugin {
 ```
 
 ### 3.1.2 Schema
-Saved object ownership will be recorded as metadata within each `private` saved object. We do so by adding a top-level `accessControl` object with a singular `owner` property:
+Saved object ownership will be recorded as metadata within each `private` saved object. We do so by adding a top-level `accessControl` object with a singular `owner` property. See [unresolved question 1](#81-accessControl.owner) for details on the `owner` property.
 
 ```ts
 /**
