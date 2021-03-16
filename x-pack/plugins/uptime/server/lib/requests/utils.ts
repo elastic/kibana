@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract, ISavedObjectsRepository } from 'src/core/server';
+
 import {
   IFieldType,
   SavedObject,
@@ -23,7 +24,7 @@ export const getFieldByName = (
 };
 
 export const findIndexPatternById = async (
-  savedObjectsClient: SavedObjectsClientContract,
+  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
   index: string
 ): Promise<SavedObject<IndexPatternAttributes> | undefined> => {
   const savedObjectsResponse = await savedObjectsClient.find<IndexPatternAttributes>({

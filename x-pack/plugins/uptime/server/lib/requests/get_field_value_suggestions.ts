@@ -29,8 +29,8 @@ export const getFieldValueSuggestion: UMElasticsearchQueryFn<
   const result = await uptimeEsClient.baseESClient.search({ index, body });
 
   const buckets: any[] =
-    get(result, 'aggregations.suggestions.buckets') ||
-    get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
+    get(result, 'body.aggregations.suggestions.buckets') ||
+    get(result, 'body.aggregations.nestedSuggestions.suggestions.buckets');
 
   return buckets;
 };
@@ -45,14 +45,20 @@ async function getBody(field: IFieldType | string, query: string, filters: Filte
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
 
-  // We don't care about the accuracy of the counts, just the content of the terms, so this reduces
-  // the amount of information that needs to be transmitted to the coordinating node
-  const shardSize = 10;
   const body = {
     size: 0,
     query: {
       bool: {
-        filter: filters,
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: 'now-15m',
+                lte: 'now',
+              },
+            },
+          },
+        ],
       },
     },
     aggs: {
@@ -61,7 +67,6 @@ async function getBody(field: IFieldType | string, query: string, filters: Filte
           field: isFieldObject(field) ? field.name : field,
           include: `${getEscapedQuery(query)}.*`,
           execution_hint: executionHint,
-          shard_size: shardSize,
         },
       },
     },
