@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
-import { AggregationOptionsByType } from '../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
 import { APMEventESSearchRequest } from '../lib/helpers/create_es_client/create_apm_event_client';
 
 export type Projection = Omit<APMEventESSearchRequest, 'body'> & {

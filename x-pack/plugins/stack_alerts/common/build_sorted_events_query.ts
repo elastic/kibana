@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { estypes } from '@elastic/elasticsearch';
-import type { ESSearchRequest } from '../../../typings/elasticsearch';
+import type { ESSearchRequest } from '../../../../typings/elasticsearch';
 
 interface BuildSortedEventsQueryOpts {
   aggs?: Record<string, estypes.AggregationContainer>;

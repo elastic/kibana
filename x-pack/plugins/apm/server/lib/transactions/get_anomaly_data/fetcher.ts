@@ -6,7 +6,7 @@
  */
 
 import { QueryContainer } from '@elastic/elasticsearch/api/types';
-import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { rangeQuery } from '../../../../server/utils/queries';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';

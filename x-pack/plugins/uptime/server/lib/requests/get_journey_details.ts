@@ -28,13 +28,12 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
           },
           {
             term: {
-              'synthetics.type': 'journey/end',
+              'synthetics.type': 'journey/start',
             },
           },
         ] as QueryContainer[],
       },
     },
-    _source: ['@timestamp', 'monitor.id'],
     size: 1,
   };
 
@@ -54,7 +53,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
             },
             {
               term: {
-                'synthetics.type': 'journey/end',
+                'synthetics.type': 'journey/start',
               },
             },
           ] as QueryContainer[],
@@ -110,6 +109,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
       nextJourneyResult?.hits?.hits.length > 0 ? nextJourneyResult?.hits?.hits[0] : null;
     return {
       timestamp: thisJourneySource['@timestamp'],
+      journey: thisJourneySource,
       previous: previousJourney
         ? {
             checkGroup: previousJourney._source.monitor.check_group,

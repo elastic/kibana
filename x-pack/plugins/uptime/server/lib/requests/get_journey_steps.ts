@@ -15,7 +15,7 @@ export interface GetJourneyStepsParams {
   syntheticEventTypes?: string | string[];
 }
 
-const defaultEventTypes = ['step/end', 'stderr', 'cmd/status', 'step/screenshot'];
+const defaultEventTypes = ['step/end', 'cmd/status', 'step/screenshot', 'journey/browserconsole'];
 
 export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
   if (!eventTypes) {

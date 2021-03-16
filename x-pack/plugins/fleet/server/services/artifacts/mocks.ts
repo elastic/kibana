@@ -10,7 +10,7 @@ import type { ApiResponse } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
-import type { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import type { ESSearchHit, ESSearchResponse } from '../../../../../../typings/elasticsearch';
 
 import type { Artifact, ArtifactElasticsearchProperties, ArtifactsClientInterface } from './types';
 

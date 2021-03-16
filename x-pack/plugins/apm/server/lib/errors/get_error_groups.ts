@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SortOptions } from '../../../../../../typings/elasticsearch/aggregations';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,

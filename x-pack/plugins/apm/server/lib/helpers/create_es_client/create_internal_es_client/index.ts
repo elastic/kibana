@@ -17,7 +17,7 @@ import { APMRequestHandlerContext } from '../../../../routes/typings';
 import {
   ESSearchResponse,
   ESSearchRequest,
-} from '../../../../../../../typings/elasticsearch';
+} from '../../../../../../../../typings/elasticsearch';
 import {
   callAsyncWithDebug,
   getDebugBody,
