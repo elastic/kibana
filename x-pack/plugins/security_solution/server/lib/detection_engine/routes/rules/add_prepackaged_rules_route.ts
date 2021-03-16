@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type {
   AppClient,
   SecuritySolutionPluginRouter,
@@ -49,6 +50,13 @@ export const addPrepackedRulesRoute = (
       validate: false,
       options: {
         tags: ['access:securitySolution'],
+        timeout: {
+          // FUNFACT: If we do not add a very long timeout what will happen
+          // is that Chrome which receive a 408 error and then do a retry.
+          // This retry can cause lots of connections to happen. Using a very
+          // long timeout will ensure that Chrome does not do retries and saturate the connections.
+          idleSocket: moment.duration('1', 'hour').asMilliseconds(),
+        },
       },
     },
     async (context, _, response) => {

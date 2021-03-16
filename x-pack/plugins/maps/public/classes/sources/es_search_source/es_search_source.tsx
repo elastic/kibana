@@ -14,7 +14,12 @@ import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties } from 'geojson';
 import { AbstractESSource } from '../es_source';
 import { getHttp, getSearchService } from '../../../kibana_services';
-import { addFieldToDSL, getField, hitsToGeoJson } from '../../../../common/elasticsearch_util';
+import {
+  addFieldToDSL,
+  getField,
+  hitsToGeoJson,
+  PreIndexedShape,
+} from '../../../../common/elasticsearch_util';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 
@@ -43,7 +48,7 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { ImmutableSourceProperty, PreIndexedShape, SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import {
   GeoJsonWithMeta,
