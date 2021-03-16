@@ -15,13 +15,15 @@ export const startDatafeedSchema = schema.object({
 
 export const indicesOptionsSchema = schema.object({
   expand_wildcards: schema.maybe(
-    schema.oneOf([
-      schema.literal('all'),
-      schema.literal('open'),
-      schema.literal('closed'),
-      schema.literal('hidden'),
-      schema.literal('none'),
-    ])
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal('all'),
+        schema.literal('open'),
+        schema.literal('closed'),
+        schema.literal('hidden'),
+        schema.literal('none'),
+      ])
+    )
   ),
   ignore_unavailable: schema.maybe(schema.boolean()),
   allow_no_indices: schema.maybe(schema.boolean()),
