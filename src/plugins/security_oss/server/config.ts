@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;
 

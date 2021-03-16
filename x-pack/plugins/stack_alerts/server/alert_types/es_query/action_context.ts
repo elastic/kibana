@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerts/server';
+import { AlertExecutorOptions, AlertInstanceContext } from '../../../../alerting/server';
 import { EsQueryAlertParams } from './alert_type_params';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
 

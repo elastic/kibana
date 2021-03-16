@@ -21,12 +21,13 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { getEmptyValue } from '../../empty_value';
 
 import { ExceptionBuilderComponent } from './';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiColorLightShade: '#ece',
   },
-};
+});
 
 jest.mock('../../../../common/lib/kibana');
 

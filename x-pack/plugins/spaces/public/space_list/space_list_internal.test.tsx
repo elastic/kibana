@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
 import { act } from '@testing-library/react';
+import type { ReactWrapper } from 'enzyme';
+import React from 'react';
+
+import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
 import type { Space } from 'src/plugins/spaces_oss/common';
-import type { SpaceListProps } from '../../../../../src/plugins/spaces_oss/public';
-import { getSpacesContextWrapper } from '../spaces_context';
+import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
+
+import { getSpacesContextProviderWrapper } from '../spaces_context';
 import { spacesManagerMock } from '../spaces_manager/mocks';
-import { ReactWrapper } from 'enzyme';
 import { SpaceListInternal } from './space_list_internal';
 
 const ACTIVE_SPACE: Space = {
@@ -55,7 +57,10 @@ describe('SpaceListInternal', () => {
     spacesManager.getActiveSpace.mockResolvedValue(ACTIVE_SPACE);
     spacesManager.getSpaces.mockResolvedValue(spaces);
 
-    const SpacesContext = getSpacesContextWrapper({ getStartServices, spacesManager });
+    const SpacesContext = await getSpacesContextProviderWrapper({
+      getStartServices,
+      spacesManager,
+    });
     const wrapper = mountWithIntl(
       <SpacesContext feature={feature}>
         <SpaceListInternal {...props} />
@@ -149,7 +154,10 @@ describe('SpaceListInternal', () => {
         const button = getButton(wrapper);
         expect(button.text()).toEqual('+1 more');
 
-        button.simulate('click');
+        await act(async () => {
+          button.simulate('click');
+        });
+        wrapper.update();
         const badgeText = getListText(wrapper);
         expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F']);
         expect(button.text()).toEqual('show less');
@@ -167,7 +175,10 @@ describe('SpaceListInternal', () => {
         const button = getButton(wrapper);
         expect(button.text()).toEqual('+2 more');
 
-        button.simulate('click');
+        await act(async () => {
+          button.simulate('click');
+        });
+        wrapper.update();
         const badgeText = getListText(wrapper);
         expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', '+1']);
         expect(button.text()).toEqual('show less');
@@ -185,7 +196,10 @@ describe('SpaceListInternal', () => {
         const button = getButton(wrapper);
         expect(button.text()).toEqual('+3 more');
 
-        button.simulate('click');
+        await act(async () => {
+          button.simulate('click');
+        });
+        wrapper.update();
         const badgeText = getListText(wrapper);
         expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', '+2']);
         expect(button.text()).toEqual('show less');
@@ -236,7 +250,10 @@ describe('SpaceListInternal', () => {
         const button = getButton(wrapper);
         expect(button.text()).toEqual('+8 more');
 
-        button.simulate('click');
+        await act(async () => {
+          button.simulate('click');
+        });
+        wrapper.update();
         const badgeText = getListText(wrapper);
         expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(button.text()).toEqual('show less');
@@ -250,7 +267,10 @@ describe('SpaceListInternal', () => {
         const button = getButton(wrapper);
         expect(button.text()).toEqual('+2 more');
 
-        button.simulate('click');
+        await act(async () => {
+          button.simulate('click');
+        });
+        wrapper.update();
         const badgeText = getListText(wrapper);
         expect(badgeText).toEqual(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(button.text()).toEqual('show less');
@@ -275,7 +295,10 @@ describe('SpaceListInternal', () => {
         const button = getButton(wrapper);
         expect(button.text()).toEqual('+5 more');
 
-        button.simulate('click');
+        await act(async () => {
+          button.simulate('click');
+        });
+        wrapper.update();
         const badgeText = getListText(wrapper);
         expect(badgeText).toEqual(['D!', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', '+1']);
         expect(button.text()).toEqual('show less');
@@ -300,7 +323,10 @@ describe('SpaceListInternal', () => {
         const button = getButton(wrapper);
         expect(button.text()).toEqual('+4 more');
 
-        button.simulate('click');
+        await act(async () => {
+          button.simulate('click');
+        });
+        wrapper.update();
         const badgeText = getListText(wrapper);
         expect(badgeText).toEqual(['A', 'C', 'D', 'E', 'F', 'G', 'H', 'B', '+1']);
         expect(button.text()).toEqual('show less');

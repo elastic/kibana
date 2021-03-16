@@ -60,6 +60,45 @@ function getShortGroupId(errorGroupId?: string) {
   return errorGroupId.slice(0, 5);
 }
 
+function ErrorGroupHeader({
+  groupId,
+  isUnhandled,
+}: {
+  groupId: string;
+  isUnhandled?: boolean;
+}) {
+  return (
+    <>
+      <ApmHeader>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h1>
+                {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
+                  defaultMessage: 'Error group {errorGroupId}',
+                  values: {
+                    errorGroupId: getShortGroupId(groupId),
+                  },
+                })}
+              </h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          {isUnhandled && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
+                  defaultMessage: 'Unhandled',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </ApmHeader>
+      <SearchBar />
+    </>
+  );
+}
+
 type ErrorGroupDetailsProps = RouteComponentProps<{
   groupId: string;
   serviceName: string;
@@ -101,7 +140,7 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
   useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });
 
   if (!errorGroupData || !errorDistributionData) {
-    return null;
+    return <ErrorGroupHeader groupId={groupId} />;
   }
 
   // If there are 0 occurrences, show only distribution chart w. empty message
@@ -114,32 +153,7 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
 
   return (
     <>
-      <ApmHeader>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h1>
-                {i18n.translate('xpack.apm.errorGroupDetails.errorGroupTitle', {
-                  defaultMessage: 'Error group {errorGroupId}',
-                  values: {
-                    errorGroupId: getShortGroupId(groupId),
-                  },
-                })}
-              </h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          {isUnhandled && (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="warning">
-                {i18n.translate('xpack.apm.errorGroupDetails.unhandledLabel', {
-                  defaultMessage: 'Unhandled',
-                })}
-              </EuiBadge>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </ApmHeader>
-      <SearchBar />
+      <ErrorGroupHeader groupId={groupId} isUnhandled={isUnhandled} />
       <EuiPage>
         <EuiPageBody>
           <EuiPanel>

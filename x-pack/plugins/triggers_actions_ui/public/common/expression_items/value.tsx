@@ -17,7 +17,7 @@ import {
 import { ClosablePopoverTitle } from './components';
 import { IErrorObject } from '../../types';
 
-interface ValueExpressionProps {
+export interface ValueExpressionProps {
   description: string;
   value: number;
   onChangeSelectedValue: (updatedValue: number) => void;
@@ -100,3 +100,6 @@ export const ValueExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ValueExpression as default };

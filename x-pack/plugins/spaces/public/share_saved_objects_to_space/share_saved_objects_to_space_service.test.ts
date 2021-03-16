@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { savedObjectsManagementPluginMock } from 'src/plugins/saved_objects_management/public/mocks';
+
+import { uiApiMock } from '../ui_api/mocks';
 import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_to_space_action';
 // import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
-import { ShareSavedObjectsToSpaceService } from '.';
-import { savedObjectsManagementPluginMock } from '../../../../../src/plugins/saved_objects_management/public/mocks';
-import { uiApiMock } from '../ui_api/mocks';
+import { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space_service';
 
 describe('ShareSavedObjectsToSpaceService', () => {
   describe('#setup', () => {

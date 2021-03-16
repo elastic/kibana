@@ -109,6 +109,24 @@ export default function ({ getService, getPageObjects }) {
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
 
+    it('visualize app menu navigates to the visualize listing page if the last opened visualization was linked to dashboard', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      // Create markdown by reference.
+      await createMarkdownVis('by reference');
+
+      // Edit then save and return
+      await editMarkdownVis();
+      await PageObjects.visualize.saveVisualizationAndReturn();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await appsMenu.clickLink('Visualize Library');
+      await PageObjects.common.clickConfirmOnModal();
+      expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
+    });
+
     describe('by value', () => {
       it('save and return button returns to dashboard after editing visualization with changes saved', async () => {
         await PageObjects.common.navigateToApp('dashboard');

@@ -11,6 +11,8 @@ Unmute an alert instance.
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>/alert_instance/<alert_instance_id>/_unmute`
 
+`POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/alert_instance/<alert_instance_id>/_unmute`
+
 [[alerts-api-unmute-path-params]]
 ==== Path parameters
 
@@ -19,6 +21,9 @@ Unmute an alert instance.
 
 `alert_instance_id`::
   (Required, string) The ID of the alert instance that you want to unmute.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[alerts-api-unmute-response-codes]]
 ==== Response code

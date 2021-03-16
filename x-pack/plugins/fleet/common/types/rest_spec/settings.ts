@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Settings } from '../models';
+import type { Settings } from '../models';
 
 export interface GetSettingsResponse {
   item: Settings;

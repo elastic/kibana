@@ -13,12 +13,13 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { LicensingPluginSetup } from '../../licensing/server';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { CancellationToken } from '../common';
-import { BaseParams } from '../common/types';
+import { BaseParams, TaskRunResult } from '../common/types';
 import { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { LevelLogger } from './lib';
-import { ReportTaskParams, TaskRunResult } from './lib/tasks';
+import { ReportTaskParams } from './lib/tasks';
 
 /*
  * Plugin Contract
@@ -29,11 +30,13 @@ export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
 }
 
 export interface ReportingStartDeps {
   data: DataPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export type ReportingStart = object;

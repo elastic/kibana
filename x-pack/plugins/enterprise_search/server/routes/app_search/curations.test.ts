@@ -130,6 +130,71 @@ describe('curations routes', () => {
     });
   });
 
+  describe('GET /api/app_search/engines/{engineName}/curations/{curationId}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      });
+
+      registerCurationsRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/:engineName/curations/:curationId',
+      });
+    });
+  });
+
+  describe('PUT /api/app_search/engines/{engineName}/curations/{curationId}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/app_search/engines/{engineName}/curations/{curationId}',
+      });
+
+      registerCurationsRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/:engineName/curations/:curationId',
+      });
+    });
+
+    describe('validates', () => {
+      it('required body', () => {
+        const request = {
+          body: {
+            query: 'hello',
+            queries: ['hello', 'world'],
+            promoted: ['some-doc-id'],
+            hidden: ['another-doc-id'],
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+
+      it('missing body', () => {
+        const request = { body: {} };
+        mockRouter.shouldThrow(request);
+      });
+    });
+  });
+
   describe('GET /api/app_search/engines/{engineName}/curations/find_or_create', () => {
     let mockRouter: MockRouter;
 

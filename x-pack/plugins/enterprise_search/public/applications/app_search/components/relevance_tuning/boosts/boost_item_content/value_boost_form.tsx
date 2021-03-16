@@ -20,10 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { RelevanceTuningLogic } from '../..';
-import { Boost } from '../../types';
+import { ValueBoost } from '../../types';
 
 interface Props {
-  boost: Boost;
+  boost: ValueBoost;
   index: number;
   name: string;
 }
@@ -70,7 +70,7 @@ export const ValueBoostForm: React.FC<Props> = ({ boost, index, name }) => {
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.value.addValueButtonLabel',
           {
-            defaultMessage: 'Add Value',
+            defaultMessage: 'Add value',
           }
         )}
       </EuiButton>

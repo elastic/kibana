@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { EuiSpacer, EuiTitle, EuiFormRow } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CopyOptions, SavedObjectTarget } from '../types';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { CopyOptions, SavedObjectTarget } from '../types';
+import type { CopyMode } from './copy_mode_control';
+import { CopyModeControl } from './copy_mode_control';
 import { SelectableSpacesControl } from './selectable_spaces_control';
-import { CopyModeControl, CopyMode } from './copy_mode_control';
 
 interface Props {
   savedObjectTarget: Required<SavedObjectTarget>;

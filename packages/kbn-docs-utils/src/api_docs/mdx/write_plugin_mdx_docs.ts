@@ -72,6 +72,7 @@ image: https://source.unsplash.com/400x175/?github
 summary: API docs for the ${doc.id} plugin
 date: 2020-11-16
 tags: ['contributor', 'dev', 'apidocs', 'kibana', '${doc.id}']
+warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
 
 import ${json} from './${fileName}.json';
@@ -108,35 +109,35 @@ function scopApiToMdx(scope: ScopeApi, title: string, json: string, scopeName: s
 
     if (scope.setup) {
       mdx += `### Setup\n`;
-      mdx += `<DocDefinitionList data={[${json}.${scopeName}.setup]}/>\n`;
+      mdx += `<DocDefinitionList data={[${json}.${scopeName}.setup]}/>\n\n`;
     }
     if (scope.start) {
       mdx += `### Start\n`;
-      mdx += `<DocDefinitionList data={[${json}.${scopeName}.start]}/>\n`;
+      mdx += `<DocDefinitionList data={[${json}.${scopeName}.start]}/>\n\n`;
     }
     if (scope.objects.length > 0) {
       mdx += `### Objects\n`;
-      mdx += `<DocDefinitionList data={${json}.${scopeName}.objects}/>\n`;
+      mdx += `<DocDefinitionList data={${json}.${scopeName}.objects}/>\n\n`;
     }
     if (scope.functions.length > 0) {
       mdx += `### Functions\n`;
-      mdx += `<DocDefinitionList data={${json}.${scopeName}.functions}/>\n`;
+      mdx += `<DocDefinitionList data={${json}.${scopeName}.functions}/>\n\n`;
     }
     if (scope.classes.length > 0) {
       mdx += `### Classes\n`;
-      mdx += `<DocDefinitionList data={${json}.${scopeName}.classes}/>\n`;
+      mdx += `<DocDefinitionList data={${json}.${scopeName}.classes}/>\n\n`;
     }
     if (scope.interfaces.length > 0) {
       mdx += `### Interfaces\n`;
-      mdx += `<DocDefinitionList data={${json}.${scopeName}.interfaces}/>\n`;
+      mdx += `<DocDefinitionList data={${json}.${scopeName}.interfaces}/>\n\n`;
     }
     if (scope.enums.length > 0) {
       mdx += `### Enums\n`;
-      mdx += `<DocDefinitionList data={${json}.${scopeName}.enums}/>\n`;
+      mdx += `<DocDefinitionList data={${json}.${scopeName}.enums}/>\n\n`;
     }
     if (scope.misc.length > 0) {
       mdx += `### Consts, variables and types\n`;
-      mdx += `<DocDefinitionList data={${json}.${scopeName}.misc}/>\n`;
+      mdx += `<DocDefinitionList data={${json}.${scopeName}.misc}/>\n\n`;
     }
   }
   return mdx;

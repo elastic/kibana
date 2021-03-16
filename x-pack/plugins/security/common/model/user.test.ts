@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getUserDisplayName, User } from './user';
+import type { User } from './user';
+import { getUserDisplayName } from './user';
 
 describe('#getUserDisplayName', () => {
   it(`uses the full name when available`, () => {

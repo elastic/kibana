@@ -60,7 +60,7 @@ export const buildMatchedIndicator = ({
 
     return {
       ...indicator,
-      matched: { atomic, field: query.field, type },
+      matched: { atomic, field: query.field, id: query.id, index: query.index, type },
     };
   });
 

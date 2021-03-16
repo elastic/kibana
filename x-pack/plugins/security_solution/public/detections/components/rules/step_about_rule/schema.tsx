@@ -198,14 +198,14 @@ export const schema: FormSchema<AboutStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
       {
-        defaultMessage: 'Threat Indicator Path',
+        defaultMessage: 'Indicator prefix override',
       }
     ),
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
       {
         defaultMessage:
-          'Specify the document path containing your threat indicator fields. Used for enrichment of indicator match alerts.',
+          'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
       }
     ),
     labelAppend: OptionalFieldLabel,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-import { spacesClientMock } from '../spaces_client/spaces_client.mock';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
+import { spacesClientMock } from '../spaces_client/spaces_client.mock';
+import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 
 const createSetupContractMock = (spaceId = DEFAULT_SPACE_ID) => {
   const setupContract: jest.Mocked<SpacesServiceSetup> = {

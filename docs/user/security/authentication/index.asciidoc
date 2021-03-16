@@ -382,14 +382,19 @@ xpack.security.authc.providers:
 [[anonymous-access-and-embedding]]
 ===== Anonymous access and embedding
 
-One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it. If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
+One of the most popular use cases for anonymous access is when you embed {kib} into other applications and don't want to force your users to log in to view it. 
+If you configured {kib} to use anonymous access as the sole authentication mechanism, you don't need to do anything special while embedding {kib}.
 
-If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding dashboards and visualizations, then toggle *Public URL* in the *Share > Embed code* menu in  *Dashboard* or *Visualize*.
+If you have multiple authentication providers enabled, and you want to automatically log in anonymous users when embedding dashboards and visualizations:
 
-You can also use the *Public URL* toggle when you're generating permanent links to dashboards, visualizations, and saved searches.
-
-NOTE:  The *Public URL* toggle is only available if anonymous access is properly configured and your anonymous service account has privileges to access what you want to embed or share.
-
+. Open the main menu, then click *Dashboard* or *Visualize Library*.
+. Open then dashboard or visualization you want to embed.
+. Open the *Share* menu, then click *Embed code > Public URL*.
++
+You can also use *Public URL* when you're generating permanent links to dashboards, visualizations, and saved searches.
++
+NOTE: *Public URL* is available only when anonymous access is configured and your anonymous service account has privileges to access what you want to embed or share.
++
 For more information, refer to <<embedding, Embed {kib} content in a web page>>.
 
 [[http-authentication]]

@@ -7,6 +7,7 @@
 
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
+import { UA_READONLY_MODE } from '../../common/constants';
 import { renderApp } from './render_app';
 import { KibanaVersionContext } from './app_context';
 
@@ -16,7 +17,7 @@ export async function mountManagementSection(
   params: ManagementAppMountParams,
   kibanaVersionInfo: KibanaVersionContext
 ) {
-  const [{ i18n, docLinks }] = await coreSetup.getStartServices();
+  const [{ i18n, docLinks, notifications }] = await coreSetup.getStartServices();
   return renderApp({
     element: params.element,
     isCloudEnabled,
@@ -24,5 +25,7 @@ export async function mountManagementSection(
     i18n,
     docLinks,
     kibanaVersionInfo,
+    notifications,
+    isReadOnlyMode: UA_READONLY_MODE,
   });
 }
