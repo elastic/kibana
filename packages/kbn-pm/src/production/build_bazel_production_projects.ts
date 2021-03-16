@@ -59,7 +59,7 @@ export async function buildBazelProductionProjects({
 async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: string) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = relative(kibanaRoot, project.path);
-  const buildProjectPath = resolve(buildRoot, relativeProjectPath);
+  const buildProjectPath = resolve(buildRoot, relativeProjectPath, 'npm_module');
 
   await copy(['**/*'], buildProjectPath, {
     cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath), 'npm_module'),
