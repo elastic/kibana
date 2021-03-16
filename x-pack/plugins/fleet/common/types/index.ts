@@ -7,7 +7,7 @@
 
 export * from './models';
 export * from './rest_spec';
-import { NewAgentPolicy } from './models';
+import type { NewAgentPolicy } from './models';
 
 export interface FleetConfigType {
   enabled: boolean;
