@@ -111,5 +111,19 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
     },
+
+    async assertClearSelectionButtonVisible(expectVisible: boolean) {
+      if (expectVisible) {
+        await testSubjects.existOrFail('mlAnomalyTimelineClearSelection');
+      } else {
+        await testSubjects.missingOrFail('mlAnomalyTimelineClearSelection');
+      }
+    },
+
+    async clearSwimLaneSelection() {
+      await this.assertClearSelectionButtonVisible(true);
+      await testSubjects.click('mlAnomalyTimelineClearSelection');
+      await this.assertClearSelectionButtonVisible(false);
+    },
   };
 }
