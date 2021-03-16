@@ -8,7 +8,12 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, isEqual } from 'lodash';
 
+import { flashAPIErrors } from '../../../shared/flash_messages';
+
+import { HttpLogic } from '../../../shared/http';
+
 import { Schema, SchemaConflicts } from '../../../shared/types';
+import { EngineLogic } from '../engine';
 
 import {
   FieldResultSetting,
@@ -55,6 +60,7 @@ interface ResultSettingsActions {
   // Listeners
   clearRawSizeForField(fieldName: string): string;
   clearSnippetSizeForField(fieldName: string): string;
+  initializeResultSettingsData(): void;
 }
 
 interface ResultSettingsValues {
@@ -103,6 +109,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     saving: () => true,
     clearRawSizeForField: (fieldName) => fieldName,
     clearSnippetSizeForField: (fieldName) => fieldName,
+    initializeResultSettingsData: () => true,
   }),
   reducers: () => ({
     dataLoading: [
@@ -234,6 +241,24 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     },
     clearSnippetSizeForField: (fieldName) => {
       actions.updateField(fieldName, omit(values.resultFields[fieldName], ['snippetSize']));
+    },
+    initializeResultSettingsData: async () => {
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      const url = `/api/app_search/engines/${engineName}/result_settings/details`;
+
+      try {
+        const {
+          schema,
+          schemaConflicts,
+          searchSettings: { result_fields: serverFieldResultSettings },
+        } = await http.get(url);
+
+        actions.initializeResultFields(serverFieldResultSettings, schema, schemaConflicts);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
   }),
 });

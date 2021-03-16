@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+
+import { mockEngineValues } from '../../__mocks__';
 
 import { omit } from 'lodash';
+
+import { nextTick } from '@kbn/test/jest';
 
 import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
 
@@ -43,6 +47,7 @@ describe('ResultSettingsLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockEngineValues.engineName = 'test-engine';
   });
 
   it('has expected default values', () => {
@@ -512,6 +517,9 @@ describe('ResultSettingsLogic', () => {
   });
 
   describe('listeners', () => {
+    const { http } = mockHttpValues;
+    const { flashAPIErrors } = mockFlashMessageHelpers;
+
     describe('clearRawSizeForField', () => {
       it('should remove the raw size set on a field', () => {
         mount({
@@ -547,6 +555,82 @@ describe('ResultSettingsLogic', () => {
           raw: false,
           snippet: true,
         });
+      });
+    });
+
+    describe('initializeResultSettingsData', () => {
+      it('should remove the snippet size set on a field', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5 },
+            bar: { raw: true, rawSize: 5, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.clearSnippetSizeForField('foo');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
+          raw: false,
+          snippet: true,
+        });
+      });
+    });
+
+    describe('initializeResultFields', () => {
+      it('should make an API call and set state based on the response', async () => {
+        const serverFieldResultSettings = {
+          foo: {
+            raw: {},
+          },
+          bar: {
+            raw: {},
+          },
+        };
+        const schema = {
+          foo: 'text',
+          bar: 'number',
+        };
+        const schemaConflicts = {
+          baz: {
+            text: ['test'],
+            number: ['test2'],
+          },
+        };
+
+        mount();
+        http.get.mockReturnValueOnce(
+          Promise.resolve({
+            searchSettings: {
+              result_fields: serverFieldResultSettings,
+            },
+            schema,
+            schemaConflicts,
+          })
+        );
+        jest.spyOn(ResultSettingsLogic.actions, 'initializeResultFields');
+
+        ResultSettingsLogic.actions.initializeResultSettingsData();
+        await nextTick();
+
+        expect(http.get).toHaveBeenCalledWith(
+          '/api/app_search/engines/test-engine/result_settings/details'
+        );
+        expect(ResultSettingsLogic.actions.initializeResultFields).toHaveBeenCalledWith(
+          serverFieldResultSettings,
+          schema,
+          schemaConflicts
+        );
+      });
+
+      it('handles errors', async () => {
+        mount();
+        http.get.mockReturnValueOnce(Promise.reject('error'));
+
+        ResultSettingsLogic.actions.initializeResultSettingsData();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
   });
