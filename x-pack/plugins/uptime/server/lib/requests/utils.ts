@@ -5,36 +5,22 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, ISavedObjectsRepository } from 'src/core/server';
-
-import {
-  IFieldType,
-  SavedObject,
-  IndexPatternAttributes,
-} from '../../../../../../src/plugins/data/common';
+import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
+import { UptimeESClient } from '../lib';
 
 export const getFieldByName = (
   fieldName: string,
-  indexPattern: SavedObject<IndexPatternAttributes>
-): IFieldType | undefined => {
-  const fields: IFieldType[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
-  const field = fields && fields.find((f) => f.name === fieldName);
-
-  return field;
+  fields: FieldDescriptor[]
+): FieldDescriptor | undefined => {
+  return fields && fields.find((f) => f.name === fieldName);
 };
 
-export const findIndexPatternById = async (
-  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
-  index: string
-): Promise<SavedObject<IndexPatternAttributes> | undefined> => {
-  const savedObjectsResponse = await savedObjectsClient.find<IndexPatternAttributes>({
-    type: 'index-pattern',
-    fields: ['fields'],
-    search: `"${index}"`,
-    searchFields: ['title'],
+export const findIndexPatternById = async (uptimeEsClient: UptimeESClient, index: string) => {
+  const indexPatternsFetcher = new IndexPatternsFetcher(uptimeEsClient.baseESClient);
+
+  const fields = await indexPatternsFetcher.getFieldsForWildcard({
+    pattern: index,
   });
 
-  if (savedObjectsResponse.total > 0) {
-    return savedObjectsResponse.saved_objects[0];
-  }
+  return { fields };
 };

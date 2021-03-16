@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 
+import { useDebounce } from 'react-use';
 import { useValuesList } from '../../../hooks/use_values_list';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldValueSelection } from './field_value_selection';
@@ -29,12 +30,22 @@ export function FieldValueSuggestions({
   const [query, setQuery] = useState('');
   const { values, loading } = useValuesList({ indexPattern, query, sourceField });
 
+  const [debouncedValue, setDebouncedValue] = useState('');
+
+  useDebounce(
+    () => {
+      setQuery(debouncedValue);
+    },
+    400,
+    [debouncedValue]
+  );
+
   return (
     <FieldValueSelection
       values={values}
       label={label}
       onChange={onSelectionChange}
-      setQuery={setQuery}
+      setQuery={setDebouncedValue}
       loading={loading}
       value={value}
     />

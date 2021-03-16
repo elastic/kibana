@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { HttpStart } from 'kibana/public';
 import { IIndexPattern } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { ObservabilityClientPluginsStart } from '../plugin';
 import { useFetcher } from './use_fetcher';
 
 interface Props {
@@ -18,17 +18,40 @@ interface Props {
 
 export const useValuesList = ({ sourceField, indexPattern, query }: Props) => {
   const {
-    services: { data },
-  } = useKibana<ObservabilityClientPluginsStart>();
+    services: { http },
+  } = useKibana();
 
-  const { data: values, status } = useFetcher(() => {
-    return data.autocomplete.getValueSuggestions({
-      indexPattern,
+  const { data, status } = useFetcher(() => {
+    return getValueSuggestions(http!, {
+      index: indexPattern?.title ?? 'apm-*',
       query: query || '',
-      useTimeRange: false,
-      field: indexPattern.fields.find(({ name }) => name === sourceField)!,
+      field: sourceField,
+      fieldType: indexPattern?.fields?.find(({ name }) => name === sourceField)?.type,
     });
-  }, [data.autocomplete, indexPattern, sourceField, query]);
+  }, [indexPattern, sourceField, query, http]);
 
-  return { values, loading: status === 'loading' || status === 'pending' };
+  return {
+    values: (data?.values ?? []).map(({ key }: { key: string | number }) => String(key)),
+    loading: status === 'loading' || status === 'pending',
+  };
+};
+
+export const getValueSuggestions = async (
+  http: HttpStart,
+  {
+    field,
+    index,
+    query,
+    fieldType,
+  }: {
+    field: string;
+    index: string;
+    query: string;
+    fieldType?: string;
+  }
+) => {
+  return await http.post('/api/uptime/suggestions/values/' + index, {
+    method: 'POST',
+    body: JSON.stringify({ field, index, query, fieldType }),
+  });
 };

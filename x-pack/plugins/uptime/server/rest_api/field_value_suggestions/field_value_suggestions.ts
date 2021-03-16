@@ -25,14 +25,24 @@ export const createGetFieldValueSuggestionsRoute: UMRestApiRouteFactory = (libs:
         field: schema.string(),
         query: schema.string(),
         filters: schema.maybe(schema.any()),
+        fieldType: schema.maybe(schema.string()),
+        useTimeRange: schema.maybe(schema.boolean()),
       },
       { unknowns: 'allow' }
     ),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {
-    const { field: fieldName, query, filters } = request.body;
+    const { field: fieldName, query, filters, fieldType, useTimeRange } = request.body;
     const { index } = request.params;
 
-    return getFieldValueSuggestion({ uptimeEsClient, index, fieldName, query, filters });
+    return getFieldValueSuggestion({
+      uptimeEsClient,
+      index,
+      fieldName,
+      fieldType,
+      query,
+      filters,
+      useTimeRange,
+    });
   },
 });

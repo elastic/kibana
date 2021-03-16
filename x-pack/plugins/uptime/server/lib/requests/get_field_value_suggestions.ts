@@ -8,23 +8,53 @@
 import { get } from 'lodash';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { findIndexPatternById, getFieldByName } from './utils';
-import { Filter, IFieldType } from '../../../../../../src/plugins/data/common';
+import { ESFilter } from '../../../../../typings/elasticsearch';
 
 export interface FieldValueSuggestionParams {
   index: string;
   fieldName: string;
+  fieldType: string;
   query: string;
-  filters?: Filter[];
+  filters?: ESFilter[];
+  useTimeRange?: boolean;
 }
 
 export const getFieldValueSuggestion: UMElasticsearchQueryFn<
   FieldValueSuggestionParams,
   any
-> = async ({ uptimeEsClient, index, fieldName, query, filters }) => {
-  const indexPattern = await findIndexPatternById(uptimeEsClient.getSavedObjectsClient()!, index);
+> = async ({
+  uptimeEsClient,
+  index,
+  fieldName,
+  fieldType,
+  query,
+  filters: filtersQ,
+  useTimeRange,
+}) => {
+  let fieldTypeT = fieldType;
+  if (!fieldType) {
+    const { fields = [] } = await findIndexPatternById(uptimeEsClient, index);
 
-  const field = indexPattern && getFieldByName(fieldName, indexPattern);
-  const body = await getBody(field || fieldName, query, filters);
+    const field = getFieldByName(fieldName, fields);
+
+    fieldTypeT = field?.type!;
+  }
+
+  let filters = filtersQ;
+
+  if (!filters || filters.length === 0 || useTimeRange) {
+    filters = [];
+    (filters ?? []).push({
+      range: {
+        '@timestamp': {
+          gte: 'now-30m',
+          lte: 'now',
+        },
+      },
+    });
+  }
+
+  const body = await getBody({ fieldType: fieldTypeT, fieldName, query, filters });
 
   const result = await uptimeEsClient.baseESClient.search({ index, body });
 
@@ -32,12 +62,20 @@ export const getFieldValueSuggestion: UMElasticsearchQueryFn<
     get(result, 'body.aggregations.suggestions.buckets') ||
     get(result, 'body.aggregations.nestedSuggestions.suggestions.buckets');
 
-  return buckets;
+  return { values: buckets };
 };
 
-async function getBody(field: IFieldType | string, query: string, filters: Filter[] = []) {
-  const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
-
+async function getBody({
+  fieldType,
+  fieldName,
+  query,
+  filters,
+}: {
+  query: string;
+  fieldType: string;
+  fieldName: string;
+  filters: ESFilter[];
+}) {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   const getEscapedQuery = (q: string = '') =>
     q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
@@ -45,46 +83,31 @@ async function getBody(field: IFieldType | string, query: string, filters: Filte
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
 
-  const body = {
+  return {
     size: 0,
     query: {
       bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: 'now-15m',
-                lte: 'now',
-              },
-            },
-          },
-        ],
+        filter: filters,
       },
     },
     aggs: {
       suggestions: {
         terms: {
-          field: isFieldObject(field) ? field.name : field,
-          include: `${getEscapedQuery(query)}.*`,
+          field: fieldName,
+          ...(fieldType === 'string'
+            ? {
+                include: `${getEscapedQuery(query)}.*`,
+              }
+            : {}),
+          ...(fieldType === 'number'
+            ? {
+                size: 100,
+              }
+            : {}),
           execution_hint: executionHint,
+          shard_size: 10,
         },
       },
     },
   };
-
-  if (isFieldObject(field) && field.subType && field.subType.nested) {
-    return {
-      ...body,
-      aggs: {
-        nestedSuggestions: {
-          nested: {
-            path: field.subType.nested.path,
-          },
-          aggs: body.aggs,
-        },
-      },
-    };
-  }
-
-  return body;
 }
