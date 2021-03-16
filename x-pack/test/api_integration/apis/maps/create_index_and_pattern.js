@@ -23,17 +23,16 @@ export default function ({ getService }) {
 
       expect(resp.body.success).to.be(true);
     });
-  });
 
-  it('should fail to create index and pattern with fields missing', async () => {
-    const resp = await supertest
-      .post(`/api/maps/indexSource`)
-      .set('kbn-xsrf', 'kibana')
-      .send({
-        index: 'testing456',
-      })
-      .expect(500);
-
-    expect(resp.body.success).to.be(false);
+    it('should fail to create index and pattern with invalid index', async () => {
+      await supertest
+        .post(`/api/maps/indexSource`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          index: '_testing456',
+          mappings: { properties: { coordinates: { type: 'geo_point' } } },
+        })
+        .expect(500);
+    });
   });
 }
