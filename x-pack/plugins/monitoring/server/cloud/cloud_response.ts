@@ -5,32 +5,58 @@
  * 2.0.
  */
 
+interface CloudServiceResponseOptions {
+  id?: string;
+  vmType?: string;
+  region?: string;
+  zone?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CloudServiceResponseJson {
+  name: string;
+  id?: string;
+  vm_type?: string;
+  region?: string;
+  zone?: string;
+  metadata?: Record<string, unknown>;
+}
+
 /**
- * {@code CloudServiceResponse} represents a single response from any individual {@code CloudService}.
+ * Represents a single response from any individual CloudService.
  */
 export class CloudServiceResponse {
+  private readonly _name: string;
+  private readonly _confirmed: boolean;
+  private readonly _id?: string;
+  private readonly _vmType?: string;
+  private readonly _region?: string;
+  private readonly _zone?: string;
+  private readonly _metadata?: Record<string, unknown>;
+
   /**
-   * Create an unconfirmed {@code CloudServiceResponse} by the {@code name}.
-   *
-   * @param {String} name The name of the {@code CloudService}.
-   * @return {CloudServiceResponse} Never {@code null}.
+   * Create an unconfirmed CloudServiceResponse by the name.
    */
-  static unconfirmed(name) {
+  static unconfirmed(name: string) {
     return new CloudServiceResponse(name, false, {});
   }
 
   /**
-   * Create a new {@code CloudServiceResponse}.
+   * Create a new CloudServiceResponse.
    *
-   * @param {String} name The name of the {@code CloudService}.
-   * @param {Boolean} confirmed Confirmed to be the current {@code CloudService}.
+   * @param {String} name The name of the CloudService.
+   * @param {Boolean} confirmed Confirmed to be the current CloudService.
    * @param {String} id The optional ID of the VM (depends on the cloud service).
    * @param {String} vmType The optional type of VM (depends on the cloud service).
    * @param {String} region The optional region of the VM (depends on the cloud service).
    * @param {String} availabilityZone The optional availability zone within the region (depends on the cloud service).
    * @param {Object} metadata The optional metadata associated with the VM.
    */
-  constructor(name, confirmed, { id, vmType, region, zone, metadata }) {
+  constructor(
+    name: string,
+    confirmed: boolean,
+    { id, vmType, region, zone, metadata }: CloudServiceResponseOptions
+  ) {
     this._name = name;
     this._confirmed = confirmed;
     this._id = id;
@@ -41,9 +67,7 @@ export class CloudServiceResponse {
   }
 
   /**
-   * Get the name of the {@code CloudService} associated with the current response.
-   *
-   * @return {String} The cloud service that created this response.
+   * Get the name of the CloudService associated with the current response.
    */
   getName() {
     return this._name;
@@ -51,8 +75,6 @@ export class CloudServiceResponse {
 
   /**
    * Determine if the Cloud Service is confirmed to exist.
-   *
-   * @return {Boolean} {@code true} to indicate that Kibana is running in this cloud environment.
    */
   isConfirmed() {
     return this._confirmed;
@@ -60,11 +82,8 @@ export class CloudServiceResponse {
 
   /**
    * Create a plain JSON object that can be indexed that represents the response.
-   *
-   * @return {Object} Never {@code null} object.
-   * @throws {Error} if this response is not {@code confirmed}.
    */
-  toJSON() {
+  toJSON(): CloudServiceResponseJson {
     if (!this._confirmed) {
       throw new Error(`[${this._name}] is not confirmed`);
     }

@@ -5,13 +5,25 @@
  * 2.0.
  */
 
+import type { CloudService } from './cloud_service';
+import type { CloudServiceResponseJson } from './cloud_response';
 import { CLOUD_SERVICES } from './cloud_services';
 
+interface CloudDetectorOptions {
+  cloudServices?: CloudService[];
+}
+
 /**
- * {@code CloudDetector} can be used to asynchronously detect the cloud service that Kibana is running within.
+ * The `CloudDetector` can be used to asynchronously detect the
+ * cloud service that Kibana is running within.
+ *
+ * @internal
  */
 export class CloudDetector {
-  constructor(options = {}) {
+  private readonly _cloudServices: CloudService[];
+  private _cloudDetails?: CloudServiceResponseJson;
+
+  constructor(options: CloudDetectorOptions = {}) {
     const { cloudServices = CLOUD_SERVICES } = options;
 
     this._cloudServices = cloudServices;
@@ -44,13 +56,13 @@ export class CloudDetector {
    * @param {Array} cloudServices The {@code CloudService} objects listed in priority order
    * @return {Promise} {@code undefined} if none match. Otherwise the plain JSON {@code Object} from the {@code CloudServiceResponse}.
    */
-  async _getCloudService(cloudServices) {
+  async _getCloudService(cloudServices: CloudService[]) {
     // check each service until we find one that is confirmed to match; order is assumed to matter
     for (const service of cloudServices) {
       try {
         const serviceResponse = await service.checkIfService();
 
-        if (serviceResponse.isConfirmed()) {
+        if (serviceResponse?.isConfirmed()) {
           return serviceResponse.toJSON();
         }
       } catch (ignoredError) {

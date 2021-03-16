@@ -5,20 +5,44 @@
  * 2.0.
  */
 
+import fs from 'fs';
 import { get, isString, omit } from 'lodash';
 import { promisify } from 'util';
-import { CloudService } from './cloud_service';
+import { CloudService, CloudServiceOptions, Request, RequestOptions } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
-import fs from 'fs';
-import { CLOUD_METADATA_SERVICES } from '../../common/constants';
+
+// We explicitly call out the version, 2016-09-02, rather than 'latest' to avoid unexpected changes
+const SERVICE_ENDPOINT = 'http://169.254.169.254/2016-09-02/dynamic/instance-identity/document';
+
+/** @internal */
+export interface AWSResponse {
+  accountId: string;
+  architecture: string;
+  availabilityZone: string;
+  billingProducts: unknown;
+  devpayProductCodes: unknown;
+  marketplaceProductCodes: unknown;
+  imageId: string;
+  instanceId: string;
+  instanceType: string;
+  kernelId: unknown;
+  pendingTime: string;
+  privateIp: string;
+  ramdiskId: unknown;
+  region: string;
+  version: string;
+}
 
 /**
- * {@code AWSCloudService} will check and load the service metadata for an Amazon Web Service VM if it is available.
+ * Checks and loads the service metadata for an Amazon Web Service VM if it is available.
  *
- * This is exported for testing purposes. Use the {@code AWS} singleton.
+ * This is only exported for testing purposes.
  */
 export class AWSCloudService extends CloudService {
-  constructor(options = {}) {
+  private readonly _isWindows: boolean;
+  private readonly _fs: typeof fs;
+
+  constructor(options: CloudServiceOptions = {}) {
     super('aws', options);
 
     // Allow the file system handler to be swapped out for tests
@@ -28,10 +52,14 @@ export class AWSCloudService extends CloudService {
     this._isWindows = _isWindows;
   }
 
-  _checkIfService(request) {
-    const req = {
+  _checkIfService(request?: Request) {
+    if (!request) {
+      return Promise.reject(new Error('not implemented'));
+    }
+
+    const req: RequestOptions = {
       method: 'GET',
-      uri: CLOUD_METADATA_SERVICES.AWS_URL,
+      uri: SERVICE_ENDPOINT,
       json: true,
     };
 
@@ -44,33 +72,31 @@ export class AWSCloudService extends CloudService {
   }
 
   /**
-   * Parse the AWS response, if possible. Example payload (with fake accountId value):
+   * Parse the AWS response, if possible.
    *
+   * Example payload:
    * {
-   *   "devpayProductCodes" : null,
-   *   "privateIp" : "10.0.0.38",
-   *   "availabilityZone" : "us-west-2c",
-   *   "version" : "2010-08-31",
-   *   "instanceId" : "i-0c7a5b7590a4d811c",
-   *   "billingProducts" : null,
-   *   "instanceType" : "t2.micro",
-   *   "imageId" : "ami-6df1e514",
    *   "accountId" : "1234567890",
    *   "architecture" : "x86_64",
+   *   "availabilityZone" : "us-west-2c",
+   *   "billingProducts" : null,
+   *   "devpayProductCodes" : null,
+   *   "imageId" : "ami-6df1e514",
+   *   "instanceId" : "i-0c7a5b7590a4d811c",
+   *   "instanceType" : "t2.micro",
    *   "kernelId" : null,
-   *   "ramdiskId" : null,
    *   "pendingTime" : "2017-07-06T02:09:12Z",
+   *   "privateIp" : "10.0.0.38",
+   *   "ramdiskId" : null,
    *   "region" : "us-west-2"
+   *   "version" : "2010-08-31",
    * }
-   *
-   * @param {Object} body The response from the VM web service.
-   * @return {CloudServiceResponse} {@code null} if not confirmed. Otherwise the response.
    */
-  _parseBody(body) {
-    const id = get(body, 'instanceId');
-    const vmType = get(body, 'instanceType');
-    const region = get(body, 'region');
-    const zone = get(body, 'availabilityZone');
+  _parseBody(body: AWSResponse): CloudServiceResponse | null {
+    const id = get(body, 'instanceId') as string | undefined;
+    const vmType = get(body, 'instanceType') as string | undefined;
+    const region = get(body, 'region') as string | undefined;
+    const zone = get(body, 'availabilityZone') as string | undefined;
     const metadata = omit(body, [
       // remove keys we already have
       'instanceId',
@@ -93,10 +119,9 @@ export class AWSCloudService extends CloudService {
   }
 
   /**
-   * Attempt to load the UUID by checking `/sys/hypervisor/uuid`. This is a fallback option if the metadata service is
-   * unavailable for some reason.
+   * Attempt to load the UUID by checking `/sys/hypervisor/uuid`.
    *
-   * @return {Promise} Never {@code null} {@code CloudServiceResponse}.
+   * This is a fallback option if the metadata service is unavailable for some reason.
    */
   _tryToDetectUuid() {
     // Windows does not have an easy way to check
@@ -120,8 +145,6 @@ export class AWSCloudService extends CloudService {
 }
 
 /**
- * Singleton instance of {@code AWSCloudService}.
- *
- * @type {AWSCloudService}
+ * Singleton instance of AWSCloudService.
  */
 export const AWS = new AWSCloudService();

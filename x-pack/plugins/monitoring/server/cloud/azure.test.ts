@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { Request, RequestOptions } from './cloud_service';
 import { AZURE } from './azure';
+
+type Callback = (err: unknown, res: unknown) => void;
 
 describe('Azure', () => {
   it('is named "azure"', () => {
@@ -15,16 +18,16 @@ describe('Azure', () => {
   describe('_checkIfService', () => {
     it('handles expected response', async () => {
       const id = 'abcdef';
-      const request = (req, callback) => {
+      const request = ((req: RequestOptions, callback: Callback) => {
         expect(req.method).toEqual('GET');
         expect(req.uri).toEqual('http://169.254.169.254/metadata/instance?api-version=2017-04-02');
-        expect(req.headers.Metadata).toEqual('true');
+        expect(req.headers?.Metadata).toEqual('true');
         expect(req.json).toEqual(true);
 
         const body = `{"compute":{"vmId": "${id}","location":"fakeus","availabilityZone":"fakeus-2"}}`;
 
-        callback(null, { statusCode: 200, body }, body);
-      };
+        callback(null, { statusCode: 200, body });
+      }) as Request;
       const response = await AZURE._checkIfService(request);
 
       expect(response.isConfirmed()).toEqual(true);
@@ -43,39 +46,30 @@ describe('Azure', () => {
     // NOTE: the CloudService method, checkIfService, catches the errors that follow
     it('handles not running on Azure with error by rethrowing it', async () => {
       const someError = new Error('expected: request failed');
-      const failedRequest = (_req, callback) => callback(someError, null);
+      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
+        callback(someError, null)) as Request;
 
-      try {
+      expect(async () => {
         await AZURE._checkIfService(failedRequest);
-
-        expect().fail('Method should throw exception (Promise.reject)');
-      } catch (err) {
-        expect(err.message).toEqual(someError.message);
-      }
+      }).rejects.toThrowError(someError.message);
     });
 
     it('handles not running on Azure with 404 response by throwing error', async () => {
-      const failedRequest = (_req, callback) => callback(null, { statusCode: 404 });
+      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
+        callback(null, { statusCode: 404 })) as Request;
 
-      try {
+      expect(async () => {
         await AZURE._checkIfService(failedRequest);
-
-        expect().fail('Method should throw exception (Promise.reject)');
-      } catch (ignoredErr) {
-        // ignored
-      }
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
     });
 
     it('handles not running on Azure with unexpected response by throwing error', async () => {
-      const failedRequest = (_req, callback) => callback(null, null);
+      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
+        callback(null, null)) as Request;
 
-      try {
+      expect(async () => {
         await AZURE._checkIfService(failedRequest);
-
-        expect().fail('Method should throw exception (Promise.reject)');
-      } catch (ignoredErr) {
-        // ignored
-      }
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`"Azure request failed"`);
     });
   });
 
@@ -124,9 +118,9 @@ describe('Azure', () => {
 
       const response = AZURE._parseBody(body);
 
-      expect(response.getName()).toEqual(AZURE.getName());
-      expect(response.isConfirmed()).toEqual(true);
-      expect(response.toJSON()).toEqual({
+      expect(response?.getName()).toEqual(AZURE.getName());
+      expect(response?.isConfirmed()).toEqual(true);
+      expect(response?.toJSON()).toEqual({
         name: 'azure',
         id: 'd4c57456-2b3b-437a-9f1f-7082cf123456',
         vm_type: 'Standard_A1',
@@ -176,9 +170,9 @@ describe('Azure', () => {
 
       const response = AZURE._parseBody(body);
 
-      expect(response.getName()).toEqual(AZURE.getName());
-      expect(response.isConfirmed()).toEqual(true);
-      expect(response.toJSON()).toEqual({
+      expect(response?.getName()).toEqual(AZURE.getName());
+      expect(response?.isConfirmed()).toEqual(true);
+      expect(response?.toJSON()).toEqual({
         name: 'azure',
         id: undefined,
         vm_type: undefined,
@@ -191,9 +185,13 @@ describe('Azure', () => {
     });
 
     it('ignores unexpected response body', () => {
+      // @ts-expect-error
       expect(AZURE._parseBody(undefined)).toBe(null);
+      // @ts-expect-error
       expect(AZURE._parseBody(null)).toBe(null);
+      // @ts-expect-error
       expect(AZURE._parseBody({})).toBe(null);
+      // @ts-expect-error
       expect(AZURE._parseBody({ privateIp: 'a.b.c.d' })).toBe(null);
     });
   });

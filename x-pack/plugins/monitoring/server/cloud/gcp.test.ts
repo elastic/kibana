@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { Request, RequestOptions } from './cloud_service';
 import { GCP } from './gcp';
+
+type Callback = (err: unknown, res: unknown) => void;
 
 describe('GCP', () => {
   it('is named "gcp"', () => {
@@ -17,30 +20,28 @@ describe('GCP', () => {
     const headers = { 'metadata-flavor': 'Google' };
 
     it('handles expected responses', async () => {
-      const metadata = {
+      const metadata: Record<string, string> = {
         id: 'abcdef',
         'machine-type': 'projects/441331612345/machineTypes/f1-micro',
         zone: 'projects/441331612345/zones/us-fake4-c',
       };
-      const request = (req, callback) => {
+      const request = ((req: RequestOptions, callback: Callback) => {
         const basePath = 'http://169.254.169.254/computeMetadata/v1/instance/';
 
         expect(req.method).toEqual('GET');
-        expect(req.uri.startsWith(basePath)).toBe(true);
-        expect(req.headers['Metadata-Flavor']).toEqual('Google');
+        expect((req.uri as string).startsWith(basePath)).toBe(true);
+        expect(req.headers!['Metadata-Flavor']).toEqual('Google');
         expect(req.json).toEqual(false);
 
-        const requestKey = req.uri.substring(basePath.length);
+        const requestKey = (req.uri as string).substring(basePath.length);
         let body = null;
 
         if (metadata[requestKey]) {
           body = metadata[requestKey];
-        } else {
-          expect().fail(`Unknown field requested [${requestKey}]`);
         }
 
-        callback(null, { statusCode: 200, body, headers }, body);
-      };
+        callback(null, { statusCode: 200, body, headers });
+      }) as Request;
       const response = await GCP._checkIfService(request);
 
       expect(response.isConfirmed()).toEqual(true);
@@ -56,79 +57,63 @@ describe('GCP', () => {
 
     // NOTE: the CloudService method, checkIfService, catches the errors that follow
     it('handles unexpected responses', async () => {
-      const request = (_req, callback) => callback(null, { statusCode: 200, headers });
+      const request = ((_req: RequestOptions, callback: Callback) =>
+        callback(null, { statusCode: 200, headers })) as Request;
 
-      try {
+      expect(async () => {
         await GCP._checkIfService(request);
-      } catch (err) {
-        // ignored
-        return;
-      }
-
-      expect().fail('Method should throw exception (Promise.reject)');
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`"unrecognized responses"`);
     });
 
     it('handles unexpected responses without response header', async () => {
       const body = 'xyz';
-      const request = (_req, callback) => callback(null, { statusCode: 200, body }, body);
+      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
+        callback(null, { statusCode: 200, body })) as Request;
 
-      try {
-        await GCP._checkIfService(request);
-      } catch (err) {
-        // ignored
-        return;
-      }
-
-      expect().fail('Method should throw exception (Promise.reject)');
+      expect(async () => {
+        await GCP._checkIfService(failedRequest);
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`"unrecognized responses"`);
     });
 
     it('handles not running on GCP with error by rethrowing it', async () => {
       const someError = new Error('expected: request failed');
-      const failedRequest = (_req, callback) => callback(someError, null);
+      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
+        callback(someError, null)) as Request;
 
-      try {
+      expect(async () => {
         await GCP._checkIfService(failedRequest);
-
-        expect().fail('Method should throw exception (Promise.reject)');
-      } catch (err) {
-        expect(err.message).toEqual(someError.message);
-      }
+      }).rejects.toThrowError(someError);
     });
 
     it('handles not running on GCP with 404 response by throwing error', async () => {
       const body = 'This is some random error text';
-      const failedRequest = (_req, callback) =>
-        callback(null, { statusCode: 404, headers, body }, body);
+      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
+        callback(null, { statusCode: 404, headers, body })) as Request;
 
-      try {
+      expect(async () => {
         await GCP._checkIfService(failedRequest);
-      } catch (err) {
-        // ignored
-        return;
-      }
-
-      expect().fail('Method should throw exception (Promise.reject)');
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`"GCP request failed"`);
     });
 
     it('handles not running on GCP with unexpected response by throwing error', async () => {
-      const failedRequest = (_req, callback) => callback(null, null);
+      const failedRequest = ((_req: RequestOptions, callback: Callback) =>
+        callback(null, null)) as Request;
 
-      try {
+      expect(async () => {
         await GCP._checkIfService(failedRequest);
-      } catch (err) {
-        // ignored
-        return;
-      }
-
-      expect().fail('Method should throw exception (Promise.reject)');
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`"GCP request failed"`);
     });
   });
 
   describe('_extractValue', () => {
     it('only handles strings', () => {
+      // @ts-expect-error
       expect(GCP._extractValue()).toBe(undefined);
+      // @ts-expect-error
       expect(GCP._extractValue(null, null)).toBe(undefined);
+      // @ts-expect-error
       expect(GCP._extractValue('abc', { field: 'abcxyz' })).toBe(undefined);
+      // @ts-expect-error
       expect(GCP._extractValue('abc', 1234)).toBe(undefined);
       expect(GCP._extractValue('abc/', 'abc/xyz')).toEqual('xyz');
     });
@@ -179,12 +164,17 @@ describe('GCP', () => {
     });
 
     it('ignores unexpected response body', () => {
+      // @ts-expect-error
       expect(() => GCP._combineResponses()).toThrow();
+      // @ts-expect-error
       expect(() => GCP._combineResponses(undefined, undefined, undefined)).toThrow();
+      // @ts-expect-error
       expect(() => GCP._combineResponses(null, null, null)).toThrow();
       expect(() =>
+        // @ts-expect-error
         GCP._combineResponses({ id: 'x' }, { machineType: 'a' }, { zone: 'b' })
       ).toThrow();
+      // @ts-expect-error
       expect(() => GCP._combineResponses({ privateIp: 'a.b.c.d' })).toThrow();
     });
   });

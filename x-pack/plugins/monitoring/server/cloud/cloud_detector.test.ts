@@ -6,6 +6,7 @@
  */
 
 import { CloudDetector } from './cloud_detector';
+import type { CloudService } from './cloud_service';
 
 describe('CloudDetector', () => {
   const cloudService1 = {
@@ -28,8 +29,10 @@ describe('CloudDetector', () => {
       };
     },
   };
-  // this service is theoretically a better match for the current server, but order dictates that it should
-  // never be checked (at least until we have some sort of "confidence" metric returned, if we ever run into this problem)
+  // this service is theoretically a better match for the current server,
+  // but order dictates that it should never be checked (at least until
+  // we have some sort of "confidence" metric returned, if we ever run
+  // into this problem)
   const cloudService4 = {
     checkIfService: () => {
       return {
@@ -40,7 +43,12 @@ describe('CloudDetector', () => {
       };
     },
   };
-  const cloudServices = [cloudService1, cloudService2, cloudService3, cloudService4];
+  const cloudServices = ([
+    cloudService1,
+    cloudService2,
+    cloudService3,
+    cloudService4,
+  ] as unknown) as CloudService[];
 
   describe('getCloudDetails', () => {
     it('returns undefined by default', () => {
@@ -71,7 +79,12 @@ describe('CloudDetector', () => {
     it('returns undefined if none match', async () => {
       const detector = new CloudDetector();
 
-      expect(await detector._getCloudService([cloudService1, cloudService2])).toBe(undefined);
+      expect(
+        await detector._getCloudService(([
+          cloudService1,
+          cloudService2,
+        ] as unknown) as CloudService[])
+      ).toBe(undefined);
       expect(await detector._getCloudService([])).toBe(undefined);
     });
 
@@ -79,7 +92,9 @@ describe('CloudDetector', () => {
     it('ignores exceptions from cloud services', async () => {
       const detector = new CloudDetector();
 
-      expect(await detector._getCloudService([cloudService2])).toBe(undefined);
+      expect(await detector._getCloudService(([cloudService2] as unknown) as CloudService[])).toBe(
+        undefined
+      );
     });
   });
 });

@@ -11,7 +11,5 @@ import { GCP } from './gcp';
 
 /**
  * An iteratable that can be used to loop across all known cloud services to detect them.
- *
- * @type {Array}
  */
-export const CLOUD_SERVICES = [AWS, GCP, AZURE];
+export const CLOUD_SERVICES: [typeof AWS, typeof GCP, typeof AZURE] = [AWS, GCP, AZURE];

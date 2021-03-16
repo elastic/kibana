@@ -7,22 +7,33 @@
 
 import { get, omit } from 'lodash';
 import { promisify } from 'util';
-import { CloudService } from './cloud_service';
+import { CloudService, Request } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
-import { CLOUD_METADATA_SERVICES } from '../../common/constants';
+
+// 2017-04-02 is the first GA release of this API
+const SERVICE_ENDPOINT = 'http://169.254.169.254/metadata/instance?api-version=2017-04-02';
+
+interface AzureResponse {
+  compute?: Record<string, string>;
+  network: unknown;
+}
 
 /**
- * {@code AzureCloudService} will check and load the service metadata for an Azure VM if it is available.
+ * Checks and loads the service metadata for an Azure VM if it is available.
  */
 class AzureCloudService extends CloudService {
   constructor(options = {}) {
     super('azure', options);
   }
 
-  _checkIfService(request) {
+  _checkIfService(request?: Request) {
+    if (!request) {
+      return Promise.reject(new Error('not implemented'));
+    }
+
     const req = {
       method: 'GET',
-      uri: CLOUD_METADATA_SERVICES.AZURE_URL,
+      uri: SERVICE_ENDPOINT,
       headers: {
         // Azure requires this header
         Metadata: 'true',
@@ -34,14 +45,21 @@ class AzureCloudService extends CloudService {
       promisify(request)(req)
         // Note: there is no fallback option for Azure
         .then((response) => {
+          if (!response || response.statusCode === 404) {
+            throw new Error('Azure request failed');
+          }
           return this._parseResponse(response.body, (body) => this._parseBody(body));
         })
     );
   }
 
   /**
-   * Parse the Azure response, if possible. Example payload (with network object ignored):
+   * Parse the Azure response, if possible.
    *
+   * Azure VMs created using the "classic" method, as opposed to the resource manager,
+   * do not provide a "compute" field / object. However, both report the "network" field / object.
+   *
+   * Example payload (with network object ignored):
    * {
    *   "compute": {
    *     "location": "eastus",
@@ -60,18 +78,12 @@ class AzureCloudService extends CloudService {
    *     ...
    *   }
    * }
-   *
-   * Note: Azure VMs created using the "classic" method, as opposed to the resource manager,
-   * do not provide a "compute" field / object. However, both report the "network" field / object.
-   *
-   * @param {Object} body The response from the VM web service.
-   * @return {CloudServiceResponse} {@code null} for default fallback.
    */
-  _parseBody(body) {
-    const compute = get(body, 'compute');
-    const id = get(compute, 'vmId');
-    const vmType = get(compute, 'vmSize');
-    const region = get(compute, 'location');
+  _parseBody(body: AzureResponse): CloudServiceResponse | null {
+    const compute = get(body, 'compute') as Record<string, string>;
+    const id: string = get(compute, 'vmId');
+    const vmType: string = get(compute, 'vmSize');
+    const region: string = get(compute, 'location');
 
     // remove keys that we already have; explicitly undefined so we don't send it when empty
     const metadata = compute ? omit(compute, ['vmId', 'vmSize', 'location']) : undefined;
@@ -92,8 +104,6 @@ class AzureCloudService extends CloudService {
 }
 
 /**
- * Singleton instance of {@code AzureCloudService}.
- *
- * @type {AzureCloudService}
+ * Singleton instance of AzureCloudService.
  */
 export const AZURE = new AzureCloudService();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CloudService } from './cloud_service';
+import { CloudService, Response } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
 describe('CloudService', () => {
@@ -28,13 +28,9 @@ describe('CloudService', () => {
 
   describe('_checkIfService', () => {
     it('throws an exception unless overridden', async () => {
-      const request = jest.fn();
-
-      try {
-        await service._checkIfService(request);
-      } catch (err) {
-        expect(err.message).toEqual('not implemented');
-      }
+      expect(async () => {
+        await service._checkIfService(undefined);
+      }).rejects.toThrowErrorMatchingInlineSnapshot(`"not implemented"`);
     });
   });
 
@@ -49,8 +45,11 @@ describe('CloudService', () => {
 
   describe('_stringToJson', () => {
     it('only handles strings', () => {
+      // @ts-expect-error
       expect(() => service._stringToJson({})).toThrow();
+      // @ts-expect-error
       expect(() => service._stringToJson(123)).toThrow();
+      // @ts-expect-error
       expect(() => service._stringToJson(true)).toThrow();
     });
 
@@ -89,42 +88,47 @@ describe('CloudService', () => {
 
   describe('_parseResponse', () => {
     const body = { some: { body: {} } };
-    const tryParseResponse = async (...args) => {
-      try {
-        await service._parseResponse(...args);
-      } catch (err) {
-        // expected
-        return;
-      }
-
-      expect().fail('Should throw exception');
-    };
 
     it('throws error upon failure to parse body as object', async () => {
-      // missing body
-      await tryParseResponse();
-      await tryParseResponse(null);
-      await tryParseResponse({});
-      await tryParseResponse(123);
-      await tryParseResponse('raw string');
-      // malformed JSON object
-      await tryParseResponse('{{}');
+      expect(async () => {
+        // @ts-expect-error missing body
+        await service._parseResponse();
+      }).rejects.toMatchInlineSnapshot(`undefined`);
+      expect(async () => {
+        await service._parseResponse(null);
+      }).rejects.toMatchInlineSnapshot(`undefined`);
+      expect(async () => {
+        await service._parseResponse({});
+      }).rejects.toMatchInlineSnapshot(`undefined`);
+      expect(async () => {
+        await service._parseResponse(123);
+      }).rejects.toMatchInlineSnapshot(`undefined`);
+      expect(async () => {
+        await service._parseResponse('raw string');
+      }).rejects.toMatchInlineSnapshot(`[Error: 'raw string' is not a JSON object]`);
+      expect(async () => {
+        await service._parseResponse('{{}');
+      }).rejects.toMatchInlineSnapshot(`[SyntaxError: Unexpected token { in JSON at position 1]`);
     });
 
     it('expects unusable bodies', async () => {
-      const parseBody = (parsedBody) => {
+      const parseBody = (parsedBody: Response['body']) => {
         expect(parsedBody).toEqual(body);
 
         return null;
       };
 
-      await tryParseResponse(JSON.stringify(body), parseBody);
-      await tryParseResponse(body, parseBody);
+      expect(async () => {
+        await service._parseResponse(JSON.stringify(body), parseBody);
+      }).rejects.toMatchInlineSnapshot(`undefined`);
+      expect(async () => {
+        await service._parseResponse(body, parseBody);
+      }).rejects.toMatchInlineSnapshot(`undefined`);
     });
 
     it('uses parsed object to create response', async () => {
       const serviceResponse = new CloudServiceResponse('a123', true, { id: 'xyz' });
-      const parseBody = (parsedBody) => {
+      const parseBody = (parsedBody: Response['body']) => {
         expect(parsedBody).toEqual(body);
 
         return serviceResponse;
