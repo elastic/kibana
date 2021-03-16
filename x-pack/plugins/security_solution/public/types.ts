@@ -22,6 +22,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
+import { CasesUiStart } from '../../cases/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
@@ -69,6 +70,8 @@ export type StartServices = CoreStart &
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
 }
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginStart {}
 
 export interface AppObservableLibs extends AppFrontendLibs {
   kibana: CoreStart;

@@ -17,3 +17,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { CasesUiPlugin };
 export * from './plugin';
+export * from './types';
