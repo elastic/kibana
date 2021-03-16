@@ -58,7 +58,7 @@ you can begin viewing sample traces to continue your investigation.
 
 As you sift through high-latency transactions, you'll likely notice other interesting attributes.
 Return to the correlations fly-out and select *Customize fields* to search on these new attributes.
-You may need to do this a few time–each time filtering out more and more noise and bringing you
+You may need to do this a few times–each time filtering out more and more noise and bringing you
 closer to a diagnosis.
 
 [discrete]
@@ -89,7 +89,7 @@ you can begin viewing sample traces to continue your investigation.
 
 As you sift through erroneous transactions, you'll likely notice other interesting attributes.
 Return to the correlations fly-out and select *Customize fields* to search on these new attributes.
-You may need to do this a few time–each time filtering out more and more noise and bringing you
+You may need to do this a few times–each time filtering out more and more noise and bringing you
 closer to a diagnosis.
 
 [discrete]
