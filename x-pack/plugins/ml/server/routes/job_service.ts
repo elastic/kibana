@@ -552,7 +552,6 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           splitFieldName,
           splitFieldValue,
           runtimeMappings,
-
           indicesOptions
         );
 
@@ -610,7 +609,6 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
           aggFieldNamePairs,
           splitFieldName,
           runtimeMappings,
-
           indicesOptions
         );
 

@@ -14,6 +14,7 @@ import { ML_DATA_PREVIEW_COUNT } from '../../../common/util/job_utils';
 import { fieldsServiceProvider } from '../fields_service';
 import type { MlClient } from '../../lib/ml_client';
 import { parseInterval } from '../../../common/util/parse_interval';
+import { isPopulatedObject } from '../../../common/util/object_utils';
 
 export interface MlDatafeedsResponse {
   datafeeds: Datafeed[];
@@ -260,19 +261,19 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
 
     // if aggs or aggregations is set, add it to the search
     const aggregations = datafeed.aggs ?? datafeed.aggregations;
-    if (aggregations && Object.keys(aggregations).length) {
+    if (isPopulatedObject(aggregations)) {
       body.size = 0;
       body.aggregations = aggregations;
 
       // add script_fields if present
       const scriptFields = datafeed.script_fields;
-      if (scriptFields && Object.keys(scriptFields).length) {
+      if (isPopulatedObject(scriptFields)) {
         body.script_fields = scriptFields;
       }
 
       // add runtime_mappings if present
       const runtimeMappings = datafeed.runtime_mappings;
-      if (runtimeMappings && Object.keys(runtimeMappings).length) {
+      if (isPopulatedObject(runtimeMappings)) {
         body.runtime_mappings = runtimeMappings;
       }
     } else {
@@ -281,13 +282,13 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
 
       // add script_fields if present
       const scriptFields = datafeed.script_fields;
-      if (scriptFields && Object.keys(scriptFields).length) {
+      if (isPopulatedObject(scriptFields)) {
         body.script_fields = scriptFields;
       }
 
       // add runtime_mappings if present
       const runtimeMappings = datafeed.runtime_mappings;
-      if (runtimeMappings && Object.keys(runtimeMappings).length) {
+      if (isPopulatedObject(runtimeMappings)) {
         body.runtime_mappings = runtimeMappings;
       }
 
