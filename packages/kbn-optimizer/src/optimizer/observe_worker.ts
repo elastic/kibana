@@ -63,6 +63,7 @@ function usingWorkerProc<T>(
     (): ProcResource => {
       const proc = execa.node(require.resolve('../worker/run_worker'), [], {
         nodeOptions: [
+          ...process.execArgv,
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),
