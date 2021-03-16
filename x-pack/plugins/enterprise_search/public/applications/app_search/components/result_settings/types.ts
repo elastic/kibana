@@ -6,10 +6,10 @@
  */
 
 export enum OpenModal {
-  None = 'None',
-  ConfirmModifyModal = 'Confirm Modify',
-  ConfirmResetModal = 'Confirm Reset',
-  ConfirmSaveModal = 'Confirm Save',
+  None,
+  ConfirmModifyModal,
+  ConfirmResetModal,
+  ConfirmSaveModal,
 }
 export interface ServerFieldResultSetting {
   raw?:
