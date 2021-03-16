@@ -61,9 +61,9 @@ image::images/search-session-awhile.png[Search Session indicator displaying the 
 image::images/search-session-complete.png[Popup with link to go directly to Search Sessions in Stack Management]
 +
 . In the *Search Sessions* view in *Stack Management*, use the edit menu to:
-.. *Inspect* the queries and filters that makeup the session.
-.. *Extend* the expiration of a completed session.
-.. *Delete* a session.
+** *Inspect* the queries and filters that makeup the session.
+** *Extend* the expiration of a completed session.
+** *Delete* a session.
 +
 [role="screenshot"]
 image::images/search-sessions-menu.png[Search Sessions management view with actions for inspecting, extending, and deleting a session. ]
