@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 
-import { AssetType, ElasticsearchAssetType, KibanaAssetType, ServiceName } from '../../types';
+import type { AssetType, ServiceName } from '../../types';
+import { ElasticsearchAssetType, KibanaAssetType } from '../../types';
 
 // only allow Kibana assets for the kibana key, ES asssets for elasticsearch, etc
 type ServiceNameToAssetTypes = Record<Extract<ServiceName, 'kibana'>, KibanaAssetType[]> &
