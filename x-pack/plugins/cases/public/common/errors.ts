@@ -22,7 +22,7 @@ export interface KibanaError extends AppError {
   };
 }
 
-export interface SecurityAppError extends AppError {
+export interface CasesAppError extends AppError {
   body: {
     message: string;
     status_code: number;
@@ -32,8 +32,8 @@ export interface SecurityAppError extends AppError {
 export const isKibanaError = (error: unknown): error is KibanaError =>
   has('message', error) && has('body.message', error) && has('body.statusCode', error);
 
-export const isSecurityAppError = (error: unknown): error is SecurityAppError =>
+export const isCasesAppError = (error: unknown): error is CasesAppError =>
   has('message', error) && has('body.message', error) && has('body.status_code', error);
 
 export const isAppError = (error: unknown): error is AppError =>
-  isKibanaError(error) || isSecurityAppError(error);
+  isKibanaError(error) || isCasesAppError(error);
