@@ -150,7 +150,7 @@ export const GroupSourcePrioritization: React.FC = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
-            <EuiTableRowCell align="right" style={{ padding: 0 }}>
+            <EuiTableRowCell align="right">
               <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceAround">
                 <EuiFlexItem grow={false}>
                   <EuiRange
