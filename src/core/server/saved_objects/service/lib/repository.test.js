@@ -2787,7 +2787,7 @@ describe('SavedObjectsRepository', () => {
                 'originId',
                 'title',
               ],
-            })
+            }),
           }),
           expect.anything()
         );

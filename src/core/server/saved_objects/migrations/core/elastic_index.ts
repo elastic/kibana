@@ -47,7 +47,7 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
 
   const [indexName, indexInfo] = Object.entries(body)[0];
 
-    // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
+  // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
   return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
 }
 

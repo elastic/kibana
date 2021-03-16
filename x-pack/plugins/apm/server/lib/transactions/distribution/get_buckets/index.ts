@@ -125,7 +125,7 @@ export async function getBuckets({
                           ] as const,
                           size: 10,
                           sort: {
-                            _score: 'desc' as const
+                            _score: 'desc' as const,
                           },
                         },
                       },

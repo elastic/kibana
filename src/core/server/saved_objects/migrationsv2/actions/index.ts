@@ -139,9 +139,9 @@ export const removeWriteBlock = (
         body: {
           index: {
             blocks: {
-              write: false
-            }
-          }
+              write: false,
+            },
+          },
         },
       },
       { maxRetries: 0 /** handle retry ourselves for now */ }

@@ -57,9 +57,9 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
             terms: {
               bytes: 2,
             },
-          }
+          },
         },
-      }
+      },
     },
   });
   // @ts-expect-error we only care about the response body
