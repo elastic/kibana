@@ -180,7 +180,7 @@ export const Overview: React.FC = () => {
         <EuiTableHeader>
           <EuiTableHeaderCell>{EVENT_HEADER}</EuiTableHeaderCell>
           {!custom && <EuiTableHeaderCell>{STATUS_HEADER}</EuiTableHeaderCell>}
-          <EuiTableHeaderCell>{TIME_HEADER}</EuiTableHeaderCell>
+          <EuiTableHeaderCell align="right">{TIME_HEADER}</EuiTableHeaderCell>
         </EuiTableHeader>
         <EuiTableBody>
           {activities.map(({ details: activityDetails, event, time, status }, i) => (
@@ -203,7 +203,7 @@ export const Overview: React.FC = () => {
                   </EuiText>
                 </EuiTableRowCell>
               )}
-              <EuiTableRowCell>
+              <EuiTableRowCell align="right">
                 <EuiText size="xs">{time}</EuiText>
               </EuiTableRowCell>
             </EuiTableRow>
