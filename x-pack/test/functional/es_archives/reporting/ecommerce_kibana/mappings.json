@@ -57,7 +57,6 @@
           "map": "9134b47593116d7953f6adba096fc463",
           "maps-telemetry": "5ef305b18111b77789afefbd36b66171",
           "metrics-explorer-view": "3d1b76c39bfb2cc8296b024d73854724",
-          "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
           "ml-job": "3bb64c31915acf93fc724af137a0891b",
           "ml-telemetry": "257fd1d4b4fdbb9cb4b8a3b27da201e9",
           "monitoring-telemetry": "2669d5ec15e82391cf58df4294ee9c68",
@@ -1744,56 +1743,6 @@
         "metrics-explorer-view": {
           "dynamic": "false",
           "type": "object"
-        },
-        "migrationVersion": {
-          "dynamic": "true",
-          "properties": {
-            "config": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "dashboard": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "index-pattern": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "search": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            },
-            "visualization": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
         },
         "ml-job": {
           "properties": {

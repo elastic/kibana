@@ -9,9 +9,6 @@
         "dateFormat:tz": "UTC",
         "defaultIndex": "5193f870-d861-11e9-a311-0fa548c5f953"
       },
-      "migrationVersion": {
-        "config": "7.13.0"
-      },
       "references": [],
       "type": "config",
       "updated_at": "2019-09-16T09:06:51.201Z"
@@ -29,9 +26,6 @@
         "buildNum": 9007199254740991,
         "dateFormat:tz": "UTC",
         "defaultIndex": "5193f870-d861-11e9-a311-0fa548c5f953"
-      },
-      "migrationVersion": {
-        "config": "7.13.0"
       },
       "references": [],
       "type": "config",
@@ -51,9 +45,6 @@
         "timeFieldName": "order_date",
         "title": "ecommerce"
       },
-      "migrationVersion": {
-        "index-pattern": "7.11.0"
-      },
       "references": [],
       "type": "index-pattern",
       "updated_at": "2019-12-11T23:24:13.381Z"
@@ -67,9 +58,6 @@
     "id": "search:6091ead0-1c6d-11ea-a100-8589bb9d7c6b",
     "index": ".kibana_1",
     "source": {
-      "migrationVersion": {
-        "search": "7.9.3"
-      },
       "references": [
         {
           "id": "5193f870-d861-11e9-a311-0fa548c5f953",
@@ -132,9 +120,6 @@
         "title": "Ecom Dashboard Hidden Panel Titles",
         "version": 1
       },
-      "migrationVersion": {
-        "dashboard": "7.11.0"
-      },
       "references": [
         {
           "id": "0a464230-79f0-11ea-ae7f-13c5d6e410a0",
@@ -179,9 +164,6 @@
     "id": "visualization:0a464230-79f0-11ea-ae7f-13c5d6e410a0",
     "index": ".kibana_1",
     "source": {
-      "migrationVersion": {
-        "visualization": "7.12.0"
-      },
       "references": [
         {
           "id": "5193f870-d861-11e9-a311-0fa548c5f953",
@@ -211,9 +193,6 @@
     "id": "visualization:200609c0-79f0-11ea-ae7f-13c5d6e410a0",
     "index": ".kibana_1",
     "source": {
-      "migrationVersion": {
-        "visualization": "7.12.0"
-      },
       "references": [
         {
           "id": "5193f870-d861-11e9-a311-0fa548c5f953",
@@ -243,9 +222,6 @@
     "id": "visualization:ef8757d0-7ac2-11ea-b69c-cf0d7935cd67",
     "index": ".kibana_1",
     "source": {
-      "migrationVersion": {
-        "visualization": "7.12.0"
-      },
       "references": [
         {
           "id": "5193f870-d861-11e9-a311-0fa548c5f953",
@@ -275,9 +251,6 @@
     "id": "visualization:132ab9c0-7ac3-11ea-b69c-cf0d7935cd67",
     "index": ".kibana_1",
     "source": {
-      "migrationVersion": {
-        "visualization": "7.12.0"
-      },
       "references": [
         {
           "id": "5193f870-d861-11e9-a311-0fa548c5f953",
@@ -307,9 +280,6 @@
     "id": "visualization:4a36acd0-7ac3-11ea-b69c-cf0d7935cd67",
     "index": ".kibana_1",
     "source": {
-      "migrationVersion": {
-        "visualization": "7.12.0"
-      },
       "references": [],
       "type": "visualization",
       "updated_at": "2020-04-10T00:36:17.053Z",
@@ -369,9 +339,6 @@
         "title": "Ecom Dashboard",
         "version": 1
       },
-      "migrationVersion": {
-        "dashboard": "7.11.0"
-      },
       "references": [
         {
           "id": "0a464230-79f0-11ea-ae7f-13c5d6e410a0",
@@ -421,9 +388,6 @@
     "id": "visualization:1bba55f0-507e-11eb-9c0d-97106882b997",
     "index": ".kibana_1",
     "source": {
-      "migrationVersion": {
-        "visualization": "7.12.0"
-      },
       "references": [
         {
           "id": "6091ead0-1c6d-11ea-a100-8589bb9d7c6b",
