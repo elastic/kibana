@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import styled from 'styled-components';
 import { EuiLoadingSpinner, EuiPageContentBody, EuiPanel } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../plugin';
@@ -13,11 +14,10 @@ import { ExploratoryViewHeader } from './header/header';
 import { SeriesEditor } from './series_editor/series_editor';
 import { useUrlStorage } from './hooks/use_url_strorage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
-import styled from 'styled-components';
 import { EmptyView } from './components/empty_view';
 import { useIndexPatternContext } from '../../../hooks/use_default_index_pattern';
 
-export const ExploratoryView = () => {
+export function ExploratoryView() {
   const {
     services: { lens },
   } = useKibana<ObservabilityClientPluginsStart>();
@@ -45,6 +45,8 @@ export const ExploratoryView = () => {
                 style={{ height: 550 }}
                 timeRange={series?.time}
                 attributes={lensAttributes}
+                onBrushEnd={(data) => {}}
+                onLoad={(val) => {}}
               />
             ) : (
               <EmptyView />
@@ -59,7 +61,7 @@ export const ExploratoryView = () => {
       </EuiPageContentBody>
     </EuiPanel>
   );
-};
+}
 
 const SpinnerWrap = styled.div`
   height: 100vh;
