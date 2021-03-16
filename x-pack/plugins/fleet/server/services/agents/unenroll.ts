@@ -105,7 +105,7 @@ export async function forceUnenrollAgent(
   const agent = await getAgentById(esClient, agentId);
 
   await Promise.all([
-    agent && agent.access_api_key_id
+    agent.access_api_key_id
       ? APIKeyService.invalidateAPIKeys(soClient, [agent.access_api_key_id])
       : undefined,
     agent && agent.default_api_key_id
