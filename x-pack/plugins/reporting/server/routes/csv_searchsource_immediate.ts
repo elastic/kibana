@@ -8,26 +8,17 @@
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
 import { ReportingCore } from '../';
-import { createJobFnFactory } from '../export_types/csv_from_savedobject/create_job';
-import { runTaskFnFactory } from '../export_types/csv_from_savedobject/execute_job';
-import {
-  JobParamsPanelCsv,
-  JobParamsPanelCsvPost,
-} from '../export_types/csv_from_savedobject/types';
+import { runTaskFnFactory } from '../export_types/csv_searchsource_immediate/execute_job';
+import { JobParamsDownloadCSV } from '../export_types/csv_searchsource_immediate/types';
 import { LevelLogger as Logger } from '../lib';
 import { TaskRunResult } from '../lib/tasks';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
-import { getJobParamsFromRequest } from './lib/get_job_params_from_request';
 import { HandlerErrorFunction } from './types';
 
 const API_BASE_URL_V1 = '/api/reporting/v1';
 const API_BASE_GENERATE_V1 = `${API_BASE_URL_V1}/generate`;
 
-export type CsvFromSavedObjectRequest = KibanaRequest<
-  JobParamsPanelCsv,
-  unknown,
-  JobParamsPanelCsvPost
->;
+export type CsvFromSavedObjectRequest = KibanaRequest<unknown, unknown, JobParamsDownloadCSV>;
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -47,43 +38,28 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   const userHandler = authorizedUserPreRoutingFactory(reporting);
   const { router } = setupDeps;
 
-  /*
-   * CSV export with the `immediate` option does not queue a job with Reporting's ESQueue to run the job async. Instead, this does:
-   *  - re-use the createJob function to build up es query config
-   *  - re-use the runTask function to run the scan and scroll queries and capture the entire CSV in a result object.
-   */
+  // This API calls run the SearchSourceImmediate export type's runTaskFn directly
   router.post(
     {
-      path: `${API_BASE_GENERATE_V1}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
+      path: `${API_BASE_GENERATE_V1}/immediate/csv_searchsource`,
       validate: {
-        params: schema.object({
-          savedObjectType: schema.string({ minLength: 5 }),
-          savedObjectId: schema.string({ minLength: 5 }),
-        }),
         body: schema.object({
-          state: schema.object({}, { unknowns: 'allow' }),
-          timerange: schema.object({
-            timezone: schema.string({ defaultValue: 'UTC' }),
-            min: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
-            max: schema.nullable(schema.oneOf([schema.number(), schema.string({ minLength: 5 })])),
-          }),
+          searchSource: schema.object({}, { unknowns: 'allow' }),
+          browserTimezone: schema.string({ defaultValue: 'UTC' }),
+          title: schema.string(),
         }),
       },
     },
     userHandler(async (user, context, req: CsvFromSavedObjectRequest, res) => {
-      const logger = parentLogger.clone(['savedobject-csv']);
-      const jobParams = getJobParamsFromRequest(req);
-      const createJob = createJobFnFactory(reporting, logger);
+      const logger = parentLogger.clone(['csv_searchsource_immediate']);
       const runTaskFn = runTaskFnFactory(reporting, logger);
 
       try {
-        // FIXME: no create job for immediate download
-        const payload = await createJob(jobParams, context, req);
         const {
           content_type: jobOutputContentType,
           content: jobOutputContent,
           size: jobOutputSize,
-        }: TaskRunResult = await runTaskFn(null, payload, context, req);
+        }: TaskRunResult = await runTaskFn(null, req.body, context, req);
 
         logger.info(`Job output size: ${jobOutputSize} bytes`);
 
