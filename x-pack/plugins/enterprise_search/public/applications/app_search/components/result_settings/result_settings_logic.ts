@@ -6,6 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { isEqual } from 'lodash';
 
 import { Schema, SchemaConflicts } from '../../../shared/types';
 
@@ -17,6 +18,8 @@ import {
 } from './types';
 
 import {
+  areFieldsAtDefaultSettings,
+  areFieldsEmpty,
   clearAllFields,
   clearAllServerFields,
   convertServerResultFieldsToResultFields,
@@ -62,6 +65,11 @@ interface ResultSettingsValues {
   lastSavedResultFields: FieldResultSettingObject;
   schema: Schema;
   schemaConflicts: SchemaConflicts;
+  // Selectors
+  resultFieldsAtDefaultSettings: boolean;
+  resultFieldsEmpty: boolean;
+  stagedUpdates: true;
+  reducedServerResultFields: ServerFieldResultSettingObject;
 }
 
 export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, ResultSettingsActions>>({
@@ -185,6 +193,34 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       {
         initializeResultFields: (_, { schemaConflicts }) => schemaConflicts || {},
       },
+    ],
+  }),
+  selectors: ({ selectors }) => ({
+    resultFieldsAtDefaultSettings: [
+      () => [selectors.resultFields],
+      (resultFields: FieldResultSettingObject) => areFieldsAtDefaultSettings(resultFields),
+    ],
+    resultFieldsEmpty: [
+      () => [selectors.resultFields],
+      (resultFields: FieldResultSettingObject) => areFieldsEmpty(resultFields),
+    ],
+    stagedUpdates: [
+      () => [selectors.lastSavedResultFields, selectors.resultFields],
+      (lastSavedResultFields: FieldResultSettingObject, resultFields: FieldResultSettingObject) =>
+        !isEqual(lastSavedResultFields, resultFields),
+    ],
+    reducedServerResultFields: [
+      () => [selectors.serverResultFields],
+      (serverResultFields: ServerFieldResultSettingObject) =>
+        Object.entries(serverResultFields).reduce(
+          (acc: ServerFieldResultSettingObject, [fieldName, resultSetting]) => {
+            if (resultSetting.raw || resultSetting.snippet) {
+              acc[fieldName] = resultSetting;
+            }
+            return acc;
+          },
+          {}
+        ),
     ],
   }),
 });

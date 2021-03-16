@@ -7,6 +7,8 @@
 
 import { LogicMounter } from '../../../__mocks__';
 
+import { omit } from 'lodash';
+
 import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
 
 import { OpenModal, ServerFieldResultSettingObject } from './types';
@@ -29,13 +31,26 @@ describe('ResultSettingsLogic', () => {
     schemaConflicts: {},
   };
 
+  const SELECTORS = {
+    reducedServerResultFields: {},
+    resultFieldsAtDefaultSettings: true,
+    resultFieldsEmpty: true,
+    stagedUpdates: false,
+  };
+
+  // Values without selectors
+  const resultSettingLogicValues = () => omit(ResultSettingsLogic.values, Object.keys(SELECTORS));
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('has expected default values', () => {
     mount();
-    expect(ResultSettingsLogic.values).toEqual(DEFAULT_VALUES);
+    expect(ResultSettingsLogic.values).toEqual({
+      ...DEFAULT_VALUES,
+      ...SELECTORS,
+    });
   });
 
   describe('actions', () => {
@@ -71,7 +86,7 @@ describe('ResultSettingsLogic', () => {
           schemaConflicts
         );
 
-        expect(ResultSettingsLogic.values).toEqual({
+        expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           dataLoading: false,
           saving: false,
@@ -173,7 +188,7 @@ describe('ResultSettingsLogic', () => {
 
       ResultSettingsLogic.actions.openConfirmSaveModal();
 
-      expect(ResultSettingsLogic.values).toEqual({
+      expect(resultSettingLogicValues()).toEqual({
         ...DEFAULT_VALUES,
         openModal: OpenModal.ConfirmSaveModal,
       });
@@ -186,7 +201,7 @@ describe('ResultSettingsLogic', () => {
 
       ResultSettingsLogic.actions.openConfirmResetModal();
 
-      expect(ResultSettingsLogic.values).toEqual({
+      expect(resultSettingLogicValues()).toEqual({
         ...DEFAULT_VALUES,
         openModal: OpenModal.ConfirmResetModal,
       });
@@ -200,7 +215,7 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.closeModals();
 
-        expect(ResultSettingsLogic.values).toEqual({
+        expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           openModal: OpenModal.None,
         });
@@ -230,7 +245,7 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.clearAllFields();
 
-        expect(ResultSettingsLogic.values).toEqual({
+        expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           nonTextResultFields: {
             foo: {},
@@ -275,7 +290,7 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.resetAllFields();
 
-        expect(ResultSettingsLogic.values).toEqual({
+        expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           nonTextResultFields: {
             bar: { raw: true, snippet: false, snippetFallback: false },
@@ -303,7 +318,7 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.resetAllFields();
 
-        expect(ResultSettingsLogic.values).toEqual({
+        expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           openModal: OpenModal.None,
         });
@@ -339,7 +354,7 @@ describe('ResultSettingsLogic', () => {
           snippetFallback: false,
         });
 
-        expect(ResultSettingsLogic.values).toEqual({
+        expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           // the settings for foo are updated below for any *ResultFields state in which they appear
           nonTextResultFields: {
@@ -372,7 +387,7 @@ describe('ResultSettingsLogic', () => {
         });
 
         // 'baz' does not exist in state, so nothing is updated
-        expect(ResultSettingsLogic.values).toEqual({
+        expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           ...initialValues,
         });
@@ -387,10 +402,110 @@ describe('ResultSettingsLogic', () => {
 
         ResultSettingsLogic.actions.saving();
 
-        expect(ResultSettingsLogic.values).toEqual({
+        expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           saving: true,
           openModal: OpenModal.None,
+        });
+      });
+    });
+  });
+
+  describe('selectors', () => {
+    describe('resultFieldsAtDefaultSettings', () => {
+      it('should return true if all fields are at their default settings', () => {
+        mount({
+          resultFields: {
+            foo: { raw: true, snippet: false, snippetFallback: false },
+            bar: { raw: true, snippet: false, snippetFallback: false },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.resultFieldsAtDefaultSettings).toEqual(true);
+      });
+
+      it('should return false otherwise', () => {
+        mount({
+          resultFields: {
+            foo: { raw: true, snippet: false, snippetFallback: false },
+            bar: { raw: true, snippet: true, snippetFallback: false },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.resultFieldsAtDefaultSettings).toEqual(false);
+      });
+    });
+
+    describe('resultFieldsEmpty', () => {
+      it('should return true if all fields are empty', () => {
+        mount({
+          resultFields: {
+            foo: {},
+            bar: {},
+          },
+        });
+
+        expect(ResultSettingsLogic.values.resultFieldsEmpty).toEqual(true);
+      });
+
+      it('should return false otherwise', () => {
+        mount({
+          resultFields: {
+            foo: {},
+            bar: { raw: true, snippet: true, snippetFallback: false },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.resultFieldsEmpty).toEqual(false);
+      });
+    });
+
+    describe('stagedUpdates', () => {
+      it('should return true if changes have been made since the last save', () => {
+        mount({
+          lastSavedResultFields: {
+            foo: {},
+            bar: { raw: true, snippet: true, snippetFallback: false },
+          },
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetFallback: true },
+            bar: { raw: true, snippet: true, snippetFallback: false },
+          },
+        });
+
+        // resultFields is different than lastSavedResultsFields, which happens if changes
+        // have been made since the last save, which is represented by lastSavedResultFields
+        expect(ResultSettingsLogic.values.stagedUpdates).toEqual(true);
+      });
+
+      it('should return false otherwise', () => {
+        mount({
+          lastSavedResultFields: {
+            foo: { raw: false, snippet: true, snippetFallback: true },
+            bar: { raw: true, snippet: true, snippetFallback: false },
+          },
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetFallback: true },
+            bar: { raw: true, snippet: true, snippetFallback: false },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.stagedUpdates).toEqual(false);
+      });
+    });
+
+    describe('reducedServerResultFields', () => {
+      it('filters out fields that do not have any settings', () => {
+        mount({
+          serverResultFields: {
+            foo: { raw: { size: 5 } },
+            bar: {},
+          },
+        });
+
+        expect(ResultSettingsLogic.values.reducedServerResultFields).toEqual({
+          // bar was filtered out because it has neither raw nor snippet data set
+          foo: { raw: { size: 5 } },
         });
       });
     });
