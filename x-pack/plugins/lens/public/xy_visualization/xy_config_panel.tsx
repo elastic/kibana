@@ -8,7 +8,7 @@
 import './xy_config_panel.scss';
 import React, { useMemo, useState, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
+import { CurveType, Position } from '@elastic/charts';
 import { debounce } from 'lodash';
 import {
   EuiButtonGroup,
@@ -54,6 +54,7 @@ import { getAxesConfiguration } from './axes_configuration';
 import { PalettePicker } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getSortedAccessors } from './to_expression';
+import { CurveSettingsPopover } from '../shared_components/curve_settings_popover/curve_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -401,6 +402,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               setState({
                 ...state,
                 legend: { ...state.legend, position: id as Position },
+              });
+            }}
+          />
+          <CurveSettingsPopover
+            value={state.curveType as CurveType}
+            onChange={(id) => {
+              setState({
+                ...state,
+                curveType: id,
               });
             }}
           />

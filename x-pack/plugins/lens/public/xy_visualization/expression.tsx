@@ -24,6 +24,7 @@ import {
   HorizontalAlignment,
   ElementClickListener,
   BrushEndListener,
+  CurveType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -179,6 +180,7 @@ export const xyChart: ExpressionFunctionDefinition<
       help: 'Layers of visual series',
       multi: true,
     },
+    curveType: CurveType.CURVE_CATMULL_ROM,
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
