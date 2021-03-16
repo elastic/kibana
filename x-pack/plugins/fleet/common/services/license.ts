@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 
 import type { ILicense } from '../../../licensing/common/types';
 
