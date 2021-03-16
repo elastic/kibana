@@ -55,6 +55,7 @@
         ],
         reviewers: [
           'markov00',
+          'nickofthyme',
         ],
         masterIssueApproval: false,
       },
