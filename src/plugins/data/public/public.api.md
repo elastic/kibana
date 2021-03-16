@@ -2322,6 +2322,8 @@ export class SearchInterceptor {
     // (undocumented)
     protected readonly deps: SearchInterceptorDeps;
     // (undocumented)
+    protected getSerializableOptions(options?: ISearchOptions): Pick<ISearchOptions, "strategy" | "sessionId" | "isStored" | "isRestore" | "legacyHitsTotal">;
+    // (undocumented)
     protected getTimeoutMode(): TimeoutErrorMode;
     // Warning: (ae-forgotten-export) The symbol "KibanaServerError" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "AbortError" needs to be exported by the entry point index.d.ts
