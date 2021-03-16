@@ -63705,7 +63705,6 @@ async function applyCorrectPermissions(project, kibanaRoot, buildRoot) {
 
   for (const pluginPath of allPluginPaths) {
     const resolvedPluginPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildProjectPath, pluginPath);
-    console.log(resolvedPluginPath);
 
     if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["isFile"])(resolvedPluginPath)) {
       await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["chmod"])(resolvedPluginPath, 0o644);
