@@ -15,6 +15,7 @@ import { Query, uniqFilters } from '../../query';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
 import { KibanaTimerangeOutput } from './timerange';
+import { SavedObjectReference } from '../../../../../core/types';
 
 interface Arguments {
   q?: KibanaQueryOutput | null;
@@ -77,6 +78,28 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
         defaultMessage: 'Specify saved search ID to be used for queries and filters',
       }),
     },
+  },
+
+  extract(state) {
+    const references: SavedObjectReference[] = [];
+    if (state.savedSearchId.length && typeof state.savedeSearchId[0] === 'string') {
+      const refName = 'kibana_context.savedSearchId';
+      references.push({
+        name: refName,
+        type: 'search',
+        id: state.savedSearchId[0] as string,
+      });
+      state.savedSearchId[0] = refName;
+    }
+    return { state, references };
+  },
+
+  inject(state, references) {
+    const reference = references.find((r) => r.name === 'kibana_context.savedSearchId');
+    if (reference) {
+      state.savedSearchId[0] = reference.id;
+    }
+    return state;
   },
 
   async fn(input, args, { getSavedObject }) {
