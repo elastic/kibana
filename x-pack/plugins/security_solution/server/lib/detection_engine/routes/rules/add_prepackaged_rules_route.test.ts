@@ -58,7 +58,7 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-jest.mock('../../../timeline/routes/utils/install_prepacked_timelines', () => {
+jest.mock('../../../timeline/routes/install_prepackaged_timelines', () => {
   return {
     installPrepackagedTimelines: jest.fn().mockResolvedValue({
       success: true,
