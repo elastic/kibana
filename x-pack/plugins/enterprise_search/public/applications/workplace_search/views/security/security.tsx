@@ -74,7 +74,7 @@ export const Security: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const panelClass = classNames('euiPanel--noShadow', {
+  const panelClass = classNames({
     'euiPanel--disabled': !hasPlatinumLicense,
   });
 

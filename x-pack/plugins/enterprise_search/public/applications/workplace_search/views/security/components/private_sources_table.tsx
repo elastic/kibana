@@ -94,7 +94,7 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
   const panelDisabled = !isEnabled || !hasPlatinumLicense;
   const sectionDisabled = !sectionEnabled;
 
-  const panelClass = classNames('euiPanel--outline euiPanel--noShadow', {
+  const panelClass = classNames('euiPanel--outline', {
     'euiPanel--disabled': panelDisabled,
   });
 
