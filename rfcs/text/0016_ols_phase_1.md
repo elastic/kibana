@@ -109,7 +109,7 @@ There are two primary changes to this wrapper:
 
 #### Attaching Access Controls
 
-This wrapper will be responsible for attaching an access control specification to all private objects before they are created.
+This wrapper will be responsible for attaching an access control specification to all private objects before they are created in Elasticsearch.
 It will also allow users to provide their own access control specification in order to support the import/create use cases.
 
 Similar to the way we treat `namespaces`, it will not be possible to change an access control specification via the `update`/`bulk_update` functions in this first phase. We may consider adding a dedicated function to update the access control specification, similar to what we've done for sharing to spaces.
