@@ -7,9 +7,18 @@
 
 import { getBannerInfoMock } from './plugin.test.mocks';
 import { coreMock } from '../../../../src/core/public/mocks';
+import { BannerConfiguration } from '../common/types';
 import { BannersPlugin } from './plugin';
 
 const nextTick = async () => await new Promise<void>((resolve) => resolve());
+
+const createBannerConfig = (parts: Partial<BannerConfiguration> = {}): BannerConfiguration => ({
+  placement: 'disabled',
+  textContent: 'foo',
+  textColor: '#FFFFFF',
+  backgroundColor: '#000000',
+  ...parts,
+});
 
 describe('BannersPlugin', () => {
   let plugin: BannersPlugin;
@@ -24,6 +33,7 @@ describe('BannersPlugin', () => {
 
     getBannerInfoMock.mockResolvedValue({
       allowed: false,
+      banner: createBannerConfig(),
     });
   });
 
@@ -40,32 +50,62 @@ describe('BannersPlugin', () => {
     getBannerInfoMock.mockReset();
   });
 
-  it('calls `getBannerInfo` if `config.placement !== disabled`', async () => {
-    await startPlugin();
+  describe('when banner is allowed', () => {
+    it('registers the header banner if `banner.placement` is `header`', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: true,
+        banner: createBannerConfig({
+          placement: 'header',
+        }),
+      });
 
-    expect(getBannerInfoMock).toHaveBeenCalledTimes(1);
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(1);
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledWith({
+        content: expect.any(Function),
+      });
+    });
+
+    it('does not register the header banner if `banner.placement` is `disabled`', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: true,
+        banner: createBannerConfig({
+          placement: 'disabled',
+        }),
+      });
+
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
+    });
   });
 
-  it('registers the header banner if `getBannerInfo` return `allowed=true`', async () => {
-    getBannerInfoMock.mockResolvedValue({
-      allowed: true,
+  describe('when banner is not allowed', () => {
+    it('does not register the header banner if `banner.placement` is `header`', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: false,
+        banner: createBannerConfig({
+          placement: 'header',
+        }),
+      });
+
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
     });
 
-    await startPlugin();
+    it('does not register the header banner if `banner.placement` is `disabled`', async () => {
+      getBannerInfoMock.mockResolvedValue({
+        allowed: false,
+        banner: createBannerConfig({
+          placement: 'disabled',
+        }),
+      });
 
-    expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(1);
-    expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledWith({
-      content: expect.any(Function),
+      await startPlugin();
+
+      expect(coreStart.chrome.setHeaderBanner).toHaveBeenCalledTimes(0);
     });
-  });
-
-  it('does not register the header banner if `getBannerInfo` return `allowed=false`', async () => {
-    getBannerInfoMock.mockResolvedValue({
-      allowed: false,
-    });
-
-    await startPlugin();
-
-    expect(coreStart.chrome.setHeaderBanner).not.toHaveBeenCalled();
   });
 });
