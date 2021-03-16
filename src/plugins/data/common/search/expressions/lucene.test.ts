@@ -30,14 +30,14 @@ describe('interpreter/functions#lucene', () => {
 
   it('returns an object with the correct structure', () => {
     const actual = fn(input, { q: '{ "test": 1 }' }, context);
-    expect(actual).toMatchInlineSnapshot(
-      `
+    expect(actual).toMatchInlineSnapshot(`
       Object {
         "language": "lucene",
-        "query": { "test": 1 },
+        "query": Object {
+          "test": 1,
+        },
         "type": "kibana_query",
       }
-    `
-    );
+    `);
   });
 });
