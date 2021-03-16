@@ -52,7 +52,7 @@ export const createGetLogEntriesQuery = (
         },
       },
       // @ts-expect-error @elastic/elasticsearch doesn't declare body.fields on AsyncSearchSubmitRequest
-      fields: fieldsWithContext,
+      fields,
       _source: false,
       ...createSortClause(sortDirection, timestampField, tiebreakerField),
       ...createSearchAfterClause(cursor),
