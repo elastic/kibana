@@ -8,10 +8,10 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, isEqual } from 'lodash';
 
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { i18n } from '@kbn/i18n';
 
+import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-
 import { Schema, SchemaConflicts } from '../../../shared/types';
 import { EngineLogic } from '../engine';
 
@@ -61,6 +61,7 @@ interface ResultSettingsActions {
   clearRawSizeForField(fieldName: string): string;
   clearSnippetSizeForField(fieldName: string): string;
   initializeResultSettingsData(): void;
+  saveResultSettings(resultFields: ServerFieldResultSettingObject): ServerFieldResultSettingObject;
 }
 
 interface ResultSettingsValues {
@@ -110,6 +111,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     clearRawSizeForField: (fieldName) => fieldName,
     clearSnippetSizeForField: (fieldName) => fieldName,
     initializeResultSettingsData: () => true,
+    saveResultSettings: (resultFields) => resultFields,
   }),
   reducers: () => ({
     dataLoading: [
@@ -259,6 +261,36 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       } catch (e) {
         flashAPIErrors(e);
       }
+    },
+    saveResultSettings: async (resultFields: ServerFieldResultSettingObject) => {
+      actions.saving();
+
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+      const url = `/api/app_search/engines/${engineName}/result_settings`;
+
+      actions.saving();
+
+      let response;
+      try {
+        response = await http.put(url, {
+          body: JSON.stringify({
+            result_fields: resultFields,
+          }),
+        });
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+
+      actions.initializeResultFields(response.result_fields, values.schema);
+      setSuccessMessage(
+        i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
+          {
+            defaultMessage: 'Result settings have been saved successfully.',
+          }
+        )
+      );
     },
   }),
 });

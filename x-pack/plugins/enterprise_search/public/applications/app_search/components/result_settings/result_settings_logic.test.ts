@@ -520,6 +520,25 @@ describe('ResultSettingsLogic', () => {
     const { http } = mockHttpValues;
     const { flashAPIErrors } = mockFlashMessageHelpers;
 
+    const serverFieldResultSettings = {
+      foo: {
+        raw: {},
+      },
+      bar: {
+        raw: {},
+      },
+    };
+    const schema = {
+      foo: 'text',
+      bar: 'number',
+    };
+    const schemaConflicts = {
+      baz: {
+        text: ['test'],
+        number: ['test2'],
+      },
+    };
+
     describe('clearRawSizeForField', () => {
       it('should remove the raw size set on a field', () => {
         mount({
@@ -579,25 +598,6 @@ describe('ResultSettingsLogic', () => {
 
     describe('initializeResultFields', () => {
       it('should make an API call and set state based on the response', async () => {
-        const serverFieldResultSettings = {
-          foo: {
-            raw: {},
-          },
-          bar: {
-            raw: {},
-          },
-        };
-        const schema = {
-          foo: 'text',
-          bar: 'number',
-        };
-        const schemaConflicts = {
-          baz: {
-            text: ['test'],
-            number: ['test2'],
-          },
-        };
-
         mount();
         http.get.mockReturnValueOnce(
           Promise.resolve({
@@ -628,6 +628,50 @@ describe('ResultSettingsLogic', () => {
         http.get.mockReturnValueOnce(Promise.reject('error'));
 
         ResultSettingsLogic.actions.initializeResultSettingsData();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      });
+    });
+
+    describe('saveResultSettings', () => {
+      it('should make an API call to update result settings and update state accordingly', async () => {
+        mount({
+          schema,
+        });
+        http.put.mockReturnValueOnce(
+          Promise.resolve({
+            result_fields: serverFieldResultSettings,
+          })
+        );
+        jest.spyOn(ResultSettingsLogic.actions, 'saving');
+        jest.spyOn(ResultSettingsLogic.actions, 'initializeResultFields');
+
+        ResultSettingsLogic.actions.saveResultSettings(serverFieldResultSettings);
+
+        expect(ResultSettingsLogic.actions.saving).toHaveBeenCalled();
+
+        await nextTick();
+
+        expect(http.put).toHaveBeenCalledWith(
+          '/api/app_search/engines/test-engine/result_settings',
+          {
+            body: JSON.stringify({
+              result_fields: serverFieldResultSettings,
+            }),
+          }
+        );
+        expect(ResultSettingsLogic.actions.initializeResultFields).toHaveBeenCalledWith(
+          serverFieldResultSettings,
+          schema
+        );
+      });
+
+      it('handles errors', async () => {
+        mount();
+        http.put.mockReturnValueOnce(Promise.reject('error'));
+
+        ResultSettingsLogic.actions.saveResultSettings(serverFieldResultSettings);
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
