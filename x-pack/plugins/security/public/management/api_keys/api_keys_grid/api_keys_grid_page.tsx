@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
@@ -43,7 +42,7 @@ import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/pu
 import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
-import { SelectableCodeField } from '../../../components/code_field';
+import { SelectableTokenField } from '../../../components/token_field';
 import type { APIKeysAPIClient, CreateApiKeyResponse } from '../api_keys_api_client';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
@@ -63,7 +62,7 @@ interface State {
   isAdmin: boolean;
   canManage: boolean;
   areApiKeysEnabled: boolean;
-  apiKeys: Array<ApiKey & { base64: string }>;
+  apiKeys: ApiKey[];
   selectedItems: ApiKey[];
   error: any;
   createdApiKey?: CreateApiKeyResponse;
@@ -94,7 +93,12 @@ export class APIKeysGridPage extends Component<Props, State> {
     return (
       <div>
         <Route path="/create">
-          <Breadcrumb text="Create" href="/create">
+          <Breadcrumb
+            text={i18n.translate('xpack.security.management.apiKeys.createBreadcrumb', {
+              defaultMessage: 'Create',
+            })}
+            href="/create"
+          >
             <CreateApiKeyFlyout
               onSuccess={(apiKey) => {
                 this.props.history.push({ pathname: '/' });
@@ -183,12 +187,12 @@ export class APIKeysGridPage extends Component<Props, State> {
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle>
-              <h2>
+              <h1>
                 <FormattedMessage
                   id="xpack.security.management.apiKeys.table.apiKeysTitle"
                   defaultMessage="API Keys"
                 />
-              </h2>
+              </h1>
             </EuiTitle>
             <EuiText color="subdued" size="s" data-test-subj="apiKeysDescriptionText">
               <p>
@@ -229,10 +233,10 @@ export class APIKeysGridPage extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.security.management.apiKeys.successDescription"
-                  defaultMessage="Copy this key now. You will not be able to see it again."
+                  defaultMessage="Copy this key now. You will not be able to view it again."
                 />
               </p>
-              <SelectableCodeField
+              <SelectableTokenField
                 options={[
                   {
                     key: 'base64',
@@ -427,7 +431,7 @@ export class APIKeysGridPage extends Component<Props, State> {
               title={
                 <FormattedMessage
                   id="xpack.security.management.apiKeys.table.manageOwnKeysWarning"
-                  defaultMessage="You only have permissions to manage your own API keys."
+                  defaultMessage="You only have permission to manage your own API keys."
                 />
               }
               color="primary"
@@ -460,14 +464,6 @@ export class APIKeysGridPage extends Component<Props, State> {
 
     config = config.concat([
       {
-        field: 'base64',
-        name: i18n.translate('xpack.security.management.apiKeys.table.base64ColumnName', {
-          defaultMessage: 'API key',
-        }),
-        sortable: true,
-        render: (base64: string) => <EuiCode>{base64}</EuiCode>,
-      },
-      {
         field: 'name',
         name: i18n.translate('xpack.security.management.apiKeys.table.nameColumnName', {
           defaultMessage: 'Name',
@@ -494,6 +490,13 @@ export class APIKeysGridPage extends Component<Props, State> {
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
+        },
+        {
+          field: 'realm',
+          name: i18n.translate('xpack.security.management.apiKeys.table.realmColumnName', {
+            defaultMessage: 'Realm',
+          }),
+          sortable: true,
         },
       ]);
     }
@@ -678,12 +681,7 @@ export class APIKeysGridPage extends Component<Props, State> {
     try {
       const { isAdmin } = this.state;
       const { apiKeys } = await this.props.apiKeysAPIClient.getApiKeys(isAdmin);
-      this.setState({
-        apiKeys: apiKeys.map((apiKey) => ({
-          ...apiKey,
-          base64: `${btoa(apiKey.id).substr(0, 8)}...`,
-        })),
-      });
+      this.setState({ apiKeys });
     } catch (e) {
       this.setState({ error: e });
     }

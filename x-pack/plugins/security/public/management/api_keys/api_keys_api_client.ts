@@ -7,7 +7,7 @@
 
 import type { HttpStart } from 'src/core/public';
 
-import type { ApiKey, ApiKeyToInvalidate, Role } from '../../../common/model';
+import type { ApiKey, ApiKeyRoleDescriptors, ApiKeyToInvalidate } from '../../../common/model';
 
 export interface CheckPrivilegesResponse {
   areApiKeysEnabled: boolean;
@@ -27,9 +27,7 @@ export interface GetApiKeysResponse {
 export interface CreateApiKeyRequest {
   name: string;
   expiration?: string;
-  role_descriptors?: {
-    [key in string]: Role['elasticsearch'];
-  };
+  role_descriptors?: ApiKeyRoleDescriptors;
 }
 
 export interface CreateApiKeyResponse {

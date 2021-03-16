@@ -25,11 +25,11 @@ import { i18n } from '@kbn/i18n';
 
 import { useTheme } from './use_theme';
 
-export interface CodeFieldProps extends Omit<EuiFieldTextProps, 'append'> {
+export interface TokenFieldProps extends Omit<EuiFieldTextProps, 'append'> {
   value: string;
 }
 
-export const CodeField: FunctionComponent<CodeFieldProps> = (props) => {
+export const TokenField: FunctionComponent<TokenFieldProps> = (props) => {
   const theme = useTheme();
 
   return (
@@ -39,8 +39,8 @@ export const CodeField: FunctionComponent<CodeFieldProps> = (props) => {
         <EuiCopy textToCopy={props.value}>
           {(copyText) => (
             <EuiButtonIcon
-              aria-label={i18n.translate('xpack.security.copyCodeField.copyButton', {
-                defaultMessage: 'Copy code',
+              aria-label={i18n.translate('xpack.security.copyTokenField.copyButton', {
+                defaultMessage: 'Copy to clipboard',
               })}
               iconType="copyClipboard"
               color="success"
@@ -55,6 +55,9 @@ export const CodeField: FunctionComponent<CodeFieldProps> = (props) => {
     >
       <input
         type="text"
+        aria-label={i18n.translate('xpack.security.copyTokenField.tokenLabel', {
+          defaultMessage: 'Token',
+        })}
         className="euiFieldText euiFieldText--inGroup"
         value={props.value}
         style={{ fontFamily: theme.euiCodeFontFamily, fontSize: theme.euiFontSizeXS }}
@@ -65,7 +68,7 @@ export const CodeField: FunctionComponent<CodeFieldProps> = (props) => {
   );
 };
 
-export interface SelectableCodeFieldOption {
+export interface SelectableTokenFieldOption {
   key: string;
   value: string;
   icon?: string;
@@ -73,19 +76,21 @@ export interface SelectableCodeFieldOption {
   description?: string;
 }
 
-export interface SelectableCodeFieldProps extends Omit<EuiFieldTextProps, 'value' | 'prepend'> {
-  options: SelectableCodeFieldOption[];
+export interface SelectableTokenFieldProps extends Omit<EuiFieldTextProps, 'value' | 'prepend'> {
+  options: SelectableTokenFieldOption[];
 }
 
-export const SelectableCodeField: FunctionComponent<SelectableCodeFieldProps> = (props) => {
+export const SelectableTokenField: FunctionComponent<SelectableTokenFieldProps> = (props) => {
   const { options, ...rest } = props;
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
-  const [selectedOption, setSelectedOption] = React.useState<SelectableCodeFieldOption>(options[0]);
+  const [selectedOption, setSelectedOption] = React.useState<SelectableTokenFieldOption>(
+    options[0]
+  );
   const selectedIndex = options.findIndex((c) => c.key === selectedOption.key);
   const closePopover = () => setIsPopoverOpen(false);
 
   return (
-    <CodeField
+    <TokenField
       {...rest}
       prepend={
         <EuiPopover

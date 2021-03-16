@@ -9,7 +9,8 @@ import type { EuiBreadcrumb } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 
-import type { ChromeStart } from '../../../../../src/core/public';
+import type { ChromeStart } from 'src/core/public';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface BreadcrumbsContext {
@@ -141,7 +142,7 @@ export function getDocTitle(breadcrumbs: BreadcrumbProps[], maxBreadcrumbs = 2) 
 }
 
 export function createBreadcrumbsChangeHandler(
-  chrome: ChromeStart,
+  chrome: Pick<ChromeStart, 'docTitle' | 'setBreadcrumbs'>,
   setBreadcrumbs = chrome.setBreadcrumbs
 ) {
   return (breadcrumbs: BreadcrumbProps[]) => {

@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { CodeEditor, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import type { RoleDescriptors } from '../../../../common/model';
+import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import type { FormFlyoutProps } from '../../../components/form_flyout';
 import { FormFlyout } from '../../../components/form_flyout';
@@ -116,13 +116,16 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
 
   useEffect(() => {
     if (currentUser && roles) {
-      const userPermissions = currentUser.roles.reduce<RoleDescriptors>((accumulator, roleName) => {
-        const role = roles.find((r) => r.name === roleName)!;
-        if (role) {
-          accumulator[role.name] = role.elasticsearch;
-        }
-        return accumulator;
-      }, {});
+      const userPermissions = currentUser.roles.reduce<ApiKeyRoleDescriptors>(
+        (accumulator, roleName) => {
+          const role = roles.find((r) => r.name === roleName);
+          if (role) {
+            accumulator[role.name] = role.elasticsearch;
+          }
+          return accumulator;
+        },
+        {}
+      );
       if (!form.touched.role_descriptors) {
         form.setValue('role_descriptors', JSON.stringify(userPermissions, null, 2));
       }
@@ -186,9 +189,17 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiIcon type="user" />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem style={{ overflow: 'hidden' }}>
                 <EuiSpacer size="xs" />
-                <EuiText>{currentUser?.username}</EuiText>
+                <EuiText
+                  style={{
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {currentUser?.username}
+                </EuiText>
                 <EuiSpacer size="xs" />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -220,7 +231,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               label={i18n.translate(
                 'xpack.security.accountManagement.createApiKey.customPrivilegesLabel',
                 {
-                  defaultMessage: 'Restrict access and permissions',
+                  defaultMessage: 'Restrict privileges',
                 }
               )}
               checked={!!form.values.customPrivileges}
@@ -259,7 +270,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
           <EuiSpacer />
           <EuiFormFieldset>
             <EuiSwitch
-              id="apiKeyCeverExpire"
               name="customExpiration"
               label={i18n.translate(
                 'xpack.security.accountManagement.createApiKey.customExpirationLabel',
@@ -285,6 +295,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                       }
                     )}
                     name="expiration"
+                    min={0}
                     defaultValue={form.values.expiration}
                     isInvalid={form.touched.expiration && !!form.errors.expiration}
                     fullWidth

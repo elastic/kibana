@@ -22,4 +22,4 @@ export interface ApiKeyToInvalidate {
   name: string;
 }
 
-export type RoleDescriptors = Record<string, Role['elasticsearch']>;
+export type ApiKeyRoleDescriptors = Record<string, Role['elasticsearch']>;
