@@ -156,7 +156,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       }
 
       if (columnId === '@timestamp') {
-        return value.fields!['@timestamp'];
+        return value.fields['@timestamp'];
       }
 
       return '-';
