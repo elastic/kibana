@@ -1,0 +1,36 @@
+[role="xpack"]
+[[banners-settings-kb]]
+=== Banners settings in {kib}
+++++
+<titleabbrev>Banners settings</titleabbrev>
+++++
+
+Banners are disabled by default. You need to manually configure them in order to use the feature.
+
+You can configure the `xpack.banners` settings in your `kibana.yml` file.
+
+[[general-banners-settings-kb]]
+==== General banners settings
+
+[cols="2*<"]
+|===
+
+| `xpack.banners.placement`
+| Set to `header` to enable the header banner. Defaults to `disabled`
+
+| `xpack.banners.textContent`
+| The text content that will be displayed inside the banner, either plain text or markdown.
+
+| `xpack.banners.textColor`
+| The color for the banner's text. Defaults to `#8A6A0A`
+
+| `xpack.banners.backgroundColor`
+| The color of the banner's background. Defaults to `#FFF9E8`
+
+|===
+
+[NOTE]
+====
+The `banners` plugin requires a Gold or higher license to be enabled. If the
+license level is not met, these settings will not be used.
+====
