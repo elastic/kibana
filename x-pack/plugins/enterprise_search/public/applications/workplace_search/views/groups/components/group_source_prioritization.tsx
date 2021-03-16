@@ -158,16 +158,12 @@ export const GroupSourcePrioritization: React.FC = () => {
                     min={1}
                     max={10}
                     step={1}
+                    showInput
                     value={activeSourcePriorities[id]}
                     onChange={(e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) =>
                       handleSliderChange(id, e)
                     }
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ paddingLeft: 10, width: 32 }}>
-                  <div style={{ margin: 0 }} className="input-container--range__count">
-                    {activeSourcePriorities[id]}
-                  </div>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
