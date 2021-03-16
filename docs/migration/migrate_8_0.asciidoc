@@ -202,5 +202,13 @@ All supported operating systems support using systemd service files.  Any system
 *Impact:*
 Any installations using `.deb` or `.rpm` packages using SysV will need to migrate to systemd.
 
+[float]
+=== Platform removed from root folder name for `.tar.gz` and `.zip` archives
+
+*Details:*
+The output directory after extracting an archive no longer includes the target platform.  For example, `kibana-8.0.0-linux-aarch64.tar.gz` will produce a folder named `kibana-8.0.0`.
+
+*Impact:*
+Configuration management tools and automation will need to be updated to use the new directory.
 
 // end::notable-breaking-changes[]
