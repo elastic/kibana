@@ -106,7 +106,7 @@ export const GroupSourcePrioritization: React.FC = () => {
   const hasSources = contentSources.length > 0;
 
   const zeroState = (
-    <EuiPanel paddingSize="none" className="euiPanel--inset">
+    <EuiPanel paddingSize="none">
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt
         iconType="advancedSettingsApp"

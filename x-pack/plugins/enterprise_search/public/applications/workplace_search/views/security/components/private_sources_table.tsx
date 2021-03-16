@@ -103,7 +103,7 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
   const emptyState = (
     <>
       <EuiSpacer />
-      <EuiPanel className="euiPanel--inset euiPanel--outline" hasShadow={false} color="subdued">
+      <EuiPanel className="euiPanel--outline" hasShadow={false} color="subdued">
         <EuiText textAlign="center" color="subdued" size="s">
           <strong>
             {isRemote ? REMOTE_SOURCES_EMPTY_TABLE_TITLE : STANDARD_SOURCES_EMPTY_TABLE_TITLE}
