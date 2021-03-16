@@ -428,7 +428,7 @@ export function initPatchSubCasesApi({
     },
     async (context, request, response) => {
       try {
-        const casesClient = context.cases.getCasesClient();
+        const casesClient = await context.cases.getCasesClient();
         const subCases = request.body as SubCasesPatchRequest;
 
         return response.ok({

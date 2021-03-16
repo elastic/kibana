@@ -219,7 +219,7 @@ export interface CaseServiceSetup {
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
   getTags(args: ClientArgs): Promise<string[]>;
   getReporters(args: ClientArgs): Promise<User[]>;
-  getUser(args: GetUserArgs): Promise<AuthenticatedUser | User>;
+  getUser(args: GetUserArgs): AuthenticatedUser | User;
   postNewCase(args: PostCaseArgs): Promise<SavedObject<ESCaseAttributes>>;
   postNewComment(args: PostCommentArgs): Promise<SavedObject<CommentAttributes>>;
   patchCase(args: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<ESCaseAttributes>>;
@@ -996,7 +996,7 @@ export class CaseService implements CaseServiceSetup {
     }
   }
 
-  public async getUser({ request }: GetUserArgs) {
+  public getUser({ request }: GetUserArgs) {
     try {
       this.log.debug(`Attempting to authenticate a user`);
       if (this.authentication != null) {

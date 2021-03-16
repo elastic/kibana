@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { KibanaRequest } from 'kibana/server';
 import { createExternalCasesClient } from '../../../client';
 import {
   AlertService,
@@ -17,6 +18,9 @@ import {
 import { authenticationMock } from '../__fixtures__';
 import type { CasesRequestHandlerContext } from '../../../types';
 import { createActionsClient } from './mock_actions_client';
+import { featuresPluginMock } from '../../../../../features/server/mocks';
+import { securityMock } from '../../../../../security/server/mocks';
+import { CasesClientFactory } from '../../../client/factory';
 
 export const createRouteContext = async (client: any, badAuth = false) => {
   const actionsMock = createActionsClient();
@@ -31,9 +35,23 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   const connectorMappingsServicePlugin = new ConnectorMappingsService(log);
   const caseUserActionsServicePlugin = new CaseUserActionService(log);
 
+  const connectorMappingsService = await connectorMappingsServicePlugin.setup();
   const caseConfigureService = await caseConfigureServicePlugin.setup();
   const userActionService = await caseUserActionsServicePlugin.setup();
   const alertsService = new AlertService();
+  const factory = new CasesClientFactory(log);
+  factory.initialize({
+    alertsService,
+    caseConfigureService,
+    caseService,
+    connectorMappingsService,
+    userActionService,
+    featuresPluginStart: featuresPluginMock.createStart(),
+    getSpace: async (req: KibanaRequest) => undefined,
+    isAuthEnabled: true,
+    securityPluginSetup: securityMock.createSetup(),
+    securityPluginStart: securityMock.createStart(),
+  });
 
   const context = ({
     core: {
@@ -43,11 +61,10 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     },
     actions: { getActionsClient: () => actionsMock },
     cases: {
-      getCasesClient: () => casesClient,
+      getCasesClient: async () => casesClient,
     },
   } as unknown) as CasesRequestHandlerContext;
 
-  const connectorMappingsService = await connectorMappingsServicePlugin.setup();
   const casesClient = createExternalCasesClient({
     savedObjectsClient: client,
     user: authc.getCurrentUser(),

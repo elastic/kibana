@@ -7,9 +7,9 @@
 
 import { KibanaRequest } from 'kibana/server';
 import Boom from '@hapi/boom';
-import { Space } from '../../../spaces/server';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import { GetSpaceFn } from './types';
 
 // TODO: probably should move these to the types.ts file
 // TODO: Larry would prefer if we have an operation per entity route so I think we need to create a bunch like
@@ -24,8 +24,6 @@ export enum WriteOperations {
   Delete = 'delete',
   Update = 'update',
 }
-
-type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions

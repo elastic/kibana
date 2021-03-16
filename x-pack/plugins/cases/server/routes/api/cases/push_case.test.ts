@@ -126,7 +126,7 @@ describe('Push case', () => {
       })
     );
 
-    const casesClient = context.cases.getCasesClient();
+    const casesClient = await context.cases.getCasesClient();
     casesClient.getAlerts = jest.fn().mockResolvedValue([]);
 
     const response = await routeHandler(context, request, kibanaResponseFactory);

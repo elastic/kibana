@@ -8,13 +8,7 @@
 import { Logger } from 'kibana/server';
 import { CaseResponse, ConnectorTypes } from '../../common/api';
 import { CasesClientGetAlertsResponse } from '../client/alerts/types';
-import {
-  CaseServiceSetup,
-  CaseConfigureServiceSetup,
-  CaseUserActionServiceSetup,
-  ConnectorMappingsServiceSetup,
-  AlertServiceContract,
-} from '../services';
+import { CasesClientFactory } from '../client/factory';
 import { RegisterActionType } from '../types';
 
 export {
@@ -25,11 +19,7 @@ export {
 
 export interface GetActionTypeParams {
   logger: Logger;
-  caseService: CaseServiceSetup;
-  caseConfigureService: CaseConfigureServiceSetup;
-  connectorMappingsService: ConnectorMappingsServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
-  alertsService: AlertServiceContract;
+  factory: CasesClientFactory;
 }
 
 export interface RegisterConnectorsArgs extends GetActionTypeParams {

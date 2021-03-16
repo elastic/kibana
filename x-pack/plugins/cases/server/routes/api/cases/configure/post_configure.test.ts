@@ -83,13 +83,14 @@ describe('POST configuration', () => {
       ...context,
       cases: {
         ...context.cases,
-        getCasesClient: () =>
-          ({
-            ...context?.cases?.getCasesClient(),
+        getCasesClient: async () => {
+          return {
+            ...(await context?.cases?.getCasesClient()),
             getMappings: () => {
               throw new Error();
             },
-          } as CasesClient),
+          } as CasesClient;
+        },
       },
     };
 

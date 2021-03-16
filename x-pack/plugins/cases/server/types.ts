@@ -18,7 +18,7 @@ import {
 import { CasesClient } from './client';
 
 export interface CaseRequestContext {
-  getCasesClient: () => CasesClient;
+  getCasesClient: () => Promise<CasesClient>;
 }
 
 /**

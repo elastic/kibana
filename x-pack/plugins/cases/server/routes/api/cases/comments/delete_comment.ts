@@ -45,7 +45,7 @@ export function initDeleteCommentApi({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { username, full_name, email } = await caseService.getUser({ request });
+        const { username, full_name, email } = caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
         const myComment = await caseService.getComment({

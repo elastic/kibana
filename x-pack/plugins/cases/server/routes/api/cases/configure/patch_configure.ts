@@ -72,7 +72,7 @@ export function initPatchCaseConfigure({
           if (!context.cases) {
             throw Boom.badRequest('RouteHandlerContext is not registered for cases');
           }
-          const casesClient = context.cases.getCasesClient();
+          const casesClient = await context.cases.getCasesClient();
           const actionsClient = context.actions?.getActionsClient();
           if (actionsClient == null) {
             throw Boom.notFound('Action client have not been found');
