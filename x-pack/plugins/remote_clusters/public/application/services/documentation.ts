@@ -14,15 +14,11 @@ export let proxyModeUrl: string;
 export let proxySettingsUrl: string;
 export let cloudRemoteClustersUrl: string;
 
-export function init(docLinks: DocLinksStart): void {
-  const { ELASTIC_WEBSITE_URL } = docLinks;
-
 export function init({ links }: DocLinksStart): void {
-  skippingDisconnectedClustersUrl = `${links.ccs.skippingDisconnectedClusters}`;
-  remoteClustersUrl = `${links.elasticsearch.remoteClusters}`;
-  transportPortUrl = `${links.elasticsearch.transportSettings}`;
-  proxyModeUrl = `${links.elasticsearch.remoteClustersProxy}`;
-  proxySettingsUrl = `${links.elasticsearch.remoteClusersProxySettings}`;
-  cloudRemoteClustersUrl = `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-enable-ccs.html`;
-
+  skippingDisconnectedClustersUrl = links.ccs.skippingDisconnectedClusters;
+  remoteClustersUrl = links.elasticsearch.remoteClusters;
+  transportPortUrl = links.elasticsearch.transportSettings;
+  proxyModeUrl = links.elasticsearch.remoteClustersProxy;
+  proxySettingsUrl = links.elasticsearch.remoteClusersProxySettings;
+  cloudRemoteClustersUrl = links.cloud.ccs;
 }

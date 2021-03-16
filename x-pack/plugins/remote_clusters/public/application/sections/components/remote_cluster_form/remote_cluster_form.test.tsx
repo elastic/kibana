@@ -9,6 +9,7 @@ import React from 'react';
 import { mountWithIntl, renderWithIntl } from '@kbn/test/jest';
 import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import { RemoteClusterForm } from './remote_cluster_form';
+import { ReactWrapper } from 'enzyme';
 
 // Make sure we have deterministic aria IDs.
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -44,7 +45,7 @@ describe('RemoteClusterForm', () => {
         'remoteClusterFormGlobalError',
       ].map((testSubject) => {
         const mountedField = findTestSubject(component, testSubject);
-        return takeMountedSnapshot(mountedField);
+        return takeMountedSnapshot(mountedField as ReactWrapper);
       });
 
       expect(fieldsSnapshot).toMatchSnapshot();
