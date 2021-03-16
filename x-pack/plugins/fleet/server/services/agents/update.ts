@@ -20,11 +20,11 @@ export async function unenrollForAgentPolicyId(
   let hasMore = true;
   let page = 1;
   while (hasMore) {
-    const { agents } = await listAgents(soClient, esClient, {
+    const { agents } = await listAgents(esClient, {
       kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:"${policyId}"`,
       page: page++,
       perPage: 1000,
-      showInactive: true,
+      showInactive: false,
     });
 
     if (agents.length === 0) {

@@ -11,7 +11,7 @@ import sampleJsonResponseWithNesting from './es_sample_response_with_nesting.jso
 import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_containment';
 import { SearchResponse } from 'elasticsearch';
 import { OTHER_CATEGORY } from '../es_query_builder';
-import { alertsMock } from '../../../../../alerts/server/mocks';
+import { alertsMock } from '../../../../../alerting/server/mocks';
 import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
 
 describe('geo_containment', () => {

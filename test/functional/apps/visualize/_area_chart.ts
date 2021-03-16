@@ -443,7 +443,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         const errorMessage = await fieldErrorMessage.getVisibleText();
         expect(errorMessage).to.be(
-          'The index pattern test_index* does not contain any of the following compatible field types: date'
+          'The index pattern test_index* does not contain any of the following compatible field types: date or date_range'
         );
       });
     });

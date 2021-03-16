@@ -5,54 +5,45 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Switch, Route } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
-
-import { PLUGIN_NAME } from '../../common';
-import { LiveQuery } from '../live_query';
+import { Container, Nav, Wrapper } from './layouts';
+import { OsqueryAppRoutes } from '../routes';
+import { useRouterNavigate } from '../common/lib/kibana';
 
 export const OsqueryAppComponent = () => {
+  const location = useLocation();
+  const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
+
   return (
-    <EuiPage restrictWidth="1000px">
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage
-                id="xpack.osquery.helloWorldText"
-                defaultMessage="{name}"
-                // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                values={{ name: PLUGIN_NAME }}
-              />
-            </h1>
-          </EuiTitle>
-        </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <EuiSpacer />
-
-            <Switch>
-              <Route path={`/live_query`}>
-                <LiveQuery />
-              </Route>
-            </Switch>
-
-            <EuiSpacer />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <Container>
+      <Wrapper>
+        <Nav>
+          <EuiFlexGroup gutterSize="l" alignItems="center">
+            <EuiFlexItem>
+              <EuiTabs display="condensed">
+                <EuiTab isSelected={section === 'overview'} {...useRouterNavigate('overview')}>
+                  <FormattedMessage
+                    id="xpack.osquery.appNavigation.overviewLinkText"
+                    defaultMessage="Overview"
+                  />
+                </EuiTab>
+                <EuiTab isSelected={section === 'live_query'} {...useRouterNavigate('live_query')}>
+                  <FormattedMessage
+                    id="xpack.osquery.appNavigation.liveQueryLinkText"
+                    defaultMessage="Live Query"
+                  />
+                </EuiTab>
+              </EuiTabs>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Nav>
+        <OsqueryAppRoutes />
+      </Wrapper>
+    </Container>
   );
 };
 

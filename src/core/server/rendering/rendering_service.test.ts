@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
+import {
+  registerBootstrapRouteMock,
+  bootstrapRendererMock,
+  getSettingValueMock,
+  getStylesheetPathsMock,
+} from './rendering_service.test.mocks';
+
 import { load } from 'cheerio';
 
 import { httpServerMock } from '../http/http_server.mocks';
@@ -42,9 +49,22 @@ describe('RenderingService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = new RenderingService(mockRenderingServiceParams);
+
+    getSettingValueMock.mockImplementation((settingName: string) => settingName);
+    getStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
   });
 
   describe('setup()', () => {
+    it('calls `registerBootstrapRoute` with the correct parameters', async () => {
+      await service.setup(mockRenderingSetupDeps);
+
+      expect(registerBootstrapRouteMock).toHaveBeenCalledTimes(1);
+      expect(registerBootstrapRouteMock).toHaveBeenCalledWith({
+        router: expect.any(Object),
+        renderer: bootstrapRendererMock,
+      });
+    });
+
     describe('render()', () => {
       let uiSettings: ReturnType<typeof uiSettingsServiceMock.createClient>;
       let render: InternalRenderingServiceSetup['render'];
@@ -100,6 +120,28 @@ describe('RenderingService', () => {
         const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
+      it('calls `getStylesheetPaths` with the correct parameters', async () => {
+        getSettingValueMock.mockImplementation((settingName: string) => {
+          if (settingName === 'theme:darkMode') {
+            return true;
+          }
+          if (settingName === 'theme:version') {
+            return 'v8';
+          }
+          return settingName;
+        });
+
+        await render(createKibanaRequest(), uiSettings);
+
+        expect(getStylesheetPathsMock).toHaveBeenCalledTimes(1);
+        expect(getStylesheetPathsMock).toHaveBeenCalledWith({
+          darkMode: true,
+          themeVersion: 'v8',
+          basePath: '/mock-server-basepath',
+          buildNum: expect.any(Number),
+        });
       });
     });
   });
