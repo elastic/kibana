@@ -72,7 +72,7 @@ export interface StepDefineExposedState {
   isRuntimeMappingsEditorEnabled: boolean;
 }
 
-export function isRuntimeField(arg: any): arg is RuntimeField {
+export function isRuntimeField(arg: unknown): arg is RuntimeField {
   return (
     isPopulatedObject(arg) &&
     ((Object.keys(arg).length === 1 && arg.hasOwnProperty('type')) ||
@@ -84,18 +84,18 @@ export function isRuntimeField(arg: any): arg is RuntimeField {
             Object.keys(arg.script).length === 1 &&
             arg.script.hasOwnProperty('source') &&
             typeof arg.script.source === 'string')))) &&
-    RUNTIME_FIELD_TYPES.includes(arg.type)
+    RUNTIME_FIELD_TYPES.includes(arg.type as RuntimeType)
   );
 }
 
-export function isRuntimeMappings(arg: any): arg is RuntimeMappings {
+export function isRuntimeMappings(arg: unknown): arg is RuntimeMappings {
   return isPopulatedObject(arg) && Object.values(arg).every((d) => isRuntimeField(d));
 }
 
-export function isPivotPartialRequest(arg: any): arg is { pivot: PivotConfigDefinition } {
+export function isPivotPartialRequest(arg: unknown): arg is { pivot: PivotConfigDefinition } {
   return isPopulatedObject(arg) && arg.hasOwnProperty('pivot');
 }
 
-export function isLatestPartialRequest(arg: any): arg is { latest: LatestFunctionConfig } {
+export function isLatestPartialRequest(arg: unknown): arg is { latest: LatestFunctionConfig } {
   return isPopulatedObject(arg) && arg.hasOwnProperty('latest');
 }
