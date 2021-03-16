@@ -8,6 +8,7 @@
 import { setMockValues } from '../../../../../__mocks__';
 
 import React from 'react';
+import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
@@ -29,12 +30,15 @@ describe('CurationResult', () => {
     { title: 'add', iconType: 'plus', onClick: () => {} },
     { title: 'remove', iconType: 'minus', onClick: () => {} },
   ];
+  const mockDragging = {} as DraggableProvidedDragHandleProps; // Passed from EuiDraggable
 
   let wrapper: ShallowWrapper;
 
   beforeAll(() => {
     setMockValues(values);
-    wrapper = shallow(<CurationResult result={mockResult} actions={mockActions} />);
+    wrapper = shallow(
+      <CurationResult result={mockResult} actions={mockActions} dragHandleProps={mockDragging} />
+    );
   });
 
   it('passes EngineLogic state', () => {
@@ -42,8 +46,9 @@ describe('CurationResult', () => {
     expect(wrapper.find(Result).prop('schemaForTypeHighlights')).toEqual('some mock schema');
   });
 
-  it('passes result and actions props', () => {
+  it('passes result, actions, and dragHandleProps props', () => {
     expect(wrapper.find(Result).prop('result')).toEqual(mockResult);
     expect(wrapper.find(Result).prop('actions')).toEqual(mockActions);
+    expect(wrapper.find(Result).prop('dragHandleProps')).toEqual(mockDragging);
   });
 });
