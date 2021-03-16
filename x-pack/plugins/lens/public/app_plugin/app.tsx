@@ -100,22 +100,6 @@ export function App({
 
   const { lastKnownDoc } = state;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const notifyErrorThrottled = useCallback(
-    // Because the indexpattern loading happens multiple time at bootstrap
-    // in case of a missing indexpattern cause 3 identical toasts to appear
-    // this shows only the first toast within a 2 s window
-    // Note: The message is always the same for this function, so not token based logic
-    _.throttle(
-      (message: string) => {
-        return notifications.toasts.addDanger(message);
-      },
-      2000,
-      { trailing: false }
-    ),
-    [notifications]
-  );
-
   const showNoDataPopover = useCallback(() => {
     setState((prevState) => ({ ...prevState, indicateNoData: true }));
   }, [setState]);
@@ -353,7 +337,7 @@ export function App({
         const indexPatternIds = _.uniq(
           doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
         );
-        getAllIndexPatterns(indexPatternIds, data.indexPatterns, notifyErrorThrottled)
+        getAllIndexPatterns(indexPatternIds, data.indexPatterns)
           .then((indexPatterns) => {
             // Don't overwrite any pinned filters
             data.query.filterManager.setAppFilters(
@@ -385,7 +369,6 @@ export function App({
       });
   }, [
     notifications,
-    notifyErrorThrottled,
     data.indexPatterns,
     data.query.filterManager,
     initialInput,
@@ -699,7 +682,6 @@ export function App({
             initialContext={initialContext}
             setState={setState}
             data={data}
-            notify={notifyErrorThrottled}
             query={state.query}
             filters={state.filters}
             searchSessionId={state.searchSessionId}
@@ -752,7 +734,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   initialContext,
   setState,
   data,
-  notify,
   lastKnownDoc,
   activeData: activeDataRef,
 }: {
@@ -770,7 +751,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   initialContext: VisualizeFieldContext | undefined;
   setState: React.Dispatch<React.SetStateAction<LensAppState>>;
   data: DataPublicPluginStart;
-  notify: (message: string) => Toast;
   lastKnownDoc: React.MutableRefObject<Document | undefined>;
   activeData: React.MutableRefObject<Record<string, Datatable> | undefined>;
 }) {
@@ -806,7 +786,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
               (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
             )
           ) {
-            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns, notify).then(
+            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
               (indexPatterns) => {
                 if (indexPatterns) {
                   setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
@@ -822,20 +802,12 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
 
 export async function getAllIndexPatterns(
   ids: string[],
-  indexPatternsService: IndexPatternsContract,
-  notify: (message: string) => Toast
+  indexPatternsService: IndexPatternsContract
 ): Promise<IndexPatternInstance[]> {
   const responses = await Promise.allSettled(ids.map((id) => indexPatternsService.get(id)));
   const fullfilled = responses.filter(
     (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
       response.status === 'fulfilled'
   );
-  if (fullfilled.length < responses.length) {
-    notify(
-      i18n.translate('xpack.lens.app.indexPatternLoadingError', {
-        defaultMessage: 'Error loading index patterns',
-      })
-    );
-  }
   return fullfilled.map((response) => response.value);
 }
