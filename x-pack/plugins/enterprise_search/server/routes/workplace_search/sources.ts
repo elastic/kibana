@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { getOAuthTokenPackageParams } from '../../lib/get_oauth_token_package_params';
+
 import { RouteDependencies } from '../../plugin';
 
 const schemaValuesSchema = schema.recordOf(
@@ -855,16 +857,20 @@ export function registerOauthConnectorParamsRoute({
       validate: {
         query: schema.object({
           kibana_host: schema.string(),
-          code: schema.string(),
-          session_state: schema.string(),
+          code: schema.maybe(schema.string()),
+          session_state: schema.maybe(schema.string()),
           state: schema.string(),
+          oauth_token: schema.maybe(schema.string()),
           oauth_verifier: schema.maybe(schema.string()),
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/ws/sources/create',
-    })
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: '/ws/sources/create',
+        params: getOAuthTokenPackageParams(request.headers.cookie),
+      })(context, request, response);
+    }
   );
 }
 

@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Virtual Private Network Connection Attempt",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (\n    (process.name : \"networksetup\" and process.args : \"-connectpppoeservice\") or\n    (process.name : \"scutil\" and process.args : \"--nc\" and process.args : \"start\") or\n    (process.name : \"osascript\" and process.command_line : \"osascript*set VPN to service*\")\n  )\n",
   "references": [

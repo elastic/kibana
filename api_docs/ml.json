@@ -546,7 +546,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/modules.ts",
-              "lineNumber": 80
+              "lineNumber": 94
             },
             "signature": [
               {
@@ -567,7 +567,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/modules.ts",
-              "lineNumber": 81
+              "lineNumber": 95
             },
             "signature": [
               {
@@ -588,7 +588,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/modules.ts",
-              "lineNumber": 82
+              "lineNumber": 96
             },
             "signature": [
               "{ search: ",
@@ -621,7 +621,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/modules.ts",
-          "lineNumber": 79
+          "lineNumber": 93
         },
         "initialIsOpen": false
       },
@@ -5498,17 +5498,11 @@
         "type": "Function",
         "children": [
           {
-            "type": "CompoundType",
+            "type": "Any",
             "label": "error",
-            "isRequired": false,
+            "isRequired": true,
             "signature": [
-              {
-                "pluginId": "ml",
-                "scope": "common",
-                "docId": "kibMlPluginApi",
-                "section": "def-common.ErrorType",
-                "text": "ErrorType"
-              }
+              "any"
             ],
             "description": [],
             "source": {
@@ -5518,9 +5512,7 @@
           }
         ],
         "signature": [
-          "(error: ",
-          "ErrorType",
-          ") => string"
+          "(error: any) => string"
         ],
         "description": [],
         "label": "extractErrorMessage",

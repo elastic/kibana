@@ -220,11 +220,11 @@
       {
         "id": "def-public.SavedObjectLoader",
         "type": "Class",
-        "tags": [],
-        "label": "SavedObjectLoader",
-        "description": [
-          "\nThe SavedObjectLoader class provides some convenience functions\nto load and save one kind of saved objects (specified in the constructor).\n\nIt is based on the SavedObjectClient which implements loading and saving\nin an abstract, type-agnostic way. If possible, use SavedObjectClient directly\nto avoid pulling in extra functionality which isn't used."
+        "tags": [
+          "deprecated"
         ],
+        "label": "SavedObjectLoader",
+        "description": [],
         "children": [
           {
             "tags": [],
@@ -234,7 +234,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             }
           },
           {
@@ -245,7 +245,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             }
           },
           {
@@ -256,7 +256,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 36
+              "lineNumber": 37
             },
             "signature": [
               "Record<string, string>"
@@ -281,7 +281,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 39
+                  "lineNumber": 40
                 }
               },
               {
@@ -302,7 +302,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 40
+                  "lineNumber": 41
                 }
               }
             ],
@@ -310,7 +310,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             }
           },
           {
@@ -334,7 +334,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 60
+                  "lineNumber": 61
                 }
               }
             ],
@@ -342,7 +342,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 60
+              "lineNumber": 61
             }
           },
           {
@@ -364,7 +364,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 68
+                  "lineNumber": 69
                 }
               }
             ],
@@ -372,7 +372,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 68
+              "lineNumber": 69
             }
           },
           {
@@ -394,7 +394,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 72
+                  "lineNumber": 73
                 }
               }
             ],
@@ -402,7 +402,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 72
+              "lineNumber": 73
             }
           },
           {
@@ -434,7 +434,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 92
+                  "lineNumber": 93
                 }
               },
               {
@@ -447,7 +447,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 93
+                  "lineNumber": 94
                 }
               },
               {
@@ -467,7 +467,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 94
+                  "lineNumber": 95
                 }
               }
             ],
@@ -477,7 +477,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 91
+              "lineNumber": 92
             }
           },
           {
@@ -514,7 +514,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                      "lineNumber": 113
+                      "lineNumber": 114
                     },
                     "signature": [
                       "Record<string, unknown>"
@@ -528,7 +528,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                      "lineNumber": 114
+                      "lineNumber": 115
                     }
                   },
                   {
@@ -539,7 +539,7 @@
                     "description": [],
                     "source": {
                       "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                      "lineNumber": 115
+                      "lineNumber": 116
                     },
                     "signature": [
                       {
@@ -555,7 +555,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 112
+                  "lineNumber": 113
                 }
               }
             ],
@@ -565,7 +565,7 @@
             ],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 108
+              "lineNumber": 109
             }
           },
           {
@@ -595,7 +595,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 152
+                  "lineNumber": 153
                 }
               },
               {
@@ -615,7 +615,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-                  "lineNumber": 152
+                  "lineNumber": 153
                 }
               }
             ],
@@ -623,20 +623,22 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-              "lineNumber": 152
+              "lineNumber": 153
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
-          "lineNumber": 32
+          "lineNumber": 33
         },
         "initialIsOpen": false
       },
       {
         "id": "def-public.SavedObjectSaveModal",
         "type": "Class",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "SavedObjectSaveModal",
         "description": [],
         "signature": [
@@ -671,7 +673,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 72
+                  "lineNumber": 73
                 }
               },
               {
@@ -682,7 +684,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 73
+                  "lineNumber": 74
                 }
               },
               {
@@ -693,7 +695,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 74
+                  "lineNumber": 75
                 }
               },
               {
@@ -704,7 +706,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 75
+                  "lineNumber": 76
                 }
               },
               {
@@ -715,7 +717,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 76
+                  "lineNumber": 77
                 }
               },
               {
@@ -726,7 +728,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-                  "lineNumber": 77
+                  "lineNumber": 78
                 }
               }
             ],
@@ -734,7 +736,7 @@
             "label": "state",
             "source": {
               "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 71
+              "lineNumber": 72
             }
           },
           {
@@ -750,13 +752,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-              "lineNumber": 80
+              "lineNumber": 81
             }
           }
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
-          "lineNumber": 69
+          "lineNumber": 70
         },
         "initialIsOpen": false
       }
@@ -1517,7 +1519,9 @@
         "type": "Interface",
         "label": "SavedObject",
         "description": [],
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "children": [
           {
             "tags": [],
@@ -1527,7 +1531,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "signature": [
               "() => { attributes: ",
@@ -1557,7 +1561,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "signature": [
               "Record<string, unknown>"
@@ -1571,7 +1575,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 27
+              "lineNumber": 28
             },
             "signature": [
               "(resp: Record<string, any>) => Promise<",
@@ -1593,7 +1597,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 28
+              "lineNumber": 29
             }
           },
           {
@@ -1604,7 +1608,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 29
+              "lineNumber": 30
             },
             "signature": [
               "(opts: ",
@@ -1626,7 +1630,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             },
             "signature": [
               "any"
@@ -1640,7 +1644,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             },
             "signature": [
               "(() => Promise<{}>) | undefined"
@@ -1654,7 +1658,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 32
+              "lineNumber": 33
             },
             "signature": [
               "() => void"
@@ -1668,7 +1672,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 33
+              "lineNumber": 34
             },
             "signature": [
               "() => string"
@@ -1682,7 +1686,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             },
             "signature": [
               "() => string"
@@ -1696,7 +1700,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             },
             "signature": [
               "() => string"
@@ -1710,7 +1714,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 36
+              "lineNumber": 37
             },
             "signature": [
               "((id?: string | undefined) => Promise<",
@@ -1732,7 +1736,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             },
             "signature": [
               "string | undefined"
@@ -1746,7 +1750,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "signature": [
               "(() => Promise<",
@@ -1768,7 +1772,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 39
+              "lineNumber": 40
             }
           },
           {
@@ -1779,7 +1783,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             },
             "signature": [
               "() => boolean"
@@ -1793,7 +1797,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 41
+              "lineNumber": 42
             }
           },
           {
@@ -1804,7 +1808,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 42
+              "lineNumber": 43
             },
             "signature": [
               "Record<string, any> | undefined"
@@ -1818,7 +1822,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 43
+              "lineNumber": 44
             },
             "signature": [
               "(saveOptions: ",
@@ -1840,7 +1844,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 44
+              "lineNumber": 45
             },
             "signature": [
               "Pick<",
@@ -1862,7 +1866,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 45
+              "lineNumber": 46
             },
             "signature": [
               {
@@ -1883,7 +1887,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 46
+              "lineNumber": 47
             }
           },
           {
@@ -1894,7 +1898,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             }
           },
           {
@@ -1905,7 +1909,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             },
             "signature": [
               {
@@ -1921,7 +1925,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/types.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "initialIsOpen": false
       },
@@ -1940,7 +1944,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 78
+              "lineNumber": 79
             },
             "signature": [
               "((savedObject: ",
@@ -1970,7 +1974,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 79
+              "lineNumber": 80
             },
             "signature": [
               "any"
@@ -1984,7 +1988,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 80
+              "lineNumber": 81
             },
             "signature": [
               "((opts: ",
@@ -2014,7 +2018,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 81
+              "lineNumber": 82
             },
             "signature": [
               "(<T extends ",
@@ -2044,7 +2048,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 82
+              "lineNumber": 83
             },
             "signature": [
               "string | undefined"
@@ -2058,7 +2062,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 83
+              "lineNumber": 84
             },
             "signature": [
               "(() => void) | undefined"
@@ -2072,7 +2076,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 84
+              "lineNumber": 85
             },
             "signature": [
               {
@@ -2093,7 +2097,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 85
+              "lineNumber": 86
             },
             "signature": [
               "Record<string, any> | undefined"
@@ -2107,7 +2111,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 86
+              "lineNumber": 87
             },
             "signature": [
               "Record<string, any> | undefined"
@@ -2121,7 +2125,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 87
+              "lineNumber": 88
             },
             "signature": [
               "string | undefined"
@@ -2135,7 +2139,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 88
+              "lineNumber": 89
             },
             "signature": [
               "boolean | Pick<",
@@ -2157,7 +2161,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 89
+              "lineNumber": 90
             },
             "signature": [
               "string | undefined"
@@ -2166,7 +2170,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/types.ts",
-          "lineNumber": 76
+          "lineNumber": 77
         },
         "initialIsOpen": false
       },
@@ -2599,7 +2603,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 52
+              "lineNumber": 53
             },
             "signature": [
               "boolean | undefined"
@@ -2613,7 +2617,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 53
+              "lineNumber": 54
             },
             "signature": [
               "boolean | undefined"
@@ -2627,7 +2631,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 54
+              "lineNumber": 55
             },
             "signature": [
               "(() => void) | undefined"
@@ -2641,7 +2645,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/saved_objects/public/types.ts",
-              "lineNumber": 55
+              "lineNumber": 56
             },
             "signature": [
               "boolean | undefined"
@@ -2650,7 +2654,7 @@
         ],
         "source": {
           "path": "src/plugins/saved_objects/public/types.ts",
-          "lineNumber": 51
+          "lineNumber": 52
         },
         "initialIsOpen": false
       },
@@ -2819,14 +2823,16 @@
       "tags": [],
       "children": [
         {
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "id": "def-public.SavedObjectsStart.SavedObjectClass",
           "type": "Object",
           "label": "SavedObjectClass",
           "description": [],
           "source": {
             "path": "src/plugins/saved_objects/public/plugin.ts",
-            "lineNumber": 26
+            "lineNumber": 27
           },
           "signature": [
             "new (raw: Record<string, any>) => ",
@@ -2840,14 +2846,16 @@
           ]
         },
         {
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "id": "def-public.SavedObjectsStart.settings",
           "type": "Object",
           "label": "settings",
           "description": [],
           "source": {
             "path": "src/plugins/saved_objects/public/plugin.ts",
-            "lineNumber": 27
+            "lineNumber": 29
           },
           "signature": [
             "{ getPerPage: () => number; getListingLimit: () => number; }"
