@@ -35,7 +35,7 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
 }) => (
   <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
     <EuiFlexItem>
-      <EuiFlexGroup gutterSize="none" justifyContent="flexStart" alignItems="center">
+      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={null}>
           <SourceIcon
             className="content-source-meta__icon"
@@ -46,7 +46,7 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h5 style={{ paddingLeft: 8 }}>{sourceName}</h5>
+            <h5>{sourceName}</h5>
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
