@@ -14,7 +14,7 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', () => {
-      loadTestFile(require.resolve('./create_index_and_pattern'));
+      loadTestFile(require.resolve('./create_doc_source'));
       loadTestFile(require.resolve('./fonts_api'));
       loadTestFile(require.resolve('./index_settings'));
       loadTestFile(require.resolve('./migrations'));

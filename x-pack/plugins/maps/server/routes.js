@@ -34,7 +34,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
-import { createIndexSource } from './create_index_source';
+import { createDocSource } from './create_doc_source';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -619,7 +619,7 @@ export async function initRoutes(
           context.core.savedObjects.client,
           context.core.elasticsearch.client.asCurrentUser
         );
-        const result = await createIndexSource(
+        const result = await createDocSource(
           index,
           mappings,
           context.core.elasticsearch.client,

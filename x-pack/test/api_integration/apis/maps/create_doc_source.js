@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  describe('index and pattern creation', () => {
+  describe('doc source creation', () => {
     it('should create an index and pattern', async () => {
       const resp = await supertest
         .post(`/api/maps/docSource`)

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface CreateIndexSourceResp {
+export interface CreateDocSourceResp {
   success: boolean;
   error?: Error;
 }

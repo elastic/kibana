@@ -8,7 +8,7 @@
 import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
 import {
   INDEX_META_DATA_CREATED_BY,
-  CreateIndexSourceResp,
+  CreateDocSourceResp,
   IndexSourceMappings,
   BodySettings,
 } from '../common';
@@ -21,12 +21,12 @@ const DEFAULT_MAPPINGS = {
   },
 };
 
-export async function createIndexSource(
+export async function createDocSource(
   index: string,
   mappings: IndexSourceMappings,
   { asCurrentUser }: IScopedClusterClient,
   indexPatternsService: IndexPatternsService
-): Promise<CreateIndexSourceResp> {
+): Promise<CreateDocSourceResp> {
   try {
     await createIndex(index, mappings, asCurrentUser);
     await indexPatternsService.createAndSave(
