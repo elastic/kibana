@@ -83,7 +83,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           validatedParams,
           timestampField,
           indexPattern,
-          scopedClusterClient,
+          scopedClusterClient.asCurrentUser,
           alertInstanceFactory
         );
       } else {
@@ -91,7 +91,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           validatedParams,
           timestampField,
           indexPattern,
-          scopedClusterClient,
+          scopedClusterClient.asCurrentUser,
           alertInstanceFactory
         );
       }
