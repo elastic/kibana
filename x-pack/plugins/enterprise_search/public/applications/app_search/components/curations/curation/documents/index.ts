@@ -6,3 +6,4 @@
  */
 
 export { OrganicDocuments } from './organic_documents';
+export { HiddenDocuments } from './hidden_documents';

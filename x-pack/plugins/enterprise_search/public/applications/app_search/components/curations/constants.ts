@@ -37,3 +37,17 @@ export const RESULT_ACTIONS_DIRECTIONS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.resultActionsDescription',
   { defaultMessage: 'Promote results by clicking the star, hide them by clicking the eye.' }
 );
+export const HIDE_DOCUMENT_ACTION = {
+  title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.hideButtonLabel', {
+    defaultMessage: 'Hide this result',
+  }),
+  iconType: 'eyeClosed',
+  iconColor: 'danger',
+};
+export const SHOW_DOCUMENT_ACTION = {
+  title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.showButtonLabel', {
+    defaultMessage: 'Show this result',
+  }),
+  iconType: 'eye',
+  iconColor: 'primary',
+};
