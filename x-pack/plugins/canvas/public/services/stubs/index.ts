@@ -11,6 +11,7 @@ import { expressionsService } from './expressions';
 import { navLinkService } from './nav_link';
 import { notifyService } from './notify';
 import { platformService } from './platform';
+import { searchService } from './search';
 
 export const stubs: CanvasServices = {
   embeddables: embeddablesService,
@@ -18,6 +19,7 @@ export const stubs: CanvasServices = {
   navLink: navLinkService,
   notify: notifyService,
   platform: platformService,
+  search: searchService,
 };
 
 export const startServices = async (providedServices: Partial<CanvasServices> = {}) => {

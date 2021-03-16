@@ -25,6 +25,7 @@ const defaultContextValue = {
   notify: {},
   platform: {},
   navLink: {},
+  search: {},
 };
 
 const context = createContext<CanvasServices>(defaultContextValue as CanvasServices);
@@ -53,6 +54,7 @@ export const ServicesProvider: FC<{
     notify: specifiedProviders.notify.getService(),
     platform: specifiedProviders.platform.getService(),
     navLink: specifiedProviders.navLink.getService(),
+    search: specifiedProviders.search.getService(),
   };
   return <context.Provider value={value}>{children}</context.Provider>;
 };
