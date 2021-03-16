@@ -25,6 +25,7 @@ const uiCapabilities: Capabilities = {
   management: { fake: { show: false } },
   catalogue: { show: false },
   visualize: { show: true },
+  infrastructure: { save: true },
 };
 
 const getTestSubject = (component: ReactWrapper, name: string) => {

@@ -560,7 +560,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             })}
             helpText={i18n.translate('xpack.ml.dataframe.analytics.create.maxNumThreadsHelpText', {
               defaultMessage:
-                'The maximum number of threads to be used by the analysis. The default value is 1',
+                'The maximum number of threads to be used by the analysis. The default value is 1.',
             })}
             isInvalid={maxNumThreads === 0}
             error={

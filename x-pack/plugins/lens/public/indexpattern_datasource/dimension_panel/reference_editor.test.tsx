@@ -50,6 +50,7 @@ describe('reference editor', () => {
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
       data: {} as DataPublicPluginStart,
+      dimensionGroups: [],
     };
   }
 

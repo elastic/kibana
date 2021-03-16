@@ -17,6 +17,8 @@ import {
   buildExistsFilter,
   PhraseFilter,
   isPhraseFilter,
+  RangeFilter,
+  isRangeFilter,
 } from '../../../../common';
 
 const INDEX_NAME = 'my-index';
@@ -99,6 +101,53 @@ describe('Generate filters', () => {
     expect(isPhraseFilter(filters[0])).toBeTruthy();
     expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
+    });
+  });
+
+  it('should create range filter when provided complex range datatype', () => {
+    const filters = generateFilters(
+      mockFilterManager,
+      {
+        name: 'my-field',
+        type: 'ip_range',
+      } as IFieldType,
+      {
+        gt: '192.168.0.0',
+        lte: '192.168.255.255',
+      },
+      '+',
+      INDEX_NAME
+    );
+    expect(filters).toHaveLength(1);
+    expect(filters[0].meta.index === INDEX_NAME);
+    expect(filters[0].meta.negate).toBeFalsy();
+    expect(isRangeFilter(filters[0])).toBeTruthy();
+    expect((filters[0] as RangeFilter).range).toEqual({
+      [FIELD.name]: {
+        gt: '192.168.0.0',
+        lte: '192.168.255.255',
+      },
+    });
+  });
+
+  it('should create a phrase filter on a simple range datatype', () => {
+    const filters = generateFilters(
+      mockFilterManager,
+      {
+        name: 'my-field',
+        type: 'number_range',
+      } as IFieldType,
+      10000,
+      '+',
+      INDEX_NAME
+    );
+
+    expect(filters).toHaveLength(1);
+    expect(filters[0].meta.index === INDEX_NAME);
+    expect(filters[0].meta.negate).toBeFalsy();
+    expect(isPhraseFilter(filters[0])).toBeTruthy();
+    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+      [FIELD.name]: 10000,
     });
   });
 

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from 'kibana/server';
 import type {
   CoreSetup,
   LifecycleResponseFactory,
   OnPreAuthToolkit,
   OnPreAuthHandler,
 } from 'kibana/server';
+
 import { LIMITED_CONCURRENCY_ROUTE_TAG } from '../../common';
 import type { FleetConfigType } from '../index';
 

@@ -14,7 +14,6 @@ export const createConfigurationMock = (): FleetConfigType => {
     registryProxyUrl: '',
     agents: {
       enabled: true,
-      fleetServerEnabled: false,
       tlsCheckDisabled: true,
       pollingRequestTimeout: 1000,
       maxConcurrentConnections: 100,

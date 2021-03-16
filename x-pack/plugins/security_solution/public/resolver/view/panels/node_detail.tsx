@@ -122,8 +122,12 @@ const NodeDetailView = memo(function ({
       description: eventModel.argsForProcess(processEvent),
     };
 
-    // This is the data in {title, description} form for the EuiDescriptionList to display
-    const processDescriptionListData = [
+    const flattenedEntries: Array<{
+      title: string;
+      description: string | string[] | number | undefined;
+    }> = [];
+
+    const flattenedDescriptionListData = [
       createdEntry,
       pathEntry,
       pidEntry,
@@ -132,7 +136,21 @@ const NodeDetailView = memo(function ({
       parentPidEntry,
       md5Entry,
       commandLineEntry,
-    ]
+    ].reduce((flattenedList, entry) => {
+      if (Array.isArray(entry.description)) {
+        return [
+          ...flattenedList,
+          ...entry.description.map((value) => {
+            return { title: entry.title, description: value };
+          }),
+        ];
+      } else {
+        return [...flattenedList, entry];
+      }
+    }, flattenedEntries);
+
+    // This is the data in {title, description} form for the EuiDescriptionList to display
+    const processDescriptionListData = flattenedDescriptionListData
       .filter((entry) => {
         return entry.description !== undefined;
       })

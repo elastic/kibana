@@ -82,8 +82,8 @@ describe('QueryBar ', () => {
 
     expect(searchBarProps).toEqual({
       dataTestSubj: undefined,
-      dateRangeFrom: 'now-24h',
-      dateRangeTo: 'now',
+      dateRangeFrom: 'now/d',
+      dateRangeTo: 'now/d',
       filters: [],
       indexPatterns: [
         {
@@ -172,6 +172,18 @@ describe('QueryBar ', () => {
               searchable: true,
               type: 'string',
             },
+            {
+              aggregatable: false,
+              name: 'nestedField.firstAttributes',
+              searchable: true,
+              type: 'string',
+            },
+            {
+              aggregatable: false,
+              name: 'nestedField.secondAttributes',
+              searchable: true,
+              type: 'string',
+            },
           ],
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
@@ -183,6 +195,7 @@ describe('QueryBar ', () => {
         query: 'here: query',
       },
       refreshInterval: undefined,
+      savedQuery: undefined,
       showAutoRefreshOnly: false,
       showDatePicker: false,
       showFilterBar: true,

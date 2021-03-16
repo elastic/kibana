@@ -7,30 +7,26 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import pMap from 'p-map';
-import { getAgent, listAgents } from './crud';
+
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import type { KueryNode } from '../../../../../../src/plugins/data/server';
-import { normalizeKuery } from '../saved_object';
-import { appContextService } from '../app_context';
-import { removeSOAttributes } from './crud_fleet_server';
+
+import { getAgent, listAgents, removeSOAttributes } from './crud';
 
 export async function getAgentStatusById(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentStatus> {
-  const agent = await getAgent(soClient, esClient, agentId);
+  const agent = await getAgent(esClient, agentId);
   return AgentStatusKueryHelper.getAgentStatus(agent);
 }
 
 export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
 function joinKuerys(...kuerys: Array<string | undefined>) {
-  const isFleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
-
   return kuerys
     .filter((kuery) => kuery !== undefined)
     .reduce((acc: KueryNode | undefined, kuery: string | undefined): KueryNode | undefined => {
@@ -38,9 +34,7 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
         return acc;
       }
       const normalizedKuery: KueryNode = esKuery.fromKueryExpression(
-        isFleetServerEnabled
-          ? removeSOAttributes(kuery || '')
-          : normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery || '')
+        removeSOAttributes(kuery || '')
       );
 
       if (!acc) {
@@ -70,7 +64,7 @@ export async function getAgentStatusForAgentPolicy(
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
     (kuery) =>
-      listAgents(soClient, esClient, {
+      listAgents(esClient, {
         showInactive: false,
         perPage: 0,
         page: 1,

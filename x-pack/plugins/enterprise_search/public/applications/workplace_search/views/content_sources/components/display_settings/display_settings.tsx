@@ -22,9 +22,11 @@ import {
 import { clearFlashMessages } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { Loading } from '../../../../../shared/loading';
+import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
 import { AppLogic } from '../../../../app_logic';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { SAVE_BUTTON } from '../../../../constants';
+
 import {
   DISPLAY_SETTINGS_RESULT_DETAIL_PATH,
   DISPLAY_SETTINGS_SEARCH_RESULT_PATH,
@@ -69,13 +71,6 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
     return clearFlashMessages;
   }, []);
 
-  useEffect(() => {
-    window.onbeforeunload = hasDocuments && unsavedChanges ? () => UNSAVED_MESSAGE : null;
-    return () => {
-      window.onbeforeunload = null;
-    };
-  }, [unsavedChanges]);
-
   if (dataLoading) return <Loading />;
 
   const tabs = [
@@ -107,6 +102,10 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ tabId }) => {
 
   return (
     <>
+      <UnsavedChangesPrompt
+        hasUnsavedChanges={hasDocuments && unsavedChanges}
+        messageText={UNSAVED_MESSAGE}
+      />
       <form onSubmit={handleFormSubmit}>
         <ViewContentHeader
           title={DISPLAY_SETTINGS_TITLE}

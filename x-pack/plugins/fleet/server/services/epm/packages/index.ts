@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from 'src/core/server';
+
 import { requiredPackages, installationStatuses } from '../../../../common';
 import type { RequiredPackage, ValueOf } from '../../../../common';
 import { KibanaAssetType } from '../../../types';

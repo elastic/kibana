@@ -11,14 +11,15 @@ import { ThemeProvider } from 'styled-components';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
+import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiBreakpoints: {
       l: '1200px',
     },
   },
-};
+});
 
 const request =
   '{"index": ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"],"allowNoIndices": true, "ignoreUnavailable": true, "body": { "aggregations": {"hosts": {"cardinality": {"field": "host.name" } }, "hosts_histogram": {"auto_date_histogram": {"field": "@timestamp","buckets": "6"},"aggs": { "count": {"cardinality": {"field": "host.name" }}}}}, "query": {"bool": {"filter": [{"range": { "@timestamp": {"gte": 1562290224506,"lte": 1562376624506 }}}]}}, "size": 0, "track_total_hits": false}}';

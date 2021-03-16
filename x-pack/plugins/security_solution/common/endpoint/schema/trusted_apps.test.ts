@@ -106,7 +106,7 @@ describe('When invoking Trusted Apps Schema', () => {
       expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
     });
 
-    it('should validate `os` to to only accept known values', () => {
+    it('should validate `os` to only accept known values', () => {
       const bodyMsg = createNewTrustedApp({ os: undefined });
       expect(() => body.validate(bodyMsg)).toThrow();
 

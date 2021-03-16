@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { createAPIKey } from './security';
 
 export { invalidateAPIKeys } from './security';

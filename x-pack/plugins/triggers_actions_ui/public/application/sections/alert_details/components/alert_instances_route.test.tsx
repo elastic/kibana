@@ -93,7 +93,7 @@ describe('getAlertState useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert instance summary: OMG',
+      title: 'Unable to load alerts: OMG',
     });
   });
 });
