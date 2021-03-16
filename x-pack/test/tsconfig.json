@@ -3,9 +3,9 @@
   "compilerOptions": {
     // overhead is too significant
     "incremental": false,
-    "types": ["node", "flot"]
+    "types": ["node"]
   },
-  "include": ["**/*", "../typings/**/*", "../../packages/kbn-test/types/ftr_globals/**/*"],
+  "include": ["**/*", "../../typings/**/*", "../../packages/kbn-test/types/ftr_globals/**/*"],
   "references": [
     { "path": "../../src/core/tsconfig.json" },
     { "path": "../../src/plugins/bfetch/tsconfig.json" },

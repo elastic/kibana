@@ -13,8 +13,9 @@ import { createHash, BinaryLike } from 'crypto';
 import uuid from 'uuid';
 import { ElasticsearchClient } from 'kibana/server';
 
-import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
-import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import type { ListResult } from '../../../common';
+import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
+import type { ESSearchHit, ESSearchResponse } from '../../../../../../typings/elasticsearch';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
