@@ -82,7 +82,6 @@ module.exports = {
     alias: {
       ui: path.resolve(KIBANA_ROOT, 'src/legacy/ui/public'),
     },
-    symlinks: false,
   },
   module: {
     rules: [

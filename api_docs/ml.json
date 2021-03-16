@@ -5498,11 +5498,17 @@
         "type": "Function",
         "children": [
           {
-            "type": "Any",
+            "type": "CompoundType",
             "label": "error",
-            "isRequired": true,
+            "isRequired": false,
             "signature": [
-              "any"
+              {
+                "pluginId": "ml",
+                "scope": "common",
+                "docId": "kibMlPluginApi",
+                "section": "def-common.ErrorType",
+                "text": "ErrorType"
+              }
             ],
             "description": [],
             "source": {
@@ -5512,7 +5518,9 @@
           }
         ],
         "signature": [
-          "(error: any) => string"
+          "(error: ",
+          "ErrorType",
+          ") => string"
         ],
         "description": [],
         "label": "extractErrorMessage",

@@ -65,8 +65,7 @@ export const DeprecationAccordion: FunctionComponent<{
   title: string;
   currentGroupBy: GroupByOption;
   forceExpand: boolean;
-  dataTestSubj: string;
-}> = ({ id, deprecations, title, currentGroupBy, forceExpand, dataTestSubj }) => {
+}> = ({ id, deprecations, title, currentGroupBy, forceExpand }) => {
   const hasIndices = Boolean(
     currentGroupBy === GroupByOption.message && deprecations.filter((d) => d.index).length
   );
@@ -75,7 +74,6 @@ export const DeprecationAccordion: FunctionComponent<{
   return (
     <EuiAccordion
       id={id}
-      data-test-subj={dataTestSubj}
       className="upgDeprecations__item"
       initialIsOpen={forceExpand}
       buttonContent={<span className="upgDeprecations__itemName">{title}</span>}
@@ -225,7 +223,6 @@ export class GroupedDeprecations extends React.Component<
               <DeprecationAccordion
                 key={expandNumber}
                 id={`depgroup-${groupName}`}
-                dataTestSubj={`depgroup_${groupName.split(' ').join('_')}`}
                 title={groupName}
                 deprecations={groups[groupName]}
                 {...{ currentGroupBy, forceExpand }}

@@ -201,7 +201,6 @@ describe('GroupedDeprecations', () => {
 describe('DeprecationAccordion', () => {
   const defaultProps = {
     id: 'x',
-    dataTestSubj: 'data-test-subj',
     title: 'Issue 1',
     currentGroupBy: GroupByOption.message,
     forceExpand: false,

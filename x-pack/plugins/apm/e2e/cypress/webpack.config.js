@@ -8,7 +8,6 @@
 module.exports = {
   resolve: {
     extensions: ['.ts', '.js'],
-    symlinks: false,
   },
   node: { fs: 'empty', child_process: 'empty', readline: 'empty' },
   module: {

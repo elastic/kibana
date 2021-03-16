@@ -8,21 +8,19 @@
 import { I18nProvider } from '@kbn/i18n/react';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-
-import { ReindexWarning } from '../../../../../../../../common/types';
 import { mockKibanaSemverVersion } from '../../../../../../../../common/constants';
 
+import { ReindexWarning } from '../../../../../../../../common/types';
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
 jest.mock('../../../../../../app_context', () => {
-  const { docLinksServiceMock } = jest.requireActual(
-    '../../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
-  );
-
   return {
     useAppContext: () => {
       return {
-        docLinks: docLinksServiceMock.createStartContract(),
+        docLinks: {
+          DOC_LINK_VERSION: 'current',
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        },
         kibanaVersionInfo: {
           currentMajor: mockKibanaSemverVersion.major,
           prevMajor: mockKibanaSemverVersion.major - 1,
@@ -36,7 +34,7 @@ jest.mock('../../../../../../app_context', () => {
 describe('WarningsFlyoutStep', () => {
   const defaultProps = {
     advanceNextStep: jest.fn(),
-    warnings: [] as ReindexWarning[],
+    warnings: [ReindexWarning.customTypeName],
     closeFlyout: jest.fn(),
     renderGlobalCallouts: jest.fn(),
   };
@@ -47,40 +45,19 @@ describe('WarningsFlyoutStep', () => {
 
   if (mockKibanaSemverVersion.major === 7) {
     it('does not allow proceeding until all are checked', () => {
-      const defaultPropsWithWarnings = {
-        ...defaultProps,
-        warnings: [
-          {
-            warningType: 'customTypeName',
-            meta: {
-              typeName: 'my_mapping_type',
-            },
-          },
-          {
-            warningType: 'indexSetting',
-            meta: {
-              deprecatedSettings: ['index.force_memory_term_dictionary'],
-            },
-          },
-        ] as ReindexWarning[],
-      };
       const wrapper = mount(
         <I18nProvider>
-          <WarningsFlyoutStep {...defaultPropsWithWarnings} />
+          <WarningsFlyoutStep {...defaultProps} />
         </I18nProvider>
       );
       const button = wrapper.find('EuiButton');
 
       button.simulate('click');
-      expect(defaultPropsWithWarnings.advanceNextStep).not.toHaveBeenCalled();
+      expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
 
-      // first warning (customTypeName)
-      wrapper.find(`input#${idForWarning(0)}`).simulate('change');
-      // second warning (indexSetting)
-      wrapper.find(`input#${idForWarning(1)}`).simulate('change');
+      wrapper.find(`input#${idForWarning(ReindexWarning.customTypeName)}`).simulate('change');
       button.simulate('click');
-
-      expect(defaultPropsWithWarnings.advanceNextStep).toHaveBeenCalled();
+      expect(defaultProps.advanceNextStep).toHaveBeenCalled();
     });
   }
 });

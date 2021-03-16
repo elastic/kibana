@@ -22,10 +22,3 @@ export const DetectionsRequirementsLink = () => (
     linkText={i18n.DETECTIONS_REQUIREMENTS_LINK_TEXT}
   />
 );
-
-export const MlJobCompatibilityLink = () => (
-  <DocLink
-    docPath={i18n.ML_JOB_COMPATIBILITY_LINK_PATH}
-    linkText={i18n.ML_JOB_COMPATIBILITY_LINK_TEXT}
-  />
-);

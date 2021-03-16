@@ -15,17 +15,6 @@ export interface ParsedIndexName {
   newIndexName: string;
   cleanBaseName: string;
 }
-/**
- * An array of deprecated index settings specific to 7.0 --> 8.0 upgrade
- * This excludes the deprecated translog retention settings
- * as these are only marked as deprecated if soft deletes is enabled
- * See logic in getDeprecatedSettingWarning() for more details
- */
-const deprecatedSettings = [
-  'index.force_memory_term_dictionary',
-  'index.max_adjacency_matrix_filters',
-  'index.soft_deletes.enabled',
-];
 
 /**
  * Validates, and updates deprecated settings and mappings to be applied to the
@@ -75,55 +64,6 @@ export const generateNewIndexName = (indexName: string): string => {
     : `${currentVersion}-${sourceName}`;
 };
 
-export const getCustomTypeWarning = (
-  flatSettings: FlatSettingsWithTypeName | FlatSettings
-): ReindexWarning | undefined => {
-  const DEFAULT_TYPE_NAME = '_doc';
-  // In 7+, it's not possible to have more than one type,
-  // so always grab the first (and only) key.
-  const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
-  const typeNameWarning = Boolean(typeName && typeName !== DEFAULT_TYPE_NAME);
-
-  if (typeNameWarning) {
-    return {
-      warningType: 'customTypeName',
-      meta: {
-        typeName,
-      },
-    };
-  }
-};
-
-export const getDeprecatedSettingWarning = (
-  flatSettings: FlatSettingsWithTypeName | FlatSettings
-): ReindexWarning | undefined => {
-  const { settings } = flatSettings;
-
-  const deprecatedSettingsInUse = Object.keys(settings).filter((setting) => {
-    return deprecatedSettings.indexOf(setting) > -1;
-  });
-
-  // Translog settings are only marked as deprecated if soft deletes is enabled
-  if (settings['index.soft_deletes.enabled'] === 'true') {
-    if (settings['index.translog.retention.size']) {
-      deprecatedSettingsInUse.push('index.translog.retention.size');
-    }
-
-    if (settings['index.translog.retention.age']) {
-      deprecatedSettingsInUse.push('index.translog.retention.age');
-    }
-  }
-
-  if (deprecatedSettingsInUse.length) {
-    return {
-      warningType: 'indexSetting',
-      meta: {
-        deprecatedSettings: deprecatedSettingsInUse,
-      },
-    };
-  }
-};
-
 /**
  * Returns an array of warnings that should be displayed to user before reindexing begins.
  * @param flatSettings
@@ -131,22 +71,22 @@ export const getDeprecatedSettingWarning = (
 export const getReindexWarnings = (
   flatSettings: FlatSettingsWithTypeName | FlatSettings
 ): ReindexWarning[] => {
-  const warnings = [] as ReindexWarning[];
+  const warnings = [
+    // No warnings yet for 8.0 -> 9.0
+  ] as Array<[ReindexWarning, boolean]>;
 
   if (versionService.getMajorVersion() === 7) {
-    const customTypeWarning = getCustomTypeWarning(flatSettings);
-    const deprecatedSettingWarning = getDeprecatedSettingWarning(flatSettings);
+    const DEFAULT_TYPE_NAME = '_doc';
+    // In 7+ it's not possible to have more than one type anyways, so always grab the first
+    // (and only) key.
+    const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
 
-    if (customTypeWarning) {
-      warnings.push(customTypeWarning);
-    }
+    const typeNameWarning = Boolean(typeName && typeName !== DEFAULT_TYPE_NAME);
 
-    if (deprecatedSettingWarning) {
-      warnings.push(deprecatedSettingWarning);
-    }
+    warnings.push([ReindexWarning.customTypeName, typeNameWarning]);
   }
 
-  return warnings;
+  return warnings.filter(([_, applies]) => applies).map(([warning, _]) => warning);
 };
 
 const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
@@ -179,25 +119,30 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
     'index.version.upgraded',
   ]);
 
-const removeDeprecatedSettings = (settings: FlatSettings['settings']) => {
-  const updatedSettings = { ...settings };
-
-  // Translog settings are only marked as deprecated if soft deletes is enabled
-  if (updatedSettings['index.soft_deletes.enabled'] === 'true') {
-    if (updatedSettings['index.translog.retention.size']) {
-      delete updatedSettings['index.translog.retention.size'];
-    }
-
-    if (settings['index.translog.retention.age']) {
-      delete updatedSettings['index.translog.retention.age'];
-    }
+const validateSettings = (settings: FlatSettings['settings']) => {
+  if (settings['index.mapper.dynamic']) {
+    throw new Error(`'index.mapper.dynamic' is no longer supported.`);
   }
 
-  return omit(updatedSettings, deprecatedSettings);
+  if (settings['index.merge.policy.reclaim_deletes_weight']) {
+    throw new Error(`'index.merge.policy.reclaim_deletes_weight' is no longer supported.`);
+  }
+
+  if (settings['index.force_memory_term_dictionary']) {
+    throw new Error(`'index.force_memory_term_dictionary' is no longer supported.`);
+  }
+
+  if (settings['index.max_adjacency_matrix_filters']) {
+    throw new Error(
+      `'index.max_adjacency_matrix_filters' is no longer supported; use 'indices.query.bool.max_clause_count' as an alternative.`
+    );
+  }
+
+  return settings;
 };
 
 // Use `flow` to pipe the settings through each function.
-const transformSettings = flow(removeUnsettableSettings, removeDeprecatedSettings);
+const transformSettings = flow(removeUnsettableSettings, validateSettings);
 
 const updateFixableMappings = (mappings: FlatSettings['mappings']) => {
   return mappings;

@@ -40,7 +40,6 @@ import {
 
 import {
   FEATURE_IMPORTANCE,
-  FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
@@ -164,10 +163,6 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 
     if (field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`)) {
       schema = 'featureImportance';
-    }
-
-    if (field === `${resultsField}.${FEATURE_INFLUENCE}`) {
-      schema = 'featureInfluence';
     }
 
     return { id: field, schema, isSortable };

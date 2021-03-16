@@ -45,7 +45,6 @@ export const CreateArchives: Task = {
                 },
               },
               createRootDirectory: true,
-              rootDirectoryName: build.getRootDirectory(),
             }),
           });
           break;
@@ -64,7 +63,6 @@ export const CreateArchives: Task = {
                 },
               },
               createRootDirectory: true,
-              rootDirectoryName: build.getRootDirectory(),
             }),
           });
           break;

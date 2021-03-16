@@ -79,8 +79,6 @@ export type FleetConfigType = TypeOf<typeof config.schema>;
 
 export { PackagePolicyServiceInterface } from './services/package_policy';
 
-export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
-
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);
 };

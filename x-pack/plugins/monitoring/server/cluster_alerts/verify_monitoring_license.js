@@ -16,18 +16,17 @@ import { i18n } from '@kbn/i18n';
  * @param  {Object} server Server object containing config and plugins
  * @return {Boolean} {@code true} to indicate that cluster alerts can be used.
  */
-export async function verifyMonitoringLicense(server) {
+export function verifyMonitoringLicense(server) {
   const config = server.config();
 
   // if cluster alerts are enabled, then ensure that we can use it according to the license
   if (config.get('monitoring.cluster_alerts.enabled')) {
     const xpackInfo = get(server.plugins.monitoring, 'info');
     if (xpackInfo) {
-      const licenseService = await xpackInfo.getLicenseService();
-      const watcherFeature = licenseService.getWatcherFeature();
+      const watcherFeature = xpackInfo.getWatcherFeature();
       return {
         enabled: watcherFeature.isEnabled,
-        message: licenseService.getMessage(),
+        message: xpackInfo.getMessage(),
       };
     }
 

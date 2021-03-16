@@ -20,12 +20,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ReindexButton } from './reindex';
 import { AppContext } from '../../../../app_context';
 import { EnrichedDeprecationInfo } from '../../../../../../common/types';
-import { FixIndexSettingsButton } from './index_settings';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
   reindexIndexName?: string;
-  deprecatedIndexSettings?: string[];
   docUrl?: string;
   headline?: string;
   healthColor?: string;
@@ -40,7 +38,6 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
   reindexIndexName,
-  deprecatedIndexSettings,
   docUrl,
   items = [],
   children,
@@ -95,12 +92,6 @@ export const DeprecationCell: FunctionComponent<DeprecationCellProps> = ({
               />
             )}
           </AppContext.Consumer>
-        </EuiFlexItem>
-      )}
-
-      {deprecatedIndexSettings?.length && (
-        <EuiFlexItem grow={false}>
-          <FixIndexSettingsButton settings={deprecatedIndexSettings} index={reindexIndexName!} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

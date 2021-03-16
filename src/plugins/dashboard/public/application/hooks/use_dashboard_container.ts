@@ -80,7 +80,11 @@ export const useDashboardContainer = ({
       searchSession.restore(searchSessionIdFromURL);
     }
 
+    // when dashboard state manager initially loads, determine whether or not there are unsaved changes
     const incomingEmbeddable = getIncomingEmbeddable(true);
+    setUnsavedChanges?.(
+      Boolean(incomingEmbeddable) || dashboardStateManager.hasUnsavedPanelState()
+    );
 
     let canceled = false;
     let pendingContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
@@ -133,7 +137,6 @@ export const useDashboardContainer = ({
         );
       }
       setDashboardContainer(pendingContainer);
-      setUnsavedChanges?.(dashboardStateManager.getIsDirty(data.query.timefilter.timefilter));
     })();
     return () => {
       canceled = true;
@@ -148,7 +151,6 @@ export const useDashboardContainer = ({
       setDashboardContainer(null);
     };
   }, [
-    data.query.timefilter.timefilter,
     dashboardCapabilities,
     dashboardStateManager,
     getIncomingEmbeddable,

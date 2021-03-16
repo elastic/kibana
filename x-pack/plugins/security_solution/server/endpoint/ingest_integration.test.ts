@@ -11,15 +11,15 @@ import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
 } from '../../common/endpoint/models/policy_config';
-import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
+import { buildManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
-} from './fleet_integration';
+} from './ingest_integration';
 import { KibanaRequest } from 'kibana/server';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
-import { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
-import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
+import { EndpointAppContextServiceStartContract } from './endpoint_app_context_services';
+import { createMockEndpointAppContextServiceStartContract } from './mocks';
 import { licenseMock } from '../../../licensing/common/licensing.mock';
 import { LicenseService } from '../../common/license/license';
 import { Subject } from 'rxjs';
@@ -29,10 +29,10 @@ import { ProtectionModes } from '../../common/endpoint/types';
 import type { SecuritySolutionRequestHandlerContext } from '../types';
 import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
 import { ExceptionListClient } from '../../../lists/server';
-import { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
-import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
-import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/mocks';
-import { Manifest } from '../endpoint/lib/artifacts';
+import { InternalArtifactCompleteSchema } from './schemas/artifacts';
+import { ManifestManager } from './services/artifacts/manifest_manager';
+import { getMockArtifacts, toArtifactRecords } from './lib/artifacts/mocks';
+import { Manifest } from './lib/artifacts';
 import { NewPackagePolicy } from '../../../fleet/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
 
@@ -130,7 +130,7 @@ describe('ingest_integration tests ', () => {
     });
 
     test('default manifest is taken when there is none and there are errors pushing artifacts', async () => {
-      const newManifest = ManifestManager.createDefaultManifest();
+      const newManifest = Manifest.getDefault();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       const manifestManager = buildManifestManagerMock();
@@ -152,7 +152,7 @@ describe('ingest_integration tests ', () => {
     });
 
     test('default manifest is taken when there is none and there are errors commiting manifest', async () => {
-      const newManifest = ManifestManager.createDefaultManifest();
+      const newManifest = Manifest.getDefault();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
       const manifestManager = buildManifestManagerMock();
@@ -175,7 +175,7 @@ describe('ingest_integration tests ', () => {
     });
 
     test('manifest is created successfuly when there is none', async () => {
-      const newManifest = ManifestManager.createDefaultManifest();
+      const newManifest = Manifest.getDefault();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 

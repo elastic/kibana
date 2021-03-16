@@ -11,7 +11,7 @@ function singleLine(literals: TemplateStringsArray): string {
   return literals[0].split('\n').join('');
 }
 
-export const JOB_PARAMS_RISON_CSV_DEPRECATED = singleLine`(conflictedTypesFields:!(),fields:!('@ti
+export const JOB_PARAMS_RISON = singleLine`(conflictedTypesFields:!(),fields:!('@ti
 mestamp',clientip,extension),indexPatternId:'logstash-*',metaFields:!(_source,_id,_type,_
 index,_score),searchRequest:(body:(_source:(excludes:!(),includes:!('@timestamp',clientip
 ,extension)),docvalue_fields:!(),query:(bool:(filter:!((match_all:()),(range:('@timestamp

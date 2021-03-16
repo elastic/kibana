@@ -31,7 +31,6 @@ Object {
   "indices": Array [
     Object {
       "blockerForReindexing": undefined,
-      "deprecatedIndexSettings": Array [],
       "details": "[[type: doc, field: spins], [type: doc, field: mlockall], [type: doc, field: node_master], [type: doc, field: primary]]",
       "index": ".monitoring-es-6-2018.11.07",
       "level": "warning",
@@ -41,7 +40,6 @@ Object {
     },
     Object {
       "blockerForReindexing": undefined,
-      "deprecatedIndexSettings": Array [],
       "details": "[[type: tweet, field: liked]]",
       "index": "twitter",
       "level": "warning",
@@ -51,7 +49,6 @@ Object {
     },
     Object {
       "blockerForReindexing": undefined,
-      "deprecatedIndexSettings": Array [],
       "details": "[[type: index-pattern, field: notExpandable], [type: config, field: xPackMonitoring:allowReport], [type: config, field: xPackMonitoring:showBanner], [type: dashboard, field: pause], [type: dashboard, field: timeRestore]]",
       "index": ".kibana",
       "level": "warning",
@@ -61,7 +58,6 @@ Object {
     },
     Object {
       "blockerForReindexing": undefined,
-      "deprecatedIndexSettings": Array [],
       "details": "[[type: doc, field: notify], [type: doc, field: created], [type: doc, field: attach_payload], [type: doc, field: met]]",
       "index": ".watcher-history-6-2018.11.07",
       "level": "warning",
@@ -71,7 +67,6 @@ Object {
     },
     Object {
       "blockerForReindexing": undefined,
-      "deprecatedIndexSettings": Array [],
       "details": "[[type: doc, field: snapshot]]",
       "index": ".monitoring-kibana-6-2018.11.07",
       "level": "warning",
@@ -81,7 +76,6 @@ Object {
     },
     Object {
       "blockerForReindexing": undefined,
-      "deprecatedIndexSettings": Array [],
       "details": "[[type: tweet, field: liked]]",
       "index": "twitter2",
       "level": "warning",

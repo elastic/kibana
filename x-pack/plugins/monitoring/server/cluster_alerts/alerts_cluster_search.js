@@ -146,8 +146,8 @@ export function createFilterForTime(options) {
  * @param {Object} req Request object from the API route
  * @param {String} cluster The cluster being checked
  */
-export async function alertsClusterSearch(req, alertsIndex, cluster, checkLicense, options = {}) {
-  const verification = await verifyMonitoringLicense(req.server);
+export function alertsClusterSearch(req, alertsIndex, cluster, checkLicense, options = {}) {
+  const verification = verifyMonitoringLicense(req.server);
 
   if (!verification.enabled) {
     return Promise.resolve({ message: verification.message });

@@ -25,7 +25,7 @@ import {
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
 import { InfraPluginSetup } from '../../infra/server';
-import { LicensingPluginStart } from '../../licensing/server';
+import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { CloudSetup } from '../../cloud/server';
@@ -47,6 +47,7 @@ export interface MonitoringElasticsearchConfig {
 export interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
   alerting?: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
@@ -61,7 +62,6 @@ export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerCon
 export interface PluginsStart {
   alerting: AlertingPluginStartContract;
   actions: ActionsPluginsStartContact;
-  licensing: LicensingPluginStart;
 }
 
 export interface MonitoringCoreConfig {
@@ -92,8 +92,6 @@ export interface LegacyShimDependencies {
 export interface IBulkUploader {
   getKibanaStats: () => any;
   stop: () => void;
-  start: () => void;
-  handleNotEnabled: () => void;
 }
 
 export interface MonitoringPluginSetup {
@@ -129,9 +127,7 @@ export interface LegacyServer {
   };
   plugins: {
     monitoring: {
-      info: {
-        getLicenseService: () => MonitoringLicenseService;
-      };
+      info: MonitoringLicenseService;
     };
     elasticsearch: {
       getCluster: (

@@ -6,7 +6,6 @@
  */
 
 import { IScopedClusterClient } from 'src/core/server';
-import { indexSettingDeprecations } from '../../common/constants';
 import {
   DeprecationAPIResponse,
   EnrichedDeprecationInfo,
@@ -58,7 +57,6 @@ const getCombinedIndexInfos = (deprecations: DeprecationAPIResponse) =>
             ...d,
             index: indexName,
             reindex: /Index created before/.test(d.message),
-            deprecatedIndexSettings: getIndexSettingDeprecations(d.message),
           } as EnrichedDeprecationInfo)
       )
     );
@@ -75,12 +73,4 @@ const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEna
   } else {
     return combined;
   }
-};
-
-const getIndexSettingDeprecations = (message: string) => {
-  const indexDeprecation = Object.values(indexSettingDeprecations).find(
-    ({ deprecationMessage }) => deprecationMessage === message
-  );
-
-  return indexDeprecation?.settings || [];
 };

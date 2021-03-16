@@ -294,9 +294,6 @@ export const getJobConfigFromFormState = (
   if (formState.jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {
     const analysis = Object.assign(
       {},
-      formState.computeFeatureInfluence !== undefined && {
-        compute_feature_influence: formState.computeFeatureInfluence,
-      },
       formState.method && { method: formState.method },
       formState.nNeighbors && {
         n_neighbors: formState.nNeighbors,
@@ -305,7 +302,7 @@ export const getJobConfigFromFormState = (
       formState.featureInfluenceThreshold && {
         feature_influence_threshold: formState.featureInfluenceThreshold,
       },
-      formState.standardizationEnabled !== undefined && {
+      formState.standardizationEnabled && {
         standardization_enabled: formState.standardizationEnabled,
       }
     );

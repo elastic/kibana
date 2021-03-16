@@ -120,8 +120,7 @@ export const DataGrid: FC<Props> = memo(
 
     const popOverContent = useMemo(() => {
       return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
-        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
-        analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
+        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
         ? {
             featureImportance: ({ children }: { cellContentsElement: any; children: any }) => {
               const rowIndex = children?.props?.visibleRowIndex;
@@ -167,11 +166,6 @@ export const DataGrid: FC<Props> = memo(
                 />
               );
             },
-            featureInfluence: ({
-              cellContentsElement,
-            }: {
-              cellContentsElement: HTMLDivElement;
-            }) => <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>,
           }
         : undefined;
     }, [baseline, data]);

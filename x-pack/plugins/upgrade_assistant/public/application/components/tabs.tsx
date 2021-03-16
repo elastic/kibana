@@ -160,8 +160,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
       const resp = await this.props.http.get('/api/upgrade_assistant/status');
       this.setState({
         loadingState: LoadingState.Success,
-        // resp.data is specifically to handle the CITs which uses axios to mock HTTP requests
-        checkupData: resp.data ? resp.data : resp,
+        checkupData: resp,
       });
     } catch (e) {
       if (get(e, 'response.status') === 426) {
@@ -244,7 +243,8 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
 
     this.setState({ telemetryState: TelemetryState.Running });
 
-    await this.props.http.put('/api/upgrade_assistant/stats/ui_open', {
+    await this.props.http.fetch('/api/upgrade_assistant/stats/ui_open', {
+      method: 'PUT',
       body: JSON.stringify(set({}, tabName, true)),
     });
 

@@ -348,17 +348,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         plugins.fleet.createArtifactsClient('endpoint')
       ) as unknown) as ArtifactClient;
 
-      manifestManager = new ManifestManager(
-        {
-          savedObjectsClient,
-          artifactClient,
-          exceptionListClient,
-          packagePolicyService: plugins.fleet.packagePolicyService,
-          logger: this.logger,
-          cache: this.artifactsCache,
-        },
-        this.config.fleetServerEnabled
-      );
+      manifestManager = new ManifestManager({
+        savedObjectsClient,
+        artifactClient,
+        exceptionListClient,
+        packagePolicyService: plugins.fleet.packagePolicyService,
+        logger: this.logger,
+        cache: this.artifactsCache,
+      });
 
       if (this.manifestTask) {
         this.manifestTask.start({

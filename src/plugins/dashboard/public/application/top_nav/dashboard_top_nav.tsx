@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import UseUnmount from 'react-use/lib/useUnmount';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
@@ -115,9 +114,7 @@ export function DashboardTopNav({
         id || DASHBOARD_PANELS_UNSAVED_ID
       );
     }
-    return () => {
-      visibleSubscription.unsubscribe();
-    };
+    return () => visibleSubscription.unsubscribe();
   }, [chrome, allowByValueEmbeddables, dashboardStateManager, savedDashboard]);
 
   const addFromLibrary = useCallback(() => {
@@ -460,10 +457,6 @@ export function DashboardTopNav({
     runQuickSave,
     share,
   ]);
-
-  UseUnmount(() => {
-    clearAddPanel();
-  });
 
   const getNavBarProps = () => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart, HttpSetup, NotificationsStart } from 'src/core/public';
+import { DocLinksStart, HttpSetup } from 'src/core/public';
 import React, { createContext, useContext } from 'react';
 
 export interface KibanaVersionContext {
@@ -19,7 +19,6 @@ export interface ContextValue {
   isCloudEnabled: boolean;
   docLinks: DocLinksStart;
   kibanaVersionInfo: KibanaVersionContext;
-  notifications: NotificationsStart;
   isReadOnlyMode: boolean;
 }
 

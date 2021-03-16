@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/utils';
 import { dirname, relative } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
@@ -22,7 +21,7 @@ const dateNow = Date.now.bind(Date);
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
-    rootDirectory = REPO_ROOT,
+    rootDirectory = dirname(require.resolve('../../../../package.json')),
     getTestMetadata = () => ({}),
   } = options;
 

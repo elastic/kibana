@@ -24,7 +24,7 @@ import { PluginStartContract as AlertsPluginStartContract } from '../../../alert
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
-} from '../fleet_integration/fleet_integration';
+} from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
 import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';

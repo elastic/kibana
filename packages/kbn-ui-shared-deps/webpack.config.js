@@ -101,7 +101,6 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       moment: MOMENT_SRC,
     },
     extensions: ['.js', '.ts'],
-    symlinks: false,
   },
 
   optimization: {

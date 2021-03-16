@@ -36,5 +36,4 @@ export interface QueryStringInputProps
 |  [query](./kibana-plugin-plugins-data-public.querystringinputprops.query.md) | <code>Query</code> |  |
 |  [screenTitle](./kibana-plugin-plugins-data-public.querystringinputprops.screentitle.md) | <code>string</code> |  |
 |  [size](./kibana-plugin-plugins-data-public.querystringinputprops.size.md) | <code>SuggestionsListSize</code> |  |
-|  [submitOnBlur](./kibana-plugin-plugins-data-public.querystringinputprops.submitonblur.md) | <code>boolean</code> |  |
 

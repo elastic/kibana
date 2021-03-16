@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiPageHeader, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
@@ -20,8 +20,6 @@ import { Loading } from '../../../../shared/loading';
 import { MANAGE_CURATION_TITLE } from '../constants';
 
 import { CurationLogic } from './curation_logic';
-import { OrganicDocuments } from './documents';
-import { ActiveQuerySelect, ManageQueriesModal } from './queries';
 
 interface Props {
   curationsBreadcrumb: BreadcrumbTrail;
@@ -30,7 +28,7 @@ interface Props {
 export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
   const { curationId } = useParams() as { curationId: string };
   const { loadCuration } = useActions(CurationLogic({ curationId }));
-  const { dataLoading, queries } = useValues(CurationLogic({ curationId }));
+  const { dataLoading, curation } = useValues(CurationLogic({ curationId }));
 
   useEffect(() => {
     loadCuration();
@@ -40,27 +38,20 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
 
   return (
     <>
-      <SetPageChrome trail={[...curationsBreadcrumb, queries.join(', ')]} />
+      <SetPageChrome trail={[...curationsBreadcrumb, curation.queries.join(', ')]} />
       <EuiPageHeader
         pageTitle={MANAGE_CURATION_TITLE}
         /* TODO: Restore defaults button */
         responsive={false}
       />
 
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="xl" responsive={false}>
-        <EuiFlexItem>
-          <ActiveQuerySelect />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ManageQueriesModal />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {/* TODO: Active query switcher / Manage queries modal */}
 
       <EuiSpacer size="xl" />
       <FlashMessages />
 
       {/* TODO: PromotedDocuments section */}
-      <OrganicDocuments />
+      {/* TODO: OrganicDocuments section */}
       {/* TODO: HiddenDocuments section */}
 
       {/* TODO: AddResult flyout */}

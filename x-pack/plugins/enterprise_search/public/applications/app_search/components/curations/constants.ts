@@ -32,8 +32,3 @@ export const SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteSuccessMessage',
   { defaultMessage: 'Successfully removed curation.' }
 );
-
-export const RESULT_ACTIONS_DIRECTIONS = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.curations.resultActionsDescription',
-  { defaultMessage: 'Promote results by clicking the star, hide them by clicking the eye.' }
-);

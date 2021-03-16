@@ -18,19 +18,12 @@ import { Curation } from '../types';
 interface CurationValues {
   dataLoading: boolean;
   curation: Curation;
-  queries: Curation['queries'];
-  queriesLoading: boolean;
-  activeQuery: string;
-  organicDocumentsLoading: boolean;
 }
 
 interface CurationActions {
   loadCuration(): void;
   onCurationLoad(curation: Curation): { curation: Curation };
-  updateCuration(): void;
-  onCurationError(): void;
-  updateQueries(queries: Curation['queries']): { queries: Curation['queries'] };
-  setActiveQuery(query: string): { query: string };
+  updateCuration(options?: { queries?: string[] }): { queries?: string[] };
 }
 
 interface CurationProps {
@@ -42,10 +35,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
   actions: () => ({
     loadCuration: true,
     onCurationLoad: (curation) => ({ curation }),
-    updateCuration: true,
-    onCurationError: true,
-    updateQueries: (queries) => ({ queries }),
-    setActiveQuery: (query) => ({ query }),
+    updateCuration: ({ queries } = {}) => ({ queries }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -53,7 +43,6 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       {
         loadCuration: () => true,
         onCurationLoad: () => false,
-        onCurationError: () => false,
       },
     ],
     curation: [
@@ -67,36 +56,6 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       },
       {
         onCurationLoad: (_, { curation }) => curation,
-      },
-    ],
-    queries: [
-      [],
-      {
-        onCurationLoad: (_, { curation }) => curation.queries,
-        updateQueries: (_, { queries }) => queries,
-      },
-    ],
-    queriesLoading: [
-      false,
-      {
-        updateQueries: () => true,
-        onCurationLoad: () => false,
-        onCurationError: () => false,
-      },
-    ],
-    activeQuery: [
-      '',
-      {
-        setActiveQuery: (_, { query }) => query,
-        onCurationLoad: (activeQuery, { curation }) => activeQuery || curation.queries[0],
-      },
-    ],
-    organicDocumentsLoading: [
-      false,
-      {
-        setActiveQuery: () => true,
-        onCurationLoad: () => false,
-        onCurationError: () => false,
       },
     ],
   }),
@@ -117,7 +76,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
       }
     },
-    updateCuration: async (_, breakpoint) => {
+    updateCuration: async ({ queries }, breakpoint) => {
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
@@ -129,8 +88,8 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
           `/api/app_search/engines/${engineName}/curations/${props.curationId}`,
           {
             body: JSON.stringify({
-              queries: values.queries,
-              query: values.activeQuery,
+              queries: queries || values.curation.queries,
+              query: '', // TODO: activeQuery state
               promoted: [], // TODO: promotedIds state
               hidden: [], // TODO: hiddenIds state
             }),
@@ -139,15 +98,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         actions.onCurationLoad(response);
       } catch (e) {
         flashAPIErrors(e);
-        actions.onCurationError();
       }
     },
-    updateQueries: ({ queries }) => {
-      const activeQueryDeleted = !queries.includes(values.activeQuery);
-      if (activeQueryDeleted) actions.setActiveQuery(queries[0]);
-
-      actions.updateCuration();
-    },
-    setActiveQuery: () => actions.updateCuration(),
   }),
 });

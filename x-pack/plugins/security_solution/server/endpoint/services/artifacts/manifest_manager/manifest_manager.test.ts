@@ -581,7 +581,7 @@ describe('ManifestManager', () => {
     test('Creates new saved object if no saved object version', async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
-      const manifest = ManifestManager.createDefaultManifest();
+      const manifest = Manifest.getDefault();
 
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);

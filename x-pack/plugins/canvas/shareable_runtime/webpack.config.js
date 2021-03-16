@@ -43,7 +43,6 @@ module.exports = {
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
-    symlinks: false,
   },
   module: {
     rules: [

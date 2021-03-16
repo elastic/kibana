@@ -112,9 +112,7 @@ export const ActionTypeForm = ({
     );
     if (defaultParams) {
       for (const [key, paramValue] of Object.entries(defaultParams)) {
-        if (actionItem.params[key] === undefined || actionItem.params[key] === null) {
-          setActionParamsProperty(key, paramValue, index);
-        }
+        setActionParamsProperty(key, paramValue, index);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

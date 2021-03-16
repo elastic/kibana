@@ -36,7 +36,7 @@
       {
         groupName: '@elastic/charts',
         packageNames: ['@elastic/charts'],
-        reviewers: ['markov00', 'nickofthyme'],
+        reviewers: ['markov00'],
         matchBaseBranches: ['master'],
         labels: ['release_note:skip', 'v8.0.0', 'v7.13.0'],
         enabled: true,
