@@ -252,6 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
           await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStatsResults
           );

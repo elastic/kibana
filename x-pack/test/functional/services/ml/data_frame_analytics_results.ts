@@ -126,6 +126,21 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       return featureImportanceCell;
     },
 
+    async assertFeatureInfluenceCellNotEmpty() {
+      // get first row of the data grid
+      const dataGrid = await testSubjects.find('mlExplorationDataGrid loaded');
+      // find the feature influence cell in that row
+      const featureInfluenceCell = await dataGrid.findByCssSelector(
+        '[data-test-subj="dataGridRowCell"][class*="featureInfluence"]'
+      );
+      const contentString = await featureInfluenceCell.getVisibleText();
+
+      expect(contentString.length).to.be.greaterThan(
+        0,
+        'Expected feature influence cell to have content but it is empty.'
+      );
+    },
+
     async waitForInteractionButtonToDisplay(interactionButton: WebElementWrapper) {
       await retry.tryForTime(5000, async () => {
         const buttonVisible = await interactionButton.isDisplayed();

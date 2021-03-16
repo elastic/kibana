@@ -17,7 +17,7 @@ import {
 
 import { SO_SEARCH_LIMIT } from '../../../constants';
 import { useLink, useGetPackagePolicies } from '../../../hooks';
-import { AgentPolicy } from '../../../types';
+import type { AgentPolicy } from '../../../types';
 import { Loading } from '../../agents/components';
 
 import { OverviewStats } from './overview_stats';
