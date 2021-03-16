@@ -12,7 +12,7 @@ import { ExpressionFunctionKql } from './kql';
 import { ExpressionFunctionLucene } from './lucene';
 
 export const queryToAst = (query: Query) => {
-  if (query.language === 'kql') {
+  if (query.language === 'kuery') {
     return buildExpression([
       buildExpressionFunction<ExpressionFunctionKql>('kql', { q: query.query as string }),
     ]);

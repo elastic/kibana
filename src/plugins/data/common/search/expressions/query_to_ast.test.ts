@@ -9,12 +9,21 @@
 import { queryToAst } from './query_to_ast';
 
 describe('queryToAst', () => {
-  it('returns an object with the correct structure', () => {
+  it('returns an object with the correct structure for lucene queies', () => {
     const actual = queryToAst({ language: 'lucene', query: { country: 'US' } });
     expect(actual).toHaveProperty('functions');
     expect(actual.functions[0]).toHaveProperty('name', 'lucene');
     expect(actual.functions[0]).toHaveProperty('arguments', {
       q: ['{"country":"US"}'],
+    });
+  });
+
+  it('returns an object with the correct structure for kql queies', () => {
+    const actual = queryToAst({ language: 'kuery', query: 'country:US' });
+    expect(actual).toHaveProperty('functions');
+    expect(actual.functions[0]).toHaveProperty('name', 'kql');
+    expect(actual.functions[0]).toHaveProperty('arguments', {
+      q: ['country:US'],
     });
   });
 });
