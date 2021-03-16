@@ -18,7 +18,7 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   ? `alertId`
   : K;
 
-type AsApiContract<
+export type AsApiContract<
   T,
   ComplexPropertyKeys = `actions` | `executionStatus`,
   OpaquePropertyKeys = `params`

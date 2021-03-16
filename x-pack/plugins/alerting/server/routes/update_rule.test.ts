@@ -33,6 +33,7 @@ describe('updateRuleRoute', () => {
     name: 'abc',
     alertTypeId: '1',
     tags: ['foo'],
+    throttle: '10m',
     schedule: { interval: '12s' },
     params: {
       otherField: false,
@@ -53,8 +54,7 @@ describe('updateRuleRoute', () => {
   };
 
   const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
-    ...pick(mockedAlert, 'name', 'tags', 'schedule', 'params'),
-    throttle: null,
+    ...pick(mockedAlert, 'name', 'tags', 'schedule', 'params', 'throttle'),
     notify_when: mockedAlert.notifyWhen,
     actions: [
       {
@@ -70,6 +70,7 @@ describe('updateRuleRoute', () => {
     id: mockedAlert.id,
     updated_at: mockedAlert.updatedAt,
     created_at: mockedAlert.createdAt,
+    rule_type_id: mockedAlert.alertTypeId,
     actions: mockedAlert.actions.map(({ actionTypeId, ...rest }) => ({
       ...rest,
       connector_type_id: actionTypeId,
@@ -124,9 +125,9 @@ describe('updateRuleRoute', () => {
               "interval": "12s",
             },
             "tags": Array [
-              "bar",
+              "foo",
             ],
-            "throttle": null,
+            "throttle": "10m",
           },
           "id": "1",
         },

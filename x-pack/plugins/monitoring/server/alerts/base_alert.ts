@@ -123,7 +123,7 @@ export class BaseAlert {
     alertsClient: AlertsClient,
     actionsClient: ActionsClient,
     actions: AlertEnableAction[]
-  ): Promise<Alert<AlertTypeParams>> {
+  ): Promise<SanitizedAlert<AlertTypeParams>> {
     const existingAlertData = await alertsClient.find({
       options: {
         search: this.alertOptions.id,

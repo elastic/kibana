@@ -73,26 +73,34 @@ const rewriteBodyRes: RewriteResponseCase<PartialAlert<AlertTypeParams>> = ({
   ...rest
 }) => ({
   ...rest,
-  rule_type_id: alertTypeId,
-  scheduled_task_id: scheduledTaskId,
-  created_by: createdBy,
-  updated_by: updatedBy,
-  created_at: createdAt,
-  updated_at: updatedAt,
-  api_key_owner: apiKeyOwner,
-  notify_when: notifyWhen,
-  mute_all: muteAll,
-  muted_instance_ids: mutedInstanceIds,
-  execution_status: executionStatus && {
-    status: executionStatus.status,
-    last_execution_date: executionStatus.lastExecutionDate,
-  },
-  actions: actions?.map(({ group, id, actionTypeId, params }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-  })),
+  ...(alertTypeId ? { rule_type_id: alertTypeId } : {}),
+  ...(scheduledTaskId ? { scheduled_task_id: scheduledTaskId } : {}),
+  ...(createdBy ? { created_by: createdBy } : {}),
+  ...(updatedBy ? { updated_by: updatedBy } : {}),
+  ...(createdAt ? { created_at: createdAt } : {}),
+  ...(updatedAt ? { updated_at: updatedAt } : {}),
+  ...(apiKeyOwner ? { api_key_owner: apiKeyOwner } : {}),
+  ...(notifyWhen ? { notify_when: notifyWhen } : {}),
+  ...(muteAll ? { mute_all: muteAll } : {}),
+  ...(mutedInstanceIds ? { muted_instance_ids: mutedInstanceIds } : {}),
+  ...(executionStatus
+    ? {
+        execution_status: {
+          status: executionStatus.status,
+          last_execution_date: executionStatus.lastExecutionDate,
+        },
+      }
+    : {}),
+  ...(actions
+    ? {
+        actions: actions.map(({ group, id, actionTypeId, params }) => ({
+          group,
+          id,
+          params,
+          connector_type_id: actionTypeId,
+        })),
+      }
+    : {}),
 });
 
 export const updateRuleRoute = (
