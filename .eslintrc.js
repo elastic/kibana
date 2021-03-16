@@ -1007,7 +1007,64 @@ module.exports = {
       },
     },
     {
-      // typescript and javascript for front and back end
+      // typescript for /public and /common
+      files: ['x-pack/plugins/lists/public/*.{ts,tsx}', 'x-pack/plugins/lists/common/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-for-in-array': 'error',
+        '@typescript-eslint/no-unsafe-assignment': 'error',
+        '@typescript-eslint/no-unsafe-return': 'error',
+      },
+    },
+    {
+      // typescript for /public and /common
+      files: ['x-pack/plugins/lists/public/*.{ts,tsx}', 'x-pack/plugins/lists/common/*.{ts,tsx}'],
+      plugins: ['react'],
+      env: {
+        jest: true,
+      },
+      rules: {
+        'react/boolean-prop-naming': 'error',
+        'react/button-has-type': 'error',
+        'react/display-name': 'error',
+        'react/forbid-dom-props': 'error',
+        'react/no-access-state-in-setstate': 'error',
+        'react/no-children-prop': 'error',
+        'react/no-danger-with-children': 'error',
+        'react/no-deprecated': 'error',
+        'react/no-did-mount-set-state': 'error',
+        'react/no-did-update-set-state': 'error',
+        'react/no-direct-mutation-state': 'error',
+        'react/no-find-dom-node': 'error',
+        'react/no-redundant-should-component-update': 'error',
+        'react/no-render-return-value': 'error',
+        'react/no-typos': 'error',
+        'react/no-string-refs': 'error',
+        'react/no-this-in-sfc': 'error',
+        'react/no-unescaped-entities': 'error',
+        'react/no-unsafe': 'error',
+        'react/no-unused-prop-types': 'error',
+        'react/no-unused-state': 'error',
+        'react/sort-comp': 'error',
+        'react/void-dom-elements-no-children': 'error',
+        'react/jsx-no-comment-textnodes': 'error',
+        'react/jsx-no-literals': 'error',
+        'react/jsx-no-target-blank': 'error',
+        'react/jsx-fragments': 'error',
+        'react/jsx-sort-default-props': 'error',
+      },
+    },
+    {
+      files: ['x-pack/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      plugins: ['react-perf'],
+      rules: {
+        'react-perf/jsx-no-new-object-as-prop': 'error',
+        'react-perf/jsx-no-new-array-as-prop': 'error',
+        'react-perf/jsx-no-new-function-as-prop': 'error',
+        'react/jsx-no-bind': 'error',
+      },
+    },
+    {
+      // typescript and javascript for front and back
       files: ['x-pack/plugins/lists/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node'],
       env: {
