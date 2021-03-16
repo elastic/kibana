@@ -181,21 +181,6 @@ logging:
 ====
 
 [float]
-[[known-issues-v7.12.0]]
-=== Known issue
-
-There is a known issue when you create aggregation-based area, bar, and line charts in *Visualize Library*. When you create the chart, split the chart by column, 
-then click and drag your cursor across the chart to zoom in on the data, the time filter is incorrectly applied.
-
-To resolve this issue, use the legacy charts library.
-
-. Open the main menu, then click *Stack Management > Advanced settings*.
-
-. Select *Legacy charts library*.
-+
-For more information, refer to {kibana-pull}94252[#94252].
-
-[float]
 [[feaatures-v7.12.0]]
 === Features
 
