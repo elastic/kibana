@@ -1,0 +1,84 @@
+{
+    "dynamic": "strict",
+    "properties": {
+        "@timestamp": {
+            "type": "date"
+        },
+        "alert": {
+            "properties": {
+                "actionGroup": {
+                    "type": "keyword"
+                },
+                "actionGroupName": {
+                    "type": "keyword"
+                },
+                "actionSubgroup": {
+                    "type": "keyword"
+                },
+                "context": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "id": {
+                    "type": "keyword"
+                },
+                "state": {
+                    "type": "object",
+                    "enabled": false
+                }
+            }
+        },
+        "tags": {
+            "ignore_above": 1024,
+            "type": "keyword",
+            "meta": {
+                "isArray": "true"
+            }
+        },
+        "message": {
+            "norms": false,
+            "type": "text"
+        },
+        "ecs": {
+            "properties": {
+                "version": {
+                    "ignore_above": 1024,
+                    "type": "keyword"
+                }
+            }
+        },
+        "event": {
+            "properties": {
+                "kind": {
+                    "type": "keyword"
+                }
+            }
+        },
+        "rule": {
+            "properties": {
+                "author": {
+                    "type": "keyword"
+                },
+                "category": {
+                    "type": "keyword"
+                },
+                "id": {
+                    "type": "keyword"
+                },
+                "license": {
+                    "type": "keyword"
+                },
+                "name": {
+                    "type": "keyword"
+                },
+                "params": {
+                    "type": "object",
+                    "enabled": false
+                },
+                "space": {
+                    "type": "keyword"
+                }
+            }
+        }
+    }
+}
