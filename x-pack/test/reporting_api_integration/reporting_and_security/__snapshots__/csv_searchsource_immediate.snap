@@ -41,6 +41,8 @@ BgMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"-\\",\\"Women's Clothing\\",EUR,Brigit
 "
 `;
 
+exports[`Reporting APIs CSV Generation from SearchSource Fails with an explanation if the search throws an error 1`] = `"{\\"statusCode\\":500,\\"error\\":\\"Internal Server Error\\",\\"message\\":\\"An internal server error occurred.\\"}"`;
+
 exports[`Reporting APIs CSV Generation from SearchSource date formatting Formatted date_nanos data, UTC timezone 1`] = `
 "date,message
 \\"Jan 1, 2015 @ 12:10:30.123456789\\",\\"Hello 2\\"
