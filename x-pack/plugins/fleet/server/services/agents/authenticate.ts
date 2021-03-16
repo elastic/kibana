@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type { ElasticsearchClient } from 'src/core/server';
 
 import type { Agent } from '../../types';
