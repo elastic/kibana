@@ -117,7 +117,10 @@ export async function persistedStateToExpression(
     };
   }
 
-  const indexPatternValidation = validateRequiredIndexPatterns(datasourceStates[datasourceId]);
+  const indexPatternValidation = validateRequiredIndexPatterns(
+    datasources[datasourceId],
+    datasourceStates[datasourceId]
+  );
 
   if (indexPatternValidation) {
     return {
@@ -149,41 +152,24 @@ export async function persistedStateToExpression(
 }
 
 export function getMissingIndexPattern(
-  currentDatasourceState:
-    | {
-        isLoading: boolean;
-        state: unknown;
-      }
-    | null
-    | string
+  currentDatasource: Datasource | null,
+  currentDatasourceState: { state: unknown } | null
 ) {
-  if (currentDatasourceState == null || typeof currentDatasourceState === 'string') {
+  if (currentDatasourceState == null || currentDatasource == null) {
     return [];
   }
-  const datasourceState =
-    (currentDatasourceState.state as {
-      layers: Record<string, { indexPatternId: string }>;
-      indexPatterns: Record<string, unknown>;
-    }) || {};
-
-  const ids = Object.values(datasourceState.layers || {}).map(
-    ({ indexPatternId }) => indexPatternId
-  );
-  return ids.filter((id) => !datasourceState.indexPatterns[id]);
+  const missingIds = currentDatasource.checkIntegrity(currentDatasourceState.state);
+  if (!missingIds.length) {
+    return [];
+  }
+  return missingIds;
 }
 
 const validateRequiredIndexPatterns = (
-  currentDatasourceState: unknown | null
+  currentDatasource: Datasource,
+  currentDatasourceState: { state: unknown } | null
 ): ErrorMessage[] | undefined => {
-  const missingIds = getMissingIndexPattern(
-    currentDatasourceState as
-      | {
-          isLoading: boolean;
-          state: unknown;
-        }
-      | null
-      | string
-  );
+  const missingIds = getMissingIndexPattern(currentDatasource, currentDatasourceState);
 
   if (!missingIds.length) {
     return;

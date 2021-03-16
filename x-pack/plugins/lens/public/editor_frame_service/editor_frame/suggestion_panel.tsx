@@ -183,7 +183,8 @@ export function SuggestionPanel({
     : activeVisualizationId;
 
   const missingIndexPatterns = getMissingIndexPattern(
-    activeDatasourceId && datasourceStates[activeDatasourceId]
+    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
   );
   const { suggestions, currentStateExpression, currentStateError } = useMemo(
     () => {

@@ -140,7 +140,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     : null;
 
   const missingIndexPatterns = getMissingIndexPattern(
-    activeDatasourceId && datasourceStates[activeDatasourceId]
+    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
   );
 
   const missingRefsErrors = missingIndexPatterns.length
