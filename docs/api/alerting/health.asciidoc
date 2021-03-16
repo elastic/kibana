@@ -1,4 +1,4 @@
-[[alerts-api-health]]
+[[alerting-health-api]]
 === Get Alerting framework health API
 ++++
 <titleabbrev>Get Alerting framework health</titleabbrev>
@@ -6,33 +6,33 @@
 
 Retrieve the health status of the Alerting framework.
 
-[[alerts-api-health-request]]
+[[alerting-health-api-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/alerts/_health`
+`GET <kibana host>:<port>/api/alerting/_health`
 
-`GET <kibana host>:<port>/s/<space_id>/api/alerts/_health`
+`GET <kibana host>:<port>/s/<space_id>/api/alerting/_health`
 
-[[alerts-api-health-params]]
+[[alerting-health-api-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-api-health-codes]]
+[[alerting-health-api-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[alerts-api-health-example]]
+[[alerting-health-api-example]]
 ==== Example
 
 Retrieve the health status of the Alerting framework:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/alerts/_health
+$ curl -X GET api/alerting/_health
 --------------------------------------------------
 // KIBANA
 
@@ -41,18 +41,18 @@ The API returns the following:
 [source,sh]
 --------------------------------------------------
 {
-   "isSufficientlySecure":true,
-   "hasPermanentEncryptionKey":true,
-   "alertingFrameworkHeath":{
-      "decryptionHealth":{
+   "is_sufficiently_secure":true,
+   "has_permanent_encryption_key":true,
+   "alerting_framework_health":{
+      "decryption_health":{
          "status":"ok",
          "timestamp":"2021-02-10T23:35:04.949Z"
       },
-      "executionHealth":{
+      "execution_health":{
          "status":"ok",
          "timestamp":"2021-02-10T23:35:04.949Z"
       },
-      "readHealth":{
+      "read_health":{
          "status":"ok",
          "timestamp":"2021-02-10T23:35:04.949Z"
       }
@@ -65,29 +65,29 @@ The health API response contains the following properties:
 [cols="2*<"]
 |===
 
-| `isSufficientlySecure`
+| `is_sufficiently_secure`
 | Returns `false` if security is enabled, but TLS is not.
 
-| `hasPermanentEncryptionKey`
+| `has_permanent_encryption_key`
 | Return the state `false` if Encrypted Saved Object plugin has not a permanent encryption Key.
 
-| `alertingFrameworkHeath`
-| This state property has three substates that identify the health of the alerting framework API: `decryptionHealth`, `executionHealth`, and `readHealth`.
+| `alerting_framework_health`
+| This state property has three substates that identify the health of the alerting framework API: `decryption_health`, `execution_health`, and `read_health`.
 
 |===
 
-`alertingFrameworkHeath` consists of the following properties:
+`alerting_framework_health` consists of the following properties:
 
 [cols="2*<"]
 |===
 
-| `decryptionHealth`
-| Returns the timestamp and status  of the alert decryption: `ok`, `warn` or `error` .
+| `decryption_health`
+| Returns the timestamp and status of the rule decryption: `ok`, `warn` or `error` .
 
 | `executionHealth`
-| Returns the timestamp and status of the alert execution: `ok`, `warn` or `error`.
+| Returns the timestamp and status of the rule execution: `ok`, `warn` or `error`.
 
 | `readHealth`
-| Returns the timestamp and status of the alert reading events: `ok`, `warn` or `error`.
+| Returns the timestamp and status of the rule reading events: `ok`, `warn` or `error`.
 
 |===

@@ -1,0 +1,44 @@
+[[rules-api]]
+== Rules APIs
+
+The following APIs are available for managing {kib} rules.
+
+* <<rules-create-api, Create rule API>> to create a rule
+
+* <<rules-update-api, Update rule API>> to update the attributes for existing rules
+
+* <<rules-get-api, Get rule API>> to retrieve a single rule by ID
+
+* <<rules-delete-api, Delete rule API>> to permanently remove a rule
+
+* <<rules-find-api, Find rules API>> to retrieve a paginated set of rules by condition
+
+* <<alerting-list-rule-types-api, List alerting rule types API>> to retrieve a list of rule types
+
+* <<rules-enable-api, Enable rule API>> to enable a single rule by ID
+
+* <<rules-disable-api, Disable rule API>> to disable a single rule by ID
+
+* <<rules-mute-api, Mute alert API>> to mute alert for a single rule by ID
+
+* <<rules-unmute-api, Unmute alert API>> to unmute alert for a single rule by ID
+
+* <<rules-mute-all-api, Mute all alerts API>> to mute all alerts for a single rule by ID
+
+* <<rules-unmute-all-api, Unmute all alerts API>> to unmute all alerts for a single rule by ID
+
+* <<alerting-health-api, Get Alerting framework health API>> to retrieve the health of the Alerting framework
+
+include::alerting/create.asciidoc[]
+include::alerting/update.asciidoc[]
+include::alerting/get.asciidoc[]
+include::alerting/delete.asciidoc[]
+include::alerting/find.asciidoc[]
+include::alerting/list_rule_types.asciidoc[]
+include::alerting/enable.asciidoc[]
+include::alerting/disable.asciidoc[]
+include::alerting/mute_all.asciidoc[]
+include::alerting/mute.asciidoc[]
+include::alerting/unmute_all.asciidoc[]
+include::alerting/unmute.asciidoc[]
+include::alerting/health.asciidoc[]
