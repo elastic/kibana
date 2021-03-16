@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { flow } from 'lodash';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -54,6 +55,8 @@ const fieldsConfig: FieldsConfig = {
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternsFieldLabel', {
       defaultMessage: 'Patterns',
     }),
+    deserializer: flow(String, to.escapeBackslashes),
+    serializer: from.unescapeBackslashes,
     helpText: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternsHelpText', {
       defaultMessage:
         'Grok expressions used to match and extract named capture groups. Uses the first matching expression.',
@@ -134,6 +137,8 @@ export const Grok: FunctionComponent = () => {
               onRemove={removeItem}
               addLabel={i18nTexts.addPatternLabel}
               textValidation={patternValidation}
+              textDeserializer={fieldsConfig.patterns?.deserializer}
+              textSerializer={fieldsConfig.patterns?.serializer}
             />
           );
         }}
