@@ -170,24 +170,24 @@ image::images/intro-management.png[Index Management view in Stack Management]
 [float]
 ==== Alert and take action
 Detecting and acting on significant shifts and signals in your data is a need
-that exists in almost every use case. For example, you might set an alert to notify you when:
+that exists in almost every use case. For example, you might set a rule to notify you when:
 
 * A shift occurs in your business critical KPIs.
 * System resources, such as memory, CPU and disk space, take a dip.
 * An unusually high number of service requests, suspicious processes, and login attempts occurs.
 
-An alert triggers when a specified condition is met. For example,
-you can trigger an alert when the average or max of one of
+A rule triggers when a specified condition is met. For example,
+you can create a rule when the average or max of one of
 your metrics exceeds a threshold within a specified time frame.
 
-When the alert triggers, you can send a notification to a system that is part of
+When the rule triggers, you can send a notification to a system that is part of
 your daily workflow. {kib} integrates with email, Slack, PagerDuty, and ServiceNow,
 to name a few.
 
-A dedicated view for creating, searching, and editing alerts is in <<alert-management,*Alerts and Actions*>>.
+A dedicated view for creating, searching, and editing rules is in <<alert-management,*Rules and Connectors*>>.
 
 [role="screenshot"]
-image::images/alerts-and-actions.png[Alerts and Actions view]
+image::images/rules-and-connectors.png[Rules and Connectors view]
 
 
 [float]
@@ -425,8 +425,8 @@ the <<get-started,{kib} Quick start>>.
 |Manage your Elasticsearch data
 |<<manage-data,Stack Management > Data>>
 
-|Set up alerts
-|<<alert-management,Stack Management > Alerts and Actions>>
+|Set up rules
+|<<alert-management,Stack Management > Rules and Connectors>>
 
 |Organize your workspace and users
 |<<xpack-spaces,Stack Management > Spaces>>

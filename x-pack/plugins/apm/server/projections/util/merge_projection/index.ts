@@ -10,7 +10,7 @@ import { DeepPartial } from 'utility-types';
 import {
   AggregationInputMap,
   ESSearchBody,
-} from '../../../../../../typings/elasticsearch';
+} from '../../../../../../../typings/elasticsearch';
 import { APMEventESSearchRequest } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { Projection } from '../../typings';
 

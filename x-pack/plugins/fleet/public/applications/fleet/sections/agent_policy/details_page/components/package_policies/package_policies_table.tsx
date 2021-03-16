@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiBadge,
   EuiContextMenuItem,
   EuiButton,
@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { AgentPolicy, PackagePolicy } from '../../../../../types';
+import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, ContextMenuActions } from '../../../../../components';
 import { PackagePolicyDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
 import { useCapabilities, useLink } from '../../../../../hooks';
