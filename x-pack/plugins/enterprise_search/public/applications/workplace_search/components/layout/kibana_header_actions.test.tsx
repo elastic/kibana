@@ -12,7 +12,6 @@ import { shallow } from 'enzyme';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import { externalUrl } from '../../../shared/enterprise_search_url';
-import { EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 
 import { WorkplaceSearchHeaderActions } from './';
 
@@ -28,7 +27,9 @@ describe('WorkplaceSearchHeaderActions', () => {
 
     const wrapper = shallow(<WorkplaceSearchHeaderActions />);
 
-    expect(wrapper.find(EuiButtonEmptyTo).prop('to')).toEqual('/p/sources');
+    expect(wrapper.find(EuiButtonEmpty).first().prop('href')).toEqual(
+      'http://localhost:3002/ws/sources'
+    );
   });
 
   it('renders a link to the search application', () => {
@@ -36,6 +37,8 @@ describe('WorkplaceSearchHeaderActions', () => {
 
     const wrapper = shallow(<WorkplaceSearchHeaderActions />);
 
-    expect(wrapper.find(EuiButtonEmpty).prop('href')).toEqual('http://localhost:3002/ws/search');
+    expect(wrapper.find(EuiButtonEmpty).last().prop('href')).toEqual(
+      'http://localhost:3002/ws/search'
+    );
   });
 });
