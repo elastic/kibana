@@ -1,28 +1,243 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-This section summarizes the most important changes in this release. For previous
-releases, refer to:
+coming::[7.12.0]
 
-* {kibana-ref-all}/7.11/whats-new.html[7.11]
-* {kibana-ref-all}/7.10/whats-new.html[7.10]
-* {kibana-ref-all}/7.9/whats-new.html[7.9]
-* {kibana-ref-all}/7.8/whats-new.html[7.8]
-* {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7]
-* {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6]
-* {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5]
-* {kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4]
-* {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3]
-* {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
-* {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1]
-* {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
+Here are the highlights of what's new and improved in {minor-version}.
+For detailed information about this release,
+check out the <<release-notes, release notes>>.
 
-For the full list of changes in {minor-version}, see <<release-notes>> and
-<<breaking-changes>>.
+Other versions: {kibana-ref-all}/7.11/whats-new.html[7.11] | {kibana-ref-all}/7.10/whats-new.html[7.10] |
+{kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
+{kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
+{kibana-ref-all}/7.4/release-highlights-7.4.0.html[7.4] | {kibana-ref-all}/7.3/release-highlights-7.3.0.html[7.3] | {kibana-ref-all}/7.2/release-highlights-7.2.0.html[7.2]
+| {kibana-ref-all}/7.1/release-highlights-7.1.0.html[7.1] | {kibana-ref-all}/7.0/release-highlights-7.0.0.html[7.0]
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
 // tag::notable-highlights[]
+
+[float]
+[[search-sessions-7-12]]
+=== Search sessions
+
+Increasing data volumes and tiered storage systems mean some searches
+take a little longer. When searching frozen indices or using cold storage,
+there is no reason to sit and wait. {kib} has added search sessions
+that allow users to have control when {es} needs more time to complete a search.
+
+Search sessions are groups of queries, from a dashboard for example,
+that can run in the background for as long as needed. You can retrieve
+search results at any time, and {kib} manages older sessions automatically.
+Once you have saved your session, you can close the browser window and
+come back once your searches are complete.
+
+You can save a search session in *Dashboard* and *Discover*, and then
+manage it in *Stack Management*.
+
+[role="screenshot"]
+image::user/images/highlights-search-session.png[Popup for saving a search session from a dashboard]
+
+[float]
+[[customizable-header-7-12]]
+=== Custom global header
+
+Whether you have multiple {kib} instances running for different environments,
+need to provide some additional context for accreditation purposes, or simply
+want to customize {kib}, you can now add your own header to Kibana.
+Customizable headers are a https://www.elastic.co/subscriptions[subscription feature].
+For more details on how to
+configure globally, view the configuration settings.
+
+[role="screenshot"]
+image::user/images/highlights-global-header.png[Customizable global header]
+
+[float]
+[[runtime-fields-7-12]]
+=== Runtime fields in Discover
+
+With 7.12, runtime fields are now fully usable and available for use in
+*Discover*. This enables you to open *Discover* and display schema-on-write
+fields and schema-on-read fields side by side. You can also use runtime fields
+to create visualizations.
+Check out https://github.com/elastic/kibana/issues/88426[this list] of known limitations.
+
+[float]
+[[dashboard-7-12]]
+=== New Dashboard flow
+
+Creating dashboards is now quicker and easier with the new streamlined navigation
+between apps. We’re thinking dashboard-first, making it easier to create new
+visualizations and add them in place, without interrupting the dashboard building process.
+For more information about the Dashboard changes, refer to {kibana-ref}/dashboard.html[Dashboard].
+
+[float]
+==== Visualize Library
+
+Visualize is now the **Visualize Library** to reflect its new function as the
+home for all of your saved panels.
+
+[float]
+==== Copy to dashboard
+
+Have a panel that you want to instantly copy to a new or existing dashboard?
+Now you can right from the panel menu.
+
+[float]
+==== Quick save
+
+We’ve added a *Save* option to the toolbar so that you can quickly
+save a dashboard without adding a title first. To pick up where you left off,
+simply navigate back to *Dashboard*.
+
+[float]
+[[alerting-7-12]]
+=== {es} query alert
+
+*Alerting* adds a number of new alert types, including the {kibana-ref}/rule-type-es-query.html.html[{es} query alert],
+which allows you to create alerts using Search DSL queries.
+Use the {es} query alert with any of your indices and be alerted on the number of matching documents.
+This alert is designed for
+advanced use cases where you want to create custom alerts with custom DSL queries.
+
+[role="screenshot"]
+image::user/images/highlights-es-query.png[Elasticsearch query alert]
+
+Other new alert types include the <<tracking-alert-7-12,tracking containment alert>>, the <<anomaly-alert-7-12,{anomaly-detect} alert>>,
+and the stack monitoring alert.
+
+[float]
+[[maps-7-12]]
+=== Maps&mdash;alerts and labels
+
+[float]
+[[tracking-alert-7-12]]
+==== Location-based alert
+
+The 7.12 release brings the location-based alert to GA.
+The {kibana-ref}/geo-alerting.html[tracking containment alert] allows you to monitor an entity’s
+location as it relates to a boundary, triggering a notification while contained,
+or when entering or leaving a boundary. The tracking alert feature is also
+known as “geo-fencing” and is common for tracking the movement of devices, such as
+vehicles within a fleet. The tracking containment alert is a
+https://www.elastic.co/subscriptions[subscription feature].
+
+[float]
+==== More labels
+
+You can now add labels to polygons and lines.
+This simple feature can help anyone working with your map to immediately have
+the right context for analysis.
+
+[role="screenshot"]
+image::user/images/highlights-maps.png[Map showing lines with labels]
+
+[float]
+[[drilldowns-7-12]]
+=== URL drilldowns generally available
+
+URL drilldowns, which enable you to navigate from a dashboard to internal or external URLs,
+is now generally available. Now users whose companies limit the use of beta software or services
+in production can leverage the capabilities that URL drilldowns provide. For more information,
+refer to {kibana-ref}/drilldowns.html#url-drilldowns[URL drilldowns].
+
+
+[float]
+[[lens-7-12]]
+=== Lens&mdash;Functions, interactions, and improvements
+
+[float]
+==== New functions
+
+*Lens* now supports even more functions to meet your visualization needs,
+including percentiles, cumulative sum, moving average, counter rate, and differences.
+Io give the new functions a try, take a look at the new Lens tutorial.
+
+[float]
+==== New drag and drop interactions
+
+To significantly speed up the visualization creation process, we have added a
+fully accessible drag and drop system in *Lens*. For more information, refer to *Lens*.
+
+[float]
+==== Table improvements
+To customize the data table in *Lens*, we’ve implemented several customization options,
+including column resize, text alignment, and the ability to hide columns.
+
+[float]
+[[charts-7-12]]
+=== New chart renderer
+
+To align data visualization best practices and styling across {kib}, we replaced
+the legacy renderer for aggregation-based area, line, and bar charts. Now when you
+create these charts in *Dashboard* or *Visualize Library*, you’ll notice a more
+uniform look and feel.
+
+[role="screenshot"]
+image::user/images/highlights-chart.png[Chart showing a more unified look and feel]
+
+
+
+[float]
+[[user-management-7-12]]
+=== Improved user management
+
+7.12 brings a redesigned user management interface. Highlights include a redesigned role selector,
+and the ability to both activate and deactivate users in the native realm.
+
+[role="screenshot"]
+image::user/images/highlights-user-management.png[User management UI showing new role select]
+
+[float]
+[[machine-learning-7-12]]
+=== Machine Learning&mdash;alerts, geo data, and more
+
+[float]
+[[anomaly-alert-7-12]]
+==== {anomaly-detect-cap} alerts (beta)
+
+This release provides more flexible, more intuitive, easier to set-up alerting for {anomaly-detect}.
+{anomaly-detect-cap} alerts are integrated with the {kib} alerting framework,
+so you can quickly create alerts for your {anomaly-jobs}. This new type of alert can be created
+for existing jobs from the *Alerts* page under *Stack Management* or from the {ml} job list,
+or at the end of the Anomaly Detection job wizard.
+
+You can pick the type of results
+you want to be alerted on, depending on whether you are interested in the overall anomaly score for the job,
+individual anomalies, or entities behaving unusually over time. The new alert type replaces
+the current {ml} integration with *Watcher*.
+
+[role="screenshot"]
+image::user/images/highlights-anomaly-detection.png[Anomaly detection alert]
+
+[float]
+==== {ml-cap} integration with Maps
+
+This integration enables you to view geographic data inside the {ml-cap} app and
+anomaly data inside *Maps*. The redesigned Data Visualizer shows the distribution of
+values for geo_point field types.
+
+[role="screenshot"]
+image::user/images/highlights-ml-maps.png[Machine learning integration with Maps]
+
+For jobs that use the {ml-docs}/ml-geo-functions.html#ml-lat-long[lat_long] function to detect anomalies in the geographic location
+of the input data, the Anomaly Explorer shows the actual and typical locations on maps.
+
+[role="screenshot"]
+image::user/images/highlights-lat-long.png[Anomaly Explorer showing the actual and typical locations on maps]
+
+[float]
+==== AUC ROC visualization for classification jobs
+
+Performance measurement is an essential part of {ml}, and for classification models,
+the {ml-docs}/ml-dfanalytics-evaluate.html#ml-dfanalytics-class-aucroc[AUC ROC] (Area Under the Curve of Receiver Operating Characteristics) is one of the most
+important evaluation metrics for checking model performance. You can view the ROC
+curve in the data frame analytics job results in {kib}. The AUC value is calculated from this curve,
+as a number between 0 and 1. A higher value means the model is more precise in predicting the class correctly.
+
+[role="screenshot"]
+image::user/images/highlights-auc-roc.png[Visualization of the ROC curve in the data frame analytics job results]
+
 
 // end::notable-highlights[]
