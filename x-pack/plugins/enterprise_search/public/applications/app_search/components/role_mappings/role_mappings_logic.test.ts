@@ -62,7 +62,7 @@ describe('RoleMappingsLogic', () => {
 
   describe('actions', () => {
     describe('setRoleMappingsData', () => {
-      it('it sets data based on server response from the `mappings` (plural) endpoint', () => {
+      it('sets data based on server response from the `mappings` (plural) endpoint', () => {
         RoleMappingsLogic.actions.setRoleMappingsData(mappingsServerProps);
 
         expect(RoleMappingsLogic.values.roleMappings).toEqual([asRoleMapping]);
@@ -443,13 +443,12 @@ describe('RoleMappingsLogic', () => {
         expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
 
-      it('will do nothing if not confirmed', async () => {
+      it('will do nothing if not confirmed', () => {
         mount(mappingServerProps);
-        window.confirm = () => false;
+        jest.spyOn(window, 'confirm').mockReturnValueOnce(false);
         RoleMappingsLogic.actions.handleDeleteMapping();
 
         expect(http.delete).not.toHaveBeenCalled();
-        await nextTick();
       });
     });
   });
