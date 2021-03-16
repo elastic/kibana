@@ -51,12 +51,12 @@ const isLessThanMaxSize = (str: any) => {
 
 const validatePdfLogo = (str: any) => {
   if (!isImageData(str)) {
-    return i18n.translate('xpack.reporting.uiSettings.validate.customLogo', {
+    return i18n.translate('xpack.reporting.uiSettings.validate.customLogo.badFile', {
       defaultMessage: `Sorry, that file will not work. Please try a different image file.`,
     });
   }
   if (!isLessThanMaxSize(str)) {
-    return i18n.translate('xpack.reporting.uiSettings.validate.customLogo', {
+    return i18n.translate('xpack.reporting.uiSettings.validate.customLogo.tooLarge', {
       defaultMessage: `Sorry, that file is too large. The image file must be less than 200 kilobytes.`,
     });
   }
