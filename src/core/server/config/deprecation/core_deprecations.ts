@@ -145,7 +145,7 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
       '"logging.dest" has been deprecated and will be removed ' +
         'in 8.0. To set the destination moving forward, you can use the "console" appender ' +
         'in your logging configuration or define a custom one. For more details, see ' +
-        'https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
     );
   }
   return settings;
@@ -189,7 +189,7 @@ const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
         'you can configure the "appender.layout" property for every custom appender in your logging configuration. ' +
         'There is currently no default layout for custom appenders and each one must be declared explicitly. ' +
         'For more details, see ' +
-        'https://github/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx.'
     );
   }
   return settings;
@@ -205,7 +205,7 @@ const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   ) {
     log(
       '"logging.rotate" and sub-options have been deprecated and will be removed in 8.0. ' +
-        'Moving forward, you can enabled log rotation using the "rolling-file" appender for a context ' +
+        'Moving forward, you can enable log rotation using the "rolling-file" appender for a logger ' +
         'in your logging configuration. For more details, see ' +
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender'
     );

@@ -103,9 +103,8 @@ logging:
       fileName: /var/log/kibana.log
       layout:
         type: pattern
-  loggers:
-    - name: plugins.myPlugin
-      appenders: [file]
+  root:
+    appenders: [default, file]
 -------------------
 
 [float]
@@ -193,7 +192,6 @@ logging:
       type: console
       layout:
         type: pattern
-  appenders:
     custom_json:
       type: console
       layout:
@@ -201,8 +199,9 @@ logging:
   loggers:
     - name: plugins.myPlugin
       appenders: [custom_console]
-    - name: plugins.myOtherPlugin
-      appenders: [custom_json]
+  root:
+    appenders: [default, custom_json]
+    level: warn
 -------------------
 
 [float]
