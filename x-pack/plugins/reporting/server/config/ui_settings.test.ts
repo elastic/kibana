@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { isImageData } from './ui_settings';
+import { range } from 'lodash';
+import { PdfLogoSchema } from './ui_settings';
 
-test('validate base64 string is image data', () => {
+test('validates when provided with image data', () => {
   const jpgString =
     `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAoHCBcUFBUUExUYGRUaGRsZGxsZHB8bIh0iGhgbGxkbGx8dIy0kGx0rIiIbJTcoKi8xNDU0ISY6Pzo2` +
     `Pi0zNDMBCwsLBgYGEAYGEDEcFRwxMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMf/AABEIAOgA2gMBIgACEQEDEQH/xAAcAAEAAgMBAQE` +
@@ -73,7 +74,7 @@ test('validate base64 string is image data', () => {
     `D4oiDjY7svTVjcs0TT94ABw8DZRg9F0LB+bVFRG4Xy9skC/LjZEQDsxiUDfzfEDIQR2ZG3/EXXuBuNNaS50D9NxFr8+P9lEQcGr6S62nldTy0jHyi2seZwN927is9V0h4hluzDS` +
     `3iS4m1rankiINGXpIqajLGMPc6VrgbNDnAO4ag+C+vxLFJGujGHMYDf1job6nsuuDqe7f8URBwoazGZHFkNO5guB2YwwDS2/QeS69J0bYhUDPVVZY47wHG+7iRvREEqwfospIQC` +
     `+8snFz9eWgvYKS4ZsvS05zRQsDveIzH4Er4iDtr6iICIiAiIgIiICIiD//2Q==`;
-  expect(isImageData(jpgString)).toBe(true);
+  expect(PdfLogoSchema.validate(jpgString)).toBe(jpgString);
 
   const pngString =
     `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAO4AAADUCAMAAACs0e/bAAAAjVBMVEX////8/Pz4+Pj5+fnb29vz8/Px8fFeXl7r6+u/v79nZ` +
@@ -146,7 +147,7 @@ test('validate base64 string is image data', () => {
     `Ui7KC7taYS0qlRoQ9imL6u7UmGSDHp/q7QqknE+A8TLZlD2cfqsrdrLzH8/eNkHwmsSS6DzEbzi/8imTxKSl5JFDfw0j1xP0OCfwY7CCtVQFCqFyqVSZ14jwFUmM8Hq8Wgm0PZw` +
     `FSKm2ErmmHyl1P2hLuboXsb4fpqELkofxAYDgU6iKBk0QkCVZ+51D+QViwthm63t7jff1HQNoHtj/U6wJyMhHSNKWqfFeZhE+5Pn7wgx/84Ac/+MEPfvCDH/zgSfw/XwGzVqSgf` +
     `tcAAAAASUVORK5CYII=`;
-  expect(isImageData(pngString)).toBe(true);
+  expect(PdfLogoSchema.validate(pngString)).toBe(pngString);
 
   const gifString =
     `data:image/gif;base64,R0lGODlhoADIAPYAAO/w7wgFBwsLCxMTExsbGyMjI5SUlLS0tLu7u9vb2+Hh4e/v7/Ds7////0NDQ2RkZCkXJO/w8PLy8g8QD` +
@@ -176,7 +177,7 @@ test('validate base64 string is image data', () => {
     `W1m0/ZnNwIhPnRiW5AVQMr3UaftGCYNkY/S8CQEfgUrL5dwEY9gJh12gPK9zAYwk6dXPri8HINPXLnyEKbDsO2VJqKNa5D3Ythc5BpB0h1jHm9/MZhEzvExtbjDpgQXcKy1wIbM` +
     `A2onf1s0nI7AMc2SAU/eqVy99bDdsOYC4S0628Dr3/ufqOrL4eDfUpzA/gGp7FPMIB5f1vX7obmCQaez3gT4OAFD/irAa7waMu73/3WY8NxDeuJW/zi3RYGxjf+b4hwnOOD+XjH` +
     `53IIefTH3WR4N8lXzvKWu/zlMI+5zGdO85rb/OY4z7nOd87znvv850APutCHTvSiG/3oSE+60pfO9KY7/elQj7rU5xIIADs=`;
-  expect(isImageData(gifString)).toBe(true);
+  expect(PdfLogoSchema.validate(gifString)).toBe(gifString);
 
   const svgString =
     `data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhLS0gQ3JlYXRlZCB3aXR` +
@@ -224,27 +225,43 @@ test('validate base64 string is image data', () => {
     `LjM3NSwtOTYuMDYyNSB6IgogICAgICAgICBpZD0icGF0aDM2ODkiCiAgICAgICAgIHN0eWxlPSJjb2xvcjojMDAwMDAwO2ZpbGw6bm9uZTtzdHJva2U6bm9uZTtzdHJva2Utd2lkd` +
     `Gg6MTttYXJrZXI6bm9uZTt2aXNpYmlsaXR5OnZpc2libGU7ZGlzcGxheTppbmxpbmU7b3ZlcmZsb3c6dmlzaWJsZTtlbmFibGUtYmFja2dyb3VuZDphY2N1bXVsYXRlIiAvPgogIC` +
     `AgPC9nPgogIDwvZz4KPC9zdmc+Cg==`;
-  expect(isImageData(svgString)).toBe(true);
+  expect(PdfLogoSchema.validate(svgString)).toBe(svgString);
 });
 
-test('validate base64 string is not image data', () => {
-  expect(isImageData('')).toBe(false);
-  expect(isImageData(undefined)).toBe(false);
-  expect(isImageData(null)).toBe(false);
-  expect(isImageData(true)).toBe(false);
-  expect(isImageData(false)).toBe(false);
-  expect(isImageData({})).toBe(false);
-  expect(isImageData([])).toBe(false);
-  expect(isImageData(0)).toBe(false);
-  expect(isImageData(0x00f)).toBe(false);
+test('validates if provided with null / undefined value', () => {
+  expect(() => PdfLogoSchema.validate(undefined)).not.toThrow();
+  expect(() => PdfLogoSchema.validate(null)).not.toThrow();
+});
+
+test('throws validation error if provided with data over max size', () => {
+  const largeJpgMock =
+    `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAoHCBcUFBUUExUYGRUaGRsZGxsZHB8bIh0iGhgbGxkbGx8dIy0kGx0rIiIbJTcoKi8xNDU0ISY6Pzo2` +
+    range(0, 2050)
+      .map(
+        () =>
+          `Pi0zNDMBCwsLBgYGEAYGEDEcFRwxMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMTExMf/AABEIAOgA2gMBIgACEQEDEQH/xAAcAAEAAgMBAQE`
+      )
+      .join('') +
+    `+8snFz9eWgvYKS4ZsvS05zRQsDveIzH4Er4iDtr6iICIiAiIgIiICIiD//2Q==`;
+  expect(() => PdfLogoSchema.validate(largeJpgMock)).toThrowError(/too large/);
+});
+
+test('throws validation error if provided with non-image data', () => {
+  expect(() => PdfLogoSchema.validate('')).toThrowError(/try a different image/);
+  expect(() => PdfLogoSchema.validate(true)).toThrow(/try a different image/);
+  expect(() => PdfLogoSchema.validate(false)).toThrow(/try a different image/);
+  expect(() => PdfLogoSchema.validate({})).toThrow(/try a different image/);
+  expect(() => PdfLogoSchema.validate([])).toThrow(/try a different image/);
+  expect(() => PdfLogoSchema.validate(0)).toThrow(/try a different image/);
+  expect(() => PdfLogoSchema.validate(0x00f)).toThrow(/try a different image/);
 
   const csvString =
     `data:text/csv;base64,Il9pZCIsIl9pbmRleCIsIl9zY29yZSIsIl90eXBlIiwiZm9vLmJhciIsImZvby5iYXIua2V5d29yZCIKZjY1QU9IZ0J5bFZmWW04W` +
     `TRvb1EsYmVlLDEsIi0iLGJheixiYXoKbks1QU9IZ0J5bFZmWW04WTdZcUcsYmVlLDEsIi0iLGJvbyxib28K`;
-  expect(isImageData(csvString)).toBe(false);
+  expect(() => PdfLogoSchema.validate(csvString)).toThrow(/try a different image/);
 
   const scriptString =
     `data:application/octet-stream;base64,QEVDSE8gT0ZGCldFRUtPRllSLkNPTSB8IEZJTkQgIlRoaXMgaXMiID4gVEVNUC5CQV` +
     `QKRUNITz5USElTLkJBVCBTRVQgV0VFSz0lJTMKQ0FMTCBURU1QLkJBVApERUwgIFRFTVAuQkFUCkRFTCAgVEhJUy5CQVQKRUNITyBXZWVrICVXRUVLJQo=`;
-  expect(isImageData(scriptString)).toBe(false);
+  expect(() => PdfLogoSchema.validate(scriptString)).toThrow(/try a different image/);
 });

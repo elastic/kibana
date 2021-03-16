@@ -11,6 +11,7 @@ import { CoreSetup, UiSettingsParams } from 'kibana/server';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from '../../common/constants';
 
 const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
+const maxLogoSizeInKilobytes = kbToBase64Length(200);
 
 // inspired by x-pack/plugins/canvas/common/lib/dataurl.ts
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;
@@ -36,23 +37,36 @@ const isImageData = (str: any): boolean => {
   return true;
 };
 
-const isLessThanMaxSize = (str: any, maxSize: string) => {
-  const schemaMax = schema.byteSize({ max: maxSize });
-  return schemaMax.validate(str);
+const isLessThanMaxSize = (str: any) => {
+  if (typeof str !== 'string') {
+    return false;
+  }
+
+  if (str.length > maxLogoSizeInKilobytes) {
+    return false;
+  }
+
+  return true;
 };
 
-export const validatePdfLogo = (str: any) => {
+const validatePdfLogo = (str: any) => {
   if (!isImageData(str)) {
     return i18n.translate('xpack.reporting.uiSettings.validate.customLogo', {
       defaultMessage: `Sorry, that file will not work. Please try a different image file.`,
     });
   }
-  if (!isLessThanMaxSize(str, '200kb')) {
+  if (!isLessThanMaxSize(str)) {
     return i18n.translate('xpack.reporting.uiSettings.validate.customLogo', {
       defaultMessage: `Sorry, that file is too large. The image file must be less than 200 kilobytes.`,
     });
   }
 };
+
+export const PdfLogoSchema = schema.nullable(
+  schema.any({
+    validate: validatePdfLogo,
+  })
+);
 
 export function registerUiSettings(core: CoreSetup<object, unknown>) {
   core.uiSettings.register({
@@ -66,15 +80,11 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       sensitive: true,
       type: 'image',
-      schema: schema.nullable(
-        schema.any({
-          validate: validatePdfLogo,
-        })
-      ),
+      schema: PdfLogoSchema,
       category: [PLUGIN_ID],
       validation: {
         maxSize: {
-          length: kbToBase64Length(200),
+          length: maxLogoSizeInKilobytes,
           description: '200 kB',
         },
       },
