@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
 import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
@@ -29,7 +30,7 @@ const memoizedIndexPatterns = (globPatterns: string) => {
 const gbMultiplier = 1000000000;
 
 export async function fetchIndexShardSize(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   threshold: number,
@@ -113,7 +114,7 @@ export async function fetchIndexShardSize(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const stats: IndexShardSizeStats[] = [];
   const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
   const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
