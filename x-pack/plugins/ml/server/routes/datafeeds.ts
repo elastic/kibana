@@ -295,8 +295,8 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
         const { body } = await mlClient.startDatafeed({
           datafeed_id: datafeedId,
           body: {
-            start,
-            end,
+            start: start !== undefined ? String(start) : undefined,
+            end: end !== undefined ? String(end) : undefined,
           },
         });
 

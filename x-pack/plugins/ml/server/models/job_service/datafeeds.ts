@@ -103,8 +103,8 @@ export function datafeedsProvider(mlClient: MlClient) {
     return mlClient.startDatafeed({
       datafeed_id: datafeedId,
       body: {
-        start: (start as unknown) as string,
-        end: (end as unknown) as string,
+        start: start !== undefined ? String(start) : undefined,
+        end: end !== undefined ? String(end) : undefined,
       },
     });
   }
@@ -117,13 +117,13 @@ export function datafeedsProvider(mlClient: MlClient) {
         const { body } = await mlClient.stopDatafeed({
           datafeed_id: datafeedId,
         });
-        results[datafeedId].stopped = body.stopped;
+        results[datafeedId] = { stopped: body.stopped };
       } catch (error) {
         if (isRequestTimeout(error)) {
           return fillResultsWithTimeouts(results, datafeedId, datafeedIds, DATAFEED_STATE.STOPPED);
         } else {
           results[datafeedId] = {
-            started: false,
+            stopped: false,
             error: error.body,
           };
         }
