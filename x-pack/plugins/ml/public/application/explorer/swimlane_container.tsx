@@ -26,6 +26,8 @@ import {
   HeatmapSpec,
   TooltipSettings,
   HeatmapBrushEvent,
+  Position,
+  ScaleType,
 } from '@elastic/charts';
 import moment from 'moment';
 
@@ -370,17 +372,18 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   <Settings
                     onElementClick={onElementClick}
                     showLegend
-                    legendPosition="top"
+                    legendPosition={Position.Top}
                     xDomain={{
                       min: swimlaneData.earliest * 1000,
                       max: swimlaneData.latest * 1000,
                       minInterval: swimlaneData.interval * 1000,
                     }}
                     tooltip={tooltipOptions}
+                    debugState
                   />
                   <Heatmap
                     id={id}
-                    colorScale="threshold"
+                    colorScale={ScaleType.Threshold}
                     ranges={[
                       ANOMALY_THRESHOLD.LOW,
                       ANOMALY_THRESHOLD.WARNING,
@@ -402,7 +405,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                     valueAccessor="value"
                     highlightedData={highlightedData}
                     valueFormatter={getFormattedSeverityScore}
-                    xScaleType="time"
+                    xScaleType={ScaleType.Time}
                     ySortPredicate="dataIndex"
                     config={swimLaneConfig}
                   />

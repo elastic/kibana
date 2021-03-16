@@ -51,6 +51,9 @@ const testDataList = [
   },
 ];
 
+const overallSwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneOverall';
+const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
@@ -125,6 +128,49 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('anomalies table is not empty');
           await ml.anomaliesTable.assertTableNotEmpty();
         });
+
+        it('renders Overall swim lane', async () => {
+          await ml.testExecution.logTestStep('has correct axes labels');
+          await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'x', [
+            '2016-02-07 00:00',
+            '2016-02-08 00:00',
+            '2016-02-09 00:00',
+            '2016-02-10 00:00',
+            '2016-02-11 00:00',
+            '2016-02-12 00:00',
+          ]);
+          await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'y', ['Overall']);
+        });
+
+        it('renders View By swim lane', async () => {
+          await ml.testExecution.logTestStep('has correct axes labels');
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
+            '2016-02-07 00:00',
+            '2016-02-08 00:00',
+            '2016-02-09 00:00',
+            '2016-02-10 00:00',
+            '2016-02-11 00:00',
+            '2016-02-12 00:00',
+          ]);
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
+            'AAL',
+            'VRD',
+            'EGF',
+            'SWR',
+            'AMX',
+            'JZA',
+            'TRS',
+            'ACA',
+            'BAW',
+            'ASA',
+          ]);
+        });
+
+        it('supports cell selection by click', async () => {});
+
+        it('supports cell selection by brush action', async () => {});
+
+        it('restores cell selection from the URL state', async () => {});
 
         it('adds swim lane embeddable to a dashboard', async () => {
           // should be the last step because it navigates away from the Anomaly Explorer page
