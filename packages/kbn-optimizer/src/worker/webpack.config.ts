@@ -270,8 +270,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           extractComments: false,
           parallel: false,
           terserOptions: {
-            compress: false,
-            mangle: false,
+            compress: true,
+            mangle: true,
           },
         }),
       ],
