@@ -42,6 +42,7 @@ export enum ScheduleUnit {
 }
 
 export enum Mode {
+  FORM = 'form',
   JSON = 'json',
   TEXT = 'text',
   XML = 'xml',
