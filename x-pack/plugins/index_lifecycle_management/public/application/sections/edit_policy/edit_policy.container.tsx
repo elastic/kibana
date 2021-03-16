@@ -90,7 +90,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   }
 
   const maybePolicy = getPolicyByName(policies, attemptToURIDecode(policyName))?.policy;
-  const isNewPolicy = !maybePolicy;
+  const isNewPolicy = maybePolicy === undefined;
   const policy = maybePolicy ?? defaultPolicy;
 
   return (

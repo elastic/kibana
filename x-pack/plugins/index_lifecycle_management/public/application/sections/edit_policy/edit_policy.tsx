@@ -145,16 +145,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
     window.scrollTo(0, 0);
   }, []);
 
-  const currentViewPhase = currentView.id === 'rollupAction' ? currentView.phase : undefined;
-  const currentRollupField = form.getFields()[`phases.${currentViewPhase}.actions.rollup.config`];
-  const hasCurrentRollupField = Boolean(currentRollupField);
-
-  useEffect(() => {
-    if (!hasCurrentRollupField) {
-      goToPolicyView();
-    }
-  }, [hasCurrentRollupField, goToPolicyView]);
-
   return (
     <EuiPage>
       <EuiPageBody>
@@ -351,7 +341,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               ) : null}
             </Form>
           </div>
-          {currentView.id === 'rollupAction' && hasCurrentRollupField && (
+          {currentView.id === 'rollupAction' && (
             <RollupWizard
               form={form}
               policyName={currentPolicyName || originalPolicyName}
@@ -362,14 +352,14 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               }}
               onDone={(rollupAction) => {
                 const { phase } = currentView;
-                const fieldPath = `phases.${phase}.actions.rollup.config`;
-                const rollupField = form.getFields()[fieldPath];
+                const rollupConfigPath = `phases.${phase}.actions.rollup.config`;
+                const rollupField = form.getFields()[rollupConfigPath];
                 const newCurrentPolicy = cloneDeep({
                   ...currentPolicy,
                   name: originalPolicyName,
                 });
 
-                set(newCurrentPolicy, fieldPath, rollupAction);
+                set(newCurrentPolicy, rollupConfigPath, rollupAction);
                 setCurrentPolicy(newCurrentPolicy);
                 rollupField.setValue(rollupAction);
 

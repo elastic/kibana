@@ -6,5 +6,5 @@
  */
 
 export interface CustomFieldForm {
-  field: string;
+  fieldName: string;
 }

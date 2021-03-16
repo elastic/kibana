@@ -9,6 +9,7 @@ import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
 
 import { useFormData, FormHook } from '../../../../../shared_imports';
+
 import { RollupWizard as RollupWizardView, Props as RollupWizardViewProps } from './rollup_wizard';
 import { FieldChooserProvider } from './field_chooser_context';
 

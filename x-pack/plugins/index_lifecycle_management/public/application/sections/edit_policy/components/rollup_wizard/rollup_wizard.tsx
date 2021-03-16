@@ -132,6 +132,7 @@ const deriveStepFields = (value: RollupAction['config'] | undefined): StepFields
   );
 };
 
+// TODO: This component should be migrated to use the ES UI generic FormWizard component that takes care functionality for navigating to steps.
 export class RollupWizard extends Component<Props, State> {
   lastIndexPatternValidationTime: number;
   // @ts-ignore

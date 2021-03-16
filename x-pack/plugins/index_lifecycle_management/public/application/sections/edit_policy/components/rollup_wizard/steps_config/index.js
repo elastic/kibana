@@ -24,8 +24,6 @@ export const stepIds = [STEP_DATE_HISTOGRAM, STEP_TERMS, STEP_HISTOGRAM, STEP_ME
  * Map a specific wizard step to two functions:
  *  1. getDefaultFields: (overrides) => object
  *  2. fieldValidations
- *
- * See rollup/public/crud_app/services/jobs.js for more information on override's shape
  */
 export const stepIdToStepConfigMap = {
   [STEP_DATE_HISTOGRAM]: {

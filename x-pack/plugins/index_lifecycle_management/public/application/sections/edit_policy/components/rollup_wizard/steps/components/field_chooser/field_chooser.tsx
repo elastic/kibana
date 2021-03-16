@@ -330,7 +330,7 @@ export class FieldChooser extends Component<Props, State> {
     return (
       <Form form={customFieldForm}>
         <UseField<string>
-          path="field"
+          path="fieldName"
           form={customFieldForm}
           component={TextField}
           config={{
@@ -389,7 +389,7 @@ export class FieldChooser extends Component<Props, State> {
               return;
             }
             customFieldForm.reset();
-            onSelectField({ name: data.field });
+            onSelectField({ name: data.fieldName });
           }}
         >
           {i18n.translate(

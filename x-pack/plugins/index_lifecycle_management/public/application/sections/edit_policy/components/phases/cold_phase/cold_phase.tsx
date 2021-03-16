@@ -30,10 +30,7 @@ const i18nTexts = {
 };
 
 export const ColdPhase: FunctionComponent = () => {
-  const {
-    isUsingSearchableSnapshotInHotPhase,
-    isUsingSearchableSnapshotInColdPhase,
-  } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase, canUseRollupInColdPhase } = useConfigurationIssues();
 
   return (
     <Phase phase="cold" topLevelSettings={<SearchableSnapshotField phase="cold" />}>
@@ -48,9 +45,7 @@ export const ColdPhase: FunctionComponent = () => {
         phase="cold"
       />
 
-      {!isUsingSearchableSnapshotInColdPhase && !isUsingSearchableSnapshotInHotPhase && (
-        <RollupField phase="cold" />
-      )}
+      {canUseRollupInColdPhase && <RollupField phase="cold" />}
 
       <IndexPriorityField phase="cold" />
     </Phase>

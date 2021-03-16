@@ -6,11 +6,13 @@
  */
 
 import { get } from 'lodash';
-import React, { FunctionComponent, createContext, useContext } from 'react';
+import React, { FunctionComponent, createContext, useContext, useEffect } from 'react';
 
 import { useFormData } from '../../../../shared_imports';
 
 import { isUsingDefaultRolloverPath, isUsingCustomRolloverPath } from '../constants';
+
+import { useNavigationContext } from '../navigation';
 
 export interface ConfigurationIssues {
   /**
@@ -26,6 +28,8 @@ export interface ConfigurationIssues {
    */
   isUsingSearchableSnapshotInHotPhase: boolean;
   isUsingSearchableSnapshotInColdPhase: boolean;
+
+  canUseRollupInColdPhase: boolean;
 }
 
 const ConfigurationIssuesContext = createContext<ConfigurationIssues>(null as any);
@@ -37,6 +41,7 @@ const pathToColdPhaseSearchableSnapshot =
   'phases.cold.actions.searchable_snapshot.snapshot_repository';
 
 export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => {
+  const { setIsColdRollupActionBlocked } = useNavigationContext();
   const [formData] = useFormData({
     watch: [
       pathToHotPhaseSearchableSnapshot,
@@ -49,14 +54,25 @@ export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => 
   // Provide default value, as path may become undefined if removed from the DOM
   const isUsingCustomRollover = get(formData, isUsingCustomRolloverPath, true);
 
+  const isUsingSearchableSnapshotInHotPhase =
+    get(formData, pathToHotPhaseSearchableSnapshot) != null;
+  const isUsingSearchableSnapshotInColdPhase =
+    get(formData, pathToColdPhaseSearchableSnapshot) != null;
+
+  const canUseRollupInColdPhase =
+    !isUsingSearchableSnapshotInHotPhase && !isUsingSearchableSnapshotInColdPhase;
+
+  useEffect(() => {
+    setIsColdRollupActionBlocked(!canUseRollupInColdPhase);
+  }, [setIsColdRollupActionBlocked, canUseRollupInColdPhase]);
+
   return (
     <ConfigurationIssuesContext.Provider
       value={{
         isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
-        isUsingSearchableSnapshotInHotPhase:
-          get(formData, pathToHotPhaseSearchableSnapshot) != null,
-        isUsingSearchableSnapshotInColdPhase:
-          get(formData, pathToColdPhaseSearchableSnapshot) != null,
+        isUsingSearchableSnapshotInHotPhase,
+        isUsingSearchableSnapshotInColdPhase,
+        canUseRollupInColdPhase,
       }}
     >
       {children}

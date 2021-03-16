@@ -8,6 +8,7 @@
 import React, {
   FunctionComponent,
   createContext,
+  useState,
   useContext,
   useMemo,
   useEffect,
@@ -27,15 +28,15 @@ export type PolicyView = { id: 'policy' } | { id: 'rollupAction'; phase: 'hot' |
 interface ContextValue {
   currentView: PolicyView;
   goToPolicyView: (scrollToFieldWithId?: string) => void;
+  setIsColdRollupActionBlocked: (value: boolean) => void;
 }
 
-const NavigationContext = createContext<ContextValue>({
-  currentView: { id: 'policy' },
-  goToPolicyView: () => {},
-});
+const NavigationContext = createContext<ContextValue | null>(null);
 
 export const NavigationContextProvider: FunctionComponent = ({ children }) => {
   const { policyName } = useEditPolicyContext();
+
+  const [isColdRollupActionBlocked, setIsColdRollupActionBlocked] = useState(true);
 
   const { search } = useLocation();
   const history = useHistory();
@@ -45,12 +46,14 @@ export const NavigationContextProvider: FunctionComponent = ({ children }) => {
   } = useKibana();
 
   const currentView = useMemo<PolicyView>(() => {
-    const { rollup } = qs.parse(search) as { rollup: 'hot' | 'cold' };
-    if (rollup) {
+    const { rollup } = qs.parse(search) as { rollup?: 'hot' | 'cold' };
+    const rollupBlocked = rollup === 'cold' && isColdRollupActionBlocked;
+    if (rollup && !rollupBlocked) {
       return { id: 'rollupAction', phase: rollup };
     }
+
     return { id: 'policy' };
-  }, [search]);
+  }, [search, isColdRollupActionBlocked]);
 
   const { id: currentViewId } = currentView;
 
@@ -83,7 +86,9 @@ export const NavigationContextProvider: FunctionComponent = ({ children }) => {
   }, [breadcrumbService, search, currentViewId, policyName]);
 
   return (
-    <NavigationContext.Provider value={{ currentView, goToPolicyView }}>
+    <NavigationContext.Provider
+      value={{ currentView, goToPolicyView, setIsColdRollupActionBlocked }}
+    >
       {children}
     </NavigationContext.Provider>
   );
