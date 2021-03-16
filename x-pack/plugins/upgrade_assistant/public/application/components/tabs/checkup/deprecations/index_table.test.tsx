@@ -77,6 +77,7 @@ describe('IndexDeprecationTable', () => {
           }
         }
         responsive={true}
+        rowProps={[Function]}
         sorting={
           Object {
             "sort": Object {
