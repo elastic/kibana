@@ -246,6 +246,23 @@ describe('CurationLogic', () => {
         });
       });
     });
+
+    describe('resetCuration', () => {
+      it('should clear promotedIds & hiddenIds & set dataLoading to true', () => {
+        mount({ promotedIds: ['hello'], hiddenIds: ['world'] });
+
+        CurationLogic.actions.resetCuration();
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          dataLoading: true,
+          promotedIds: [],
+          promotedDocumentsLoading: true,
+          hiddenIds: [],
+          hiddenDocumentsLoading: true,
+        });
+      });
+    });
   });
 
   describe('listeners', () => {

@@ -32,6 +32,13 @@ export const SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteSuccessMessage',
   { defaultMessage: 'Successfully removed curation.' }
 );
+export const RESTORE_CONFIRMATION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.restoreConfirmation',
+  {
+    defaultMessage:
+      'Are you sure you want to clear your changes and return to your default results?',
+  }
+);
 
 export const RESULT_ACTIONS_DIRECTIONS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.resultActionsDescription',

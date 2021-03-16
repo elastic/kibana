@@ -10,14 +10,15 @@ import { useParams } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiPageHeader, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../../../../shared/loading';
 
-import { MANAGE_CURATION_TITLE } from '../constants';
+import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
 
 import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
@@ -29,7 +30,7 @@ interface Props {
 
 export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
   const { curationId } = useParams() as { curationId: string };
-  const { loadCuration } = useActions(CurationLogic({ curationId }));
+  const { loadCuration, resetCuration } = useActions(CurationLogic({ curationId }));
   const { dataLoading, queries } = useValues(CurationLogic({ curationId }));
 
   useEffect(() => {
@@ -43,7 +44,18 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
       <SetPageChrome trail={[...curationsBreadcrumb, queries.join(', ')]} />
       <EuiPageHeader
         pageTitle={MANAGE_CURATION_TITLE}
-        /* TODO: Restore defaults button */
+        rightSideItems={[
+          <EuiButton
+            color="danger"
+            onClick={() => {
+              if (window.confirm(RESTORE_CONFIRMATION)) resetCuration();
+            }}
+          >
+            {i18n.translate('xpack.enterpriseSearch.appSearch.actions.restoreDefaults', {
+              defaultMessage: 'Restore defaults',
+            })}
+          </EuiButton>,
+        ]}
         responsive={false}
       />
 

@@ -43,6 +43,7 @@ interface CurationActions {
   addHiddenId(id: string): { id: string };
   removeHiddenId(id: string): { id: string };
   clearHiddenIds(): void;
+  resetCuration(): void;
 }
 
 interface CurationProps {
@@ -65,12 +66,14 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     addHiddenId: (id) => ({ id }),
     removeHiddenId: (id) => ({ id }),
     clearHiddenIds: true,
+    resetCuration: true,
   }),
   reducers: () => ({
     dataLoading: [
       true,
       {
         loadCuration: () => true,
+        resetCuration: () => true,
         onCurationLoad: () => false,
         onCurationError: () => false,
       },
@@ -215,5 +218,9 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     addHiddenId: () => actions.updateCuration(),
     removeHiddenId: () => actions.updateCuration(),
     clearHiddenIds: () => actions.updateCuration(),
+    resetCuration: () => {
+      actions.clearPromotedIds();
+      actions.clearHiddenIds();
+    },
   }),
 });
