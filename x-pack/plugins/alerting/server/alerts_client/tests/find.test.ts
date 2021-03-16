@@ -55,6 +55,10 @@ beforeEach(() => {
 
 setGlobalDate();
 
+jest.mock('../lib/map_sort_field', () => ({
+  mapSortField: jest.fn(),
+}));
+
 describe('find()', () => {
   const listedTypes = new Set<RegistryAlertType>([
     {
@@ -172,10 +176,17 @@ describe('find()', () => {
         Object {
           "fields": undefined,
           "filter": undefined,
+          "sortField": undefined,
           "type": "alert",
         },
       ]
     `);
+  });
+
+  test('calls mapSortField', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    await alertsClient.find({ options: { sortField: 'name' } });
+    expect(jest.requireMock('../lib/map_sort_field').mapSortField).toHaveBeenCalledWith('name');
   });
 
   describe('authorization', () => {

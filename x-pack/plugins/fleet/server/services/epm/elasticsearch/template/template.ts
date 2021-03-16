@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from 'kibana/server';
+
 import type { Field, Fields } from '../../fields/field';
 import type {
   RegistryDataStream,
-  CallESAsCurrentUser,
   TemplateRef,
   IndexTemplate,
   IndexTemplateMappings,
@@ -424,14 +425,14 @@ function getBaseTemplate(
 }
 
 export const updateCurrentWriteIndices = async (
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   templates: TemplateRef[]
 ): Promise<void> => {
   if (!templates.length) return;
 
-  const allIndices = await queryDataStreamsFromTemplates(callCluster, templates);
+  const allIndices = await queryDataStreamsFromTemplates(esClient, templates);
   if (!allIndices.length) return;
-  return updateAllDataStreams(allIndices, callCluster);
+  return updateAllDataStreams(allIndices, esClient);
 };
 
 function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is CurrentDataStream[] {
@@ -439,26 +440,23 @@ function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is Cur
 }
 
 const queryDataStreamsFromTemplates = async (
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   templates: TemplateRef[]
 ): Promise<CurrentDataStream[]> => {
   const dataStreamPromises = templates.map((template) => {
-    return getDataStreams(callCluster, template);
+    return getDataStreams(esClient, template);
   });
   const dataStreamObjects = await Promise.all(dataStreamPromises);
   return dataStreamObjects.filter(isCurrentDataStream).flat();
 };
 
 const getDataStreams = async (
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   template: TemplateRef
 ): Promise<CurrentDataStream[] | undefined> => {
   const { templateName, indexTemplate } = template;
-  const res = await callCluster('transport.request', {
-    method: 'GET',
-    path: `/_data_stream/${templateName}-*`,
-  });
-  const dataStreams = res.data_streams;
+  const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
+  const dataStreams = body.data_streams;
   if (!dataStreams.length) return;
   return dataStreams.map((dataStream: any) => ({
     dataStreamName: dataStream.name,
@@ -468,22 +466,22 @@ const getDataStreams = async (
 
 const updateAllDataStreams = async (
   indexNameWithTemplates: CurrentDataStream[],
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ): Promise<void> => {
   const updatedataStreamPromises = indexNameWithTemplates.map(
     ({ dataStreamName, indexTemplate }) => {
-      return updateExistingDataStream({ dataStreamName, callCluster, indexTemplate });
+      return updateExistingDataStream({ dataStreamName, esClient, indexTemplate });
     }
   );
   await Promise.all(updatedataStreamPromises);
 };
 const updateExistingDataStream = async ({
   dataStreamName,
-  callCluster,
+  esClient,
   indexTemplate,
 }: {
   dataStreamName: string;
-  callCluster: CallESAsCurrentUser;
+  esClient: ElasticsearchClient;
   indexTemplate: IndexTemplate;
 }) => {
   const { settings, mappings } = indexTemplate.template;
@@ -496,7 +494,7 @@ const updateExistingDataStream = async ({
 
   // try to update the mappings first
   try {
-    await callCluster('indices.putMapping', {
+    await esClient.indices.putMapping({
       index: dataStreamName,
       body: mappings,
       write_index_only: true,
@@ -505,7 +503,7 @@ const updateExistingDataStream = async ({
   } catch (err) {
     try {
       const path = `/${dataStreamName}/_rollover`;
-      await callCluster('transport.request', {
+      await esClient.transport.request({
         method: 'POST',
         path,
       });
@@ -518,7 +516,7 @@ const updateExistingDataStream = async ({
   // for now, only update the pipeline
   if (!settings.index.default_pipeline) return;
   try {
-    await callCluster('indices.putSettings', {
+    await esClient.indices.putSettings({
       index: dataStreamName,
       body: { index: { default_pipeline: settings.index.default_pipeline } },
     });

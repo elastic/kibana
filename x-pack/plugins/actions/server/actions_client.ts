@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { omitBy, isUndefined } from 'lodash';
 import {
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObject,
@@ -62,7 +62,7 @@ export interface CreateOptions {
 
 interface ConstructorOptions {
   defaultKibanaIndex: string;
-  scopedClusterClient: ILegacyScopedClusterClient;
+  scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   preconfiguredActions: PreConfiguredAction[];
@@ -80,7 +80,7 @@ export interface UpdateOptions {
 
 export class ActionsClient {
   private readonly defaultKibanaIndex: string;
-  private readonly scopedClusterClient: ILegacyScopedClusterClient;
+  private readonly scopedClusterClient: IScopedClusterClient;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly actionTypeRegistry: ActionTypeRegistry;
   private readonly preconfiguredActions: PreConfiguredAction[];
@@ -506,7 +506,7 @@ function actionFromSavedObject(savedObject: SavedObject<RawAction>): ActionResul
 
 async function injectExtraFindData(
   defaultKibanaIndex: string,
-  scopedClusterClient: ILegacyScopedClusterClient,
+  scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
   const aggs: Record<string, unknown> = {};
@@ -543,7 +543,7 @@ async function injectExtraFindData(
       },
     };
   }
-  const aggregationResult = await scopedClusterClient.callAsInternalUser('search', {
+  const { body: aggregationResult } = await scopedClusterClient.asInternalUser.search({
     index: defaultKibanaIndex,
     body: {
       aggs,

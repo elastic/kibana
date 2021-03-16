@@ -178,7 +178,8 @@ export class Embeddable
       });
 
     // Update search context and reload on changes related to search
-    input$
+    this.getUpdated$()
+      .pipe(map(() => this.getInput()))
       .pipe(
         distinctUntilChanged((a, b) =>
           isEqual(
@@ -374,6 +375,9 @@ export class Embeddable
   };
 
   async reload() {
+    if (!this.savedVis || !this.isInitialized) {
+      return;
+    }
     this.handleContainerStateChanged(this.input);
     if (this.domNode) {
       this.render(this.domNode);

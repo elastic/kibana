@@ -26,6 +26,7 @@ import {
   EuiHealth,
   EuiText,
   EuiToolTip,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
@@ -46,7 +47,7 @@ import {
 } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
-import { routeToAlertDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
+import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import {
@@ -99,6 +100,10 @@ export const AlertsList: React.FunctionComponent = () => {
   const [alertStatusesFilter, setAlertStatusesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
   const [dismissAlertErrors, setDismissAlertErrors] = useState<boolean>(false);
+  const [sort, setSort] = useState<EuiTableSortingType<AlertTableItem>['sort']>({
+    field: 'name',
+    direction: 'asc',
+  });
   const [manageLicenseModalOpts, setManageLicenseModalOpts] = useState<{
     licenseType: string;
     alertTypeId: string;
@@ -149,8 +154,8 @@ export const AlertsList: React.FunctionComponent = () => {
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertTypesMessage',
-            { defaultMessage: 'Unable to load alert types' }
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadRuleTypesMessage',
+            { defaultMessage: 'Unable to load rule types' }
           ),
         });
         setAlertTypesState({ ...alertTypesState, isLoading: false });
@@ -174,8 +179,8 @@ export const AlertsList: React.FunctionComponent = () => {
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage',
-            { defaultMessage: 'Unable to load action types' }
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadConnectorTypesMessage',
+            { defaultMessage: 'Unable to load connector types' }
           ),
         });
       }
@@ -194,6 +199,7 @@ export const AlertsList: React.FunctionComponent = () => {
           typesFilter,
           actionTypesFilter,
           alertStatusesFilter,
+          sort,
         });
         await loadAlertAggs();
         setAlertsState({
@@ -208,9 +214,9 @@ export const AlertsList: React.FunctionComponent = () => {
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsMessage',
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadRulesMessage',
             {
-              defaultMessage: 'Unable to load alerts',
+              defaultMessage: 'Unable to load rules',
             }
           ),
         });
@@ -234,9 +240,9 @@ export const AlertsList: React.FunctionComponent = () => {
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertsList.unableToLoadAlertsStatusesInfoMessage',
+          'xpack.triggersActionsUI.sections.alertsList.unableToLoadRuleStatusInfoMessage',
           {
-            defaultMessage: 'Unable to load alert statuses info',
+            defaultMessage: 'Unable to load rule status info',
           }
         ),
       });
@@ -307,7 +313,7 @@ export const AlertsList: React.FunctionComponent = () => {
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.nameTitle',
         { defaultMessage: 'Name' }
       ),
-      sortable: false,
+      sortable: true,
       truncateText: true,
       width: '35%',
       'data-test-subj': 'alertsTableCell-name',
@@ -316,7 +322,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiLink
             title={name}
             onClick={() => {
-              history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+              history.push(routeToRuleDetails.replace(`:ruleId`, alert.id));
             }}
           >
             {name}
@@ -325,17 +331,17 @@ export const AlertsList: React.FunctionComponent = () => {
       },
     },
     {
-      field: 'executionStatus',
+      field: 'executionStatus.status',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.statusTitle',
         { defaultMessage: 'Status' }
       ),
-      sortable: false,
+      sortable: true,
       truncateText: false,
       width: '150px',
       'data-test-subj': 'alertsTableCell-status',
       render: (executionStatus: AlertExecutionStatus, item: AlertTableItem) => {
-        return renderAlertExecutionStatus(executionStatus, item);
+        return renderAlertExecutionStatus(item.executionStatus, item);
       },
     },
     {
@@ -348,9 +354,9 @@ export const AlertsList: React.FunctionComponent = () => {
       'data-test-subj': 'alertsTableCell-tagsText',
     },
     {
-      field: 'actionsText',
+      field: 'actionsCount',
       name: i18n.translate(
-        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsText',
+        'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsCount',
         { defaultMessage: 'Actions' }
       ),
       render: (count: number, item: AlertTableItem) => {
@@ -361,7 +367,7 @@ export const AlertsList: React.FunctionComponent = () => {
         );
       },
       sortable: false,
-      'data-test-subj': 'alertsTableCell-actionsText',
+      'data-test-subj': 'alertsTableCell-actionsCount',
     },
     {
       field: 'alertType',
@@ -503,8 +509,8 @@ export const AlertsList: React.FunctionComponent = () => {
               onClick={() => setAlertFlyoutVisibility(true)}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
-                defaultMessage="Create alert"
+                id="xpack.triggersActionsUI.sections.alertsList.addRuleButtonLabel"
+                defaultMessage="Create rule"
               />
             </EuiButton>
           </EuiFlexItem>
@@ -546,7 +552,7 @@ export const AlertsList: React.FunctionComponent = () => {
               title={
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.alertsList.attentionBannerTitle"
-                  defaultMessage="Error found in {totalStausesError, plural, one {# alert} other {# alerts}}."
+                  defaultMessage="Error found in {totalStausesError, plural, one {# rule} other {# rules}}."
                   values={{
                     totalStausesError: alertsStatusesTotal.error,
                   }}
@@ -582,7 +588,7 @@ export const AlertsList: React.FunctionComponent = () => {
           <EuiText size="s" color="subdued" data-test-subj="totalAlertsCount">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.totalItemsCountDescription"
-              defaultMessage="Showing: {pageSize} of {totalItemCount} alerts."
+              defaultMessage="Showing: {pageSize} of {totalItemCount} rules."
               values={{
                 totalItemCount: alertsState.totalItemCount,
                 pageSize: alertsState.data.length,
@@ -655,6 +661,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }
         itemId="id"
         columns={alertsTableColumns}
+        sorting={{ sort }}
         rowProps={(item: AlertTableItem) => ({
           'data-test-subj': 'alert-row',
           className: !alertTypesState.data.get(item.alertTypeId)?.enabledInLicense
@@ -680,8 +687,19 @@ export const AlertsList: React.FunctionComponent = () => {
             setSelectedIds(updatedSelectedItemsList.map((item) => item.id));
           },
         }}
-        onChange={({ page: changedPage }: { page: Pagination }) => {
-          setPage(changedPage);
+        onChange={({
+          page: changedPage,
+          sort: changedSort,
+        }: {
+          page?: Pagination;
+          sort?: EuiTableSortingType<AlertTableItem>['sort'];
+        }) => {
+          if (changedPage) {
+            setPage(changedPage);
+          }
+          if (changedSort) {
+            setSort(changedSort);
+          }
         }}
       />
       {manageLicenseModalOpts && (
@@ -730,10 +748,10 @@ export const AlertsList: React.FunctionComponent = () => {
         apiDeleteCall={deleteAlerts}
         idsToDelete={alertsToDelete}
         singleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.singleTitle', {
-          defaultMessage: 'alert',
+          defaultMessage: 'rule',
         })}
         multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.alertsList.multipleTitle', {
-          defaultMessage: 'alerts',
+          defaultMessage: 'rules',
         })}
         setIsLoadingState={(isLoading: boolean) => {
           setAlertsState({ ...alertsState, isLoading });
@@ -771,7 +789,7 @@ const noPermissionPrompt = (
       <h1>
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.alertsList.noPermissionToCreateTitle"
-          defaultMessage="No permissions to create alerts"
+          defaultMessage="No permissions to create rules"
         />
       </h1>
     }
@@ -797,7 +815,7 @@ function convertAlertsToTableItems(
 ) {
   return alerts.map((alert) => ({
     ...alert,
-    actionsText: alert.actions.length,
+    actionsCount: alert.actions.length,
     tagsText: alert.tags.join(', '),
     alertType: alertTypesIndex.get(alert.alertTypeId)?.name ?? alert.alertTypeId,
     isEditable:
