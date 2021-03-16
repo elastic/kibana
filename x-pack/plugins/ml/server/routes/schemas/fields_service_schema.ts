@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { indicesOptionsSchema } from './datafeeds_schema';
 
 export const getCardinalityOfFieldsSchema = schema.object({
   /** Index or indexes for which to return the time range. */
@@ -30,5 +31,5 @@ export const getTimeFieldRangeSchema = schema.object({
   /** Query to match documents in the index(es). */
   query: schema.maybe(schema.any()),
   /** Additional search options. */
-  indicesOptions: schema.maybe(schema.any()),
+  indicesOptions: indicesOptionsSchema,
 });
