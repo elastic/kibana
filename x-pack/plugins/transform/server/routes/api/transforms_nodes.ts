@@ -13,10 +13,10 @@ import { addBasePath } from '../index';
 
 import { wrapError, wrapEsError } from './error_utils';
 
+const NODE_ROLES = 'roles';
+
 interface NodesAttributes {
-  attributes: {
-    'transform.node'?: string;
-  };
+  roles: string[];
 }
 type Nodes = Record<string, NodesAttributes>;
 
@@ -26,8 +26,8 @@ export const isNodes = (arg: unknown): arg is Nodes => {
     Object.values(arg).every(
       (node) =>
         isPopulatedObject(node) &&
-        {}.hasOwnProperty.call(node, 'attributes') &&
-        isPopulatedObject(node.attributes)
+        {}.hasOwnProperty.call(node, NODE_ROLES) &&
+        Array.isArray(node.roles)
     )
   );
 };
@@ -50,13 +50,13 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
         const {
           body: { nodes },
         } = await ctx.core.elasticsearch.client.asInternalUser.nodes.info({
-          filter_path: 'nodes.*.attributes',
+          filter_path: `nodes.*.${NODE_ROLES}`,
         });
 
         let count = 0;
         if (isNodes(nodes)) {
-          for (const { attributes } of Object.values(nodes)) {
-            if (attributes['transform.node'] === 'true') {
+          for (const { roles } of Object.values(nodes)) {
+            if (roles.includes('transform')) {
               count++;
             }
           }

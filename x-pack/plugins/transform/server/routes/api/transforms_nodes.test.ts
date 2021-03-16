@@ -21,11 +21,22 @@ describe('Transform: Nodes API endpoint', () => {
       })
     ).toBe(false);
 
-    expect(isNodes({ nodeId: { attributes: { someAttribute: true } } })).toBe(true);
+    // Legacy format based on attributes should return false
+    expect(isNodes({ nodeId: { attributes: { someAttribute: true } } })).toBe(false);
     expect(
       isNodes({
         nodeId1: { attributes: { someAttribute: true } },
         nodeId2: { attributes: { 'transform.node': 'true' } },
+      })
+    ).toBe(false);
+
+    // Current format based on roles should return true
+    expect(isNodes({ nodeId: { roles: ['master', 'transform'] } })).toBe(true);
+    expect(isNodes({ nodeId: { roles: ['transform'] } })).toBe(true);
+    expect(
+      isNodes({
+        nodeId1: { roles: ['master', 'data'] },
+        nodeId2: { roles: ['transform'] },
       })
     ).toBe(true);
   });
