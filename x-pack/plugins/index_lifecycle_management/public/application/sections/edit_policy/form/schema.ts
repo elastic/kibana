@@ -50,6 +50,13 @@ export const searchableSnapshotFields = {
     validations: [
       { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
     ],
+    // TODO: update text copy
+    helpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.repositoryHelpText',
+      {
+        defaultMessage: 'Note: the repository is common for every phase.',
+      }
+    ),
   },
   storage: {
     label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageLabel', {
