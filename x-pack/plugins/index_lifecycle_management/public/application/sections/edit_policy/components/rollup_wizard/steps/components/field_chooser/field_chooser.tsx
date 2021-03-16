@@ -234,7 +234,7 @@ export class FieldChooser extends Component<Props, State> {
         return <div />;
       }
 
-      if (!searchedItems.length) {
+      if (!unselectedFields.length) {
         return (
           <p>
             {i18n.translate(
