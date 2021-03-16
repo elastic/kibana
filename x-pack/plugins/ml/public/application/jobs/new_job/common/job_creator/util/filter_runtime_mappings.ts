@@ -71,6 +71,11 @@ function findFieldsInJob(job: Job, datafeed: Datafeed) {
     findFieldsInAgg(aggs).forEach((f) => usedFields.add(f));
   }
 
+  const query = datafeed.query;
+  if (query !== undefined) {
+    findFieldsInAgg(query).forEach((f) => usedFields.add(f));
+  }
+
   return [...usedFields];
 }
 
