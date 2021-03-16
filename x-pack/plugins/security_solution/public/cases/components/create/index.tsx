@@ -18,6 +18,8 @@ import { FormContext } from './form_context';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { fieldName as descriptionFieldName } from './description';
 import { SubmitCaseButton } from './submit_button';
+import { USE_RAC_CASES_UI } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -39,6 +41,7 @@ const InsertTimeline = () => {
 };
 
 export const Create = React.memo(() => {
+  const { cases } = useKibana().services;
   const history = useHistory();
   const onSuccess = useCallback(
     async ({ id }) => {
@@ -53,32 +56,39 @@ export const Create = React.memo(() => {
 
   return (
     <EuiPanel>
-      <FormContext onSuccess={onSuccess}>
-        <CreateCaseForm />
-        <Container>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="xs"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="create-case-cancel"
-                size="s"
-                onClick={handleSetIsCancel}
-                iconType="cross"
-              >
-                {i18n.CANCEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SubmitCaseButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </Container>
-        <InsertTimeline />
-      </FormContext>
+      {USE_RAC_CASES_UI ? (
+        cases.getCreateCase({
+          onCancel: handleSetIsCancel,
+          onSuccess,
+        })
+      ) : (
+        <FormContext onSuccess={onSuccess}>
+          <CreateCaseForm />
+          <Container>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="xs"
+              responsive={false}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="create-case-cancel"
+                  size="s"
+                  onClick={handleSetIsCancel}
+                  iconType="cross"
+                >
+                  {i18n.CANCEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SubmitCaseButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Container>
+          <InsertTimeline />
+        </FormContext>
+      )}
     </EuiPanel>
   );
 });
