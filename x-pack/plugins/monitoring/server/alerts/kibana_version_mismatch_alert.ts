@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -66,7 +67,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -75,7 +76,7 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
       kibanaIndexPattern = getCcsIndexPattern(kibanaIndexPattern, availableCcs);
     }
     const kibanaVersions = await fetchKibanaVersions(
-      callCluster,
+      esClient,
       clusters,
       kibanaIndexPattern,
       Globals.app.config.ui.max_bucket_size
