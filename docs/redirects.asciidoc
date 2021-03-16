@@ -292,6 +292,7 @@ This content has moved. Refer to <<dashboard, **Dashboard**>>.
 [role="exclude",id="explore-dashboard-data"]
 This content has moved. Refer to <<dashboard, **Dashboard**>>.
 
+<<<<<<< HEAD
 [role="exclude",id="ingest-node-pipelines"]
 == Ingest Node Pipelines
 
@@ -302,3 +303,8 @@ This content has moved. See {ref}/ingest.html[Ingest pipelines].
 == Timelion
 
 This content has moved. refer to <<timelion>>.
+=======
+[role="exclude",id="breaking-changes"]
+
+This content has moved. Refer to <<release-notes, Release notes>>.
+>>>>>>> ee158c815ac... [DOCS] Adds the 7.12.0 Release notes
