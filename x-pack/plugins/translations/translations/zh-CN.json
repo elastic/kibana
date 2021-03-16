@@ -5014,7 +5014,6 @@
     "xpack.apm.agentConfig.configTable.appliedTooltipMessage": "已至少由一个代理应用",
     "xpack.apm.agentConfig.configTable.configTable.failurePromptText": "无法获取代理配置列表。您的用户可能没有足够的权限。",
     "xpack.apm.agentConfig.configTable.createConfigButtonLabel": "创建配置",
-    "xpack.apm.agentConfig.configTable.emptyPromptText": "让我们改动一下！可以直接从 Kibana 微调代理配置，无需重新部署。首先创建您的第一个配置。",
     "xpack.apm.agentConfig.configTable.emptyPromptTitle": "未找到任何配置。",
     "xpack.apm.agentConfig.configTable.environmentColumnLabel": "服务环境",
     "xpack.apm.agentConfig.configTable.lastUpdatedColumnLabel": "上次更新时间",
