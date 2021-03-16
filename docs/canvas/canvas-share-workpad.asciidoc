@@ -23,7 +23,7 @@ Want to export multiple workpads? Go to the *Canvas* home page, select the workp
 [[add-workpad-website]]
 === Share the workpad on a website
 
-beta[] Canvas allows you to create _shareables_, which are workpads that you download and securely share on any website. 
+beta[] *Canvas* allows you to create _shareables_, which are workpads that you download and securely share on any website. 
 To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
 . Click *Share > Share on a website*.
@@ -32,7 +32,7 @@ To customize the behavior of the workpad on your website, you can choose to auto
 
 . To customize the workpad behavior to autoplay the pages or hide the toolbar, use the inline parameters.
 +
-To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. Canvas does not display elements that manipulate the data on the workpad.
+To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. *Canvas* does not display elements that manipulate the data on the workpad.
 +
 [role="screenshot"]
 image::canvas/images/canvas-embed_workpad.gif[Image showing how to share the workpad on a website]
