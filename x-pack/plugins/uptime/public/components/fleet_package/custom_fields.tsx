@@ -102,7 +102,7 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                   target="_blank"
                 >
                   <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.heartbeatDocs"
+                    id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.heartbeatDocs"
                     defaultMessage="Heartbeat docs"
                   />
                 </EuiLink>
@@ -115,9 +115,23 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
           <EuiFlexItem>
             <EuiForm component="form">
               <EuiFormRow
-                label="Monitor Type"
+                label={
+                  <FormattedMessage
+                    id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType"
+                    defaultMessage="Monitor Type"
+                  />
+                }
                 isInvalid={!fields[ConfigKeys.MONITOR_TYPE]}
-                error={!fields[ConfigKeys.MONITOR_TYPE] ? ['Monitor type is required'] : undefined}
+                error={
+                  !fields[ConfigKeys.MONITOR_TYPE]
+                    ? [
+                        <FormattedMessage
+                          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.error"
+                          defaultMessage="Monitor type is required"
+                        />,
+                      ]
+                    : undefined
+                }
               >
                 <EuiSelect
                   options={dataStreamOptions}
@@ -129,9 +143,23 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
               </EuiFormRow>
               {isHTTP && (
                 <EuiFormRow
-                  label="URL"
+                  label={
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL"
+                      defaultMessage="URL"
+                    />
+                  }
                   isInvalid={!fields[ConfigKeys.URLS]}
-                  error={!fields[ConfigKeys.URLS] ? ['URL is required'] : undefined}
+                  error={
+                    !fields[ConfigKeys.URLS]
+                      ? [
+                          <FormattedMessage
+                            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL.error"
+                            defaultMessage="URL is required"
+                          />,
+                        ]
+                      : undefined
+                  }
                 >
                   <EuiFieldText
                     value={fields[ConfigKeys.URLS]}
@@ -141,9 +169,23 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
               )}
               {(isTCP || isICMP) && (
                 <EuiFormRow
-                  label="Host"
+                  label={
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.hosts"
+                      defaultMessage="Host"
+                    />
+                  }
                   isInvalid={!fields[ConfigKeys.HOSTS]}
-                  error={!fields[ConfigKeys.HOSTS] ? ['Host is required'] : undefined}
+                  error={
+                    !fields[ConfigKeys.HOSTS]
+                      ? [
+                          <FormattedMessage
+                            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.hosts.error"
+                            defaultMessage="Host is required"
+                          />,
+                        ]
+                      : undefined
+                  }
                 >
                   <EuiFieldText
                     value={fields[ConfigKeys.HOSTS]}
@@ -152,7 +194,15 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                 </EuiFormRow>
               )}
               {(isHTTP || isTCP) && (
-                <EuiFormRow label="Proxy URL" labelAppend={<OptionalLabel />}>
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL"
+                      defaultMessage="Proxy URL"
+                    />
+                  }
+                  labelAppend={<OptionalLabel />}
+                >
                   <EuiFieldText
                     value={fields[ConfigKeys.PROXY_URL]}
                     onChange={(event) =>
@@ -161,12 +211,42 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                   />
                 </EuiFormRow>
               )}
+              {isTCP && !!fields[ConfigKeys.PROXY_URL] && (
+                <EuiFormRow>
+                  <EuiCheckbox
+                    id={'uptimeFleetUseLocalResolverCheckbox'}
+                    checked={fields[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]}
+                    label={
+                      <FormattedMessage
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.resolveHostnamesLocally"
+                        defaultMessage="Resolve hostnames locally"
+                      />
+                    }
+                    onChange={(event) =>
+                      handleCheckboxChange({
+                        event,
+                        configKey: ConfigKeys.PROXY_USE_LOCAL_RESOLVER,
+                      })
+                    }
+                  />
+                </EuiFormRow>
+              )}
               <EuiFormRow
-                label="Monitor interval in seconds"
+                label={
+                  <FormattedMessage
+                    id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
+                    defaultMessage="Monitor interval"
+                  />
+                }
                 isInvalid={!fields[ConfigKeys.SCHEDULE] || fields[ConfigKeys.SCHEDULE].number < 1}
                 error={
                   !fields[ConfigKeys.SCHEDULE] || fields[ConfigKeys.SCHEDULE].number < 1
-                    ? ['Schedule is required']
+                    ? [
+                        <FormattedMessage
+                          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
+                          defaultMessage="Monitor interval is required"
+                        />,
+                      ]
                     : undefined
                 }
               >
@@ -179,23 +259,41 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
               </EuiFormRow>
               {isICMP && (
                 <EuiFormRow
-                  label="Wait in seconds"
-                  isInvalid={!fields[ConfigKeys.WAIT] || fields[ConfigKeys.WAIT] < 1}
+                  label={
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait"
+                      defaultMessage="Wait in seconds"
+                    />
+                  }
+                  isInvalid={fields[ConfigKeys.WAIT] < 0}
                   error={
-                    !fields[ConfigKeys.WAIT] || fields[ConfigKeys.WAIT] < 1
-                      ? ['Schedule is required']
+                    fields[ConfigKeys.WAIT] < 0
+                      ? [
+                          <FormattedMessage
+                            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.error"
+                            defaultMessage="Wait must be 0 or greater"
+                          />,
+                        ]
                       : undefined
                   }
                   labelAppend={<OptionalLabel />}
                 >
                   <EuiFieldNumber
-                    min={1}
+                    min={0}
                     value={fields[ConfigKeys.WAIT]}
                     onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.WAIT })}
                   />
                 </EuiFormRow>
               )}
-              <EuiFormRow label="APM service name" labelAppend={<OptionalLabel />}>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName"
+                    defaultMessage="APM service name"
+                  />
+                }
+                labelAppend={<OptionalLabel />}
+              >
                 <EuiFieldText
                   value={fields[ConfigKeys.SERVICE_NAME]}
                   onChange={(event) =>
@@ -203,7 +301,26 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                   }
                 />
               </EuiFormRow>
-              <EuiFormRow label="Max redirects" labelAppend={<OptionalLabel />}>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects"
+                    defaultMessage="Max redirects"
+                  />
+                }
+                isInvalid={fields[ConfigKeys.MAX_REDIRECTS] < 0}
+                error={
+                  fields[ConfigKeys.MAX_REDIRECTS] < 0
+                    ? [
+                        <FormattedMessage
+                          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.error"
+                          defaultMessage="Max redirects must be 0 or greater"
+                        />,
+                      ]
+                    : undefined
+                }
+                labelAppend={<OptionalLabel />}
+              >
                 <EuiFieldNumber
                   min={0}
                   value={fields[ConfigKeys.MAX_REDIRECTS]}
@@ -212,29 +329,41 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                   }
                 />
               </EuiFormRow>
-              {isTCP && !!fields[ConfigKeys.PROXY_URL] && (
-                <EuiFormRow>
-                  <EuiCheckbox
-                    id={'uptimeFleetUseLocalResolverCheckbox'}
-                    checked={fields[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]}
-                    label="Resolve hostnames locally"
-                    onChange={(event) =>
-                      handleCheckboxChange({
-                        event,
-                        configKey: ConfigKeys.PROXY_USE_LOCAL_RESOLVER,
-                      })
-                    }
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout"
+                    defaultMessage="Timeout in milliseconds"
                   />
-                </EuiFormRow>
-              )}
-              <EuiFormRow label="Timeout in milliseconds" labelAppend={<OptionalLabel />}>
+                }
+                isInvalid={fields[ConfigKeys.TIMEOUT] < 0}
+                error={
+                  fields[ConfigKeys.TIMEOUT] < 0
+                    ? [
+                        <FormattedMessage
+                          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error"
+                          defaultMessage="Timeout must be 0 or greater"
+                        />,
+                      ]
+                    : undefined
+                }
+                labelAppend={<OptionalLabel />}
+              >
                 <EuiFieldNumber
                   min={0}
                   value={fields[ConfigKeys.TIMEOUT]}
                   onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.TIMEOUT })}
                 />
               </EuiFormRow>
-              <EuiFormRow label="Tags" labelAppend={<OptionalLabel />}>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags"
+                    defaultMessage="Tags"
+                  />
+                }
+                labelAppend={<OptionalLabel />}
+              >
                 <ComboBox
                   configKey={ConfigKeys.TAGS}
                   selectedOptions={fields[ConfigKeys.TAGS]}
