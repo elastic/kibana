@@ -64,6 +64,8 @@ interface ResultSettingsActions {
   toggleRawForField(fieldName: string): string;
   toggleSnippetForField(fieldName: string): string;
   toggleSnippetFallbackForField(fieldName: string): string;
+  updateRawSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
+  updateSnippetSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
   initializeResultSettingsData(): void;
   saveResultSettings(resultFields: ServerFieldResultSettingObject): ServerFieldResultSettingObject;
 }
@@ -117,6 +119,8 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     toggleRawForField: (fieldName) => fieldName,
     toggleSnippetForField: (fieldName) => fieldName,
     toggleSnippetFallbackForField: (fieldName) => fieldName,
+    updateRawSizeForField: (fieldName, size) => ({ fieldName, size }),
+    updateSnippetSizeForField: (fieldName, size) => ({ fieldName, size }),
     initializeResultSettingsData: () => true,
     saveResultSettings: (resultFields) => resultFields,
   }),
@@ -279,6 +283,12 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         ...field,
         snippetFallback: !field.snippetFallback,
       });
+    },
+    updateRawSizeForField: ({ fieldName, size }) => {
+      actions.updateField(fieldName, { ...values.resultFields[fieldName], rawSize: size });
+    },
+    updateSnippetSizeForField: ({ fieldName, size }) => {
+      actions.updateField(fieldName, { ...values.resultFields[fieldName], snippetSize: size });
     },
     initializeResultSettingsData: async () => {
       const { http } = HttpLogic.values;

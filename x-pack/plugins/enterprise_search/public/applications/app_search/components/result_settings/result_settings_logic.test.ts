@@ -722,6 +722,47 @@ describe('ResultSettingsLogic', () => {
       });
     });
 
+    describe('updateRawSizeForField', () => {
+      it('should update the rawSize value for a field', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5, snippetFallback: true },
+            bar: { raw: true, rawSize: 5, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.updateRawSizeForField('bar', 7);
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
+          raw: true,
+          rawSize: 7,
+          snippet: false,
+        });
+      });
+    });
+
+    describe('updateSnippetSizeForField', () => {
+      it('should update the snippetSize value for a field', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5, snippetFallback: true },
+            bar: { raw: true, rawSize: 5, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.updateSnippetSizeForField('foo', 7);
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
+          raw: false,
+          snippet: true,
+          snippetSize: 7,
+          snippetFallback: true,
+        });
+      });
+    });
+
     describe('initializeResultSettingsData', () => {
       it('should remove the snippet size set on a field', () => {
         mount({
