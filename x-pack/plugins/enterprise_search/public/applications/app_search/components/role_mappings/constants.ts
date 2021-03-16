@@ -23,7 +23,7 @@ export const DELETE_ROLE_MAPPING_MESSAGE = i18n.translate(
 export const ROLE_MAPPING_DELETED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingDeletedMessage',
   {
-    defaultMessage: 'Successfully deleted Role mapping',
+    defaultMessage: 'Successfully deleted role mapping',
   }
 );
 
