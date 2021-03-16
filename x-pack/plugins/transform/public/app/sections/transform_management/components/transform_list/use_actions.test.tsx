@@ -14,7 +14,7 @@ jest.mock('../../../../../app/app_dependencies');
 
 describe('Transform: Transform List Actions', () => {
   test('useActions()', () => {
-    const { result } = renderHook(() => useActions({ forceDisable: false }));
+    const { result } = renderHook(() => useActions({ forceDisable: false, transformNodes: 1 }));
     const actions = result.current.actions;
 
     // Using `any` for the callback. Somehow the EUI types don't pass
