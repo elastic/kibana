@@ -52,6 +52,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   const { asInternalUser } = client;
 
   const { forceDeleteDatafeed, getDatafeedIdsByJobId, getDatafeedByJobId } = datafeedsProvider(
+    client,
     mlClient
   );
   const { getAuditMessagesSummary } = jobAuditMessagesProvider(client, mlClient);
