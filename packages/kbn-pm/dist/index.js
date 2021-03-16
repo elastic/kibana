@@ -22978,7 +22978,7 @@ class Project {
 
   ensureValidProjectDependency(project) {
     const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, project.path));
-    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}/npm_module`));
+    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `${__dirname}/../../../bazel/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}/npm_module`));
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `link:${relativePathToProject}`;
     const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
