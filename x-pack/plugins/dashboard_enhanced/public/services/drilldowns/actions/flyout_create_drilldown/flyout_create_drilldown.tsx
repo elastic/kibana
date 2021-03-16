@@ -88,6 +88,14 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
           dynamicActionManager={embeddable.enhancements.dynamicActions}
           triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
+          templates={[
+            {
+              factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
+              name: 'Hello world',
+              triggers: [],
+              config: {},
+            },
+          ]}
           onClose={() => handle.close()}
         />
       ),

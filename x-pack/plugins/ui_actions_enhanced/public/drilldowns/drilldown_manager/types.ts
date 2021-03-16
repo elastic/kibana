@@ -67,6 +67,25 @@ export interface PublicDrilldownManagerProps {
    * Extra action factory context passed into action factories CollectConfig, getIconType, getDisplayName and etc...
    */
   placeContext?: ActionFactoryPlaceContext<BaseActionFactoryContext>;
+
+  /**
+   * List of drilldown templates, which will be displayed to user for fast
+   * drilldown creation flow.
+   */
+  templates?: DrilldownTemplate[];
+}
+
+/**
+ * Template for a pre-configured new drilldown, this gives ability to create a
+ * drilldown from a template instead of user creating a drilldown from scratch.
+ * This is used in "drilldown cloning" functionality, where drilldowns can be
+ * cloned from one dashboard panel to another.
+ */
+export interface DrilldownTemplate {
+  factoryId: string;
+  name: string;
+  triggers: string[];
+  config: unknown;
 }
 
 /**
