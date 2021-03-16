@@ -262,7 +262,6 @@
     "charts.colormaps.greysText": "グレー",
     "charts.colormaps.redsText": "赤",
     "charts.colormaps.yellowToRedText": "黄色から赤",
-    "charts.colorPicker.clearColor": "色のクリア",
     "charts.colorPicker.setColor.screenReaderDescription": "値 {legendDataLabel} の色を設定",
     "charts.countText": "カウント",
     "charts.functions.palette.args.colorHelpText": "パレットの色です。{html} カラー名、{hex}、{hsl}、{hsla}、{rgb}、または {rgba} を使用できます。",
