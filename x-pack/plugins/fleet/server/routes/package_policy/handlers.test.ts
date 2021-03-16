@@ -6,14 +6,14 @@
  */
 
 import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from 'kibana/server';
 import type { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
 
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { PackagePolicyServiceInterface, ExternalCallback } from '../..';
-import { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
+import type { CreatePackagePolicyRequestSchema } from '../../types/rest_spec';
 
 import { registerRoutes } from './index';
 
