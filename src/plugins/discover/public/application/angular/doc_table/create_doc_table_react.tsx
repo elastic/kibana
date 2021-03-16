@@ -158,7 +158,7 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
                   your search, refine your search to see others."
             values={{ sampleSize: renderProps.sampleSize }}
           />
-          <EuiButtonEmpty onClick={renderProps.onBackToTop}>
+          <EuiButtonEmpty onClick={renderProps.onBackToTop} data-test-subj="discoverBackToTop">
             <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
           </EuiButtonEmpty>
         </div>
