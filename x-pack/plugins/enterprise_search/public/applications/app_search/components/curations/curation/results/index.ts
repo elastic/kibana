@@ -6,3 +6,4 @@
  */
 
 export { CurationResult } from './curation_result';
+export { convertToResultFormat } from './utils';
