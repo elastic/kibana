@@ -405,11 +405,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
@@ -496,11 +498,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
@@ -537,7 +541,7 @@ describe('queryEventsBySavedObject', () => {
     expect(query).toMatchObject({
       index: 'index-name',
       body: {
-        sort: { 'event.end': { order: 'desc' } },
+        sort: [{ 'event.end': { order: 'desc' } }],
       },
     });
   });
@@ -629,11 +633,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
@@ -736,11 +742,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
