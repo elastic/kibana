@@ -46,7 +46,6 @@ export async function bulkInstallPackages({
             pkgkey: Registry.pkgToPkgKey(latestPackage),
             installSource,
             skipPostInstall: true,
-            allowedInstallTypes: ['install'],
           }),
         };
       }

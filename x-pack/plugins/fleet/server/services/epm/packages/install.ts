@@ -164,7 +164,7 @@ export async function handleInstallPackageFailure({
         savedObjectsClient,
         pkgkey: prevVersion,
         esClient,
-        allowedInstallTypes: ['reinstall', 'reupdate', 'rollback'],
+        force: true,
       });
     }
   } catch (e) {
@@ -183,7 +183,6 @@ interface InstallRegistryPackageParams {
   pkgkey: string;
   esClient: ElasticsearchClient;
   force?: boolean;
-  allowedInstallTypes?: InstallType[];
 }
 
 async function installPackageFromRegistry({
@@ -191,7 +190,6 @@ async function installPackageFromRegistry({
   pkgkey,
   esClient,
   force = false,
-  allowedInstallTypes = ['install', 'update'],
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -207,7 +205,7 @@ async function installPackageFromRegistry({
   // if the requested version is the same as installed version, check if we allow it
   // if we don't allow it, just return the asset references from the existing installation
   if (installedPkg?.attributes.version === pkgVersion) {
-    if (!force && !allowedInstallTypes.includes(installType)) {
+    if (!force) {
       logger.debug(`${pkgkey} is already installed, skipping installation`);
       return {
         assets: [
@@ -222,7 +220,7 @@ async function installPackageFromRegistry({
   // if the requested version is out-of-date of the latest package version, check if we allow it
   // if we don't allow it, return an error
   if (semverLt(pkgVersion, latestPackage.version)) {
-    if (!force && !allowedInstallTypes.includes(installType)) {
+    if (!force && !['reinstall', 'reupdate', 'rollback'].includes(installType)) {
       throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
     }
     logger.debug(
@@ -331,7 +329,7 @@ export async function installPackage(args: InstallPackageParams) {
   const { savedObjectsClient, esClient, skipPostInstall = false, installSource } = args;
 
   if (args.installSource === 'registry') {
-    const { pkgkey, force, allowedInstallTypes } = args;
+    const { pkgkey, force } = args;
     const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
     logger.debug(`kicking off install of ${pkgkey} from registry`);
     const response = installPackageFromRegistry({
@@ -339,7 +337,6 @@ export async function installPackage(args: InstallPackageParams) {
       pkgkey,
       esClient,
       force,
-      allowedInstallTypes,
     }).then(async (installResult) => {
       if (skipPostInstall) {
         return installResult;
