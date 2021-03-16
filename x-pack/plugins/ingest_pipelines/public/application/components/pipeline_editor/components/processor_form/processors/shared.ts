@@ -36,6 +36,12 @@ export const to = {
   arrayOfStrings: (v: unknown): string[] =>
     isArrayOfStrings(v) ? v : typeof v === 'string' && v.length ? [v] : [],
   jsonString: (v: unknown) => (v ? JSON.stringify(v, null, 2) : '{}'),
+  /**
+   * Useful when deserializing strings that will be rendered inside of text areas or text inputs. We want
+   * a string like: "my\ttab" to render the same, not to render as "my<tab>tab".
+   */
+  escapeBackslashes: (v: unknown) =>
+    typeof v === 'string' ? JSON.parse(JSON.stringify(v).replace(/\\/g, '\\\\')) : v,
 };
 
 /**
@@ -69,6 +75,13 @@ export const from = {
   optionalArrayOfStrings: (v: string[]) => (v.length ? v : undefined),
   undefinedIfValue: (value: unknown) => (v: boolean) => (v === value ? undefined : v),
   emptyStringToUndefined: (v: unknown) => (v === '' ? undefined : v),
+  /**
+   * Useful when serializing user input from a <textarea /> that we want to later JSON.stringify but keep the same as what
+   * the user input. For instance, given "my\ttab", encoded as "my%5Ctab" will JSON.stringify to "my\\ttab", instead we want
+   * to keep the input exactly as the user entered it.
+   */
+  unescapeBackslashes: (v: unknown) =>
+    typeof v === 'string' ? JSON.parse(JSON.stringify(v).replace(/\\\\/g, '\\')) : v,
 };
 
 export const EDITOR_PX_HEIGHT = {
