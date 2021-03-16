@@ -29,6 +29,7 @@ const enabledActionTypes = [
   '.resilient',
   '.server-log',
   '.servicenow',
+  '.servicenow-sir',
   '.slack',
   '.webhook',
   '.case',
