@@ -249,11 +249,11 @@ export function DashboardTopNav({
                 useReplace: true,
               });
             } else {
-              setIsSaveInProgress(false);
               dashboardStateManager.resetState();
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
             }
           }
+          setIsSaveInProgress(false);
           return { id };
         })
         .catch((error) => {
