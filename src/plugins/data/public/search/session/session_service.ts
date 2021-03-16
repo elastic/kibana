@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
 import { PublicContract } from '@kbn/utility-types';
 import { distinctUntilChanged, map, startWith } from 'rxjs/operators';
 import { Observable, Subscription } from 'rxjs';
-import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
+import {
+  PluginInitializerContext,
+  StartServicesAccessor,
+  ToastsStart as ToastService,
+} from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
 import { ConfigSchema } from '../../../config';
 import {
@@ -22,6 +26,7 @@ import { ISessionsClient } from './sessions_client';
 import { ISearchOptions } from '../../../common';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { formatSessionName } from './lib/session_name_formatter';
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -38,7 +43,13 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
    * e.g. will be displayed in saved Search Sessions management list
    */
   getName: () => Promise<string>;
-  appendSessionStartToName?: boolean;
+
+  /**
+   * Append session start time to a session name,
+   * `true` by default
+   */
+  appendSessionStartTimeToName?: boolean;
+
   getUrlGeneratorData: () => Promise<{
     urlGeneratorId: ID;
     initialState: UrlGeneratorStateMapping[ID]['State'];
@@ -74,6 +85,8 @@ export class SessionService {
   private currentApp?: string;
   private hasAccessToSearchSessions: boolean = false;
 
+  private toastService?: ToastService;
+
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
@@ -104,6 +117,8 @@ export class SessionService {
       // using management?.kibana? we infer if any of the apps allows current user to store sessions
       this.hasAccessToSearchSessions =
         coreStart.application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID];
+
+      this.toastService = coreStart.notifications.toasts;
 
       this.subscription.add(
         coreStart.application.currentAppId$.subscribe((newAppName) => {
@@ -258,13 +273,10 @@ export class SessionService {
       currentSessionInfoProvider.getUrlGeneratorData(),
     ]);
 
-    let formattedName = name;
-
-    if (currentSessionInfoProvider.appendSessionStartToName) {
-      if (this.state.get().startTime) {
-        formattedName = `${name} - ${moment(this.state.get().startTime).format(`L @ LT`)}`;
-      }
-    }
+    const formattedName = formatSessionName(name, {
+      sessionStartTime: this.state.get().startTime,
+      appendStartTime: currentSessionInfoProvider.appendSessionStartTimeToName,
+    });
 
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
@@ -281,6 +293,10 @@ export class SessionService {
     }
   }
 
+  /**
+   * Change user-facing name of a current session
+   * @param newName - new session name
+   */
   public async renameCurrentSession(newName: string) {
     const sessionId = this.getSessionId();
     if (sessionId && this.state.get().isStored) {
@@ -289,9 +305,11 @@ export class SessionService {
         await this.sessionsClient.rename(sessionId, newName);
         renamed = true;
       } catch (e) {
-        // TODO: failed to rename toast
-        // eslint-disable-next-line no-console
-        console.error(e);
+        this.toastService?.addError(e, {
+          title: i18n.translate('data.searchSessions.sessionService.sessionEditNameError', {
+            defaultMessage: 'Failed to edit name of the search session',
+          }),
+        });
       }
 
       if (renamed && sessionId === this.getSessionId()) {
@@ -349,7 +367,7 @@ export class SessionService {
     searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig
   ) {
     this.searchSessionInfoProvider = {
-      appendSessionStartToName: true,
+      appendSessionStartTimeToName: true,
       ...searchSessionInfoProvider,
     };
     this.searchSessionIndicatorUiConfig = searchSessionIndicatorUiConfig;
@@ -380,9 +398,11 @@ export class SessionService {
           this.state.transitions.setSearchSessionSavedObject(savedObject);
         }
       } catch (e) {
-        // TODO: toast
-        // eslint-disable-next-line no-console
-        console.error(e);
+        this.toastService?.addError(e, {
+          title: i18n.translate('data.searchSessions.sessionService.sessionObjectFetchError', {
+            defaultMessage: 'Failed to fetch search session info',
+          }),
+        });
       }
     }
   }

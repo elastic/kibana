@@ -2378,8 +2378,7 @@ export type SearchRequest = Record<string, any>;
 //
 // @public
 export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
-    // (undocumented)
-    appendSessionStartToName?: boolean;
+    appendSessionStartTimeToName?: boolean;
     getName: () => Promise<string>;
     // (undocumented)
     getUrlGeneratorData: () => Promise<{
@@ -2699,7 +2698,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:425:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:428:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:34:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/search/session/session_service.ts:44:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/search/session/session_service.ts:55:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
