@@ -54,6 +54,7 @@ interface ResultSettingsActions {
   saving(): void;
   // Listeners
   clearRawSizeForField(fieldName: string): string;
+  clearSnippetSizeForField(fieldName: string): string;
 }
 
 interface ResultSettingsValues {
@@ -101,6 +102,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     updateField: (fieldName, settings) => ({ fieldName, settings }),
     saving: () => true,
     clearRawSizeForField: (fieldName) => fieldName,
+    clearSnippetSizeForField: (fieldName) => fieldName,
   }),
   reducers: () => ({
     dataLoading: [
@@ -229,6 +231,9 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
   listeners: ({ actions, values }) => ({
     clearRawSizeForField: (fieldName) => {
       actions.updateField(fieldName, omit(values.resultFields[fieldName], ['rawSize']));
+    },
+    clearSnippetSizeForField: (fieldName) => {
+      actions.updateField(fieldName, omit(values.resultFields[fieldName], ['snippetSize']));
     },
   }),
 });

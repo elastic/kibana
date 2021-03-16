@@ -530,5 +530,24 @@ describe('ResultSettingsLogic', () => {
         });
       });
     });
+
+    describe('clearSnippetSizeForField', () => {
+      it('should remove the snippet size set on a field', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5 },
+            bar: { raw: true, rawSize: 5, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.clearSnippetSizeForField('foo');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
+          raw: false,
+          snippet: true,
+        });
+      });
+    });
   });
 });
