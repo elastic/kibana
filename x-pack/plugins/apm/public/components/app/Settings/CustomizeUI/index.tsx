@@ -23,7 +23,7 @@ export function CustomizeUI() {
       <EuiSpacer size="s" />
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.settings.customizeApp.description', {
-          defaultMessage: `The following settings are available for you to extend the app experience.`,
+          defaultMessage: `Extend the APM app experience with the following settings.`,
         })}
       </EuiText>
       <EuiSpacer size="l" />
