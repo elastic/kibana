@@ -37,15 +37,14 @@ export interface ListSnapshotReposResponse {
   repositories: string[];
 }
 
-export type CheckIndexPatternFieldResponseFieldType = 'date' | 'keyword' | 'numeric';
-export interface CheckIndexPatternFieldResponse {
+export type LoadIndexPatternFieldResponseFieldType = 'date' | 'keyword' | 'numeric';
+export interface LoadIndexPatternFieldResponse {
   name: string;
-  type: CheckIndexPatternFieldResponseFieldType | 'unknown';
+  type: LoadIndexPatternFieldResponseFieldType | 'unknown';
 }
 
-export type CheckIndexPatternFieldsResponse = CheckIndexPatternFieldResponse[];
+export type CheckIndexPatternFieldsResponse = LoadIndexPatternFieldResponse[];
 
-export interface CheckIndexPatternResponse {
-  doesMatchIndices: boolean;
+export interface LoadIndexPatternFieldsResponse {
   fields: CheckIndexPatternFieldsResponse;
 }

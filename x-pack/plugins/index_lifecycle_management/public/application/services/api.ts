@@ -12,7 +12,7 @@ import {
   SerializedPolicy,
   ListNodesRouteResponse,
   ListSnapshotReposResponse,
-  CheckIndexPatternResponse,
+  LoadIndexPatternFieldsResponse,
 } from '../../../common/types';
 
 import {
@@ -88,7 +88,7 @@ export const removeLifecycleForIndex = async (indexNames: string[]) => {
 };
 
 export const loadIndexPatternFields = async ({ indexPattern }: { indexPattern: string }) => {
-  return await sendGet<CheckIndexPatternResponse>(
+  return await sendGet<LoadIndexPatternFieldsResponse>(
     `load_index_pattern_fields/${encodeURIComponent(indexPattern)}`
   );
 };

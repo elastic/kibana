@@ -6,9 +6,9 @@
  */
 import { schema } from '@kbn/config-schema';
 import {
-  CheckIndexPatternResponse,
+  LoadIndexPatternFieldsResponse,
   CheckIndexPatternFieldsResponse,
-  CheckIndexPatternFieldResponse,
+  LoadIndexPatternFieldResponse,
 } from '../../../../common/types';
 import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
@@ -54,7 +54,7 @@ function isNumericField(fieldCapability: FieldCapability) {
   return numericTypes.some((numericType) => fieldCapability[numericType as NumericField] != null);
 }
 
-function determineFieldType(fieldCap: FieldCapability): CheckIndexPatternFieldResponse['type'] {
+function determineFieldType(fieldCap: FieldCapability): LoadIndexPatternFieldResponse['type'] {
   if (!fieldCap) {
     return 'unknown';
   }
@@ -101,8 +101,6 @@ export const registerLoadIndexPatternFieldsRoute = ({
           fields: fields ?? '*',
         });
 
-        const doesMatchIndices = Object.entries(fieldCapabilities.fields).length !== 0;
-
         const responseFields: CheckIndexPatternFieldsResponse = [];
 
         const fieldCapabilitiesEntries = Object.entries(fieldCapabilities.fields);
@@ -115,8 +113,7 @@ export const registerLoadIndexPatternFieldsRoute = ({
           }
         );
 
-        const body: CheckIndexPatternResponse = {
-          doesMatchIndices,
+        const body: LoadIndexPatternFieldsResponse = {
           fields: responseFields,
         };
 
@@ -124,8 +121,7 @@ export const registerLoadIndexPatternFieldsRoute = ({
       } catch (error) {
         // 404s are still valid results.
         if (error.statusCode === 404) {
-          const notFoundBody: CheckIndexPatternResponse = {
-            doesMatchIndices: false,
+          const notFoundBody: LoadIndexPatternFieldsResponse = {
             fields: [],
           };
           return response.ok({ body: notFoundBody });
