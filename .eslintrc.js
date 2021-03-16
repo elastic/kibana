@@ -951,8 +951,6 @@ module.exports = {
       files: ['x-pack/plugins/lists/public/*.{ts,tsx}', 'x-pack/plugins/lists/common/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-for-in-array': 'error',
-        '@typescript-eslint/no-unsafe-assignment': 'error',
-        '@typescript-eslint/no-unsafe-return': 'error',
       },
     },
     {
