@@ -34,6 +34,8 @@ export const successfulResolveResponse = {
 };
 
 const successfulSearchResponse = {
+  isPartial: false,
+  isRunning: false,
   rawResponse: {
     aggregations: {
       indices: {
@@ -44,6 +46,8 @@ const successfulSearchResponse = {
 };
 
 const partialSearchResponse = {
+  isPartial: true,
+  isRunning: true,
   rawResponse: {
     hits: {
       total: 2,

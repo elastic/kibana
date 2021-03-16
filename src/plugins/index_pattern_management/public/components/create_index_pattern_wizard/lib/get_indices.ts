@@ -91,8 +91,10 @@ export const getIndicesViaSearch = async ({
       },
     },
   })
-    .pipe(filter((resp) => isCompleteResponse(resp) || !!isErrorResponse(resp)))
-    .pipe(map(searchResponseToArray(getIndexTags, showAllIndices)))
+    .pipe(
+      filter((resp) => isCompleteResponse(resp) || isErrorResponse(resp)),
+      map(searchResponseToArray(getIndexTags, showAllIndices))
+    )
     .toPromise()
     .catch(() => []);
 
