@@ -283,11 +283,25 @@ export class IndexPatternsService {
     fields: IndexPatternFieldMap,
     id: string,
     title: string,
+    options: GetFieldsOptions,
     fieldAttrs: FieldAttrs = {}
   ) => {
     const fieldsAsArr = Object.values(fields);
+    const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
     try {
-      return this.fieldArrayToMap(fieldsAsArr, fieldAttrs);
+      let updatedFieldList: FieldSpec[];
+      const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
+      newFields.forEach((field) => (field.isMapped = true));
+
+      // If allowNoIndex, only update field list if field caps finds fields. To support
+      // beats creating index pattern and dashboard before docs
+      if (!options.allowNoIndex || (newFields && newFields.length > 5)) {
+        updatedFieldList = [...newFields, ...scriptedFields];
+      } else {
+        updatedFieldList = fieldsAsArr;
+      }
+
+      return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -382,7 +396,7 @@ export class IndexPatternsService {
     }
 
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, runtimeFieldMap } = spec;
+    const { title, type, typeMeta, runtimeFieldMap } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
@@ -392,6 +406,13 @@ export class IndexPatternsService {
         spec.fields || {},
         id,
         spec.title as string,
+        {
+          pattern: title as string,
+          metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+          type,
+          rollupIndex: typeMeta?.params?.rollup_index,
+          allowNoIndex: spec.allowNoIndex,
+        },
         spec.fieldAttrs
       );
       // CREATE RUNTIME FIELDS
