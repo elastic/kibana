@@ -181,6 +181,15 @@ function initializeExecutionStatus(
   };
 }
 
+function isEmptyObject(obj: {}) {
+  for (const attr in obj) {
+    if (obj.hasOwnProperty(attr)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function restructureConnectorsThatSupportIncident(
   doc: SavedObjectUnsanitizedDoc<RawAlert>
 ): SavedObjectUnsanitizedDoc<RawAlert> {
@@ -195,13 +204,21 @@ function restructureConnectorsThatSupportIncident(
     // x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/migrations.ts
     const subActionParamsIncident =
       (action.params?.subActionParams as SavedObjectAttributes)?.incident ?? null;
-    if (subActionParamsIncident != null) {
+    if (subActionParamsIncident != null && !isEmptyObject(subActionParamsIncident)) {
       return [...acc, action];
     }
 
     if (action.actionTypeId === '.servicenow') {
-      const { title, comments, comment, description, severity, urgency, impact } = action.params
-        .subActionParams as {
+      const {
+        title,
+        comments,
+        comment,
+        description,
+        severity,
+        urgency,
+        impact,
+        short_description: shortDescription,
+      } = action.params.subActionParams as {
         title: string;
         description?: string;
         severity?: string;
@@ -209,6 +226,7 @@ function restructureConnectorsThatSupportIncident(
         impact?: string;
         comment?: string;
         comments?: Array<{ commentId: string; comment: string }>;
+        short_description?: string;
       };
       return [
         ...acc,
@@ -218,7 +236,7 @@ function restructureConnectorsThatSupportIncident(
             subAction: 'pushToService',
             subActionParams: {
               incident: {
-                short_description: title,
+                short_description: shortDescription ?? title,
                 description,
                 severity,
                 urgency,
@@ -235,8 +253,8 @@ function restructureConnectorsThatSupportIncident(
     }
 
     if (action.actionTypeId === '.jira') {
-      const { title, comments, description, issueType, priority, labels, parent } = action.params
-        .subActionParams as {
+      const { title, comments, description, issueType, priority, labels, parent, summary } = action
+        .params.subActionParams as {
         title: string;
         description: string;
         issueType: string;
@@ -244,6 +262,7 @@ function restructureConnectorsThatSupportIncident(
         labels?: string[];
         parent?: string;
         comments?: unknown[];
+        summary?: string;
       };
       return [
         ...acc,
@@ -253,7 +272,7 @@ function restructureConnectorsThatSupportIncident(
             subAction: 'pushToService',
             subActionParams: {
               incident: {
-                summary: title,
+                summary: summary ?? title,
                 description,
                 issueType,
                 priority,
@@ -268,13 +287,14 @@ function restructureConnectorsThatSupportIncident(
     }
 
     if (action.actionTypeId === '.resilient') {
-      const { title, comments, description, incidentTypes, severityCode } = action.params
+      const { title, comments, description, incidentTypes, severityCode, name } = action.params
         .subActionParams as {
         title: string;
         description: string;
         incidentTypes?: number[];
         severityCode?: number;
         comments?: unknown[];
+        name?: string;
       };
       return [
         ...acc,
@@ -284,7 +304,7 @@ function restructureConnectorsThatSupportIncident(
             subAction: 'pushToService',
             subActionParams: {
               incident: {
-                name: title,
+                name: name ?? title,
                 description,
                 incidentTypes,
                 severityCode,
