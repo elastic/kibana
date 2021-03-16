@@ -95,7 +95,7 @@ export const CustomTypeNameWarningCheckbox: React.FunctionComponent<WarningCheck
       label={
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle"
-          defaultMessage="Mapping type {mappingType} will be changed to {defaultType}"
+          defaultMessage="Replace mapping type {mappingType} with {defaultType}"
           values={{
             mappingType: <EuiCode>{meta!.typeName as string}</EuiCode>,
             defaultType: <EuiCode>_doc</EuiCode>,
@@ -105,8 +105,7 @@ export const CustomTypeNameWarningCheckbox: React.FunctionComponent<WarningCheck
       description={
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
-          defaultMessage="Mapping types are no longer supported in 8.0. This index mapping does not use the
-                    default type name, {defaultType}. Ensure no application code or scripts rely on a different type."
+          defaultMessage="Mapping types are no longer supported in 8.0. Ensure no application code or scripts rely on {mappingType}."
           values={{
             defaultType: <EuiCode>_doc</EuiCode>,
           }}
@@ -132,14 +131,14 @@ export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCh
       label={
         <FormattedMessage
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningTitle"
-          defaultMessage="Deprecated index settings will be removed"
+          defaultMessage="Remove deprecated index settings"
         />
       }
       description={
         <>
           <FormattedMessage
             id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningDetail"
-            defaultMessage="The following deprecated index settings were detected and will be removed:"
+            defaultMessage="The following deprecated index settings were detected:"
           />
 
           <EuiSpacer size="xs" />
