@@ -44,7 +44,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Default value of the setting was changed.' },
   },
   'banner:textContent': {
-    type: 'text',
+    type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
   // non-sensitive
