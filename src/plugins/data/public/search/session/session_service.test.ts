@@ -15,6 +15,26 @@ import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { SearchSessionSavedObject } from './sessions_client';
+import { SearchSessionStatus } from '../../../common';
+
+const mockSavedObject: SearchSessionSavedObject = {
+  id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
+  type: 'search-session',
+  attributes: {
+    name: 'my_name',
+    appId: 'my_app_id',
+    urlGeneratorId: 'my_url_generator_id',
+    idMapping: {},
+    sessionId: 'session_id',
+    touched: new Date().toISOString(),
+    created: new Date().toISOString(),
+    expires: new Date().toISOString(),
+    status: SearchSessionStatus.COMPLETE,
+    persisted: true,
+  },
+  references: [],
+};
 
 describe('Session service', () => {
   let sessionService: ISessionService;
@@ -28,6 +48,12 @@ describe('Session service', () => {
     const startService = coreMock.createSetup().getStartServices;
     nowProvider = createNowProviderMock();
     currentAppId$ = new BehaviorSubject('app');
+    const sessionsClientMock = getSessionsClientMock();
+    sessionsClientMock.get.mockImplementation(async (id) => ({
+      ...mockSavedObject,
+      id,
+      attributes: { ...mockSavedObject.attributes, sessionId: id },
+    }));
     sessionService = new SessionService(
       initializerContext,
       () =>
@@ -49,7 +75,7 @@ describe('Session service', () => {
           },
           ...rest,
         ]),
-      getSessionsClientMock(),
+      sessionsClientMock,
       nowProvider,
       { freezeState: false } // needed to use mocks inside state container
     );
