@@ -86,51 +86,6 @@ const expectedIndexPatterns = {
   },
 };
 
-const draggingField = {
-  field: { type: 'number', name: 'bytes', aggregatable: true },
-  indexPatternId: 'foo',
-  id: 'bar',
-  humanData: { label: 'Label' },
-};
-
-const draggingCol1 = {
-  columnId: 'col1',
-  groupId: 'a',
-  layerId: 'first',
-  id: 'col1',
-  humanData: { label: 'Column 1' },
-};
-
-const draggingCol2 = {
-  columnId: 'col2',
-  groupId: 'b',
-  layerId: 'first',
-  id: 'col2',
-  humanData: { label: 'Column 2' },
-  filterOperations: (op: OperationMetadata) => op.isBucketed,
-};
-
-const draggingCol3 = {
-  columnId: 'col3',
-  groupId: 'b',
-  layerId: 'first',
-  id: 'col3',
-  humanData: {
-    label: '',
-  },
-};
-
-const draggingCol4 = {
-  columnId: 'col4',
-  groupId: 'c',
-  layerId: 'first',
-  id: 'col4',
-  humanData: {
-    label: '',
-  },
-  filterOperations: (op: OperationMetadata) => op.isBucketed === false,
-};
-
 const dimensionGroups = [
   {
     accessors: [],
@@ -221,6 +176,51 @@ const multipleColumnsLayer: IndexPatternLayer = {
       sourceField: 'bytes',
     },
   },
+};
+
+const draggingField = {
+  field: { type: 'number', name: 'bytes', aggregatable: true },
+  indexPatternId: 'foo',
+  id: 'bar',
+  humanData: { label: 'Label' },
+};
+
+const draggingCol1 = {
+  columnId: 'col1',
+  groupId: 'a',
+  layerId: 'first',
+  id: 'col1',
+  humanData: { label: 'Column 1' },
+};
+
+const draggingCol2 = {
+  columnId: 'col2',
+  groupId: 'b',
+  layerId: 'first',
+  id: 'col2',
+  humanData: { label: 'Column 2' },
+  filterOperations: (op: OperationMetadata) => op.isBucketed,
+};
+
+const draggingCol3 = {
+  columnId: 'col3',
+  groupId: 'b',
+  layerId: 'first',
+  id: 'col3',
+  humanData: {
+    label: '',
+  },
+};
+
+const draggingCol4 = {
+  columnId: 'col4',
+  groupId: 'c',
+  layerId: 'first',
+  id: 'col4',
+  humanData: {
+    label: '',
+  },
+  filterOperations: (op: OperationMetadata) => op.isBucketed === false,
 };
 
 /**
@@ -1200,15 +1200,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
           // b: col2, col3
           // c: col4
           // dragging col1 into newCol in group b
-          const draggingCol1 = {
-            columnId: 'col1',
-            groupId: 'a',
-            layerId: 'first',
-            id: 'col1',
-            humanData: {
-              label: '',
-            },
-          };
           onDrop({
             ...defaultProps,
             columnId: 'newCol',
@@ -1247,15 +1238,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
           // b: col2, col3
           // c: col4
           // copying col1 within group a
-          const draggingCol1 = {
-            columnId: 'col1',
-            groupId: 'a',
-            layerId: 'first',
-            id: 'col1',
-            humanData: {
-              label: '',
-            },
-          };
           onDrop({
             ...defaultProps,
             columnId: 'newCol',

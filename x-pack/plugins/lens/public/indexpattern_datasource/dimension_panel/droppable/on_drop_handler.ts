@@ -309,6 +309,16 @@ function onSwapIncompatible({
   return true;
 }
 
+const swapColumnOrder = (columnOrder: string[], sourceId: string, targetId: string) => {
+  const newColumnOrder = [...columnOrder];
+  const sourceIndex = newColumnOrder.findIndex((c) => c === sourceId);
+  const targetIndex = newColumnOrder.findIndex((c) => c === targetId);
+
+  newColumnOrder[sourceIndex] = targetId;
+  newColumnOrder[targetIndex] = sourceId;
+  return newColumnOrder;
+};
+
 function onSwapCompatible({
   columnId,
   setState,
@@ -326,16 +336,6 @@ function onSwapCompatible({
   newColumns[targetId] = sourceColumn;
   newColumns[sourceId] = targetColumn;
 
-  const swapColumnOrder = (columnOrder: string[], sourceId: string, targetId: string) => {
-    const newColumnOrder = [...columnOrder];
-    const sourceIndex = newColumnOrder.findIndex((c) => c === sourceId);
-    const targetIndex = newColumnOrder.findIndex((c) => c === targetId);
-  
-    newColumnOrder[sourceIndex] = targetId;
-    newColumnOrder[targetIndex] = sourceId;
-    return newColumnOrder
-  }
-
   const newColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
 
   setState(
@@ -350,4 +350,3 @@ function onSwapCompatible({
   );
   return true;
 }
-
