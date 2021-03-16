@@ -265,7 +265,6 @@
     "charts.colormaps.greysText": "灰色",
     "charts.colormaps.redsText": "红色",
     "charts.colormaps.yellowToRedText": "黄到红",
-    "charts.colorPicker.clearColor": "清除颜色",
     "charts.colorPicker.setColor.screenReaderDescription": "为值 {legendDataLabel} 设置颜色",
     "charts.countText": "计数",
     "charts.functions.palette.args.colorHelpText": "调色板颜色。接受 {html} 颜色名称 {hex}、{hsl}、{hsla}、{rgb} 或 {rgba}。",
