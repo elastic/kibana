@@ -432,7 +432,6 @@
     "@types/elasticsearch": "^5.0.33",
     "@types/enzyme": "^3.10.5",
     "@types/eslint": "^7.2.7",
-    "@types/estree": "^0.0.46",
     "@types/extract-zip": "^1.6.2",
     "@types/faker": "^5.1.5",
     "@types/fancy-log": "^1.3.1",
@@ -850,7 +849,7 @@
     "webpack-merge": "^4.2.2",
     "webpack-sources": "^1.4.1",
     "write-pkg": "^4.0.0",
-    "xml-crypto": "^2.0.0",
+    "xml-crypto": "^2.1.1",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
     "zlib": "^1.0.5"

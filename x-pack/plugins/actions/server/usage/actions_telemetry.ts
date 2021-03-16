@@ -57,8 +57,8 @@ export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: 
   return {
     countTotal: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
       (total: number, key: string) =>
-        parseInt(searchResult.aggregations.byActionTypeId.value.types[key], 0) + total,
-      10
+        parseInt(searchResult.aggregations.byActionTypeId.value.types[key], 10) + total,
+      0
     ),
     countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
       // ES DSL aggregations are returned as `any` by esClient.search
