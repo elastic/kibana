@@ -65,7 +65,7 @@ const mockOptions = (
   state = {}
 ): any => {
   services.scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-  services.scopedClusterClient.asCurrentUser = jest.fn();
+  services.scopedClusterClient.asCurrentUser = (jest.fn() as unknown) as any;
 
   services.savedObjectsClient.get.mockResolvedValue({
     id: '',
