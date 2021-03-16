@@ -15,6 +15,7 @@ import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts } from '../../../shared/types';
 import { EngineLogic } from '../engine';
 
+import { DEFAULT_SNIPPET_SIZE } from './constants';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
@@ -60,6 +61,9 @@ interface ResultSettingsActions {
   // Listeners
   clearRawSizeForField(fieldName: string): string;
   clearSnippetSizeForField(fieldName: string): string;
+  toggleRawForField(fieldName: string): string;
+  toggleSnippetForField(fieldName: string): string;
+  toggleSnippetFallbackForField(fieldName: string): string;
   initializeResultSettingsData(): void;
   saveResultSettings(resultFields: ServerFieldResultSettingObject): ServerFieldResultSettingObject;
 }
@@ -110,6 +114,9 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     saving: () => true,
     clearRawSizeForField: (fieldName) => fieldName,
     clearSnippetSizeForField: (fieldName) => fieldName,
+    toggleRawForField: (fieldName) => fieldName,
+    toggleSnippetForField: (fieldName) => fieldName,
+    toggleSnippetFallbackForField: (fieldName) => fieldName,
     initializeResultSettingsData: () => true,
     saveResultSettings: (resultFields) => resultFields,
   }),
@@ -243,6 +250,35 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     },
     clearSnippetSizeForField: (fieldName) => {
       actions.updateField(fieldName, omit(values.resultFields[fieldName], ['snippetSize']));
+    },
+    toggleRawForField: (fieldName: string) => {
+      // We cast this b/c it could be an empty object, which we can still treat as a FieldResultSetting safely
+      const field = values.resultFields[fieldName] as FieldResultSetting;
+      const raw = !field.raw;
+      actions.updateField(fieldName, {
+        ...omit(field, ['rawSize']),
+        raw,
+        ...(raw ? { rawSize: field.rawSize } : {}),
+      });
+    },
+    toggleSnippetForField: (fieldName: string) => {
+      // We cast this b/c it could be an empty object, which we can still treat as a FieldResultSetting safely
+      const field = values.resultFields[fieldName] as FieldResultSetting;
+      const snippet = !field.snippet;
+
+      actions.updateField(fieldName, {
+        ...omit(field, ['snippetSize']),
+        snippet,
+        ...(snippet ? { snippetSize: DEFAULT_SNIPPET_SIZE } : {}),
+      });
+    },
+    toggleSnippetFallbackForField: (fieldName: string) => {
+      // We cast this b/c it could be an empty object, which we can still treat as a FieldResultSetting safely
+      const field = values.resultFields[fieldName] as FieldResultSetting;
+      actions.updateField(fieldName, {
+        ...field,
+        snippetFallback: !field.snippetFallback,
+      });
     },
     initializeResultSettingsData: async () => {
       const { http } = HttpLogic.values;

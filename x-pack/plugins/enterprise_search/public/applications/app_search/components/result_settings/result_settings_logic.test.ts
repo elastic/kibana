@@ -577,6 +577,151 @@ describe('ResultSettingsLogic', () => {
       });
     });
 
+    describe('toggleRawForField', () => {
+      it('should toggle the raw value on for a field', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5 },
+            bar: { raw: false, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.toggleRawForField('bar');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
+          raw: true,
+          snippet: false,
+        });
+      });
+
+      it('should maintain rawSize if it was set prior', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5 },
+            bar: { raw: false, rawSize: 10, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.toggleRawForField('bar');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
+          raw: true,
+          rawSize: 10,
+          snippet: false,
+        });
+      });
+
+      it('should remove rawSize value when toggling off', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5 },
+            bar: { raw: true, rawSize: 5, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.toggleRawForField('bar');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
+          raw: false,
+          snippet: false,
+        });
+      });
+
+      it('should still work if the object is empty', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5 },
+            bar: {},
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.toggleRawForField('bar');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
+          raw: true,
+        });
+      });
+    });
+
+    describe('toggleSnippetForField', () => {
+      it('should toggle the raw value on for a field, always setting the snippet size to 100', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5 },
+            bar: { raw: false, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.toggleSnippetForField('bar');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
+          raw: false,
+          snippet: true,
+          snippetSize: 100,
+        });
+      });
+
+      it('should remove rawSize value when toggling off', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5 },
+            bar: { raw: false, snippet: true, snippetSize: 5 },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.toggleSnippetForField('bar');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
+          raw: false,
+          snippet: false,
+        });
+      });
+
+      it('should still work if the object is empty', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5 },
+            bar: {},
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.toggleSnippetForField('bar');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('bar', {
+          snippet: true,
+          snippetSize: 100,
+        });
+      });
+    });
+
+    describe('toggleSnippetFallbackForField', () => {
+      it('should toggle the snippetFallback value for a field', () => {
+        mount({
+          resultFields: {
+            foo: { raw: false, snippet: true, snippetSize: 5, snippetFallback: true },
+            bar: { raw: false, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.toggleSnippetFallbackForField('foo');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
+          raw: false,
+          snippet: true,
+          snippetSize: 5,
+          snippetFallback: false,
+        });
+      });
+    });
+
     describe('initializeResultSettingsData', () => {
       it('should remove the snippet size set on a field', () => {
         mount({
