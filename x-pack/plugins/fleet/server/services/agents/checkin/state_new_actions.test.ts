@@ -217,7 +217,7 @@ describe('test agent checkin new action services', () => {
       ).toEqual(expectedResult);
     });
 
-    it('should return CONNFIG_CHANGE and data.config for agent version <= 7.9', async () => {
+    it('should return CONFIG_CHANGE and data.config for agent version <= 7.9', async () => {
       const expectedResult = [
         {
           agent_id: 'agent1',
