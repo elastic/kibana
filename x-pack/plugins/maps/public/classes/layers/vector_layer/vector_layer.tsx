@@ -877,9 +877,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
       mbMap.addLayer(mbLayer);
       mbMap.setFilter(tooManyFeaturesLayerId, [
-        '==',
-        ['get', KBN_TOO_MANY_FEATURES_PROPERTY],
-        true,
+        'all',
+        ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true],
+        ['==', ['get', 'isComplete'], false],
       ]);
       mbMap.setPaintProperty(
         tooManyFeaturesLayerId,

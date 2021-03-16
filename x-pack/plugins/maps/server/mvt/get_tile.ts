@@ -23,7 +23,7 @@ import {
   SUPER_FINE_ZOOM_DELTA,
 } from '../../common/constants';
 
-import { convertRegularRespToGeoJson, hitsToGeoJson } from '../../common/elasticsearch_util';
+import {convertRegularRespToGeoJson, formatEnvelopeAsPolygon, hitsToGeoJson} from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
 import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
@@ -42,7 +42,6 @@ export async function getGridTile({
   z,
   requestBody = {},
   requestType = RENDER_AS.POINT,
-  geoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT,
   searchSessionId,
   abortSignal,
 }: {
@@ -83,6 +82,26 @@ export async function getGridTile({
       )
       .toPromise();
     const features: Feature[] = convertRegularRespToGeoJson(response.rawResponse, requestType);
+
+
+    if (features.length) {
+      const bounds = formatEnvelopeAsPolygon({
+        maxLat: tileBounds.top_left.lat,
+        minLat: tileBounds.bottom_right.lat,
+        maxLon: tileBounds.bottom_right.lon,
+        minLon: tileBounds.top_left.lon,
+      });
+      const metaDataFeature = {
+        type: 'Feature',
+        properties: {
+          [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+          isComplete: true,
+        },
+        geometry: bounds,
+      };
+      features.push(metaDataFeature);
+    }
+
     const featureCollection: FeatureCollection = {
       features,
       type: 'FeatureCollection',
@@ -177,6 +196,7 @@ export async function getTile({
           type: 'Feature',
           properties: {
             [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
+            isComplete: false,
           },
           geometry: esBboxToGeoJsonPolygon(
             bboxResponse.rawResponse.aggregations.data_bounds.bounds,

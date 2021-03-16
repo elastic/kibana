@@ -14,7 +14,11 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { Feature } from 'geojson';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
-import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
+import {
+  SOURCE_DATA_REQUEST_ID,
+  LAYER_TYPE,
+  KBN_TOO_MANY_FEATURES_PROPERTY,
+} from '../../../../common/constants';
 import { VectorLayer, VectorLayerArguments } from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
 import { DataRequestContext } from '../../../actions';
@@ -177,9 +181,10 @@ export class TiledVectorLayer extends VectorLayer {
     console.log('going to queyr', this._getMbSourceId(), sourceMeta.layerName);
     const features = mbMap.querySourceFeatures(this._getMbSourceId(), {
       sourceLayer: sourceMeta.layerName,
+      filter: ['==', ['get', KBN_TOO_MANY_FEATURES_PROPERTY], true],
     });
 
-    console.log('f', features);
+    console.log('metdata features', features);
 
     return null;
   }
