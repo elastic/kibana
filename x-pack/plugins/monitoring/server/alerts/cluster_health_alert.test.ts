@@ -11,8 +11,6 @@ import { AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 const RealDate = Date;
 
