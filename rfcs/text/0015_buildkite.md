@@ -12,6 +12,7 @@
       - [Stable](#stable)
       - [Surfaces information intuitively](#surfaces-information-intuitively)
       - [Pipelines](#pipelines)
+      - [Advanced Pipeline logic](#advanced-pipeline-logic)
       - [Cloud-friendly pricing model](#cloud-friendly-pricing-model)
       - [Public access](#public-access)
       - [Secrets handling](#secrets-handling)
@@ -21,8 +22,8 @@
       - [Customization](#customization)
       - [Core functionality is first-party](#core-functionality-is-first-party)
       - [First-class support for test results](#first-class-support-for-test-results)
-      - [Advanced Pipeline features](#advanced-pipeline-features)
       - [GitHub Integration](#github-integration)
+      - [Local testing / reproduction?](#local-testing--reproduction)
 - [Buildkite - Detailed design](#buildkite---detailed-design)
   - [Overview](#overview)
   - [Required and Desired Capabilities](#required-and-desired-capabilities-1)
@@ -31,6 +32,7 @@
       - [Stable](#stable-1)
       - [Surfaces information intuitively](#surfaces-information-intuitively-1)
       - [Pipelines](#pipelines-1)
+      - [Advanced Pipeline logic](#advanced-pipeline-logic-1)
       - [Cloud-friendly pricing model](#cloud-friendly-pricing-model-1)
       - [Public access](#public-access-1)
       - [Secrets handling](#secrets-handling-1)
@@ -39,10 +41,15 @@
       - [Customization](#customization-1)
       - [Core functionality is first-party](#core-functionality-is-first-party-1)
       - [First-class support for test results](#first-class-support-for-test-results-1)
-      - [Advanced Pipeline features](#advanced-pipeline-features-1)
       - [GitHub Integration](#github-integration-1)
-  - [Elastic Buildkite Agent Manager](#elastic-buildkite-agent-manager)
-  - [Elastic Buildkite PR Bot](#elastic-buildkite-pr-bot)
+  - [What we will build and manage](#what-we-will-build-and-manage)
+    - [Elastic Buildkite Agent Manager](#elastic-buildkite-agent-manager)
+    - [Elastic Buildkite PR Bot](#elastic-buildkite-pr-bot)
+    - [GCP Infrastructure](#gcp-infrastructure)
+    - [Monitoring / Alerting](#monitoring--alerting)
+    - [Agent Image management](#agent-image-management)
+    - [Buildkite org-level settings management](#buildkite-org-level-settings-management)
+    - [IT Security Processes](#it-security-processes)
 - [Drawbacks](#drawbacks)
 - [Alternatives](#alternatives)
   - [Jenkins](#jenkins)
@@ -96,6 +103,23 @@ This RFC is focused on the option of using a system other than Jenkins, and mana
 - Pipelines should be reasonably easy to understand and change. Kibana team members should be able to follow a simple guide and create new pipelines on their own.
 - Changes to pipelines should generally be able to be tested in Pull Requests before being merged.
 
+#### Advanced Pipeline logic
+
+With such a large codebase and CI pipeline, we often complex requirements around when and how certain tasks should run, and we want the ability to handle this built into the system we use. It can be very difficult and require complex solutions for fairly simple use cases when the system does not support advanced pipeline logic out of the box.
+
+For example, the flaky test suite runner that we currently have in Jenkins is fairly simple: run a given task (which might have a dependency) `N` number of times on `M` agents. This is very difficult to model in a system like TeamCity, which does not have dynamic dependencies.
+
+- Retries
+  - Automatic (e.g. run a test suite twice to account for flakiness) and manual (user-initiated)
+  - Full (e.g. a whole pipeline) and partial (e.g. a single step)
+- Dynamic pipelines
+  - Conditional dependencies/steps
+    - Based on user input
+    - Based on external events/data (e.g. PR label)
+    - Based on source code or changes (e.g. only run this for .md changes)
+- Metadata and Artifacts re-usable between tasks
+  - Metadata could be a docker image tag for a specific task, built from a previous step
+
 #### Cloud-friendly pricing model
 
 If the given system has a cost, the pricing model should be cloud-friendly and/or usage-based.
@@ -144,19 +168,14 @@ Any core functionality that we depend on should be created and maintained by the
 
 #### First-class support for test results
 
-#### Advanced Pipeline features
-
-TODO
-
-- Retries - automatic and manual - full and partial
-- Dynamic / Optional dependencies/steps
-- Artifacts re-usable between tasks
-  - This might just be the ability to dynamically specify a docker image tag for a specific task, built from a previous step
-
 #### GitHub Integration
 
 - Ability to trigger jobs based on webhooks
 - Integrate GitHub-specific information into UI, e.g. a build for a PR should link back to the PR
+
+#### Local testing / reproduction?
+
+TODO
 
 # Buildkite - Detailed design
 
@@ -198,9 +217,9 @@ If Buildkite's status pages are accurate, they seem to be extremely stable, and 
 - [Historical Uptime](https://www.buildkitestatus.com/uptime)
 - [Incident History](https://www.buildkitestatus.com/history)
 
-TODO check our Buildkite SLA? Can we put that info in here or is it under NDA?
+For agents, stability and availability will depend primarily on the infrastructure that we build and the availability of the cloud provider (GCP, primarily) running our agents. Since we control our agents, we will be able to run agents across multiple zones, and possibly regions, in GCP for increased availability. See [TODO agent manager section].
 
-TODO talk about agents, GCP, zones, etc
+TODO check our Buildkite SLA? Can we put that info in here or is it under NDA?
 
 TODO how does Buildkite handle failures? What happens to jobs? Even if poorly, downtime seems to be very rare
 
@@ -225,6 +244,23 @@ TODO link to customization section once complete - we can surface any extra info
 - Pipelines should be defined as code.
 - Pipelines should be reasonably easy to understand and change. Kibana team members should be able to follow a simple guide and create new pipelines on their own.
 - Changes to pipelines should generally be able to be tested in Pull Requests before being merged.
+
+#### Advanced Pipeline logic
+
+With such a large codebase and CI pipeline, we often complex requirements around when and how certain tasks should run, and we want the ability to handle this built into the system we use. It can be very difficult and require complex solutions for fairly simple use cases when the system does not support advanced pipeline logic out of the box.
+
+For example, the flaky test suite runner that we currently have in Jenkins is fairly simple: run a given task (which might have a dependency) `N` number of times on `M` agents. This is very difficult to model in a system like TeamCity, which does not have dynamic dependencies.
+
+- Retries
+  - Automatic (run a test suite twice to account for flakiness) and manual (user-initiated)
+  - Full (e.g. a whole pipeline) and partial (e.g. a single step)
+- Dynamic pipelines
+  - Conditional dependencies/steps
+    - Based on user input
+    - Based on external events/data (e.g. PR label)
+    - Based on source code or changes (e.g. only run this for .md changes)
+- Metadata and Artifacts re-usable between tasks
+  - Metadata could be a docker image tag for a specific task, built from a previous step
 
 #### Cloud-friendly pricing model
 
@@ -268,25 +304,54 @@ Any core functionality that we depend on should be created and maintained by the
 
 #### First-class support for test results
 
-#### Advanced Pipeline features
-
-TODO
-
-- Retries - automatic and manual - full and partial
-- Dynamic / Optional dependencies/steps
-- Artifacts re-usable between tasks
-  - This might just be the ability to dynamically specify a docker image tag for a specific task, built from a previous step
-
 #### GitHub Integration
 
 - Ability to trigger jobs based on webhooks
 - Integrate GitHub-specific information into UI, e.g. a build for a PR should link back to the PR
 
-## Elastic Buildkite Agent Manager
+## What we will build and manage
+
+### Elastic Buildkite Agent Manager
 
 TODO
 
-## Elastic Buildkite PR Bot
+### Elastic Buildkite PR Bot
+
+TODO
+
+### GCP Infrastructure
+
+TODO
+
+Hosting for bots/services, GCS buckets, images, networking (cloud nat), IAM/permissions
+
+Terraform
+
+### Monitoring / Alerting
+
+TODO
+
+GCP monitoring (instances, quotas, etc)
+
+Buildkite monitoring (agent queues, job times)
+
+### Agent Image management
+
+### Buildkite org-level settings management
+
+TODO
+
+Mostly/all terraform
+
+Any settings not stored in pipeline yaml
+
+Top-level pipelines and their settings
+
+Users/roles
+
+SSO
+
+### IT Security Processes
 
 TODO
 
