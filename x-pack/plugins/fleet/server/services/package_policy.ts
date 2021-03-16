@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type {
   ElasticsearchClient,
   RequestHandlerContext,
@@ -37,9 +37,8 @@ import type {
   PackagePolicy,
   PackagePolicySOAttributes,
   RegistryPackage,
-  CallESAsCurrentUser,
 } from '../types';
-import { ExternalCallback } from '..';
+import type { ExternalCallback } from '..';
 
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
@@ -60,7 +59,6 @@ class PackagePolicyService {
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    callCluster: CallESAsCurrentUser,
     packagePolicy: NewPackagePolicy,
     options?: { id?: string; user?: AuthenticatedUser; bumpRevision?: boolean }
   ): Promise<PackagePolicy> {
@@ -94,7 +92,7 @@ class PackagePolicyService {
         ensureInstalledPackage({
           savedObjectsClient: soClient,
           pkgName: packagePolicy.package.name,
-          callCluster,
+          esClient,
         }),
         getPackageInfo({
           savedObjectsClient: soClient,

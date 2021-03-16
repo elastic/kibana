@@ -537,7 +537,7 @@ exports[`DatatableComponent it should not render actions on header when it is in
         Array [
           Object {
             "actions": Object {
-              "additional": undefined,
+              "additional": Array [],
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
@@ -551,7 +551,7 @@ exports[`DatatableComponent it should not render actions on header when it is in
           },
           Object {
             "actions": Object {
-              "additional": undefined,
+              "additional": Array [],
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,
@@ -565,7 +565,7 @@ exports[`DatatableComponent it should not render actions on header when it is in
           },
           Object {
             "actions": Object {
-              "additional": undefined,
+              "additional": Array [],
               "showHide": false,
               "showMoveLeft": false,
               "showMoveRight": false,

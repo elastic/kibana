@@ -11,6 +11,7 @@
     // add all the folders contains files to be compiled
     "common/**/*",
     "public/**/*",
+    "scripts/**/*",
     "server/**/*"
   ],
   "references": [

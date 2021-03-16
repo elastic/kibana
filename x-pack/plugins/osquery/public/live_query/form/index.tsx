@@ -6,40 +6,34 @@
  */
 
 import { EuiButton, EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 
 import { UseField, Form, useForm } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
-import { CodeEditorField } from './code_editor_field';
+import { LiveQueryQueryField } from './live_query_query_field';
 
 const FORM_ID = 'liveQueryForm';
 
 interface LiveQueryFormProps {
-  actionDetails?: Record<string, string>;
+  defaultValue?: unknown;
   onSubmit: (payload: Record<string, string>) => Promise<void>;
 }
 
-const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ actionDetails, onSubmit }) => {
-  const handleSubmit = useCallback(
-    (payload) => {
-      onSubmit(payload);
-      return Promise.resolve();
-    },
-    [onSubmit]
-  );
-
+const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ defaultValue, onSubmit }) => {
   const { form } = useForm({
     id: FORM_ID,
     // schema: formSchema,
-    onSubmit: handleSubmit,
+    onSubmit,
     options: {
       stripEmptyFields: false,
     },
-    defaultValue: actionDetails,
-    deserializer: ({ fields, _source }) => ({
-      agents: fields?.agents,
-      command: _source?.data?.commands[0],
-    }),
+    defaultValue: {
+      // @ts-expect-error update types
+      query: defaultValue ?? {
+        id: null,
+        query: '',
+      },
+    },
   });
 
   const { submit } = form;
@@ -48,8 +42,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({ actionDetails, o
     <Form form={form}>
       <UseField path="agents" component={AgentsTableField} />
       <EuiSpacer />
-      <UseField path="command" component={CodeEditorField} />
-      <EuiButton onClick={submit}>Send query</EuiButton>
+      <UseField path="query" component={LiveQueryQueryField} />
+      <EuiSpacer />
+      <EuiButton onClick={submit}>{'Send query'}</EuiButton>
     </Form>
   );
 };

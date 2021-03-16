@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Persistence via Atom Init Script Modification",
   "query": "event.category:\"file\" and not event.type:\"deletion\" and file.path:/Users/*/.atom/init.coffee and not process.name:(Atom or xpcproxy) and not user.name:root",
   "references": [

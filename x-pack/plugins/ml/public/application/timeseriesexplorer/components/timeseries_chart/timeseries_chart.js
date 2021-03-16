@@ -1076,11 +1076,7 @@ class TimeseriesChartIntl extends Component {
       .defined((d) => d.lower !== null && d.upper !== null);
 
     if (modelPlotEnabled === true) {
-      cxtGroup
-        .append('path')
-        .datum(data)
-        .attr('class', 'area context')
-        .attr('d', contextBoundsArea);
+      cxtGroup.append('path').datum(data).attr('class', 'area bounds').attr('d', contextBoundsArea);
     }
 
     const contextValuesLine = d3.svg

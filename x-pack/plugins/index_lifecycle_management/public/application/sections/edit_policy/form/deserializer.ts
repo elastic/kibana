@@ -17,7 +17,7 @@ import { FormInternal } from '../types';
 
 export const deserializer = (policy: SerializedPolicy): FormInternal => {
   const {
-    phases: { hot, warm, cold, delete: deletePhase },
+    phases: { hot, warm, cold, frozen, delete: deletePhase },
   } = policy;
 
   const _meta: FormInternal['_meta'] = {
@@ -40,6 +40,11 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       enabled: Boolean(cold),
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
       freezeEnabled: Boolean(cold?.actions?.freeze),
+    },
+    frozen: {
+      enabled: Boolean(frozen),
+      dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
+      freezeEnabled: Boolean(frozen?.actions?.freeze),
     },
     delete: {
       enabled: Boolean(deletePhase),

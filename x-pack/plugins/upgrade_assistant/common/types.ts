@@ -92,11 +92,21 @@ export interface ReindexOperation extends SavedObjectAttributes {
 
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
-export enum ReindexWarning {
-  // 7.0 -> 8.0 warnings
-  customTypeName,
-
-  // 8.0 -> 9.0 warnings
+// 7.0 -> 8.0 warnings
+export type ReindexWarningTypes = 'customTypeName' | 'indexSetting';
+export interface ReindexWarning {
+  warningType: ReindexWarningTypes;
+  /**
+   * Optional metadata for deprecations
+   *
+   * @remark
+   * For example, for the "customTypeName" deprecation,
+   * we want to surface the typeName to the user.
+   * For "indexSetting" we want to surface the deprecated settings.
+   */
+  meta?: {
+    [key: string]: string | string[];
+  };
 }
 
 export enum IndexGroup {
@@ -181,6 +191,7 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
   reindex?: boolean;
+  deprecatedIndexSettings?: string[];
   /**
    * Indicate what blockers have been detected for calling reindex
    * against this index.

@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Windows Error Manager Masquerading",
   "query": "sequence by host.id, process.entity_id with maxspan = 5s\n  [process where event.type:\"start\" and process.name : (\"wermgr.exe\", \"WerFault.exe\") and process.args_count == 1]\n  [network where process.name : (\"wermgr.exe\", \"WerFault.exe\") and network.protocol != \"dns\" and\n    network.direction == \"outgoing\" and destination.ip !=\"::1\" and destination.ip !=\"127.0.0.1\"\n  ]\n",
   "references": [

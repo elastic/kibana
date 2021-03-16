@@ -7,7 +7,6 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { ExternalLinkIcon } from '../../../../common/components/external_link_icon';
 
 import { RowRendererId } from '../../../../../common/types/timeline';
 import {
@@ -37,7 +36,6 @@ const Link = ({ children, url }: { children: React.ReactNode; url: string }) => 
     data-test-subj="externalLink"
   >
     {children}
-    <ExternalLinkIcon data-test-subj="externalLinkIcon" />
   </EuiLink>
 );
 
