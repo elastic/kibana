@@ -109,7 +109,7 @@ interface DatatableStatePost711 {
 type OperationTypePre712 =
   | 'avg'
   | 'cardinality'
-  | 'derivatives'
+  | 'derivative'
   | 'filters'
   | 'terms'
   | 'date_histogram'
@@ -126,7 +126,7 @@ type OperationTypePre712 =
   | 'moving_average';
 type OperationTypePost712 = Exclude<
   OperationTypePre712 | 'average' | 'unique_count' | 'differences',
-  'avg' | 'cardinality' | 'derivatives'
+  'avg' | 'cardinality' | 'derivative'
 >;
 interface LensDocShapePre712<VisualizationState = unknown> {
   visualizationType: string | null;
@@ -474,7 +474,7 @@ const renameOperationsForFormula: SavedObjectMigrationFn<
   const renameMapping = {
     avg: 'average',
     cardinality: 'unique_count',
-    derivatives: 'differences',
+    derivative: 'differences',
   } as const;
   function shouldBeRenamed(op: OperationTypePre712): op is keyof typeof renameMapping {
     return op in renameMapping;
