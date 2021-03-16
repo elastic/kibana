@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import semverSatisfies from 'semver/functions/satisfies';
 import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
 import {
   extractPanelsReferences,
@@ -33,17 +34,35 @@ export function extractReferences(
   const panelReferences: SavedObjectReference[] = [];
   let panels: Array<Record<string, string>> = JSON.parse(String(attributes.panelsJSON));
 
-  const extractedReferencesResult = extractPanelsReferences(
-    (panels as unknown) as SavedDashboardPanel730ToLatest[],
-    deps
-  );
+  const isPre730Panel = (panel: Record<string, string>): boolean => {
+    return 'version' in panel ? semverSatisfies(panel.version, '<7.3') : true;
+  };
 
-  panels = (extractedReferencesResult.map((res) => res.panel) as unknown) as Array<
-    Record<string, string>
-  >;
-  extractedReferencesResult.forEach((res) => {
-    panelReferences.push(...res.references);
-  });
+  const hasPre730Panel = panels.some(isPre730Panel);
+
+  /**
+   * `extractPanelsReferences` only knows how to reliably handle "latest" panels
+   * It is possible that `extractReferences` is run on older dashboard SO with older panels,
+   * for example, when importing a saved object using saved object UI `extractReferences` is called BEFORE any server side migrations are run.
+   *
+   * In this case we skip running `extractPanelsReferences` on such object.
+   * We also know that there is nothing to extract
+   * (First possible entity to be extracted by this mechanism is a dashboard drilldown since 7.11)
+   */
+  if (!hasPre730Panel) {
+    const extractedReferencesResult = extractPanelsReferences(
+      // it is ~safe~ to cast to `SavedDashboardPanel730ToLatest` because above we've checked that there are only >=7.3 panels
+      (panels as unknown) as SavedDashboardPanel730ToLatest[],
+      deps
+    );
+
+    panels = (extractedReferencesResult.map((res) => res.panel) as unknown) as Array<
+      Record<string, string>
+    >;
+    extractedReferencesResult.forEach((res) => {
+      panelReferences.push(...res.references);
+    });
+  }
 
   // TODO: This extraction should be done by EmbeddablePersistableStateService
   // https://github.com/elastic/kibana/issues/82830

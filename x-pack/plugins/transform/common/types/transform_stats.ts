@@ -6,6 +6,7 @@
  */
 
 import { TransformState, TRANSFORM_STATE } from '../constants';
+import { isPopulatedObject } from '../utils/object_utils';
 import { TransformId } from './transform';
 
 export interface TransformStats {
@@ -55,11 +56,12 @@ export interface TransformStats {
   state: TransformState;
 }
 
-export function isTransformStats(arg: any): arg is TransformStats {
+function isTransformState(arg: unknown): arg is TransformState {
+  return typeof arg === 'string' && Object.values(TRANSFORM_STATE).includes(arg as TransformState);
+}
+
+export function isTransformStats(arg: unknown): arg is TransformStats {
   return (
-    typeof arg === 'object' &&
-    arg !== null &&
-    {}.hasOwnProperty.call(arg, 'state') &&
-    Object.values(TRANSFORM_STATE).includes(arg.state)
+    isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'state') && isTransformState(arg.state)
   );
 }

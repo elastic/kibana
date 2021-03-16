@@ -13,9 +13,7 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
-  ElasticsearchClient,
-  ILegacyClusterClient,
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
@@ -33,6 +31,7 @@ import {
   AlertsHealth,
   AlertNotifyWhenType,
   WithoutReservedActionGroups,
+  ActionVariable,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -62,13 +61,8 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
 export interface Services {
-  /**
-   * @deprecated Use `scopedClusterClient` instead.
-   */
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
-  scopedClusterClient: ElasticsearchClient;
-  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
+  scopedClusterClient: IScopedClusterClient;
 }
 
 export interface AlertServices<
@@ -100,12 +94,6 @@ export interface AlertExecutorOptions<
   tags: string[];
   createdBy: string | null;
   updatedBy: string | null;
-}
-
-export interface ActionVariable {
-  name: string;
-  description: string;
-  useWithTripleBracesInTemplates?: boolean;
 }
 
 export type ExecutorType<
