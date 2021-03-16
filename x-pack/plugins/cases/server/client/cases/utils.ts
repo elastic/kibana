@@ -184,7 +184,7 @@ export const createIncident = async ({
 
   if (totalAlerts > 0) {
     comments.push({
-      comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
+      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
       commentId: `${theCase.id}-total-alerts`,
     });
   }

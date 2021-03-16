@@ -6,10 +6,12 @@
  */
 
 import { CoreStart } from 'kibana/public';
+import { ReactElement } from 'react';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
+import { CreateCaseProps } from './components/create';
 
 export interface SetupPlugins {
   triggersActionsUi: TriggersActionsSetup;
@@ -19,6 +21,9 @@ export interface StartPlugins {
   triggersActionsUi: TriggersActionsStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
 export type StartServices = CoreStart & StartPlugins;
+
+export interface CasesUiStart {
+  casesComponent: () => JSX.Element;
+  getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
+}

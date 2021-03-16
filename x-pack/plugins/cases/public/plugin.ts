@@ -6,17 +6,10 @@
  */
 
 import { CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { ReactElement } from 'react';
 import { TestComponent } from '.';
-import { CreateCaseProps } from './components/create';
-import { SetupPlugins, StartPlugins } from './types';
+import { CasesUiStart, SetupPlugins, StartPlugins } from './types';
 import { getCreateCaseLazy } from './get_create_case';
 import { KibanaServices } from './common/lib/kibana';
-
-export interface CasesUiStart {
-  casesComponent: () => JSX.Element;
-  getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
-}
 
 export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;

@@ -20,7 +20,7 @@ export const INCIDENT_MANAGEMENT_SYSTEM_DESC = i18n.translate(
   'xpack.cases.configureCases.incidentManagementSystemDesc',
   {
     defaultMessage:
-      'You may optionally connect Security cases to an external incident management system of your choosing. This will allow you to push case data as an incident in your chosen third-party system.',
+      'You may optionally connect cases to an external incident management system of your choosing. This will allow you to push case data as an incident in your chosen third-party system.',
   }
 );
 
@@ -46,7 +46,7 @@ export const CASE_CLOSURE_OPTIONS_DESC = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsDesc',
   {
     defaultMessage:
-      'Define how you wish Security cases to be closed. Automated case closures require an established connection to an external incident management system.',
+      'Define how you wish cases to be closed. Automated case closures require an established connection to an external incident management system.',
   }
 );
 
@@ -67,22 +67,21 @@ export const CASE_CLOSURE_OPTIONS_LABEL = i18n.translate(
 export const CASE_CLOSURE_OPTIONS_MANUAL = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsManual',
   {
-    defaultMessage: 'Manually close Security cases',
+    defaultMessage: 'Manually close cases',
   }
 );
 
 export const CASE_CLOSURE_OPTIONS_NEW_INCIDENT = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsNewIncident',
   {
-    defaultMessage:
-      'Automatically close Security cases when pushing new incident to external system',
+    defaultMessage: 'Automatically close cases when pushing new incident to external system',
   }
 );
 
 export const CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT = i18n.translate(
   'xpack.cases.configureCases.caseClosureOptionsClosedIncident',
   {
-    defaultMessage: 'Automatically close Security cases when incident is closed in external system',
+    defaultMessage: 'Automatically close cases when incident is closed in external system',
   }
 );
 export const FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
@@ -96,7 +95,7 @@ export const FIELD_MAPPING_DESC = (thirdPartyName: string): string => {
   return i18n.translate('xpack.cases.configureCases.fieldMappingDesc', {
     values: { thirdPartyName },
     defaultMessage:
-      'Map Security Case fields to { thirdPartyName } fields when pushing data to { thirdPartyName }. Field mappings require an established connection to { thirdPartyName }.',
+      'Map Case fields to { thirdPartyName } fields when pushing data to { thirdPartyName }. Field mappings require an established connection to { thirdPartyName }.',
   });
 };
 
@@ -117,7 +116,7 @@ export const EDIT_FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
 export const FIELD_MAPPING_FIRST_COL = i18n.translate(
   'xpack.cases.configureCases.fieldMappingFirstCol',
   {
-    defaultMessage: 'Security case field',
+    defaultMessage: 'Kibana case field',
   }
 );
 
