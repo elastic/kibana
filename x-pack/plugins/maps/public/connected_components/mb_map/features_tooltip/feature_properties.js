@@ -192,7 +192,7 @@ export class FeatureProperties extends React.Component {
         onClick={async () => {
           this.props.onCloseTooltip();
           const filters = await tooltipProperty.getESFilters();
-          this.props.addFilters(filters);
+          this.props.addFilters(filters, ACTION_GLOBAL_APPLY_FILTER);
         }}
         aria-label={i18n.translate('xpack.maps.tooltip.filterOnPropertyAriaLabel', {
           defaultMessage: 'Filter on property',
