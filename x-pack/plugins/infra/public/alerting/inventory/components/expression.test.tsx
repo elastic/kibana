@@ -90,7 +90,7 @@ describe('Expression', () => {
     ]);
   });
 
-  it('should pass the correct filterQuery to the expression chart', async () => {
+  it('should pass the elasticsearch query to the expression chart', async () => {
     const FILTER_QUERY =
       '{"bool":{"should":[{"match_phrase":{"host.name":"testHostName"}}],"minimum_should_match":1}}';
 
