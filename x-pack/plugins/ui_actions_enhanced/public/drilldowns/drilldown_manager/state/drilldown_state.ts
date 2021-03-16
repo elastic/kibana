@@ -71,7 +71,7 @@ export class DrilldownState {
   public readonly name$: BehaviorSubject<string>;
 
   /**
-   * Whether the `name$` is valid or is in error state.
+   * Whether the `name$` is valid or is in an error state.
    */
   public readonly nameError$: Observable<string | undefined>;
 
@@ -98,6 +98,11 @@ export class DrilldownState {
    * configuration object, which will be serialized and persisted in storage.
    */
   public readonly config$: BehaviorSubject<BaseActionConfig>;
+
+  /**
+   * Error identifier, in case `config$` is in an error state.
+   */
+  public readonly configError$: Observable<string | undefined>;
 
   /**
    * Whether the drilldown state is in an error and should not be saved. I value
@@ -132,11 +137,15 @@ export class DrilldownState {
       })
     );
 
-    this.error$ = combineLatest([this.nameError$]).pipe(
-      map(([nameError]) => {
-        if (nameError) return nameError;
+    this.configError$ = this.config$.pipe(
+      map((conf) => {
+        if (!this.factory.isConfigValid(conf, this.getFactoryContext())) return 'INVALID_CONFIG';
         return undefined;
       })
+    );
+
+    this.error$ = combineLatest([this.nameError$, this.configError$]).pipe(
+      map(([nameError, configError]) => nameError || configError || undefined)
     );
   }
 
