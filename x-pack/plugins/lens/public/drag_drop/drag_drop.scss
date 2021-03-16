@@ -109,7 +109,6 @@
   }
 
   .lnsDragDrop-isActiveDropTarget {
-    @include lnsDraggable;
     z-index: $euiZLevel3;
   }
 }
@@ -162,13 +161,12 @@
   visibility: visible;
 }
 
-.lnsDragDrop__trapezoid {
+.lnsDragDrop__diamondPath {
   position: absolute;
   width: 30%;
   top: 50%;
-  transform: translateY(-50%);
   left: -$euiSize;
-  // background:rgba(165, 17, 251, 0.2);
+  transform: translateY(-50%);
 }
 
 .lnsDragDrop__extraDrop {

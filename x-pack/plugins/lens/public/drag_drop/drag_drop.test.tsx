@@ -598,7 +598,6 @@ describe('DragDrop', () => {
 
       expect(setDragging).toBeCalledWith({ ...items[0] });
       expect(setA11yMessage).toBeCalledWith('Lifted Label1');
-      // console.log(component.html());
       expect(
         component
           .find('[data-test-subj="lnsDragDrop-reorderableGroup"]')

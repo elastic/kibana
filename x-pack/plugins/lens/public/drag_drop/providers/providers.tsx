@@ -67,13 +67,9 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
     [setDraggingState]
   );
 
-  const setA11yMessage = useMemo(
-    () => (message: string) => {
-      // console.log(message);
-      return setA11yMessageState(message);
-    },
-    [setA11yMessageState]
-  );
+  const setA11yMessage = useMemo(() => (message: string) => setA11yMessageState(message), [
+    setA11yMessageState,
+  ]);
 
   const setActiveDropTarget = useMemo(
     () => (activeDropTarget?: DropIdentifier) => setActiveDropTargetState(activeDropTarget),

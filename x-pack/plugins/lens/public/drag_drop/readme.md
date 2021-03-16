@@ -48,7 +48,7 @@ To enable dragging an item, use `DragDrop` with both a `draggable` and a `value`
 
 ## Dropping
 
-To enable dropping, use `DragDrop` with both a `dropType` attribute that is truthy and an `onDrop` handler attribute. `dropType` should only be truthy if is an item being dragged, and if a drop of the dragged item is supported.
+To enable dropping, use `DragDrop` with both a `dropTypes` attribute that should be an array with at least one value and an `onDrop` handler attribute. `dropType` should only be truthy if is an item being dragged, and if a drop of the dragged item is supported.
 
 ```js
 const { dragging } = useContext(DragContext);
