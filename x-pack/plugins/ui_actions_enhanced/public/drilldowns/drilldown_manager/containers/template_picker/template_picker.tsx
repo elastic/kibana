@@ -17,9 +17,7 @@ export const TemplatePicker: React.FC = () => {
   if (!templates || !templates.length) return null;
 
   const handleSelect = (index: number) => {
-    const template = templates[index];
-
-    console.log(template);
+    // const template = templates[index];
   };
 
   return <TemplateList items={templates} onSelect={handleSelect} />;

@@ -6,8 +6,11 @@
  */
 
 import * as React from 'react';
+import {
+  DrilldownTemplateTable,
+  DrilldownTemplateTableItem,
+} from '../../components/drilldown_template_table';
 import { DrilldownTemplate } from '../../types';
-import { TemplateListItem } from './template_list_item';
 
 export interface TemplateListProps {
   items: DrilldownTemplate[];
@@ -15,11 +18,15 @@ export interface TemplateListProps {
 }
 
 export const TemplateList: React.FC<TemplateListProps> = ({ items, onSelect }) => {
-  return (
-    <>
-      {items.map((template, index) => (
-        <TemplateListItem key={index} template={template} onSelect={() => onSelect(index)} />
-      ))}
-    </>
-  );
+  const tableItems: DrilldownTemplateTableItem[] = React.useMemo<
+    DrilldownTemplateTableItem[]
+  >(() => {
+    return items.map((item, index) => ({
+      id: String(index),
+      name: item.name,
+      description: item.description,
+    }));
+  }, [items]);
+
+  return <DrilldownTemplateTable items={tableItems} onCreate={() => {}} />;
 };
