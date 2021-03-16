@@ -38,6 +38,7 @@ exports[`creating index patterns from yaml fields createFieldFormatMap creates c
 
 exports[`creating index patterns from yaml fields createIndexPattern function creates Kibana index pattern: createIndexPattern 1`] = `
 {
+  "id": "logs-*",
   "title": "logs-*",
   "timeFieldName": "@timestamp",
   "fields": {
