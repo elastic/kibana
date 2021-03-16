@@ -131,8 +131,8 @@ export async function getAgentsByKuery(
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
-    agents = agents.filter(
-      (agent) => agent && isAgentUpgradeable(agent, appContextService.getKibanaVersion())
+    agents = agents.filter((agent) =>
+      isAgentUpgradeable(agent, appContextService.getKibanaVersion())
     );
   }
 
@@ -329,7 +329,7 @@ export async function getAgentPolicyForAgent(
   agentId: string
 ) {
   const agent = await getAgentById(esClient, agentId);
-  if (!agent || !agent.policy_id) {
+  if (!agent.policy_id) {
     return;
   }
 
