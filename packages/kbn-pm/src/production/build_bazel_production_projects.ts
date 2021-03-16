@@ -59,7 +59,7 @@ export async function buildBazelProductionProjects({
 async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: string) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = relative(kibanaRoot, project.path);
-  const buildProjectPath = resolve(buildRoot, relativeProjectPath, 'npm_module');
+  const buildProjectPath = resolve(buildRoot, relativeProjectPath);
 
   await copy(['**/*'], buildProjectPath, {
     cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath), 'npm_module'),
@@ -88,12 +88,12 @@ async function applyCorrectPermissions(project: Project, kibanaRoot: string, bui
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
   const allPluginPaths = await globby([`**/*`], {
     onlyFiles: false,
-    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath), 'npm_module'),
+    cwd: buildProjectPath,
     dot: true,
   });
 
   for (const pluginPath of allPluginPaths) {
-    const resolvedPluginPath = resolve(buildRoot, pluginPath);
+    const resolvedPluginPath = resolve(buildProjectPath, pluginPath);
     if (await isFile(resolvedPluginPath)) {
       await chmod(resolvedPluginPath, 0o644);
     }

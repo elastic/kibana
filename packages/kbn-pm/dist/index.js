@@ -23167,7 +23167,7 @@ function transformDependencies(dependencies = {}) {
     }
 
     if (isBazelPackageDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:bazel/bin/', 'file:');
+      newDeps[name] = depVersion.replace('link:bazel/bin/', 'file:').replace('/npm_module', '');
       continue;
     }
 
@@ -63675,7 +63675,7 @@ async function buildBazelProductionProjects({
 async function copyToBuild(project, kibanaRoot, buildRoot) {
   // We want the package to have the same relative location within the build
   const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
-  const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath, 'npm_module');
+  const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
   await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*'], buildProjectPath, {
     cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath), 'npm_module'),
     dot: true,
@@ -63699,12 +63699,13 @@ async function applyCorrectPermissions(project, kibanaRoot, buildRoot) {
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
   const allPluginPaths = await globby__WEBPACK_IMPORTED_MODULE_1___default()([`**/*`], {
     onlyFiles: false,
-    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath), 'npm_module'),
+    cwd: buildProjectPath,
     dot: true
   });
 
   for (const pluginPath of allPluginPaths) {
-    const resolvedPluginPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, pluginPath);
+    const resolvedPluginPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildProjectPath, pluginPath);
+    console.log(resolvedPluginPath);
 
     if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["isFile"])(resolvedPluginPath)) {
       await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["chmod"])(resolvedPluginPath, 0o644);
