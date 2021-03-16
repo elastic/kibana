@@ -591,12 +591,16 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                   closePopover={() => {
                     setPopoverOpen(false);
                   }}
+                  ownFocus
                   data-test-subj="lnsIndexPatternActions-popover"
                   button={
                     <EuiButtonIcon
                       color="text"
                       iconType="boxesHorizontal"
                       data-test-subj="lnsIndexPatternActions"
+                      aria-label={i18n.translate('xpack.lens.indexPatterns.actionsPopoverLabel', {
+                        defaultMessage: 'Index pattern settings',
+                      })}
                       onClick={() => {
                         setPopoverOpen(!popoverOpen);
                       }}
