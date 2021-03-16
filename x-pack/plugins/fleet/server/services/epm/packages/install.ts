@@ -202,10 +202,12 @@ async function installPackageFromRegistry({
   // get latest package version
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
 
+  const forceInstall = force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
+
   // if the requested version is the same as installed version, check if we allow it
   // if we don't allow it, just return the asset references from the existing installation
   if (installedPkg?.attributes.version === pkgVersion) {
-    if (!force) {
+    if (!forceInstall) {
       logger.debug(`${pkgkey} is already installed, skipping installation`);
       return {
         assets: [
@@ -220,7 +222,7 @@ async function installPackageFromRegistry({
   // if the requested version is out-of-date of the latest package version, check if we allow it
   // if we don't allow it, return an error
   if (semverLt(pkgVersion, latestPackage.version)) {
-    if (!force && !['reinstall', 'reupdate', 'rollback'].includes(installType)) {
+    if (!forceInstall) {
       throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
     }
     logger.debug(
