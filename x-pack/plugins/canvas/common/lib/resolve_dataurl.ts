@@ -14,13 +14,16 @@ import { missingImage } from '../../common/lib/missing_asset';
  * For example:
  *   [{"type":"expression","chain":[{"type":"function","function":"asset","arguments":{"_":["..."]}}]}]
  */
-export const resolveFromArgs = (args, defaultDataurl = null) => {
+export const resolveFromArgs = (args: any, defaultDataurl: string | null = null): string => {
   const dataurl = get(args, 'dataurl.0', null);
   return isValidUrl(dataurl) ? dataurl : defaultDataurl;
 };
 
-export const resolveWithMissingImage = (img, alt = null) => {
-  if (isValidUrl(img)) {
+export const resolveWithMissingImage = (
+  img: string | null,
+  alt: string | null = null
+): string | null => {
+  if (img !== null && isValidUrl(img)) {
     return img;
   }
   if (img === null) {

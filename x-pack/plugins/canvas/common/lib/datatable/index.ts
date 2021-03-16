@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-export class ExpressionFormHandlers {
-  constructor() {
-    this.destroy = () => {};
-    this.done = () => {};
-  }
-
-  onDestroy(fn) {
-    this.destroy = fn;
-  }
-}
+export { queryDatatable } from './query';
