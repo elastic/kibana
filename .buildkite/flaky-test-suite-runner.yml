@@ -1,0 +1,17 @@
+steps:
+  - input: 'Test Suite Runner'
+    fields:
+      - select: 'Test Suite'
+        key: 'test-suite'
+        required: true
+        options:
+          - label: 'Default CI Group 1'
+            value: 'default:cigroup:1'
+          - label: 'Default CI Group 2'
+            value: 'default:cigroup:2'
+      - text: 'Number of Runs'
+        key: 'run-count'
+        required: true
+
+  - command: .buildkite/scripts/flaky-test-suite-runner.sh | buildkite-agent pipeline upload
+    label: ':pipeline: Upload'
