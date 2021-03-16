@@ -108,7 +108,7 @@ export async function forceUnenrollAgent(
     agent.access_api_key_id
       ? APIKeyService.invalidateAPIKeys(soClient, [agent.access_api_key_id])
       : undefined,
-    agent && agent.default_api_key_id
+    agent.default_api_key_id
       ? APIKeyService.invalidateAPIKeys(soClient, [agent.default_api_key_id])
       : undefined,
   ]);
