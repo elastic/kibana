@@ -13,7 +13,7 @@ import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
-import { useConfiguration, UseField } from '../../../../form';
+import { useConfiguration, UseField, globalFields } from '../../../../form';
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 import { RepositoryComboBoxField } from './repository_combobox_field';
@@ -62,13 +62,12 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
-  const searchableSnapshotRepoGlobalPath = '_meta.searchableSnapshot.repository';
 
   const [formData] = useFormData({
-    watch: searchableSnapshotRepoGlobalPath,
+    watch: globalFields.searchableSnapshotRepo.path,
   });
 
-  const searchableSnapshotGlobalRepo = get(formData, searchableSnapshotRepoGlobalPath);
+  const searchableSnapshotGlobalRepo = get(formData, globalFields.searchableSnapshotRepo.path);
   const isColdPhase = phase === 'cold';
   const isFrozenPhase = phase === 'frozen';
   const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;

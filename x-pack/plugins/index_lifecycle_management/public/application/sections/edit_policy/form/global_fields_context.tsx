@@ -8,35 +8,38 @@
 import React, { createContext, FunctionComponent, useContext } from 'react';
 import { UseMultiFields, FieldHook, FieldConfig } from '../../../../shared_imports';
 
-export interface GlobalFields {
-  deleteEnabled: FieldHook<boolean>;
-  searchableSnapshotRepo: FieldHook<string>;
+/**
+ * Those are the fields that we always want present in our form.
+ */
+interface GlobalFieldsTypes {
+  deleteEnabled: boolean;
+  searchableSnapshotRepo: string;
 }
+
+type GlobalFields = {
+  [K in keyof GlobalFieldsTypes]: FieldHook<GlobalFieldsTypes[K]>;
+};
 
 const GlobalFieldsContext = createContext<GlobalFields | null>(null);
 
-export const GlobalFieldsProvider: FunctionComponent = ({ children }) => {
-  const fields: Record<keyof GlobalFields, { path: string; config?: FieldConfig<any> }> = {
-    deleteEnabled: {
-      path: '_meta.delete.enabled',
-    },
-    searchableSnapshotRepo: {
-      path: '_meta.searchableSnapshot.repository',
-    },
-  };
+export const globalFields: Record<
+  keyof GlobalFields,
+  { path: string; config?: FieldConfig<any> }
+> = {
+  deleteEnabled: {
+    path: '_meta.delete.enabled',
+  },
+  searchableSnapshotRepo: {
+    path: '_meta.searchableSnapshot.repository',
+  },
+};
 
+export const GlobalFieldsProvider: FunctionComponent = ({ children }) => {
   return (
-    <UseMultiFields<{
-      deleteEnabled: boolean;
-      searchableSnapshotRepo: string;
-    }>
-      fields={fields}
-    >
-      {(fieldsHooks) => {
+    <UseMultiFields<GlobalFieldsTypes> fields={globalFields}>
+      {(fields) => {
         return (
-          <GlobalFieldsContext.Provider value={fieldsHooks}>
-            {children}
-          </GlobalFieldsContext.Provider>
+          <GlobalFieldsContext.Provider value={fields}>{children}</GlobalFieldsContext.Provider>
         );
       }}
     </UseMultiFields>

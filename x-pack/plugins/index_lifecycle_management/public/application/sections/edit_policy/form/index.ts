@@ -25,4 +25,4 @@ export {
   PhaseTimingConfiguration,
 } from './phase_timings_context';
 
-export { useGlobalFields } from './global_fields_context';
+export { useGlobalFields, globalFields } from './global_fields_context';
