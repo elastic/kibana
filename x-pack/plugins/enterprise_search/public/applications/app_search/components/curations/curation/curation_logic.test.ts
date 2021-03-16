@@ -51,6 +51,10 @@ describe('CurationLogic', () => {
     queriesLoading: false,
     activeQuery: '',
     organicDocumentsLoading: false,
+    promotedIds: [],
+    promotedDocumentsLoading: false,
+    hiddenIds: [],
+    hiddenDocumentsLoading: false,
   };
 
   beforeEach(() => {
@@ -64,7 +68,7 @@ describe('CurationLogic', () => {
 
   describe('actions', () => {
     describe('onCurationLoad', () => {
-      it('should set curation, queries, activeQuery, & all loading states to false', () => {
+      it('should set curation, queries, activeQuery, promotedIds, hiddenIds, & all loading states to false', () => {
         mount();
 
         CurationLogic.actions.onCurationLoad(MOCK_CURATION_RESPONSE);
@@ -74,9 +78,13 @@ describe('CurationLogic', () => {
           curation: MOCK_CURATION_RESPONSE,
           queries: ['some search'],
           activeQuery: 'some search',
+          promotedIds: ['some-promoted-document'],
+          hiddenIds: ['some-hidden-document'],
           dataLoading: false,
           queriesLoading: false,
           organicDocumentsLoading: false,
+          promotedDocumentsLoading: false,
+          hiddenDocumentsLoading: false,
         });
       });
 
@@ -95,6 +103,8 @@ describe('CurationLogic', () => {
           dataLoading: true,
           queriesLoading: true,
           organicDocumentsLoading: true,
+          promotedDocumentsLoading: true,
+          hiddenDocumentsLoading: true,
         });
 
         CurationLogic.actions.onCurationError();
@@ -104,6 +114,8 @@ describe('CurationLogic', () => {
           dataLoading: false,
           queriesLoading: false,
           organicDocumentsLoading: false,
+          promotedDocumentsLoading: false,
+          hiddenDocumentsLoading: false,
         });
       });
     });
@@ -133,6 +145,104 @@ describe('CurationLogic', () => {
           ...DEFAULT_VALUES,
           activeQuery: 'some query',
           organicDocumentsLoading: true,
+        });
+      });
+    });
+
+    describe('setPromotedIds', () => {
+      it('should set promotedIds state & promotedDocumentsLoading to true', () => {
+        mount();
+
+        CurationLogic.actions.setPromotedIds(['hello', 'world']);
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          promotedIds: ['hello', 'world'],
+          promotedDocumentsLoading: true,
+        });
+      });
+    });
+
+    describe('addPromotedId', () => {
+      it('should set promotedIds state & promotedDocumentsLoading to true', () => {
+        mount({ promotedIds: ['hello'] });
+
+        CurationLogic.actions.addPromotedId('world');
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          promotedIds: ['hello', 'world'],
+          promotedDocumentsLoading: true,
+        });
+      });
+    });
+
+    describe('removePromotedId', () => {
+      it('should set promotedIds state & promotedDocumentsLoading to true', () => {
+        mount({ promotedIds: ['hello', 'deleteme', 'world'] });
+
+        CurationLogic.actions.removePromotedId('deleteme');
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          promotedIds: ['hello', 'world'],
+          promotedDocumentsLoading: true,
+        });
+      });
+    });
+
+    describe('clearPromotedId', () => {
+      it('should reset promotedIds state & set promotedDocumentsLoading to true', () => {
+        mount({ promotedIds: ['hello', 'world'] });
+
+        CurationLogic.actions.clearPromotedIds();
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          promotedIds: [],
+          promotedDocumentsLoading: true,
+        });
+      });
+    });
+
+    describe('addHiddenId', () => {
+      it('should set hiddenIds state & hiddenDocumentsLoading to true', () => {
+        mount({ hiddenIds: ['hello'] });
+
+        CurationLogic.actions.addHiddenId('world');
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          hiddenIds: ['hello', 'world'],
+          hiddenDocumentsLoading: true,
+        });
+      });
+    });
+
+    describe('removeHiddenId', () => {
+      it('should set hiddenIds state & hiddenDocumentsLoading to true', () => {
+        mount({ hiddenIds: ['hello', 'deleteme', 'world'] });
+
+        CurationLogic.actions.removeHiddenId('deleteme');
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          hiddenIds: ['hello', 'world'],
+          hiddenDocumentsLoading: true,
+        });
+      });
+    });
+
+    describe('clearHiddenId', () => {
+      it('should reset hiddenIds state & set hiddenDocumentsLoading to true', () => {
+        mount({ hiddenIds: ['hello', 'world'] });
+
+        CurationLogic.actions.clearHiddenIds();
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          hiddenIds: [],
+          hiddenDocumentsLoading: true,
         });
       });
     });
@@ -187,6 +297,8 @@ describe('CurationLogic', () => {
           {
             queries: ['a', 'b', 'c'],
             activeQuery: 'b',
+            promotedIds: ['d', 'e', 'f'],
+            hiddenIds: ['g'],
           },
           { curationId: 'cur-123456789' }
         );
@@ -199,7 +311,7 @@ describe('CurationLogic', () => {
         expect(http.put).toHaveBeenCalledWith(
           '/api/app_search/engines/some-engine/curations/cur-123456789',
           {
-            body: '{"queries":["a","b","c"],"query":"b","promoted":[],"hidden":[]}', // Uses state currently in CurationLogic
+            body: '{"queries":["a","b","c"],"query":"b","promoted":["d","e","f"],"hidden":["g"]}', // Uses state currently in CurationLogic
           }
         );
         expect(CurationLogic.actions.onCurationLoad).toHaveBeenCalledWith(MOCK_CURATION_RESPONSE);
@@ -248,6 +360,34 @@ describe('CurationLogic', () => {
 
       it('setActiveQuery', () => {
         CurationLogic.actions.setActiveQuery('test');
+      });
+
+      it('setPromotedIds', () => {
+        CurationLogic.actions.setPromotedIds(['test']);
+      });
+
+      it('addPromotedId', () => {
+        CurationLogic.actions.addPromotedId('test');
+      });
+
+      it('removePromotedId', () => {
+        CurationLogic.actions.removePromotedId('test');
+      });
+
+      it('clearPromotedIds', () => {
+        CurationLogic.actions.clearPromotedIds();
+      });
+
+      it('addHiddenId', () => {
+        CurationLogic.actions.addHiddenId('test');
+      });
+
+      it('removeHiddenId', () => {
+        CurationLogic.actions.removeHiddenId('test');
+      });
+
+      it('clearHiddenIds', () => {
+        CurationLogic.actions.clearHiddenIds();
       });
     });
   });

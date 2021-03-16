@@ -14,6 +14,7 @@ import { ENGINE_CURATIONS_PATH } from '../../../routes';
 import { EngineLogic, generateEnginePath } from '../../engine';
 
 import { Curation } from '../types';
+import { addDocument, removeDocument } from '../utils';
 
 interface CurationValues {
   dataLoading: boolean;
@@ -22,6 +23,10 @@ interface CurationValues {
   queriesLoading: boolean;
   activeQuery: string;
   organicDocumentsLoading: boolean;
+  promotedIds: string[];
+  promotedDocumentsLoading: boolean;
+  hiddenIds: string[];
+  hiddenDocumentsLoading: boolean;
 }
 
 interface CurationActions {
@@ -31,6 +36,13 @@ interface CurationActions {
   onCurationError(): void;
   updateQueries(queries: Curation['queries']): { queries: Curation['queries'] };
   setActiveQuery(query: string): { query: string };
+  setPromotedIds(promotedIds: string[]): { promotedIds: string[] };
+  addPromotedId(id: string): { id: string };
+  removePromotedId(id: string): { id: string };
+  clearPromotedIds(): void;
+  addHiddenId(id: string): { id: string };
+  removeHiddenId(id: string): { id: string };
+  clearHiddenIds(): void;
 }
 
 interface CurationProps {
@@ -46,6 +58,13 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     onCurationError: true,
     updateQueries: (queries) => ({ queries }),
     setActiveQuery: (query) => ({ query }),
+    setPromotedIds: (promotedIds) => ({ promotedIds }),
+    addPromotedId: (id) => ({ id }),
+    removePromotedId: (id) => ({ id }),
+    clearPromotedIds: true,
+    addHiddenId: (id) => ({ id }),
+    removeHiddenId: (id) => ({ id }),
+    clearHiddenIds: true,
   }),
   reducers: () => ({
     dataLoading: [
@@ -99,6 +118,46 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         onCurationError: () => false,
       },
     ],
+    promotedIds: [
+      [],
+      {
+        onCurationLoad: (_, { curation }) => curation.promoted.map((document) => document.id),
+        setPromotedIds: (_, { promotedIds }) => promotedIds,
+        addPromotedId: (promotedIds, { id }) => addDocument(promotedIds, id),
+        removePromotedId: (promotedIds, { id }) => removeDocument(promotedIds, id),
+        clearPromotedIds: () => [],
+      },
+    ],
+    promotedDocumentsLoading: [
+      false,
+      {
+        setPromotedIds: () => true,
+        addPromotedId: () => true,
+        removePromotedId: () => true,
+        clearPromotedIds: () => true,
+        onCurationLoad: () => false,
+        onCurationError: () => false,
+      },
+    ],
+    hiddenIds: [
+      [],
+      {
+        onCurationLoad: (_, { curation }) => curation.hidden.map((document) => document.id),
+        addHiddenId: (hiddenIds, { id }) => addDocument(hiddenIds, id),
+        removeHiddenId: (hiddenIds, { id }) => removeDocument(hiddenIds, id),
+        clearHiddenIds: () => [],
+      },
+    ],
+    hiddenDocumentsLoading: [
+      false,
+      {
+        addHiddenId: () => true,
+        removeHiddenId: () => true,
+        clearHiddenIds: () => true,
+        onCurationLoad: () => false,
+        onCurationError: () => false,
+      },
+    ],
   }),
   listeners: ({ actions, values, props }) => ({
     loadCuration: async () => {
@@ -131,8 +190,8 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
             body: JSON.stringify({
               queries: values.queries,
               query: values.activeQuery,
-              promoted: [], // TODO: promotedIds state
-              hidden: [], // TODO: hiddenIds state
+              promoted: values.promotedIds,
+              hidden: values.hiddenIds,
             }),
           }
         );
@@ -149,5 +208,12 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
       actions.updateCuration();
     },
     setActiveQuery: () => actions.updateCuration(),
+    setPromotedIds: () => actions.updateCuration(),
+    addPromotedId: () => actions.updateCuration(),
+    removePromotedId: () => actions.updateCuration(),
+    clearPromotedIds: () => actions.updateCuration(),
+    addHiddenId: () => actions.updateCuration(),
+    removeHiddenId: () => actions.updateCuration(),
+    clearHiddenIds: () => actions.updateCuration(),
   }),
 });
