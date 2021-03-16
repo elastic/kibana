@@ -184,6 +184,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('updates the View By swim lane');
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', ['AMX', 'TRS', 'VRD']);
 
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(6);
+
           await ml.testExecution.logTestStep('updates the URL state');
           await ml.navigation.assertCurrentURL(
             "http://localhost:5620/app/ml/explorer?_g=(ml%3A(jobIds%3A!(fq_multi_1_ae))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2016-02-07T00%3A00%3A00.000Z'%2Cto%3A'2016-02-11T23%3A59%3A54.000Z'))&_a=(explorer%3A(mlExplorerFilter%3A()%2CmlExplorerSwimlane%3A(selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1455105600%2C1455120000)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t%2CviewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10))%2Cquery%3A(query_string%3A(analyze_wildcard%3A!t%2Cquery%3A'*')))"

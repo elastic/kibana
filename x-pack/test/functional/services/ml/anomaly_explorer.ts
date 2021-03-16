@@ -125,5 +125,17 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       await testSubjects.click('mlAnomalyTimelineClearSelection');
       await this.assertClearSelectionButtonVisible(false);
     },
+
+    async assertAnomalyExplorerChartsCount(expectedChartsCount: number) {
+      await testSubjects.existOrFail('mlExplorerChartsContainer');
+      const chartsContainer = await testSubjects.find('mlExplorerChartsContainer');
+      const actualChartsCount = (
+        await chartsContainer.findAllByClassName('ml-explorer-chart-container')
+      ).length;
+      expect(expectedChartsCount).to.eql(
+        actualChartsCount,
+        `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
+      );
+    },
   };
 }
