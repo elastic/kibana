@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getIndices, responseToItemArray, dedupeMatchedItems } from './get_indices';
+import {
+  getIndices,
+  getIndicesViaSearch,
+  responseToItemArray,
+  dedupeMatchedItems,
+} from './get_indices';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { ResolveIndexResponseItemIndexAttrs, MatchedItem } from '../types';
 import { Observable } from 'rxjs';
@@ -54,6 +59,11 @@ const partialSearchResponse = {
       hits: [],
     },
   },
+};
+
+const errorSearchResponse = {
+  isPartial: true,
+  isRunning: false,
 };
 
 const getIndexTags = () => [];
@@ -158,11 +168,26 @@ describe('getIndices', () => {
   });
 
   describe('errors', () => {
-    it('should handle errors gracefully', async () => {
+    it('should handle thrown errors gracefully', async () => {
       http.get.mockImplementationOnce(() => {
         throw new Error('Test error');
       });
       const result = await getIndices({ http, getIndexTags, pattern: 'kibana', searchClient });
+      expect(result.length).toBe(0);
+    });
+
+    it('getIndicesViaSearch should handle error responses gracefully', async () => {
+      const searchClientErrorResponse = () =>
+        new Observable((observer) => {
+          observer.next(errorSearchResponse);
+          observer.complete();
+        }) as any;
+      const result = await getIndicesViaSearch({
+        getIndexTags,
+        pattern: '*:kibana',
+        searchClient: searchClientErrorResponse,
+        showAllIndices: false,
+      });
       expect(result.length).toBe(0);
     });
   });
