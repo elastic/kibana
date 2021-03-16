@@ -92,6 +92,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
             {
               factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
               name: 'Hello world',
+              description: 'Panel A',
               triggers: [],
               config: {},
             },

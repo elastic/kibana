@@ -84,6 +84,7 @@ export interface PublicDrilldownManagerProps {
 export interface DrilldownTemplate {
   factoryId: string;
   name: string;
+  description: string;
   triggers: string[];
   config: unknown;
 }

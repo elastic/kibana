@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useDrilldownManager } from '../context';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { DrilldownList } from '../drilldown_list';
+import { TemplatePicker } from '../template_picker';
 
 export const txtCreateNew = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.containers.DrilldownManager.createNew',
@@ -34,6 +35,7 @@ const tabs: EuiTabbedContentProps['tabs'] = [
       <>
         <EuiSpacer />
         <FormDrilldownWizard />
+        <TemplatePicker />
       </>
     ),
   },
