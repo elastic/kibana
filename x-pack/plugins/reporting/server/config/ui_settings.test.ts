@@ -247,21 +247,23 @@ test('throws validation error if provided with data over max size', () => {
 });
 
 test('throws validation error if provided with non-image data', () => {
-  expect(() => PdfLogoSchema.validate('')).toThrowError(/try a different image/);
-  expect(() => PdfLogoSchema.validate(true)).toThrow(/try a different image/);
-  expect(() => PdfLogoSchema.validate(false)).toThrow(/try a different image/);
-  expect(() => PdfLogoSchema.validate({})).toThrow(/try a different image/);
-  expect(() => PdfLogoSchema.validate([])).toThrow(/try a different image/);
-  expect(() => PdfLogoSchema.validate(0)).toThrow(/try a different image/);
-  expect(() => PdfLogoSchema.validate(0x00f)).toThrow(/try a different image/);
+  const invalidErrorMatcher = /try a different image/;
+
+  expect(() => PdfLogoSchema.validate('')).toThrowError(invalidErrorMatcher);
+  expect(() => PdfLogoSchema.validate(true)).toThrow(invalidErrorMatcher);
+  expect(() => PdfLogoSchema.validate(false)).toThrow(invalidErrorMatcher);
+  expect(() => PdfLogoSchema.validate({})).toThrow(invalidErrorMatcher);
+  expect(() => PdfLogoSchema.validate([])).toThrow(invalidErrorMatcher);
+  expect(() => PdfLogoSchema.validate(0)).toThrow(invalidErrorMatcher);
+  expect(() => PdfLogoSchema.validate(0x00f)).toThrow(invalidErrorMatcher);
 
   const csvString =
     `data:text/csv;base64,Il9pZCIsIl9pbmRleCIsIl9zY29yZSIsIl90eXBlIiwiZm9vLmJhciIsImZvby5iYXIua2V5d29yZCIKZjY1QU9IZ0J5bFZmWW04W` +
     `TRvb1EsYmVlLDEsIi0iLGJheixiYXoKbks1QU9IZ0J5bFZmWW04WTdZcUcsYmVlLDEsIi0iLGJvbyxib28K`;
-  expect(() => PdfLogoSchema.validate(csvString)).toThrow(/try a different image/);
+  expect(() => PdfLogoSchema.validate(csvString)).toThrow(invalidErrorMatcher);
 
   const scriptString =
     `data:application/octet-stream;base64,QEVDSE8gT0ZGCldFRUtPRllSLkNPTSB8IEZJTkQgIlRoaXMgaXMiID4gVEVNUC5CQV` +
     `QKRUNITz5USElTLkJBVCBTRVQgV0VFSz0lJTMKQ0FMTCBURU1QLkJBVApERUwgIFRFTVAuQkFUCkRFTCAgVEhJUy5CQVQKRUNITyBXZWVrICVXRUVLJQo=`;
-  expect(() => PdfLogoSchema.validate(scriptString)).toThrow(/try a different image/);
+  expect(() => PdfLogoSchema.validate(scriptString)).toThrow(invalidErrorMatcher);
 });
