@@ -227,7 +227,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
       const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
-        'Artistpreviouslyknownaslens by ref'
+        'Artistpreviouslyknownaslens by ref 2'
       );
       expect(isLinked).to.be(true);
 

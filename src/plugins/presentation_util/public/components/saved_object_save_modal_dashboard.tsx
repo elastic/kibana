@@ -48,7 +48,9 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>(
     documentId || disableDashboardOptions ? null : 'existing'
   );
-  const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(!initialCopyOnSave);
+  const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(
+    !initialCopyOnSave || disableDashboardOptions
+  );
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
   );

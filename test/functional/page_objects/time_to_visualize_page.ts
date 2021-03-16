@@ -38,7 +38,7 @@ export function TimeToVisualizePageProvider({ getService, getPageObjects }: FtrP
       await dashboardSelector.findByCssSelector(`input[id="existing-dashboard-option"]:disabled`);
 
       const librarySelector = await testSubjects.find('add-to-library-checkbox');
-      await librarySelector.findByCssSelector(`input[id="add-to-library-option"]:disabled`);
+      await librarySelector.findByCssSelector(`input[id="add-to-library-checkbox"]:disabled`);
     }
 
     public async resetNewDashboard() {

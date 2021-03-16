@@ -178,7 +178,7 @@ export default function ({ getPageObjects, getService }) {
       expect(panelCount).to.eql(1);
 
       const isInLibrary = await PageObjects.timeToVisualize.libraryNotificationExists(
-        'document example'
+        'document example copy'
       );
       expect(isInLibrary).to.be(true);
       await PageObjects.timeToVisualize.resetNewDashboard();
