@@ -27,7 +27,7 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
         defaultMessage: 'Theme version',
       }),
-      value: 'v7',
+      value: 'v8 (beta)',
       type: 'select',
       options: ['v7', 'v8 (beta)'],
       description: i18n.translate('core.ui_settings.params.themeVersionText', {
