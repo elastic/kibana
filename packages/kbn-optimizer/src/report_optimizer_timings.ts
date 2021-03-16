@@ -34,7 +34,7 @@ export function reportOptimizerTimings(log: ToolingLog, config: OptimizerConfig)
           notCachedBundles.add(update.event.bundle.id);
         }
 
-        // wait for the optimizer to complete, wither with a success or failure
+        // wait for the optimizer to complete, either with a success or failure
         if (update.state.phase !== 'issue' && update.state.phase !== 'success') {
           return update;
         }
