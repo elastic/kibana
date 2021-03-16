@@ -226,6 +226,10 @@ If this behavior is not desired, we can prevent `private` saved objects from bei
 
 See [unresolved question 3](#83-behavior-when-security-is-disabled)
 
+## 3.4 Impacts on telemetry
+
+The proposed design does not have any impacts on telemetry collection or reporting. Telemetry collectors run in the background against an "unwrapped" saved objects client. That is to say, they run without space-awareness, and without security. Since the security enforcement for private objects exists within the security wrapper, telemetry collection can continue as it currently exists.
+
 # 4. Drawbacks
 
 As outlined above, this approach introduces additional overhead to many of the saved object APIs. We minimize this by denoting which saved object types require this additional authorization.
