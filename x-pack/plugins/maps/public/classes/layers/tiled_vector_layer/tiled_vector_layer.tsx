@@ -156,6 +156,34 @@ export class TiledVectorLayer extends VectorLayer {
     this._setMbCentroidProperties(mbMap, sourceMeta.layerName);
   }
 
+  queryForTileMeta(mbMap: MbMap) {
+    console.log('query for tile meta!', mbMap);
+
+    // @ts-ignore
+    const mbSource = mbMap.getSource(this._getMbSourceId());
+    if (!mbSource) {
+      return null;
+    }
+
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      return;
+    }
+    const sourceMeta: MVTSingleLayerVectorSourceConfig = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
+    if (sourceMeta.layerName === '') {
+      return;
+    }
+
+    console.log('going to queyr', this._getMbSourceId(), sourceMeta.layerName);
+    const features = mbMap.querySourceFeatures(this._getMbSourceId(), {
+      sourceLayer: sourceMeta.layerName,
+    });
+
+    console.log('f', features);
+
+    return null;
+  }
+
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
     const mbSource = mbMap.getSource(this._getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
     if (!mbSource) {

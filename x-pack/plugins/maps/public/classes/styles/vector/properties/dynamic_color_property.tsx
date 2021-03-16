@@ -201,6 +201,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     }
 
     const rangeFieldMeta = this.getRangeFieldMeta();
+    console.log('range field meta', rangeFieldMeta);
     if (!rangeFieldMeta) {
       return null;
     }

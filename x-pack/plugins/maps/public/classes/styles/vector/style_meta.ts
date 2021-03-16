@@ -11,7 +11,7 @@ import {
   CategoryFieldMeta,
 } from '../../../../common/descriptor_types';
 
-export class StyleMeta {
+export class StyleMetaFromLocal {
   private readonly _descriptor: StyleMetaDescriptor;
   constructor(styleMetaDescriptor: StyleMetaDescriptor | null | undefined) {
     this._descriptor = styleMetaDescriptor ? styleMetaDescriptor : { fieldMeta: {} };

@@ -22,7 +22,7 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import { StyleMeta } from './style_meta';
+import { StyleMetaFromLocal } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { isOnlySingleFeatureType } from './style_util';
@@ -83,7 +83,7 @@ export interface IVectorStyle extends IStyle {
   getAllStyleProperties(): Array<IStyleProperty<StylePropertyOptions>>;
   getDynamicPropertiesArray(): Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
   getSourceFieldNames(): string[];
-  getStyleMeta(): StyleMeta;
+  getStyleMetaFromLocal(): StyleMetaFromLocal;
   getDescriptorWithUpdatedStyleProps(
     nextFields: IField[],
     previousFields: IField[],
@@ -145,7 +145,7 @@ export class VectorStyle implements IVectorStyle {
   private readonly _descriptor: VectorStyleDescriptor;
   private readonly _layer: IVectorLayer;
   private readonly _source: IVectorSource;
-  private readonly _styleMeta: StyleMeta;
+  private readonly _styleMeta: StyleMetaFromLocal;
 
   private readonly _symbolizeAsStyleProperty: SymbolizeAsProperty;
   private readonly _lineColorStyleProperty: StaticColorProperty | DynamicColorProperty;
@@ -190,7 +190,7 @@ export class VectorStyle implements IVectorStyle {
         }
       : VectorStyle.createDescriptor();
 
-    this._styleMeta = new StyleMeta(this._descriptor.__styleMeta);
+    this._styleMeta = new StyleMetaFromLocal(this._descriptor.__styleMeta);
 
     this._symbolizeAsStyleProperty = new SymbolizeAsProperty(
       this._descriptor.properties[VECTOR_STYLES.SYMBOLIZE_AS].options,
@@ -488,8 +488,17 @@ export class VectorStyle implements IVectorStyle {
     );
   }
 
-  async pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest) {
+
+
+  async pluckStyleMetaFromSourceDataRequest(
+    sourceDataRequest: DataRequest
+  ): Promise<StyleMetaDescriptor> {
+
+    console.log('pluck style meta', sourceDataRequest);
+
     const features = _.get(sourceDataRequest.getData(), 'features', []);
+
+    console.log('f', features);
 
     const supportedFeatures = await this._source.getSupportedShapeTypes();
     const hasFeatureType = {
@@ -611,7 +620,8 @@ export class VectorStyle implements IVectorStyle {
     });
   }
 
-  getStyleMeta() {
+  getStyleMetaFromLocal() {
+    console.log('gsm', this._styleMeta);
     return this._styleMeta;
   }
 

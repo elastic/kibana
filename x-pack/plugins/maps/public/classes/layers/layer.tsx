@@ -154,6 +154,10 @@ export class AbstractLayer implements ILayer {
     return mbStyle.sources[sourceId].data;
   }
 
+  queryForTileMeta(mbMap) {
+    return null;
+  }
+
   async cloneDescriptor(): Promise<LayerDescriptor> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox

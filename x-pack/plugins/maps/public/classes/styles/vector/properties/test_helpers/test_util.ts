@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
-import { StyleMeta } from '../../style_meta';
+import { StyleMetaFromLocal } from '../../style_meta';
 import {
   CategoryFieldMeta,
   GeometryTypes,
@@ -76,7 +76,7 @@ export class MockStyle implements IStyle {
     return LAYER_STYLE_TYPE.VECTOR;
   }
 
-  getStyleMeta(): StyleMeta {
+  getStyleMeta(): StyleMetaFromLocal {
     const geomTypes: GeometryTypes = {
       isPointsOnly: false,
       isLinesOnly: false,
@@ -110,7 +110,7 @@ export class MockStyle implements IStyle {
       },
     };
 
-    return new StyleMeta(styleMetaDescriptor);
+    return new StyleMetaFromLocal(styleMetaDescriptor);
   }
 }
 

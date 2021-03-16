@@ -108,7 +108,7 @@ export class TileStatusTracker {
           break;
         }
       }
-      this._setAreTilesLoaded(layer.getId(), !atLeastOnePendingTile);
+      this._setAreTilesLoaded(layer.getId(), !atLeastOnePendingTile, layer);
     }
   }, 100);
 

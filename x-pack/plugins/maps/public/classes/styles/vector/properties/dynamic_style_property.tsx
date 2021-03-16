@@ -105,7 +105,7 @@ export class DynamicStyleProperty<T>
 
   getRangeFieldMeta() {
     const style = this._layer.getStyle() as IVectorStyle;
-    const styleMeta = style.getStyleMeta();
+    const styleMeta = style.getStyleMetaFromLocal();
     const fieldName = this.getFieldName();
     const rangeFieldMetaFromLocalFeatures = styleMeta.getRangeFieldMetaDescriptor(fieldName);
 
@@ -152,7 +152,7 @@ export class DynamicStyleProperty<T>
 
   getCategoryFieldMeta() {
     const style = this._layer.getStyle() as IVectorStyle;
-    const styleMeta = style.getStyleMeta();
+    const styleMeta = style.getStyleMetaFromLocal();
     const fieldName = this.getFieldName();
     const categoryFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
 

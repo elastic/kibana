@@ -8,7 +8,7 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { MBMap } from './mb_map';
+import { MbMap } from './mb_map';
 import {
   mapExtentChanged,
   mapReady,
@@ -19,6 +19,7 @@ import {
   setMapInitError,
   MapExtentState,
   setAreTilesLoaded,
+  updateCounts,
 } from '../../actions';
 import {
   getLayerList,
@@ -73,8 +74,11 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
       dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
     },
+    updateCounts(layerId: string, foobar: any) {
+      dispatch(updateCounts(layerId, foobar));
+    },
   };
 }
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(MBMap);
+const connected = connect(mapStateToProps, mapDispatchToProps)(MbMap);
 export { connected as MBMap };

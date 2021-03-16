@@ -48,6 +48,7 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
+import { string } from '../../../security_solution/public/resolver/models/schema';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -546,5 +547,20 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
     id: layerId,
     propName: '__areTilesLoaded',
     newValue: areTilesLoaded,
+  };
+}
+
+export function updateCounts(layerId: string, foobar: any) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    console.log('update counts', layerId);
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    console.log('l', layer);
   };
 }

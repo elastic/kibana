@@ -73,6 +73,7 @@ export interface Props {
   geoFields: GeoFieldWithIndex[];
   renderTooltipContent?: RenderToolTipContent;
   setAreTilesLoaded: (layerId: string, areTilesLoaded: boolean) => void;
+  updateCounts: (layerId: string, foobar: any) => void;
 }
 
 interface State {
@@ -81,7 +82,7 @@ interface State {
   mbMap: MapboxMap | undefined;
 }
 
-export class MBMap extends Component<Props, State> {
+export class MbMap extends Component<Props, State> {
   private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
@@ -134,6 +135,14 @@ export class MBMap extends Component<Props, State> {
     }
     this.props.onMapDestroyed();
   }
+
+  _queryForMeta = _.debounce((layerId, layer) => {
+    console.log('query for da meta!!!', layerId, layer);
+    const meta = layer.queryForTileMeta(this.state.mbMap);
+    console.log(meta);
+
+    // this.props.updateCounts(layerId, 'foobar');
+  }, 512);
 
   _debouncedSync = _.debounce(() => {
     if (this._isMounted && this.props.isMapReady && this.state.mbMap) {
@@ -207,7 +216,11 @@ export class MBMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        setAreTilesLoaded: this.props.setAreTilesLoaded,
+        setAreTilesLoaded: (layerId, areTilesLoaded, layer) => {
+          console.log('setAreTilesLaoded');
+          this.props.setAreTilesLoaded(layerId, areTilesLoaded);
+          this._queryForMeta(layerId, layer);
+        },
       });
 
       const tooManyFeaturesImageSrc =
@@ -268,6 +281,7 @@ export class MBMap extends Component<Props, State> {
         this.props.extentChanged(this._getMapState());
       }, 100)
     );
+
     // Attach event only if view control is visible, which shows lat/lon
     if (!this.props.settings.hideViewControl) {
       const throttledSetMouseCoordinates = _.throttle((e: MapMouseEvent) => {
