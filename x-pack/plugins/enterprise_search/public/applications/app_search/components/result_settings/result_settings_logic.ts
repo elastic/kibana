@@ -6,7 +6,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { isEqual } from 'lodash';
+import { omit, isEqual } from 'lodash';
 
 import { Schema, SchemaConflicts } from '../../../shared/types';
 
@@ -49,9 +49,11 @@ interface ResultSettingsActions {
   resetAllFields(): void;
   updateField(
     fieldName: string,
-    settings: FieldResultSetting
+    settings: FieldResultSetting | {}
   ): { fieldName: string; settings: FieldResultSetting };
   saving(): void;
+  // Listeners
+  clearRawSizeForField(fieldName: string): string;
 }
 
 interface ResultSettingsValues {
@@ -98,6 +100,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     resetAllFields: () => true,
     updateField: (fieldName, settings) => ({ fieldName, settings }),
     saving: () => true,
+    clearRawSizeForField: (fieldName) => fieldName,
   }),
   reducers: () => ({
     dataLoading: [
@@ -222,5 +225,10 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
           {}
         ),
     ],
+  }),
+  listeners: ({ actions, values }) => ({
+    clearRawSizeForField: (fieldName) => {
+      actions.updateField(fieldName, omit(values.resultFields[fieldName], ['rawSize']));
+    },
   }),
 });

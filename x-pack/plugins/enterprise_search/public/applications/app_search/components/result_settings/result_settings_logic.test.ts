@@ -510,4 +510,25 @@ describe('ResultSettingsLogic', () => {
       });
     });
   });
+
+  describe('listeners', () => {
+    describe('clearRawSizeForField', () => {
+      it('should remove the raw size set on a field', () => {
+        mount({
+          resultFields: {
+            foo: { raw: true, rawSize: 5, snippet: false },
+            bar: { raw: true, rawSize: 5, snippet: false },
+          },
+        });
+        jest.spyOn(ResultSettingsLogic.actions, 'updateField');
+
+        ResultSettingsLogic.actions.clearRawSizeForField('foo');
+
+        expect(ResultSettingsLogic.actions.updateField).toHaveBeenCalledWith('foo', {
+          raw: true,
+          snippet: false,
+        });
+      });
+    });
+  });
 });
