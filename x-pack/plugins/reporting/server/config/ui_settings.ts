@@ -16,7 +16,7 @@ const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
 const dataurlRegex = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?(;([a-z0-9]+))?,/;
 const imageTypes = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
 
-export const isImageData = (str: any): boolean => {
+const isImageData = (str: any): boolean => {
   if (typeof str !== 'string') {
     return false;
   }
@@ -36,6 +36,24 @@ export const isImageData = (str: any): boolean => {
   return true;
 };
 
+const isLessThanMaxSize = (str: any, maxSize: string) => {
+  const schemaMax = schema.byteSize({ max: maxSize });
+  return schemaMax.validate(str);
+};
+
+export const validatePdfLogo = (str: any) => {
+  if (!isImageData(str)) {
+    return i18n.translate('xpack.reporting.uiSettings.validate.customLogo', {
+      defaultMessage: `Sorry, that file will not work. Please try a different image file.`,
+    });
+  }
+  if (!isLessThanMaxSize(str, '200kb')) {
+    return i18n.translate('xpack.reporting.uiSettings.validate.customLogo', {
+      defaultMessage: `Sorry, that file is too large. The image file must be less than 200 kilobytes.`,
+    });
+  }
+};
+
 export function registerUiSettings(core: CoreSetup<object, unknown>) {
   core.uiSettings.register({
     [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
@@ -50,14 +68,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       type: 'image',
       schema: schema.nullable(
         schema.any({
-          validate: (str: any) => {
-            const check = isImageData(str);
-            if (!check) {
-              return i18n.translate('xpack.reporting.uiSettings.validate.customLogo', {
-                defaultMessage: `Sorry, that file will not work. Please try a different image file.`,
-              });
-            }
-          },
+          validate: validatePdfLogo,
         })
       ),
       category: [PLUGIN_ID],
