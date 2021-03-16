@@ -193,14 +193,14 @@ my-package:
         {{{ search }}} | streamstats`;
 
     const vars = {
-      asteriskOnly: { value: '"*"', type: 'string' },
-      startsWithAsterisk: { value: '"*lala"', type: 'string' },
-      numeric: { value: '100', type: 'string' },
-      mixed: { value: '1s', type: 'string' },
-      a: { value: '/opt/package/*', type: 'string' },
-      b: { value: '/logs/my.log*', type: 'string' },
-      c: { value: '/opt/*/package/', type: 'string' },
-      d: { value: 'logs/*my.log', type: 'string' },
+      asteriskOnly: { value: '"*"', type: 'text' },
+      startsWithAsterisk: { value: '"*lala"', type: 'text' },
+      numeric: { value: '100', type: 'text' },
+      mixed: { value: '1s', type: 'text' },
+      a: { value: '/opt/package/*', type: 'text' },
+      b: { value: '/logs/my.log*', type: 'text' },
+      c: { value: '/opt/*/package/', type: 'text' },
+      d: { value: 'logs/*my.log', type: 'text' },
       search: { value: 'search sourcetype="access*"', type: 'text' },
     };
 
