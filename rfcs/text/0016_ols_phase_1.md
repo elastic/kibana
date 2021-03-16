@@ -118,7 +118,7 @@ Similar to the way we treat `namespaces`, it will not be possible to change an a
 
 This wrapper will be updated to ensure that access to private objects is only granted to authorized users. A user is authorized to operate on a private saved object if **all of the following** are true:
 Step 1) The user is authorized to perform the operation on saved objects of the requested type, within the requested space. (Example: `update` a `user-settings` saved object in the `marketing` space)
-Step 2) The user is authorized to access this specific instance of the saved object, as described by that object's access control specification. For this first phase, the `accessControl.owner` is allowed to perform all operations. The only other users who are allowed to access this object are administrators (see [unresolved question 2](#82-authorization-for-private-objects))
+Step 2) The user is authorized to access this specific instance of the saved object, as described by that object's access control specification. For this first phase, the `accessControl.owner` is allowed to perform all operations. The only other users who are allowed to access this object are administrators (see [resolved question 2](#92-authorization-for-private-objects))
 
 Step 1 of this authorization check is the same check we perform today for all existing saved object types. Step 2 is a new authorization check, and **introduces additional overhead and complexity**. We explore the logic for this step in more detail later in this RFC.
 
@@ -254,6 +254,8 @@ The `accessControl.owner` property will uniquely identify the owner of each `pri
 
 ## 8.2 Authorization for private objects
 
+This has been [resolved](#92-authorization-for-private-objects).
+
 The user identified by `accessControl.owner` will be authorized for all operations against that instance, provided they pass the existing type/space/action authorization checks.
 
 In addition to the object owner, we also need to allow administrators to manage these saved objects. This is beneficial if they need to perform a bulk import/export of private objects, or if they wish to remove private objects from users that no longer exist. The open question is: **who counts as an administrator?**
@@ -264,5 +266,9 @@ We have historically used the `Saved Objects Management` feature for these admin
 When security is disabled, should `private` saved objects still be accessible via the Saved Objects Client?
 
 
+# 9. Resolved Questions
 
+## 9.2 Authorization for private objects
 
+Users with the `Saved Objects Management` privilege will be authorized to access private saved objects belonging to other users.
+Additionally, we will introduce a sub-feature privilege which will allow administrators to control which of their users with `Saved Objects Management` access are authorized to access these private objects.
