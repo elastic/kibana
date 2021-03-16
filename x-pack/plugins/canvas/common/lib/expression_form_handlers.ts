@@ -5,4 +5,15 @@
  * 2.0.
  */
 
-export * from './query';
+export class ExpressionFormHandlers {
+  public destroy: () => void;
+  public done: () => void;
+  constructor() {
+    this.destroy = () => {};
+    this.done = () => {};
+  }
+
+  onDestroy(fn: () => void) {
+    this.destroy = fn;
+  }
+}
