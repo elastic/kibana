@@ -12,8 +12,8 @@ import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
 import { enqueueJobFactory } from '../lib/enqueue_job';
+import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
-import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { registerLegacy } from './legacy';
 import { HandlerFunction } from './types';
 

@@ -851,7 +851,29 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 58
+                  "lineNumber": 69
+                }
+              },
+              {
+                "type": "Object",
+                "label": "context",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.PluginInitializerContext",
+                    "text": "PluginInitializerContext"
+                  },
+                  "<Readonly<{ encryptionKey?: string | undefined; } & { enabled: boolean; index: string; capture: Readonly<{} & { browser: Readonly<{} & { type: string; chromium: Readonly<{ inspect?: boolean | undefined; disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; timeouts: Readonly<{} & { openUrl: number | moment.Duration; waitForElements: number | moment.Duration; renderComplete: number | moment.Duration; }>; networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; zoom: number; viewport: Readonly<{} & { height: number; width: number; }>; loadDelay: number | moment.Duration; maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; port?: number | undefined; protocol?: string | undefined; } & {}>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; csv: Readonly<{} & { scroll: Readonly<{} & { size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "ByteSizeValue",
+                  "; useByteOrderMarkEncoding: boolean; }>; roles: Readonly<{} & { allow: string[]; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; }>>"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 69
                 }
               }
             ],
@@ -859,7 +881,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 58
+              "lineNumber": 69
             }
           },
           {
@@ -895,7 +917,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 63
+                  "lineNumber": 79
                 }
               }
             ],
@@ -903,7 +925,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 63
+              "lineNumber": 79
             }
           },
           {
@@ -939,7 +961,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 71
+                  "lineNumber": 93
                 }
               }
             ],
@@ -947,7 +969,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 71
+              "lineNumber": 93
             }
           },
           {
@@ -963,7 +985,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 79
+              "lineNumber": 106
             }
           },
           {
@@ -979,7 +1001,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 90
+              "lineNumber": 117
             }
           },
           {
@@ -995,7 +1017,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 97
+              "lineNumber": 124
             }
           },
           {
@@ -1031,7 +1053,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 104
+                  "lineNumber": 131
                 }
               }
             ],
@@ -1039,7 +1061,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 104
+              "lineNumber": 131
             }
           },
           {
@@ -1057,7 +1079,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 112
+              "lineNumber": 139
             }
           },
           {
@@ -1080,7 +1102,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 132
+              "lineNumber": 159
             }
           },
           {
@@ -1104,7 +1126,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 142
+              "lineNumber": 169
             }
           },
           {
@@ -1127,7 +1149,76 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 150
+              "lineNumber": 177
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.scheduleTask",
+            "type": "Function",
+            "label": "scheduleTask",
+            "signature": [
+              "(report: ",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.ReportTaskParams",
+                "text": "ReportTaskParams"
+              },
+              "<",
+              {
+                "pluginId": "reporting",
+                "scope": "server",
+                "docId": "kibReportingPluginApi",
+                "section": "def-server.BasePayload",
+                "text": "BasePayload"
+              },
+              ">) => Promise<",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.ConcreteTaskInstance",
+                "text": "ConcreteTaskInstance"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "report",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.ReportTaskParams",
+                    "text": "ReportTaskParams"
+                  },
+                  "<",
+                  {
+                    "pluginId": "reporting",
+                    "scope": "server",
+                    "docId": "kibReportingPluginApi",
+                    "section": "def-server.BasePayload",
+                    "text": "BasePayload"
+                  },
+                  ">"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 181
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 181
             }
           },
           {
@@ -1151,7 +1242,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 154
+              "lineNumber": 185
             }
           },
           {
@@ -1175,7 +1266,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 158
+              "lineNumber": 189
             }
           },
           {
@@ -1199,7 +1290,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 168
+              "lineNumber": 199
             }
           },
           {
@@ -1222,7 +1313,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 177
+              "lineNumber": 208
             }
           },
           {
@@ -1245,7 +1336,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 184
+              "lineNumber": 216
             }
           },
           {
@@ -1291,7 +1382,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 193
+                  "lineNumber": 225
                 }
               }
             ],
@@ -1299,7 +1390,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 193
+              "lineNumber": 225
             }
           },
           {
@@ -1344,7 +1435,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 199
+                  "lineNumber": 231
                 }
               },
               {
@@ -1363,7 +1454,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 199
+                  "lineNumber": 231
                 }
               }
             ],
@@ -1371,7 +1462,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 199
+              "lineNumber": 231
             }
           },
           {
@@ -1409,7 +1500,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 213
+                  "lineNumber": 245
                 }
               },
               {
@@ -1422,7 +1513,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 213
+                  "lineNumber": 245
                 }
               },
               {
@@ -1441,7 +1532,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 213
+                  "lineNumber": 245
                 }
               }
             ],
@@ -1449,7 +1540,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 213
+              "lineNumber": 245
             }
           },
           {
@@ -1502,7 +1593,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 233
+                  "lineNumber": 265
                 }
               },
               {
@@ -1521,7 +1612,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/core.ts",
-                  "lineNumber": 233
+                  "lineNumber": 265
                 }
               }
             ],
@@ -1529,13 +1620,137 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/core.ts",
-              "lineNumber": 233
+              "lineNumber": 265
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.getDataService",
+            "type": "Function",
+            "label": "getDataService",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "server",
+                "docId": "kibDataPluginApi",
+                "section": "def-server.DataPluginStart",
+                "text": "DataPluginStart"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 275
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.getEsClient",
+            "type": "Function",
+            "label": "getEsClient",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.IClusterClient",
+                "text": "IClusterClient"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 280
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.trackReport",
+            "type": "Function",
+            "label": "trackReport",
+            "signature": [
+              "(reportId: string) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "reportId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 285
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 285
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.untrackReport",
+            "type": "Function",
+            "label": "untrackReport",
+            "signature": [
+              "(reportId: string) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "reportId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/reporting/server/core.ts",
+                  "lineNumber": 289
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 289
+            }
+          },
+          {
+            "id": "def-server.ReportingCore.countConcurrentReports",
+            "type": "Function",
+            "label": "countConcurrentReports",
+            "signature": [
+              "() => number"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/reporting/server/core.ts",
+              "lineNumber": 293
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/core.ts",
-          "lineNumber": 50
+          "lineNumber": 58
         },
         "initialIsOpen": false
       },
