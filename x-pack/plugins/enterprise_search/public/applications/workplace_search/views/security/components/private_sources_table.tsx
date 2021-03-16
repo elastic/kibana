@@ -94,10 +94,6 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
   const panelDisabled = !isEnabled || !hasPlatinumLicense;
   const sectionDisabled = !sectionEnabled;
 
-  const panelClass = classNames({
-    'euiPanel--disabled': panelDisabled,
-  });
-
   const tableClass = classNames({ 'euiTable--disabled': sectionDisabled });
 
   const emptyState = (
@@ -175,7 +171,12 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
   );
 
   return (
-    <EuiPanel hasShadow={false} className={panelClass}>
+    <EuiPanel
+      hasShadow={false}
+      className={classNames({
+        'euiPanel--disabled': panelDisabled,
+      })}
+    >
       {sectionHeading}
       {hasSources && sourcesTable}
     </EuiPanel>
