@@ -42,16 +42,9 @@ export const getAgentHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const notFound = response.notFound({
-    body: { message: `Agent ${request.params.agentId} not found` },
-  });
 
   try {
     const agent = await AgentService.getAgentById(esClient, request.params.agentId);
-    if (!agent) {
-      return notFound;
-    }
-
     const body: GetOneAgentResponse = {
       item: {
         ...agent,
@@ -62,7 +55,9 @@ export const getAgentHandler: RequestHandler<
     return response.ok({ body });
   } catch (error) {
     if (soClient.errors.isNotFoundError(error)) {
-      return notFound;
+      return response.notFound({
+        body: { message: `Agent ${request.params.agentId} not found` },
+      });
     }
 
     return defaultIngestErrorHandler({ error, response });
@@ -133,19 +128,12 @@ export const updateAgentHandler: RequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const notFound = response.notFound({
-    body: { message: `Agent ${request.params.agentId} not found` },
-  });
 
   try {
     await AgentService.updateAgent(esClient, request.params.agentId, {
       user_provided_metadata: request.body.user_provided_metadata,
     });
     const agent = await AgentService.getAgentById(esClient, request.params.agentId);
-    if (!agent) {
-      return notFound;
-    }
-
     const body = {
       item: {
         ...agent,
@@ -156,7 +144,9 @@ export const updateAgentHandler: RequestHandler<
     return response.ok({ body });
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
-      return notFound;
+      return response.notFound({
+        body: { message: `Agent ${request.params.agentId} not found` },
+      });
     }
 
     return defaultIngestErrorHandler({ error, response });
