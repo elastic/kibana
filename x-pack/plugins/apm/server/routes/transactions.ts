@@ -22,7 +22,7 @@ import { getAnomalySeries } from '../lib/transactions/get_anomaly_data';
 import { getLatencyPeriods } from '../lib/transactions/get_latency_charts';
 import { getThroughputCharts } from '../lib/transactions/get_throughput_charts';
 import { getTransactionGroupList } from '../lib/transaction_groups';
-import { getErrorRate } from '../lib/transaction_groups/get_error_rate';
+import { getErrorRatePeriods } from '../lib/transaction_groups/get_error_rate';
 import { createRoute } from './create_route';
 import {
   comparisonRangeRt,
@@ -380,11 +380,9 @@ export const transactionChartsErrorRateRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
       t.type({ transactionType: t.string }),
       t.partial({ transactionName: t.string }),
+      t.intersection([environmentRt, kueryRt, rangeRt, comparisonRangeRt]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -397,13 +395,15 @@ export const transactionChartsErrorRateRoute = createRoute({
       kuery,
       transactionType,
       transactionName,
+      comparisonStart,
+      comparisonEnd,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
 
-    return getErrorRate({
+    return getErrorRatePeriods({
       environment,
       kuery,
       serviceName,
@@ -411,6 +411,8 @@ export const transactionChartsErrorRateRoute = createRoute({
       transactionName,
       setup,
       searchAggregatedTransactions,
+      comparisonStart,
+      comparisonEnd,
     });
   },
 });

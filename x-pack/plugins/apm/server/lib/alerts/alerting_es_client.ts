@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { ApiResponse } from '@elastic/elasticsearch';
 import { ThresholdMetActionGroupId } from '../../../common/alert_types';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
+} from '../../../../../../typings/elasticsearch';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -23,8 +24,8 @@ export function alertingEsClient<TParams extends ESSearchRequest>(
     ThresholdMetActionGroupId
   >,
   params: TParams
-): Promise<ESSearchResponse<unknown, TParams>> {
-  return services.callCluster('search', {
+): Promise<ApiResponse<ESSearchResponse<unknown, TParams>>> {
+  return services.scopedClusterClient.asCurrentUser.search({
     ...params,
     ignore_unavailable: true,
   });
