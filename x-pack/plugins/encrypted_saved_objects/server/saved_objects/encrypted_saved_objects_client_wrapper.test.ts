@@ -1851,6 +1851,49 @@ describe('#closePointInTime', () => {
       expect(mockBaseClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('#updateObjectsSpaces', () => {
+    const objects = [{ type: 'foo', id: 'bar' }];
+    const spacesToAdd = ['space-x'];
+    const spacesToRemove = ['space-y'];
+    const options = {};
+    it('redirects request to underlying base client', async () => {
+      await wrapper.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
+
+      expect(mockBaseClient.updateObjectsSpaces).toHaveBeenCalledTimes(1);
+      expect(mockBaseClient.updateObjectsSpaces).toHaveBeenCalledWith(
+        objects,
+        spacesToAdd,
+        spacesToRemove,
+        options
+      );
+    });
+
+    it('returns response from underlying client', async () => {
+      const returnValue = { objects: [] };
+      mockBaseClient.updateObjectsSpaces.mockResolvedValue(returnValue);
+
+      const result = await wrapper.updateObjectsSpaces(
+        objects,
+        spacesToAdd,
+        spacesToRemove,
+        options
+      );
+
+      expect(result).toBe(returnValue);
+    });
+
+    it('fails if base client fails', async () => {
+      const failureReason = new Error('Something bad happened...');
+      mockBaseClient.updateObjectsSpaces.mockRejectedValue(failureReason);
+
+      await expect(
+        wrapper.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options)
+      ).rejects.toThrowError(failureReason);
+
+      expect(mockBaseClient.updateObjectsSpaces).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 
 describe('#createPointInTimeFinder', () => {

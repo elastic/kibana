@@ -8,7 +8,68 @@
 
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { encodeHitVersion } from '../../version';
-import { getSavedObjectFromSource } from './internal_utils';
+import { getBulkOperationError, getSavedObjectFromSource } from './internal_utils';
+
+describe('#getBulkOperationError', () => {
+  const type = 'obj-type';
+  const id = 'obj-id';
+
+  it('returns index not found error', () => {
+    const rawResponse = {
+      status: 404,
+      error: { type: 'index_not_found_exception', reason: 'some-reason', index: 'some-index' },
+    };
+
+    const result = getBulkOperationError(type, id, rawResponse);
+    expect(result).toEqual({
+      error: 'Internal Server Error',
+      message: 'An internal server error occurred', // TODO: this error payload is not very helpful to consumers, can we change it?
+      statusCode: 500,
+    });
+  });
+
+  it('returns generic not found error', () => {
+    const rawResponse = {
+      status: 404,
+      error: { type: 'anything', reason: 'some-reason', index: 'some-index' },
+    };
+
+    const result = getBulkOperationError(type, id, rawResponse);
+    expect(result).toEqual({
+      error: 'Not Found',
+      message: `Saved object [${type}/${id}] not found`,
+      statusCode: 404,
+    });
+  });
+
+  it('returns conflict error', () => {
+    const rawResponse = {
+      status: 409,
+      error: { type: 'anything', reason: 'some-reason', index: 'some-index' },
+    };
+
+    const result = getBulkOperationError(type, id, rawResponse);
+    expect(result).toEqual({
+      error: 'Conflict',
+      message: `Saved object [${type}/${id}] conflict`,
+      statusCode: 409,
+    });
+  });
+
+  it('returns an unexpected result error', () => {
+    const rawResponse = {
+      status: 123, // any status
+      error: { type: 'anything', reason: 'some-reason', index: 'some-index' },
+    };
+
+    const result = getBulkOperationError(type, id, rawResponse);
+    expect(result).toEqual({
+      error: 'Internal Server Error',
+      message: `Unexpected bulk response [${rawResponse.status}] ${rawResponse.error.type}: ${rawResponse.error.reason}`,
+      statusCode: 500,
+    });
+  });
+});
 
 describe('#getSavedObjectFromSource', () => {
   const NAMESPACE_AGNOSTIC_TYPE = 'agnostic-type';

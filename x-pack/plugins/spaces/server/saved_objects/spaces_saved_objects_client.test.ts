@@ -697,5 +697,32 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         expect(baseClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects);
       });
     });
+
+    describe('#updateObjectsSpaces', () => {
+      test(`calls base client`, async () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+        const expectedReturnValue = { objects: [] };
+        baseClient.updateObjectsSpaces.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const objects = [{ type: 'foo', id: 'bar' }];
+        const spacesToAdd = ['space-x'];
+        const spacesToRemove = ['space-y'];
+        const options = {};
+        const actualReturnValue = await client.updateObjectsSpaces(
+          objects,
+          spacesToAdd,
+          spacesToRemove,
+          options
+        );
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.updateObjectsSpaces).toHaveBeenCalledWith(
+          objects,
+          spacesToAdd,
+          spacesToRemove,
+          options
+        );
+      });
+    });
   });
 });

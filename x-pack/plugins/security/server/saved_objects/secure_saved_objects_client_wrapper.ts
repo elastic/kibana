@@ -24,6 +24,8 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
 
@@ -639,6 +641,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
     // TODO: authZ
     return await this.baseClient.collectMultiNamespaceReferences(objects);
+  }
+
+  async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    // TODO: authZ
+    return await this.baseClient.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
   }
 
   private async checkPrivileges(

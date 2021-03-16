@@ -300,3 +300,25 @@ test(`#collectMultiNamespaceReferences`, async () => {
   expect(mockRepository.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects);
   expect(result).toBe(returnValue);
 });
+
+test(`#updateObjectsSpaces`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    updateObjectsSpaces: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const objects = Symbol();
+  const spacesToAdd = Symbol();
+  const spacesToRemove = Symbol();
+  const options = Symbol();
+  const result = await client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
+
+  expect(mockRepository.updateObjectsSpaces).toHaveBeenCalledWith(
+    objects,
+    spacesToAdd,
+    spacesToRemove,
+    options
+  );
+  expect(result).toBe(returnValue);
+});

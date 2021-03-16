@@ -20,6 +20,10 @@ export type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
 } from './lib';
 
 export * from './saved_objects_client';

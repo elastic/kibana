@@ -13,6 +13,8 @@ import type {
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
 } from './lib';
 import {
   SavedObject,
@@ -687,5 +689,27 @@ export class SavedObjectsClient {
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
     return await this._repository.collectMultiNamespaceReferences(objects);
+  }
+
+  /**
+   * Updates one or more objects to add and/or remove them from specified spaces.
+   *
+   * @param objects
+   * @param spacesToAdd
+   * @param spacesToRemove
+   * @param options
+   */
+  async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    return await this._repository.updateObjectsSpaces(
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      options
+    );
   }
 }

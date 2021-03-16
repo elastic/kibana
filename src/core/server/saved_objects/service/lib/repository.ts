@@ -67,7 +67,11 @@ import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
-import { getSavedObjectFromSource } from './internal_utils';
+import {
+  getBulkOperationError,
+  getExpectedVersionProperties,
+  getSavedObjectFromSource,
+} from './internal_utils';
 import {
   ALL_NAMESPACES_STRING,
   FIND_DEFAULT_PAGE,
@@ -78,6 +82,11 @@ import {
   collectMultiNamespaceReferences,
   SavedObjectsCollectMultiNamespaceReferencesObject,
 } from './collect_multi_namespace_references';
+import {
+  updateObjectsSpaces,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+} from './update_objects_spaces';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -139,7 +148,7 @@ export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOp
   refresh?: boolean;
 }
 
-const DEFAULT_REFRESH_SETTING = 'wait_for';
+export const DEFAULT_REFRESH_SETTING = 'wait_for';
 
 /**
  * See {@link SavedObjectsRepository}
@@ -516,16 +525,11 @@ export class SavedObjectsRepository {
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const { error, ...rawResponse } = Object.values(
-          bulkResponse?.body.items[esRequestIndex] ?? {}
-        )[0] as any;
+        const rawResponse = Object.values(bulkResponse?.body.items[esRequestIndex] ?? {})[0] as any;
 
+        const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
         if (error) {
-          return {
-            id: requestedId,
-            type: rawMigratedDoc._source.type,
-            error: getBulkOperationError(error, rawMigratedDoc._source.type, requestedId),
-          };
+          return { type: rawMigratedDoc._source.type, id: requestedId, error };
         }
 
         // When method == 'index' the bulkResponse doesn't include the indexed
@@ -1287,6 +1291,34 @@ export class SavedObjectsRepository {
   }
 
   /**
+   * Updates one or more objects to add and/or remove them from specified spaces.
+   *
+   * @param objects
+   * @param spacesToAdd
+   * @param spacesToRemove
+   * @param options
+   */
+  async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    return updateObjectsSpaces({
+      registry: this._registry,
+      allowedTypes: this._allowedTypes,
+      client: this.client,
+      serializer: this._serializer,
+      getIndexForType: this.getIndexForType,
+      collectMultiNamespaceReferences: this.collectMultiNamespaceReferences,
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      options,
+    });
+  }
+
+  /**
    * Adds one or more namespaces to a given multi-namespace saved object. This method and
    * [`deleteFromNamespaces`]{@link SavedObjectsRepository.deleteFromNamespaces} are the only ways to change which Spaces a multi-namespace
    * saved object is shared to.
@@ -1641,11 +1673,16 @@ export class SavedObjectsRepository {
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
         const response = bulkUpdateResponse?.body.items[esRequestIndex] ?? {};
+        const rawResponse = Object.values(response)[0] as any;
+
+        const error = getBulkOperationError(type, id, rawResponse);
+        if (error) {
+          return { type, id, error };
+        }
+
         // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
         // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
-        const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
-          response
-        )[0] as any;
+        const { _seq_no: seqNo, _primary_term: primaryTerm, get } = rawResponse;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { [type]: attributes, references, updated_at } = documentToSave;
@@ -2244,43 +2281,6 @@ export class SavedObjectsRepository {
     const object = await this.get<T>(type, id, options);
     return { saved_object: object, outcome: 'exactMatch' };
   }
-}
-
-function getBulkOperationError(
-  error: { type: string; reason?: string; index?: string },
-  type: string,
-  id: string
-) {
-  switch (error.type) {
-    case 'version_conflict_engine_exception':
-      return errorContent(SavedObjectsErrorHelpers.createConflictError(type, id));
-    case 'document_missing_exception':
-      return errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
-    case 'index_not_found_exception':
-      return errorContent(SavedObjectsErrorHelpers.createIndexAliasNotFoundError(error.index!));
-    default:
-      return {
-        message: error.reason || JSON.stringify(error),
-      };
-  }
-}
-
-/**
- * Returns an object with the expected version properties. This facilitates Elasticsearch's Optimistic Concurrency Control.
- *
- * @param version Optional version specified by the consumer.
- * @param document Optional existing document that was obtained in a preflight operation.
- */
-function getExpectedVersionProperties(version?: string, document?: SavedObjectsRawDoc) {
-  if (version) {
-    return decodeRequestVersion(version);
-  } else if (document) {
-    return {
-      if_seq_no: document._seq_no,
-      if_primary_term: document._primary_term,
-    };
-  }
-  return {};
 }
 
 /**

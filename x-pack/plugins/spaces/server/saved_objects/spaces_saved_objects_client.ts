@@ -26,6 +26,8 @@ import type {
   SavedObjectsFindOptions,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
 } from 'src/core/server';
 
@@ -397,6 +399,24 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
     // This function is not scoped to the current space
     return await this.client.collectMultiNamespaceReferences(objects);
+  }
+
+  /**
+   * Updates one or more objects to add and/or remove them from specified spaces.
+   *
+   * @param objects
+   * @param spacesToAdd
+   * @param spacesToRemove
+   * @param options
+   */
+  public async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    // This function is not scoped to the current space
+    return await this.client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
   }
 
   /**

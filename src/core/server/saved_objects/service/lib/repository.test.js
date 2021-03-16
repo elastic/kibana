@@ -8,6 +8,8 @@
 
 import { pointInTimeFinderMock } from './repository.test.mock';
 import { mockCollectMultiNamespaceReferences } from './__mocks__/collect_multi_namespace_references';
+import { mockUpdateObjectsSpaces } from './__mocks__/update_objects_spaces';
+import { mockGetBulkOperationError } from './__mocks__/internal_utils';
 
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
@@ -758,6 +760,10 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
+      afterEach(() => {
+        mockGetBulkOperationError.mockReset();
+      });
+
       const obj3 = {
         type: 'dashboard',
         id: 'three',
@@ -765,11 +771,13 @@ describe('SavedObjectsRepository', () => {
         references: [{ name: 'ref_0', type: 'test', id: '2' }],
       };
 
-      const bulkCreateError = async (obj, esError, expectedError) => {
+      const bulkCreateError = async (obj, isBulkError, expectedErrorResult) => {
         let response;
-        if (esError) {
+        if (isBulkError) {
+          // mock the bulk error for only the second object
+          mockGetBulkOperationError.mockReturnValueOnce(undefined);
+          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error);
           response = getMockBulkCreateResponse([obj1, obj, obj2]);
-          response.items[1].create = { error: esError };
         } else {
           response = getMockBulkCreateResponse([obj1, obj2]);
         }
@@ -780,14 +788,14 @@ describe('SavedObjectsRepository', () => {
         const objects = [obj1, obj, obj2];
         const result = await savedObjectsRepository.bulkCreate(objects);
         expect(client.bulk).toHaveBeenCalled();
-        const objCall = esError ? expectObjArgs(obj) : [];
+        const objCall = isBulkError ? expectObjArgs(obj) : [];
         const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
           expect.anything()
         );
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectedError, expectSuccess(obj2)],
+          saved_objects: [expectSuccess(obj1), expectedErrorResult, expectSuccess(obj2)],
         });
       };
 
@@ -879,25 +887,9 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it(`returns error when there is a version conflict (bulk)`, async () => {
-        const esError = { type: 'version_conflict_engine_exception' };
-        await bulkCreateError(obj3, esError, expectErrorConflict(obj3));
-      });
-
-      it(`returns error when document is missing`, async () => {
-        const esError = { type: 'document_missing_exception' };
-        await bulkCreateError(obj3, esError, expectErrorNotFound(obj3));
-      });
-
-      it(`returns error reason for other errors`, async () => {
-        const esError = { reason: 'some_other_error' };
-        await bulkCreateError(obj3, esError, expectErrorResult(obj3, { message: esError.reason }));
-      });
-
-      it(`returns error string for other errors if no reason is defined`, async () => {
-        const esError = { foo: 'some_other_error' };
-        const expectedError = expectErrorResult(obj3, { message: JSON.stringify(esError) });
-        await bulkCreateError(obj3, esError, expectedError);
+      it(`returns bulk error`, async () => {
+        const expectedErrorResult = { type: obj3.type, id: obj3.id, error: 'Oh no, a bulk error!' };
+        await bulkCreateError(obj3, true, expectedErrorResult);
       });
     });
 
@@ -1531,16 +1523,22 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
+      afterEach(() => {
+        mockGetBulkOperationError.mockReset();
+      });
+
       const obj = {
         type: 'dashboard',
         id: 'three',
       };
 
-      const bulkUpdateError = async (obj, esError, expectedError) => {
+      const bulkUpdateError = async (obj, isBulkError, expectedErrorResult) => {
         const objects = [obj1, obj, obj2];
         const mockResponse = getMockBulkUpdateResponse(objects);
-        if (esError) {
-          mockResponse.items[1].update = { error: esError };
+        if (isBulkError) {
+          // mock the bulk error for only the second object
+          mockGetBulkOperationError.mockReturnValueOnce(undefined);
+          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error);
         }
         client.bulk.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(mockResponse)
@@ -1548,14 +1546,14 @@ describe('SavedObjectsRepository', () => {
 
         const result = await savedObjectsRepository.bulkUpdate(objects);
         expect(client.bulk).toHaveBeenCalled();
-        const objCall = esError ? expectObjArgs(obj) : [];
+        const objCall = isBulkError ? expectObjArgs(obj) : [];
         const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
           expect.anything()
         );
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectedError, expectSuccess(obj2)],
+          saved_objects: [expectSuccess(obj1), expectedErrorResult, expectSuccess(obj2)],
         });
       };
 
@@ -1593,19 +1591,19 @@ describe('SavedObjectsRepository', () => {
 
       it(`returns error when type is invalid`, async () => {
         const _obj = { ...obj, type: 'unknownType' };
-        await bulkUpdateError(_obj, undefined, expectErrorNotFound(_obj));
+        await bulkUpdateError(_obj, false, expectErrorNotFound(_obj));
       });
 
       it(`returns error when type is hidden`, async () => {
         const _obj = { ...obj, type: HIDDEN_TYPE };
-        await bulkUpdateError(_obj, undefined, expectErrorNotFound(_obj));
+        await bulkUpdateError(_obj, false, expectErrorNotFound(_obj));
       });
 
       it(`returns error when object namespace is '*'`, async () => {
         const _obj = { ...obj, namespace: '*' };
         await bulkUpdateError(
           _obj,
-          undefined,
+          false,
           expectErrorResult(obj, createBadRequestError('"namespace" cannot be "*"'))
         );
       });
@@ -1628,25 +1626,9 @@ describe('SavedObjectsRepository', () => {
         await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, mgetResponse);
       });
 
-      it(`returns error when there is a version conflict (bulk)`, async () => {
-        const esError = { type: 'version_conflict_engine_exception' };
-        await bulkUpdateError(obj, esError, expectErrorConflict(obj));
-      });
-
-      it(`returns error when document is missing (bulk)`, async () => {
-        const esError = { type: 'document_missing_exception' };
-        await bulkUpdateError(obj, esError, expectErrorNotFound(obj));
-      });
-
-      it(`returns error reason for other errors (bulk)`, async () => {
-        const esError = { reason: 'some_other_error' };
-        await bulkUpdateError(obj, esError, expectErrorResult(obj, { message: esError.reason }));
-      });
-
-      it(`returns error string for other errors if no reason is defined (bulk)`, async () => {
-        const esError = { foo: 'some_other_error' };
-        const expectedError = expectErrorResult(obj, { message: JSON.stringify(esError) });
-        await bulkUpdateError(obj, esError, expectedError);
+      it(`returns bulk error`, async () => {
+        const expectedErrorResult = { type: obj.type, id: obj.id, error: 'Oh no, a bulk error!' };
+        await bulkUpdateError(obj, true, expectedErrorResult);
       });
     });
 
@@ -4748,6 +4730,38 @@ describe('SavedObjectsRepository', () => {
       mockCollectMultiNamespaceReferences.mockRejectedValue(expectedResult);
 
       await expect(savedObjectsRepository.collectMultiNamespaceReferences([])).rejects.toEqual(
+        expectedResult
+      );
+    });
+  });
+
+  describe('#updateObjectsSpaces', () => {
+    afterEach(() => {
+      mockUpdateObjectsSpaces.mockReset();
+    });
+
+    it('passes arguments to the updateObjectsSpaces module and returns the result', async () => {
+      const objects = Symbol();
+      const spacesToAdd = Symbol();
+      const spacesToRemove = Symbol();
+      const options = Symbol();
+      const expectedResult = Symbol();
+      mockUpdateObjectsSpaces.mockResolvedValue(expectedResult);
+
+      await expect(
+        savedObjectsRepository.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options)
+      ).resolves.toEqual(expectedResult);
+      expect(mockUpdateObjectsSpaces).toHaveBeenCalledTimes(1);
+      expect(mockUpdateObjectsSpaces).toHaveBeenCalledWith(
+        expect.objectContaining({ objects, spacesToAdd, spacesToRemove, options })
+      );
+    });
+
+    it('returns an error from the updateObjectsSpaces module', async () => {
+      const expectedResult = new Error('Oh no!');
+      mockUpdateObjectsSpaces.mockRejectedValue(expectedResult);
+
+      await expect(savedObjectsRepository.updateObjectsSpaces([], [], [])).rejects.toEqual(
         expectedResult
       );
     });

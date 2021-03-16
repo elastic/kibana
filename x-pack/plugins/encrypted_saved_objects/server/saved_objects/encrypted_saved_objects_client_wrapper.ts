@@ -29,6 +29,8 @@ import type {
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from 'src/core/server';
@@ -282,6 +284,20 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
     return await this.options.baseClient.collectMultiNamespaceReferences(objects);
+  }
+
+  public async updateObjectsSpaces(
+    objects: SavedObjectsUpdateObjectsSpacesObject[],
+    spacesToAdd: string[],
+    spacesToRemove: string[],
+    options: SavedObjectsUpdateObjectsSpacesOptions
+  ) {
+    return await this.options.baseClient.updateObjectsSpaces(
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      options
+    );
   }
 
   /**

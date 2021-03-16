@@ -33,3 +33,10 @@ export type {
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './collect_multi_namespace_references';
+
+export type {
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
+} from './update_objects_spaces';
