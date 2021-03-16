@@ -63653,7 +63653,7 @@ async function buildBazelProductionProjects({
   const projectNames = [...projects.values()].map(project => project.name);
   _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
   await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['build', '//packages:build']);
-  _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete}]`);
+  _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete`);
 
   for (const project of projects.values()) {
     await copyToBuild(project, kibanaRoot, buildRoot);

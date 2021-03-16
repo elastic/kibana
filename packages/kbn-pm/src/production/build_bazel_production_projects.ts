@@ -37,7 +37,7 @@ export async function buildBazelProductionProjects({
   log.info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
 
   await runBazel(['build', '//packages:build']);
-  log.info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete}]`);
+  log.info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete`);
 
   for (const project of projects.values()) {
     await copyToBuild(project, kibanaRoot, buildRoot);
