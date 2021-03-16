@@ -20,6 +20,7 @@ export interface CurveSettingsPopoverProps {
    * Callback on display option change
    */
   onChange: (id: CurveType) => void;
+  isDisabled: boolean;
 }
 export const curveStyleOptions = [
   {
@@ -31,7 +32,7 @@ export const curveStyleOptions = [
   {
     id: 0,
     title: i18n.translate('xpack.lens.curveStyle.ordinal', {
-      defaultMessage: 'Linear',
+      defaultMessage: 'Ordinal',
     }),
   },
   {
@@ -87,6 +88,7 @@ export const curveStyleOptions = [
 export const CurveSettingsPopover: React.FunctionComponent<CurveSettingsPopoverProps> = ({
   onChange,
   value,
+  isDisabled,
 }) => {
   return (
     <ToolbarPopover
@@ -96,6 +98,7 @@ export const CurveSettingsPopover: React.FunctionComponent<CurveSettingsPopoverP
       type="curve"
       groupPosition="right"
       buttonDataTestSubj="lnsLegendButton"
+      isDisabled={isDisabled}
     >
       <EuiFormRow
         display="columnCompressed"
@@ -133,7 +136,7 @@ export const CurveSettingsPopover: React.FunctionComponent<CurveSettingsPopoverP
               inputDisplay: title,
             };
           })}
-          valueOfSelected={String(value)}
+          valueOfSelected={value ? String(value) : String(CurveType.LINEAR)}
           onChange={(valueN) => onChange(Number(valueN) as CurveType)}
           itemLayoutAlign="top"
           hasDividers

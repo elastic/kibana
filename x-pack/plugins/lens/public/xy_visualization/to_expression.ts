@@ -6,7 +6,7 @@
  */
 
 import { Ast } from '@kbn/interpreter/common';
-import { ScaleType } from '@elastic/charts';
+import { CurveType, ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { State, ValidLayer, XYLayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
@@ -148,6 +148,7 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
+          curveType: [state.curveType || CurveType.LINEAR],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',

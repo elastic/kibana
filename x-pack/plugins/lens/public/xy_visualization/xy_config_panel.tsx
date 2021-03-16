@@ -272,6 +272,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
 
   const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
   const isFittingEnabled = hasNonBarSeries;
+  const isCurveTypeEnabled = hasNonBarSeries;
 
   const valueLabelsDisabledReason = getValueLabelDisableReason({
     isAreaPercentage,
@@ -282,6 +283,16 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
+          <CurveSettingsPopover
+            value={state.curveType as CurveType}
+            onChange={(id) => {
+              setState({
+                ...state,
+                curveType: id,
+              });
+            }}
+            isDisabled={!isCurveTypeEnabled}
+          />
           <TooltipWrapper
             tooltipContent={valueLabelsDisabledReason}
             condition={!isValueLabelsEnabled && !isFittingEnabled}
@@ -402,15 +413,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
               setState({
                 ...state,
                 legend: { ...state.legend, position: id as Position },
-              });
-            }}
-          />
-          <CurveSettingsPopover
-            value={state.curveType as CurveType}
-            onChange={(id) => {
-              setState({
-                ...state,
-                curveType: id,
               });
             }}
           />

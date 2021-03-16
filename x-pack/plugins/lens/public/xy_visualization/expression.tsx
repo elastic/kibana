@@ -24,7 +24,6 @@ import {
   HorizontalAlignment,
   ElementClickListener,
   BrushEndListener,
-  CurveType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -180,7 +179,12 @@ export const xyChart: ExpressionFunctionDefinition<
       help: 'Layers of visual series',
       multi: true,
     },
-    curveType: CurveType.CURVE_CATMULL_ROM,
+    curveType: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.xyChart.curveType.help', {
+        defaultMessage: 'Define how curve type is rendered for a line chart',
+      }),
+    },
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -332,7 +336,14 @@ export function XYChart({
   renderMode,
   syncColors,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
+  const {
+    legend,
+    layers,
+    fittingFunction,
+    gridlinesVisibilitySettings,
+    valueLabels,
+    curveType,
+  } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -778,7 +789,12 @@ export function XYChart({
           switch (seriesType) {
             case 'line':
               return (
-                <LineSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+                <LineSeries
+                  key={index}
+                  {...seriesProps}
+                  fit={getFitOptions(fittingFunction)}
+                  curve={curveType}
+                />
               );
             case 'bar':
             case 'bar_stacked':
@@ -806,11 +822,17 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
+                  curve={curveType}
                 />
               );
             case 'area':
               return (
-                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+                <AreaSeries
+                  key={index}
+                  {...seriesProps}
+                  fit={getFitOptions(fittingFunction)}
+                  curve={curveType}
+                />
               );
             default:
               return assertNever(seriesType);
