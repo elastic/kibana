@@ -1371,13 +1371,13 @@ export function shimHitsTotal(response: estypes.SearchResponse<unknown>, { legac
     aggregations?: Record<string, estypes.Aggregate> | undefined;
     _clusters?: estypes.ClusterStatistics | undefined;
     documents?: unknown[] | undefined;
-    fields?: Record<string, estypes.LazyDocument> | undefined;
+    fields?: Record<string, any> | undefined;
     max_score?: number | undefined;
     num_reduce_phases?: number | undefined;
     profile?: estypes.Profile | undefined;
     pit_id?: string | undefined;
     _scroll_id?: string | undefined;
-    suggest?: estypes.SuggestDictionary<unknown> | undefined;
+    suggest?: Record<string, estypes.Suggest<unknown>[]> | undefined;
     terminated_early?: boolean | undefined;
 };
 
