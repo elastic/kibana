@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import angular, { auto } from 'angular';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -187,7 +188,7 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: JsonCodeEditor,
+      component: ({ hit }) => <JsonCodeEditor json={hit} hasLineNumbers />,
     });
 
     const {

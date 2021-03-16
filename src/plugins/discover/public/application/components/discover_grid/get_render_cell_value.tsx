@@ -20,6 +20,7 @@ import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
+import { defaultMonacoEditorWidth } from './constants';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
@@ -107,9 +108,18 @@ export const getRenderCellValueFn = (
     );
   }
 
+  if (typeof rowFlattened[columnId] === 'object' && isDetails) {
+    return (
+      <JsonCodeEditor
+        json={rowFlattened[columnId] as Record<string, any>}
+        width={defaultMonacoEditorWidth}
+      />
+    );
+  }
+
   if (field && field.type === '_source') {
     if (isDetails) {
-      return <JsonCodeEditor hit={row} hasLineNumbers={false} width={370} />;
+      return <JsonCodeEditor json={row} width={defaultMonacoEditorWidth} />;
     }
     const formatted = indexPattern.formatHit(row);
 
