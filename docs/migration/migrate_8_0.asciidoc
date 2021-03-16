@@ -50,9 +50,9 @@ for example, `logstash-*`.
 
 [float]
 ==== Default logging timezone is now the system's timezone
-*Details:* In prior releases the timezone used in logs defaulted to UTC.  We now use the host machine's timezone by default.
+*Details:* In prior releases the timezone used in logs defaulted to UTC. We now use the host machine's timezone by default.
 
-*Impact:* To restore the previous behavior, in kibana.yml use the pattern layout, with a date modifier:
+*Impact:* To restore the previous behavior, in kibana.yml use the pattern layout, with a <<date-format, date modifier>>:
 [source,yaml]
 -------------------
 logging:
@@ -67,14 +67,14 @@ See https://github.com/elastic/kibana/pull/90368 for more details.
 
 [float]
 ==== Responses are never logged by default
-*Details:* Previously responses would be logged if either `logging.json` was true, `logging.dest` was specified, or a `TTY` was detected.
+*Details:* Previously responses would be logged if either `logging.json` was true, `logging.dest` was specified, or a `TTY` was detected. With the new logging config, these are provided by a dedicated <<logger-hierarchy,logger>>.
 
-*Impact:* To restore the previous behavior, in kibana.yml enable `debug` logs for the `http.server.response` context under `logging.loggers`:
+*Impact:* To restore the previous behavior, in `kibana.yml` enable `debug` for the <<request-response-logger,`http.server.response`>> logger:
 [source,yaml]
 -------------------
 logging:
   loggers:
-    - context: http.server.response
+    - name: http.server.response
       appenders: [console]
       level: debug
 -------------------
@@ -82,9 +82,9 @@ See https://github.com/elastic/kibana/pull/87939 for more details.
 
 [float]
 ==== Logging destination is specified by the appender
-*Details:* Previously log destination would be `stdout` and could be changed to `file` using `logging.dest`. 
+*Details:* Previously log destination would be `stdout` and could be changed to `file` using `logging.dest`. With new {kib} logging you specify the destination using <<logging-appenders,appenders>>. 
 
-*Impact:* To restore the previous behavior, in `kibana.yml` use the `console` appender to send logs to `stdout`.
+*Impact:* To restore the previous behavior and log records to *stdout*, in `kibana.yml` use the `console` appender.
 [source,yaml]
 -------------------
 logging:
@@ -107,8 +107,8 @@ logging:
 -------------------
 
 [float]
-==== Specify log event output with root
-*Details:* Previously logging output would be specified by `logging.silent` (none), 'logging.quiet' (error messages only) and `logging.verbose` (all).
+==== Specify log verbosity with root
+*Details:* Previously logging output would be specified by `logging.silent` (none), `logging.quiet` (error messages only) and `logging.verbose` (all). With the new logging configuration, set the minimum required <<log-level,log level>>.
 
 *Impact:* To restore the previous behavior, in `kibana.yml` specify `logging.root.level` as one of `off`, `error`, `all`:
 [source,yaml]
@@ -138,50 +138,13 @@ logging:
     level: all
 -------------------
 
-[float]
-==== Suppress all log output with root
-*Details:* Previously all logging output would be suppressed if `logging.silent` was true.
-
-*Impact:* To restore the previous behavior, in `kibana.yml` turn `logging.root.level` to 'off'.
-[source,yaml]
--------------------
-logging:
-  root:
-    appenders: [default]
-    level: off
--------------------
-
-[float]
-==== Suppress log output with root
-*Details:* Previously all logging output other than error messages would be suppressed if `logging.quiet` was true.
-
-*Impact:* To restore the previous behavior, in `kibana.yml` turn `logging.root.level` to 'error'.
-[source,yaml]
--------------------
-logging:
-  root:
-    appenders: [default]
-    level: error
--------------------
-
-[float]
-==== Log all output with root
-*Details:* Previously all events would be logged if `logging.verbose` was true.
-
-*Impact:* To restore the previous behavior, in `kibana.yml` turn `logging.root.level` to 'all'.
-[source,yaml]
--------------------
-logging:
-  root:
-    appenders: [default]
-    level: all
--------------------
+NOTE: You need to specify the `root.appender` to have your log records surfaced.
 
 [float]
 ==== Declare log message format for each custom appender
-*Details:* Previously all events would be logged in `json` format when `logging.json` was true.
+*Details:* Previously all events would be logged in `json` format when `logging.json` was true. With the new logging configuration you can specify the output format with <<logging-layouts,layouts>>. See here for a quick look at <<logging-json-format-old-and-new-example,`json` format>> and <<logging-pattern-format-old-and-new-example,*stdout*>>.
 
-*Impact:* To restore the previous behavior, in `kibana.yml` configure the logging format for each custom appender with the `appender.layout` property. There is no default for custom appenders and each one must be configured expilictly.
+*Impact:* To restore the previous behavior, in `kibana.yml` configure the logging format for each custom appender with the <<logging-layouts,`appender.layout`>> property. There is no default for custom appenders and each one must be configured expilictly. 
 
 [source,yaml]
 -------------------

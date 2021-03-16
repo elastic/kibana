@@ -1,119 +1,88 @@
 [[logging-configuration-migration]]
-==== Logging config migration
+== Logging configuration migration
 
 Compatibility with the legacy logging system is assured until the end of the `v7` version.
 All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
 root appenders, make sure that it contains `default` appender to provide backward compatibility.
 
-NOTE: If you define an appender for a context name, the log messages aren't handled by the
-`root` context anymore and not forwarded to the legacy logging service.
+NOTE: If you define an appender for a logger name, the log messages aren't handled by the
+`root` logger anymore and are not forwarded to the legacy logging service.
 
-===== logging.dest
-By default logs in *stdout*. With new {kib} logging you can use pre-existing `console` appender or
-define a custom one.
+// === logging.json
+// Defines the format of log output. Logs in JSON if `true`. With new logging config you can adjust
+// the output format with <<logging-layouts,layouts>>.
 
-[source,yaml]
-----
-logging:
-  loggers:
-    - name: plugins.myPlugin
-      appenders: [console]
-----
+// === logging.quiet
+// Suppresses all logging output other than error messages. With new logging, config can be achieved
+// with adjusting minimum required <<log-level,log level>>.
 
-Logs in a *file* if given file path. You should define a custom appender with `type: file`
+// [source,yaml]
+// ----
+//   loggers:
+//     - name: plugins.myPlugin
+//       appenders: [console]
+//       level: error
+// # or for all output
+// logging.root.level: error
+// ----
 
-[source,yaml]
-----
+// === logging.silent:
+// Suppresses all logging output.
+// [source,yaml]
+// ----
+// logging.root.level: off
+// ----
 
-logging:
-  appenders:
-    file:
-      type: file
-      fileName: /var/log/kibana.log
-      layout:
-        type: pattern
-  loggers:
-    - name: plugins.myPlugin
-      appenders: [file]
-----
+// === logging.verbose:
+// Logs all events
+// [source,yaml]
+// ----
+// logging.root.level: all
+// ----
 
-===== logging.json
-Defines the format of log output. Logs in JSON if `true`. With new logging config you can adjust
-the output format with <<logging-layouts,layouts>>.
+// === logging.timezone
+// NOTE: Mentioned
+// Set to the canonical timezone id to log events using that timezone. New logging config allows
+// to <<date-format,specify timezone>> for `layout: pattern`. Defaults to host timezone when not specified.
 
-===== logging.quiet
-Suppresses all logging output other than error messages. With new logging, config can be achieved
-with adjusting minimum required <<log-level,log level>>.
+// [source,yaml]
+// ----
+// logging:
+//   appenders:
+//     custom-console:
+//       type: console
+//       layout:
+//         type: pattern
+//         highlight: true
+//         pattern: "[%level] [%date{ISO8601_TZ}{America/Los_Angeles}][%logger] %message"
+// ----
 
-[source,yaml]
-----
-  loggers:
-    - name: plugins.myPlugin
-      appenders: [console]
-      level: error
-# or for all output
-logging.root.level: error
-----
+// === logging.events
+// Define a custom logger for a specific logger name.
 
-===== logging.silent:
-Suppresses all logging output.
-[source,yaml]
-----
-logging.root.level: off
-----
+// **`logging.events.ops`** outputs sample system and process information at a regular interval.
+// With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
+// and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
+// [source,yaml]
+// ----
+//   loggers:
+//     - name: metrics.ops
+//       appenders: [console]
+//       level: debug
+// ----
 
-===== logging.verbose:
-Logs all events
-[source,yaml]
-----
-logging.root.level: all
-----
+// **`logging.events.request` and `logging.events.response`** provide logs for each request handled
+// by the http service. With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
+// and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
+// [source,yaml]
+// ----
+//   loggers:
+//     - name: http.server.response
+//       appenders: [console]
+//       level: debug
+// ----
 
-===== logging.timezone
-Set to the canonical timezone id to log events using that timezone. New logging config allows
-to <<date-format,specify timezone>> for `layout: pattern`. Defaults to host timezone when not specified.
-
-[source,yaml]
-----
-logging:
-  appenders:
-    custom-console:
-      type: console
-      layout:
-        type: pattern
-        highlight: true
-        pattern: "[%level] [%date{ISO8601_TZ}{America/Los_Angeles}][%logger] %message"
-----
-
-===== logging.events
-Define a custom logger for a specific context name.
-
-**`logging.events.ops`** outputs sample system and process information at a regular interval.
-With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
-and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
-[source,yaml]
-----
-  loggers:
-    - name: metrics.ops
-      appenders: [console]
-      level: debug
-----
-
-**`logging.events.request` and `logging.events.response`** provide logs for each request handled
-by the http service. With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
-and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
-[source,yaml]
-----
-  loggers:
-    - name: http.server.response
-      appenders: [console]
-      level: debug
-----
-
-===== logging.filter
-TBD
-
-
+[[logging-pattern-format-old-and-new-example]]
 [options="header"]
 |===
 
@@ -131,7 +100,7 @@ TBD
 
 |===
 
-
+[[logging-json-format-old-and-new-example]]
 [options="header"]
 |===
 
@@ -153,7 +122,7 @@ TBD
 
 |===
 
-==== Logging configuration via CLI migration guide
+=== Logging configuration via CLI migration guide
 
 NOTE: The `--verbose` and `--silent` cli flags are supported and have build-in behavior. You can override the default behavior using the following equivalent platform logging configurations:
 [options="header"]

@@ -1,0 +1,85 @@
+[[patterns]]
+== Patterns
+[[scoped-services]]
+=== Scoped services
+Whenever Kibana needs to get access to data saved in elasticsearch, it
+should perform a check whether an end-user has access to the data. In
+the legacy platform, Kibana requires binding elasticsearch related API
+with an incoming request to access elasticsearch service on behalf of a
+user.
+
+[source,js]
+----
+async function handler(req, res) {
+  const dataCluster = server.plugins.elasticsearch.getCluster('data');
+  const data = await dataCluster.callWithRequest(req, 'ping');
+}
+----
+
+The Kibana Platform introduced a handler interface on the server-side to perform that association
+internally. Core services, that require impersonation with an incoming
+request, are exposed via `context` argument of
+{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandler.md[the
+request handler interface.] The above example looks in the Kibana Platform
+as
+
+[source,js]
+----
+async function handler(context, req, res) {
+  const data = await context.core.elasticsearch.client.asCurrentUser('ping');
+}
+----
+
+The
+{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md[request
+handler context] exposed the next scoped *core* services:
+
+[width="100%",cols="30%,70%",options="header",]
+|===
+|Legacy Platform |Kibana Platform
+|`request.getSavedObjectsClient`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsclient.md[`context.savedObjects.client`]
+
+|`server.plugins.elasticsearch.getCluster('admin')`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
+
+|`server.plugins.elasticsearch.getCluster('data')`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
+
+|`request.getUiSettingsService`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.uiSettings.client`]
+|===
+
+==== Declare a custom scoped service
+
+Plugins can extend the handler context with a custom API that will be
+available to the plugin itself and all dependent plugins. For example,
+the plugin creates a custom elasticsearch client and wants to use it via
+the request handler context:
+
+[source,typescript]
+----
+import type { CoreSetup, RequestHandlerContext, IScopedClusterClient } from 'kibana/server';
+
+interface MyRequestHandlerContext extends RequestHandlerContext {
+ myPlugin: {
+   client: IScopedClusterClient;
+ };
+}
+
+class MyPlugin {
+  setup(core: CoreSetup) {
+    const client = core.elasticsearch.createClient('myClient');
+    core.http.registerRouteHandlerContext<MyRequestHandlerContext, 'myPlugin'>('myPlugin', (context, req, res) => {
+      return { client: client.asScoped(req) };
+    });
+    const router = core.http.createRouter<MyRequestHandlerContext>();
+    router.get(
+      { path: '/api/my-plugin/', validate: … },
+      async (context, req, res) => {
+        // context type is inferred as MyPluginContext
+        const data = await context.myPlugin.client.asCurrentUser('endpoint');
+      }
+    );
+  }
+----

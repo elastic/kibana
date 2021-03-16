@@ -1,5 +1,5 @@
-[[logging-service-configuration]]
-== Logging Service Configuration
+[[logging-service-configuration-example]]
+== Logging Service Configuration Example
 
 As with any configuration in the {kib} platform, logging configuration is validated against the predefined schema and if there are
 any issues with it, {kib} will fail to start with the detailed error message.

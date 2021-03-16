@@ -33,28 +33,24 @@ The main idea is to have consistent logging behaviour (configuration, log format
 messages according to message type and level, to control how these messages are formatted and where the final logs
 will be displayed or stored.
 
-__Loggers__ define what logging settings should be applied at the particular context name.
+__Loggers__ define what logging settings should be applied to a particular logger.
 
-__<<appenders,Appenders>>__ define where log messages are displayed (eg. stdout or console) and stored (eg. file on the disk).
+__<<logging-appenders,Appenders>>__ define where log messages are displayed (eg. stdout or console) and stored (eg. file on the disk).
 
 __<<logging-layouts,Layouts>>__ define how log messages are formatted and what type of information they include.
 
 [[logger-hierarchy]]
 === Logger hierarchy
 
-Every logger has its unique context name that follows a hierarchical naming rule. The logger is considered to be an
-ancestor of another logger if its name followed by a `.` is a prefix of the descendant logger name. For example logger
-with `a.b` context name is an ancestor of logger with `a.b.c` context name. All top-level loggers are descendants of special
-logger with `root` context name that resides at the top of the logger hierarchy. This logger always exists and
+Every logger has a unique name that follows a hierarchical naming rule. The logger is considered to be an
+ancestor of another logger if its name followed by a `.` is a prefix of the descendant logger. For example, a logger
+named `a.b` is an ancestor of logger `a.b.c`. All top-level loggers are descendants of a special `root` logger at the top of the logger hierarchy. The `root` logger always exists and
 fully configured.
 
-Developer can configure _<<log-level, log level>>_ and _appenders_ that should be used within particular context name. If logger configuration
-specifies only _log level_ then _appenders_ configuration will be inherited from the ancestor logger.
+You can configure _<<log-level, log level>>_ and _appenders_ for a specific logger. If a logger only has a _log level_ configured, then the _appenders_ configuration applied to the logger is inherited from the ancestor logger.
 
-NOTE: In the current implementation log messages are only forwarded to appenders configured for a particular logger
-context name or to appenders of the closest ancestor if current logger doesn't have any appenders configured. That means that
-we __don't support__ so called _appender additivity_ when log messages are forwarded to _every_ distinct appender within
-ancestor chain including `root`.
+NOTE: In the current implementation we __don't support__ so called _appender additivity_ when log messages are forwarded to _every_ distinct appender within
+ancestor chain including `root`. That means that log messages are only forwarded to appenders that are configured for a particular logger. If a logger doesn't have any appenders configured, the configuration of that particular logger will be inherited from its closest ancestor. 
 
 [[log-level]]
 === Log level
@@ -74,7 +70,7 @@ log record or disable logging entirely for the specific context name.
 
 Every appender should know exactly how to format log messages before they are written to the console or file on the disk.
 This behaviour is controlled by the layouts and configured through `appender.layout` configuration property for every
-custom appender (see examples in <<logging-service-configuration,Configuration>>). Currently we don't define any default layout for the
+custom appender (see examples in <<logging-service-configuration-example,Configuration>>). Currently we don't define any default layout for the
 custom appenders, so one should always make the choice explicitly.
 
 There are two types of layout supported at the moment: <<pattern-layout,`pattern`>> and <<json-layout,`json`>>.
@@ -162,7 +158,7 @@ to a terminal with color support.
 ==== JSON layout
 With `json` layout log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, context name, message text and any other metadata that may be associated with the log message itself.
 
-[[appenders]]
+[[logging-appenders]]
 === Appenders
 
 [[rolling-file-appender]]
@@ -463,6 +459,7 @@ ops.interval: 5000
 
 The minimum interval is 100ms and defaults to 5000ms.
 
+[[request-response-logger]]
 **Request and Response Logs**
 
 The `http.server.response` logger is configured with `debug` level and will automatically output
@@ -543,6 +540,3 @@ The log will be less verbose with `warn` level for the `server` context name:
 [2017-07-25T11:54:41.639-07:00][FATAL][server] Message with `fatal` log level.
 ----
 
-include::logging-service-configuration.asciidoc[leveloffset=+1]
-
-include::logging-configuration-migration.asciidoc[]

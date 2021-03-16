@@ -1,0 +1,42 @@
+[[http-service]]
+== HTTP service
+Allows plugins:
+
+* to extend the {kib} server with custom REST API.
+* to execute custom logic on an incoming request or server response.
+* implement custom authentication and authorization strategy.
+
+See {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md[HTTP service API docs]
+
+[source,typescript]
+----
+import { schema } from '@kbn/config-schema';
+import type { CoreSetup, Plugin } from 'kibana/server';
+
+export class MyPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    const router = core.http.createRouter();
+    
+    const validate = {
+      params: schema.object({
+        id: schema.string(),
+      }),
+    };
+    
+    router.get({
+      path: 'my_plugin/{id}',
+      validate
+    },
+    async (context, request, response) => {
+      const data = await findObject(request.params.id);
+      if (!data) return response.notFound();
+      return response.ok({
+        body: data,
+        headers: {
+          'content-type': 'application/json'
+        }
+      });
+    });
+  }
+}
+----
