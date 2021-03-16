@@ -71,7 +71,7 @@ export const isQueryValid = (input: Query, indexPattern: IndexPattern) => {
 };
 
 export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
-  operationType: OPERATION_NAME;
+  operationType: typeof OPERATION_NAME;
   params: {
     filters: Filter[];
   };
@@ -87,7 +87,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   getDefaultLabel: () => filtersLabel,
   buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
-    if (previousColumn?.operationType === 'terms') {
+    if (previousColumn?.operationType === 'terms' && 'sourceField' in previousColumn) {
       params = {
         filters: [
           {

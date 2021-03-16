@@ -1091,7 +1091,7 @@ describe('IndexPattern Data Source', () => {
             columnOrder: [],
             columns: {},
             incompleteColumns: {
-              col1: { operationType: 'avg' as const },
+              col1: { operationType: 'average' as const },
               col2: { operationType: 'sum' as const },
             },
           },

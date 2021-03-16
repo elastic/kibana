@@ -219,7 +219,7 @@ export const createMockedRestrictedIndexPattern = () => {
             interval: 1000,
           },
         },
-        avg: {
+        average: {
           bytes: {
             agg: 'avg',
           },

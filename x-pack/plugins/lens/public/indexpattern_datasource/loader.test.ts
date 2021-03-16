@@ -145,7 +145,7 @@ const indexPattern2 = ({
           agg: 'histogram',
           interval: 1000,
         },
-        avg: {
+        average: {
           agg: 'avg',
         },
         max: {
@@ -565,7 +565,7 @@ describe('loader', () => {
               dataType: 'number',
               isBucketed: false,
               label: '',
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'myfield',
             },
           },
@@ -578,7 +578,7 @@ describe('loader', () => {
               dataType: 'number',
               isBucketed: false,
               label: '',
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'myfield2',
             },
           },

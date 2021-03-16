@@ -36,7 +36,7 @@ const ofName = buildLabelFunction((name?: string) => {
 
 export type DerivativeIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: OPERATION_NAME;
+    operationType: typeof OPERATION_NAME;
   };
 
 export const derivativeOperation: OperationDefinition<
