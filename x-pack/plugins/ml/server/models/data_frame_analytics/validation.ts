@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
@@ -197,7 +198,7 @@ async function getValidationCheckMessages(
   analyzedFields: string[],
   index: string | string[],
   analysisConfig: AnalysisConfig,
-  query: unknown = defaultQuery
+  query: estypes.QueryContainer = defaultQuery
 ) {
   const analysisType = getAnalysisType(analysisConfig);
   const depVar = getDependentVar(analysisConfig);
