@@ -14,7 +14,7 @@ jest.mock('../../../../../shared_imports');
 
 describe('Transform: Transform List <CreateTransformButton />', () => {
   test('Minimal initialization', () => {
-    const wrapper = shallow(<CreateTransformButton onClick={jest.fn()} />);
+    const wrapper = shallow(<CreateTransformButton onClick={jest.fn()} transformNodes={1} />);
 
     expect(wrapper).toMatchSnapshot();
   });
