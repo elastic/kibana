@@ -76,7 +76,6 @@ describe('DeprecationList', () => {
                 "deprecatedIndexSettings": undefined,
                 "details": undefined,
                 "index": "0",
-                "needsDefaultFields": false,
                 "reindex": false,
               },
               Object {
@@ -84,7 +83,6 @@ describe('DeprecationList', () => {
                 "deprecatedIndexSettings": undefined,
                 "details": undefined,
                 "index": "1",
-                "needsDefaultFields": false,
                 "reindex": false,
               },
             ]

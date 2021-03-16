@@ -23,42 +23,6 @@ exports[`WarningsFlyoutStep renders 1`] = `
       </p>
     </EuiCallOut>
     <EuiSpacer />
-    <WarningCheckbox
-      checkedIds={
-        Object {
-          "reindexWarning-0": false,
-        }
-      }
-      description={
-        <FormattedMessage
-          defaultMessage="Mapping types are no longer supported in 8.0. This index mapping does not use the default type name, {defaultType}. Ensure no application code or scripts rely on a different type."
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
-          values={
-            Object {
-              "defaultType": <EuiCode>
-                _doc
-              </EuiCode>,
-            }
-          }
-        />
-      }
-      documentationUrl="https://www.elastic.co/guide/en/elasticsearch/reference/current/removal-of-types.html"
-      label={
-        <FormattedMessage
-          defaultMessage="Mapping type will be changed to {defaultType}"
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle"
-          values={
-            Object {
-              "defaultType": <EuiCode>
-                _doc
-              </EuiCode>,
-            }
-          }
-        />
-      }
-      onChange={[Function]}
-      warning={0}
-    />
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup

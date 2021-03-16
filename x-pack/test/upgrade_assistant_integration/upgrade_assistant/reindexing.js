@@ -125,9 +125,13 @@ export default function ({ getService }) {
       });
     });
 
-    it('returns a warning for `doc` type', async () => {
+    it(`returns a warning for 'doc' type`, async () => {
       const resp = await supertest.get(`/api/upgrade_assistant/reindex/6.0-data`);
-      expect(resp.body.warnings.includes(ReindexWarning.customTypeName)).to.be(true);
+      const hasTypeNameWarning = Boolean(
+        resp.body.warnings.find((warning) => warning.warningType === 'customTypeName')
+      );
+
+      expect(hasTypeNameWarning).to.be(true);
     });
 
     it('reindexes old 6.0 index', async () => {
