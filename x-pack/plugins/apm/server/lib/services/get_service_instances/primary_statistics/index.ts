@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { joinByKey } from '../../../../common/utils/join_by_key';
-import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { joinByKey } from '../../../../../common/utils/join_by_key';
+import { withApmSpan } from '../../../../utils/with_apm_span';
+import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 import { getServiceInstanceSystemMetricStats } from './get_service_instance_system_metric_stats';
 import { getServiceInstanceTransactionStats } from './get_service_instance_transaction_stats';
 
-export interface ServiceInstanceParams {
+export interface ServiceInstancePrimaryStatisticsParams {
   environment?: string;
   kuery?: string;
   latencyAggregationType: LatencyAggregationType;
@@ -21,12 +21,19 @@ export interface ServiceInstanceParams {
   transactionType: string;
   searchAggregatedTransactions: boolean;
   size: number;
-  numBuckets: number;
+}
+interface ServiceInstancesPrimaryStatistics {
+  serviceNodeName: string;
+  errorRate?: number;
+  throughput?: number;
+  latency?: number | null;
+  cpuUsage?: number | null;
+  memoryUsage?: number | null;
 }
 
-export async function getServiceInstances(
-  params: Omit<ServiceInstanceParams, 'size'>
-) {
+export async function getServiceInstancesPrimaryStatistics(
+  params: Omit<ServiceInstancePrimaryStatisticsParams, 'size'>
+): Promise<ServiceInstancesPrimaryStatistics[]> {
   return withApmSpan('get_service_instances', async () => {
     const paramsForSubQueries = {
       ...params,

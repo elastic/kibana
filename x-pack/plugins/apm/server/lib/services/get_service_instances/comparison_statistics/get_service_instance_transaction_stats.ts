@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import { EventOutcome } from '../../../../common/event_outcome';
+import { EventOutcome } from '../../../../../common/event_outcome';
 import {
   environmentQuery,
   rangeQuery,
   kqlQuery,
-} from '../../../../server/utils/queries';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
+} from '../../../../../server/utils/queries';
+import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import { ServiceInstanceParams } from '.';
-import { getBucketSize } from '../../helpers/get_bucket_size';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { ServiceInstanceComparisonStatisticsParams } from '.';
+import { getBucketSize } from '../../../helpers/get_bucket_size';
 import {
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
-} from '../../helpers/aggregated_transactions';
-import { calculateThroughput } from '../../helpers/calculate_throughput';
-import { withApmSpan } from '../../../utils/with_apm_span';
+} from '../../../helpers/aggregated_transactions';
+import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   getLatencyAggregation,
   getLatencyValue,
-} from '../../helpers/latency_aggregation_type';
+} from '../../../helpers/latency_aggregation_type';
 
 export async function getServiceInstanceTransactionStats({
   environment,
@@ -38,12 +37,14 @@ export async function getServiceInstanceTransactionStats({
   setup,
   transactionType,
   serviceName,
-  size,
   searchAggregatedTransactions,
   numBuckets,
-}: ServiceInstanceParams) {
+  start,
+  end,
+  serviceNodeIds,
+}: ServiceInstanceComparisonStatisticsParams) {
   return withApmSpan('get_service_instance_transaction_stats', async () => {
-    const { apmEventClient, start, end } = setup;
+    const { apmEventClient } = setup;
 
     const { intervalString, bucketSize } = getBucketSize({
       start,
@@ -81,6 +82,7 @@ export async function getServiceInstanceTransactionStats({
             filter: [
               { term: { [SERVICE_NAME]: serviceName } },
               { term: { [TRANSACTION_TYPE]: transactionType } },
+              { terms: { [SERVICE_NODE_NAME]: serviceNodeIds } },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -92,10 +94,8 @@ export async function getServiceInstanceTransactionStats({
             terms: {
               field: SERVICE_NODE_NAME,
               missing: SERVICE_NODE_NAME_MISSING,
-              size,
             },
             aggs: {
-              ...subAggs,
               timeseries: {
                 date_histogram: {
                   field: '@timestamp',
@@ -121,43 +121,25 @@ export async function getServiceInstanceTransactionStats({
     return (
       response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
         (serviceNodeBucket) => {
-          const {
-            doc_count: count,
-            latency,
-            key,
-            failures,
-            timeseries,
-          } = serviceNodeBucket;
+          const { key, timeseries } = serviceNodeBucket;
 
           return {
             serviceNodeName: String(key),
-            errorRate: {
-              value: failures.doc_count / count,
-              timeseries: timeseries.buckets.map((dateBucket) => ({
-                x: dateBucket.key,
-                y: dateBucket.failures.doc_count / dateBucket.doc_count,
-              })),
-            },
-            throughput: {
-              value: calculateThroughput({ start, end, value: count }),
-              timeseries: timeseries.buckets.map((dateBucket) => ({
-                x: dateBucket.key,
-                y: dateBucket.doc_count / bucketSizeInMinutes,
-              })),
-            },
-            latency: {
-              value: getLatencyValue({
-                aggregation: latency,
+            errorRate: timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: dateBucket.failures.doc_count / dateBucket.doc_count,
+            })),
+            throughput: timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: dateBucket.doc_count / bucketSizeInMinutes,
+            })),
+            latency: timeseries.buckets.map((dateBucket) => ({
+              x: dateBucket.key,
+              y: getLatencyValue({
+                aggregation: dateBucket.latency,
                 latencyAggregationType,
               }),
-              timeseries: timeseries.buckets.map((dateBucket) => ({
-                x: dateBucket.key,
-                y: getLatencyValue({
-                  aggregation: dateBucket.latency,
-                  latencyAggregationType,
-                }),
-              })),
-            },
+            })),
           };
         }
       ) ?? []

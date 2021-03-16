@@ -10,8 +10,8 @@ import {
   environmentQuery,
   rangeQuery,
   kqlQuery,
-} from '../../../../server/utils/queries';
-import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
+} from '../../../../../server/utils/queries';
+import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_PROCESS_CPU_PERCENT,
@@ -19,15 +19,14 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { ServiceInstanceParams } from '.';
-import { getBucketSize } from '../../helpers/get_bucket_size';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { ProcessorEvent } from '../../../../../common/processor_event';
+import { ServiceInstancePrimaryStatisticsParams } from '.';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
-} from '../../metrics/by_agent/shared/memory';
-import { withApmSpan } from '../../../utils/with_apm_span';
+} from '../../../metrics/by_agent/shared/memory';
+import { withApmSpan } from '../../../../utils/with_apm_span';
 
 export async function getServiceInstanceSystemMetricStats({
   environment,
@@ -35,12 +34,9 @@ export async function getServiceInstanceSystemMetricStats({
   setup,
   serviceName,
   size,
-  numBuckets,
-}: ServiceInstanceParams) {
+}: ServiceInstancePrimaryStatisticsParams) {
   return withApmSpan('get_service_instance_system_metric_stats', async () => {
     const { apmEventClient, start, end } = setup;
-
-    const { intervalString } = getBucketSize({ start, end, numBuckets });
 
     const systemMemoryFilter = {
       bool: {
@@ -60,20 +56,6 @@ export async function getServiceInstanceSystemMetricStats({
     function withTimeseries<T extends AggregationOptionsByType['avg']>(agg: T) {
       return {
         avg: { avg: agg },
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-            extended_bounds: {
-              min: start,
-              max: end,
-            },
-          },
-          aggs: {
-            avg: { avg: agg },
-          },
-        },
       };
     }
 
@@ -135,24 +117,8 @@ export async function getServiceInstanceSystemMetricStats({
 
           return {
             serviceNodeName: String(serviceNodeBucket.key),
-            cpuUsage: {
-              value: serviceNodeBucket.cpu_usage.avg.value,
-              timeseries: serviceNodeBucket.cpu_usage.timeseries.buckets.map(
-                (dateBucket) => ({
-                  x: dateBucket.key,
-                  y: dateBucket.avg.value,
-                })
-              ),
-            },
-            memoryUsage: {
-              value: serviceNodeBucket[memoryMetricsKey].avg.value,
-              timeseries: serviceNodeBucket[
-                memoryMetricsKey
-              ].timeseries.buckets.map((dateBucket) => ({
-                x: dateBucket.key,
-                y: dateBucket.avg.value,
-              })),
-            },
+            cpuUsage: serviceNodeBucket.cpu_usage.avg.value,
+            memoryUsage: serviceNodeBucket[memoryMetricsKey].avg.value,
           };
         }
       ) ?? []
