@@ -135,6 +135,10 @@ export class DrilldownState {
       this.placeTriggers.includes(trigger)
     );
 
+    // Pre-select a trigger if there is only one trigger for user to choose from.
+    // In case there is only one possible trigger, UI will not display a trigger picker.
+    if (this.uiTriggers.length === 1) this.triggers$.next([this.uiTriggers[0]]);
+
     this.nameError$ = this.name$.pipe(
       map((currentName) => {
         if (!currentName) return 'NAME_EMPTY';
