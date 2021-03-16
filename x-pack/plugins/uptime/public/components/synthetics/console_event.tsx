@@ -7,8 +7,8 @@
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React, { useContext, FC } from 'react';
-import { Ping } from '../../../../common/runtime_types';
-import { UptimeThemeContext } from '../../../contexts';
+import { UptimeThemeContext } from '../../contexts';
+import { Ping } from '../../../common/runtime_types/ping';
 
 interface Props {
   event: Ping;
