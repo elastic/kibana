@@ -12,6 +12,15 @@ import {
 } from '../../../../../../../src/core/server';
 import { IRuleActionsAttributesSavedObjectAttributes, RuleAlertAction } from './types';
 
+function isEmptyObject(obj: {}) {
+  for (const attr in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, attr)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export const ruleActionsSavedObjectMigration = {
   '7.11.2': (
     doc: SavedObjectUnsanitizedDoc<IRuleActionsAttributesSavedObjectAttributes>
@@ -28,13 +37,21 @@ export const ruleActionsSavedObjectMigration = {
       // x-pack/plugins/alerting/server/saved_objects/migrations.ts
       const subActionParamsIncident =
         (action.params?.subActionParams as SavedObjectAttributes)?.incident ?? null;
-      if (subActionParamsIncident != null) {
+      if (subActionParamsIncident != null && !isEmptyObject(subActionParamsIncident)) {
         return [...acc, action];
       }
 
       if (action.action_type_id === '.servicenow') {
-        const { title, comments, comment, description, severity, urgency, impact } = action.params
-          .subActionParams as {
+        const {
+          title,
+          comments,
+          comment,
+          description,
+          severity,
+          urgency,
+          impact,
+          short_description: shortDescription,
+        } = action.params.subActionParams as {
           title: string;
           description?: string;
           severity?: string;
@@ -42,6 +59,7 @@ export const ruleActionsSavedObjectMigration = {
           impact?: string;
           comment?: string;
           comments?: Array<{ commentId: string; comment: string }>;
+          short_description?: string;
         };
         return [
           ...acc,
@@ -51,7 +69,7 @@ export const ruleActionsSavedObjectMigration = {
               subAction: 'pushToService',
               subActionParams: {
                 incident: {
-                  short_description: title,
+                  short_description: shortDescription ?? title,
                   description,
                   severity,
                   urgency,
@@ -68,8 +86,16 @@ export const ruleActionsSavedObjectMigration = {
       }
 
       if (action.action_type_id === '.jira') {
-        const { title, comments, description, issueType, priority, labels, parent } = action.params
-          .subActionParams as {
+        const {
+          title,
+          comments,
+          description,
+          issueType,
+          priority,
+          labels,
+          parent,
+          summary,
+        } = action.params.subActionParams as {
           title: string;
           description: string;
           issueType: string;
@@ -77,6 +103,7 @@ export const ruleActionsSavedObjectMigration = {
           labels?: string[];
           parent?: string;
           comments?: unknown[];
+          summary?: string;
         };
         return [
           ...acc,
@@ -86,7 +113,7 @@ export const ruleActionsSavedObjectMigration = {
               subAction: 'pushToService',
               subActionParams: {
                 incident: {
-                  summary: title,
+                  summary: summary ?? title,
                   description,
                   issueType,
                   priority,
@@ -101,13 +128,14 @@ export const ruleActionsSavedObjectMigration = {
       }
 
       if (action.action_type_id === '.resilient') {
-        const { title, comments, description, incidentTypes, severityCode } = action.params
+        const { title, comments, description, incidentTypes, severityCode, name } = action.params
           .subActionParams as {
           title: string;
           description: string;
           incidentTypes?: number[];
           severityCode?: number;
           comments?: unknown[];
+          name?: string;
         };
         return [
           ...acc,
@@ -117,7 +145,7 @@ export const ruleActionsSavedObjectMigration = {
               subAction: 'pushToService',
               subActionParams: {
                 incident: {
-                  name: title,
+                  name: name ?? title,
                   description,
                   incidentTypes,
                   severityCode,

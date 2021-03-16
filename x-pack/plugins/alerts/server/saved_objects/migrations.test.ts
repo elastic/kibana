@@ -608,6 +608,68 @@ describe('7.11.2', () => {
 
     expect(migration7112(alert, migrationContext)).toEqual(alert);
   });
+
+  test('if incident attribute is an empty object, copy back the related attributes from subActionParams back to incident', () => {
+    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.server-log',
+          group: 'threshold met',
+          params: {
+            level: 'info',
+            message: 'log message',
+          },
+          id: '99257478-e591-4560-b264-441bdd4fe1d9',
+        },
+        {
+          actionTypeId: '.servicenow',
+          group: 'threshold met',
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              short_description: 'SN short desc',
+              description: 'SN desc',
+              severity: '2',
+              impact: '2',
+              urgency: '2',
+              incident: {},
+              comments: [{ commentId: '1', comment: 'sn comment' }],
+            },
+          },
+          id: '1266562a-4e1f-4305-99ca-1b44c469b26e',
+        },
+      ],
+    });
+
+    expect(migration7112(alert, migrationContext)).toEqual({
+      ...alert,
+      attributes: {
+        ...alert.attributes,
+        actions: [
+          alert.attributes.actions![0],
+          {
+            actionTypeId: '.servicenow',
+            group: 'threshold met',
+            params: {
+              subAction: 'pushToService',
+              subActionParams: {
+                incident: {
+                  short_description: 'SN short desc',
+                  description: 'SN desc',
+                  severity: '2',
+                  impact: '2',
+                  urgency: '2',
+                },
+                comments: [{ commentId: '1', comment: 'sn comment' }],
+              },
+            },
+            id: '1266562a-4e1f-4305-99ca-1b44c469b26e',
+          },
+        ],
+      },
+    });
+  });
 });
 
 function getUpdatedAt(): string {
