@@ -7,7 +7,8 @@
  */
 
 import { uniq } from 'lodash';
-import { PanelSchema, IndexPatternObject } from '../common/types';
+import { PanelSchema, IndexPatternObject, FetchedIndexPattern } from '../common/types';
+import { IndexPatternsService } from '../../data/common';
 
 export const isStringTypeIndexPattern = (
   indexPatternObject: IndexPatternObject
@@ -23,7 +24,7 @@ export const convertIndexPatternObjectToStringRepresentation = (
 export const getIndexPatternObjectKey = (indexPatternObject: IndexPatternObject) =>
   isStringTypeIndexPattern(indexPatternObject) ? indexPatternObject : indexPatternObject?.id ?? '';
 
-export const extractIndexPatterns = (
+export const extractIndexPatternObjects = (
   panel: PanelSchema,
   defaultIndex?: PanelSchema['default_index_pattern']
 ) => {
@@ -54,4 +55,35 @@ export const extractIndexPatterns = (
   }
 
   return uniq<IndexPatternObject>(patterns).sort();
+};
+
+export const fetchIndexPattern = async (
+  indexPatternObject: IndexPatternObject,
+  indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>
+): Promise<FetchedIndexPattern> => {
+  let indexPattern: FetchedIndexPattern['indexPattern'];
+  let indexPatternString: string = '';
+
+  if (!indexPatternObject) {
+    indexPattern = await indexPatternsService.getDefault();
+  } else {
+    if (typeof indexPatternObject === 'string') {
+      indexPattern = (await indexPatternsService.find(indexPatternObject)).find(
+        (index) => index.title === indexPatternObject
+      );
+
+      if (!indexPattern) {
+        indexPatternString = indexPatternObject;
+      }
+    } else if (indexPatternObject.id) {
+      indexPattern =
+        (await indexPatternsService.get(indexPatternObject.id)) ??
+        (await indexPatternsService.getDefault());
+    }
+  }
+
+  return {
+    indexPattern,
+    indexPatternString: indexPattern?.title ?? indexPatternString,
+  };
 };

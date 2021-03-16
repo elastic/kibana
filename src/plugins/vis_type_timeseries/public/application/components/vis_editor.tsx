@@ -29,7 +29,7 @@ import { Storage } from '../../../../../plugins/kibana_utils/public';
 // @ts-expect-error
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { PanelConfig } from './panel_config';
-import { extractIndexPatterns } from '../../../common/index_patterns_utils';
+import { extractIndexPatternObjects } from '../../../common/index_patterns_utils';
 import { VisPicker } from './vis_picker';
 import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
@@ -86,7 +86,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       isDirty: false,
     });
 
-    const extractedIndexPatterns = extractIndexPatterns(
+    const extractedIndexPatterns = extractIndexPatternObjects(
       this.state.model,
       this.state.model.default_index_pattern
     );
@@ -205,7 +205,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
 
     dataStart.indexPatterns.getDefault().then(async (index) => {
       const defaultIndexTitle = index?.title ?? '';
-      const indexPatterns = extractIndexPatterns(this.props.vis.params, defaultIndexTitle);
+      const indexPatterns = extractIndexPatternObjects(this.props.vis.params, defaultIndexTitle);
       const visFields = await fetchFields(indexPatterns);
 
       this.setState((state) => ({

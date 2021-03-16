@@ -10,7 +10,7 @@ import { uniqBy } from 'lodash';
 
 import { Framework } from '../plugin';
 import { VisTypeTimeseriesFieldsRequest, VisTypeTimeseriesRequestHandlerContext } from '../types';
-import { getCachedIndexPatternFetcher } from './search_strategies/lib/get_index_pattern';
+import { getCachedIndexPatternFetcher } from './search_strategies/lib/cached_index_pattern_fetcher';
 
 export async function getFields(
   requestContext: VisTypeTimeseriesRequestHandlerContext,

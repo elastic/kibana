@@ -9,7 +9,7 @@
 import { VisTypeTimeseriesVisDataRequest } from '../../../types';
 import { AbstractSearchStrategy, DefaultSearchCapabilities } from '../../search_strategies';
 import { IndexPatternsService } from '../../../../../data/common';
-import { CachedIndexPatternFetcher } from '../../search_strategies/lib/get_index_pattern';
+import { CachedIndexPatternFetcher } from '../../search_strategies/lib/cached_index_pattern_fetcher';
 
 export interface FieldsFetcherServices {
   indexPatternsService: IndexPatternsService;

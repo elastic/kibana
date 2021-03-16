@@ -25,7 +25,7 @@ import { PANEL_TYPES } from '../../../common/panel_types';
 
 import {
   convertIndexPatternObjectToStringRepresentation,
-  extractIndexPatterns,
+  extractIndexPatternObjects,
 } from '../../../common/index_patterns_utils';
 
 export async function getSeriesData(
@@ -34,7 +34,7 @@ export async function getSeriesData(
   panel: PanelSchema,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const indexPattern = extractIndexPatterns(panel, panel.default_index_pattern)
+  const indexPattern = extractIndexPatternObjects(panel, panel.default_index_pattern)
     .map(convertIndexPatternObjectToStringRepresentation)
     .join(',');
 

@@ -38,6 +38,24 @@ const toIndexPatternObject = (index: IIndexPattern): IndexPatternObject => ({
   title: index.title,
 });
 
+const defaultIndexPatternHelpText = i18n.translate(
+  'visTypeTimeseries.indexPatternSelect.defaultIndexPatternText',
+  {
+    defaultMessage: 'Default index pattern is used.',
+  }
+);
+
+const queryAllIndexesHelpText = i18n.translate(
+  'visTypeTimeseries.indexPatternSelect.queryAllIndexesText',
+  {
+    defaultMessage: 'To query all indexes use *',
+  }
+);
+
+const indexPatternLabel = i18n.translate('visTypeTimeseries.indexPatternSelect.label', {
+  defaultMessage: 'Index pattern',
+});
+
 export const IndexPatternSelect = ({
   value,
   indexPatternName,
@@ -111,14 +129,9 @@ export const IndexPatternSelect = ({
   return (
     <EuiFormRow
       id={htmlId('indexPattern')}
-      label={i18n.translate('visTypeTimeseries.indexPatternSelect.label', {
-        defaultMessage: 'Index pattern',
-      })}
+      label={indexPatternLabel}
       helpText={
-        !value &&
-        i18n.translate('visTypeTimeseries.indexPatternSelect.helpText', {
-          defaultMessage: 'Default index pattern is used. To query all indexes use *',
-        })
+        !value && defaultIndexPatternHelpText + (!useKibanaIndices ? queryAllIndexesHelpText : '')
       }
       labelAppend={
         value &&

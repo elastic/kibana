@@ -10,7 +10,7 @@ import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
 import { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRequest } from '../../../types';
 import { IndexPatternsService } from '../../../../../data/server';
-import { CachedIndexPatternFetcher } from '../lib/get_index_pattern';
+import { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
   checkForViability(

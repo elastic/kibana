@@ -7,9 +7,12 @@
  */
 
 import { IndexPattern, IndexPatternsService } from 'src/plugins/data/server';
-import { getCachedIndexPatternFetcher, CachedIndexPatternFetcher } from './get_index_pattern';
+import {
+  getCachedIndexPatternFetcher,
+  CachedIndexPatternFetcher,
+} from './cached_index_pattern_fetcher';
 
-describe('getIndexPatternObject', () => {
+describe('CachedIndexPatternFetcher', () => {
   let mockedIndices: IndexPattern[] | [];
   let cachedIndexPatternFetcher: CachedIndexPatternFetcher;
 

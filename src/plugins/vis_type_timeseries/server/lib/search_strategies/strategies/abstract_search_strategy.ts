@@ -15,7 +15,7 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { CachedIndexPatternFetcher } from '../lib/get_index_pattern';
+import { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 
 export const toSanitizedFieldType = (fields: FieldSpec[]) => {
   return fields

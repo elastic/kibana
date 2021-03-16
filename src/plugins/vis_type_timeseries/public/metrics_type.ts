@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { TSVB_EDITOR_NAME } from './application';
 import { PANEL_TYPES } from '../common/panel_types';
+import { fetchIndexPattern } from '../common/index_patterns_utils';
 import { toExpressionAst } from './to_ast';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getDataStart } from './services';
@@ -76,6 +77,12 @@ export const metricsVisDefinition = {
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
 
-    return params.index_pattern ? await indexPatterns.find(params.index_pattern) : [];
+    if (params.index_pattern) {
+      const { indexPattern } = await fetchIndexPattern(params.index_pattern, indexPatterns);
+      if (indexPattern) {
+        return [indexPattern];
+      }
+    }
+    return [];
   },
 };

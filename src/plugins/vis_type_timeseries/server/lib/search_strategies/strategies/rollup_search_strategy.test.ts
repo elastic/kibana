@@ -12,7 +12,7 @@ import {
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
 import { IndexPatternsService } from '../../../../../data/common';
-import { CachedIndexPatternFetcher } from '../lib/get_index_pattern';
+import { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 
 jest.mock('./abstract_search_strategy', () => {
   class AbstractSearchStrategyMock {

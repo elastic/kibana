@@ -15,7 +15,7 @@ import {
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
 import { IndexPatternObject } from '../../../../common/types';
-import { CachedIndexPatternFetcher } from '../lib/get_index_pattern';
+import { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import { convertIndexPatternObjectToStringRepresentation } from '../../../../common/index_patterns_utils';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
