@@ -20,14 +20,10 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiTextColor,
   EuiTitle,
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
-
-import { search } from '../../../../../../../../../../src/plugins/data/public';
-const { parseEsInterval } = search.aggs;
 
 import { CALENDAR_INTERVAL_OPTIONS } from '../constants';
 
@@ -116,103 +112,6 @@ export class StepDateHistogram extends Component {
     super(props);
 
     this.state = {};
-  }
-
-  renderIntervalHelpText() {
-    const { fields } = this.props;
-    const { dateHistogramInterval } = fields;
-
-    let preferFixedWarning;
-
-    try {
-      const { value, unit } = parseEsInterval(dateHistogramInterval);
-
-      if (value === 1) {
-        switch (unit) {
-          case 'd':
-            preferFixedWarning = (
-              <EuiTextColor color="warning">
-                <p>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldInterval.preferFixedWarningDayLabel"
-                    defaultMessage="Consider using 24h instead of 1d. This allows for more flexible queries."
-                  />
-                </p>
-              </EuiTextColor>
-            );
-            break;
-
-          case 'h':
-            preferFixedWarning = (
-              <EuiTextColor color="warning">
-                <p>
-                  <FormattedMessage
-                    id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldInterval.preferFixedWarningHourLabel"
-                    defaultMessage="Consider using 60m instead of 1h. This allows for more flexible queries."
-                  />
-                </p>
-              </EuiTextColor>
-            );
-            break;
-        }
-      }
-
-      switch (unit) {
-        case 'y':
-          preferFixedWarning = (
-            <EuiTextColor color="warning">
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldInterval.preferFixedWarningYearLabel"
-                  defaultMessage="Consider using the d unit instead of y. This allows for more flexible queries."
-                />
-              </p>
-            </EuiTextColor>
-          );
-          break;
-
-        case 'M':
-          preferFixedWarning = (
-            <EuiTextColor color="warning">
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldInterval.preferFixedWarningMonthLabel"
-                  defaultMessage="Consider using the d unit instead of M. This allows for more flexible queries."
-                />
-              </p>
-            </EuiTextColor>
-          );
-          break;
-
-        case 'w':
-          preferFixedWarning = (
-            <EuiTextColor color="warning">
-              <p>
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldInterval.preferFixedWarningWeekLabel"
-                  defaultMessage="Consider using the d unit instead of w. This allows for more flexible queries."
-                />
-              </p>
-            </EuiTextColor>
-          );
-          break;
-      }
-    } catch (error) {
-      // Swallow error; the validation logic will handle it elsewhere.
-    }
-
-    return (
-      <Fragment>
-        {preferFixedWarning}
-
-        <p>
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.rollup.create.stepDateHistogram.fieldInterval.helpExampleLabel"
-            defaultMessage="Example sizes: 1000ms, 30s, 20m, 24h, 2d, 1w, 1M, 1y"
-          />
-        </p>
-      </Fragment>
-    );
   }
 
   render() {
