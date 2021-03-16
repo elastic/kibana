@@ -379,7 +379,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                       minInterval: swimlaneData.interval * 1000,
                     }}
                     tooltip={tooltipOptions}
-                    debugState
+                    // debugState={window._echDebugStateFlag ?? false}
+                    debugState={true}
                   />
                   <Heatmap
                     id={id}

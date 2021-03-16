@@ -13,17 +13,16 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 type HeatmapDebugState = Required<Pick<DebugState, 'heatmap' | 'axes' | 'legend'>>;
 
 export function SwimLaneProvider({ getService }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
+  const elasticChart = getService('elasticChart');
+  const browser = getService('browser');
 
   return {
     async getDebugState(testSubj: string): Promise<HeatmapDebugState> {
-      const chart = await testSubjects.find(testSubj);
-      const chartStatusNode = await chart.findByClassName('echChartStatus');
-      const debugState = await chartStatusNode.getAttribute('data-ech-debug-state');
-      if (!debugState || debugState === '{}') {
-        throw new Error('Debug state is not available');
+      const state = await elasticChart.getChartDebugData(testSubj);
+      if (!state) {
+        throw new Error('Swim lane debug state is not available');
       }
-      return JSON.parse(debugState);
+      return state as HeatmapDebugState;
     },
 
     async getAxisLabels(testSubj: string, axis: 'x' | 'y'): Promise<DebugStateAxis['labels']> {
@@ -44,7 +43,48 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       return state.heatmap.cells;
     },
 
-    async selectSingleCell() {},
+    async getHighlighted(testSubj: string): Promise<HeatmapDebugState['heatmap']['selection']> {
+      const state = await this.getDebugState(testSubj);
+      return state.heatmap.selection;
+    },
+
+    async assertSelection(
+      testSubj: string,
+      expectedData: HeatmapDebugState['heatmap']['selection']['data'],
+      expectedArea?: HeatmapDebugState['heatmap']['selection']['area']
+    ) {
+      const actualSelection = await this.getHighlighted(testSubj);
+      expect(actualSelection.data).to.eql(
+        expectedData,
+        `Expected swim lane  to be ${
+          expectedData ? `${expectedData.x.join(',')} and ${expectedData.y.join(',')}` : 'null'
+        }, got ${
+          actualSelection.data
+            ? `${actualSelection.data.x.join(',')} and ${actualSelection.data.y.join(',')}`
+            : 'null'
+        }`
+      );
+    },
+
+    async selectSingleCell(testSubj: string, { x, y }: { x: number; y: number }) {
+      const renderCount = await elasticChart.getVisualizationRenderingCount();
+      const el = await elasticChart.getCanvas(testSubj);
+
+      /**
+       * Y axis labels width + padding
+       */
+      const xOffset = 170 + 8;
+
+      const resultX = xOffset + Math.round(x);
+
+      await browser
+        .getActions()
+        .move({ x: resultX, y: Math.round(y), origin: el._webElement })
+        .click()
+        .perform();
+
+      await elasticChart.waitForRenderingCount(renderCount + 1, testSubj);
+    },
 
     async assertSwimlaneSelection() {},
   };

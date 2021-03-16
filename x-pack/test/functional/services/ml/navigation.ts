@@ -14,6 +14,7 @@ export function MachineLearningNavigationProvider({
   getPageObjects,
 }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
@@ -192,6 +193,14 @@ export function MachineLearningNavigationProvider({
         await PageObjects.common.navigateToApp('home');
         await testSubjects.existOrFail('homeApp', { timeout: 2000 });
       });
+    },
+
+    async assertCurrentURL(expectedUrl: string) {
+      const currentUrl = await browser.getCurrentUrl();
+      expect(currentUrl).to.eql(
+        expectedUrl,
+        `Expected the current URL to be ${expectedUrl}, got ${currentUrl}`
+      );
     },
   };
 }
