@@ -829,48 +829,12 @@ module.exports = {
       // typescript only for front and back end
       files: ['x-pack/plugins/security_solution/**/*.{ts,tsx}'],
       rules: {
-        // This will be turned on after bug fixes are complete
-        // '@typescript-eslint/explicit-member-accessibility': 'warn',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        // This will be turned on after bug fixes are complete
-        // '@typescript-eslint/no-object-literal-type-assertion': 'warn',
         '@typescript-eslint/unified-signatures': 'error',
-
-        // eventually we want this to be a warn and then an error since this is a recommended linter rule
-        // for now, keeping it commented out to avoid too much IDE noise until the other linter issues
-        // are fixed in the next release or two
-        // '@typescript-eslint/explicit-function-return-type': 'warn',
-
-        // these rules cannot be turned on and tested at the moment until this issue is resolved:
-        // https://github.com/prettier/prettier-eslint/issues/201
-        // '@typescript-eslint/await-thenable': 'error',
-        // '@typescript-eslint/no-non-null-assertion': 'error'
-        // '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-        // '@typescript-eslint/no-unused-vars': 'error',
-        // '@typescript-eslint/prefer-includes': 'error',
-        // '@typescript-eslint/prefer-string-starts-ends-with': 'error',
-        // '@typescript-eslint/promise-function-async': 'error',
-        // '@typescript-eslint/prefer-regexp-exec': 'error',
-        // '@typescript-eslint/promise-function-async': 'error',
-        // '@typescript-eslint/require-array-sort-compare': 'error',
-        // '@typescript-eslint/restrict-plus-operands': 'error',
-        // '@typescript-eslint/unbound-method': 'error',
       },
     },
-    // {
-    //   // will introduced after the other warns are fixed
-    //   // typescript and javascript for front end react performance
-    //   files: ['x-pack/plugins/security_solution/public/**/!(*.test).{js,mjs,ts,tsx}'],
-    //   plugins: ['react-perf'],
-    //   rules: {
-    //     // 'react-perf/jsx-no-new-object-as-prop': 'error',
-    //     // 'react-perf/jsx-no-new-array-as-prop': 'error',
-    //     // 'react-perf/jsx-no-new-function-as-prop': 'error',
-    //     // 'react/jsx-no-bind': 'error',
-    //   },
-    // },
     {
       // typescript and javascript for front and back end
       files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
@@ -883,21 +847,6 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        // This will be turned on after bug fixes are mostly completed
-        // 'consistent-return': 'warn',
-        // This will be turned on after bug fixes are mostly completed
-        // 'func-style': ['warn', 'expression'],
-        // These will be turned on after bug fixes are mostly completed and we can
-        // run a fix-lint
-        /*
-        'import/order': [
-          'warn',
-          {
-            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-            'newlines-between': 'always',
-          },
-        ],
-        */
         'node/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
@@ -937,12 +886,8 @@ module.exports = {
         'no-useless-catch': 'error',
         'no-useless-concat': 'error',
         'no-useless-computed-key': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-useless-escape': 'warn',
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        // This will be turned on after bug fixers are mostly complete
-        // 'no-void': 'warn',
         'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
@@ -958,9 +903,6 @@ module.exports = {
         'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
         'react/no-did-mount-set-state': 'error',
-        // Re-enable once we have better options per this issue:
-        // https://github.com/airbnb/javascript/issues/1875
-        // 'react/no-did-update-set-state': 'error',
         'react/no-direct-mutation-state': 'error',
         'react/no-find-dom-node': 'error',
         'react/no-redundant-should-component-update': 'error',
@@ -972,8 +914,6 @@ module.exports = {
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
-        // will introduced after the other warns are fixed
-        // 'react/sort-comp': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',

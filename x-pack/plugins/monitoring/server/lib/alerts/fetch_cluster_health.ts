@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 
 export async function fetchClusterHealth(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string
 ): Promise<AlertClusterHealth[]> {
@@ -58,7 +59,7 @@ export async function fetchClusterHealth(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   return response.hits.hits.map((hit: { _source: ElasticsearchSource; _index: string }) => {
     return {
       health: hit._source.cluster_state?.status,
