@@ -58,6 +58,10 @@ export interface SearchSessionIndicatorUiConfig {
   isDisabled: () => { disabled: true; reasonText: string } | { disabled: false };
 }
 
+export interface SearchSessionOptions {
+  cacheOnClient?: boolean;
+}
+
 /**
  * Responsible for tracking a current search session. Supports only a single session at a time.
  */
@@ -186,9 +190,9 @@ export class SessionService {
    * Start a new search session
    * @returns sessionId
    */
-  public start() {
+  public start(options: SearchSessionOptions = {}) {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
-    this.state.transitions.start({ appName: this.currentApp });
+    this.state.transitions.start({ appName: this.currentApp, ...options });
     return this.getSessionId()!;
   }
 
@@ -273,6 +277,14 @@ export class SessionService {
    */
   public isCurrentSession(sessionId?: string): boolean {
     return !!sessionId && this.getSessionId() === sessionId;
+  }
+
+  /**
+   * Should cache on client
+   * @param sessionId
+   */
+  public shouldCacheOnClient(sessionId?: string): boolean {
+    return !!sessionId && (this.state.get().cacheOnClient ?? false);
   }
 
   /**

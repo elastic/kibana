@@ -21,10 +21,15 @@ import {
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 import { createRequestHash } from './utils';
 
+interface ResponseCacheItem {
+  response: IKibanaSearchResponse<any>;
+  timeout: NodeJS.Timeout;
+}
+
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
   private searchTimeout: number;
-  private responseCache: Map<string, IKibanaSearchResponse<any>>;
+  private responseCache: Map<string, ResponseCacheItem>;
 
   /**
    * @internal
@@ -52,9 +57,44 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       : TimeoutErrorMode.CONTACT;
   }
 
+  private createRequestHash$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
+    const { sessionId } = options;
+    const { preference, ...params } = request.params;
+    const hashOptions = {
+      ...params,
+      sessionId,
+    };
+
+    return from(
+      this.deps.session.shouldCacheOnClient(sessionId)
+        ? createRequestHash(hashOptions)
+        : of(undefined)
+    );
+  }
+
+  private cacheResponse(requestHash: string, response: IKibanaSearchResponse<any>) {
+    const timeout = setTimeout(() => {
+      this.responseCache.delete(requestHash);
+    }, 30000);
+
+    this.responseCache.set(requestHash, {
+      response,
+      timeout,
+    });
+  }
+
+  private touchCachedResponse(requestHash: string) {
+    const item = this.responseCache.get(requestHash);
+    if (item) {
+      clearTimeout(item.timeout);
+      this.cacheResponse(requestHash, item.response);
+    }
+  }
+
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
+    const { abortSignal, sessionId } = options;
     const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({
-      abortSignal: options.abortSignal,
+      abortSignal,
       timeout: this.searchTimeout,
     });
     const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
@@ -64,20 +104,19 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
     const untrackSearch =
-      this.deps.session.isCurrentSession(options.sessionId) &&
-      this.deps.session.trackSearch({ abort });
+      this.deps.session.isCurrentSession(sessionId) && this.deps.session.trackSearch({ abort });
 
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
     let isSavedToBackground = false;
     const savedToBackgroundSub =
-      this.deps.session.isCurrentSession(options.sessionId) &&
+      this.deps.session.isCurrentSession(sessionId) &&
       this.deps.session.state$
         .pipe(
           skip(1), // ignore any state, we are only interested in transition x -> BackgroundLoading
           filter(
             (state) =>
-              this.deps.session.isCurrentSession(options.sessionId) &&
+              this.deps.session.isCurrentSession(sessionId) &&
               state === SearchSessionState.BackgroundLoading
           ),
           take(1)
@@ -90,39 +129,41 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
     });
 
-    return from(createRequestHash(request)).pipe(
-      switchMap((shaKey) => {
-        const cached = this.responseCache.get(shaKey);
-        if (!id && cached) {
-          return of(cached);
+    return this.createRequestHash$(request, options).pipe(
+      switchMap((requestHash) => {
+        const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
+        if (cached) {
+          this.touchCachedResponse(requestHash!);
+          return of(cached.response);
         }
 
         return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
           tap((response) => (id = response.id)),
           tap((response) => {
-            if (!this.responseCache.has(shaKey) && isCompleteResponse(response)) {
-              this.responseCache.set(shaKey, response);
-              setTimeout(() => {
-                this.responseCache.delete(shaKey);
-              }, 30000);
+            if (
+              requestHash &&
+              isCompleteResponse(response) &&
+              !this.responseCache.has(requestHash)
+            ) {
+              this.cacheResponse(requestHash, response);
             }
           }),
           catchError((e: Error) => {
             cancel();
             return throwError(this.handleSearchError(e, timeoutSignal, options));
-          }),
-          finalize(() => {
-            this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-            cleanup();
-            if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
-              // untrack if this search still belongs to current session
-              untrackSearch();
-            }
-            if (savedToBackgroundSub) {
-              savedToBackgroundSub.unsubscribe();
-            }
           })
         );
+      }),
+      finalize(() => {
+        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+        cleanup();
+        if (untrackSearch && this.deps.session.isCurrentSession(sessionId)) {
+          // untrack if this search still belongs to current session
+          untrackSearch();
+        }
+        if (savedToBackgroundSub) {
+          savedToBackgroundSub.unsubscribe();
+        }
       })
     );
   }

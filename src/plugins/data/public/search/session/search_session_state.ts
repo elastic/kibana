@@ -104,6 +104,11 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
    * Start time of current session
    */
   startTime?: Date;
+
+  /**
+   * Should responses be cached on the client
+   */
+  cacheOnClient?: boolean;
 }
 
 const createSessionDefaultState: <
@@ -122,7 +127,7 @@ export interface SessionPureTransitions<
   SearchDescriptor = unknown,
   S = SessionStateInternal<SearchDescriptor>
 > {
-  start: (state: S) => ({ appName }: { appName: string }) => S;
+  start: (state: S) => ({ appName }: { appName: string; cacheOnClient?: boolean }) => S;
   restore: (state: S) => (sessionId: string) => S;
   clear: (state: S) => () => S;
   store: (state: S) => () => S;
@@ -132,11 +137,12 @@ export interface SessionPureTransitions<
 }
 
 export const sessionPureTransitions: SessionPureTransitions = {
-  start: (state) => ({ appName }) => ({
+  start: (state) => ({ appName, cacheOnClient }) => ({
     ...createSessionDefaultState(),
     sessionId: uuid.v4(),
     startTime: new Date(),
     appName,
+    cacheOnClient,
   }),
   restore: (state) => (sessionId: string) => ({
     ...createSessionDefaultState(),
