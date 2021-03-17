@@ -34,6 +34,13 @@ export function ChangeIndexPattern({
 
   const isMissingCurrent = !indexPatternRefs.some(({ id }) => id === indexPatternId);
 
+  // be careful to only add color with a value, otherwise it will fallbacks to "primary"
+  const colorProp = isMissingCurrent
+    ? {
+        color: 'danger' as const,
+      }
+    : {};
+
   const createTrigger = function () {
     const { label, title, ...rest } = trigger;
     return (
@@ -41,7 +48,7 @@ export function ChangeIndexPattern({
         title={title}
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         fullWidth
-        color={isMissingCurrent ? 'danger' : undefined}
+        {...colorProp}
         {...rest}
       >
         {label}
