@@ -6,12 +6,14 @@
  */
 
 import { flow } from 'fp-ts/function';
-import { deserializer } from '../form';
+import { createDeserializer } from '../form';
 
 import {
   formDataToAbsoluteTimings,
   calculateRelativeFromAbsoluteMilliseconds,
 } from './absolute_timing_to_relative_timing';
+
+const deserializer = createDeserializer(false);
 
 export const calculateRelativeTimingMs = flow(
   formDataToAbsoluteTimings,
