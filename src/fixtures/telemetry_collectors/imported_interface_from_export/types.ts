@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const STATE_STORAGE_KEY = '_a';
-export const GLOBAL_STATE_STORAGE_KEY = '_g';
+export type { Usage } from './usage_type';
