@@ -10,7 +10,7 @@ import Path from 'path';
 
 import { REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
-import { mapTo, filter, take, tap, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { map, mapTo, filter, take, tap, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 import { CliArgs } from '../../core/server/config';
 import { LegacyConfig } from '../../core/server/legacy';
@@ -168,16 +168,17 @@ export class CliDevMode {
     this.startTime = Date.now();
 
     this.subscription.add(
-      firstAllTrue(this.devServer.isReady$(), this.optimizer.isReady$())
+      this.getStarted$()
         .pipe(
-          switchMap(async () => {
+          switchMap(async (success) => {
             const reporter = CiStatsReporter.fromEnv(this.log.toolingLog);
             await reporter.timings({
               timings: [
                 {
                   group: 'yarn start',
-                  id: 'dev cli start => ready',
+                  id: 'started',
                   ms: Date.now() - this.startTime!,
+                  meta: { success },
                 },
               ],
             });
@@ -242,6 +243,46 @@ export class CliDevMode {
     this.subscription.add(this.optimizer.run$.subscribe(this.observer('@kbn/optimizer')));
     this.subscription.add(this.watcher.run$.subscribe(this.observer('watcher')));
     this.subscription.add(this.devServer.run$.subscribe(this.observer('dev server')));
+  }
+
+  /**
+   * returns an observable that emits once the dev server and optimizer are started, emits
+   * true if they both started successfully, otherwise false
+   */
+  private getStarted$() {
+    return Rx.combineLatest([
+      // convert the dev server and optimizer phase to:
+      //  - true if they are started successfully
+      //  - false if they failed to start
+      //  - undefined if they are still coming up
+      this.devServer.getPhase$().pipe(
+        map((phase) => {
+          if (phase === 'listening') {
+            return true;
+          }
+          if (phase === 'fatal exit') {
+            return false;
+          }
+        })
+      ),
+      this.optimizer.getPhase$().pipe(
+        map((phase) => {
+          if (phase === 'issue') {
+            return false;
+          }
+          if (phase === 'success') {
+            return true;
+          }
+        })
+      ),
+    ]).pipe(
+      // ignore states where either start state is undefined
+      filter((states) => states.every((s) => typeof s === 'boolean')),
+      // merge the states to true only if all states are true, otherwise false
+      map((states) => states.every((s) => s === true)),
+      // we one "started" once
+      take(1)
+    );
   }
 
   public stop() {
