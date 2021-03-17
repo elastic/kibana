@@ -7,7 +7,7 @@
 
 import url from 'url';
 
-import { BasePath, KibanaRequest } from 'src/core/server';
+import type { BasePath, KibanaRequest } from 'src/core/server';
 import type { IRouter } from 'src/core/server';
 
 import { INSTALL_SCRIPT_API_ROUTES } from '../../constants';
