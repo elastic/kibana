@@ -16,6 +16,20 @@ export interface ESError {
   caused_by?: ESErrorCausedBy;
 }
 
+export interface ESErrorBody {
+  error?: ESError;
+  status?: number;
+}
+
+export interface ESErrorMeta {
+  body?: ESErrorBody;
+  statusCode?: number;
+}
+export interface ElasticsearchResponseError {
+  name?: string;
+  meta?: ESErrorMeta;
+}
+
 function extractCausedByChain(
   causedBy: ESErrorCausedBy = {},
   accumulator: string[] = []
@@ -39,11 +53,15 @@ function extractCausedByChain(
  * @param err Object Error thrown by ES JS client
  * @return ES error cause
  */
-export function identifyEsError(err: { response: string }) {
-  const { response } = err;
-
+export function identifyEsError(err: ElasticsearchResponseError) {
+  if (!err.meta) {
+    return [];
+  }
+  const {
+    meta: { body: response },
+  } = err;
   if (response) {
-    const { error } = JSON.parse(response) as { error?: ESError };
+    const { error } = response;
     if (error) {
       const { root_cause: rootCause = [], caused_by: causedBy } = error;
 
