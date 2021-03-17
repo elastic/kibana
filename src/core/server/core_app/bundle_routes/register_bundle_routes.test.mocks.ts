@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/src/optimize'],
-};
+export const registerRouteForBundleMock = jest.fn();
+jest.doMock('./bundles_route', () => ({
+  registerRouteForBundle: registerRouteForBundleMock,
+}));
+
+jest.doMock('@kbn/ui-shared-deps', () => ({
+  distDir: 'uiSharedDepsDistDir',
+}));
