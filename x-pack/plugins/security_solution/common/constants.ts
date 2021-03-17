@@ -214,4 +214,4 @@ export const showAllOthersBucket: string[] = [
   DO NOT MERGE to master as true, dev only
 */
 
-export const USE_RAC_CASES_UI = true;
+export const USE_RAC_CASES_UI = false;

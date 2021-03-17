@@ -38,7 +38,7 @@ import {
   UtilityBarText,
 } from '../utility_bar';
 import { getBulkItems } from '../bulk_actions';
-import { CaseHeaderPage } from '../case_header_page'; // TODO: Removed sourcerer, subtitle, and updated backOptions expected params. Now needs an onBackActionsClick
+import { CaseHeaderPage } from '../case_header_page';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
@@ -48,7 +48,7 @@ import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { CaseCallOut } from '../callout';
 import { ConfigureCaseButton } from '../configure_cases/button';
 import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
-import { CaseDetailsHrefSchema, LinkButton } from '../../common/components/links'; // TODO: Building this rather than importing the enitre thing
+import { CaseDetailsHrefSchema, LinkButton } from '../../common/components/links';
 import { Stats } from '../status';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { getExpandedRowMap } from './expanded_row';

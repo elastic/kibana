@@ -59,12 +59,10 @@ Badge.displayName = 'Badge';
 
 interface BackOptions {
   href: LinkIconProps['href'];
-  onClick?: (ev: MouseEvent) => void; // TODO: Added on click here to allow consuming app to determine behavior
+  onClick?: (ev: MouseEvent) => void;
   text: LinkIconProps['children'];
   dataTestSubj?: string;
 }
-
-// TODO: Removed hideSourcer since cases does not need to know about it
 
 export interface HeaderPageProps extends HeaderProps {
   backOptions?: BackOptions;
