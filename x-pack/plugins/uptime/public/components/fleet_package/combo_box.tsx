@@ -7,23 +7,13 @@
 
 import React, { useState, useCallback } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { ConfigKeys, ICustomFields } from './types';
-
-// is there a way in typescript to express ConfigKey of type string[]?
-type ComboBoxKeys =
-  | ConfigKeys.TAGS
-  | ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE
-  | ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
-  | ConfigKeys.RESPONSE_STATUS_CHECK
-  | ConfigKeys.RESPONSE_RECEIVE_CHECK;
 
 export interface Props {
-  configKey: ComboBoxKeys;
-  setFields: React.Dispatch<React.SetStateAction<ICustomFields>>;
+  onChange: (value: string[]) => void;
   selectedOptions: string[];
 }
 
-export const ComboBox = ({ configKey, setFields, selectedOptions }: Props) => {
+export const ComboBox = ({ onChange, selectedOptions }: Props) => {
   const [formattedSelectedOptions, setSelectedOptions] = useState<
     Array<EuiComboBoxOptionOption<string>>
   >(selectedOptions.map((option) => ({ label: option, key: option })));
@@ -33,10 +23,10 @@ export const ComboBox = ({ configKey, setFields, selectedOptions }: Props) => {
     (options: Array<EuiComboBoxOptionOption<string>>) => {
       setSelectedOptions(options);
       const formattedTags = options.map((option) => option.label);
-      setFields((currentFields) => ({ ...currentFields, [configKey]: formattedTags }));
+      onChange(formattedTags);
       setInvalid(false);
     },
-    [configKey, setFields, setSelectedOptions, setInvalid]
+    [onChange, setSelectedOptions, setInvalid]
   );
 
   const onCreateOption = useCallback(
@@ -46,15 +36,12 @@ export const ComboBox = ({ configKey, setFields, selectedOptions }: Props) => {
         label: formattedTag,
       };
 
-      setFields((currentFields) => ({
-        ...currentFields,
-        [configKey]: [...currentFields[configKey], formattedTag],
-      }));
+      onChange([...selectedOptions, formattedTag]);
 
       // Select the option.
       setSelectedOptions([...formattedSelectedOptions, newOption]);
     },
-    [configKey, formattedSelectedOptions, setFields, setSelectedOptions]
+    [onChange, formattedSelectedOptions, selectedOptions, setSelectedOptions]
   );
 
   const onSearchChange = useCallback(
