@@ -12,7 +12,7 @@ import { useValuesList } from '../../../hooks/use_values_list';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldValueSelection } from './field_value_selection';
 
-interface Props {
+export interface FieldValueSuggestionsProps {
   value?: string;
   label: string;
   indexPattern: IIndexPattern;
@@ -26,8 +26,9 @@ export function FieldValueSuggestions({
   indexPattern,
   value,
   onChange: onSelectionChange,
-}: Props) {
+}: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
+
   const { values, loading } = useValuesList({ indexPattern, query, sourceField });
 
   const [debouncedValue, setDebouncedValue] = useState('');
@@ -42,7 +43,7 @@ export function FieldValueSuggestions({
 
   return (
     <FieldValueSelection
-      values={values}
+      values={values as string[]}
       label={label}
       onChange={onSelectionChange}
       setQuery={setDebouncedValue}
@@ -51,3 +52,6 @@ export function FieldValueSuggestions({
     />
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default FieldValueSuggestions;
