@@ -174,11 +174,11 @@ function ensurePreconfiguredPackagesAndPolicies(
 
   // Create policies specified in Kibana config
   const policiesPromise = Promise.all(
-    (policies ?? []).map(async ({ integrations, ...newAgentPolicy }) => {
+    (policies ?? []).map(async ({ integrations, id, ...newAgentPolicy }) => {
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
-        newAgentPolicy
+        { ...newAgentPolicy, preconfiguration_id: String(id) }
       );
       return { created, policy, integrations };
     })

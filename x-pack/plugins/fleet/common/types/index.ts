@@ -31,6 +31,7 @@ export interface FleetConfigType {
   };
   policies?: Array<
     NewAgentPolicy & {
+      id: string | number;
       integrations: Array<{
         package: string;
         name: string;

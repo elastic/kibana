@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
@@ -17,14 +18,18 @@ import {
 
 import { FleetPlugin } from './plugin';
 
-// Regex to validate if a package name matches <name>:<semver>
-// Valid entries include: abc:1.0.2, def:2.10.3-beta, jkl:3.3.3/subdirectory
-const packageNameWithSemverRegex = () =>
-  /(?<=^v?|\sv?)(.+):(?:(?:0|[1-9]\d*)\.){2}(?:0|[1-9]\d*)(?:-(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*)(?:\.(?:0|[1-9]\d*|[\da-z-]*[a-z-][\da-z-]*))*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/gi;
+const packageNameRegex = () => /^[a-z0-9_]+$/;
+const semverRegex = () =>
+  /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
 
 const validatePackageNameWithSemver = (value: string) => {
-  if (!packageNameWithSemverRegex().test(value)) {
-    return 'must be in the format <package-name>:<semver>';
+  const [name, semver] = value.split(':');
+  const nameMatchesPattern = packageNameRegex().test(name);
+  const semverMatchesPattern = semverRegex().test(semver);
+  if (!nameMatchesPattern || !semverMatchesPattern) {
+    return i18n.translate('xpack.fleet.config.invalidPackageNameError', {
+      defaultMessage: 'must be in the format <package-name>:<semver>',
+    });
   }
 };
 
@@ -90,6 +95,7 @@ export const config: PluginConfigDescriptor = {
       schema.arrayOf(
         schema.object({
           name: schema.string(),
+          id: schema.oneOf([schema.string(), schema.number()]),
           namespace: schema.maybe(schema.string()),
           description: schema.maybe(schema.string()),
           monitoring_enabled: schema.maybe(

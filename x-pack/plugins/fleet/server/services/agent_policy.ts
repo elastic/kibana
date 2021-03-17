@@ -142,10 +142,10 @@ class AgentPolicyService {
     created: boolean;
     policy: AgentPolicy;
   }> {
-    const { name } = config;
+    const id = config.preconfiguration_id!;
     const searchParams = {
-      searchFields: ['name'],
-      search: escapeSearchQueryPhrase(name),
+      searchFields: ['preconfiguration_id'],
+      search: escapeSearchQueryPhrase(id),
     };
 
     const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
