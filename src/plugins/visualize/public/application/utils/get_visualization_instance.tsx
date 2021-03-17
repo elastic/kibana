@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   SerializedVis,
   Vis,
@@ -17,12 +21,15 @@ import { SearchSourceFields } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
+import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { createSavedSearchesLoader } from '../../../../discover/public';
 import { VisualizeServices } from '../types';
+import { redirectToSavedObjectPage } from './utils';
 
 const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
-  visualizeServices: VisualizeServices
+  visualizeServices: VisualizeServices,
+  opts?: Record<string, unknown> | string
 ) => {
   const {
     data,
@@ -38,9 +45,40 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
 
   embeddableHandler.getOutput$().subscribe((output) => {
     if (output.error) {
-      data.search.showError(
-        ((output.error as unknown) as ExpressionValueError['error']).original || output.error
-      );
+      const originalError = ((output.error as unknown) as ExpressionValueError['error']).original;
+      if (originalError instanceof SavedObjectNotFound && typeof opts === 'string') {
+        if (originalError) {
+          // @ts-expect-error
+          // we ignore ts error because toast take message as string but also works fine if it is Element.
+          // we should use Element because we use Link inside toast. Because of this we replace original message.
+          originalError.message = (
+            <FormattedMessage
+              id="visualize.public.application.utils.getVisualizationInstance.fieldNotFounded"
+              defaultMessage='The field "{fieldParameter}" associated with this object no longer exists in the index pattern. Please use another field, or if you know what this error means, go ahead and fix it {savedObjectLink}'
+              values={{
+                fieldParameter: originalError.savedObjectId,
+                savedObjectLink: (
+                  <EuiLink
+                    onClick={() =>
+                      redirectToSavedObjectPage(visualizeServices, originalError, opts)
+                    }
+                    data-test-subj="savedObjectPageLink"
+                  >
+                    {i18n.translate(
+                      'visualize.public.application.utils.getVisualizationInstance.savedObjectLinkText',
+                      {
+                        defaultMessage: 'here',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          );
+        }
+      }
+
+      data.search.showError(originalError || output.error);
     }
   });
 
@@ -119,7 +157,8 @@ export const getVisualizationInstance = async (
 
   const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
     vis,
-    visualizeServices
+    visualizeServices,
+    opts
   );
   return {
     vis,

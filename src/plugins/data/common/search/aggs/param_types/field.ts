@@ -47,13 +47,38 @@ export class FieldParamType extends BaseParamType {
           );
         }
 
-        if (field.scripted) {
+        const validField = this.getAvailableFields(aggConfig).find(
+          (f: any) => f.name === field.name
+        );
+
+        if (field.type === 'unknown' && !validField) {
+          throw new SavedObjectNotFound('index-pattern-field', field.name);
+        }
+
+        if (!validField) {
+          throw new Error(
+            i18n.translate(
+              'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
+              {
+                defaultMessage:
+                  'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
+                values: {
+                  fieldParameter: field.name,
+                  aggType: aggConfig?.type?.title,
+                  indexPatternTitle: aggConfig.getIndexPattern().title,
+                },
+              }
+            )
+          );
+        }
+
+        if (validField.scripted) {
           output.params.script = {
-            source: field.script,
-            lang: field.lang,
+            source: validField.script,
+            lang: validField.lang,
           };
         } else {
-          output.params.field = field.name;
+          output.params.field = validField.name;
         }
       };
     }
@@ -69,28 +94,15 @@ export class FieldParamType extends BaseParamType {
       const field = aggConfig.getIndexPattern().fields.getByName(fieldName);
 
       if (!field) {
-        throw new SavedObjectNotFound('index-pattern-field', fieldName);
+        return new IndexPatternField({
+          type: 'unknown',
+          name: fieldName,
+          searchable: false,
+          aggregatable: false,
+        });
       }
 
-      const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
-      if (!validField) {
-        throw new Error(
-          i18n.translate(
-            'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
-            {
-              defaultMessage:
-                'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
-              values: {
-                fieldParameter: fieldName,
-                aggType: aggConfig?.type?.title,
-                indexPatternTitle: aggConfig.getIndexPattern().title,
-              },
-            }
-          )
-        );
-      }
-
-      return validField;
+      return field;
     };
   }
 
