@@ -85,7 +85,7 @@ export const PromotedDocuments: React.FC = () => {
             {documents.map((document, i: number) => (
               <EuiDraggable
                 index={i}
-                key={i + document.id}
+                key={document.id}
                 draggableId={document.id}
                 customDragHandle
                 spacing="none"
