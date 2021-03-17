@@ -102,7 +102,8 @@ During the course of an investigation however, you may to need to add and remove
 this list multiple times as you narrow in on a diagnosis.
 
 Add and remove fields under the **Customize fields** dropdown.
-The following fields are selected by default:
+The following fields are selected by default.
+To keep the default list manageable, only the first six matching fields with wildcards are used.
 
 **Frontend (RUM) agent:**
 
