@@ -8,54 +8,38 @@
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow } from '@elastic/eui';
-import { ConfigKeys, ContentType, Mode, IHTTPAdvancedFields } from './types';
+import { ContentType, Mode } from './types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
 
 interface Props {
-  configKey: ConfigKeys;
-  label: string | React.ReactElement;
   contentMode?: Mode;
-  setFields: React.Dispatch<React.SetStateAction<IHTTPAdvancedFields>>;
+  label: string | React.ReactElement;
+  isInvalid: boolean;
+  onChange: (value: Record<string, string>) => void;
 }
 
-export const HeaderField = ({ configKey, contentMode, label, setFields }: Props) => {
+export const HeaderField = ({ contentMode, label, isInvalid, onChange }: Props) => {
   const [headers, setHeaders] = useState<Pair[]>([['', '', false]]);
-  const isInvalid = headers.some((header) => {
-    const [key] = header;
-    if (key) {
-      const whiteSpaceRegEx = /[\s]/g;
-      return whiteSpaceRegEx.test(key);
-    } else {
-      return false;
-    }
-  });
 
   useEffect(() => {
-    setFields((prevFields) => {
-      const formattedHeaders = headers.reduce((acc: Record<string, string>, header) => {
-        const [key, value, checked] = header;
-        if (checked) {
-          return {
-            ...acc,
-            [key]: value,
-          };
-        }
-        return acc;
-      }, {});
-      if (contentMode) {
+    const formattedHeaders = headers.reduce((acc: Record<string, string>, header) => {
+      const [key, value, checked] = header;
+      if (checked) {
         return {
-          ...prevFields,
-          [configKey]: { 'Content-Type': contentTypes[contentMode], ...formattedHeaders },
-        };
-      } else {
-        return {
-          ...prevFields,
-          [configKey]: formattedHeaders,
+          ...acc,
+          [key]: value,
         };
       }
-    });
-  }, [configKey, contentMode, headers, setFields]);
+      return acc;
+    }, {});
+
+    if (contentMode) {
+      onChange({ 'Content-Type': contentTypes[contentMode], ...formattedHeaders });
+    } else {
+      onChange(formattedHeaders);
+    }
+  }, [contentMode, headers, onChange]);
 
   return (
     <EuiFormRow
@@ -73,7 +57,7 @@ export const HeaderField = ({ configKey, contentMode, label, setFields }: Props)
           : undefined
       }
     >
-      <KeyValuePairsField configKey={configKey} defaultPairs={headers} onChange={setHeaders} />
+      <KeyValuePairsField defaultPairs={headers} onChange={setHeaders} />
     </EuiFormRow>
   );
 };
