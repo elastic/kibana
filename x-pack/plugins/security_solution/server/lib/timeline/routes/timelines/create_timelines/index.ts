@@ -15,7 +15,7 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 
 import { transformError, buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { createTimelineSchema } from '../../../schemas/timelines/create_timelines_schema';
+import { createTimelineSchema } from '../../../schemas/timelines';
 import {
   buildFrameworkRequest,
   CompareTimelinesStatus,

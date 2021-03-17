@@ -12,7 +12,7 @@ import { timeline as timelineLib, pinnedEvent as pinnedEventLib } from '../../..
 import { FrameworkRequest } from '../../../../framework';
 import { SavedTimeline } from '../../../../../../common/types/timeline';
 import { NoteResult, ResponseTimeline } from '../../../../../graphql/types';
-import { persistNotes } from '../../../saved_object/note/persist_notes';
+import { persistNotes } from '../../../saved_object/notes/persist_notes';
 
 interface CreateTimelineProps {
   frameworkRequest: FrameworkRequest;

@@ -18,8 +18,8 @@ import { PinnedEventSavedObject } from '../../../../../../common/types/timeline/
 import { transformDataToNdjson } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 
 import { FrameworkRequest } from '../../../../framework';
-import * as noteLib from '../../../saved_object/note';
-import * as pinnedEventLib from '../../../saved_object/pinned_event';
+import * as noteLib from '../../../saved_object/notes';
+import * as pinnedEventLib from '../../../saved_object/pinned_events';
 
 import { getSelectedTimelines } from '../../../saved_object/timelines';
 

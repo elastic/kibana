@@ -15,18 +15,18 @@ import {
   AllTimelinesResponse,
 } from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-import { getNotesByTimelineId } from '../note/saved_object';
-import { getAllPinnedEventsByTimelineId } from '../pinned_event';
+import { getNotesByTimelineId } from '../notes/saved_object';
+import { getAllPinnedEventsByTimelineId } from '../pinned_events';
 
 jest.mock('./convert_saved_object_to_savedtimeline', () => ({
   convertSavedObjectToSavedTimeline: jest.fn(),
 }));
 
-jest.mock('../note/saved_object', () => ({
+jest.mock('../notes/saved_object', () => ({
   getNotesByTimelineId: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('../pinned_event', () => ({
+jest.mock('../pinned_events', () => ({
   getAllPinnedEventsByTimelineId: jest.fn().mockResolvedValue([]),
 }));
 

@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * as timeline from './timelines';
-export * as note from './notes';
-export * as pinnedEvent from './pinned_events';
+export { cleanDraftTimelineSchema } from './clean_draft_timelines_schema';
+export { getDraftTimelineSchema } from './get_draft_timelines_schema';

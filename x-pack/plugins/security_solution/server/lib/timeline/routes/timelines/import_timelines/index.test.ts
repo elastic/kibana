@@ -107,13 +107,13 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_event', () => {
+      jest.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../saved_object/note/saved_object', () => {
+      jest.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
           getNote: mockGetNote
@@ -356,13 +356,13 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_event', () => {
+      jest.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../saved_object/note/saved_object', () => {
+      jest.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };
@@ -462,7 +462,7 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_event', () => {
+      jest.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline.mockReturnValue(
             new Error('Test error')
@@ -470,7 +470,7 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/note/saved_object', () => {
+      jest.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };
@@ -571,13 +571,13 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_event', () => {
+      jest.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../saved_object/note/saved_object', () => {
+      jest.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
           getNote: mockGetNote.mockResolvedValueOnce(mockUniqueParsedObjects[0].globalNotes[0]),
@@ -723,13 +723,13 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_event', () => {
+      jest.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../saved_object/note/saved_object', () => {
+      jest.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };
@@ -891,7 +891,7 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/pinned_event', () => {
+      jest.doMock('../../../saved_object/pinned_events', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline.mockReturnValue(
             new Error('Test error')
@@ -899,7 +899,7 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../saved_object/note/saved_object', () => {
+      jest.doMock('../../../saved_object/notes/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };

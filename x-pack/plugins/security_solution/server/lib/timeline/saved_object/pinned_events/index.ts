@@ -26,7 +26,7 @@ import {
   SortNote,
   PinnedEvent as PinnedEventResponse,
 } from '../../../../graphql/types';
-import { pickSavedTimeline } from '..';
+import { pickSavedTimeline } from '../../saved_object/timelines';
 import { convertSavedObjectToSavedTimeline } from '../timelines';
 import { pinnedEventSavedObjectType } from '../../saved_object_mappings/pinned_events';
 import { timelineSavedObjectType } from '../../saved_object_mappings';

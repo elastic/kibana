@@ -8,8 +8,10 @@
 import * as rt from 'io-ts';
 
 import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
-import { eventNotes, globalNotes, pinnedEventIds } from '../schemas';
 import { unionWithNullType } from '../../../../../common/utility_types';
+
+import { eventNotes, globalNotes } from '../notes';
+import { pinnedEventIds } from '../pinned_events';
 
 export const ImportTimelinesSchemaRt = rt.intersection([
   SavedTimelineRuntimeType,

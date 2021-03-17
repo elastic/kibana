@@ -29,8 +29,8 @@ import {
   Maybe,
 } from '../../../../graphql/types';
 import { FrameworkRequest } from '../../../framework';
-import * as note from '../note/saved_object';
-import * as pinnedEvent from '../pinned_event';
+import * as note from '../notes/saved_object';
+import * as pinnedEvent from '../pinned_events';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings/';

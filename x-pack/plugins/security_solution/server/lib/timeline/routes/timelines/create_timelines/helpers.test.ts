@@ -6,8 +6,8 @@
  */
 
 import * as module from './helpers';
-import { savePinnedEvents } from '../../../saved_object/pinned_event';
-import { getNote } from '../../../saved_object/note';
+import { savePinnedEvents } from '../../../saved_object/pinned_events';
+import { getNote } from '../../../saved_object/notes';
 import { FrameworkRequest } from '../../../../framework';
 import { SavedTimeline } from '../../../../../../common/types/timeline';
 import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
@@ -19,7 +19,7 @@ import {
   createTimelineWithoutTimelineId,
 } from '../../../__mocks__/request_responses';
 import { persistTimeline } from '../../../saved_object/timelines';
-import { persistNotes } from '../../../saved_object/note/persist_notes';
+import { persistNotes } from '../../../saved_object/notes/persist_notes';
 
 const template = { ...mockTemplate } as SavedTimeline;
 const timeline = { ...mockTimeline } as SavedTimeline;
@@ -53,16 +53,16 @@ jest.mock('../../../saved_object/timelines', () => ({
   }),
 }));
 
-jest.mock('../../../saved_object/pinned_event', () => ({
+jest.mock('../../../saved_object/pinned_events', () => ({
   savePinnedEvents: jest.fn(),
 }));
 
-jest.mock('../../../saved_object/note', () => ({
+jest.mock('../../../saved_object/notes', () => ({
   getNote: jest.fn(),
   persistNote: jest.fn(),
 }));
 
-jest.mock('../../../saved_object/note/persist_notes', () => ({
+jest.mock('../../../saved_object/notes/persist_notes', () => ({
   persistNotes: jest.fn(),
 }));
 

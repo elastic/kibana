@@ -19,9 +19,12 @@ import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../common/
 
 import { requestMock } from '../../detection_engine/routes/__mocks__';
 
-import { patchTimelineSchema } from '../schemas/timelines/patch_timelines_schema';
-import { createTimelineSchema } from '../schemas/timelines/create_timelines_schema';
-import { GetTimelineByIdSchemaQuery } from '../schemas/timelines/get_timeline_by_id_schema';
+import {
+  patchTimelineSchema,
+  createTimelineSchema,
+  GetTimelineByIdSchemaQuery,
+} from '../schemas/timelines';
+
 import { getReadables } from '../utils/common';
 
 export const getExportTimelinesRequest = () =>

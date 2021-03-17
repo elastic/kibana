@@ -13,7 +13,7 @@ import { transformError, buildSiemResponse } from '../../../../detection_engine/
 import {
   exportTimelinesQuerySchema,
   exportTimelinesRequestBodySchema,
-} from '../../../schemas/timelines/export_timelines_schema';
+} from '../../../schemas/timelines';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { SetupPlugins } from '../../../../../plugin';

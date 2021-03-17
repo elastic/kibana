@@ -14,7 +14,7 @@ import { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { getDraftTimeline, persistTimeline } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { getDraftTimelineSchema } from '../../../schemas/draft_timelines/get_draft_timelines_schema';
+import { getDraftTimelineSchema } from '../../../schemas/draft_timelines';
 
 export const getDraftTimelinesRoute = (
   router: SecuritySolutionPluginRouter,

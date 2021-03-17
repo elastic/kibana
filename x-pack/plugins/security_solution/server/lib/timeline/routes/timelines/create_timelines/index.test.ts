@@ -77,13 +77,13 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../saved_object/pinned_event', () => {
+        jest.doMock('../../../saved_object/pinned_events', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../saved_object/note', () => {
+        jest.doMock('../../../saved_object/notes', () => {
           return {
             persistNote: mockPersistNote,
           };
@@ -138,13 +138,13 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../saved_object/pinned_event', () => {
+        jest.doMock('../../../saved_object/pinned_events', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../saved_object/note', () => {
+        jest.doMock('../../../saved_object/notes', () => {
           return {
             persistNote: mockPersistNote,
           };
@@ -179,13 +179,13 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../saved_object/pinned_event', () => {
+        jest.doMock('../../../saved_object/pinned_events', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../saved_object/note', () => {
+        jest.doMock('../../../saved_object/notes', () => {
           return {
             persistNote: mockPersistNote,
           };
@@ -245,13 +245,13 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../saved_object/pinned_event', () => {
+        jest.doMock('../../../saved_object/pinned_events', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../saved_object/note', () => {
+        jest.doMock('../../../saved_object/notes', () => {
           return {
             persistNote: mockPersistNote,
           };

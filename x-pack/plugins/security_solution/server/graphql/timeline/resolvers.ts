@@ -7,7 +7,7 @@
 
 import { AppResolverWithFields, AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
-import { Timeline } from '../../lib/timeline/saved_object';
+import { Timeline } from '../../lib/timeline/saved_object/timelines';
 import { TimelineType } from '../../../common/types/timeline';
 
 export type QueryTimelineResolver = AppResolverOf<QueryResolvers.GetOneTimelineResolver>;
