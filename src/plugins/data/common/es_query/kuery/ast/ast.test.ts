@@ -324,6 +324,12 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    test('should allow escaping of unicode sequences with a backslash', () => {
+      const expected = nodeTypes.literal.buildNode('\\u00A0');
+      const actual = fromLiteralExpression('\\\\u00A0');
+      expect(actual).toEqual(expected);
+    });
+
     test('should support double quoted strings that do not need escapes except for quotes', () => {
       const expected = nodeTypes.literal.buildNode('\\():<>"*');
       const actual = fromLiteralExpression('"\\():<>\\"*"');

@@ -253,6 +253,7 @@ UnquotedLiteral
 UnquotedCharacter
   = EscapedWhitespace
   / EscapedSpecialCharacter
+  / EscapedUnicodeSequence
   / EscapedKeyword
   / Wildcard
   / !SpecialCharacter !Keyword !Cursor char:. { return char; }
@@ -290,6 +291,17 @@ Keyword
 
 SpecialCharacter
   = [\\():<>"*{}]
+
+EscapedUnicodeSequence
+ = '\\' sequence:UnicodeSequence { return sequence; }
+
+UnicodeSequence
+  = "u" digits:$(HexDigit HexDigit HexDigit HexDigit) {
+      return String.fromCharCode(parseInt(digits, 16));
+    }
+
+HexDigit
+  = [0-9a-f]i
 
 RangeOperator
   = '<=' { return 'lte'; }
