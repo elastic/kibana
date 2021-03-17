@@ -51,15 +51,6 @@ export const mlExecutor = async ({
   if (ml == null) {
     throw new Error('ML plugin unavailable during rule execution');
   }
-  if (ruleParams.machineLearningJobId == null || ruleParams.anomalyThreshold == null) {
-    throw new Error(
-      [
-        'Machine learning rule is missing job id and/or anomaly threshold:',
-        `job id: "${ruleParams.machineLearningJobId}"`,
-        `anomaly threshold: "${ruleParams.anomalyThreshold}"`,
-      ].join(' ')
-    );
-  }
 
   // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
   // currently unused by the jobsSummary function.
