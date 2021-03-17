@@ -9,10 +9,10 @@ import _ from 'lodash';
 import sampleJsonResponse from './es_sample_response.json';
 import sampleJsonResponseWithNesting from './es_sample_response_with_nesting.json';
 import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_containment';
-import { SearchResponse } from 'elasticsearch';
 import { OTHER_CATEGORY } from '../es_query_builder';
 import { alertsMock } from '../../../../../alerting/server/mocks';
 import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
+import { SearchResponse } from 'elasticsearch';
 
 describe('geo_containment', () => {
   describe('transformResults', () => {
