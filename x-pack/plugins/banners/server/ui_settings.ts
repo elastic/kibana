@@ -16,7 +16,7 @@ export const registerSettings = (
   config: BannerConfiguration
 ) => {
   uiSettings.register({
-    'banner:placement': {
+    'banners:placement': {
       name: i18n.translate('xpack.banners.settings.placement.title', {
         defaultMessage: 'Banner placement',
       }),
@@ -29,7 +29,7 @@ export const registerSettings = (
       requiresPageReload: true,
       schema: schema.oneOf([schema.literal('disabled'), schema.literal('header')]),
     },
-    'banner:textContent': {
+    'banners:textContent': {
       name: i18n.translate('xpack.banners.settings.textContent.title', {
         defaultMessage: 'Banner text',
       }),
@@ -41,7 +41,7 @@ export const registerSettings = (
       requiresPageReload: true,
       schema: schema.string(),
     },
-    'banner:textColor': {
+    'banners:textColor': {
       name: i18n.translate('xpack.banners.settings.textColor.title', {
         defaultMessage: 'Banner text color',
       }),
@@ -53,12 +53,12 @@ export const registerSettings = (
       schema: schema.string({
         validate: (color) => {
           if (!isHexColor(color)) {
-            return `'banner:textColor' must be an hex color`;
+            return `'banners:textColor' must be an hex color`;
           }
         },
       }),
     },
-    'banner:backgroundColor': {
+    'banners:backgroundColor': {
       name: i18n.translate('xpack.banners.settings.backgroundColor.title', {
         defaultMessage: 'Banner background color',
       }),
@@ -70,7 +70,7 @@ export const registerSettings = (
       schema: schema.string({
         validate: (color) => {
           if (!isHexColor(color)) {
-            return `'banner:backgroundColor' must be an hex color`;
+            return `'banners:backgroundColor' must be an hex color`;
           }
         },
       }),

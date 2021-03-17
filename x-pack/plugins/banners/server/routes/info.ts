@@ -42,10 +42,10 @@ const isValidLicense = (license: ILicense): boolean => {
 
 const getBannerConfig = async (client: IUiSettingsClient): Promise<BannerConfiguration> => {
   const [placement, textContent, textColor, backgroundColor] = await Promise.all([
-    client.get<BannerPlacement>('banner:placement'),
-    client.get<string>('banner:textContent'),
-    client.get<string>('banner:textColor'),
-    client.get<string>('banner:backgroundColor'),
+    client.get<BannerPlacement>('banners:placement'),
+    client.get<string>('banners:textContent'),
+    client.get<string>('banners:textColor'),
+    client.get<string>('banners:backgroundColor'),
   ]);
 
   return {

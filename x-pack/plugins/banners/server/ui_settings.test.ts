@@ -29,10 +29,10 @@ describe('registerSettings', () => {
 
     expect(uiSettings.register).toHaveBeenCalledTimes(1);
     expect(uiSettings.register).toHaveBeenCalledWith({
-      'banner:placement': expect.any(Object),
-      'banner:textContent': expect.any(Object),
-      'banner:textColor': expect.any(Object),
-      'banner:backgroundColor': expect.any(Object),
+      'banners:placement': expect.any(Object),
+      'banners:textContent': expect.any(Object),
+      'banners:textColor': expect.any(Object),
+      'banners:backgroundColor': expect.any(Object),
     });
   });
 
@@ -48,16 +48,16 @@ describe('registerSettings', () => {
 
     expect(uiSettings.register).toHaveBeenCalledTimes(1);
     expect(uiSettings.register).toHaveBeenCalledWith({
-      'banner:placement': expect.objectContaining({
+      'banners:placement': expect.objectContaining({
         value: config.placement,
       }),
-      'banner:textContent': expect.objectContaining({
+      'banners:textContent': expect.objectContaining({
         value: config.textContent,
       }),
-      'banner:textColor': expect.objectContaining({
+      'banners:textColor': expect.objectContaining({
         value: config.textColor,
       }),
-      'banner:backgroundColor': expect.objectContaining({
+      'banners:backgroundColor': expect.objectContaining({
         value: config.backgroundColor,
       }),
     });

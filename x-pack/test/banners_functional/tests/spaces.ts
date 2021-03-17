@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaSettings();
 
       await PageObjects.settings.setAdvancedSettingsTextArea(
-        'banner:textContent',
+        'banners:textContent',
         'default space banner text'
       );
     });
