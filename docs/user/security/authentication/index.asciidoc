@@ -401,7 +401,7 @@ For more information, refer to <<embedding, Embed {kib} content in a web page>>.
 [[anonymous-access-session]]
 ===== Anonymous access session
 
-{kib} maintains a separate <<xpack-security-session-management, session>> for every anonymous user, as it does for any other authentication mechanism. This way {kib} can maintain a personalized experience even for the users who didn't provide any personal credentials. 
+{kib} maintains a separate <<xpack-security-session-management, session>> for every anonymous user, as it does for all other authentication mechanisms.
 
 You can configure both <<session-idle-timeout, session idle timeout>> and <<session-lifespan, session lifespan>> for the anonymous sessions as you'd do for any other session with the only exception that idle timeout is explicitly disabled for the anonymous sessions by default. That means that the global <<security-session-and-cookie-settings, `xpack.security.session.idleTimeout`>> setting won't affect anonymous sessions. If you want to change the idle timeout for the anonymous sessions, you must configure the provider-level <<anonymous-authentication-provider-settings, `xpack.security.authc.providers.anonymous.<provider-name>.session.idleTimeout`>> setting instead.
 

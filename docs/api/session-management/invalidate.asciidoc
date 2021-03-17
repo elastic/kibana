@@ -1,7 +1,7 @@
 [[session-management-api-invalidate]]
-=== Invalidate sessions API
+=== Invalidate user sessions API
 ++++
-<titleabbrev>Invalidate sessions</titleabbrev>
+<titleabbrev>Invalidate user sessions</titleabbrev>
 ++++
 
 experimental[] Invalidates {kib} user sessions that match provided query.
@@ -30,10 +30,16 @@ To use the invalidate sessions API, you must be a `superuser`.
 [%collapsible%open]
 =====
 `provider` :::
-(Required, object) Contains required `type` and optional `name` string properties to match sessions that were created by the specific <<authentication-security-settings, authentication provider>>.
+(Required, object) Describes the <<authentication-security-settings, authentication provider(s)>> for which to invalidate sessions.
+
+`type` ::::
+(Required, string) The authentication provider `type`.
+
+`name` ::::
+(Optional, string) The authentication provider `name`.
 
 `username` :::
-(Optional, string) If specified, {kib} will only invalidate sessions that belong to a specific user.
+(Optional, string) The username for which to invalidate sessions.
 =====
 
 [[session-management-api-invalidate-response-body]]
@@ -64,7 +70,7 @@ $ curl -X POST api/security/session/_invalidate
 --------------------------------------------------
 // KIBANA
 
-Invalidate sessions that were created by any <<saml, SAML authentication providers>> only:
+Invalidate sessions that were created by any <<saml, SAML authentication provider>>:
 
 [source,sh]
 --------------------------------------------------
@@ -78,7 +84,7 @@ $ curl -X POST api/security/session/_invalidate
 --------------------------------------------------
 // KIBANA
 
-Invalidate sessions that were created by the <<saml, SAML authentication provider>> with the name `saml1` only:
+Invalidate sessions that were created by the <<saml, SAML authentication provider>> with the name `saml1`:
 
 [source,sh]
 --------------------------------------------------
@@ -92,7 +98,7 @@ $ curl -X POST api/security/session/_invalidate
 --------------------------------------------------
 // KIBANA
 
-Invalidate sessions that were created by any <<oidc, OpenID Connect authentication providers>> for the user with the name `user@my-oidc-sso.com` only:
+Invalidate sessions that were created by any <<oidc, OpenID Connect authentication provider>> for the user with the username `user@my-oidc-sso.com`:
 
 [source,sh]
 --------------------------------------------------
