@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ApiResponse } from '@elastic/elasticsearch';
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
@@ -56,14 +57,14 @@ export const healthRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
           const {
-            security: {
-              enabled: isSecurityEnabled = false,
-              ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
-            } = {},
-          }: XPackUsageSecurity = await context.core.elasticsearch.legacy.client
-            // `transport.request` is potentially unsafe when combined with untrusted user input.
-            // Do not augment with such input.
-            .callAsInternalUser('transport.request', {
+            body: {
+              security: {
+                enabled: isSecurityEnabled = false,
+                ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
+              } = {},
+            },
+          }: ApiResponse<XPackUsageSecurity> = await context.core.elasticsearch.client.asInternalUser.transport // Do not augment with such input. // `transport.request` is potentially unsafe when combined with untrusted user input.
+            .request({
               method: 'GET',
               path: '/_xpack/usage',
             });
