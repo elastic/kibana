@@ -145,7 +145,6 @@
 # Operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
-/src/optimize/ @elastic/kibana-operations
 /packages/*eslint*/ @elastic/kibana-operations
 /packages/*babel*/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
@@ -232,8 +231,8 @@
 /x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-core
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-src/plugins/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry @elastic/infra-telemetry
-x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry @elastic/infra-telemetry
+/src/plugins/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry
+/x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization @elastic/kibana-core

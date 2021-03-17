@@ -37,6 +37,21 @@ export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
   ),
 };
 
+export const CONDITION_FIELD_DESCRIPTION: { [K in ConditionEntryField]: string } = {
+  [ConditionEntryField.HASH]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.hash',
+    { defaultMessage: 'md5, sha1, or sha256' }
+  ),
+  [ConditionEntryField.PATH]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.path',
+    { defaultMessage: 'The full path of the application' }
+  ),
+  [ConditionEntryField.SIGNER]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.description.signature',
+    { defaultMessage: 'The signer of the application' }
+  ),
+};
+
 export const OPERATOR_TITLE: { [K in ConditionEntry['operator']]: string } = {
   included: i18n.translate('xpack.securitySolution.trustedapps.card.operator.includes', {
     defaultMessage: 'is',

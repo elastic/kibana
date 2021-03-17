@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { escapeHatch, wrapError } from '../../utils';
 import { RouteDeps } from '../../types';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { CommentRequest } from '../../../../../common/api';
+import { CASE_COMMENTS_URL } from '../../../../../common';
+import { CommentRequest } from '../../../../../common';
 
 export function initPostCommentApi({ router, logger }: RouteDeps) {
   router.post(

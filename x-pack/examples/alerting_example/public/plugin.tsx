@@ -63,7 +63,7 @@ export class AlertingExamplePlugin implements Plugin<Setup, Start, AlertingExamp
     developerExamples.register({
       appId: 'AlertingExample',
       title: 'Alerting',
-      description: `This alerting example walks you through how to set up a new alert.`,
+      description: 'This alerting example walks you through how to set up a new rule.',
       links: [
         {
           label: 'README',
