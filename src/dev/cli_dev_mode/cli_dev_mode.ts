@@ -280,7 +280,7 @@ export class CliDevMode {
       filter((states) => states.every((s) => typeof s === 'boolean')),
       // merge the states to true only if all states are true, otherwise false
       map((states) => states.every((s) => s === true)),
-      // we one "started" once
+      // we only "started" once
       take(1)
     );
   }
