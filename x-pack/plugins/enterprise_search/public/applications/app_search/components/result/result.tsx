@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import classNames from 'classnames';
 
@@ -31,6 +32,7 @@ interface Props {
   shouldLinkToDetailPage?: boolean;
   schemaForTypeHighlights?: Schema;
   actions?: ResultAction[];
+  dragHandleProps?: DraggableProvidedDragHandleProps;
 }
 
 const RESULT_CUTOFF = 5;
@@ -42,6 +44,7 @@ export const Result: React.FC<Props> = ({
   shouldLinkToDetailPage = false,
   schemaForTypeHighlights,
   actions = [],
+  dragHandleProps,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -87,6 +90,11 @@ export const Result: React.FC<Props> = ({
         values: { id: result[ID].raw },
       })}
     >
+      {dragHandleProps && (
+        <div {...dragHandleProps} className="appSearchResult__dragHandle">
+          <EuiIcon type="grab" />
+        </div>
+      )}
       {conditionallyLinkedArticle(
         <>
           <ResultHeader

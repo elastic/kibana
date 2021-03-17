@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
@@ -23,7 +24,7 @@ interface ClusterBucketESResponse {
 }
 
 export async function fetchCpuUsageNodeStats(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   startMs: number,
@@ -140,7 +141,7 @@ export async function fetchCpuUsageNodeStats(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const stats: AlertCpuUsageNodeStats[] = [];
   const clusterBuckets = get(
     response,

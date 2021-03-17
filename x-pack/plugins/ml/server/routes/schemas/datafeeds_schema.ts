@@ -13,6 +13,23 @@ export const startDatafeedSchema = schema.object({
   timeout: schema.maybe(schema.any()),
 });
 
+export const indicesOptionsSchema = schema.object({
+  expand_wildcards: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal('all'),
+        schema.literal('open'),
+        schema.literal('closed'),
+        schema.literal('hidden'),
+        schema.literal('none'),
+      ])
+    )
+  ),
+  ignore_unavailable: schema.maybe(schema.boolean()),
+  allow_no_indices: schema.maybe(schema.boolean()),
+  ignore_throttled: schema.maybe(schema.boolean()),
+});
+
 export const datafeedConfigSchema = schema.object({
   datafeed_id: schema.maybe(schema.string()),
   feed_id: schema.maybe(schema.string()),
@@ -35,14 +52,7 @@ export const datafeedConfigSchema = schema.object({
   runtime_mappings: schema.maybe(schema.any()),
   scroll_size: schema.maybe(schema.number()),
   delayed_data_check_config: schema.maybe(schema.any()),
-  indices_options: schema.maybe(
-    schema.object({
-      expand_wildcards: schema.maybe(schema.arrayOf(schema.string())),
-      ignore_unavailable: schema.maybe(schema.boolean()),
-      allow_no_indices: schema.maybe(schema.boolean()),
-      ignore_throttled: schema.maybe(schema.boolean()),
-    })
-  ),
+  indices_options: indicesOptionsSchema,
 });
 
 export const datafeedIdSchema = schema.object({ datafeedId: schema.string() });

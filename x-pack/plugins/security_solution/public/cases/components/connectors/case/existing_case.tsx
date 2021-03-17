@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, useCallback } from 'react';
-import { CaseType } from '../../../../../../cases/common/api';
+import { CaseType } from '../../../../../../cases/common';
 import {
   useGetCases,
   DEFAULT_QUERY_PARAMS,

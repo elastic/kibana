@@ -28,6 +28,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getDocLinks } from '../../util/dependency_cache';
 
+import { parseMessages } from '../../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
 import { Callout, statusToEuiIconType } from '../callout';
 import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
@@ -132,7 +133,8 @@ export class ValidateJobUI extends Component {
 
         this.props.ml
           .validateJob({ duration, fields, job })
-          .then((messages) => {
+          .then((validationMessages) => {
+            const messages = parseMessages(validationMessages, getDocLinks());
             shouldShowLoadingIndicator = false;
 
             const messagesContainError = messages.some((m) => m.status === VALIDATION_STATUS.ERROR);
