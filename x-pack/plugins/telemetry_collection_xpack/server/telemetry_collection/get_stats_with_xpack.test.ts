@@ -140,9 +140,9 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
     const esClient = mockEsClient();
     const usageCollection = mockUsageCollection({
       ...kibana,
-      monitoringTelemetry: [
-        { collectionSource: 'monitoring', timestamp: new Date().toISOString() },
-      ],
+      monitoringTelemetry: {
+        stats: [{ collectionSource: 'monitoring', timestamp: new Date().toISOString() }],
+      },
     });
     const context = getContext();
 
