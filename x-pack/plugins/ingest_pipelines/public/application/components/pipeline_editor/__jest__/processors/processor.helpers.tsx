@@ -133,6 +133,7 @@ type TestSubject =
   | 'addProcessorForm.submitButton'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
+  | 'valueField.comboBoxSearchInput'
   | 'targetField.input'
   | 'keepOriginalField.input'
   | 'removeIfSuccessfulField.input';
