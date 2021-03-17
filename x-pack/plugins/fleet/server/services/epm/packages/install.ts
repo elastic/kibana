@@ -202,12 +202,18 @@ async function installPackageFromRegistry({
   // get latest package version
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
 
-  const forceInstall = force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
+  // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
+  const installOutOfDateVersionOk =
+    force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
 
-  // if the requested version is the same as installed version, check if we allow it
-  // if we don't allow it, just return the asset references from the existing installation
-  if (installedPkg?.attributes.version === pkgVersion) {
-    if (!forceInstall) {
+  // if the requested version is the same as installed version, check if we allow it based on
+  // current installed package status and force flag, if we don't allow it,
+  // just return the asset references from the existing installation
+  if (
+    installedPkg?.attributes.version === pkgVersion &&
+    installedPkg?.attributes.install_status === 'installed'
+  ) {
+    if (!force) {
       logger.debug(`${pkgkey} is already installed, skipping installation`);
       return {
         assets: [
@@ -222,7 +228,7 @@ async function installPackageFromRegistry({
   // if the requested version is out-of-date of the latest package version, check if we allow it
   // if we don't allow it, return an error
   if (semverLt(pkgVersion, latestPackage.version)) {
-    if (!forceInstall) {
+    if (!installOutOfDateVersionOk) {
       throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
     }
     logger.debug(
