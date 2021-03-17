@@ -50,6 +50,6 @@ describe('delete_list_item', () => {
       index: LIST_ITEM_INDEX,
       refresh: 'wait_for',
     };
-    expect(options.callCluster).toBeCalledWith('delete', deleteQuery);
+    expect(options.esClient.delete).toBeCalledWith(deleteQuery);
   });
 });
