@@ -30,7 +30,7 @@ import {
   AlertCommentRequestRt,
   CommentType,
   ContextTypeUserRt,
-} from '../../../../../cases/common/api';
+} from '../../../../../cases/common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
 import { OnUpdateFields } from '../case_view';

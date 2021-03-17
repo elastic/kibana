@@ -13,7 +13,7 @@ import { API_BASE_URL } from '../../common/constants';
 import { LevelLogger as Logger } from '../lib';
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
-import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
+import { registerGenerateCsvFromSavedObjectImmediate } from './csv_searchsource_immediate';
 import { HandlerFunction } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;

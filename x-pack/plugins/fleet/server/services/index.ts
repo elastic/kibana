@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/ser
 
 import type { AgentStatus, Agent, EsAssetReference } from '../types';
 
-import type { getAgent, listAgents } from './agents';
+import type { getAgentById, getAgentsByKuery } from './agents';
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
 
@@ -46,7 +46,7 @@ export interface AgentService {
   /**
    * Get an Agent by id
    */
-  getAgent: typeof getAgent;
+  getAgent: typeof getAgentById;
   /**
    * Get an Agents by ids
    */
@@ -65,7 +65,7 @@ export interface AgentService {
   /**
    * List agents
    */
-  listAgents: typeof listAgents;
+  listAgents: typeof getAgentsByKuery;
 }
 
 export interface AgentPolicyServiceInterface {

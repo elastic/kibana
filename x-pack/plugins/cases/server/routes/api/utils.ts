@@ -41,7 +41,7 @@ import {
   SubCasesFindResponse,
   User,
   AlertCommentRequestRt,
-} from '../../../common/api';
+} from '../../../common';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
 import { SortFieldCase } from './types';

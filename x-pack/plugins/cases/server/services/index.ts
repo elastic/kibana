@@ -33,7 +33,7 @@ import {
   CaseResponse,
   caseTypeField,
   CasesFindRequest,
-} from '../../common/api';
+} from '../../common';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
 import {

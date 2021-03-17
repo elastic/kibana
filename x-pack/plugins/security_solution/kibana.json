@@ -33,6 +33,7 @@
   "requiredPlugins": [
     "actions",
     "alerting",
+    "cases",
     "data",
     "dataEnhanced",
     "embeddable",

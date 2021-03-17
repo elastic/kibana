@@ -3,6 +3,9 @@
     "xpack",
     "cases"
   ],
+  "extraPublicDirs": [
+    "common"
+  ],
   "id": "cases",
   "kibanaVersion": "kibana",
   "optionalPlugins": [
@@ -10,9 +13,12 @@
     "security"
   ],
   "requiredPlugins": [
-    "actions"
+    "actions",
+    "esUiShared",
+    "kibanaReact",
+    "triggersActionsUi"
   ],
   "server": true,
-  "ui": false,
+  "ui": true,
   "version": "8.0.0"
 }

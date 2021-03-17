@@ -30,7 +30,7 @@ import {
   ActionConnector,
   CaseStatuses,
   CommentType,
-} from '../../../../../cases/common/api';
+} from '../../../../../cases/common';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
