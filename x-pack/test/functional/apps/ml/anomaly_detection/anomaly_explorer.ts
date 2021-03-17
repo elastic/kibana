@@ -169,7 +169,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('supports cell selection by click on Overall swim lane', async () => {
+          await ml.testExecution.logTestStep('checking page state before the cell selection');
           await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
+          await ml.anomaliesTable.assertTableRowsCount(25);
+
           const sampleCell = (await ml.swimLane.getCells(overallSwimLaneTestSubj))[0];
           await ml.swimLane.selectSingleCell(overallSwimLaneTestSubj, {
             x: sampleCell.x,
@@ -184,7 +187,14 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('updates the View By swim lane');
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', ['AMX', 'TRS', 'VRD']);
 
+          await ml.testExecution.logTestStep('renders anomaly explorer charts');
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(6);
+
+          await ml.testExecution.logTestStep('updates top influencers list');
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 3);
+
+          await ml.testExecution.logTestStep('updates anomalies table');
+          await ml.anomaliesTable.assertTableRowsCount(11);
 
           await ml.testExecution.logTestStep('updates the URL state');
           await ml.navigation.assertCurrentURL(
