@@ -67,8 +67,8 @@ export const enhancedEsSearchStrategyProvider = (
           };
       const promise = id
         ? client.get({ ...params, id })
-        // @ts-expect-error @lastic/elasticsearch docvalue_fields in SearchRequest and SearchRequest['body'] has incompatible types
-        : client.submit(params);
+        : // @ts-expect-error @lastic/elasticsearch docvalue_fields in SearchRequest and SearchRequest['body'] has incompatible types
+          client.submit(params);
       const { body } = await shimAbortSignal(promise, options.abortSignal);
       const response = shimHitsTotal(body.response, options);
       // @ts-expect-error @elastic/elasticsearch AsyncSearchGetResponse currently missing all properties
