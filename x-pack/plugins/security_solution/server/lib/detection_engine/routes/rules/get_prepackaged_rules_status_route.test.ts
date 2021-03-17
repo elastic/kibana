@@ -15,11 +15,11 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig } from '../__mocks__';
 import { SecurityPluginSetup } from '../../../../../../security/server';
-import { checkTimelinesStatus } from '../../../timeline/routes/utils/check_timelines_status';
+import { checkTimelinesStatus } from '../../../timeline/utils/check_timelines_status';
 import {
   mockCheckTimelinesStatusBeforeInstallResult,
   mockCheckTimelinesStatusAfterInstallResult,
-} from '../../../timeline/routes/__mocks__/import_timelines';
+} from '../../../timeline/__mocks__/import_timelines';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -44,7 +44,7 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-jest.mock('../../../timeline/routes/utils/check_timelines_status', () => {
+jest.mock('../../../timeline/utils/check_timelines_status', () => {
   return {
     checkTimelinesStatus: jest.fn(),
   };

@@ -20,7 +20,7 @@ import { listMock } from '../../../../../../lists/server/mocks';
 import { siemMock } from '../../../../mocks';
 import { FrameworkRequest } from '../../../framework';
 import { ExceptionListClient } from '../../../../../../lists/server';
-import { installPrepackagedTimelines } from '../../../timeline/routes/install_prepackaged_timelines';
+import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
