@@ -8,9 +8,10 @@
 import { curry, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { renderMustacheObject } from '../lib/mustache_renderer';
+import { buildAlertHistoryDocument, AlertHistoryEsIndexConnectorId } from '../../common';
 
 export type ESIndexActionType = ActionType<ActionTypeConfigType, {}, ActionParamsType, unknown>;
 export type ESIndexActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -54,6 +55,7 @@ export function getActionType({ logger }: { logger: Logger }): ESIndexActionType
       params: ParamsSchema,
     },
     executor: curry(executor)({ logger }),
+    renderParameterTemplates,
   };
 }
 
@@ -105,6 +107,21 @@ async function executor(
   } catch (err) {
     return wrapErr(err.message, actionId, logger);
   }
+}
+
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>,
+  actionId: string
+): ActionParamsType {
+  const { documents } = renderMustacheObject<ActionParamsType>(params, variables);
+
+  if (actionId === AlertHistoryEsIndexConnectorId) {
+    const alertHistoryDoc = buildAlertHistoryDocument(variables);
+    return { documents: alertHistoryDoc ? [alertHistoryDoc] : [] };
+  }
+
+  return { documents };
 }
 
 function wrapErr(

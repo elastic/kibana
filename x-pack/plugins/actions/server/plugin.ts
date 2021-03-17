@@ -100,6 +100,7 @@ export interface PluginStartContract {
   preconfiguredActions: PreConfiguredAction[];
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
+    actionId: string,
     params: Params,
     variables: Record<string, unknown>
   ): Params;
@@ -484,12 +485,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
   actionTypeRegistry: ActionTypeRegistry | undefined,
   actionTypeId: string,
+  actionId: string,
   params: Params,
   variables: Record<string, unknown>
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {
-    return actionType.renderParameterTemplates(params, variables) as Params;
+    return actionType.renderParameterTemplates(params, variables, actionId) as Params;
   } else {
     return renderMustacheObject(params, variables);
   }
