@@ -11,12 +11,12 @@ import * as APIKeyService from '../api_keys';
 import { AgentUnenrollmentError } from '../../errors';
 
 import { createAgentAction, bulkCreateAgentActions } from './actions';
+import type { GetAgentsOptions } from './crud';
 import {
-  getAgent,
+  getAgentById,
+  getAgents,
   updateAgent,
   getAgentPolicyForAgent,
-  getAgents,
-  listAllAgents,
   bulkUpdateAgents,
 } from './crud';
 
@@ -56,23 +56,9 @@ export async function unenrollAgent(
 export async function unenrollAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options:
-    | {
-        agentIds: string[];
-      }
-    | {
-        kuery: string;
-      }
+  options: GetAgentsOptions
 ) {
-  const agents =
-    'agentIds' in options
-      ? await getAgents(esClient, options.agentIds)
-      : (
-          await listAllAgents(esClient, {
-            kuery: options.kuery,
-            showInactive: false,
-          })
-        ).agents;
+  const agents = await getAgents(esClient, options);
 
   // Filter to agents that are not already unenrolled, or unenrolling
   const agentsEnrolled = agents.filter(
@@ -116,7 +102,7 @@ export async function forceUnenrollAgent(
   esClient: ElasticsearchClient,
   agentId: string
 ) {
-  const agent = await getAgent(esClient, agentId);
+  const agent = await getAgentById(esClient, agentId);
 
   await Promise.all([
     agent.access_api_key_id
@@ -136,24 +122,10 @@ export async function forceUnenrollAgent(
 export async function forceUnenrollAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options:
-    | {
-        agentIds: string[];
-      }
-    | {
-        kuery: string;
-      }
+  options: GetAgentsOptions
 ) {
   // Filter to agents that are not already unenrolled
-  const agents =
-    'agentIds' in options
-      ? await getAgents(esClient, options.agentIds)
-      : (
-          await listAllAgents(esClient, {
-            kuery: options.kuery,
-            showInactive: false,
-          })
-        ).agents;
+  const agents = await getAgents(esClient, options);
   const agentsToUpdate = agents.filter((agent) => !agent.unenrolled_at);
   const now = new Date().toISOString();
   const apiKeys: string[] = [];
