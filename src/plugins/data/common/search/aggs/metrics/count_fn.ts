@@ -48,6 +48,10 @@ export const aggCount = (): FunctionDefinition => ({
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
+    timeShift: {
+      types: ['string'],
+      help: '',
+    },
     customLabel: {
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.count.customLabel.help', {

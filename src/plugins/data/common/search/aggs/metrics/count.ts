@@ -25,6 +25,13 @@ export const getCountMetricAgg = () =>
         defaultMessage: 'Count',
       });
     },
+    params: [
+      {
+        name: 'timeShift',
+        type: 'string',
+        write: () => {},
+      },
+    ],
     getSerializedFormat(agg) {
       return {
         id: 'number',

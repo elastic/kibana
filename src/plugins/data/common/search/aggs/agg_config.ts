@@ -17,6 +17,7 @@ import {
   SerializedFieldFormat,
 } from 'src/plugins/expressions/common';
 
+import moment from 'moment';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
@@ -170,6 +171,13 @@ export class AggConfig {
 
   getParam(key: string): any {
     return _.get(this.params, key);
+  }
+
+  getTimeShift(): undefined | moment.Duration {
+    const rawTimeShift = this.getParam('timeShift');
+    if (!rawTimeShift) return undefined;
+    const [, amount, unit] = rawTimeShift.match(/(\d+)(\w)/);
+    return moment.duration(Number(amount), unit);
   }
 
   write(aggs?: IAggConfigs) {
