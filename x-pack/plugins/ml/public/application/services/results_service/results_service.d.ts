@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 import type { AnomalyRecordDoc } from '../../../../common/types/anomalies';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
@@ -61,7 +62,8 @@ export function resultsServiceProvider(
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    intervalMs: number
+    intervalMs: number,
+    indicesOptions?: IndicesOptions
   ): Promise<any>;
   getEventDistributionData(
     index: string,
