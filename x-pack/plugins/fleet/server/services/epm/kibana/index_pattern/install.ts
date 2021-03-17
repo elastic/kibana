@@ -60,10 +60,11 @@ const typeMap: TypeMap = {
   constant_keyword: 'string',
 };
 
+const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
+
 export const indexPatternTypes = Object.values(dataTypes);
 export async function installIndexPatterns({
   savedObjectsClient,
-  esClient,
   pkgName,
   pkgVersion,
   installSource,
@@ -75,9 +76,6 @@ export async function installIndexPatterns({
   installSource?: InstallSource;
 }) {
   const logger = appContextService.getLogger();
-  const indexPatternService = await appContextService
-    .getData()
-    .indexPatterns.indexPatternsServiceFactory(savedObjectsClient, esClient);
 
   logger.debug(
     `kicking off installation of index patterns for ${
@@ -137,7 +135,7 @@ export async function installIndexPatterns({
       if (!pkgName && installedPackagesSavedObjects.length === 0) {
         try {
           logger.debug(`deleting index pattern ${indexPatternType}-*`);
-          await indexPatternService.delete(`${indexPatternType}-*`);
+          await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, `${indexPatternType}-*`);
         } catch (err) {
           // index pattern was probably deleted by the user already
         }
@@ -150,7 +148,10 @@ export async function installIndexPatterns({
 
       // create or overwrite the index pattern
       logger.debug(`creating index pattern ${kibanaIndexPattern.title}`);
-      await indexPatternService.createAndSave(kibanaIndexPattern, true, true);
+      await savedObjectsClient.create(INDEX_PATTERN_SAVED_OBJECT_TYPE, kibanaIndexPattern, {
+        id: `${indexPatternType}-*`,
+        overwrite: true,
+      });
     })
   );
 }
