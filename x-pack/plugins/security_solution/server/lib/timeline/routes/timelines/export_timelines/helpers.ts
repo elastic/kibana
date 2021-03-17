@@ -21,7 +21,7 @@ import { FrameworkRequest } from '../../../../framework';
 import * as noteLib from '../../../saved_object/note';
 import * as pinnedEventLib from '../../../saved_object/pinned_event';
 
-import { getSelectedTimelines } from '../../../saved_object';
+import { getSelectedTimelines } from '../../../saved_object/timelines';
 
 const getGlobalEventNotesByTimelineId = (currentNotes: NoteSavedObject[]): ExportedNotes => {
   const initialNotes: ExportedNotes = {

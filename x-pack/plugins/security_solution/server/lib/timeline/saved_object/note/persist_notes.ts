@@ -7,7 +7,7 @@
 
 import { FrameworkRequest } from '../../../framework';
 import { NoteResult } from '../../../../graphql/types';
-import { persistNote } from '.';
+import { persistNote } from './saved_object';
 import { getOverridableNote } from './get_overridable_note';
 
 export const persistNotes = async (

@@ -16,14 +16,14 @@ import {
   getTimelineOrNull,
   getTimelineTemplateOrNull,
   getAllTimeline,
-} from '../../../saved_object';
+} from '../../../saved_object/timelines';
 
 import { mockGetCurrentUser } from '../../../__mocks__/import_timelines';
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
 
 import { getTimelineRoute } from '.';
 
-jest.mock('../../saved_object', () => ({
+jest.mock('../../../saved_object/timelines', () => ({
   getAllTimeline: jest.fn(),
   getTimelineOrNull: jest.fn(),
   getTimelineTemplateOrNull: jest.fn(),

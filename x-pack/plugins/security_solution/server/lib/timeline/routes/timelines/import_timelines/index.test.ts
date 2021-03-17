@@ -97,7 +97,7 @@ describe('import timelines', () => {
 
   describe('Import a new timeline', () => {
     beforeEach(() => {
-      jest.doMock('../../saved_object', () => {
+      jest.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
           getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -107,20 +107,15 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../pinned_event/saved_object', () => {
+      jest.doMock('../../../saved_object/pinned_event', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../note/persist_note', () => {
+      jest.doMock('../../../saved_object/note/saved_object', () => {
         return {
           persistNote: mockPersistNote,
-        };
-      });
-
-      jest.doMock('../../../note/get_note', () => {
-        return {
           getNote: mockGetNote
             .mockResolvedValueOnce({
               noteId: 'd2649d40-6bc5-11ea-86f0-5db0048c6086',
@@ -353,7 +348,7 @@ describe('import timelines', () => {
 
   describe('Import a timeline already exist', () => {
     beforeEach(() => {
-      jest.doMock('../../saved_object', () => {
+      jest.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
           getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -361,13 +356,13 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../pinned_event/saved_object', () => {
+      jest.doMock('../../../saved_object/pinned_event', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../note/persist_note', () => {
+      jest.doMock('../../../saved_object/note/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };
@@ -458,7 +453,7 @@ describe('import timelines', () => {
 
   describe('request validation', () => {
     beforeEach(() => {
-      jest.doMock('../../saved_object', () => {
+      jest.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
           persistTimeline: mockPersistTimeline.mockReturnValue({
@@ -467,7 +462,7 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../pinned_event/saved_object', () => {
+      jest.doMock('../../../saved_object/pinned_event', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline.mockReturnValue(
             new Error('Test error')
@@ -475,7 +470,7 @@ describe('import timelines', () => {
         };
       });
 
-      jest.doMock('../../../note/persist_note', () => {
+      jest.doMock('../../../saved_object/note/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };
@@ -566,7 +561,7 @@ describe('import timeline templates', () => {
 
   describe('Import a new timeline template', () => {
     beforeEach(() => {
-      jest.doMock('../../saved_object', () => {
+      jest.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
           getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -576,20 +571,15 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../pinned_event/saved_object', () => {
+      jest.doMock('../../../saved_object/pinned_event', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../note/persist_note', () => {
+      jest.doMock('../../../saved_object/note/saved_object', () => {
         return {
           persistNote: mockPersistNote,
-        };
-      });
-
-      jest.doMock('../../../note/get_note', () => {
-        return {
           getNote: mockGetNote.mockResolvedValueOnce(mockUniqueParsedObjects[0].globalNotes[0]),
         };
       });
@@ -721,7 +711,7 @@ describe('import timeline templates', () => {
 
   describe('Import a timeline template already exist', () => {
     beforeEach(() => {
-      jest.doMock('../../saved_object', () => {
+      jest.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
           getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
@@ -733,13 +723,13 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../pinned_event/saved_object', () => {
+      jest.doMock('../../../saved_object/pinned_event', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline,
         };
       });
 
-      jest.doMock('../../../note/persist_note', () => {
+      jest.doMock('../../../saved_object/note/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };
@@ -892,7 +882,7 @@ describe('import timeline templates', () => {
 
   describe('request validation', () => {
     beforeEach(() => {
-      jest.doMock('../../saved_object', () => {
+      jest.doMock('../../../saved_object/timelines', () => {
         return {
           getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
           persistTimeline: mockPersistTimeline.mockReturnValue({
@@ -901,7 +891,7 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../pinned_event/saved_object', () => {
+      jest.doMock('../../../saved_object/pinned_event', () => {
         return {
           savePinnedEvents: mockPersistPinnedEventOnTimeline.mockReturnValue(
             new Error('Test error')
@@ -909,7 +899,7 @@ describe('import timeline templates', () => {
         };
       });
 
-      jest.doMock('../../../note/persist_note', () => {
+      jest.doMock('../../../saved_object/note/saved_object', () => {
         return {
           persistNote: mockPersistNote,
         };

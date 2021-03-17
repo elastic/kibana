@@ -68,7 +68,7 @@ describe('create timelines', () => {
   describe('Manipulate timeline', () => {
     describe('Create a new timeline', () => {
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../../../saved_object/timelines', () => {
           return {
             getTimeline: mockGetTimeline.mockReturnValue(null),
             persistTimeline: mockPersistTimeline.mockReturnValue({
@@ -77,13 +77,13 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../pinned_event/saved_object', () => {
+        jest.doMock('../../../saved_object/pinned_event', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../note/saved_object', () => {
+        jest.doMock('../../../saved_object/note', () => {
           return {
             persistNote: mockPersistNote,
           };
@@ -131,20 +131,20 @@ describe('create timelines', () => {
 
     describe('Import a timeline already exist', () => {
       beforeEach(() => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../../../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
             persistTimeline: mockPersistTimeline,
           };
         });
 
-        jest.doMock('../../../pinned_event/saved_object', () => {
+        jest.doMock('../../../saved_object/pinned_event', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../note/saved_object', () => {
+        jest.doMock('../../../saved_object/note', () => {
           return {
             persistNote: mockPersistNote,
           };
@@ -170,7 +170,7 @@ describe('create timelines', () => {
   describe('Manipulate timeline template', () => {
     describe('Create a new timeline template', () => {
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../../../saved_object/timelines', () => {
           return {
             getTimelineTemplateOrNull: mockGetTimeline.mockReturnValue(null),
             persistTimeline: mockPersistTimeline.mockReturnValue({
@@ -179,13 +179,13 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../pinned_event/saved_object', () => {
+        jest.doMock('../../../saved_object/pinned_event', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../note/saved_object', () => {
+        jest.doMock('../../../saved_object/note', () => {
           return {
             persistNote: mockPersistNote,
           };
@@ -235,7 +235,7 @@ describe('create timelines', () => {
 
     describe('Create a timeline template already exist', () => {
       beforeEach(() => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../../../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
@@ -245,13 +245,13 @@ describe('create timelines', () => {
           };
         });
 
-        jest.doMock('../../../pinned_event/saved_object', () => {
+        jest.doMock('../../../saved_object/pinned_event', () => {
           return {
             persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
           };
         });
 
-        jest.doMock('../../../note/saved_object', () => {
+        jest.doMock('../../../saved_object/note', () => {
           return {
             persistNote: mockPersistNote,
           };

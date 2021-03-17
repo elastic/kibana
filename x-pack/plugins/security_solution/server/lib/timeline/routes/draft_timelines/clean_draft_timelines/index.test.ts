@@ -55,7 +55,7 @@ describe('clean draft timelines', () => {
     mockPersistNote = jest.fn();
     mockResetTimeline = jest.fn();
 
-    jest.doMock('../../saved_object', () => ({
+    jest.doMock('../../../saved_object/timelines', () => ({
       getTimeline: mockGetTimeline,
       getDraftTimeline: mockGetDraftTimeline,
       resetTimeline: mockResetTimeline,
@@ -65,11 +65,11 @@ describe('clean draft timelines', () => {
       }),
     }));
 
-    jest.doMock('../../../pinned_event/saved_object', () => ({
+    jest.doMock('../../../saved_object/pinned_event', () => ({
       persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
     }));
 
-    jest.doMock('../../../note/saved_object', () => ({
+    jest.doMock('../../../saved_object/note', () => ({
       persistNote: mockPersistNote,
     }));
 

@@ -57,7 +57,7 @@ describe('get draft timelines', () => {
   describe('Manipulate timeline', () => {
     describe('Create a new timeline', () => {
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => ({
+        jest.doMock('../../../saved_object/timelines', () => ({
           getTimeline: mockGetTimeline,
           getDraftTimeline: mockGetDraftTimeline,
           persistTimeline: mockPersistTimeline.mockReturnValue({
@@ -66,11 +66,11 @@ describe('get draft timelines', () => {
           }),
         }));
 
-        jest.doMock('../../../pinned_event/saved_object', () => ({
+        jest.doMock('../../../saved_object/pinned_event', () => ({
           persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
         }));
 
-        jest.doMock('../../../note/saved_object', () => ({
+        jest.doMock('../../../saved_object/note', () => ({
           persistNote: mockPersistNote,
         }));
 

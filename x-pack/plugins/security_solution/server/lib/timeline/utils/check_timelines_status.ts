@@ -20,7 +20,7 @@ import { unionWithNullType } from '../../../../common/utility_types';
 
 import { FrameworkRequest } from '../../framework';
 
-import { getExistingPrepackagedTimelines } from '../saved_object';
+import { getExistingPrepackagedTimelines } from '../saved_object/timelines';
 
 import { loadData, getReadables } from './common';
 

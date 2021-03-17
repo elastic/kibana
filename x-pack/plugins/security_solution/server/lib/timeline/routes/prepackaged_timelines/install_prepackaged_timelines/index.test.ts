@@ -29,9 +29,13 @@ jest.mock('./helpers', () => ({
   installPrepackagedTimelines: jest.fn(),
 }));
 
-jest.mock('../utils/check_timelines_status', () => ({
-  checkTimelinesStatus: jest.fn(),
-}));
+jest.mock('../../../utils/check_timelines_status', () => {
+  const actual = jest.requireActual('../../../utils/check_timelines_status');
+  return {
+    ...actual,
+    checkTimelinesStatus: jest.fn(),
+  };
+});
 
 describe('installPrepackagedTimelines', () => {
   let server: ReturnType<typeof serverMock.create>;

@@ -16,7 +16,7 @@ import { SourceStatus } from './source_status';
 import { Sources } from './sources';
 import { Note } from './timeline/saved_object/note';
 import { PinnedEvent } from './timeline/saved_object/pinned_event';
-import { Timeline } from './timeline/saved_object';
+import { Timeline } from './timeline/saved_object/timelines';
 import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
 
 export * from './hosts';

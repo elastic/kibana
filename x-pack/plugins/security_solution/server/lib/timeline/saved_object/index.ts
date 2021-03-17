@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './timelines';
+export * as timeline from './timelines';
+export * as note from './note';
+export * as pinnedEvent from './pinned_event';

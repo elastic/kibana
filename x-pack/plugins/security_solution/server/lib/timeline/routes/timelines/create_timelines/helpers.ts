@@ -8,8 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 
 import moment from 'moment';
-import * as timelineLib from '../../../saved_object';
-import * as pinnedEventLib from '../../../saved_object/pinned_event';
+import { timeline as timelineLib, pinnedEvent as pinnedEventLib } from '../../../saved_object';
 import { FrameworkRequest } from '../../../../framework';
 import { SavedTimeline } from '../../../../../../common/types/timeline';
 import { NoteResult, ResponseTimeline } from '../../../../../graphql/types';

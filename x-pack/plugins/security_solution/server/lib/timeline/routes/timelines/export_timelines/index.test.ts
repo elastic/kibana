@@ -20,26 +20,26 @@ import {
   createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
-import { convertSavedObjectToSavedNote } from '../../../saved_object/note';
+import { convertSavedObjectToSavedNote } from '../../../saved_object/note/saved_object';
 import { convertSavedObjectToSavedPinnedEvent } from '../../../saved_object/pinned_event';
 import { convertSavedObjectToSavedTimeline } from '../../../saved_object/timelines/convert_saved_object_to_savedtimeline';
 import { mockGetCurrentUser } from '../../../__mocks__/import_timelines';
 import { SecurityPluginSetup } from '../../../../../../../security/server';
 
-jest.mock('../../convert_saved_object_to_savedtimeline', () => {
+jest.mock('../../../saved_object/timelines/convert_saved_object_to_savedtimeline', () => {
   return {
     convertSavedObjectToSavedTimeline: jest.fn(),
   };
 });
 
-jest.mock('../../../note/saved_object', () => {
+jest.mock('../../../saved_object/note/saved_object', () => {
   return {
     convertSavedObjectToSavedNote: jest.fn(),
     getNotesByTimelineId: jest.fn().mockReturnValue([]),
   };
 });
 
-jest.mock('../../../pinned_event/saved_object', () => {
+jest.mock('../../../saved_object/pinned_event', () => {
   return {
     convertSavedObjectToSavedPinnedEvent: jest.fn(),
     getAllPinnedEventsByTimelineId: jest.fn().mockReturnValue([]),

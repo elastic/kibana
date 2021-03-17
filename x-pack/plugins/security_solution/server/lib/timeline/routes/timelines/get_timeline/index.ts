@@ -21,7 +21,7 @@ import {
   getTimelineTemplateOrNull,
   getTimelineOrNull,
   getAllTimeline,
-} from '../../../saved_object';
+} from '../../../saved_object/timelines';
 import { TimelineStatus } from '../../../../../../common/types/timeline';
 
 export const getTimelineRoute = (

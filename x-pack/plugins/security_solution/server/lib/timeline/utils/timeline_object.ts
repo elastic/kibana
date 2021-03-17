@@ -12,7 +12,7 @@ import {
   TimelineStatus,
 } from '../../../../common/types/timeline';
 import { FrameworkRequest } from '../../framework';
-import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object';
+import { getTimelineOrNull, getTimelineTemplateOrNull } from '../saved_object/timelines';
 
 interface TimelineObjectProps {
   id: string | null | undefined;

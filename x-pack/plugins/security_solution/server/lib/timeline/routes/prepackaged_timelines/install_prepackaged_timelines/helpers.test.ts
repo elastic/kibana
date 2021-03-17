@@ -27,7 +27,7 @@ import { importTimelines } from '../../timelines/import_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
 import { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
 
-jest.mock('../import_timelines');
+jest.mock('../../timelines/import_timelines');
 
 describe('installPrepackagedTimelines', () => {
   let securitySetup: SecurityPluginSetup;
@@ -36,7 +36,7 @@ describe('installPrepackagedTimelines', () => {
 
   const { clients, context } = requestContextMock.createTools();
   const config = createMockConfig();
-  const mockFilePath = '../__mocks__';
+  const mockFilePath = '../../../__mocks__';
   const mockFileName = 'prepackaged_timelines.ndjson';
 
   beforeEach(async () => {

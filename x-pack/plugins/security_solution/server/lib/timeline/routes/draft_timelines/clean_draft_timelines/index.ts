@@ -18,7 +18,7 @@ import {
   resetTimeline,
   getTimeline,
   persistTimeline,
-} from '../../../saved_object';
+} from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
 import { cleanDraftTimelineSchema } from '../../../schemas/draft_timelines/clean_draft_timelines_schema';
 import { TimelineType } from '../../../../../../common/types/timeline';

@@ -44,7 +44,6 @@ export const installPrepackagedTimelines = async (
       ],
     };
   }
-
   return loadData<null, ImportTimelineResultSchema>(readStream, <T>(docs: T) =>
     docs instanceof Readable
       ? importTimelines(docs, maxTimelineImportExportSize, frameworkRequest, isImmutable)

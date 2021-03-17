@@ -46,7 +46,7 @@ describe('CompareTimelinesStatus', () => {
       });
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -120,7 +120,7 @@ describe('CompareTimelinesStatus', () => {
       });
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -185,7 +185,7 @@ describe('CompareTimelinesStatus', () => {
       let timelineObj: TimelinesStatusType;
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => ({
+        jest.doMock('../saved_object/timelines', () => ({
           getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
           getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
             mockGetTemplateTimelineValue
@@ -271,7 +271,7 @@ describe('CompareTimelinesStatus', () => {
       });
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => ({
+        jest.doMock('../saved_object/timelines', () => ({
           getTimelineOrNull: mockGetTimeline,
           getTimelineTemplateOrNull: mockGetTemplateTimeline,
         }));
@@ -362,7 +362,7 @@ describe('CompareTimelinesStatus', () => {
       });
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -441,7 +441,7 @@ describe('CompareTimelinesStatus', () => {
       });
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue(null),
             getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(null),
@@ -527,7 +527,7 @@ describe('CompareTimelinesStatus', () => {
       });
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue({
               ...mockGetTimelineValue,
@@ -599,7 +599,7 @@ describe('CompareTimelinesStatus', () => {
       });
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
+        jest.doMock('../saved_object/timelines', () => {
           return {
             getTimelineOrNull: mockGetTimeline.mockReturnValue({
               ...mockGetTemplateTimelineValue,
@@ -674,7 +674,7 @@ describe('CompareTimelinesStatus', () => {
     });
 
     beforeEach(async () => {
-      jest.doMock('../../saved_object', () => ({
+      jest.doMock('../saved_object/timelines', () => ({
         getTimelineOrNull: mockGetTimeline,
         getTimelineTemplateOrNull: mockGetTemplateTimeline,
       }));
@@ -736,7 +736,7 @@ describe('CompareTimelinesStatus', () => {
     });
 
     beforeEach(async () => {
-      jest.doMock('../../saved_object', () => ({
+      jest.doMock('../saved_object/timelines', () => ({
         getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
         getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
           mockGetTemplateTimelineValue

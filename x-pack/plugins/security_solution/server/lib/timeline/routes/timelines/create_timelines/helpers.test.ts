@@ -44,7 +44,7 @@ jest.mock('moment', () => {
   return jest.fn().mockReturnValue(mockMoment);
 });
 
-jest.mock('../../saved_object', () => ({
+jest.mock('../../../saved_object/timelines', () => ({
   persistTimeline: jest.fn().mockResolvedValue({
     timeline: {
       savedObjectId: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
@@ -53,19 +53,16 @@ jest.mock('../../saved_object', () => ({
   }),
 }));
 
-jest.mock('../../../pinned_event/saved_object', () => ({
+jest.mock('../../../saved_object/pinned_event', () => ({
   savePinnedEvents: jest.fn(),
 }));
 
-jest.mock('../../../note/get_note', () => ({
+jest.mock('../../../saved_object/note', () => ({
   getNote: jest.fn(),
-}));
-
-jest.mock('../../../note/persist_note', () => ({
   persistNote: jest.fn(),
 }));
 
-jest.mock('../../../note/persist_notes', () => ({
+jest.mock('../../../saved_object/note/persist_notes', () => ({
   persistNotes: jest.fn(),
 }));
 
