@@ -15,10 +15,10 @@ export class StaticTextProperty extends StaticStyleProperty<LabelStaticOptions> 
   }
 
   syncTextFieldWithMb(mbLayerId: string, mbMap: MbMap) {
-    if (this.getOptions().value.length) {
-      mbMap.setLayoutProperty(mbLayerId, 'text-field', this.getOptions().value);
-    } else {
-      mbMap.setLayoutProperty(mbLayerId, 'text-field', null);
-    }
+    // if (this.getOptions().value.length) {
+    //   mbMap.setLayoutProperty(mbLayerId, 'text-field', this.getOptions().value);
+    // } else {
+    //   mbMap.setLayoutProperty(mbLayerId, 'text-field', null);
+    // }
   }
 }
