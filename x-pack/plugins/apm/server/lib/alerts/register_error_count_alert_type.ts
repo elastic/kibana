@@ -127,7 +127,7 @@ export function registerErrorCountAlertType({
         },
       };
 
-      const response = await alertingEsClient(services, searchParams);
+      const { body: response } = await alertingEsClient(services, searchParams);
       const errorCount = response.hits.total.value;
 
       if (errorCount > alertParams.threshold) {

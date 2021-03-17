@@ -14,7 +14,7 @@ import {
   CaseType,
   AssociationType,
   ESConnectorFields,
-} from '../../common/api';
+} from '../../common';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
