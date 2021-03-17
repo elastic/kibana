@@ -57,7 +57,6 @@ export const configSchema = schema.object({
     }),
   }),
   cluster_alerts: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     email_notifications: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       email_address: schema.string({ defaultValue: '' }),

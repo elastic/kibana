@@ -34,7 +34,6 @@ describe('config schema', () => {
             "email_address": "",
             "enabled": true,
           },
-          "enabled": true,
         },
         "enabled": true,
         "kibana": Object {
