@@ -58,6 +58,7 @@ import { addBasePath } from '../index';
 
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
+import { registerTransformNodesRoutes } from './transforms_nodes';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import { isLatestTransform } from '../../../common/types/transform';
 
@@ -175,7 +176,6 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
-  registerTransformsAuditMessagesRoutes(routeDependencies);
 
   /**
    * @apiGroup Transforms
@@ -389,6 +389,9 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
+
+  registerTransformsAuditMessagesRoutes(routeDependencies);
+  registerTransformNodesRoutes(routeDependencies);
 }
 
 async function getIndexPatternId(

@@ -23,7 +23,7 @@ import { useFormData, SelectField, NumericField } from '../../../../../../shared
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues, UseField } from '../../../form';
+import { ROLLOVER_EMPTY_VALIDATION, useConfiguration, UseField } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
@@ -47,7 +47,7 @@ export const HotPhase: FunctionComponent = () => {
   const [formData] = useFormData({
     watch: isUsingDefaultRolloverPath,
   });
-  const { isUsingRollover } = useConfigurationIssues();
+  const { isUsingRollover } = useConfiguration();
   const isUsingDefaultRollover: boolean = get(formData, isUsingDefaultRolloverPath);
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
 

@@ -332,6 +332,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       source: joinSource,
       prevDataRequest,
       nextMeta: searchFilters,
+      extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
     });
     if (canSkipFetch) {
       return {
