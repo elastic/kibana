@@ -9,6 +9,7 @@ import { get } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
+import { IndicesOptions } from '../../../../../../common/types/anomaly_detection_jobs';
 
 interface CategoryResults {
   success: boolean;
@@ -20,7 +21,8 @@ export function getCategoryFields(
   fieldName: string,
   size: number,
   query: any,
-  runtimeMappings?: RuntimeMappings
+  runtimeMappings?: RuntimeMappings,
+  indicesOptions?: IndicesOptions
 ): Promise<CategoryResults> {
   return new Promise((resolve, reject) => {
     ml.esSearch({
@@ -38,6 +40,7 @@ export function getCategoryFields(
         },
         ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
       },
+      ...(indicesOptions ?? {}),
     })
       .then((resp: any) => {
         const catFields = get(resp, ['aggregations', 'catFields', 'buckets'], []);
