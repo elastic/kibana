@@ -97,6 +97,19 @@ export async function ensureInstalledDefaultPackages(
   });
 }
 
+export async function isPackageInstalled(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  version?: string;
+}): Promise<Installation | false> {
+  const { savedObjectsClient, pkgName, version } = options;
+  const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
+  if (installedPackage && (!version || installedPackage.version === version)) {
+    return installedPackage;
+  }
+  return false;
+}
+
 export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -104,7 +117,7 @@ export async function ensureInstalledPackage(options: {
   version?: string;
 }): Promise<Installation> {
   const { savedObjectsClient, pkgName, esClient, version } = options;
-  const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
+  const installedPackage = await isPackageInstalled({ savedObjectsClient, pkgName, version });
   if (installedPackage) {
     return installedPackage;
   }

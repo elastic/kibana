@@ -27,6 +27,7 @@ import {
   ensureInstalledDefaultPackages,
   ensureInstalledPackage,
   ensurePackagesCompletedInstall,
+  isPackageInstalled,
 } from './epm/packages/install';
 import { getPackageInfo } from './epm/packages';
 import { packagePolicyService } from './package_policy';
@@ -165,9 +166,15 @@ async function createSetupSideEffects(
   }
 
   for (const preconfiguredPolicy of preconfiguredPolicies) {
-    const { created, policy, integrations } = preconfiguredPolicy;
+    const { created, policy, installedPackagePolicies } = preconfiguredPolicy;
     if (created) {
-      await addPreconfiguredPolicyPackages(soClient, esClient, policy, integrations, defaultOutput);
+      await addPreconfiguredPolicyPackages(
+        soClient,
+        esClient,
+        policy,
+        installedPackagePolicies,
+        defaultOutput
+      );
     }
   }
 
@@ -180,22 +187,24 @@ function ensurePreconfiguredPackagesAndPolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
-  const { policies: policiesOrUndefined, packages: packagesOrUndefined } =
+  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
     appContextService.getConfig() ?? {};
 
   const policies = policiesOrUndefined ?? [];
   const packages = packagesOrUndefined ?? [];
 
   // Validate configured packages to ensure there are no version conflicts
-  const packageNamesByVersion = groupBy(
-    packages,
-    (packageString: string) => packageString.split(':')[0]
-  );
+  const packageNamesByVersion = groupBy(packages, (pkg) => pkg.version);
   const duplicatePackages = Object.entries(packageNamesByVersion).filter(
     ([, versions]) => versions.length > 1
   );
   if (duplicatePackages.length) {
-    const duplicateList = duplicatePackages.map(([, versions]) => versions.join(', ')).join('; ');
+    // List duplicate packages as a comma-separated list of <package-name>:<semver>
+    // If there are multiple packages with duplicate versions, separate them with semicolons, e.g
+    // package-a:1.0.0, package-a:2.0.0; package-b:1.0.0, package-b:2.0.0
+    const duplicateList = duplicatePackages
+      .map(([, versions]) => versions.map((v) => `${v.name}:${v.version}`).join(', '))
+      .join('; ');
 
     throw new Error(
       i18n.translate('xpack.fleet.setup.duplicatePackageError', {
@@ -209,20 +218,44 @@ function ensurePreconfiguredPackagesAndPolicies(
 
   // Create policies specified in Kibana config
   const policiesPromise = Promise.all(
-    policies.map(async ({ integrations, id, ...newAgentPolicy }) => {
+    policies.map(async ({ package_policies: packagePolicies, id, ...newAgentPolicy }) => {
+      const installedPackagePolicies = await Promise.all(
+        packagePolicies.map(async ({ package: pkg, name }) => {
+          const installedPackage = await isPackageInstalled({
+            savedObjectsClient: soClient,
+            pkgName: pkg.name,
+          });
+          if (!installedPackage) {
+            throw new Error(
+              i18n.translate('xpack.fleet.preconfiguredPackageMissingError', {
+                defaultMessage:
+                  'Agent policy {agentPolicyName} could not be configured. Package policy {packagePolicyName} uses the package {pkgName}, which is not installed. Add {pkgName} to {packagesConfigValue} or remove it from this agent policy.',
+                values: {
+                  agentPolicyName: newAgentPolicy.name,
+                  packagePolicyName: name,
+                  pkgName: pkg.name,
+                  packagesConfigValue: 'xpack.fleet.packages',
+                },
+              })
+            );
+          }
+          return { name, installedPackage };
+        })
+      );
+
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
         { ...newAgentPolicy, preconfiguration_id: String(id) }
       );
-      return { created, policy, integrations };
+      return { created, policy, installedPackagePolicies };
     })
   );
 
   // Preinstall packages specified in Kibana config
   const packagesPromise = Promise.all(
-    packages.map((packageString) =>
-      ensureInstalledPreconfiguredPackage(soClient, esClient, packageString)
+    packages.map(({ name, version }) =>
+      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version)
     )
   );
 
@@ -233,34 +266,29 @@ async function addPreconfiguredPolicyPackages(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
-  integrations: Array<{ package: string; name: string }>,
+  installedPackagePolicies: Array<{ name: string; installedPackage: Installation }>,
   defaultOutput: Output
 ) {
   return await Promise.all(
-    integrations.map(async ({ package: packageString, name }) => {
-      const installedPackage = await ensureInstalledPreconfiguredPackage(
-        soClient,
-        esClient,
-        packageString
-      );
-      return addPackageToAgentPolicy(
+    installedPackagePolicies.map(async ({ installedPackage, name }) =>
+      addPackageToAgentPolicy(
         soClient,
         esClient,
         installedPackage,
         agentPolicy,
         defaultOutput,
         name
-      );
-    })
+      )
+    )
   );
 }
 
 async function ensureInstalledPreconfiguredPackage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  packageString: string
+  pkgName: string,
+  version: string
 ) {
-  const [pkgName, version] = packageString.split(':');
   return ensureInstalledPackage({
     savedObjectsClient: soClient,
     pkgName,

@@ -18,20 +18,8 @@ import {
 
 import { FleetPlugin } from './plugin';
 
-const packageNameRegex = () => /^[a-z0-9_]+$/;
 const semverRegex = () =>
   /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
-
-const validatePackageNameWithSemver = (value: string) => {
-  const [name, semver] = value.split(':');
-  const nameMatchesPattern = packageNameRegex().test(name);
-  const semverMatchesPattern = semverRegex().test(semver);
-  if (!nameMatchesPattern || !semverMatchesPattern) {
-    return i18n.translate('xpack.fleet.config.invalidPackageNameError', {
-      defaultMessage: 'must be in the format <package-name>:<semver>',
-    });
-  }
-};
 
 export { default as apm } from 'elastic-apm-node';
 export {
@@ -45,6 +33,16 @@ export {
 } from './services';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
 export { AgentNotFoundError } from './errors';
+
+const varsSchema = schema.maybe(
+  schema.recordOf(
+    schema.string(),
+    schema.object({
+      type: schema.maybe(schema.string()),
+      value: schema.oneOf([schema.string(), schema.number()]),
+    })
+  )
+);
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -89,9 +87,22 @@ export const config: PluginConfigDescriptor = {
       }),
     }),
     packages: schema.maybe(
-      schema.arrayOf(schema.string({ validate: validatePackageNameWithSemver }))
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          version: schema.string({
+            validate: (value) => {
+              if (!semverRegex().test(value)) {
+                return i18n.translate('xpack.fleet.config.invalidPackageVersionError', {
+                  defaultMessage: 'must be a valid semver',
+                });
+              }
+            },
+          }),
+        })
+      )
     ),
-    policies: schema.maybe(
+    agentPolicies: schema.maybe(
       schema.arrayOf(
         schema.object({
           name: schema.string(),
@@ -101,10 +112,35 @@ export const config: PluginConfigDescriptor = {
           monitoring_enabled: schema.maybe(
             schema.arrayOf(schema.oneOf([schema.literal('logs'), schema.literal('metrics')]))
           ),
-          integrations: schema.arrayOf(
+          package_policies: schema.arrayOf(
             schema.object({
-              package: schema.string({ validate: validatePackageNameWithSemver }),
               name: schema.string(),
+              package: schema.object({
+                name: schema.string(),
+              }),
+              description: schema.maybe(schema.string()),
+              namespace: schema.maybe(schema.string()),
+              inputs: schema.maybe(
+                schema.arrayOf(
+                  schema.object({
+                    type: schema.string(),
+                    enabled: schema.maybe(schema.boolean()),
+                    vars: varsSchema,
+                    streams: schema.maybe(
+                      schema.arrayOf(
+                        schema.object({
+                          data_stream: schema.object({
+                            type: schema.string(),
+                            dataset: schema.string(),
+                          }),
+                          enabled: schema.maybe(schema.boolean()),
+                          vars: varsSchema,
+                        })
+                      )
+                    ),
+                  })
+                )
+              ),
             })
           ),
         })
