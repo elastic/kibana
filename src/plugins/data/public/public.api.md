@@ -2055,6 +2055,8 @@ export interface QueryStringInputProps {
     //
     // (undocumented)
     size?: SuggestionsListSize;
+    // (undocumented)
+    submitOnBlur?: boolean;
 }
 
 // @public (undocumented)
