@@ -180,7 +180,7 @@ describe('bootstrapRenderer', () => {
 
       expect(getThemeTagMock).toHaveBeenCalledTimes(1);
       expect(getThemeTagMock).toHaveBeenCalledWith({
-        themeVersion: 'v7',
+        themeVersion: 'v8',
         darkMode: false,
       });
     });
