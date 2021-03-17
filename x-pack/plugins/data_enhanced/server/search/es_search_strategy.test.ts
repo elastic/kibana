@@ -133,8 +133,8 @@ describe('ES search strategy', () => {
         expect(mockGetCaller).toBeCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
-        expect(request.body).toHaveProperty('wait_for_completion_timeout');
-        expect(request.body).toHaveProperty('keep_alive', '1m');
+        expect(request).toHaveProperty('wait_for_completion_timeout');
+        expect(request).toHaveProperty('keep_alive', '1m');
       });
 
       it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
@@ -219,8 +219,8 @@ describe('ES search strategy', () => {
         expect(mockGetCaller).toBeCalled();
         const request = mockGetCaller.mock.calls[0][0];
         expect(request.id).toEqual('foo');
-        expect(request.body).toHaveProperty('wait_for_completion_timeout');
-        expect(request.body).not.toHaveProperty('keep_alive');
+        expect(request).toHaveProperty('wait_for_completion_timeout');
+        expect(request).not.toHaveProperty('keep_alive');
       });
     });
 
