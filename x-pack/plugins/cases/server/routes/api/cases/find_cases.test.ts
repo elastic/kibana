@@ -15,7 +15,7 @@ import {
   mockCases,
 } from '../__fixtures__';
 import { initFindCasesApi } from './find_cases';
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_URL } from '../../../../common';
 import { mockCaseConfigure, mockCaseNoConnectorId } from '../__fixtures__/mock_saved_objects';
 
 describe('FIND all cases', () => {

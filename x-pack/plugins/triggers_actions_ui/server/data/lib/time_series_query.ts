@@ -6,8 +6,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
-import { Logger } from 'kibana/server';
-import { LegacyScopedClusterClient } from '../../../../../../src/core/server';
+import { Logger, ElasticsearchClient } from 'kibana/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
 
@@ -16,14 +15,14 @@ export { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 
 export interface TimeSeriesQueryParameters {
   logger: Logger;
-  callCluster: LegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   query: TimeSeriesQuery;
 }
 
 export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
-  const { logger, callCluster, query: queryParams } = params;
+  const { logger, esClient, query: queryParams } = params;
   const {
     index,
     timeWindowSize,
@@ -59,9 +58,8 @@ export async function timeSeriesQuery(
       },
       // aggs: {...}, filled in below
     },
-    ignoreUnavailable: true,
-    allowNoIndices: true,
-    ignore: [404],
+    ignore_unavailable: true,
+    allow_no_indices: true,
   };
 
   // add the aggregations
@@ -127,17 +125,16 @@ export async function timeSeriesQuery(
     };
   }
 
-  let esResult: SearchResponse<unknown>;
   const logPrefix = 'indexThreshold timeSeriesQuery: callCluster';
   logger.debug(`${logPrefix} call: ${JSON.stringify(esQuery)}`);
-
+  let esResult: SearchResponse<unknown>;
   // note there are some commented out console.log()'s below, which are left
   // in, as they are VERY useful when debugging these queries; debug logging
   // isn't as nice since it's a single long JSON line.
 
   // console.log('time_series_query.ts request\n', JSON.stringify(esQuery, null, 4));
   try {
-    esResult = await callCluster('search', esQuery);
+    esResult = (await esClient.search<SearchResponse<unknown>>(esQuery, { ignore: [404] })).body;
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
     logger.warn(`${logPrefix} error: ${err.message}`);
