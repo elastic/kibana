@@ -63,13 +63,16 @@ describe('Processor: Append', () => {
     await saveNewProcessor();
 
     // Expect form error as "field" is required parameter
-    expect(form.getErrorsMessages()).toEqual(['A field value is required.', 'A value is required.']);
+    expect(form.getErrorsMessages()).toEqual([
+      'A field value is required.',
+      'A value is required.',
+    ]);
   });
 
-  test.only('saves with default parameter values', async () => {
+  test('saves with default parameter values', async () => {
     const {
       actions: { addProcessor, saveNewProcessor, addProcessorType },
-      form, find
+      form,
     } = testBed;
 
     // Open flyout to add new processor
@@ -81,7 +84,7 @@ describe('Processor: Append', () => {
 
     // find('valueField.comboBoxInput').simulate('change', [{ label: 'Some_Value' }]);
 
-    form.setInputValue('valueField.comboBoxSearchInput', 'Some_Value')
+    form.setInputValue('valueField.comboBoxSearchInput', 'Some_Value');
     // Save the field
     await saveNewProcessor();
 
