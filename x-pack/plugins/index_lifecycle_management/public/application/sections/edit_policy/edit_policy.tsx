@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useMemo, useState, useEffect } from 'react';
-import { get, set, cloneDeep } from 'lodash';
+import { get } from 'lodash';
 
 import { RouteComponentProps } from 'react-router-dom';
 
@@ -30,6 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { RollupAction } from '../../../../common/types';
 import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
 import { toasts } from '../../services/notification';
 import { createDocLink } from '../../services/documentation';
@@ -68,15 +69,13 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   const [isShowingPolicyJsonFlyout, setIsShowingPolicyJsonFlyout] = useState(false);
   const {
     isNewPolicy,
-    policy: originalPolicy,
+    policy: currentPolicy,
     existingPolicies,
     policyName,
     license,
   } = useEditPolicyContext();
 
   const { currentView, goToPolicyView } = useNavigationContext();
-
-  const [currentPolicy, setCurrentPolicy] = useState(() => cloneDeep(originalPolicy));
 
   const {
     services: { cloud },
@@ -149,6 +148,15 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
         backToPolicyList();
       }
     }
+  };
+
+  const updateRollupConfigValue = (
+    phase: 'hot' | 'cold',
+    rollupAction: RollupAction['config']
+  ): void => {
+    const rollupConfigPath = `phases.${phase}.actions.rollup.config`;
+    const rollupField = form.getFields()[rollupConfigPath];
+    rollupField.setValue(rollupAction);
   };
 
   const togglePolicyJsonFlyout = () => {
@@ -366,17 +374,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
               }}
               onDone={(rollupAction) => {
                 const { phase } = currentView;
-                const rollupConfigPath = `phases.${phase}.actions.rollup.config`;
-                const rollupField = form.getFields()[rollupConfigPath];
-                const newCurrentPolicy = cloneDeep({
-                  ...currentPolicy,
-                  name: originalPolicyName,
-                });
-
-                set(newCurrentPolicy, rollupConfigPath, rollupAction);
-                setCurrentPolicy(newCurrentPolicy);
-                rollupField.setValue(rollupAction);
-
+                updateRollupConfigValue(phase, rollupAction);
                 goToPolicyView(`#${phase}-rollup`);
               }}
             />

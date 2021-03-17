@@ -331,7 +331,6 @@ export class FieldChooser extends Component<Props, State> {
       <Form form={customFieldForm}>
         <UseField<string>
           path="fieldName"
-          form={customFieldForm}
           component={TextField}
           config={{
             defaultValue: '',
