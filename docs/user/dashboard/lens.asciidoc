@@ -33,6 +33,38 @@ image::images/lens_fields_indexpattern.png[Lens fields list can be filtered]
 NOTE: The sum of the *Other* fields can equal more than 100% by a small amount.
 
 [float]
+[[drag-and-drop-keyboard-navigation]]
+=== Create your visualizations faster with keyboard navigation
+
+Lens has a fully accessible, continuously improved drag and drop system. By using keyboard navigation instead of a mouse, you can significantly speed up your work.
+
+[role="screenshot"]
+image::images/lens_drag_drop_1.gif[Presented Lens drag and drop]
+
+. Set a focus on the chosen item. Most of the draggable elements have two focus states. The inner focus state opens a panel with more detailed information or options. The outer one allows dragging an element. Tab through the page until you get the outer focus state on the chosen element:
++
+[role="screenshot"]
+image::images/lens_drag_drop_2.png[Lens drag and drop focus state]
+
+Complete the following actions:
+
+. Press Space bar to start dragging an item.
+
+. Use Left and Right arrows to select where you want to drop the field.
+
+. To duplicate an operation, use Left and Right arrows to select the `Drop a field or click to add` in the same group.
+
++
+[role="screenshot"]
+image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
+
+. To reorder the fields in the group, use Up and Down arrows.
+
+. Press Space bar to confirm.
+
+. To cancel the action, press Esc.
+
+[float]
 [[lens-faq]]
 ==== Frequently asked questions
 
@@ -153,4 +185,3 @@ Visualizing saved searches in unsupported in *Lens*.
 ===== How do I change the number of suggestions?
 
 Configuring the *Suggestions* that *Lens* automatically populates is unsupported.
-
