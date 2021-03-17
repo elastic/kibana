@@ -820,11 +820,11 @@ describe('Session', () => {
     it('[match=all] clears all sessions even if current initiator request does not have a session', async () => {
       mockSessionCookie.get.mockResolvedValue(null);
 
-      const mockRequest = httpServerMock.createKibanaRequest();
-      await expect(session.invalidate(mockRequest, { match: 'all' })).resolves.toBe(10);
+      await expect(
+        session.invalidate(httpServerMock.createKibanaRequest(), { match: 'all' })
+      ).resolves.toBe(10);
 
-      expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
-      expect(mockSessionCookie.clear).toHaveBeenCalledWith(mockRequest);
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
       expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
       expect(mockSessionIndex.invalidate).toHaveBeenCalledWith({ match: 'all' });
     });

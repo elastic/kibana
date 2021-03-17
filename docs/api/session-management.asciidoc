@@ -1,0 +1,11 @@
+[role="xpack"]
+[[session-management-api]]
+== {kib} session management APIs
+
+Allows managing {kib} <<xpack-security-session-management, user sessions>>.
+
+The following {kib} session management APIs are available:
+
+* <<session-management-api-invalidate, Invalidate sessions API>> to invalidate {kib} user sessions
+
+include::session-management/invalidate.asciidoc[]

@@ -206,7 +206,7 @@ export class Session {
       ...publicSessionValue,
       ...sessionExpirationInfo,
       sid,
-      usernameHash: username && createHash('sha3-256').update(username).digest('hex'),
+      usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(JSON.stringify({ username, state }), aad),
     });
 
@@ -242,7 +242,7 @@ export class Session {
       ...sessionValue.metadata.index,
       ...publicSessionInfo,
       ...sessionExpirationInfo,
-      usernameHash: username && createHash('sha3-256').update(username).digest('hex'),
+      usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(
         JSON.stringify({ username, state }),
         sessionCookieValue.aad
@@ -380,6 +380,11 @@ export class Session {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     const sessionLogger = this.getLoggerForSID(sessionCookieValue?.sid);
 
+    // We clear session cookie only when the current session should be invalidated since it's the
+    // only case when this action is explicitly and unequivocally requested. This behavior doesn't
+    // introduce any risk since even if the current session has been affected the session cookie
+    // will be automatically invalidated as soon as client attempts to re-use it due to missing
+    // underlying session index value.
     let invalidateIndexValueFilter;
     if (filter.match === 'current') {
       if (!sessionCookieValue) {
@@ -391,7 +396,6 @@ export class Session {
       invalidateIndexValueFilter = { match: 'sid' as 'sid', sid: sessionCookieValue.sid };
     } else if (filter.match === 'all') {
       sessionLogger.debug('Invalidating all sessions.');
-      await this.options.sessionCookie.clear(request);
       invalidateIndexValueFilter = filter;
     } else {
       sessionLogger.debug(
@@ -399,17 +403,12 @@ export class Session {
           filter.query.username ? { ...filter.query, username: '[REDACTED]' } : filter.query
         )}.`
       );
-
-      // We don't clear session cookie in this case since we cannot always be sure that the query
-      // will match the current session. This behavior doesn't introduce any risk since even if the
-      // current session has been affected the session cookie will be automatically invalidated as
-      // soon as client attempts to re-use it due to missing underlying session index value.
       invalidateIndexValueFilter = filter.query.username
         ? {
             ...filter,
             query: {
               provider: filter.query.provider,
-              usernameHash: createHash('sha3-256').update(filter.query.username).digest('hex'),
+              usernameHash: Session.getUsernameHash(filter.query.username),
             },
           }
         : filter;
@@ -460,5 +459,15 @@ export class Session {
    */
   private getLoggerForSID(sid?: string) {
     return this.options.logger.get(sid?.slice(-10) ?? 'no_session');
+  }
+
+  /**
+   * Generates a sha3-256 hash for the specified `username`. The hash is intended to be stored in
+   * the session index to allow querying user specific sessions and don't expose the original
+   * `username` at the same time.
+   * @param username Username string to generate hash for.
+   */
+  private static getUsernameHash(username: string) {
+    return createHash('sha3-256').update(username).digest('hex');
   }
 }
