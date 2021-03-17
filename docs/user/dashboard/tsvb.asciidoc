@@ -1,4 +1,4 @@
-[[create-panels-with-tsvb]]
+[[tsvb]]
 === TSVB
 
 *TSVB* requires a date field and supports <<aggregation-reference, most {es} metric aggregations>>, multiple visualization types, custom functions,

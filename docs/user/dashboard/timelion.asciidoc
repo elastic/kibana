@@ -1,4 +1,4 @@
-[[create-panels-with-timelion]]
+[[timelion]]
 === Timelion
 
 Instead of using a visual editor to create charts, you define a graph by chaining functions together, using a timelion specific syntax. This syntax enables some features that classical point series charts don't offer - like drawing data from different indices or data sources into one graph.

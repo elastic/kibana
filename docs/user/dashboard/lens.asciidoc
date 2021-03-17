@@ -1,4 +1,4 @@
-[[lens-editor]]
+[[lens]]
 === Lens
 
 [float]
@@ -161,12 +161,6 @@ image::images/lens_bucketed_aggregation_advanced_dropdown.png[Lens Advanced opti
 
 Multiple column sorting is unsupported in *Lens*, but is supported in *Discover*. For information on how to sort multiple columns in *Discover*, 
 refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
-
-[float]
-[[is-it-possible-to-inspect-elasticsearch-queries]]
-===== How do I inspect {es} queries?
-
-Inspecting {es} queries in visualizations is unsupported in *Lens*. 
 
 [float]
 [[is-it-possible-to-sort-dimensions-in-a-chart]]
