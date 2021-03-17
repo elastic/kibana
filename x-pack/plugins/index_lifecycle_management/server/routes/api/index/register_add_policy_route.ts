@@ -18,15 +18,14 @@ async function addLifecyclePolicy(
   alias: string
 ) {
   const body = {
-    [indexName]: {
-      lifecycle: {
-        name: policyName,
-        rollover_alias: alias,
-      },
+    lifecycle: {
+      name: policyName,
+      rollover_alias: alias,
     },
   };
 
-  return client.indices.putSettings({ body });
+  // @ts-expect-error @elastic/elasticsearch UpdateIndexSettingsRequest does not support index property
+  return client.indices.putSettings({ index: indexName, body });
 }
 
 const bodySchema = schema.object({
