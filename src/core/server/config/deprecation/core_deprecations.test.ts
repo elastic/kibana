@@ -248,13 +248,6 @@ describe('core deprecations', () => {
         ]
       `);
     });
-
-    it('does not warn when other events are configured', () => {
-      const { messages } = applyCoreDeprecations({
-        logging: { events: { log: '*' } },
-      });
-      expect(messages).toEqual([]);
-    });
   });
 
   describe('logging.events.request and logging.events.response', () => {
@@ -290,13 +283,6 @@ describe('core deprecations', () => {
         ]
       `);
     });
-
-    it('does not warn when other events are configured', () => {
-      const { messages } = applyCoreDeprecations({
-        logging: { events: { log: '*' } },
-      });
-      expect(messages).toEqual([]);
-    });
   });
 
   describe('logging.timezone', () => {
@@ -309,13 +295,6 @@ describe('core deprecations', () => {
           "\\"logging.timezone\\" has been deprecated and will be removed in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
-    });
-
-    it('does not warn when other events are configured', () => {
-      const { messages } = applyCoreDeprecations({
-        logging: { events: { log: '*' } },
-      });
-      expect(messages).toEqual([]);
     });
   });
 
@@ -429,6 +408,32 @@ describe('core deprecations', () => {
       expect(messages).toMatchInlineSnapshot(`
         Array [
           "\\"logging.rotate\\" and sub-options have been deprecated and will be removed in 8.0. Moving forward, you can enable log rotation using the \\"rolling-file\\" appender for a logger in your logging configuration. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.events.log', () => {
+    it('warns when events.log is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { log: ['info'] } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.log\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level\\" in your logging configuration. ",
+        ]
+      `);
+    });
+  });
+
+  describe('logging.events.error', () => {
+    it('warns when events.error is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { events: { error: ['some error'] } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.events.error\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level: error\\" in your logging configuration. ",
         ]
       `);
     });

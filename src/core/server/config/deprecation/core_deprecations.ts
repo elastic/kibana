@@ -213,6 +213,26 @@ const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
+const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.events.log')) {
+    log(
+      '"logging.events.log" has been deprecated and will be removed ' +
+        'in 8.0. Moving forward, you can use "logging.root.level" in your logging configuration. '
+    );
+  }
+  return settings;
+};
+
+const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.events.error')) {
+    log(
+      '"logging.events.error" has been deprecated and will be removed ' +
+        'in 8.0. Moving forward, you can use "logging.root.level: error" in your logging configuration. '
+    );
+  }
+  return settings;
+};
+
 export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unusedFromRoot }) => [
   unusedFromRoot('savedObjects.indexCheckTimeout'),
   unusedFromRoot('server.xsrf.token'),
@@ -256,4 +276,6 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   verboseLoggingDeprecation,
   jsonLoggingDeprecation,
   logRotateDeprecation,
+  logEventsLogDeprecation,
+  logEventsErrorDeprecation,
 ];
