@@ -44,7 +44,7 @@ interface Props {
   /**
    * Validation to be applied to every text item
    */
-  textValidation?: ValidationFunc<any, string, string>;
+  textValidations?: Array<ValidationFunc<any, string, string>>;
   /**
    * Serializer to be applied to every text item
    */
@@ -71,7 +71,7 @@ function DragAndDropTextListComponent({
   onAdd,
   onRemove,
   addLabel,
-  textValidation,
+  textValidations,
   textDeserializer,
   textSerializer,
 }: Props): JSX.Element {
@@ -143,8 +143,8 @@ function DragAndDropTextListComponent({
                             <UseField<string>
                               path={item.path}
                               config={{
-                                validations: textValidation
-                                  ? [{ validator: textValidation }]
+                                validations: textValidations
+                                  ? textValidations.map((validator) => ({ validator }))
                                   : undefined,
                                 deserializer: textDeserializer,
                                 serializer: textSerializer,

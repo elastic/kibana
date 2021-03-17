@@ -13,7 +13,7 @@ import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../..
 
 import { TextEditor } from '../field_components';
 
-import { EDITOR_PX_HEIGHT, FieldsConfig, from, to } from './shared';
+import { EDITOR_PX_HEIGHT, FieldsConfig, from, to, isJSONStringValidator } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { TargetField } from './common_fields/target_field';
@@ -39,6 +39,9 @@ const fieldsConfig: FieldsConfig = {
             defaultMessage: 'A value is required.',
           })
         ),
+      },
+      {
+        validator: isJSONStringValidator,
       },
     ],
   },

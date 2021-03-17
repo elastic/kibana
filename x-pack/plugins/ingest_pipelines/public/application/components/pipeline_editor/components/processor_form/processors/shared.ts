@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
 import * as rt from 'io-ts';
+import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 
-import { FieldConfig } from '../../../../../../shared_imports';
+import { FieldConfig, ValidationFunc } from '../../../../../../shared_imports';
 
 export const arrayOfStrings = rt.array(rt.string);
 
@@ -40,8 +41,13 @@ export const to = {
    * Useful when deserializing strings that will be rendered inside of text areas or text inputs. We want
    * a string like: "my\ttab" to render the same, not to render as "my<tab>tab".
    */
-  escapeBackslashes: (v: unknown) =>
-    typeof v === 'string' ? JSON.parse(JSON.stringify(v).replace(/\\/g, '\\\\')) : v,
+  escapeBackslashes: (v: unknown) => {
+    if (typeof v === 'string') {
+      const s = JSON.stringify(v);
+      return s.slice(1, s.length - 1);
+    }
+    return v;
+  },
 };
 
 /**
@@ -80,8 +86,36 @@ export const from = {
    * the user input. For instance, given "my\ttab", encoded as "my%5Ctab" will JSON.stringify to "my\\ttab", instead we want
    * to keep the input exactly as the user entered it.
    */
-  unescapeBackslashes: (v: unknown) =>
-    typeof v === 'string' ? JSON.parse(JSON.stringify(v).replace(/\\\\/g, '\\')) : v,
+  unescapeBackslashes: (v: unknown) => {
+    if (typeof v === 'string') {
+      try {
+        return JSON.parse(`"${v}"`);
+      } catch (e) {
+        // Best effort
+        return v;
+      }
+    }
+  },
+};
+
+const isJSONString = (v: string) => {
+  try {
+    JSON.parse(`"${v}"`);
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+export const isJSONStringValidator: ValidationFunc = ({ value }) => {
+  if (typeof value !== 'string' || !isJSONString(value)) {
+    return {
+      message: i18n.translate(
+        'xpack.ingestPipelines.pipelineEditor.jsonStringField.invalidStringMessage',
+        { defaultMessage: 'Invalid JSON string.' }
+      ),
+    };
+  }
 };
 
 export const EDITOR_PX_HEIGHT = {

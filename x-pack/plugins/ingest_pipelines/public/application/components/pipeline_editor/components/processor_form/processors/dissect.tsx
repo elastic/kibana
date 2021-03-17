@@ -22,7 +22,7 @@ import {
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { EDITOR_PX_HEIGHT, from, to } from './shared';
+import { EDITOR_PX_HEIGHT, from, to, isJSONStringValidator } from './shared';
 
 const { emptyField } = fieldValidators;
 
@@ -68,6 +68,9 @@ const getFieldsConfig = (esDocUrl: string): Record<string, FieldConfig> => {
               }
             )
           ),
+        },
+        {
+          validator: isJSONStringValidator,
         },
       ],
     },
