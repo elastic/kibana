@@ -9,7 +9,6 @@ import { curry } from 'lodash';
 import { Logger } from 'src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
 import { CasePatchRequest, CasePostRequest, CommentRequest, CommentType } from '../../../common';
-import { createExternalCasesClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {
   CaseExecutorResponse,
@@ -20,20 +19,12 @@ import {
 import * as i18n from './translations';
 
 import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
-import { nullUser } from '../../common';
 import { createCaseError } from '../../common/error';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
 // action type definition
-export function getActionType({
-  logger,
-  caseService,
-  caseConfigureService,
-  connectorMappingsService,
-  userActionService,
-  alertsService,
-}: GetActionTypeParams): CaseActionType {
+export function getActionType({ logger, factory }: GetActionTypeParams): CaseActionType {
   return {
     id: '.case',
     minimumLicenseRequired: 'basic',
@@ -43,44 +34,26 @@ export function getActionType({
       params: CaseExecutorParamsSchema,
     },
     executor: curry(executor)({
-      alertsService,
-      caseConfigureService,
-      caseService,
-      connectorMappingsService,
+      factory,
       logger,
-      userActionService,
     }),
   };
 }
 
 // action executor
 async function executor(
-  {
-    alertsService,
-    caseConfigureService,
-    caseService,
-    connectorMappingsService,
-    logger,
-    userActionService,
-  }: GetActionTypeParams,
+  { logger, factory }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
   const { actionId, params, services } = execOptions;
   const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;
 
-  const { savedObjectsClient, scopedClusterClient } = services;
-  const casesClient = createExternalCasesClient({
-    savedObjectsClient,
+  const { scopedClusterClient } = services;
+  const casesClient = await factory.create({
+    request: undefined,
+    savedObjectsService: undefined,
     scopedClusterClient,
-    // we might want the user information to be passed as part of the action request
-    user: nullUser,
-    caseService,
-    caseConfigureService,
-    connectorMappingsService,
-    userActionService,
-    alertsService,
-    logger,
   });
 
   if (!supportedSubActions.includes(subAction)) {

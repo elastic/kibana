@@ -32,7 +32,7 @@ export function initPostCommentApi({ router, logger }: RouteDeps) {
         return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
       }
 
-      const casesClient = context.cases.getCasesClient();
+      const casesClient = await context.cases.getCasesClient();
       const caseId = request.query?.subCaseId ?? request.params.case_id;
       const comment = request.body as CommentRequest;
 

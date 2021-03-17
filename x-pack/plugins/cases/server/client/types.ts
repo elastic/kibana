@@ -19,6 +19,7 @@ import {
   CaseUserActionsResponse,
   User,
 } from '../../common';
+import { Authorization } from '../authorization/authorization';
 import { AlertInfo } from '../common';
 import {
   CaseConfigureServiceSetup,
@@ -65,7 +66,7 @@ export interface MappingsClient {
   connectorType: string;
 }
 
-export interface CasesClientFactoryArguments {
+export interface CasesClientConstructorArguments {
   scopedClusterClient: ElasticsearchClient;
   caseConfigureService: CaseConfigureServiceSetup;
   caseService: CaseServiceSetup;
@@ -75,6 +76,7 @@ export interface CasesClientFactoryArguments {
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
   logger: Logger;
+  authorization: Authorization;
 }
 
 export interface ConfigureFields {

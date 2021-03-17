@@ -27,7 +27,7 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const casesClient = context.cases.getCasesClient();
+        const casesClient = await context.cases.getCasesClient();
         const id = request.params.case_id;
 
         return response.ok({

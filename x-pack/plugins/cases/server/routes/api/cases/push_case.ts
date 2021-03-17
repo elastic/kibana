@@ -31,7 +31,7 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
 
-        const casesClient = context.cases.getCasesClient();
+        const casesClient = await context.cases.getCasesClient();
         const actionsClient = context.actions?.getActionsClient();
 
         if (actionsClient == null) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesClientFactoryArguments, CasesClient } from './types';
+import { CasesClientConstructorArguments, CasesClient } from './types';
 import { CasesClientHandler } from './client';
 
 export { CasesClientHandler } from './client';
@@ -14,7 +14,9 @@ export { CasesClient } from './types';
 /**
  * Create a CasesClientHandler to external services (other plugins).
  */
-export const createExternalCasesClient = (clientArgs: CasesClientFactoryArguments): CasesClient => {
+export const createExternalCasesClient = (
+  clientArgs: CasesClientConstructorArguments
+): CasesClient => {
   const client = new CasesClientHandler(clientArgs);
   return client;
 };

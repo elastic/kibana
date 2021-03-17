@@ -31,20 +31,12 @@ export const separator = '__SEPARATOR__';
 export const registerConnectors = ({
   registerActionType,
   logger,
-  caseService,
-  caseConfigureService,
-  connectorMappingsService,
-  userActionService,
-  alertsService,
+  factory,
 }: RegisterConnectorsArgs) => {
   registerActionType(
     getCaseConnector({
       logger,
-      caseService,
-      caseConfigureService,
-      connectorMappingsService,
-      userActionService,
-      alertsService,
+      factory,
     })
   );
 };

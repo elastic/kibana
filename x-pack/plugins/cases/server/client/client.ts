@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
 import {
-  CasesClientFactoryArguments,
+  CasesClientConstructorArguments,
   CasesClient,
   ConfigureFields,
   MappingsClient,
@@ -37,6 +37,7 @@ import { get as getUserActions } from './user_actions/get';
 import { get as getAlerts } from './alerts/get';
 import { push } from './cases/push';
 import { createCaseError } from '../common/error';
+import { Authorization } from '../authorization/authorization';
 
 /**
  * This class is a pass through for common case functionality (like creating, get a case).
@@ -51,8 +52,9 @@ export class CasesClientHandler implements CasesClient {
   private readonly _userActionService: CaseUserActionServiceSetup;
   private readonly _alertsService: AlertServiceContract;
   private readonly logger: Logger;
+  private readonly authorization: Authorization;
 
-  constructor(clientArgs: CasesClientFactoryArguments) {
+  constructor(clientArgs: CasesClientConstructorArguments) {
     this._scopedClusterClient = clientArgs.scopedClusterClient;
     this._caseConfigureService = clientArgs.caseConfigureService;
     this._caseService = clientArgs.caseService;
@@ -62,10 +64,12 @@ export class CasesClientHandler implements CasesClient {
     this._userActionService = clientArgs.userActionService;
     this._alertsService = clientArgs.alertsService;
     this.logger = clientArgs.logger;
+    this.authorization = clientArgs.authorization;
   }
 
   public async create(caseInfo: CasePostRequest) {
     try {
+      // TODO: authorize the user
       return create({
         savedObjectsClient: this._savedObjectsClient,
         caseService: this._caseService,
