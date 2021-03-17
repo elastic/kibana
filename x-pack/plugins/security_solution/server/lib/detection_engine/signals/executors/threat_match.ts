@@ -47,21 +47,6 @@ export const threatMatchExecutor = async ({
   buildRuleMessage: BuildRuleMessage;
 }) => {
   const ruleParams = rule.attributes.params;
-  if (
-    ruleParams.threatQuery == null ||
-    ruleParams.threatIndex == null ||
-    ruleParams.threatMapping == null ||
-    ruleParams.query == null
-  ) {
-    throw new Error(
-      [
-        'Indicator match is missing threatQuery and/or threatIndex and/or threatMapping:',
-        `threatQuery: "${ruleParams.threatQuery}"`,
-        `threatIndex: "${ruleParams.threatIndex}"`,
-        `threatMapping: "${ruleParams.threatMapping}"`,
-      ].join(' ')
-    );
-  }
   const inputIndex = await getInputIndex(services, version, ruleParams.index);
   return createThreatSignals({
     tuples,

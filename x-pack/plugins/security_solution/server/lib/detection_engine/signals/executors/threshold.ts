@@ -64,10 +64,6 @@ export const thresholdExecutor = async ({
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   let result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
-  // TODO: remove this validation once we use the schemas for validation
-  if (ruleParams.threshold == null) {
-    throw new Error('Threshold rule is missing "threshold" field');
-  }
   if (hasLargeValueItem(exceptionItems)) {
     await ruleStatusService.partialFailure(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'

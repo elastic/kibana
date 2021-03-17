@@ -53,9 +53,6 @@ export const eqlExecutor = async ({
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const result = createSearchAfterReturnType();
   const ruleParams = rule.attributes.params;
-  if (ruleParams.query === undefined) {
-    throw new Error('EQL query rule must have a query defined');
-  }
   if (hasLargeValueItem(exceptionItems)) {
     await ruleStatusService.partialFailure(
       'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
