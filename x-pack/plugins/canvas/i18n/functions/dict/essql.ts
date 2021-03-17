@@ -27,7 +27,7 @@ export const help: FunctionHelp<FunctionFactory<typeof essql>> = {
         SQL,
       },
     }),
-    parameter: i18n.translate('xpaxpack.canvas.functions.essql.args.parameterHelpText', {
+    parameter: i18n.translate('xpack.canvas.functions.essql.args.parameterHelpText', {
       defaultMessage: 'A parameter to be passed to the {SQL} query.',
       values: {
         SQL,

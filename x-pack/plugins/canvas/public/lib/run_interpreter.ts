@@ -7,7 +7,7 @@
 
 import { fromExpression, getType } from '@kbn/interpreter/common';
 import { ExpressionValue, ExpressionAstExpression } from 'src/plugins/expressions/public';
-import { notifyService, expressionsService, searchService } from '../services';
+import { notifyService, expressionsService } from '../services';
 
 interface Options {
   castToRender?: boolean;
@@ -20,8 +20,7 @@ export async function interpretAst(
   ast: ExpressionAstExpression,
   variables: Record<string, any>
 ): Promise<ExpressionValue> {
-  const search = searchService.getService().search;
-  const context = { variables, search };
+  const context = { variables };
   return await expressionsService.getService().execute(ast, null, context).getData();
 }
 
@@ -41,8 +40,7 @@ export async function runInterpreter(
   variables: Record<string, any>,
   options: Options = {}
 ): Promise<ExpressionValue> {
-  const search = searchService.getService().search;
-  const context = { variables, search };
+  const context = { variables };
 
   try {
     const renderable = await expressionsService.getService().execute(ast, input, context).getData();
