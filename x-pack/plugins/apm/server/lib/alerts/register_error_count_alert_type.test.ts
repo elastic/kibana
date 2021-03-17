@@ -13,6 +13,9 @@ import { AlertingPlugin } from '../../../../alerting/server';
 import { APMConfig } from '../..';
 
 import { registerErrorCountAlertType } from './register_error_count_alert_type';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
 const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
@@ -43,16 +46,20 @@ describe('Error count alert', () => {
     expect(alertExecutor).toBeDefined();
 
     const services = {
-      callCluster: jest.fn(() => ({
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+      alertInstanceFactory: jest.fn(),
+    };
+    const params = { threshold: 1 };
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
             value: 0,
           },
         },
-      })),
-      alertInstanceFactory: jest.fn(),
-    };
-    const params = { threshold: 1 };
+      })
+    );
 
     await alertExecutor!({ services, params });
     expect(services.alertInstanceFactory).not.toBeCalled();
@@ -74,7 +81,13 @@ describe('Error count alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      callCluster: jest.fn(() => ({
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
+    };
+    const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
             value: 2,
@@ -98,10 +111,8 @@ describe('Error count alert', () => {
             ],
           },
         },
-      })),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
+      })
+    );
 
     await alertExecutor!({ services, params });
     [
@@ -158,7 +169,13 @@ describe('Error count alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      callCluster: jest.fn(() => ({
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
+    };
+    const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
             value: 2,
@@ -176,10 +193,8 @@ describe('Error count alert', () => {
             ],
           },
         },
-      })),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 1, windowSize: 5, windowUnit: 'm' };
+      })
+    );
 
     await alertExecutor!({ services, params });
     ['apm.error_rate_foo', 'apm.error_rate_bar'].forEach((instanceName) =>
