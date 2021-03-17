@@ -126,6 +126,10 @@ export const getRocCurveChartVegaLiteSpec = (
     },
     height: SIZE,
     width: SIZE,
-    mark: 'line',
+    mark: {
+      type: 'line',
+      strokeCap: 'round',
+      strokeJoin: 'round',
+    },
   };
 };
