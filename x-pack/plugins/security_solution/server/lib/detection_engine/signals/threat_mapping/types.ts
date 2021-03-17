@@ -22,7 +22,7 @@ import {
   ItemsPerSearch,
   ThreatIndicatorPathOrUndefined,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
-import { PartialFilter, RuleTypeParams } from '../../types';
+import { RuleTypeParams } from '../../types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
