@@ -159,14 +159,13 @@ export function getColumns({
           transactionGroupComparisonStatistics?.currentPeriod?.[name]?.impact ??
           0;
         const previousImpact =
-          transactionGroupComparisonStatistics?.previousPeriod?.[name]
-            ?.impact ?? 0;
+          transactionGroupComparisonStatistics?.previousPeriod?.[name]?.impact;
         return (
           <EuiFlexGroup gutterSize="xs" direction="column">
             <EuiFlexItem>
               <ImpactBar value={currentImpact} size="m" />
             </EuiFlexItem>
-            {comparisonEnabled && (
+            {comparisonEnabled && previousImpact && (
               <EuiFlexItem>
                 <ImpactBar value={previousImpact} size="s" color="subdued" />
               </EuiFlexItem>

@@ -12,7 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Reporting APIs', function () {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./csv_job_params'));
-    loadTestFile(require.resolve('./csv_saved_search'));
+    loadTestFile(require.resolve('./csv_searchsource_immediate'));
     loadTestFile(require.resolve('./network_policy'));
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./usage'));
