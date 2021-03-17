@@ -17,7 +17,7 @@ import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { FieldFormat, IndexPatternSpec } from '../..';
+import { FieldFormat } from '../..';
 import { RuntimeField } from '../types';
 
 class MockFieldFormatter {}
@@ -42,7 +42,7 @@ const runtimeField = {
 fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
 
 // helper function to create index patterns
-function create(id: string, spec?: Partial<IndexPatternSpec>) {
+function create(id: string) {
   const {
     type,
     version,
@@ -58,7 +58,6 @@ function create(id: string, spec?: Partial<IndexPatternSpec>) {
       fields: { ...fields, runtime_field: runtimeField },
       title,
       runtimeFieldMap,
-      ...(spec || {}),
     },
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
@@ -313,17 +312,6 @@ describe('IndexPattern', () => {
       expect(restoredPattern.title).toEqual(indexPattern.title);
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
-    });
-  });
-
-  describe('getAsSavedObjectBody', () => {
-    test('should match snapshot', () => {
-      expect(indexPattern.getAsSavedObjectBody()).toMatchSnapshot();
-    });
-
-    test('allowNoIndex perserves all fields', () => {
-      const allowNoIndexIndexPattern = create('test-no-index-pattern', { allowNoIndex: true });
-      expect(allowNoIndexIndexPattern.getAsSavedObjectBody()).toMatchSnapshot();
     });
   });
 });
