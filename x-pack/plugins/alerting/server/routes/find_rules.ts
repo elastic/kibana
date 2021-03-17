@@ -80,7 +80,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         api_key_owner: apiKeyOwner,
         notify_when: notifyWhen,
         mute_all: muteAll,
-        muted_instance_ids: mutedInstanceIds,
+        muted_alert_ids: mutedInstanceIds,
         execution_status: {
           ...executionStatus,
           last_execution_date: lastExecutionDate,

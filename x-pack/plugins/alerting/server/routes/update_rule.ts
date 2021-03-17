@@ -82,7 +82,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialAlert<AlertTypeParams>> = ({
   ...(apiKeyOwner ? { api_key_owner: apiKeyOwner } : {}),
   ...(notifyWhen ? { notify_when: notifyWhen } : {}),
   ...(muteAll ? { mute_all: muteAll } : {}),
-  ...(mutedInstanceIds ? { muted_instance_ids: mutedInstanceIds } : {}),
+  ...(mutedInstanceIds ? { muted_alert_ids: mutedInstanceIds } : {}),
   ...(executionStatus
     ? {
         execution_status: {

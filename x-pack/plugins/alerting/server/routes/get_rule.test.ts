@@ -71,7 +71,7 @@ describe('getRuleRoute', () => {
     created_by: mockedAlert.createdBy,
     updated_by: mockedAlert.updatedBy,
     api_key_owner: mockedAlert.apiKeyOwner,
-    muted_instance_ids: mockedAlert.mutedInstanceIds,
+    muted_alert_ids: mockedAlert.mutedInstanceIds,
     created_at: mockedAlert.createdAt,
     updated_at: mockedAlert.updatedAt,
     id: mockedAlert.id,
