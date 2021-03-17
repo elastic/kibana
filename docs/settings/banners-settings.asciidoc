@@ -16,21 +16,20 @@ You can configure the `xpack.banners` settings in your `kibana.yml` file.
 |===
 
 | `xpack.banners.placement`
-| Set to `header` to enable the header banner. Defaults to `disabled`
+| Set to `header` to enable the header banner. Defaults to `disabled`.
 
 | `xpack.banners.textContent`
-| The text content that will be displayed inside the banner, either plain text or markdown.
+| The text to display inside the banner, either plain text or Markdown.
 
 | `xpack.banners.textColor`
-| The color for the banner's text. Defaults to `#8A6A0A`
+| The color for the banner text. Defaults to `#8A6A0A`.
 
 | `xpack.banners.backgroundColor`
-| The color of the banner's background. Defaults to `#FFF9E8`
+| The color of the banner background. Defaults to `#FFF9E8`.
 
 |===
 
 [NOTE]
 ====
-The `banners` plugin requires a Gold or higher license to be enabled. If the
-license level is not met, these settings will not be used.
+The `banners` plugin is a https://www.elastic.co/subscriptions[subscription feature]
 ====
