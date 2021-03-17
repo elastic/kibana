@@ -7,7 +7,6 @@
 
 import { sortBy } from 'lodash';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
-// @ts-expect-error unconverted lib file
 import { queryDatatable } from '../../../../common/lib/datatable/query';
 import { DemoRows } from './demo_rows_types';
 import { getDemoRows } from './get_demo_rows';
@@ -62,7 +61,6 @@ export function demodata(): ExpressionFunctionDefinition<
             { id: 'project', name: 'project', meta: { type: 'string' } },
             { id: 'percent_uptime', name: 'percent_uptime', meta: { type: 'number' } },
           ],
-          // @ts-expect-error invalid json mock
           rows: sortBy(demoRows, 'time'),
         };
       } else if (args.type === DemoRows.SHIRTS) {
