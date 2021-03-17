@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import moment from 'moment';
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
@@ -19,30 +18,30 @@ import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 
 interface Kibana {
-  process: {
-    memory: {
-      resident_set_size_in_bytes: number;
+  process?: {
+    memory?: {
+      resident_set_size_in_bytes?: number;
     };
   };
-  os: {
-    load: {
-      '1m': number;
+  os?: {
+    load?: {
+      '1m'?: number;
     };
   };
-  response_times: {
-    average: number;
-    max: number;
+  response_times?: {
+    average?: number;
+    max?: number;
   };
-  requests: {
-    total: number;
+  requests?: {
+    total?: number;
   };
-  concurrent_connections: number;
-  kibana: {
-    transport_address: string;
-    name: string;
-    host: string;
-    uuid: string;
-    status: string;
+  concurrent_connections?: number;
+  kibana?: {
+    transport_address?: string;
+    name?: string;
+    host?: string;
+    uuid?: string;
+    status?: string;
   };
   availability: boolean;
 }
@@ -124,11 +123,12 @@ export async function getKibanas(
 
     const kibana: Kibana = {
       kibana: hit._source.kibana?.kibana ?? legacyStats?.kibana,
-      concurrent_connections: mbStats?.concurrent_connections ?? legacyStats.concurrent_connections,
+      concurrent_connections:
+        mbStats?.concurrent_connections ?? legacyStats?.concurrent_connections,
       process: {
         memory: {
           resident_set_size_in_bytes:
-            mbStats?.process.memory?.resident_set_size?.bytes ??
+            mbStats?.process?.memory?.resident_set_size?.bytes ??
             legacyStats?.process?.memory?.resident_set_size_in_bytes,
         },
       },

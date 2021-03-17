@@ -39,6 +39,8 @@ export interface ElasticsearchSourceKibanaStats {
     response_times?: {
       max?: number;
     };
+    transport_address?: string;
+    host?: string;
   };
   os?: {
     memory?: {
@@ -469,7 +471,13 @@ export interface ElasticsearchMetricbeatSource {
     };
   };
   kibana?: {
-    kibana?: {};
+    kibana?: {
+      transport_address?: string;
+      name?: string;
+      host?: string;
+      uuid?: string;
+      status?: string;
+    };
     stats?: {
       concurrent_connections?: number;
       process?: {

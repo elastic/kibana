@@ -6,7 +6,11 @@
  */
 
 import { omit, get } from 'lodash';
-import { ElasticsearchModifiedSource, ElasticsearchLegacySource } from '../../../common/types/es';
+import {
+  ElasticsearchModifiedSource,
+  ElasticsearchLegacySource,
+  ElasticsearchSourceKibanaStats,
+} from '../../../common/types/es';
 // @ts-ignore
 import { calculateOverallStatus } from '../calculate_overall_status';
 // @ts-ignore
@@ -15,6 +19,10 @@ import { MonitoringLicenseError } from '../errors/custom_errors';
 type EnhancedClusters = ElasticsearchModifiedSource & {
   license: ElasticsearchLegacySource['license'];
   [key: string]: any;
+};
+
+type EnhancedKibana = ElasticsearchSourceKibanaStats['kibana'] & {
+  uuids?: string[];
 };
 
 export function getClustersSummary(
@@ -116,8 +124,11 @@ export function getClustersSummary(
       beats,
       apm,
       alerts,
-      isPrimary: kibana ? kibana.uuids.includes(kibanaUuid) : false,
-      status: calculateOverallStatus([status, (kibana && kibana.status) || null]),
+      isPrimary: kibana ? (kibana as EnhancedKibana).uuids?.includes(kibanaUuid) : false,
+      status: calculateOverallStatus([
+        status,
+        (kibana && (kibana as EnhancedKibana).status) || null,
+      ]),
       isCcrEnabled,
     };
   });
