@@ -9,16 +9,12 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/ser
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { AgentReassignmentError } from '../../errors';
 
-import {
-  getAgents,
-  getAgentPolicyForAgent,
-  listAllAgents,
-  updateAgent,
-  bulkUpdateAgents,
-} from './crud';
+import { getAgents, getAgentPolicyForAgent, updateAgent, bulkUpdateAgents } from './crud';
+import type { GetAgentsOptions } from './index';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
@@ -72,13 +68,7 @@ export async function reassignAgentIsAllowed(
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options:
-    | {
-        agentIds: string[];
-      }
-    | {
-        kuery: string;
-      },
+  options: { agents: Agent[] } | GetAgentsOptions,
   newAgentPolicyId: string
 ): Promise<{ items: Array<{ id: string; success: boolean; error?: estypes.ErrorCause }> }> {
   const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
@@ -86,25 +76,29 @@ export async function reassignAgents(
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  // Filter to agents that do not already use the new agent policy ID
-  const agents =
-    'agentIds' in options
-      ? await getAgents(esClient, options.agentIds)
-      : (
-          await listAllAgents(esClient, {
-            kuery: options.kuery,
-            showInactive: false,
-          })
-        ).agents;
-  // And which are allowed to unenroll
+  const allResults = 'agents' in options ? options.agents : await getAgents(esClient, options);
+  // which are allowed to unenroll
   const settled = await Promise.allSettled(
-    agents.map((agent) =>
+    allResults.map((agent) =>
       reassignAgentIsAllowed(soClient, esClient, agent.id, newAgentPolicyId).then((_) => agent)
     )
   );
-  const agentsToUpdate = agents.filter(
-    (agent, index) => settled[index].status === 'fulfilled' && agent.policy_id !== newAgentPolicyId
-  );
+
+  // Filter to agents that do not already use the new agent policy ID
+  const agentsToUpdate = allResults.filter((agent, index) => {
+    if (settled[index].status === 'fulfilled') {
+      if (agent.policy_id === newAgentPolicyId) {
+        settled[index] = {
+          status: 'rejected',
+          reason: new AgentReassignmentError(
+            `${agent.id} is already assigned to ${newAgentPolicyId}`
+          ),
+        };
+      } else {
+        return true;
+      }
+    }
+  });
 
   const res = await bulkUpdateAgents(
     esClient,

@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -59,7 +60,7 @@ export class LargeShardSizeAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams & { indexPattern: string },
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -70,7 +71,7 @@ export class LargeShardSizeAlert extends BaseAlert {
     const { threshold, indexPattern: shardIndexPatterns } = params;
 
     const stats = await fetchIndexShardSize(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       threshold!,

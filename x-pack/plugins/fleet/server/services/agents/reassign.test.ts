@@ -119,7 +119,7 @@ function createClientsMock() {
       case unmanagedAgentPolicySO2.id:
         return unmanagedAgentPolicySO2;
       default:
-        throw new Error('Not found');
+        throw new Error(`${id} not found`);
     }
   });
   soClientMock.bulkGet.mockImplementation(async (options) => {
@@ -145,7 +145,7 @@ function createClientsMock() {
       case agentInUnmanagedDoc._id:
         return { body: agentInUnmanagedDoc };
       default:
-        throw new Error('Not found');
+        throw new Error(`${id} not found`);
     }
   });
   esClientMock.bulk.mockResolvedValue({

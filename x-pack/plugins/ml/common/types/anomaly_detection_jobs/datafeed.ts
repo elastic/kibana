@@ -54,7 +54,7 @@ export type Aggregation = Record<
 >;
 
 export type IndicesOptions = estypes.IndicesOptions;
-// interface IndicesOptions {
+// export interface IndicesOptions {
 //   expand_wildcards?: 'all' | 'open' | 'closed' | 'hidden' | 'none';
 //   ignore_unavailable?: boolean;
 //   allow_no_indices?: boolean;
