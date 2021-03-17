@@ -18,7 +18,7 @@ export interface UsageStats {
   'timelion:graphite.url': string;
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
-  'banner:textContent': string;
+  'banners:textContent': string;
   /**
    * non-sensitive settings
    */
@@ -114,7 +114,7 @@ export interface UsageStats {
   'csv:quoteValues': boolean;
   'dateFormat:dow': string;
   dateFormat: string;
-  'banner:placement': string;
-  'banner:textColor': string;
-  'banner:backgroundColor': string;
+  'banners:placement': string;
+  'banners:textColor': string;
+  'banners:backgroundColor': string;
 }

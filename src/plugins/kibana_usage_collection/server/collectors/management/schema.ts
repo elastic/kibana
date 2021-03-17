@@ -43,7 +43,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  'banner:textContent': {
+  'banners:textContent': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
@@ -416,15 +416,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'banner:placement': {
+  'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'banner:textColor': {
+  'banners:textColor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'banner:backgroundColor': {
+  'banners:backgroundColor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
