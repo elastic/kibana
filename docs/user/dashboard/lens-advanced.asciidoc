@@ -43,7 +43,7 @@ The list of fields that appear depend on the <<index-patterns,index pattern>>, <
 
 [discrete]
 [[view-the-number-of-transactions-per-day]]
-=== View the number of transactions per hour
+=== View the number of transactions per hour by normalizing by unit or selecting custom interval
 
 To determine the number of orders made per hour, create a bar chart, then add it to the dashboard.
 
@@ -60,11 +60,26 @@ image::images/lens_advanced_1_1.png[Added records to the workspace]
 
 .. In the *Display name* field, enter `Number of orders`.
 
-.. Click *Add advanced options > Normalize by unit*.
+. To view number of transactions per hour, you can normalize the current interval by unit or customize time interval to 1 hour. *Normalize by unit* will calculate an hourly average for each 12-hour interval, which is less granular but faster than querying each hour. Customizing time interval will create a bucket for each hour, so querying will be slower. Apart from that, for a very big timerange, the created interval can be bigger than 1 hour as the maximum number of buckets is limited.
 
-.. From the *Normalize by unit* dropdown, select *per hour*, then click *Close*.
+.. To Normalize the current interval by unit:
+
+... Click *Add advanced options > Normalize by unit*. 
+
+... From the *Normalize by unit* dropdown, select *per hour*, then click *Close*.
+
+.. To create hourly time intervals on date histogram:
+
+... Close *Count of Records* editor by clicking *Close*.
+
+... From the editor, click *order date*.
+
+... Select *Customize time interval*.
+
+... Change the *Minimum interval* to `1 hour`, then click *Close*.
 
 . To hide the *Horizontal axis* label, open the *Bottom Axis* menu, then deselect *Show*.
+
 +
 [role="screenshot"]
 image::images/lens_advanced_1_1_2.png[Bottom axis menu]
@@ -107,7 +122,13 @@ image::images/lens_advanced_2_1_1.png[Chart type menu with Area selected]
 
 .. Click *All records*.
 
-.. In the *KQL* field, enter `day_of_week : "Saturday" or day_of_week : "Sunday"`, then press Return.
+.. In the *KQL* field, enter `day_of_week : "Saturday" or day_of_week : "Sunday"`. This <<kuery-query,{kib} KQL filter>> will match documents where `day_of_week` matches exactly `Saturday` or `Sunday`. 
+
+Hint: A simpler way to achieve the same effect is typing a filter in KQL bar above the chart. However, there are powerful advantages of using Filters aggregation over KQL bar:
+ - you can add only one filter to KQL bar, but you can add as many filters as needed with Filters aggregations,
+ - KQL bar will filter all data used in visualization, whereas Filters aggregation will only filter the current layer so you can have a chart with both filtered and unfiltered data if needed.
+
+.. Press Return.
 +
 [role="screenshot"]
 image::images/lens_advanced_2_1.png[Filter aggregation to filter weekend days]
@@ -126,7 +147,7 @@ image::images/lens_advanced_2_2.png[Line chart with cumulative sum of orders mad
 
 [discrete]
 [[add-a-data-layer]]
-=== View the key percentiles of product prices over time
+=== Create multiple key percentiles of product prices 
 
 To view the price distribution of products sold over time, create a percentile chart, then add it to the dashboard.
 
