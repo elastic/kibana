@@ -78,7 +78,8 @@ export const PopulationDetectorsSummary: FC = () => {
           aggFieldPairList,
           jobCreator.splitField,
           cs.intervalMs,
-          jobCreator.runtimeMappings
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
         );
 
         setLineChartsData(resp);
@@ -98,7 +99,11 @@ export const PopulationDetectorsSummary: FC = () => {
           (async (index: number, field: Field) => {
             return {
               index,
-              fields: await chartLoader.loadFieldExampleValues(field, jobCreator.runtimeMappings),
+              fields: await chartLoader.loadFieldExampleValues(
+                field,
+                jobCreator.runtimeMappings,
+                jobCreator.datafeedConfig.indices_options
+              ),
             };
           })(i, af.by.field)
         );
