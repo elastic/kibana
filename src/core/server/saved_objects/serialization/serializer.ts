@@ -59,6 +59,9 @@ export class SavedObjectsSerializer {
     doc: SavedObjectsRawDoc,
     options: SavedObjectsRawDocParseOptions = {}
   ): SavedObjectSanitizedDoc {
+    if (!this.isRawSavedObject(doc, options)) {
+      throw new Error(`Raw document '${doc._id}' is not a valid saved object`);
+    }
     const { namespaceTreatment = 'strict' } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
     const {
