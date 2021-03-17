@@ -29,7 +29,7 @@ fi
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-yarn kbn bootstrap --force-install --verbose
+yarn kbn bootstrap --verbose
 
 ###
 ### upload ts-refs-cache artifacts as quickly as possible so they are available for download

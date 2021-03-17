@@ -33,11 +33,15 @@ export const BootstrapCommand: ICommand = {
     const batchedNonBazelProjects = topologicallyBatchProjects(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = projects.get('kibana')?.path || '';
     const runOffline = options?.offline === true;
-    const forceInstall = !!options && options['force-install'] === true;
 
-    // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
-    // for bazel to know it has to re-install the node_modules after a reset or a clean
-    await ensureYarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules'));
+    // Force install is set in case a flag is passed or
+    // if the `.yarn-integrity` file is not found which
+    // will be indicated by the return of ensureYarnIntegrityFileExists.
+    // The mentioned function ensure we have a `node_modules/.yarn-integrity` file as we depend on it
+    // for bazel to know it has to re-install the node_modules after a reset or a clean.
+    const forceInstall =
+      (!!options && options['force-install'] === true) ||
+      !(await ensureYarnIntegrityFileExists(resolve(kibanaProjectPath, 'node_modules')));
 
     // Install bazel machinery tools if needed
     await installBazelTools(rootPath);
