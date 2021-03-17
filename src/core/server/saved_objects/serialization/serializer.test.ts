@@ -35,7 +35,6 @@ const sampleTemplate = {
   _id: 'foo:bar',
   _source: {
     type: 'foo',
-    foo: {},
   },
 };
 const createSampleDoc = (raw: any, template = sampleTemplate): SavedObjectsRawDoc =>
@@ -47,7 +46,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
       },
     });
     expect(actual).toHaveProperty('type', 'foo');
@@ -58,7 +56,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
         references: [{ name: 'ref_0', type: 'index-pattern', id: 'pattern*' }],
       },
     });
@@ -76,7 +73,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
         migrationVersion: {
           hello: '1.2.3',
           acl: '33.3.5',
@@ -94,7 +90,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
       },
     });
     expect(actual).not.toHaveProperty('migrationVersion');
@@ -142,7 +137,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
         coreMigrationVersion: '1.2.3',
       },
     });
@@ -154,7 +148,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
       },
     });
     expect(actual).not.toHaveProperty('coreMigrationVersion');
@@ -165,7 +158,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
       },
     });
     expect(actual).not.toHaveProperty('version');
@@ -178,7 +170,6 @@ describe('#rawToSavedObject', () => {
       _primary_term: 1,
       _source: {
         type: 'foo',
-        foo: {},
       },
     });
     expect(actual).toHaveProperty('version', encodeVersion(4, 1));
@@ -191,7 +182,6 @@ describe('#rawToSavedObject', () => {
         _seq_no: 4,
         _source: {
           type: 'foo',
-          foo: {},
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(`"_primary_term from elasticsearch must be an integer"`);
@@ -204,7 +194,6 @@ describe('#rawToSavedObject', () => {
         _primary_term: 1,
         _source: {
           type: 'foo',
-          foo: {},
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(`"_seq_no from elasticsearch must be an integer"`);
@@ -216,7 +205,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
         updated_at: now,
       },
     });
@@ -228,7 +216,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
       },
     });
     expect(actual).not.toHaveProperty('updated_at');
@@ -240,7 +227,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
         originId,
       },
     });
@@ -252,7 +238,6 @@ describe('#rawToSavedObject', () => {
       _id: 'foo:bar',
       _source: {
         type: 'foo',
-        foo: {},
       },
     });
     expect(actual).not.toHaveProperty('originId');
@@ -279,15 +264,18 @@ describe('#rawToSavedObject', () => {
     });
   });
 
-  test('it fails for documents which do not specify a [type] (attributes)', () => {
-    expect(() =>
-      singleNamespaceSerializer.rawToSavedObject({
-        _id: 'hello:universe',
-        _source: {
-          type: 'hello',
-        },
-      })
-    ).toThrow(`Raw document 'hello:universe' is not a valid saved object`);
+  test('it does not create attributes if [type] is missing', () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'hello:universe',
+      _source: {
+        type: 'hello',
+      },
+    });
+    expect(actual).toEqual({
+      id: 'universe',
+      type: 'hello',
+      references: [],
+    });
   });
 
   test('it fails for documents which do not specify a type', () => {
@@ -808,7 +796,7 @@ describe('#isRawSavedObject', () => {
       ).toBeFalsy();
     });
 
-    test('is false if there is no [type] attribute', () => {
+    test('is true if there is no [type] attribute', () => {
       expect(
         singleNamespaceSerializer.isRawSavedObject({
           _id: 'hello:world',
@@ -817,7 +805,7 @@ describe('#isRawSavedObject', () => {
             jam: {},
           },
         })
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
   });
 
@@ -1037,7 +1025,7 @@ describe('#isRawSavedObject', () => {
       ).toBeFalsy();
     });
 
-    test('is false if there is no [type] attribute', () => {
+    test('is true if there is no [type] attribute', () => {
       expect(
         multiNamespaceSerializer.isRawSavedObject({
           _id: 'hello:world',
@@ -1047,7 +1035,7 @@ describe('#isRawSavedObject', () => {
             namespace: 'foo',
           },
         })
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
   });
 
@@ -1130,7 +1118,7 @@ describe('#isRawSavedObject', () => {
       ).toBeFalsy();
     });
 
-    test('is false if there is no [type] attribute', () => {
+    test('is true if there is no [type] attribute', () => {
       expect(
         namespaceAgnosticSerializer.isRawSavedObject({
           _id: 'hello:world',
@@ -1140,7 +1128,7 @@ describe('#isRawSavedObject', () => {
             namespace: 'foo',
           },
         })
-      ).toBeFalsy();
+      ).toBeTruthy();
     });
   });
 });

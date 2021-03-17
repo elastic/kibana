@@ -46,7 +46,7 @@ export class SavedObjectsSerializer {
       return false;
     }
     const { idMatchesPrefix } = this.parseIdPrefix(namespace, type, _id, namespaceTreatment);
-    return idMatchesPrefix && _source.hasOwnProperty(type);
+    return idMatchesPrefix;
   }
 
   /**
