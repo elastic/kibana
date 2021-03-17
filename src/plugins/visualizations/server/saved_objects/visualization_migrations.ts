@@ -903,6 +903,7 @@ const migrateVislibPie: SavedObjectMigrationFn<any, any> = (doc) => {
       // Let it go, the data is invalid and we'll leave it as is
     }
     if (visState && visState.type === 'pie') {
+      const hasPalette = visState?.params?.palette;
       return {
         ...doc,
         attributes: {
@@ -911,10 +912,12 @@ const migrateVislibPie: SavedObjectMigrationFn<any, any> = (doc) => {
             ...visState,
             params: {
               ...visState.params,
-              palette: {
-                type: 'palette',
-                name: 'kibana_palette',
-              },
+              ...(!hasPalette && {
+                palette: {
+                  type: 'palette',
+                  name: 'kibana_palette',
+                },
+              }),
             },
           }),
         },

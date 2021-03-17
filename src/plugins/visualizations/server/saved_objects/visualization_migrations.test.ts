@@ -1757,34 +1757,6 @@ describe('migration visualization', () => {
     });
   });
 
-  describe('7.13.0 update pie visualization defaults', () => {
-    const migrate = (doc: any) =>
-      visualizationSavedObjectTypeMigrations['7.13.0'](
-        doc as Parameters<SavedObjectMigrationFn>[0],
-        savedObjectMigrationContext
-      );
-    const getTestDoc = (categoryAxes?: object[], valueAxes?: object[]) => ({
-      attributes: {
-        title: 'My Vis',
-        description: 'This is my super cool vis.',
-        visState: JSON.stringify({
-          type: 'pie',
-          title: '[Flights] Delay Type',
-          params: {
-            type: 'pie',
-          },
-        }),
-      },
-    });
-
-    it('should decorate existing docs with the kibana legacy palette - pie', () => {
-      const migratedTestDoc = migrate(getTestDoc());
-      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
-
-      expect(palette.name).toEqual('kibana_palette');
-    });
-  });
-
   describe('7.12.0 update "schema" in aggregations', () => {
     const migrate = (doc: any) =>
       visualizationSavedObjectTypeMigrations['7.12.0'](
@@ -1923,6 +1895,47 @@ describe('migration visualization', () => {
       const migratedTestDoc = migrate(testDoc);
 
       expect(migratedTestDoc).toEqual(expectedDoc);
+    });
+  });
+
+  describe('7.13.0 update pie visualization defaults', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.13.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const getTestDoc = (hasPalette = false) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({
+          type: 'pie',
+          title: '[Flights] Delay Type',
+          params: {
+            type: 'pie',
+            ...(hasPalette && {
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+            }),
+          },
+        }),
+      },
+    });
+
+    it('should decorate existing docs with the kibana legacy palette if the palette is not defined - pie', () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('kibana_palette');
+    });
+
+    it('should not overwrite the palette with the legacy one if the palette already exists in the saved object', () => {
+      const migratedTestDoc = migrate(getTestDoc(true));
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('default');
     });
   });
 });
