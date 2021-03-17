@@ -447,7 +447,7 @@ export const Overview: React.FC = () => {
       <ViewContentHeader title="Source overview" />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" direction="column">
+          <EuiFlexGroup gutterSize="xl" direction="column">
             <EuiFlexItem>
               <DocumentSummary data-test-subj="DocumentSummary" />
             </EuiFlexItem>
