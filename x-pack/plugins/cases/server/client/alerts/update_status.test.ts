@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common';
 import { createMockSavedObjectsRepository } from '../../routes/api/__fixtures__';
 import { createCasesClientWithMockSavedObjectsClient } from '../mocks';
 
