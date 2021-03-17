@@ -143,7 +143,7 @@ export const GroupSourcePrioritization: React.FC = () => {
             <EuiTableRowCell>
               <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <SourceIcon serviceType={serviceType} name={name} />
+                  <SourceIcon serviceType={serviceType} name={name} size="m" />
                 </EuiFlexItem>
                 <EuiFlexItem>{name}</EuiFlexItem>
               </EuiFlexGroup>

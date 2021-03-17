@@ -94,7 +94,7 @@ export const Connectors: React.FC = () => {
               <EuiFlexItem grow={1}>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <SourceIcon serviceType={serviceType} name={name} />
+                    <SourceIcon serviceType={serviceType} name={name} size="m" />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     {name}
