@@ -47,6 +47,10 @@ describe('CurationLogic', () => {
       organic: [],
       hidden: [],
     },
+    queries: [],
+    queriesLoading: false,
+    activeQuery: '',
+    organicDocumentsLoading: false,
   };
 
   beforeEach(() => {
@@ -60,7 +64,7 @@ describe('CurationLogic', () => {
 
   describe('actions', () => {
     describe('onCurationLoad', () => {
-      it('should set curation state & dataLoading to false', () => {
+      it('should set curation, queries, activeQuery, & all loading states to false', () => {
         mount();
 
         CurationLogic.actions.onCurationLoad(MOCK_CURATION_RESPONSE);
@@ -68,7 +72,67 @@ describe('CurationLogic', () => {
         expect(CurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           curation: MOCK_CURATION_RESPONSE,
+          queries: ['some search'],
+          activeQuery: 'some search',
           dataLoading: false,
+          queriesLoading: false,
+          organicDocumentsLoading: false,
+        });
+      });
+
+      it("should not override activeQuery once it's been set", () => {
+        mount({ activeQuery: 'test' });
+
+        CurationLogic.actions.onCurationLoad(MOCK_CURATION_RESPONSE);
+
+        expect(CurationLogic.values.activeQuery).toEqual('test');
+      });
+    });
+
+    describe('onCurationError', () => {
+      it('should set all loading states to false', () => {
+        mount({
+          dataLoading: true,
+          queriesLoading: true,
+          organicDocumentsLoading: true,
+        });
+
+        CurationLogic.actions.onCurationError();
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          dataLoading: false,
+          queriesLoading: false,
+          organicDocumentsLoading: false,
+        });
+      });
+    });
+
+    describe('updateQueries', () => {
+      it('should set queries state & queriesLoading to true', () => {
+        const values = { ...DEFAULT_VALUES, queries: ['a', 'b'], activeQuery: 'a' };
+        mount(values);
+
+        CurationLogic.actions.updateQueries(['a', 'b', 'c']);
+
+        expect(CurationLogic.values).toEqual({
+          ...values,
+          queries: ['a', 'b', 'c'],
+          queriesLoading: true,
+        });
+      });
+    });
+
+    describe('setActiveQuery', () => {
+      it('should set activeQuery state & organicDocumentsLoading to true', () => {
+        mount();
+
+        CurationLogic.actions.setActiveQuery('some query');
+
+        expect(CurationLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          activeQuery: 'some query',
+          organicDocumentsLoading: true,
         });
       });
     });
@@ -119,7 +183,13 @@ describe('CurationLogic', () => {
 
       it('should make a PUT API call with queries and promoted/hidden IDs to update', async () => {
         http.put.mockReturnValueOnce(Promise.resolve(MOCK_CURATION_RESPONSE));
-        mount({}, { curationId: 'cur-123456789' });
+        mount(
+          {
+            queries: ['a', 'b', 'c'],
+            activeQuery: 'b',
+          },
+          { curationId: 'cur-123456789' }
+        );
         jest.spyOn(CurationLogic.actions, 'onCurationLoad');
 
         CurationLogic.actions.updateCuration();
@@ -129,25 +199,7 @@ describe('CurationLogic', () => {
         expect(http.put).toHaveBeenCalledWith(
           '/api/app_search/engines/some-engine/curations/cur-123456789',
           {
-            body: '{"queries":[],"query":"","promoted":[],"hidden":[]}', // Uses state currently in CurationLogic
-          }
-        );
-        expect(CurationLogic.actions.onCurationLoad).toHaveBeenCalledWith(MOCK_CURATION_RESPONSE);
-      });
-
-      it('should allow passing a custom queries param', async () => {
-        http.put.mockReturnValueOnce(Promise.resolve(MOCK_CURATION_RESPONSE));
-        mount({}, { curationId: 'cur-123456789' });
-        jest.spyOn(CurationLogic.actions, 'onCurationLoad');
-
-        CurationLogic.actions.updateCuration({ queries: ['hello', 'world'] });
-        jest.runAllTimers();
-        await nextTick();
-
-        expect(http.put).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/curations/cur-123456789',
-          {
-            body: '{"queries":["hello","world"],"query":"","promoted":[],"hidden":[]}',
+            body: '{"queries":["a","b","c"],"query":"b","promoted":[],"hidden":[]}', // Uses state currently in CurationLogic
           }
         );
         expect(CurationLogic.actions.onCurationLoad).toHaveBeenCalledWith(MOCK_CURATION_RESPONSE);
@@ -156,6 +208,7 @@ describe('CurationLogic', () => {
       it('handles errors', async () => {
         http.put.mockReturnValueOnce(Promise.reject('error'));
         mount({}, { curationId: 'cur-123456789' });
+        jest.spyOn(CurationLogic.actions, 'onCurationError');
 
         CurationLogic.actions.updateCuration();
         jest.runAllTimers();
@@ -163,6 +216,38 @@ describe('CurationLogic', () => {
 
         expect(clearFlashMessages).toHaveBeenCalled();
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
+        expect(CurationLogic.actions.onCurationError).toHaveBeenCalled();
+      });
+    });
+
+    describe('listeners that call updateCuration as a side effect', () => {
+      beforeAll(() => {
+        mount();
+        jest.spyOn(CurationLogic.actions, 'updateCuration').mockImplementation(() => {});
+      });
+
+      afterAll(() => {
+        (CurationLogic.actions.updateCuration as jest.Mock).mockRestore();
+      });
+
+      afterEach(() => {
+        expect(CurationLogic.actions.updateCuration).toHaveBeenCalled();
+      });
+
+      describe('updateQueries', () => {
+        it('calls updateCuration', () => {
+          CurationLogic.actions.updateQueries(['hello', 'world']);
+        });
+
+        it('should also call setActiveQuery if the current activeQuery was deleted from queries', () => {
+          jest.spyOn(CurationLogic.actions, 'setActiveQuery');
+          CurationLogic.actions.updateQueries(['world']);
+          expect(CurationLogic.actions.setActiveQuery).toHaveBeenCalledWith('world');
+        });
+      });
+
+      it('setActiveQuery', () => {
+        CurationLogic.actions.setActiveQuery('test');
       });
     });
   });

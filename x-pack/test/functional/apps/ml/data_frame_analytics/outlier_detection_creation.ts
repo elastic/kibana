@@ -58,8 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
             { key: '#F5F7FA', value: 2 },
             { key: '#D3DAE6', value: 1 },
             // scatterplot circles
-            { key: '#54B399', value: 1 },
-            { key: '#54B39A', value: 1 },
+            { key: '#69707D', value: 1 },
+            { key: '#98A1B3', value: 1 },
           ],
           scatterplotMatrixColorStatsResults: [
             // background
@@ -256,6 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
           await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
             'mlDFExpandableSection-splom',
             testData.expected.scatterplotMatrixColorStatsResults
