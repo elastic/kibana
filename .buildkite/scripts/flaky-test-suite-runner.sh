@@ -14,21 +14,20 @@ export UUID
 cat << EOF
 steps:
   - command: |
-      echo export DOCKER_BUILDKIT=1 && \
-      echo docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:\$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain && \
-      echo docker push gcr.io/elastic-kibana-184716/buildkite/ci/base:\$BUILDKITE_COMMIT
+      echo 'Bootstrap'
     label: Bootstrap
     agents:
       queue: bootstrap
-  - wait
+    key: bootstrap
+
   - command: |
-      echo export DOCKER_BUILDKIT=1 && \
-      echo docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/default-build:\$BUILDKITE_COMMIT -f .ci/Dockerfile-build --build-arg BASE_IMAGE=gcr.io/elastic-kibana-184716/buildkite/ci/base:\$BUILDKITE_COMMIT . --progress plain && \
-      echo docker push gcr.io/elastic-kibana-184716/buildkite/ci/default-build:\$BUILDKITE_COMMIT
+      echo 'Build Default Distro'
     label: Build Default Distro
     agents:
       queue: bootstrap
     key: default-build
+    depends_on: bootstrap
+
   - command: 'echo "Running $TEST_SUITE"; sleep 10;'
     label: 'Run $TEST_SUITE'
     agents:
