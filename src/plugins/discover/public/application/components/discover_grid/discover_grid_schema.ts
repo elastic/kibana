@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiCodeBlock, EuiDataGridPopoverContents } from '@elastic/eui';
 import { kibanaJSON } from './constants';
 import { KBN_FIELD_TYPES } from '../../../../../data/common';
 
@@ -42,19 +40,4 @@ export function getSchemaDetectors() {
       color: '',
     },
   ];
-}
-
-/**
- * Returns custom popover content for certain schemas
- */
-export function getPopoverContents(): EuiDataGridPopoverContents {
-  return {
-    [kibanaJSON]: ({ children }) => {
-      return (
-        <EuiCodeBlock isCopyable language="json" paddingSize="none" transparentBackground={true}>
-          {children}
-        </EuiCodeBlock>
-      );
-    },
-  };
 }
