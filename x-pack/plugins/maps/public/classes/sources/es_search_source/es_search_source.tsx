@@ -12,6 +12,7 @@ import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { GeoJsonProperties } from 'geojson';
+import uuid from 'uuid/v4';
 import { AbstractESSource } from '../es_source';
 import { getHttp, getSearchService } from '../../../kibana_services';
 import {
@@ -728,19 +729,17 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
-      `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}`
+      `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
     const geoField = await this._getGeoField();
 
     const urlTemplate = `${mvtUrlServicePath}\
-?x={x}\
-&y={y}\
-&z={z}\
-&geometryFieldName=${this._descriptor.geoField}\
+?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
 &requestBody=${risonDsl}\
-&geoFieldType=${geoField.type}`;
+&geoFieldType=${geoField.type}\
+&token=${uuid()}`;
     return {
       layerName: this.getLayerName(),
       minSourceZoom: this.getMinZoom(),

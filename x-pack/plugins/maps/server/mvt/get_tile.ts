@@ -59,6 +59,8 @@ export async function getGridTile({
   searchSessionId?: string;
   abortSignal: AbortSignal;
 }): Promise<Buffer | null> {
+  logger.warn(`Requesitng grid tile ${z}/${x}/${y}:`);
+
   try {
     const tileBounds: ESBounds = tileToESBbox(x, y, z);
     requestBody.query.bool.filter.push(getTileSpatialFilter(geometryFieldName, tileBounds));

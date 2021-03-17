@@ -113,7 +113,7 @@ export class TiledVectorLayer extends VectorLayer {
     if (!sourceDataRequest) {
       // this is possible if the layer was invisible at startup.
       // the actions will not perform any data=syncing as an optimization when a layer is invisible
-      // when turning the layer back into visible, it's possible the url has not been resovled yet.
+      // when turning the layer back into visible, it's possible the url has not been resolved yet.
       return;
     }
 
