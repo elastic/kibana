@@ -84,7 +84,9 @@ export class ApiService {
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/${indexName}/index_settings`,
       method: 'post',
-      body: JSON.stringify(settings),
+      body: {
+        settings: JSON.stringify(settings),
+      },
     });
 
     return result;
