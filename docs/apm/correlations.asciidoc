@@ -1,0 +1,91 @@
+[role="xpack"]
+[[correlations]]
+=== Find latency and error correlations
+
+**Correlations** surface attributes of your data that are potentially correlated with high-latency or erroneous transactions.
+Surfaced attributes are user-defined, meaning that they are completely customizable to your APM data.
+Find something interesting? A quick click of a button will auto-query your data as you work to resolve the underlying issue.
+
+For example, a site reliability engineer, who is responsible for keeping production systems up and running,
+notices an increase in latency in certain transactions.
+Analyzing metadata or tags that exist in high-latency transactions but not in lower-latency transactions
+can potentially point towards the root cause.
+They may find that a particular piece of hardware, like a host or pod, has failed, increasing latency.
+Or, perhaps a set of users, based on IP address or region, is physically too far away from the nearest
+data center, increasing latency.
+
+[discrete]
+[[view-correlations]]
+===  View correlations
+
+With a service selected, click **View correlations**:
+
+[role="screenshot"]
+image::apm/images/correlations.png[Correlations]
+
+Queries within the APM app apply to the correlations shown in the correlations fly-out.
+
+If a correlated field seems noteworthy, use the **Filter** quick links:
+
+* `+` creates a new query in the APM app for transactions containing the selected value.
+* `-` creates a new query in the APM app for transactions without the selected value.
+
+[discrete]
+[[correlations-latency]]
+==== Find high-latency correlations
+
+Correlations help you discover which fields are contributing to increased service latency.
+
+A latency distribution chart visualizes the overall latency of the selected service's transactions.
+Correlated attributes are sorted by _Impact_–a visual representation of the score for the underlying
+aggregation that powers correlations.
+Attributes with a high impact, or attributes present in a large percentage of slow transactions,
+may contribute to increased latency.
+
+To find high-latency correlations, hover over each potentially correlated attribute to
+compare the latency distribution of transactions with and without the selected attribute.
+
+For example, in the screenshot below, the field `user_agent.name` and value `HeadlessChrome`
+exists primarily in higher-latency transactions between 3.7 and 8.7 seconds.
+
+[role="screenshot"]
+image::apm/images/correlations-hover.png[Correlations hover effect]
+
+Selecting the `+` filter creates a new query in the APM app for transactions with
+`user_agent.name: HeadlessChrome`. With the "noise" now filtered out,
+you can begin viewing sample traces to continue your investigation.
+
+[discrete]
+[[correlations-error-rate]]
+==== Find error rate correlations
+
+Correlations help you discover which fields are contributing to failed transactions.
+
+The Error rate over time chart visualizes the change in error rate over the selected time frame.
+Correlated attributes are sorted by _Impact_–a visual representation of the score for the underlying
+aggregation that powers correlations.
+Attributes with a high impact, or attributes present in a large percentage of failed transactions,
+may contribute to increased error rates.
+
+To find error rate correlations, hover over each potentially correlated attribute to
+compare the error rate distribution of transactions with and without the selected attribute.
+
+For example, in the screenshot below, the field `url.original` and value `http://localhost:3100...`
+existed in 100% of failed transactions between 6:00 and 10:30.
+
+[role="screenshot"]
+image::apm/images/error-rate-hover.png[Correlations errors hover effect]
+
+Selecting the `+` filter creates a new query in the APM app for transactions with
+`url.original: http://localhost:3100...`. With the "noise" now filtered out,
+you can begin viewing sample traces to continue your investigation.
+
+[discrete]
+[[correlations-custom-fields]]
+====  Customize fields
+
+Correlations are only as good as the data they're searching for.
+By default, a handful of potentially useful fields are selected, like `lables`, `service.version`, and `host.ip`.
+You can remove and add fields to this list under the **Customize fields** dropdown.
+
+TIP: Want to start over? Select **reset** to clear your customizations.

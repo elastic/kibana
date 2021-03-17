@@ -75,8 +75,8 @@ export const ActionTypeMenu = ({
         if (toasts) {
           toasts.addDanger({
             title: i18n.translate(
-              'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadActionTypesMessage',
-              { defaultMessage: 'Unable to load action types' }
+              'xpack.triggersActionsUI.sections.actionsConnectorsList.unableToLoadConnectorTypesMessage',
+              { defaultMessage: 'Unable to load connector types' }
             ),
           });
         }
