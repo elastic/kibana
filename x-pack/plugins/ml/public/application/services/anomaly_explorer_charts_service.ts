@@ -401,7 +401,7 @@ export class AnomalyExplorerChartsService {
     timefilter: TimefilterContract,
     severity = 0,
     maxSeries = DEFAULT_MAX_SERIES_TO_PLOT
-  ): Promise<void | ExplorerChartsData> {
+  ): Promise<ExplorerChartsData | void> {
     const data = this.getDefaultChartsData();
 
     const containerWith = chartsContainerWidth + SWIM_LANE_LABEL_WIDTH;

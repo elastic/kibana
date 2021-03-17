@@ -33,11 +33,14 @@ export interface AnomalyExplorerInitializerProps {
 
 export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = ({
   defaultTitle,
+  initialInput,
   onCreate,
   onCancel,
 }) => {
   const [panelTitle, setPanelTitle] = useState(defaultTitle);
-  const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
+  const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(
+    initialInput?.maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT
+  );
 
   const isPanelTitleValid = panelTitle.length > 0;
 
@@ -65,6 +68,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
             isInvalid={!isPanelTitleValid}
           >
             <EuiFieldText
+              data-test-subj={'panelTitleInput'}
               id="panelTitle"
               name="panelTitle"
               value={panelTitle}
@@ -94,7 +98,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
+        <EuiButtonEmpty onClick={onCancel} data-test-subj={'cancelButton'}>
           <FormattedMessage
             id="xpack.ml.anomalyExplorerChartsEmbeddable.setupModal.cancelButtonLabel"
             defaultMessage="Cancel"
@@ -102,6 +106,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
         </EuiButtonEmpty>
 
         <EuiButton
+          data-test-subj={'confirmButton'}
           isDisabled={!isFormValid}
           onClick={onCreate.bind(null, {
             panelTitle,

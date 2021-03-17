@@ -9,7 +9,7 @@ import { processFilters } from './process_filters';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
 
 describe('processFilters', () => {
-  test('should format embeddable input to es query', () => {
+  test('should format kql embeddable input to es query', () => {
     expect(
       processFilters(
         [
@@ -120,6 +120,141 @@ describe('processFilters', () => {
                   },
                 },
               ],
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  match_phrase: {
+                    instance: 'i-20d061fa',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          {
+            exists: {
+              field: 'instance',
+            },
+          },
+        ],
+        must_not: [
+          {
+            match_phrase: {
+              instance: 'i-16fd8d2a',
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  test('should format lucene embeddable input to es query', () => {
+    expect(
+      processFilters(
+        [
+          {
+            meta: {
+              index: 'c01fcbd0-8936-11ea-a70f-9f68bc175114',
+              type: 'phrases',
+              key: 'instance',
+              value: 'i-20d061fa',
+              params: ['i-20d061fa'],
+              alias: null,
+              negate: false,
+              disabled: false,
+            },
+            query: {
+              bool: {
+                should: [
+                  {
+                    match_phrase: {
+                      instance: 'i-20d061fa',
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            $state: {
+              // @ts-ignore
+              store: 'appState',
+            },
+          },
+          {
+            meta: {
+              index: 'c01fcbd0-8936-11ea-a70f-9f68bc175114',
+              alias: null,
+              negate: true,
+              disabled: false,
+              type: 'phrase',
+              key: 'instance',
+              params: {
+                query: 'i-16fd8d2a',
+              },
+            },
+            query: {
+              match_phrase: {
+                instance: 'i-16fd8d2a',
+              },
+            },
+
+            $state: {
+              // @ts-ignore
+              store: 'appState',
+            },
+          },
+          {
+            meta: {
+              index: 'c01fcbd0-8936-11ea-a70f-9f68bc175114',
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'exists',
+              key: 'instance',
+              value: 'exists',
+            },
+            exists: {
+              field: 'instance',
+            },
+            $state: {
+              // @ts-ignore
+              store: 'appState',
+            },
+          },
+          {
+            meta: {
+              index: 'c01fcbd0-8936-11ea-a70f-9f68bc175114',
+              alias: null,
+              negate: false,
+              disabled: true,
+              type: 'exists',
+              key: 'instance',
+              value: 'exists',
+            },
+            exists: {
+              field: 'region',
+            },
+            $state: {
+              // @ts-ignore
+              store: 'appState',
+            },
+          },
+        ],
+        {
+          language: 'lucene',
+          query: 'instance:i-d**',
+        },
+        CONTROLLED_BY_SWIM_LANE_FILTER
+      )
+    ).toEqual({
+      bool: {
+        must: [
+          {
+            query_string: {
+              query: 'instance:i-d**',
             },
           },
           {

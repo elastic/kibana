@@ -19,9 +19,9 @@ import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { SwimlaneContainer } from '../../application/explorer/swimlane_container';
 import { MlDependencies } from '../../application/app';
-import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
 import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
+import { coreStartMock, mlStartMock } from '../anomaly_explorer/__mocks__/services';
 
 jest.mock('./swimlane_input_resolver', () => ({
   useSwimlaneInputResolver: jest.fn(() => {
@@ -56,14 +56,11 @@ describe('ExplorerSwimlaneContainer', () => {
 
     trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
 
-    const uiActionsMock = uiActionsPluginMock.createStartContract();
-    uiActionsMock.getTrigger.mockReturnValue(trigger);
+    mlStartMock.uiActions.getTrigger.mockReturnValue(trigger);
 
     services = ([
-      {},
-      {
-        uiActions: uiActionsMock,
-      },
+      coreStartMock,
+      mlStartMock,
     ] as unknown) as ExplorerSwimlaneContainerProps['services'];
   });
 
