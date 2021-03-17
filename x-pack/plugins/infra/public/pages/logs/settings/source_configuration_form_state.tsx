@@ -20,7 +20,10 @@ export const useLogSourceConfigurationFormState = (
           ? {
               name: configuration.name,
               description: configuration.description,
-              logAlias: configuration.indices,
+              logIndices: {
+                type: 'index_name',
+                indexName: configuration.indices,
+              },
               tiebreakerField: configuration.tiebreakerField,
               timestampField: configuration.timestampField,
             }
@@ -65,7 +68,10 @@ export const useLogSourceConfigurationFormState = (
     () => ({
       name: indicesConfigurationFormState.formState.name,
       description: indicesConfigurationFormState.formState.description,
-      logAlias: indicesConfigurationFormState.formState.logAlias,
+      logAlias:
+        indicesConfigurationFormState.formState.logIndices.type === 'index-name'
+          ? indicesConfigurationFormState.formState.logIndices.indexName
+          : '',
       fields: {
         tiebreaker: indicesConfigurationFormState.formState.tiebreakerField,
         timestamp: indicesConfigurationFormState.formState.timestampField,
@@ -79,7 +85,10 @@ export const useLogSourceConfigurationFormState = (
     () => ({
       name: indicesConfigurationFormState.formStateChanges.name,
       description: indicesConfigurationFormState.formStateChanges.description,
-      logAlias: indicesConfigurationFormState.formStateChanges.logAlias,
+      logAlias:
+        indicesConfigurationFormState.formStateChanges.logIndices?.type === 'index-name'
+          ? indicesConfigurationFormState.formStateChanges.logIndices.indexName
+          : undefined,
       fields: {
         tiebreaker: indicesConfigurationFormState.formStateChanges.tiebreakerField,
         timestamp: indicesConfigurationFormState.formStateChanges.timestampField,

@@ -5,85 +5,67 @@
  * 2.0.
  */
 
-import {
-  EuiCode,
-  EuiDescribedFormGroup,
-  EuiFieldText,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import { InputFieldProps } from '../../../components/source_configuration/input_fields';
+import React, { useCallback } from 'react';
+import { FieldsConfigurationPanel } from './fields_configuration_panel';
+import { FormElementProps, isFormElementPropsForType } from './form_elements';
+import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
+import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
+import { LogIndexNameReference, LogIndexPatternReference, LogIndexReference } from './types';
 
-interface IndicesConfigurationPanelProps {
+export const IndicesConfigurationPanel: React.FC<{
   isLoading: boolean;
-  readOnly: boolean;
-  logAliasFieldProps: InputFieldProps;
-}
-
-export const IndicesConfigurationPanel = ({
+  isReadOnly: boolean;
+  indicesFormElementProps: FormElementProps<LogIndexReference>;
+  tiebreakerFieldFormElementProps: FormElementProps<string>;
+  timestampFieldFormElementProps: FormElementProps<string>;
+}> = ({
   isLoading,
-  readOnly,
-  logAliasFieldProps,
-}: IndicesConfigurationPanelProps) => (
-  <EuiForm>
-    <EuiTitle size="s">
-      <h3>
-        <FormattedMessage
-          id="xpack.infra.sourceConfiguration.indicesSectionTitle"
-          defaultMessage="Indices"
-        />
-      </h3>
-    </EuiTitle>
-    <EuiSpacer size="m" />
-    <EuiDescribedFormGroup
-      title={
-        <h4>
-          <FormattedMessage
-            id="xpack.infra.sourceConfiguration.logIndicesTitle"
-            defaultMessage="Log indices"
-          />
-        </h4>
-      }
-      description={
-        <FormattedMessage
-          id="xpack.infra.sourceConfiguration.logIndicesDescription"
-          defaultMessage="Index pattern for matching indices that contain log data"
-        />
-      }
-    >
-      <EuiFormRow
-        error={logAliasFieldProps.error}
-        fullWidth
-        helpText={
-          <FormattedMessage
-            id="xpack.infra.sourceConfiguration.logIndicesRecommendedValue"
-            defaultMessage="The recommended value is {defaultValue}"
-            values={{
-              defaultValue: <EuiCode>logs-*,filebeat-*</EuiCode>,
-            }}
-          />
-        }
-        isInvalid={logAliasFieldProps.isInvalid}
-        label={
-          <FormattedMessage
-            id="xpack.infra.sourceConfiguration.logIndicesLabel"
-            defaultMessage="Log indices"
-          />
-        }
-      >
-        <EuiFieldText
-          data-test-subj="logIndicesInput"
-          fullWidth
-          disabled={isLoading}
+  isReadOnly,
+  indicesFormElementProps,
+  tiebreakerFieldFormElementProps,
+  timestampFieldFormElementProps,
+}) => {
+  const switchToIndexPatternReference = useCallback(() => {
+    indicesFormElementProps.onChange?.({
+      type: 'index-pattern',
+      indexPattern: '',
+    });
+  }, [indicesFormElementProps]);
+
+  if (isIndexPatternFormElementProps(indicesFormElementProps)) {
+    return (
+      <IndexPatternConfigurationPanel
+        isLoading={isLoading}
+        isReadOnly={isReadOnly}
+        indexPatternFormElementProps={indicesFormElementProps}
+      />
+    );
+  } else if (isIndexNamesFormElementProps(indicesFormElementProps)) {
+    return (
+      <>
+        <IndexNamesConfigurationPanel
           isLoading={isLoading}
-          readOnly={readOnly}
-          {...logAliasFieldProps}
+          isReadOnly={isReadOnly}
+          indexNamesFormElementProps={indicesFormElementProps}
+          onSwitchToIndexPatternReference={switchToIndexPatternReference}
         />
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  </EuiForm>
+        <FieldsConfigurationPanel
+          isLoading={isLoading}
+          isReadOnly={isReadOnly}
+          tiebreakerFieldFormElementProps={tiebreakerFieldFormElementProps}
+          timestampFieldFormElementProps={timestampFieldFormElementProps}
+        />
+      </>
+    );
+  } else {
+    return null;
+  }
+};
+
+const isIndexPatternFormElementProps = isFormElementPropsForType(
+  (value): value is LogIndexPatternReference => value.type === 'index-pattern'
+);
+
+const isIndexNamesFormElementProps = isFormElementPropsForType(
+  (value): value is LogIndexNameReference => value.type === 'index-name'
 );

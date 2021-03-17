@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import { ReactNode, useCallback, useMemo, useState } from 'react';
-import {
-  createInputFieldProps,
-  validateInputFieldNotEmpty,
-} from '../../../components/source_configuration/input_fields';
+import { useCallback, useMemo, useState } from 'react';
+import { FormElementProps } from './form_elements';
+import { LogIndexNameReference, LogIndexPatternReference, LogIndexReference } from './types';
+import { FormValidationError, validateStringNotEmpty } from './validation_errors';
 
-interface FormState {
+export interface LogIndicesConfigurationFormState {
   name: string;
   description: string;
-  logAlias: string;
+  logIndices: LogIndexReference;
   tiebreakerField: string;
   timestampField: string;
 }
 
-type FormStateChanges = Partial<FormState>;
+type FormStateChanges = Partial<LogIndicesConfigurationFormState>;
 
 export const useLogIndicesConfigurationFormState = ({
   initialFormState = defaultFormState,
 }: {
-  initialFormState?: FormState;
+  initialFormState?: LogIndicesConfigurationFormState;
 }) => {
   const [formStateChanges, setFormStateChanges] = useState<FormStateChanges>({});
 
@@ -38,63 +37,80 @@ export const useLogIndicesConfigurationFormState = ({
     [initialFormState, formStateChanges]
   );
 
-  const nameFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.name),
-        name: 'name',
-        onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
-        value: formState.name,
-      }),
+  const nameFormElementProps: FormElementProps<string> = useMemo(
+    () => ({
+      errors: validateStringNotEmpty(formState.name),
+      name: 'name',
+      onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
+      value: formState.name,
+    }),
     [formState.name]
   );
-  const logAliasFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.logAlias),
-        name: 'logAlias',
-        onChange: (logAlias) => setFormStateChanges((changes) => ({ ...changes, logAlias })),
-        value: formState.logAlias,
-      }),
-    [formState.logAlias]
-  );
-  const tiebreakerFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.tiebreakerField),
-        name: `tiebreakerField`,
-        onChange: (tiebreakerField) =>
-          setFormStateChanges((changes) => ({ ...changes, tiebreakerField })),
-        value: formState.tiebreakerField,
-      }),
+
+  const logIndicesFormElementProps: FormElementProps<
+    LogIndexNameReference | LogIndexPatternReference
+  > = useMemo(() => {
+    const onChange = (logIndices: LogIndexReference) =>
+      setFormStateChanges((changes) => ({ ...changes, logIndices }));
+
+    if (formState.logIndices.type === 'index-name') {
+      return {
+        errors: validateStringNotEmpty(formState.logIndices.indexName),
+        name: 'indexNameReference',
+        onChange,
+        value: formState.logIndices,
+      };
+    } else {
+      return {
+        errors: validateStringNotEmpty(formState.logIndices.indexPattern),
+        name: 'indexPatternReference',
+        onChange,
+        value: formState.logIndices,
+      };
+    }
+  }, [formState.logIndices]);
+
+  const tiebreakerFieldFormElementProps: FormElementProps<string> = useMemo(
+    () => ({
+      errors: validateStringNotEmpty(formState.tiebreakerField),
+      name: `tiebreakerField`,
+      onChange: (tiebreakerField) =>
+        setFormStateChanges((changes) => ({ ...changes, tiebreakerField })),
+      value: formState.tiebreakerField,
+    }),
     [formState.tiebreakerField]
   );
-  const timestampFieldFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.timestampField),
-        name: `timestampField`,
-        onChange: (timestampField) =>
-          setFormStateChanges((changes) => ({ ...changes, timestampField })),
-        value: formState.timestampField,
-      }),
+
+  const timestampFieldFormElementProps: FormElementProps<string> = useMemo(
+    () => ({
+      errors: validateStringNotEmpty(formState.timestampField),
+      name: `timestampField`,
+      onChange: (timestampField) =>
+        setFormStateChanges((changes) => ({ ...changes, timestampField })),
+      value: formState.timestampField,
+    }),
     [formState.timestampField]
   );
 
   const fieldProps = useMemo(
     () => ({
-      name: nameFieldProps,
-      logAlias: logAliasFieldProps,
-      tiebreakerField: tiebreakerFieldFieldProps,
-      timestampField: timestampFieldFieldProps,
+      name: nameFormElementProps,
+      logIndices: logIndicesFormElementProps,
+      tiebreakerField: tiebreakerFieldFormElementProps,
+      timestampField: timestampFieldFormElementProps,
     }),
-    [nameFieldProps, logAliasFieldProps, tiebreakerFieldFieldProps, timestampFieldFieldProps]
+    [
+      nameFormElementProps,
+      logIndicesFormElementProps,
+      tiebreakerFieldFormElementProps,
+      timestampFieldFormElementProps,
+    ]
   );
 
   const errors = useMemo(
     () =>
-      Object.values(fieldProps).reduce<ReactNode[]>(
-        (accumulatedErrors, { error }) => [...accumulatedErrors, ...error],
+      Object.values(fieldProps).reduce<FormValidationError[]>(
+        (accumulatedErrors, formElementProps) => [...accumulatedErrors, ...formElementProps.errors],
         []
       ),
     [fieldProps]
@@ -115,10 +131,13 @@ export const useLogIndicesConfigurationFormState = ({
   };
 };
 
-const defaultFormState: FormState = {
+const defaultFormState: LogIndicesConfigurationFormState = {
   name: '',
   description: '',
-  logAlias: '',
+  logIndices: {
+    type: 'index-name',
+    indexName: '',
+  },
   tiebreakerField: '',
   timestampField: '',
 };

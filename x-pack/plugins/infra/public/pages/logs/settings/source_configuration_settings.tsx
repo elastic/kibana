@@ -11,24 +11,22 @@ import {
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
   EuiPage,
   EuiPageBody,
+  EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { FieldsConfigurationPanel } from './fields_configuration_panel';
-import { IndicesConfigurationPanel } from './indices_configuration_panel';
-import { NameConfigurationPanel } from '../../../components/source_configuration/name_configuration_panel';
-import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
-import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { Prompt } from '../../../utils/navigation_warning_prompt';
-import { LogSourceConfigurationPropertiesPatch } from '../../../../common/http_api/log_sources';
+import { IndicesConfigurationPanel } from './indices_configuration_panel';
+import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
+import { NameConfigurationPanel } from './name_configuration_panel';
+import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -60,21 +58,7 @@ export const LogsSettingsPage = () => {
   } = useLogSourceConfigurationFormState(resolvedSourceConfiguration);
 
   const persistUpdates = useCallback(async () => {
-    // NOTE / TODO: This is just a temporary workaround until this work is merged with the corresponding UI branch.
-    // Otherwise we would be duplicating work changing the logAlias etc references twice.
-    const patchedProperties: LogSourceConfigurationPropertiesPatch & { logAlias?: string } = {
-      ...formStateChanges,
-      ...(formStateChanges.logAlias
-        ? {
-            logIndices: {
-              type: 'index_name',
-              indexName: formStateChanges.logAlias,
-            },
-          }
-        : {}),
-    };
-    delete patchedProperties.logAlias;
-    await updateSourceConfiguration(patchedProperties);
+    await updateSourceConfiguration(formStateChanges);
     resetForm();
   }, [updateSourceConfiguration, resetForm, formStateChanges]);
 
@@ -102,25 +86,18 @@ export const LogsSettingsPage = () => {
           <EuiPanel paddingSize="l">
             <NameConfigurationPanel
               isLoading={isLoading}
-              nameFieldProps={indicesConfigurationProps.name}
-              readOnly={!isWriteable}
+              isReadOnly={!isWriteable}
+              nameFormElementProps={indicesConfigurationProps.name}
             />
           </EuiPanel>
           <EuiSpacer />
           <EuiPanel paddingSize="l">
             <IndicesConfigurationPanel
               isLoading={isLoading}
-              logAliasFieldProps={indicesConfigurationProps.logAlias}
-              readOnly={!isWriteable}
-            />
-          </EuiPanel>
-          <EuiSpacer />
-          <EuiPanel paddingSize="l">
-            <FieldsConfigurationPanel
-              isLoading={isLoading}
-              readOnly={!isWriteable}
-              tiebreakerFieldProps={indicesConfigurationProps.tiebreakerField}
-              timestampFieldProps={indicesConfigurationProps.timestampField}
+              isReadOnly={!isWriteable}
+              indicesFormElementProps={indicesConfigurationProps.logIndices}
+              tiebreakerFieldFormElementProps={indicesConfigurationProps.tiebreakerField}
+              timestampFieldFormElementProps={indicesConfigurationProps.timestampField}
             />
           </EuiPanel>
           <EuiSpacer />

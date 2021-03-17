@@ -1,0 +1,117 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiCode,
+  EuiDescribedFormGroup,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import React from 'react';
+import { FormElementProps, getFormRowProps, getInputFieldProps } from './form_elements';
+import { LogIndexNameReference } from './types';
+
+export const IndexNamesConfigurationPanel: React.FC<{
+  isLoading: boolean;
+  isReadOnly: boolean;
+  indexNamesFormElementProps: FormElementProps<LogIndexNameReference>;
+  onSwitchToIndexPatternReference: () => void;
+}> = ({ isLoading, isReadOnly, indexNamesFormElementProps, onSwitchToIndexPatternReference }) => {
+  return (
+    <>
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.indicesSectionTitle"
+            defaultMessage="Indices"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiCallOut title={deprecationCalloutTitle} color="warning" iconType="alert">
+        <FormattedMessage
+          tagName="p"
+          id="xpack.infra.logSourceConfiguration.indexNameReferenceDeprecationDescription"
+          defaultMessage="Referring to Elasticsearch indices directly is a deprecated way of configuring a log source. Instead, log source now integrate with Kibana index patterns to configure the used indices."
+        />
+        <EuiButton color="warning" onClick={onSwitchToIndexPatternReference}>
+          <FormattedMessage
+            id="xpack.infra.logSourceConfiguration.switchToIndexPatternReferenceButtonLabel"
+            defaultMessage="Use Kibana index patterns"
+          />
+        </EuiButton>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logIndicesTitle"
+              defaultMessage="Log indices"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.logIndicesDescription"
+            defaultMessage="Index pattern for matching indices that contain log data"
+          />
+        }
+      >
+        <EuiFormRow
+          fullWidth
+          helpText={
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logIndicesRecommendedValue"
+              defaultMessage="The recommended value is {defaultValue}"
+              values={{
+                defaultValue: <EuiCode>logs-*,filebeat-*</EuiCode>,
+              }}
+            />
+          }
+          label={
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logIndicesLabel"
+              defaultMessage="Log indices"
+            />
+          }
+          {...getFormRowProps(indexNamesFormElementProps)}
+        >
+          <EuiFieldText
+            data-test-subj="logIndicesInput"
+            fullWidth
+            disabled={isLoading}
+            isLoading={isLoading}
+            readOnly={isReadOnly}
+            {...getIndexNamesInputFieldProps(indexNamesFormElementProps)}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    </>
+  );
+};
+
+const getIndexNamesInputFieldProps = getInputFieldProps<LogIndexNameReference>(
+  (value) => ({
+    type: 'index-name',
+    indexName: value,
+  }),
+  ({ indexName }) => indexName
+);
+
+const deprecationCalloutTitle = i18n.translate(
+  'xpack.infra.logSourceConfiguration.indexNameReferenceDeprecationTitle',
+  {
+    defaultMessage: 'Deprecated Configuration Option',
+  }
+);
