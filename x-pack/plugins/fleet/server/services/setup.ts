@@ -7,6 +7,8 @@
 
 import uuid from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
+import { groupBy } from 'lodash';
 
 import {
   packageToPackagePolicy,
@@ -119,13 +121,21 @@ async function createSetupSideEffects(
       true
     );
     if (!agentPolicyWithPackagePolicies) {
-      throw new Error('Policy not found');
+      throw new Error(
+        i18n.translate('xpack.fleet.setup.policyNotFoundError', {
+          defaultMessage: 'Policy not found',
+        })
+      );
     }
     if (
       agentPolicyWithPackagePolicies.package_policies.length &&
       typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
     ) {
-      throw new Error('Policy not found');
+      throw new Error(
+        i18n.translate('xpack.fleet.setup.policyNotFoundError', {
+          defaultMessage: 'Policy not found',
+        })
+      );
     }
 
     for (const installedPackage of installedPackages) {
@@ -170,11 +180,36 @@ function ensurePreconfiguredPackagesAndPolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
-  const { policies, packages } = appContextService.getConfig() ?? {};
+  const { policies: policiesOrUndefined, packages: packagesOrUndefined } =
+    appContextService.getConfig() ?? {};
+
+  const policies = policiesOrUndefined ?? [];
+  const packages = packagesOrUndefined ?? [];
+
+  // Validate configured packages to ensure there are no version conflicts
+  const packageNamesByVersion = groupBy(
+    packages,
+    (packageString: string) => packageString.split(':')[0]
+  );
+  const duplicatePackages = Object.entries(packageNamesByVersion).filter(
+    ([, versions]) => versions.length > 1
+  );
+  if (duplicatePackages.length) {
+    const duplicateList = duplicatePackages.map(([, versions]) => versions.join(', ')).join('; ');
+
+    throw new Error(
+      i18n.translate('xpack.fleet.setup.duplicatePackageError', {
+        defaultMessage: 'Duplicate packages specified in configuration: {duplicateList}',
+        values: {
+          duplicateList,
+        },
+      })
+    );
+  }
 
   // Create policies specified in Kibana config
   const policiesPromise = Promise.all(
-    (policies ?? []).map(async ({ integrations, id, ...newAgentPolicy }) => {
+    policies.map(async ({ integrations, id, ...newAgentPolicy }) => {
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
@@ -186,7 +221,7 @@ function ensurePreconfiguredPackagesAndPolicies(
 
   // Preinstall packages specified in Kibana config
   const packagesPromise = Promise.all(
-    (packages ?? []).map((packageString) =>
+    packages.map((packageString) =>
       ensureInstalledPreconfiguredPackage(soClient, esClient, packageString)
     )
   );
@@ -294,7 +329,11 @@ export async function setupFleet(
   // save fleet admin user
   const defaultOutputId = await outputService.getDefaultOutputId(soClient);
   if (!defaultOutputId) {
-    throw new Error('Default output does not exist');
+    throw new Error(
+      i18n.translate('xpack.fleet.setup.defaultOutputError', {
+        defaultMessage: 'Default output does not exist',
+      })
+    );
   }
 
   await outputService.updateOutput(soClient, defaultOutputId, {
