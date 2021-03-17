@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import type { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Telemetry', () => {
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./telemetry_local'));
