@@ -81,9 +81,7 @@ export interface ISimpleFields {
   [ConfigKeys.MONITOR_TYPE]: DataStream;
   [ConfigKeys.PROXY_URL]: string;
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: boolean;
-  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: string[];
-  [ConfigKeys.REQUEST_SEND_CHECK]: string;
-  [ConfigKeys.SCHEDULE]: { number: number; unit: string };
+  [ConfigKeys.SCHEDULE]: { number: string; unit: string };
   [ConfigKeys.SERVICE_NAME]: string;
   [ConfigKeys.TIMEOUT]: number;
   [ConfigKeys.URLS]: string;
@@ -103,8 +101,15 @@ export interface IHTTPAdvancedFields {
   [ConfigKeys.REQUEST_METHOD_CHECK]: string;
 }
 
-export type ICustomFields = ISimpleFields & IHTTPAdvancedFields;
+export interface ITCPAdvancedFields {
+  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: string[];
+  [ConfigKeys.REQUEST_SEND_CHECK]: string;
+}
+
+export type ICustomFields = ISimpleFields & IHTTPAdvancedFields & ITCPAdvancedFields;
 
 export type Config = {
   [ConfigKeys.NAME]: string;
 } & ICustomFields;
+
+export type Validation = Partial<Record<ConfigKeys, (value: unknown) => void>>;
