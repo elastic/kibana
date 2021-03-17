@@ -84,7 +84,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                     <EuiFlexItem>
                       <EuiText size="s">
                         <h4>
-                          {name}&nbsp;
+                          {name}
                           {!connected &&
                             !accountContextOnly &&
                             isOrganization &&
