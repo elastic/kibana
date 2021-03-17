@@ -215,7 +215,7 @@ export default function (program) {
         dev: !!opts.dev,
         envName: unknownOptions.env ? unknownOptions.env.name : undefined,
         // no longer supported
-        quiet: !!opts.quiet, // no longer supported
+        quiet: !!opts.quiet,
         silent: !!opts.silent,
         watch: !!opts.watch,
         runExamples: !!opts.runExamples,
