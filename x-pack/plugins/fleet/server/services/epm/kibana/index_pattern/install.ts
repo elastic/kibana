@@ -147,11 +147,11 @@ export async function installIndexPatterns({
       const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
 
       // create or overwrite the index pattern
-      logger.debug(`creating index pattern ${kibanaIndexPattern.title}`);
       await savedObjectsClient.create(INDEX_PATTERN_SAVED_OBJECT_TYPE, kibanaIndexPattern, {
         id: `${indexPatternType}-*`,
         overwrite: true,
       });
+      logger.debug(`created index pattern ${kibanaIndexPattern.title}`);
     })
   );
 }
@@ -185,14 +185,10 @@ export const createIndexPattern = (indexPatternType: string, fields: Fields) => 
   const { indexPatternFields, fieldFormatMap } = createIndexPatternFields(fields);
 
   return {
-    id: `${indexPatternType}-*`,
     title: `${indexPatternType}-*`,
     timeFieldName: '@timestamp',
-    fields: indexPatternFields.reduce((acc, field) => {
-      acc[field.name] = field;
-      return acc;
-    }, {} as IndexPatternFieldMap),
-    fieldFormatMap,
+    fields: JSON.stringify(indexPatternFields),
+    fieldFormatMap: JSON.stringify(fieldFormatMap),
     allowNoIndex: true,
   };
 };
