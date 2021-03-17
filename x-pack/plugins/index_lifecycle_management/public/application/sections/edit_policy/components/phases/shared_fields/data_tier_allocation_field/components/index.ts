@@ -17,8 +17,6 @@ export { DefaultAllocationWarning } from './default_allocation_warning';
 
 export { NoNodeAttributesWarning } from './no_node_attributes_warning';
 
-export { MissingCloudTierCallout } from './missing_cloud_tier_callout';
-
 export { CloudDataTierCallout } from './cloud_data_tier_callout';
 
 export { LoadingError } from './loading_error';
