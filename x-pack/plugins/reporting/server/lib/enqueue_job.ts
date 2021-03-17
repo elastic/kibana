@@ -47,12 +47,16 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    const [createJob, { store }] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger),
-      reporting.getPluginStartDeps(),
+    if (!exportType.createJobFnFactory) {
+      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
+    }
+
+    const [createJob, store] = await Promise.all([
+      exportType.createJobFnFactory(reporting, logger.clone([exportType.id])),
+      reporting.getStore(),
     ]);
 
-    const job = await createJob(jobParams, context, request);
+    const job = await createJob!(jobParams, context, request);
     const pendingReport = new Report({
       jobtype: exportType.jobType,
       created_by: user ? user.username : false,
@@ -67,7 +71,7 @@ export function enqueueJobFactory(
     // store the pending report, puts it in the Reporting Management UI table
     const report = await store.addReport(pendingReport);
 
-    logger.info(`Scheduled ${exportType.name} report: ${report._id}`);
+    logger.info(`Queued ${exportType.name} report: ${report._id}`);
 
     return report;
   };

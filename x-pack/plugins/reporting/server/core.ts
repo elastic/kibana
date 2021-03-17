@@ -11,6 +11,7 @@ import { first, map, take } from 'rxjs/operators';
 import {
   BasePath,
   ElasticsearchServiceSetup,
+  IClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
@@ -28,6 +29,7 @@ import { ESQueueInstance } from './lib/create_queue';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
 import { ReportingPluginRouter } from './types';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -41,10 +43,12 @@ export interface ReportingInternalSetup {
 
 export interface ReportingInternalStart {
   browserDriverFactory: HeadlessChromiumDriverFactory;
-  esqueue: ESQueueInstance;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
+  esClient: IClusterClient;
+  data: DataPluginStart;
+  esqueue: ESQueueInstance;
 }
 
 export class ReportingCore {
@@ -155,6 +159,10 @@ export class ReportingCore {
     return (await this.getPluginStartDeps()).esqueue;
   }
 
+  public async getStore() {
+    return (await this.getPluginStartDeps()).store;
+  }
+
   public async getLicenseInfo() {
     const { licensing } = this.getPluginSetupDeps();
     return await licensing.license$
@@ -181,6 +189,7 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
+  // NOTE: Uses the Legacy API
   public getElasticsearchService() {
     return this.getPluginSetupDeps().elasticsearch;
   }
@@ -238,5 +247,15 @@ export class ReportingCore {
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
+  }
+
+  public async getDataService() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.data;
+  }
+
+  public async getEsClient() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.esClient;
   }
 }

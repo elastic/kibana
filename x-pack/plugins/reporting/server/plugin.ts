@@ -29,8 +29,8 @@ export class ReportingPlugin
 
   constructor(context: PluginInitializerContext<ReportingConfigType>) {
     this.logger = new LevelLogger(context.logger.get());
-    this.initializerContext = context;
     this.reportingCore = new ReportingCore(this.logger);
+    this.initializerContext = context;
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
@@ -121,8 +121,10 @@ export class ReportingPlugin
         browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
-        esqueue,
         store,
+        esClient: core.elasticsearch.client,
+        data: plugins.data,
+        esqueue,
       });
 
       this.logger.debug('Start complete');
