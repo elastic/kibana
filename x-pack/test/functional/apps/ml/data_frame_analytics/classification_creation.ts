@@ -43,9 +43,9 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           rocCurveColorState: [
             // tick/grid/axis
-            { key: '#DDDDDD', value: 48 },
+            { key: '#DDDDDD', value: 50 },
             // lines
-            { key: '#98A2B3', value: 32 },
+            { key: '#98A2B3', value: 30 },
             { key: '#6092C0', value: 10 },
             { key: '#5F92C0', value: 6 },
           ],
