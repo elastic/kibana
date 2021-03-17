@@ -25,6 +25,7 @@ import {
   FONTS_API_PATH,
   API_ROOT_PATH,
   INDEX_SOURCE_API_PATH,
+  MAX_DRAWING_SIZE_BYTES,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
