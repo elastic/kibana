@@ -1,6 +1,9 @@
-[role="xpack"]
 [[search-sessions]]
-=== Run a search in the background
+=== Save a long-running search in the background
+
+++++
+<titleabbrev>Save a long-running search</titleabbrev>
+++++
 
 Sometimes you might need to search through large amounts of data no matter
 how long the search takes. While this might not happen often,
@@ -25,7 +28,7 @@ Search sessions are enabled by default in your `kibana.yml` file.  For additiona
 settings, refer to <<search-session-settings-kb>>.
 
 * To save a session, you must have permissions for *Discover* and *Dashboard*,
-and the <<spaces-control-feature-visibility, search sessions subfeature>>.
+and the <<kibana-feature-privileges, search sessions subfeature>>.
 
 * To view and restore a saved session, you must have access to *Stack Management*.
 
