@@ -28,7 +28,6 @@ it('produces the right watch and ignore list', () => {
     Array [
       <absolute path>/src/core,
       <absolute path>/src/legacy/server,
-      <absolute path>/src/legacy/ui,
       <absolute path>/src/legacy/utils,
       <absolute path>/config,
       <absolute path>/x-pack/test/plugin_functional/plugins/resolver_test,
