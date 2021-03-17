@@ -29,6 +29,8 @@ The following APIs are available for managing {kib} rules.
 
 * <<alerting-health-api, Get Alerting framework health API>> to retrieve the health of the Alerting framework
 
+For deprecated APIs, refer to <<alerts-legacy-apis>>.
+
 include::alerting/create.asciidoc[]
 include::alerting/update.asciidoc[]
 include::alerting/get.asciidoc[]
@@ -42,3 +44,4 @@ include::alerting/mute.asciidoc[]
 include::alerting/unmute_all.asciidoc[]
 include::alerting/unmute.asciidoc[]
 include::alerting/health.asciidoc[]
+include::alerting/legacy/index.asciidoc[]
