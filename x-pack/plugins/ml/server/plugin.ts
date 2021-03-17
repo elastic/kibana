@@ -67,7 +67,6 @@ export type MlPluginStart = void;
 export class MlServerPlugin
   implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart> {
   private log: Logger;
-  private version: string;
   private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
@@ -79,7 +78,6 @@ export class MlServerPlugin
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
-    this.version = ctx.env.packageInfo.branch;
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
   }
@@ -182,7 +180,7 @@ export class MlServerPlugin
     jobServiceRoutes(routeInit);
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
-    jobValidationRoutes(routeInit, this.version);
+    jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,
       resolveMlCapabilities,
