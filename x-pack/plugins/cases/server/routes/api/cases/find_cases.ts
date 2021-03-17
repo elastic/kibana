@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-
-import {
-  CasesFindResponseRt,
-  CasesFindRequestRt,
-  throwErrors,
-  caseStatuses,
-} from '../../../../common';
-import { transformCases, wrapError, escapeHatch } from '../utils';
+import { CasesFindRequest } from '../../../../common';
+import { wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
-import { CASES_URL, SAVED_OBJECT_TYPES } from '../../../../common';
-import { constructQueryOptions } from './helpers';
+import { CASES_URL } from '../../../../common';
 
 export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
   router.get(
@@ -32,49 +20,14 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
-          includedHiddenTypes: SAVED_OBJECT_TYPES,
-        });
-        const queryParams = pipe(
-          CasesFindRequestRt.decode(request.query),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-        const queryArgs = {
-          tags: queryParams.tags,
-          reporters: queryParams.reporters,
-          sortByField: queryParams.sortField,
-          status: queryParams.status,
-          caseType: queryParams.type,
-        };
-
-        const caseQueries = constructQueryOptions(queryArgs);
-        const cases = await caseService.findCasesGroupedByID({
-          client,
-          caseOptions: { ...queryParams, ...caseQueries.case },
-          subCaseOptions: caseQueries.subCase,
-        });
-
-        const [openCases, inProgressCases, closedCases] = await Promise.all([
-          ...caseStatuses.map((status) => {
-            const statusQuery = constructQueryOptions({ ...queryArgs, status });
-            return caseService.findCaseStatusStats({
-              client,
-              caseOptions: statusQuery.case,
-              subCaseOptions: statusQuery.subCase,
-            });
-          }),
-        ]);
+        if (!context.cases) {
+          return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
+        }
+        const casesClient = await context.cases.getCasesClient();
+        const options = request.body as CasesFindRequest;
 
         return response.ok({
-          body: CasesFindResponseRt.encode(
-            transformCases({
-              ...cases,
-              countOpenCases: openCases,
-              countInProgressCases: inProgressCases,
-              countClosedCases: closedCases,
-              total: cases.casesMap.size,
-            })
-          ),
+          body: await casesClient.find({ ...options }),
         });
       } catch (error) {
         logger.error(`Failed to find cases in route: ${error}`);

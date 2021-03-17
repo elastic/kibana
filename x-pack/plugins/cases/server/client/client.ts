@@ -31,13 +31,14 @@ import {
   CaseUserActionServiceSetup,
   AlertServiceContract,
 } from '../services';
-import { CasesPatchRequest, CasePostRequest, User } from '../../common';
+import { CasesPatchRequest, CasePostRequest, User, CasesFindRequest } from '../../common';
 import { get } from './cases/get';
 import { get as getUserActions } from './user_actions/get';
 import { get as getAlerts } from './alerts/get';
 import { push } from './cases/push';
 import { createCaseError } from '../common/error';
 import { Authorization } from '../authorization/authorization';
+import { find } from './cases/find';
 
 /**
  * This class is a pass through for common case functionality (like creating, get a case).
@@ -82,6 +83,24 @@ export class CasesClientHandler implements CasesClient {
     } catch (error) {
       throw createCaseError({
         message: `Failed to create a new case using client: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  public async find(options: CasesFindRequest) {
+    try {
+      // TODO: authorize the user
+      return find({
+        savedObjectsClient: this._savedObjectsClient,
+        caseService: this._caseService,
+        logger: this.logger,
+        options,
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to find cases using client: ${error}`,
         error,
         logger: this.logger,
       });

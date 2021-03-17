@@ -18,6 +18,8 @@ import {
   GetFieldsResponse,
   CaseUserActionsResponse,
   User,
+  CasesFindResponse,
+  CasesFindRequest,
 } from '../../common';
 import { Authorization } from '../authorization/authorization';
 import { AlertInfo } from '../common';
@@ -105,6 +107,7 @@ export interface CasesClient {
   getFields(args: ConfigureFields): Promise<GetFieldsResponse>;
   getMappings(args: MappingsClient): Promise<ConnectorMappingsAttributes[]>;
   getUserActions(args: CasesClientGetUserActions): Promise<CaseUserActionsResponse>;
+  find(args: CasesFindRequest): Promise<CasesFindResponse>;
   push(args: CasesClientPush): Promise<CaseResponse>;
   update(args: CasesPatchRequest): Promise<CasesResponse>;
   updateAlertsStatus(args: CasesClientUpdateAlertsStatus): Promise<void>;
