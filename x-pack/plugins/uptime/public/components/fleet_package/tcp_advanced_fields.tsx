@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-
+import React, { useCallback, useState, memo } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
@@ -17,36 +17,34 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ConfigKeys, ICustomFields } from './types';
+import { ConfigKeys, Config, ITCPAdvancedFields } from './types';
 
 import { OptionalLabel } from './optional_label';
 import { ComboBox } from './combo_box';
 
 interface Props {
-  fields: ICustomFields;
-  onCheckboxChange: ({
-    event,
-    configKey,
-  }: {
-    event: React.ChangeEvent<HTMLInputElement>;
-    configKey: ConfigKeys;
-  }) => void;
-  onInputChange: ({
-    event,
-    configKey,
-  }: {
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>;
-    configKey: ConfigKeys;
-  }) => void;
-  setFields: React.Dispatch<React.SetStateAction<ICustomFields>>;
+  defaultValues: ITCPAdvancedFields;
+  onChange: (values: Partial<Config>) => void;
 }
 
-export const TCPAdvancedFields = ({
-  fields,
-  onCheckboxChange,
-  onInputChange,
-  setFields,
-}: Props) => {
+export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
+  const [fields, setFields] = useState<ITCPAdvancedFields>(defaultValues);
+
+  const handleInputChange = useCallback(
+    ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+    },
+    [setFields]
+  );
+
+  useDebounce(
+    () => {
+      onChange(fields);
+    },
+    250,
+    [fields]
+  );
+
   return (
     <EuiAccordion id="uptimeFleetAdvancedOptions" buttonContent="Advanced options">
       <EuiSpacer size="m" />
@@ -54,14 +52,14 @@ export const TCPAdvancedFields = ({
         title={
           <h4>
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationTCPRequestSettingsSectionTitle"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.title"
               defaultMessage="Request configuration"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationRequestTCPSettingsSectionDescription"
+            id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.description"
             defaultMessage="Configure your Heartbeat monitor with the following options. Find information about each option in the {link}."
             values={{
               link: (
@@ -83,7 +81,14 @@ export const TCPAdvancedFields = ({
         <EuiFormRow label="Request payload" labelAppend={<OptionalLabel />}>
           <EuiFieldText
             value={fields[ConfigKeys.REQUEST_SEND_CHECK]}
-            onChange={(event) => onInputChange({ event, configKey: ConfigKeys.REQUEST_SEND_CHECK })}
+            onChange={useCallback(
+              (value) =>
+                handleInputChange({
+                  value,
+                  configKey: ConfigKeys.REQUEST_SEND_CHECK,
+                }),
+              [handleInputChange]
+            )}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -118,12 +123,18 @@ export const TCPAdvancedFields = ({
       >
         <EuiFormRow label="Check response contains" labelAppend={<OptionalLabel />}>
           <ComboBox
-            configKey={ConfigKeys.RESPONSE_RECEIVE_CHECK}
             selectedOptions={fields[ConfigKeys.RESPONSE_RECEIVE_CHECK]}
-            setFields={setFields}
+            onChange={useCallback(
+              (value) =>
+                handleInputChange({
+                  value,
+                  configKey: ConfigKeys.RESPONSE_RECEIVE_CHECK,
+                }),
+              [handleInputChange]
+            )}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
     </EuiAccordion>
   );
-};
+});
