@@ -9,6 +9,9 @@
 const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+
 const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/utils');
 const webpack = require('webpack');
@@ -105,6 +108,19 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   },
 
   optimization: {
+    minimizer: [
+      new CssMinimizerPlugin(),
+      new TerserPlugin({
+        cache: false,
+        sourceMap: false,
+        extractComments: false,
+        parallel: false,
+        terserOptions: {
+          compress: true,
+          mangle: true,
+        },
+      }),
+    ],
     noEmitOnErrors: true,
     splitChunks: {
       cacheGroups: {
