@@ -10,19 +10,22 @@ import {
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID,
 } from '../../../../common/apm_saved_object_constants';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { ApmIndicesConfig } from './get_apm_indices';
 
-export async function saveApmIndices(
+export function saveApmIndices(
   savedObjectsClient: SavedObjectsClientContract,
   apmIndices: Partial<ApmIndicesConfig>
 ) {
-  return await savedObjectsClient.create(
-    APM_INDICES_SAVED_OBJECT_TYPE,
-    removeEmpty(apmIndices),
-    {
-      id: APM_INDICES_SAVED_OBJECT_ID,
-      overwrite: true,
-    }
+  return withApmSpan('save_apm_indices', () =>
+    savedObjectsClient.create(
+      APM_INDICES_SAVED_OBJECT_TYPE,
+      removeEmpty(apmIndices),
+      {
+        id: APM_INDICES_SAVED_OBJECT_ID,
+        overwrite: true,
+      }
+    )
   );
 }
 

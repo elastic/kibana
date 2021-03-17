@@ -88,7 +88,6 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
 
 exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
 .c0 {
-  background-color: #f5f7fa;
   padding: 16px;
 }
 
@@ -2891,7 +2890,6 @@ exports[`TrustedAppsGrid renders correctly when loading data for the first time 
 
 exports[`TrustedAppsGrid renders correctly when loading data for the second time 1`] = `
 .c0 {
-  background-color: #f5f7fa;
   padding: 16px;
 }
 
@@ -5666,7 +5664,6 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
 
 exports[`TrustedAppsGrid renders correctly when new page and page size set (not loading yet) 1`] = `
 .c0 {
-  background-color: #f5f7fa;
   padding: 16px;
 }
 

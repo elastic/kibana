@@ -6,20 +6,22 @@
  */
 
 import React from 'react';
-import { SidebarItem } from '../waterfall/types';
-
-import { render } from '../../../../../lib/helper/rtl_helpers';
-
 import 'jest-canvas-mock';
+import { fireEvent } from '@testing-library/react';
+
+import { SidebarItem } from '../waterfall/types';
+import { render } from '../../../../../lib/helper/rtl_helpers';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
 import { SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL } from '../../waterfall/components/translations';
 
 describe('waterfall filter', () => {
   const url = 'http://www.elastic.co';
-  const offsetIndex = 1;
+  const index = 0;
+  const offsetIndex = index + 1;
   const item: SidebarItem = {
     url,
     isHighlighted: true,
+    index,
     offsetIndex,
   };
 
@@ -40,12 +42,14 @@ describe('waterfall filter', () => {
   });
 
   it('does not render screen reader text when renderFilterScreenReaderText is false', () => {
-    const { queryByLabelText } = render(
-      <WaterfallSidebarItem item={item} renderFilterScreenReaderText={false} />
+    const onClick = jest.fn();
+    const { getByRole } = render(
+      <WaterfallSidebarItem item={item} renderFilterScreenReaderText={false} onClick={onClick} />
     );
+    const button = getByRole('button');
+    fireEvent.click(button);
 
-    expect(
-      queryByLabelText(`${SIDEBAR_FILTER_MATCHES_SCREENREADER_LABEL} ${offsetIndex}. ${url}`)
-    ).not.toBeInTheDocument();
+    expect(button).toBeInTheDocument();
+    expect(onClick).toBeCalled();
   });
 });

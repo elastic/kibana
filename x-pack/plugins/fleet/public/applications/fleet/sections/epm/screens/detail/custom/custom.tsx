@@ -7,9 +7,10 @@
 import React, { memo, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { useUIExtension } from '../../../../../hooks/use_ui_extension';
 import { useLink } from '../../../../../hooks';
-import { PackageInfo } from '../../../../../types';
+import type { PackageInfo } from '../../../../../types';
 import { pkgKeyFromPackageInfo } from '../../../../../services/pkg_key_from_package_info';
 import { ExtensionWrapper } from '../../../../../components/extension_wrapper';
 

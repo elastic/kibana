@@ -33,17 +33,24 @@ export const createExceptionListResponse = (data: ExceptionListItemSchema[], tot
 
 type FindExceptionListItemOptions = Parameters<ExceptionListClient['findExceptionListItem']>[0];
 
-const FILTER_REGEXP = /^exception-list-agnostic\.attributes\.os_types:"(\w+)"$/;
+const FILTER_PROPERTY_PREFIX = 'exception-list-agnostic\\.attributes';
+const FILTER_REGEXP = new RegExp(
+  `^${FILTER_PROPERTY_PREFIX}\.os_types:"([^"]+)"( and \\(${FILTER_PROPERTY_PREFIX}\.tags:"policy:all"( or ${FILTER_PROPERTY_PREFIX}\.tags:"policy:([^"]+)")?\\))?$`
+);
 
 export const mockFindExceptionListItemResponses = (
   responses: Record<string, Record<string, ExceptionListItemSchema[]>>
 ) => {
   return jest.fn().mockImplementation((options: FindExceptionListItemOptions) => {
-    const os = FILTER_REGEXP.test(options.filter || '')
-      ? options.filter!.match(FILTER_REGEXP)![1]
-      : '';
+    const matches = options.filter!.match(FILTER_REGEXP) || [];
 
-    return createExceptionListResponse(responses[options.listId]?.[os] || []);
+    if (matches[4] && responses[options.listId]?.[`${matches![1]}-${matches[4]}`]) {
+      return createExceptionListResponse(
+        responses[options.listId]?.[`${matches![1]}-${matches[4]}`] || []
+      );
+    } else {
+      return createExceptionListResponse(responses[options.listId]?.[matches![1] || ''] || []);
+    }
   });
 };
 
@@ -118,7 +125,7 @@ export const getManifestManagerMock = (
           context.exceptionListClient.findExceptionListItem = jest
             .fn()
             .mockRejectedValue(new Error('unexpected thing happened'));
-          return super.buildExceptionListArtifacts('v1');
+          return super.buildExceptionListArtifacts();
         case ManifestManagerMockType.NormalFlow:
           return getMockArtifactsWithDiff();
       }

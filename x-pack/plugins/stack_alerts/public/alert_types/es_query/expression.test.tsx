@@ -116,6 +116,11 @@ describe('EsQueryAlertTypeExpression', () => {
         docLinks: {
           ELASTIC_WEBSITE_URL: '',
           DOC_LINK_VERSION: '',
+          links: {
+            query: {
+              queryDsl: 'query-dsl.html',
+            },
+          },
         },
       },
     });
@@ -147,6 +152,7 @@ describe('EsQueryAlertTypeExpression', () => {
       <EsQueryAlertTypeExpression
         alertInterval="1m"
         alertThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
         alertParams={alertParams}
         setAlertParams={() => {}}
         setAlertProperty={() => {}}

@@ -21,7 +21,7 @@ import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererScope } from '../../containers/sourcerer';
-import { EventDetailsFlyout } from './event_details_flyout';
+import { DetailsPanel } from '../../../timelines/components/side_panel';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
@@ -46,6 +46,11 @@ export interface OwnProps {
 
 type Props = OwnProps & PropsFromRedux;
 
+/**
+ * The stateful events viewer component is the highest level component that is utilized across the security_solution pages layer where
+ * timeline is used BESIDES the flyout. The flyout makes use of the `EventsViewer` component which is a subcomponent here
+ * NOTE: As of writting, it is not used in the Case_View component
+ */
 const StatefulEventsViewerComponent: React.FC<Props> = ({
   createTimeline,
   columns,
@@ -53,7 +58,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   deletedEventIds,
   deleteEventQuery,
   end,
-  expandedEvent,
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
@@ -114,7 +118,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             dataProviders={dataProviders!}
             deletedEventIds={deletedEventIds}
             end={end}
-            expandedEvent={expandedEvent}
             isLoadingIndexPattern={isLoadingIndexPattern}
             filters={globalFilters}
             headerFilterGroup={headerFilterGroup}
@@ -133,9 +136,10 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           />
         </InspectButtonContainer>
       </FullScreenContainer>
-      <EventDetailsFlyout
+      <DetailsPanel
         browserFields={browserFields}
         docValueFields={docValueFields}
+        isFlyoutView
         timelineId={id}
       />
     </>
@@ -155,7 +159,6 @@ const makeMapStateToProps = () => {
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
-      expandedEvent,
       graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
@@ -168,7 +171,6 @@ const makeMapStateToProps = () => {
       columns,
       dataProviders,
       deletedEventIds,
-      expandedEvent: expandedEvent?.query ?? {},
       excludedRowRendererIds,
       filters: getGlobalFiltersQuerySelector(state),
       id,

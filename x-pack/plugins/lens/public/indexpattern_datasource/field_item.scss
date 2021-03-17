@@ -29,6 +29,13 @@
   }
 }
 
+.kbnFieldButton.lnsDragDrop_ghost {
+  .lnsFieldItem__infoIcon {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
 .kbnFieldButton__name {
   transition: background-color $euiAnimSpeedFast ease-in-out;
 }

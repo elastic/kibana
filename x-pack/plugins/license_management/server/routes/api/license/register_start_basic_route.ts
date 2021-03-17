@@ -18,17 +18,13 @@ export function registerStartBasicRoute({ router, plugins: { licensing } }: Rout
     },
     async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.core.elasticsearch.legacy.client;
-      try {
-        return res.ok({
-          body: await startBasic({
-            acknowledge: Boolean(req.query.acknowledge),
-            callAsCurrentUser,
-            licensing,
-          }),
-        });
-      } catch (e) {
-        return res.internalError({ body: e });
-      }
+      return res.ok({
+        body: await startBasic({
+          acknowledge: Boolean(req.query.acknowledge),
+          callAsCurrentUser,
+          licensing,
+        }),
+      });
     }
   );
 }

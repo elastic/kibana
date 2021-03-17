@@ -19,6 +19,7 @@ import { stringMatch } from '../../../util/string_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
+import { isPopulatedObject } from '../../../../../common/util/object_utils';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -379,7 +380,7 @@ export function checkForAutoStartDatafeed() {
     mlJobService.tempJobCloningObjects.datafeed = undefined;
     mlJobService.tempJobCloningObjects.createdBy = undefined;
 
-    const hasDatafeed = typeof datafeed === 'object' && Object.keys(datafeed).length > 0;
+    const hasDatafeed = isPopulatedObject(datafeed);
     const datafeedId = hasDatafeed ? datafeed.datafeed_id : '';
     return {
       id: job.job_id,

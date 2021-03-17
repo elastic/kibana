@@ -11,7 +11,7 @@ import globby from 'globby';
 import { basename, join, relative, resolve } from 'path';
 
 import { getProductionProjects } from './build_non_bazel_production_projects';
-import { runBazel } from '../utils/bazel/run';
+import { runBazel } from '../utils/bazel';
 import { chmod, isFile, isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import {
@@ -61,9 +61,8 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
   const relativeProjectPath = relative(kibanaRoot, project.path);
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
 
-  const bazelFilesToExclude = ['!*.params', '!*_mappings.json', '!*_options.optionsvalid.d.ts'];
-  await copy(['**/*', '!node_modules/**', ...bazelFilesToExclude], buildProjectPath, {
-    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath)),
+  await copy(['**/*'], buildProjectPath, {
+    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath), 'npm_module'),
     dot: true,
     onlyFiles: true,
     parents: true,
@@ -89,7 +88,7 @@ async function applyCorrectPermissions(project: Project, kibanaRoot: string, bui
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
   const allPluginPaths = await globby([`**/*`], {
     onlyFiles: false,
-    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath)),
+    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath), 'npm_module'),
     dot: true,
   });
 

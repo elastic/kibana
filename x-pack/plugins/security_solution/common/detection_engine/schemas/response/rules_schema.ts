@@ -70,6 +70,7 @@ import {
   threat_filters,
   threat_mapping,
   threat_language,
+  threat_indicator_path,
 } from '../types/threat_mapping';
 
 import { DefaultListArray } from '../types/lists_default_array';
@@ -151,6 +152,7 @@ export const dependentRulesSchema = t.partial({
   items_per_search,
   threat_mapping,
   threat_language,
+  threat_indicator_path,
 });
 
 /**
@@ -286,6 +288,9 @@ export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): 
       t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),
       t.exact(t.partial({ threat_language: dependentRulesSchema.props.threat_language })),
       t.exact(t.partial({ threat_filters: dependentRulesSchema.props.threat_filters })),
+      t.exact(
+        t.partial({ threat_indicator_path: dependentRulesSchema.props.threat_indicator_path })
+      ),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
       t.exact(t.partial({ concurrent_searches: dependentRulesSchema.props.concurrent_searches })),
       t.exact(

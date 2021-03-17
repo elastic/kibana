@@ -26,7 +26,7 @@ export const PanelToolbar: FC<Props> = ({ onAddPanelClick, onLibraryClick }) => 
         size="s"
         iconType="plusInCircleFilled"
         onClick={onAddPanelClick}
-        data-test-subj="addVisualizationButton"
+        data-test-subj="dashboardAddNewPanelButton"
       >
         {i18n.translate('dashboard.panelToolbar.addPanelButtonLabel', {
           defaultMessage: 'Create panel',
@@ -40,6 +40,7 @@ export const PanelToolbar: FC<Props> = ({ onAddPanelClick, onLibraryClick }) => 
         className="panelToolbarButton"
         iconType="folderOpen"
         onClick={onLibraryClick}
+        data-test-subj="dashboardAddPanelButton"
       >
         {i18n.translate('dashboard.panelToolbar.libraryButtonLabel', {
           defaultMessage: 'Add from library',

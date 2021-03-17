@@ -164,7 +164,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
           />
         </EuiTableRowCell>
       )}
-      <EuiTableRowCell className="source-row__actions">
+      <EuiTableRowCell align="right">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
           {showFix && <EuiFlexItem grow={false}>{fixLink}</EuiFlexItem>}
           <EuiFlexItem grow={false}>

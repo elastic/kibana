@@ -21,9 +21,8 @@ import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 
 import { Form, UseField, useForm } from '../../../shared_imports';
-import { ConnectorTypeFields } from '../../../../../case/common/api/connectors';
+import { ActionConnector, ConnectorTypeFields } from '../../../../../cases/common';
 import { ConnectorSelector } from '../connector_selector/form';
-import { ActionConnector } from '../../../../../case/common/api';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { getConnectorById } from '../configure_cases/utils';
 import { CaseUserActions } from '../../containers/types';
@@ -34,7 +33,6 @@ import * as i18n from './translations';
 interface EditConnectorProps {
   caseFields: ConnectorTypeFields['fields'];
   connectors: ActionConnector[];
-  disabled?: boolean;
   isLoading: boolean;
   onSubmit: (
     connectorId: string,
@@ -44,6 +42,8 @@ interface EditConnectorProps {
   ) => void;
   selectedConnector: string;
   userActions: CaseUserActions[];
+  disabled?: boolean;
+  hideConnectorServiceNowSir?: boolean;
 }
 
 const MyFlexGroup = styled(EuiFlexGroup)`
@@ -105,6 +105,7 @@ export const EditConnector = React.memo(
     caseFields,
     connectors,
     disabled = false,
+    hideConnectorServiceNowSir = false,
     isLoading,
     onSubmit,
     selectedConnector,
@@ -234,6 +235,7 @@ export const EditConnector = React.memo(
                       dataTestSubj: 'caseConnectors',
                       defaultValue: selectedConnector,
                       disabled,
+                      hideConnectorServiceNowSir,
                       idAria: 'caseConnectors',
                       isEdit: editConnector,
                       isLoading,

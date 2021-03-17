@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
-import {
-  SecurityPlugin,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-  PluginSetupDependencies,
-  PluginStartDependencies,
-} from './plugin';
+import type { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+
+import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
+import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
 
 export { SecurityPluginSetup, SecurityPluginStart };
 export { AuthenticatedUser } from '../common/model';

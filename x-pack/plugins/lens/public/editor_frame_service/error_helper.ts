@@ -26,6 +26,17 @@ const isRequestError = (e: Error | RequestError): e is RequestError => {
   return false;
 };
 
+interface ESError extends Error {
+  attributes?: { caused_by?: ElasticsearchErrorClause };
+}
+
+const isEsError = (e: Error | ESError): e is ESError => {
+  if ('attributes' in e) {
+    return e.attributes?.caused_by?.caused_by !== undefined;
+  }
+  return false;
+};
+
 function getNestedErrorClause({
   type,
   reason,
@@ -37,9 +48,22 @@ function getNestedErrorClause({
   return { type, reason };
 }
 
+function getErrorSource(e: Error | RequestError | ESError) {
+  if (isRequestError(e)) {
+    return e.body!.attributes!.error;
+  }
+  if (isEsError(e)) {
+    return e.attributes!.caused_by;
+  }
+}
+
 export function getOriginalRequestErrorMessage(error?: ExpressionRenderError | null) {
-  if (error && 'original' in error && error.original && isRequestError(error.original)) {
-    const rootError = getNestedErrorClause(error.original.body!.attributes!.error);
+  if (error && 'original' in error && error.original) {
+    const errorSource = getErrorSource(error.original);
+    if (errorSource == null) {
+      return;
+    }
+    const rootError = getNestedErrorClause(errorSource);
     if (rootError.reason && rootError.type) {
       return i18n.translate('xpack.lens.editorFrame.expressionFailureMessage', {
         defaultMessage: 'Request error: {type}, {reason}',
@@ -50,4 +74,16 @@ export function getOriginalRequestErrorMessage(error?: ExpressionRenderError | n
       });
     }
   }
+}
+
+export function getMissingVisualizationTypeError() {
+  return i18n.translate('xpack.lens.editorFrame.expressionMissingVisualizationType', {
+    defaultMessage: 'Visualization type not found.',
+  });
+}
+
+export function getMissingCurrentDatasource() {
+  return i18n.translate('xpack.lens.editorFrame.expressionMissingDatasource', {
+    defaultMessage: 'Could not find datasource for the visualization',
+  });
 }

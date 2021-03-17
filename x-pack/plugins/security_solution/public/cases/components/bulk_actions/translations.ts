@@ -7,22 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
-  'xpack.securitySolution.case.caseTable.bulkActions.closeSelectedTitle',
-  {
-    defaultMessage: 'Close selected',
-  }
-);
-
-export const BULK_ACTION_OPEN_SELECTED = i18n.translate(
-  'xpack.securitySolution.case.caseTable.bulkActions.openSelectedTitle',
-  {
-    defaultMessage: 'Reopen selected',
-  }
-);
-
 export const BULK_ACTION_DELETE_SELECTED = i18n.translate(
-  'xpack.securitySolution.case.caseTable.bulkActions.deleteSelectedTitle',
+  'xpack.securitySolution.cases.caseTable.bulkActions.deleteSelectedTitle',
   {
     defaultMessage: 'Delete selected',
   }

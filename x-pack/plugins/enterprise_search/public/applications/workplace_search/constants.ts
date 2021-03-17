@@ -574,7 +574,7 @@ export const CUSTOMIZE_HEADER_DESCRIPTION = i18n.translate(
 export const CUSTOMIZE_NAME_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.customize.name.label',
   {
-    defaultMessage: 'Personalize general organization settings.',
+    defaultMessage: 'Organization name',
   }
 );
 
@@ -678,6 +678,10 @@ export const DESCRIPTION_LABEL = i18n.translate(
     defaultMessage: 'Description',
   }
 );
+
+export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
+  defaultMessage: 'and',
+});
 
 export const UPDATE_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.update.label', {
   defaultMessage: 'Update',

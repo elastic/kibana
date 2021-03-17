@@ -34,12 +34,7 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <SourceIcon
-            serviceType={serviceType}
-            fullBleed
-            name={name}
-            className="adding-a-source__icon"
-          />
+          <SourceIcon serviceType={serviceType} name={name} className="adding-a-source__icon" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="m">
@@ -52,7 +47,6 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xl" />
     </>
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RawKibanaPrivileges } from '../../common/model';
+import type { RawKibanaPrivileges } from '../../common/model';
 import { PrivilegeSerializer } from './privilege_serializer';
 
 interface SerializedPrivilege {

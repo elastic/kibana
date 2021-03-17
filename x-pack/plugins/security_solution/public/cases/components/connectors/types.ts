@@ -12,9 +12,9 @@ import {
   CaseField,
   ActionConnector,
   ConnectorTypeFields,
-} from '../../../../../case/common/api';
+} from '../../../../../cases/common';
 
-export { ThirdPartyField as AllThirdPartyFields } from '../../../../../case/common/api';
+export { ThirdPartyField as AllThirdPartyFields } from '../../../../../cases/common';
 export type CaseActionConnector = ActionConnector;
 
 export interface ThirdPartyField {

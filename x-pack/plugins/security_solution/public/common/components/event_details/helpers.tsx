@@ -112,6 +112,7 @@ export const getIconFromType = (type: string | null) => {
     case 'date':
       return 'clock';
     case 'ip':
+    case 'geo_point':
       return 'globe';
     case 'object':
       return 'questionInCircle';

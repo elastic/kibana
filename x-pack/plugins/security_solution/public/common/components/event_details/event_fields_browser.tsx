@@ -108,7 +108,6 @@ export const EventFieldsBrowser = React.memo<Props>(
 
     const columnHeaders = useDeepEqualSelector((state) => {
       const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
-
       return getColumnHeaders(columns, browserFields);
     });
 

@@ -16,7 +16,6 @@ import {
   EuiCallOut,
   EuiTextColor,
   EuiSwitch,
-  EuiIconTip,
   EuiText,
 } from '@elastic/eui';
 
@@ -24,7 +23,7 @@ import { useFormData, SelectField, NumericField } from '../../../../../../shared
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION, useConfigurationIssues, UseField } from '../../../form';
+import { ROLLOVER_EMPTY_VALIDATION, useConfiguration, UseField } from '../../../form';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
@@ -48,7 +47,7 @@ export const HotPhase: FunctionComponent = () => {
   const [formData] = useFormData({
     watch: isUsingDefaultRolloverPath,
   });
-  const { isUsingRollover } = useConfigurationIssues();
+  const { isUsingRollover } = useConfiguration();
   const isUsingDefaultRollover: boolean = get(formData, isUsingDefaultRolloverPath);
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
 
@@ -121,25 +120,12 @@ export const HotPhase: FunctionComponent = () => {
           <div aria-live="polite" role="region">
             <UseField<boolean> path="_meta.hot.customRollover.enabled">
               {(field) => (
-                <>
-                  <EuiSwitch
-                    label={field.label}
-                    checked={field.value}
-                    onChange={(e) => field.setValue(e.target.checked)}
-                    data-test-subj="rolloverSwitch"
-                  />
-                  &nbsp;
-                  <EuiIconTip
-                    type="questionInCircle"
-                    content={
-                      <FormattedMessage
-                        id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent"
-                        defaultMessage="Roll over to a new index when the
-    current index meets one of the defined conditions."
-                      />
-                    }
-                  />
-                </>
+                <EuiSwitch
+                  label={field.label}
+                  checked={field.value}
+                  onChange={(e) => field.setValue(e.target.checked)}
+                  data-test-subj="rolloverSwitch"
+                />
               )}
             </UseField>
             {isUsingRollover && (

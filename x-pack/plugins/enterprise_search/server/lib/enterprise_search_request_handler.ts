@@ -16,7 +16,12 @@ import {
   Logger,
 } from 'src/core/server';
 
-import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
+import {
+  ENTERPRISE_SEARCH_KIBANA_COOKIE,
+  JSON_HEADER,
+  READ_ONLY_MODE_HEADER,
+} from '../../common/constants';
+
 import { ConfigType } from '../index';
 
 interface ConstructorDependencies {
@@ -113,11 +118,17 @@ export class EnterpriseSearchRequestHandler {
           return this.handleInvalidDataError(response, url, json);
         }
 
+        // Intercept data that is meant for the server side session
+        const { _sessionData, ...responseJson } = json;
+        if (_sessionData) {
+          this.setSessionData(_sessionData);
+        }
+
         // Pass successful responses back to the front-end
         return response.custom({
           statusCode: status,
           headers: this.headers,
-          body: json,
+          body: _sessionData ? responseJson : json,
         });
       } catch (e) {
         // Catch connection/auth errors
@@ -268,6 +279,27 @@ export class EnterpriseSearchRequestHandler {
   setResponseHeaders(apiResponse: Response) {
     const readOnlyMode = apiResponse.headers.get(READ_ONLY_MODE_HEADER);
     this.headers[READ_ONLY_MODE_HEADER] = readOnlyMode as 'true' | 'false';
+  }
+
+  /**
+   * Extract Session Data
+   *
+   * In the future, this will set the keys passed back from Enterprise Search
+   * into the Kibana login session.
+   * For now we'll explicity look for the Workplace Search OAuth token package
+   * and stuff it into a cookie so it can be picked up later when we proxy the
+   * OAuth callback.
+   */
+  setSessionData(sessionData: { [key: string]: string }) {
+    if (sessionData.wsOAuthTokenPackage) {
+      const anHourFromNow = new Date(Date.now());
+      anHourFromNow.setHours(anHourFromNow.getHours() + 1);
+
+      const cookiePayload = `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${sessionData.wsOAuthTokenPackage};`;
+      const cookieRestrictions = `Path=/; Expires=${anHourFromNow.toUTCString()}; SameSite=Lax; HttpOnly`;
+
+      this.headers['set-cookie'] = `${cookiePayload} ${cookieRestrictions}`;
+    }
   }
 
   /**

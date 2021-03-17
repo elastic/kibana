@@ -29,8 +29,8 @@ export default function ({ getPageObjects, getService }) {
 
     it('adds Lens visualization to empty dashboard', async () => {
       const title = 'Dashboard Test Lens';
-      await testSubjects.exists('addVisualizationButton');
-      await testSubjects.click('addVisualizationButton');
+      await testSubjects.exists('dashboardAddNewPanelButton');
+      await testSubjects.click('dashboardAddNewPanelButton');
       await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
       await PageObjects.lens.createAndAddLensFromDashboard({ title, redirectToOrigin: true });
       await PageObjects.dashboard.waitForRenderComplete();

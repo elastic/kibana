@@ -19,7 +19,7 @@ import { IndexPatternRef } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { getSwitchIndexPatternAppState } from '../../helpers/get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
-import { MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
+import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { AppState } from '../../angular/discover_state';
 export interface DiscoverIndexPatternProps {
   /**
@@ -46,10 +46,6 @@ export interface DiscoverIndexPatternProps {
    * Discover App state
    */
   state: AppState;
-  /**
-   * Read from the Fields API
-   */
-  useNewFieldsApi?: boolean;
 }
 
 /**
@@ -62,7 +58,6 @@ export function DiscoverIndexPattern({
   indexPatterns,
   state,
   setAppState,
-  useNewFieldsApi,
 }: DiscoverIndexPatternProps) {
   const options: IndexPatternRef[] = (indexPatternList || []).map((entity) => ({
     id: entity.id,
@@ -80,12 +75,12 @@ export function DiscoverIndexPattern({
           state.columns || [],
           (state.sort || []) as SortPairArr[],
           config.get(MODIFY_COLUMNS_ON_SWITCH),
-          useNewFieldsApi
+          config.get(SORT_DEFAULT_ORDER_SETTING)
         );
         setAppState(nextAppState);
       }
     },
-    [selectedIndexPattern, state, config, indexPatterns, setAppState, useNewFieldsApi]
+    [selectedIndexPattern, state, config, indexPatterns, setAppState]
   );
 
   const [selected, setSelected] = useState({

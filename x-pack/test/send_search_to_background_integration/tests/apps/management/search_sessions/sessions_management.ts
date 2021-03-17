@@ -22,13 +22,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89069
-  describe.skip('Search sessions Management UI', () => {
+  describe('Search Sessions Management UI', () => {
     describe('New search sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
-        retry.tryForTime(10000, async () => {
+        await retry.tryForTime(10000, async () => {
           testSubjects.existOrFail('dashboardLandingPage');
         });
         await searchSessions.markTourDone();
@@ -51,6 +50,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await retry.waitFor(`wait for first item to complete`, async function () {
           const s = await PageObjects.searchSessionsManagement.getList();
+          if (!s[0]) {
+            log.warning(`Expected item is not in the table!`);
+          } else {
+            log.debug(`First item status: ${s[0].status}`);
+          }
           return s[0] && s[0].status === 'complete';
         });
 
@@ -70,22 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // search session was restored
         await searchSessions.expectState('restored');
-      });
-
-      // NOTE: this test depends on the previous one passing
-      it('Reloads as new session from management', async () => {
-        await PageObjects.searchSessionsManagement.goTo();
-
-        const searchSessionList = await PageObjects.searchSessionsManagement.getList();
-
-        expect(searchSessionList.length).to.be(1);
-        await searchSessionList[0].reload();
-
-        // embeddable has loaded
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        // new search session was completed
-        await searchSessions.expectState('completed');
       });
 
       it('Deletes a session from management', async () => {
@@ -122,34 +110,105 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.load('data/search_sessions');
 
         const searchSessionList = await PageObjects.searchSessionsManagement.getList();
-
         expect(searchSessionList.length).to.be(10);
+        expectSnapshot(searchSessionList.map((ss) => [ss.app, ss.name, ss.created, ss.expires]))
+          .toMatchInline(`
+          Array [
+            Array [
+              "graph",
+              "[eCommerce] Orders Test 6 ",
+              "16 Feb, 2021, 00:00:00",
+              "--",
+            ],
+            Array [
+              "lens",
+              "[eCommerce] Orders Test 7",
+              "15 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "apm",
+              "[eCommerce] Orders Test 8",
+              "14 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "appSearch",
+              "[eCommerce] Orders Test 9",
+              "13 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "auditbeat",
+              "[eCommerce] Orders Test 10",
+              "12 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "code",
+              "[eCommerce] Orders Test 11",
+              "11 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "console",
+              "[eCommerce] Orders Test 12",
+              "10 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "security",
+              "[eCommerce] Orders Test 5 ",
+              "9 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "visualize",
+              "[eCommerce] Orders Test 4 ",
+              "8 Feb, 2021, 00:00:00",
+              "--",
+            ],
+            Array [
+              "canvas",
+              "[eCommerce] Orders Test 3",
+              "7 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+          ]
+        `);
 
-        expect(searchSessionList.map((ss) => ss.created)).to.eql([
-          '25 Dec, 2020, 00:00:00',
-          '24 Dec, 2020, 00:00:00',
-          '23 Dec, 2020, 00:00:00',
-          '22 Dec, 2020, 00:00:00',
-          '21 Dec, 2020, 00:00:00',
-          '20 Dec, 2020, 00:00:00',
-          '19 Dec, 2020, 00:00:00',
-          '18 Dec, 2020, 00:00:00',
-          '17 Dec, 2020, 00:00:00',
-          '16 Dec, 2020, 00:00:00',
-        ]);
+        await esArchiver.unload('data/search_sessions');
+      });
 
-        expect(searchSessionList.map((ss) => ss.expires)).to.eql([
-          '--',
-          '--',
-          '--',
-          '23 Dec, 2020, 00:00:00',
-          '22 Dec, 2020, 00:00:00',
-          '--',
-          '--',
-          '--',
-          '18 Dec, 2020, 00:00:00',
-          '17 Dec, 2020, 00:00:00',
-        ]);
+      it('has working pagination controls', async () => {
+        await esArchiver.load('data/search_sessions');
+
+        log.debug(`loading first page of sessions`);
+        const sessionListFirst = await PageObjects.searchSessionsManagement.getList();
+        expect(sessionListFirst.length).to.be(10);
+
+        await testSubjects.click('pagination-button-next');
+
+        const sessionListSecond = await PageObjects.searchSessionsManagement.getList();
+        expect(sessionListSecond.length).to.be(2);
+
+        expectSnapshot(sessionListSecond.map((ss) => [ss.app, ss.name, ss.created, ss.expires]))
+          .toMatchInline(`
+          Array [
+            Array [
+              "discover",
+              "[eCommerce] Orders Test 2",
+              "6 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+            Array [
+              "dashboard",
+              "[eCommerce] Revenue Dashboard",
+              "5 Feb, 2021, 00:00:00",
+              "24 Feb, 2021, 00:00:00",
+            ],
+          ]
+        `);
 
         await esArchiver.unload('data/search_sessions');
       });

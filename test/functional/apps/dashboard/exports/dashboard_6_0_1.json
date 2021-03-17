@@ -1,0 +1,46 @@
+[
+  {
+    "_id": "924ed3d0-8256-11eb-a5e7-93c302c8f329",
+    "_type": "dashboard",
+    "_source": {
+      "title": "My custom bwc dashboard",
+      "hits": 0,
+      "description": "",
+      "panelsJSON": "[{\"size_x\":6,\"size_y\":3,\"panelIndex\":1,\"type\":\"visualization\",\"id\":\"1bdf34a0-8266-11eb-a5e7-93c302c8f329\",\"col\":1,\"row\":1}]",
+      "optionsJSON": "{\"darkTheme\":false}",
+      "uiStateJSON": "{\"P-1\":{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}}",
+      "version": 1,
+      "timeRestore": true,
+      "timeTo": "Wed Apr 20 2016 23:59:59 GMT+0200",
+      "timeFrom": "Thu Jan 01 2015 00:00:00 GMT+0100",
+      "refreshInterval": {
+        "display": "Off",
+        "pause": false,
+        "value": 0
+      },
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  },
+  {
+    "_id": "1bdf34a0-8266-11eb-a5e7-93c302c8f329",
+    "_type": "visualization",
+    "_source": {
+      "title": "My custom bwc viz",
+      "visState": "{\"title\":\"My custom bwc viz\",\"type\":\"metric\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"type\":\"gauge\",\"gauge\":{\"verticalSplit\":false,\"autoExtend\":false,\"percentageMode\":false,\"gaugeType\":\"Metric\",\"gaugeStyle\":\"Full\",\"backStyle\":\"Full\",\"orientation\":\"vertical\",\"colorSchema\":\"Green to Red\",\"gaugeColorMode\":\"None\",\"useRange\":false,\"colorsRange\":[{\"from\":0,\"to\":100}],\"invertColors\":false,\"labels\":{\"show\":true,\"color\":\"black\"},\"scale\":{\"show\":false,\"labels\":false,\"color\":\"#333\",\"width\":2},\"type\":\"simple\",\"style\":{\"fontSize\":60,\"bgColor\":false,\"labelColor\":false,\"subText\":\"\"}}},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}}]}",
+      "uiStateJSON": "{\"vis\":{\"defaultColors\":{\"0 - 100\":\"rgb(0,104,55)\"}}}",
+      "description": "",
+      "version": 1,
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"index\":\"dd684000-8255-11eb-a5e7-93c302c8f329\",\"filter\":[],\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+      }
+    },
+    "_meta": {
+      "savedObjectVersion": 2
+    }
+  }
+]

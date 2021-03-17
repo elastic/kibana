@@ -6,7 +6,9 @@
  */
 
 import { EuiSelect } from '@elastic/eui';
-import React, { ChangeEvent, Component } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+
 import { NO_PRIVILEGE_VALUE } from '../constants';
 
 interface Props {

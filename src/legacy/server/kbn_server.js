@@ -15,10 +15,6 @@ import { Config } from './config';
 import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
-import warningsMixin from './warnings';
-import configCompleteMixin from './config/complete';
-import { optimizeMixin } from '../../optimize';
-import { uiMixin } from '../ui';
 
 /**
  * @typedef {import('./kbn_server').KibanaConfig} KibanaConfig
@@ -66,16 +62,7 @@ export default class KbnServer {
 
         coreMixin,
 
-        loggingMixin,
-        warningsMixin,
-
-        // tell the config we are done loading plugins
-        configCompleteMixin,
-
-        uiMixin,
-
-        // setup routes that serve the @kbn/optimizer output
-        optimizeMixin
+        loggingMixin
       )
     );
 

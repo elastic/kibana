@@ -14,6 +14,7 @@ import {
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
+import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { PositiveInteger } from '../../detection_engine/schemas/types';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 
@@ -103,6 +104,17 @@ const SavedFilterRuntimeType = runtimeTypes.partial({
 });
 
 /*
+ *  eqlOptionsQuery -> filterQuery Types
+ */
+const EqlOptionsRuntimeType = runtimeTypes.partial({
+  eventCategoryField: unionWithNullType(runtimeTypes.string),
+  query: unionWithNullType(runtimeTypes.string),
+  tiebreakerField: unionWithNullType(runtimeTypes.string),
+  timestampField: unionWithNullType(runtimeTypes.string),
+  size: unionWithNullType(runtimeTypes.union([runtimeTypes.string, runtimeTypes.number])),
+});
+
+/*
  *  kqlQuery -> filterQuery Types
  */
 const SavedKueryFilterQueryRuntimeType = runtimeTypes.partial({
@@ -179,10 +191,13 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
 >;
 
 export enum RowRendererId {
+  alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
+  library = 'library',
   netflow = 'netflow',
   plain = 'plain',
+  registry = 'registry',
   suricata = 'suricata',
   system = 'system',
   system_dns = 'system_dns',
@@ -242,6 +257,7 @@ export const SavedTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
   description: unionWithNullType(runtimeTypes.string),
+  eqlOptions: unionWithNullType(EqlOptionsRuntimeType),
   eventType: unionWithNullType(runtimeTypes.string),
   excludedRowRendererIds: unionWithNullType(runtimeTypes.array(RowRendererIdRuntimeType)),
   favorite: unionWithNullType(runtimeTypes.array(SavedFavoriteRuntimeType)),
@@ -280,7 +296,7 @@ export enum TimelineId {
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
-  test2 = 'test2',
+  alternateTest = 'alternateTest',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
@@ -409,13 +425,14 @@ export const importTimelineResultSchema = runtimeTypes.exact(
 
 export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimelineResultSchema>;
 
-export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
+export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom' | 'eql';
 
 export enum TimelineTabs {
   query = 'query',
   graph = 'graph',
   notes = 'notes',
   pinned = 'pinned',
+  eql = 'eql',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -423,11 +440,38 @@ type EmptyObject = Record<any, never>;
 
 export type TimelineExpandedEventType =
   | {
-      eventId: string;
-      indexName: string;
+      panelView?: 'eventDetail';
+      params?: {
+        eventId: string;
+        indexName: string;
+      };
     }
   | EmptyObject;
 
-export type TimelineExpandedEvent = {
-  [tab in TimelineTabs]?: TimelineExpandedEventType;
+export type TimelineExpandedHostType =
+  | {
+      panelView?: 'hostDetail';
+      params?: {
+        hostName: string;
+      };
+    }
+  | EmptyObject;
+
+export type TimelineExpandedNetworkType =
+  | {
+      panelView?: 'networkDetail';
+      params?: {
+        ip: string;
+        flowTarget: FlowTarget;
+      };
+    }
+  | EmptyObject;
+
+export type TimelineExpandedDetailType =
+  | TimelineExpandedEventType
+  | TimelineExpandedHostType
+  | TimelineExpandedNetworkType;
+
+export type TimelineExpandedDetail = {
+  [tab in TimelineTabs]?: TimelineExpandedDetailType;
 };

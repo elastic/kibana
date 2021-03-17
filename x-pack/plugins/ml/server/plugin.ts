@@ -57,6 +57,9 @@ import {
   savedObjectClientsFactory,
 } from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
+import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
+import { ML_ALERT_TYPES } from '../common/constants/alerts';
+import { alertingRoutes } from './routes/alerting';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -64,7 +67,6 @@ export type MlPluginStart = void;
 export class MlServerPlugin
   implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart> {
   private log: Logger;
-  private version: string;
   private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
@@ -76,7 +78,6 @@ export class MlServerPlugin
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
-    this.version = ctx.env.packageInfo.branch;
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
   }
@@ -98,6 +99,7 @@ export class MlServerPlugin
       management: {
         insightsAndAlerting: ['jobsListLink'],
       },
+      alerting: Object.values(ML_ALERT_TYPES),
       privileges: {
         all: admin,
         read: user,
@@ -123,6 +125,7 @@ export class MlServerPlugin
         ],
       },
     });
+
     registerKibanaSettings(coreSetup);
 
     this.mlLicense.setup(plugins.licensing.license$, [
@@ -177,7 +180,7 @@ export class MlServerPlugin
     jobServiceRoutes(routeInit);
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
-    jobValidationRoutes(routeInit, this.version);
+    jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,
       resolveMlCapabilities,
@@ -188,21 +191,30 @@ export class MlServerPlugin
       resolveMlCapabilities,
     });
     trainedModelsRoutes(routeInit);
+    alertingRoutes(routeInit);
 
     initMlServerLog({ log: this.log });
 
-    return {
-      ...createSharedServices(
-        this.mlLicense,
-        getSpaces,
-        plugins.cloud,
-        plugins.security?.authz,
-        resolveMlCapabilities,
-        () => this.clusterClient,
-        () => getInternalSavedObjectsClient(),
-        () => this.isMlReady
-      ),
-    };
+    const sharedServices = createSharedServices(
+      this.mlLicense,
+      getSpaces,
+      plugins.cloud,
+      plugins.security?.authz,
+      resolveMlCapabilities,
+      () => this.clusterClient,
+      () => getInternalSavedObjectsClient(),
+      () => this.isMlReady
+    );
+
+    if (plugins.alerting) {
+      registerMlAlerts({
+        alerting: plugins.alerting,
+        logger: this.log,
+        mlSharedServices: sharedServices,
+      });
+    }
+
+    return { ...sharedServices };
   }
 
   public start(coreStart: CoreStart): MlPluginStart {

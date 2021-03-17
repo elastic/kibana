@@ -22,8 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe('Search sessions Management UI permissions', () => {
-    describe('Sessions management is not available if non of apps enable search sessions', () => {
+  describe('Search Sessions Management UI permissions', () => {
+    describe('Sessions management is not available', () => {
       before(async () => {
         await security.role.create('data_analyst', {
           elasticsearch: {},
@@ -56,13 +56,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.security.forceLogout();
       });
 
-      it('Sessions management is not available if non of apps enable search sessions', async () => {
+      it('if no apps enable search sessions', async () => {
         const links = await appsMenu.readLinks();
         expect(links.map((link) => link.text)).to.not.contain('Stack Management');
       });
     });
 
-    describe('Sessions management is available if one of apps enables search sessions', () => {
+    describe('Sessions management is available', () => {
       before(async () => {
         await security.role.create('data_analyst', {
           elasticsearch: {},
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.security.forceLogout();
       });
 
-      it('Sessions management is available if one of apps enables search sessions', async () => {
+      it('if one app enables search sessions', async () => {
         const links = await appsMenu.readLinks();
         expect(links.map((link) => link.text)).to.contain('Stack Management');
         await PageObjects.common.navigateToApp('management');

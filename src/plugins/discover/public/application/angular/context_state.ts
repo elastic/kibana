@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { History } from 'history';
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart, IUiSettingsClient } from 'kibana/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -17,6 +17,7 @@ import {
   withNotifyOnErrors,
 } from '../../../../kibana_utils/public';
 import { esFilters, FilterManager, Filter, Query } from '../../../../data/public';
+import { handleSourceColumnState } from './helpers';
 
 export interface AppState {
   /**
@@ -73,6 +74,11 @@ interface GetStateParams {
    * kbnUrlStateStorage will use it notifying about inner errors
    */
   toasts?: NotificationsStart['toasts'];
+
+  /**
+   * core ui settings service
+   */
+  uiSettings: IUiSettingsClient;
 }
 
 interface GetStateReturn {
@@ -123,6 +129,7 @@ export function getState({
   storeInSessionStorage = false,
   history,
   toasts,
+  uiSettings,
 }: GetStateParams): GetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
@@ -134,7 +141,12 @@ export function getState({
   const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
 
   const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
-  const appStateInitial = createInitialAppState(defaultStepSize, timeFieldName, appStateFromUrl);
+  const appStateInitial = createInitialAppState(
+    defaultStepSize,
+    timeFieldName,
+    appStateFromUrl,
+    uiSettings
+  );
   const appStateContainer = createStateContainer<AppState>(appStateInitial);
 
   const { start, stop } = syncStates([
@@ -257,7 +269,8 @@ function getFilters(state: AppState | GlobalState): Filter[] {
 function createInitialAppState(
   defaultSize: string,
   timeFieldName: string,
-  urlState: AppState
+  urlState: AppState,
+  uiSettings: IUiSettingsClient
 ): AppState {
   const defaultState = {
     columns: ['_source'],
@@ -270,8 +283,11 @@ function createInitialAppState(
     return defaultState;
   }
 
-  return {
-    ...defaultState,
-    ...urlState,
-  };
+  return handleSourceColumnState(
+    {
+      ...defaultState,
+      ...urlState,
+    },
+    uiSettings
+  );
 }

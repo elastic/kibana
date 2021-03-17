@@ -349,7 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return an error for any component templates not sucessfully deleted', async () => {
+      it.skip('should return an error for any component templates not sucessfully deleted', async () => {
         const COMPONENT_DOES_NOT_EXIST = 'component_does_not_exist';
         const { name: componentTemplateName } = componentTemplateD;
 
@@ -359,7 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body.itemsDeleted).to.eql([componentTemplateName]);
         expect(body.errors[0].name).to.eql(COMPONENT_DOES_NOT_EXIST);
-        expect(body.errors[0].error.msg).to.contain('index_template_missing_exception');
+        expect(body.errors[0].error.msg).to.contain('resource_not_found_exception');
       });
     });
 

@@ -5,31 +5,13 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
+
 import { PolicyFromES } from '../../../common/types';
 
 export const POLICY_NAME = 'my_policy';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
-
-export const DEFAULT_POLICY: PolicyFromES = {
-  version: 1,
-  modified_date: Date.now().toString(),
-  policy: {
-    name: 'my_policy',
-    phases: {
-      hot: {
-        min_age: '0ms',
-        actions: {
-          rollover: {
-            max_age: '30d',
-            max_size: '50gb',
-          },
-        },
-      },
-    },
-  },
-  name: 'my_policy',
-};
 
 export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
   version: 1,
@@ -189,6 +171,7 @@ export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
         },
       },
       warm: {
+        min_age: '0ms',
         actions: {},
       },
     },
@@ -234,3 +217,32 @@ export const POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS = ({
   },
   name: POLICY_NAME,
 } as any) as PolicyFromES;
+
+export const getGeneratedPolicies = (): PolicyFromES[] => {
+  const policy = {
+    phases: {
+      hot: {
+        min_age: '0s',
+        actions: {
+          rollover: {
+            max_size: '1gb',
+          },
+        },
+      },
+    },
+  };
+  const policies: PolicyFromES[] = [];
+  for (let i = 0; i < 105; i++) {
+    policies.push({
+      version: i,
+      modified_date: moment().subtract(i, 'days').toISOString(),
+      linkedIndices: i % 2 === 0 ? [`index${i}`] : undefined,
+      name: `testy${i}`,
+      policy: {
+        ...policy,
+        name: `testy${i}`,
+      },
+    });
+  }
+  return policies;
+};

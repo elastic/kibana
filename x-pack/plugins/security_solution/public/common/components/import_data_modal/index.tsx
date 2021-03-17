@@ -15,7 +15,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -132,51 +131,49 @@ export const ImportDataModalComponent = ({
   return (
     <>
       {showModal && (
-        <EuiOverlayMask>
-          <EuiModal onClose={closeModal} maxWidth={'750px'}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-            </EuiModalHeader>
+        <EuiModal onClose={closeModal} maxWidth={'750px'}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-            <EuiModalBody>
-              <EuiText size="s">
-                <h4>{description}</h4>
-              </EuiText>
+          <EuiModalBody>
+            <EuiText size="s">
+              <h4>{description}</h4>
+            </EuiText>
 
-              <EuiSpacer size="s" />
-              <EuiFilePicker
-                id="rule-file-picker"
-                initialPromptText={subtitle}
-                onChange={(files: FileList | null) => {
-                  setSelectedFiles(files && files.length > 0 ? files : null);
-                }}
-                display={'large'}
-                fullWidth={true}
-                isLoading={isImporting}
+            <EuiSpacer size="s" />
+            <EuiFilePicker
+              id="rule-file-picker"
+              initialPromptText={subtitle}
+              onChange={(files: FileList | null) => {
+                setSelectedFiles(files && files.length > 0 ? files : null);
+              }}
+              display={'large'}
+              fullWidth={true}
+              isLoading={isImporting}
+            />
+            <EuiSpacer size="s" />
+            {showCheckBox && (
+              <EuiCheckbox
+                id="import-data-modal-checkbox-label"
+                label={checkBoxLabel}
+                checked={overwrite}
+                onChange={() => setOverwrite(!overwrite)}
               />
-              <EuiSpacer size="s" />
-              {showCheckBox && (
-                <EuiCheckbox
-                  id="import-data-modal-checkbox-label"
-                  label={checkBoxLabel}
-                  checked={overwrite}
-                  onChange={() => setOverwrite(!overwrite)}
-                />
-              )}
-            </EuiModalBody>
+            )}
+          </EuiModalBody>
 
-            <EuiModalFooter>
-              <EuiButtonEmpty onClick={handleCloseModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
-              <EuiButton
-                onClick={importDataCallback}
-                disabled={selectedFiles == null || isImporting}
-                fill
-              >
-                {submitBtnText}
-              </EuiButton>
-            </EuiModalFooter>
-          </EuiModal>
-        </EuiOverlayMask>
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={handleCloseModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
+            <EuiButton
+              onClick={importDataCallback}
+              disabled={selectedFiles == null || isImporting}
+              fill
+            >
+              {submitBtnText}
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
       )}
     </>
   );

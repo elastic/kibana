@@ -37,14 +37,21 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   };
 
   const writeCoverage = (coverageJson: string) => {
-    if (!Fs.existsSync(coverageDir)) {
-      Fs.mkdirSync(coverageDir, { recursive: true });
+    // on CI we make hard link clone and run tests from kibana${process.env.CI_GROUP} root path
+    const re = new RegExp(`kibana${process.env.CI_GROUP}`, 'g');
+    const dir = process.env.CI ? coverageDir.replace(re, 'kibana') : coverageDir;
+
+    if (!Fs.existsSync(dir)) {
+      Fs.mkdirSync(dir, { recursive: true });
     }
+
     const id = coverageCounter++;
     const timestamp = Date.now();
-    const path = resolve(coverageDir, `${id}.${timestamp}.coverage.json`);
+    const path = resolve(dir, `${id}.${timestamp}.coverage.json`);
     log.info('writing coverage to', path);
-    Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
+
+    const jsonString = process.env.CI ? coverageJson.replace(re, 'kibana') : coverageJson;
+    Fs.writeFileSync(path, JSON.stringify(JSON.parse(jsonString), null, 2));
   };
 
   const browserConfig: BrowserConfig = {

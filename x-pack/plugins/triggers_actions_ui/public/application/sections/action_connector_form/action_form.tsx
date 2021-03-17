@@ -40,7 +40,7 @@ import {
   DEFAULT_HIDDEN_ACTION_TYPES,
   DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES,
 } from '../../../common/constants';
-import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
+import { ActionGroup, AlertActionParam } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 
@@ -124,8 +124,8 @@ export const ActionForm = ({
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
-            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
-            { defaultMessage: 'Unable to load action types' }
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTypesMessage',
+            { defaultMessage: 'Unable to load connector types' }
           ),
         });
       } finally {
@@ -400,8 +400,8 @@ export const ActionForm = ({
               <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
-                    defaultMessage="Select an action type"
-                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
+                    defaultMessage="Select a connector type"
+                    id="xpack.triggersActionsUI.sections.alertForm.selectConnectorTypeTitle"
                   />
                 </h5>
               </EuiTitle>
@@ -417,8 +417,8 @@ export const ActionForm = ({
                       className="actActionForm__getMoreActionsLink"
                     >
                       <FormattedMessage
-                        defaultMessage="Get more actions"
-                        id="xpack.triggersActionsUI.sections.actionForm.getMoreActionsTitle"
+                        defaultMessage="Get more connectors"
+                        id="xpack.triggersActionsUI.sections.actionForm.getMoreConnectorsTitle"
                       />
                     </EuiLink>
                   </h5>
@@ -431,8 +431,8 @@ export const ActionForm = ({
             {isLoadingActionTypes ? (
               <SectionLoading>
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
-                  defaultMessage="Loading action types…"
+                  id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorTypesDescription"
+                  defaultMessage="Loading connector types…"
                 />
               </SectionLoading>
             ) : (

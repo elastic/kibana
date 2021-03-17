@@ -68,16 +68,16 @@ export const StepDetail: React.FC<Props> = ({
 }) => {
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" responsive={false} wrap>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center">
+          <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
                 <h1>{stepName}</h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
+              <EuiFlexGroup alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     onClick={handlePreviousStep}
@@ -109,7 +109,7 @@ export const StepDetail: React.FC<Props> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+          <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={handlePreviousRun}

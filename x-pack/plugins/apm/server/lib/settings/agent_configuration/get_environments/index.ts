@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { withApmSpan } from '../../../../utils/with_apm_span';
 import { getAllEnvironments } from '../../../environments/get_all_environments';
 import { Setup } from '../../../helpers/setup_request';
 import { PromiseReturnType } from '../../../../../../observability/typings/common';
@@ -24,15 +25,17 @@ export async function getEnvironments({
   setup: Setup;
   searchAggregatedTransactions: boolean;
 }) {
-  const [allEnvironments, existingEnvironments] = await Promise.all([
-    getAllEnvironments({ serviceName, setup, searchAggregatedTransactions }),
-    getExistingEnvironmentsForService({ serviceName, setup }),
-  ]);
+  return withApmSpan('get_environments_for_agent_configuration', async () => {
+    const [allEnvironments, existingEnvironments] = await Promise.all([
+      getAllEnvironments({ serviceName, setup, searchAggregatedTransactions }),
+      getExistingEnvironmentsForService({ serviceName, setup }),
+    ]);
 
-  return [ALL_OPTION_VALUE, ...allEnvironments].map((environment) => {
-    return {
-      name: environment,
-      alreadyConfigured: existingEnvironments.includes(environment),
-    };
+    return [ALL_OPTION_VALUE, ...allEnvironments].map((environment) => {
+      return {
+        name: environment,
+        alreadyConfigured: existingEnvironments.includes(environment),
+      };
+    });
   });
 }

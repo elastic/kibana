@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
 import nodeCrypto from '@elastic/node-crypto';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ConfigSchema, createConfig } from '../config';
-import { Session, SessionValueContentToEncrypt } from './session';
-import { SessionIndex } from './session_index';
-import { SessionCookie } from './session_cookie';
+import crypto from 'crypto';
 
-import { loggingSystemMock, httpServerMock } from '../../../../../src/core/server/mocks';
-import { sessionMock, sessionCookieMock, sessionIndexMock } from './index.mock';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { ConfigSchema, createConfig } from '../config';
+import { sessionCookieMock, sessionIndexMock, sessionMock } from './index.mock';
+import type { SessionValueContentToEncrypt } from './session';
+import { Session } from './session';
+import type { SessionCookie } from './session_cookie';
+import type { SessionIndex } from './session_index';
 
 describe('Session', () => {
   const now = 123456;

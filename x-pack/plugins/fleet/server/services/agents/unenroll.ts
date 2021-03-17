@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
 import * as APIKeyService from '../api_keys';
+import { AgentUnenrollmentError } from '../../errors';
+
 import { createAgentAction, bulkCreateAgentActions } from './actions';
+import type { GetAgentsOptions } from './crud';
 import {
-  getAgent,
+  getAgentById,
+  getAgents,
   updateAgent,
   getAgentPolicyForAgent,
-  getAgents,
-  listAllAgents,
   bulkUpdateAgents,
 } from './crud';
-import { AgentUnenrollmentError } from '../../errors';
 
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -46,7 +48,7 @@ export async function unenrollAgent(
     created_at: now,
     type: 'UNENROLL',
   });
-  await updateAgent(soClient, esClient, agentId, {
+  await updateAgent(esClient, agentId, {
     unenrollment_started_at: now,
   });
 }
@@ -54,23 +56,9 @@ export async function unenrollAgent(
 export async function unenrollAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options:
-    | {
-        agentIds: string[];
-      }
-    | {
-        kuery: string;
-      }
+  options: GetAgentsOptions
 ) {
-  const agents =
-    'agentIds' in options
-      ? await getAgents(soClient, esClient, options.agentIds)
-      : (
-          await listAllAgents(soClient, esClient, {
-            kuery: options.kuery,
-            showInactive: false,
-          })
-        ).agents;
+  const agents = await getAgents(esClient, options);
 
   // Filter to agents that are not already unenrolled, or unenrolling
   const agentsEnrolled = agents.filter(
@@ -99,7 +87,6 @@ export async function unenrollAgents(
 
   // Update the necessary agents
   return bulkUpdateAgents(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,
@@ -115,7 +102,7 @@ export async function forceUnenrollAgent(
   esClient: ElasticsearchClient,
   agentId: string
 ) {
-  const agent = await getAgent(soClient, esClient, agentId);
+  const agent = await getAgentById(esClient, agentId);
 
   await Promise.all([
     agent.access_api_key_id
@@ -126,7 +113,7 @@ export async function forceUnenrollAgent(
       : undefined,
   ]);
 
-  await updateAgent(soClient, esClient, agentId, {
+  await updateAgent(esClient, agentId, {
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
@@ -135,24 +122,10 @@ export async function forceUnenrollAgent(
 export async function forceUnenrollAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options:
-    | {
-        agentIds: string[];
-      }
-    | {
-        kuery: string;
-      }
+  options: GetAgentsOptions
 ) {
   // Filter to agents that are not already unenrolled
-  const agents =
-    'agentIds' in options
-      ? await getAgents(soClient, esClient, options.agentIds)
-      : (
-          await listAllAgents(soClient, esClient, {
-            kuery: options.kuery,
-            showInactive: false,
-          })
-        ).agents;
+  const agents = await getAgents(esClient, options);
   const agentsToUpdate = agents.filter((agent) => !agent.unenrolled_at);
   const now = new Date().toISOString();
   const apiKeys: string[] = [];
@@ -173,7 +146,6 @@ export async function forceUnenrollAgents(
   }
   // Update the necessary agents
   return bulkUpdateAgents(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,

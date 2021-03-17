@@ -7,7 +7,7 @@
  */
 
 import type { RuntimeField } from '../types';
-import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
+import { KbnFieldType, getKbnFieldType, castEsToKbnFieldTypeName } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import type { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
@@ -99,11 +99,13 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get type() {
-    return this.spec.type;
+    return this.runtimeField?.type
+      ? castEsToKbnFieldTypeName(this.runtimeField?.type)
+      : this.spec.type;
   }
 
   public get esTypes() {
-    return this.spec.esTypes;
+    return this.runtimeField?.type ? [this.runtimeField?.type] : this.spec.esTypes;
   }
 
   public get scripted() {

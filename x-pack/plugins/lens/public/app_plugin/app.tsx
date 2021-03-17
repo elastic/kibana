@@ -120,7 +120,8 @@ export function App({
   const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
     data,
     state.lastKnownDoc,
-    setState
+    setState,
+    state.searchSessionId
   );
 
   const onError = useCallback(
@@ -278,7 +279,7 @@ export function App({
           e.preventDefault();
         },
         text: i18n.translate('xpack.lens.breadcrumbsTitle', {
-          defaultMessage: 'Visualize',
+          defaultMessage: 'Visualize Library',
         }),
       });
     }

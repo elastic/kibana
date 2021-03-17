@@ -95,6 +95,7 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
 export const fieldFormats = {
@@ -113,6 +114,7 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
 export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } from '../common';
@@ -146,6 +148,8 @@ export {
   UI_SETTINGS,
   IndexPattern,
   IndexPatternLoadExpressionFunctionDefinition,
+  IndexPatternsService,
+  IndexPatternsService as IndexPatternsCommonService,
 } from '../common';
 
 /**
@@ -216,6 +220,7 @@ export {
 } from '../common';
 
 export {
+  IScopedSearchClient,
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
@@ -231,9 +236,9 @@ export {
   SearchUsage,
   SearchSessionService,
   ISearchSessionService,
-  SearchRequestHandlerContext,
-  DataRequestHandlerContext,
 } from './search';
+
+export { DataRequestHandlerContext } from './types';
 
 // Search namespace
 export const search = {
@@ -306,4 +311,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export type { IndexPatternsServiceProvider as IndexPatternsService } from './index_patterns';
+export type { IndexPatternsServiceProvider } from './index_patterns';

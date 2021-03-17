@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { formatNumber, DataType } from './format_number';
-export { loadStatus, Metric, FormattedStatus, ProcessedServerResponse } from './load_status';
+export { formatNumber } from './format_number';
+export { loadStatus } from './load_status';
+export type { DataType } from './format_number';
+export type { Metric, FormattedStatus, ProcessedServerResponse } from './load_status';

@@ -1,0 +1,418 @@
+{
+  "id": "maps",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "id": "def-public.RenderTooltipContentParams",
+        "type": "Interface",
+        "label": "RenderTooltipContentParams",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-public.RenderTooltipContentParams.addFilters",
+            "type": "Function",
+            "label": "addFilters",
+            "signature": [
+              "(filter: object) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Uncategorized",
+                "label": "filter",
+                "isRequired": true,
+                "signature": [
+                  "object"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 32
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 32
+            }
+          },
+          {
+            "id": "def-public.RenderTooltipContentParams.closeTooltip",
+            "type": "Function",
+            "label": "closeTooltip",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 33
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.RenderTooltipContentParams.features",
+            "type": "Array",
+            "label": "features",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 34
+            },
+            "signature": [
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.TooltipFeature",
+                "text": "TooltipFeature"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.RenderTooltipContentParams.isLocked",
+            "type": "boolean",
+            "label": "isLocked",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 35
+            }
+          },
+          {
+            "id": "def-public.RenderTooltipContentParams.getLayerName",
+            "type": "Function",
+            "label": "getLayerName",
+            "signature": [
+              "(layerId: string) => Promise<string>"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "string",
+                "label": "layerId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 36
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 36
+            }
+          },
+          {
+            "id": "def-public.RenderTooltipContentParams.loadFeatureProperties",
+            "type": "Function",
+            "label": "loadFeatureProperties",
+            "signature": [
+              "({ layerId, featureId }: ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.LoadFeatureProps",
+                "text": "LoadFeatureProps"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.ITooltipProperty",
+                "text": "ITooltipProperty"
+              },
+              "[]>"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "{ layerId, featureId }",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.LoadFeatureProps",
+                    "text": "LoadFeatureProps"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 37
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 37
+            }
+          },
+          {
+            "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry",
+            "type": "Function",
+            "label": "loadFeatureGeometry",
+            "signature": [
+              "({ layerId, featureId }: ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.LoadFeatureProps",
+                "text": "LoadFeatureProps"
+              },
+              ") => ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.FeatureGeometry",
+                "text": "FeatureGeometry"
+              }
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "{ layerId, featureId }",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.LoadFeatureProps",
+                    "text": "LoadFeatureProps"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+                  "lineNumber": 38
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+              "lineNumber": 38
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
+          "lineNumber": 31
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "tags": [],
+        "id": "def-public.MAP_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "label": "MAP_SAVED_OBJECT_TYPE",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/maps/common/constants.ts",
+          "lineNumber": 29
+        },
+        "signature": [
+          "\"map\""
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "id": "def-public.MapsStartApi",
+      "type": "Interface",
+      "label": "MapsStartApi",
+      "description": [],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-public.MapsStartApi.createLayerDescriptors",
+          "type": "Object",
+          "label": "createLayerDescriptors",
+          "description": [],
+          "source": {
+            "path": "x-pack/plugins/maps/public/api/start_api.ts",
+            "lineNumber": 14
+          },
+          "signature": [
+            "{ createSecurityLayerDescriptors: (indexPatternId: string, indexPatternTitle: string) => Promise<",
+            {
+              "pluginId": "maps",
+              "scope": "common",
+              "docId": "kibMapsPluginApi",
+              "section": "def-common.LayerDescriptor",
+              "text": "LayerDescriptor"
+            },
+            "[]>; createBasemapLayerDescriptor: () => Promise<",
+            {
+              "pluginId": "maps",
+              "scope": "common",
+              "docId": "kibMapsPluginApi",
+              "section": "def-common.LayerDescriptor",
+              "text": "LayerDescriptor"
+            },
+            " | null>; createESSearchSourceLayerDescriptor: (params: ",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.CreateLayerDescriptorParams",
+              "text": "CreateLayerDescriptorParams"
+            },
+            ") => Promise<",
+            {
+              "pluginId": "maps",
+              "scope": "common",
+              "docId": "kibMapsPluginApi",
+              "section": "def-common.LayerDescriptor",
+              "text": "LayerDescriptor"
+            },
+            ">; }"
+          ]
+        },
+        {
+          "id": "def-public.MapsStartApi.registerLayerWizard",
+          "type": "Function",
+          "label": "registerLayerWizard",
+          "signature": [
+            "(layerWizard: ",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.LayerWizard",
+              "text": "LayerWizard"
+            },
+            ") => Promise<void>"
+          ],
+          "description": [],
+          "children": [
+            {
+              "type": "Object",
+              "label": "layerWizard",
+              "isRequired": true,
+              "signature": [
+                {
+                  "pluginId": "maps",
+                  "scope": "public",
+                  "docId": "kibMapsPluginApi",
+                  "section": "def-public.LayerWizard",
+                  "text": "LayerWizard"
+                }
+              ],
+              "description": [],
+              "source": {
+                "path": "x-pack/plugins/maps/public/api/start_api.ts",
+                "lineNumber": 24
+              }
+            }
+          ],
+          "tags": [],
+          "returnComment": [],
+          "source": {
+            "path": "x-pack/plugins/maps/public/api/start_api.ts",
+            "lineNumber": 24
+          }
+        },
+        {
+          "id": "def-public.MapsStartApi.registerSource",
+          "type": "Function",
+          "label": "registerSource",
+          "signature": [
+            "(entry: ",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.SourceRegistryEntry",
+              "text": "SourceRegistryEntry"
+            },
+            ") => Promise<void>"
+          ],
+          "description": [],
+          "children": [
+            {
+              "type": "Object",
+              "label": "entry",
+              "isRequired": true,
+              "signature": [
+                {
+                  "pluginId": "maps",
+                  "scope": "public",
+                  "docId": "kibMapsPluginApi",
+                  "section": "def-public.SourceRegistryEntry",
+                  "text": "SourceRegistryEntry"
+                }
+              ],
+              "description": [],
+              "source": {
+                "path": "x-pack/plugins/maps/public/api/start_api.ts",
+                "lineNumber": 25
+              }
+            }
+          ],
+          "tags": [],
+          "returnComment": [],
+          "source": {
+            "path": "x-pack/plugins/maps/public/api/start_api.ts",
+            "lineNumber": 25
+          }
+        }
+      ],
+      "source": {
+        "path": "x-pack/plugins/maps/public/api/start_api.ts",
+        "lineNumber": 13
+      },
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewOutput } from '../types';
+import type { NewOutput } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 

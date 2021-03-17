@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RegistryRelease } from '../../../types';
+
+import type { RegistryRelease } from '../../../types';
 
 export const RELEASE_BADGE_LABEL: { [key in Exclude<RegistryRelease, 'ga'>]: string } = {
   beta: i18n.translate('xpack.fleet.epm.releaseBadge.betaLabel', {

@@ -21,6 +21,14 @@ const columnHeader = `
   type: String
 `;
 
+const eqlOptions = `
+  eventCategoryField: String
+  tiebreakerField: String
+  timestampField: String
+  query: String
+  size: ToAny
+`;
+
 const queryMatch = `
   field: String
   displayField: String
@@ -122,6 +130,10 @@ export const timelineSchema = gql`
     ${filtersMetaTimeline}
   }
 
+  input EqlOptionsInput {
+    ${eqlOptions}
+  }
+
   input FilterTimelineInput {
     exists: String
     meta: FilterMetaTimelineInput
@@ -144,10 +156,13 @@ export const timelineSchema = gql`
   }
 
   enum RowRendererId {
+    alerts
     auditd
     auditd_file
+    library
     netflow
     plain
+    registry
     suricata
     system
     system_dns
@@ -163,6 +178,7 @@ export const timelineSchema = gql`
     columns: [ColumnHeaderInput!]
     dataProviders: [DataProviderInput!]
     description: String
+    eqlOptions: EqlOptionsInput
     eventType: String
     excludedRowRendererIds: [RowRendererId!]
     filters: [FilterTimelineInput!]
@@ -243,6 +259,10 @@ export const timelineSchema = gql`
     ${filtersMetaTimeline}
   }
 
+  type EqlOptionsResult {
+    ${eqlOptions}
+  }
+
   type FilterTimelineResult {
     exists: String
     meta: FilterMetaTimelineResult
@@ -260,6 +280,7 @@ export const timelineSchema = gql`
     dataProviders: [DataProviderResult!]
     dateRange: DateRangePickerResult
     description: String
+    eqlOptions: EqlOptionsResult
     eventIdToNoteIds: [NoteResult!]
     eventType: String
     excludedRowRendererIds: [RowRendererId!]

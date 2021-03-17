@@ -21,5 +21,6 @@ export type TagWithRelations = Tag & {
 export type {
   Tag,
   TagAttributes,
+  GetAllTagsOptions,
   ITagsClient,
 } from '../../../../src/plugins/saved_objects_tagging_oss/common';

@@ -65,15 +65,32 @@ describe('timeline flyout button', () => {
     cy.get(CREATE_NEW_TIMELINE).should('not.be.visible');
   });
 
+  it('should render the global search dropdown when the input is focused', () => {
+    openTimelineUsingToggle();
+    cy.get('[data-test-subj="nav-search-input"]').focus();
+    cy.get('[data-test-subj="nav-search-input"]').should('be.focused');
+    cy.get('[data-test-subj="nav-search-option"]').should('be.visible');
+    cy.get('[data-test-subj="nav-search-option"]').first().trigger('mouseenter');
+    // check that at least one item is visible in the search bar after mousing over, i.e. it's still usable.
+    cy.get('[data-test-subj="nav-search-option"]').its('length').should('be.gte', 1);
+    closeTimelineUsingCloseButton();
+  });
+
   it('sets the data providers background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers area', () => {
     dragFirstHostToTimeline();
 
-    cy.get(TIMELINE_DATA_PROVIDERS)
-      .filter(':visible')
-      .should(
-        'have.css',
-        'background',
-        'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
-      );
+    if (Cypress.browser.name === 'firefox') {
+      cy.get(TIMELINE_DATA_PROVIDERS)
+        .filter(':visible')
+        .should('have.css', 'background-color', 'rgba(1, 125, 115, 0.1)');
+    } else {
+      cy.get(TIMELINE_DATA_PROVIDERS)
+        .filter(':visible')
+        .should(
+          'have.css',
+          'background',
+          'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
+        );
+    }
   });
 });

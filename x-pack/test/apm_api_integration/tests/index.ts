@@ -34,7 +34,6 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     loadTestFile(require.resolve('./service_maps/service_maps'));
 
     loadTestFile(require.resolve('./service_overview/dependencies'));
-    loadTestFile(require.resolve('./service_overview/error_groups'));
     loadTestFile(require.resolve('./service_overview/instances'));
 
     loadTestFile(require.resolve('./services/agent_name'));
@@ -44,6 +43,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     loadTestFile(require.resolve('./services/throughput'));
     loadTestFile(require.resolve('./services/top_services'));
     loadTestFile(require.resolve('./services/transaction_types'));
+    loadTestFile(require.resolve('./services/error_groups_primary_statistics'));
+    loadTestFile(require.resolve('./services/error_groups_comparison_statistics'));
 
     loadTestFile(require.resolve('./settings/anomaly_detection/basic'));
     loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));
@@ -62,7 +63,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     loadTestFile(require.resolve('./transactions/latency'));
     loadTestFile(require.resolve('./transactions/throughput'));
     loadTestFile(require.resolve('./transactions/top_transaction_groups'));
-    loadTestFile(require.resolve('./transactions/transactions_groups_overview'));
+    loadTestFile(require.resolve('./transactions/transactions_groups_primary_statistics'));
+    loadTestFile(require.resolve('./transactions/transactions_groups_comparison_statistics'));
 
     loadTestFile(require.resolve('./feature_controls'));
 

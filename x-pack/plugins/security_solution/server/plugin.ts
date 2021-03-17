@@ -26,7 +26,7 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/s
 import {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertPluginStartContract,
-} from '../../alerts/server';
+} from '../../alerting/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -59,7 +59,7 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
-import { ArtifactClient, ManifestManager } from './endpoint/services';
+import { ArtifactClient, EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadArtifactRoute } from './endpoint/routes/artifacts';
@@ -76,9 +76,10 @@ import {
 } from '../../../../src/plugins/telemetry/server';
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
+import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 
 export interface SetupPlugins {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsSetup;
   features: FeaturesSetup;
@@ -92,7 +93,7 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
-  alerts: AlertPluginStartContract;
+  alerting: AlertPluginStartContract;
   data: DataPluginStart;
   fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
@@ -114,6 +115,14 @@ const securitySubPlugins = [
   `${APP_ID}:${SecurityPageName.timelines}`,
   `${APP_ID}:${SecurityPageName.case}`,
   `${APP_ID}:${SecurityPageName.administration}`,
+];
+
+const caseSavedObjects = [
+  'cases',
+  'cases-comments',
+  'cases-sub-case',
+  'cases-configure',
+  'cases-user-actions',
 ];
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -153,18 +162,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
-    initUsageCollectors({
-      core,
-      kibanaIndex: globalConfig.kibana.index,
-      ml: plugins.ml,
-      usageCollection: plugins.usageCollection,
-    });
-
     const endpointContext: EndpointAppContext = {
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(config),
     };
+
+    initUsageCollectors({
+      core,
+      endpointAppContext: endpointContext,
+      kibanaIndex: globalConfig.kibana.index,
+      ml: plugins.ml,
+      usageCollection: plugins.usageCollection,
+    });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
@@ -189,9 +199,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
-    registerResolverRoutes(router, endpointContext);
+    registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
-    registerTrustedAppsRoutes(router, endpointContext);
+    registerTrustedAppsRoutes(router);
     registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({
@@ -215,10 +225,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           savedObject: {
             all: [
               'alert',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
+              ...caseSavedObjects,
               'exception-list',
               'exception-list-agnostic',
               ...savedObjectTypes,
@@ -241,10 +248,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             all: [],
             read: [
               'config',
-              'cases',
-              'cases-comments',
-              'cases-configure',
-              'cases-user-actions',
+              ...caseSavedObjects,
               'exception-list',
               'exception-list-agnostic',
               ...savedObjectTypes,
@@ -261,7 +265,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    if (plugins.alerts != null) {
+    if (plugins.alerting != null) {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         eventsTelemetry: this.telemetryEventsSender,
@@ -274,11 +278,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
       if (isAlertExecutor(signalRuleType)) {
-        plugins.alerts.registerType(signalRuleType);
+        plugins.alerting.registerType(signalRuleType);
       }
 
       if (isNotificationAlertExecutor(ruleNotificationType)) {
-        plugins.alerts.registerType(ruleNotificationType);
+        plugins.alerting.registerType(ruleNotificationType);
       }
     }
 
@@ -302,6 +306,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const securitySolutionTimelineSearchStrategy = securitySolutionTimelineSearchStrategyProvider(
         depsStart.data
       );
+      const securitySolutionTimelineEqlSearchStrategy = securitySolutionTimelineEqlSearchStrategyProvider(
+        depsStart.data
+      );
       const securitySolutionIndexFields = securitySolutionIndexFieldsProvider();
 
       plugins.data.search.registerSearchStrategy(
@@ -315,6 +322,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       plugins.data.search.registerSearchStrategy(
         'securitySolutionTimelineSearchStrategy',
         securitySolutionTimelineSearchStrategy
+      );
+      plugins.data.search.registerSearchStrategy(
+        'securitySolutionTimelineEqlSearchStrategy',
+        securitySolutionTimelineEqlSearchStrategy
       );
     });
 
@@ -333,16 +344,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
       const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
-      const artifactClient = new ArtifactClient(savedObjectsClient);
+      const artifactClient = (new EndpointArtifactClient(
+        plugins.fleet.createArtifactsClient('endpoint')
+      ) as unknown) as ArtifactClient;
 
-      manifestManager = new ManifestManager({
-        savedObjectsClient,
-        artifactClient,
-        exceptionListClient,
-        packagePolicyService: plugins.fleet.packagePolicyService,
-        logger: this.logger,
-        cache: this.artifactsCache,
-      });
+      manifestManager = new ManifestManager(
+        {
+          savedObjectsClient,
+          artifactClient,
+          exceptionListClient,
+          packagePolicyService: plugins.fleet.packagePolicyService,
+          logger: this.logger,
+          cache: this.artifactsCache,
+        },
+        this.config.fleetServerEnabled
+      );
 
       if (this.manifestTask) {
         this.manifestTask.start({
@@ -370,7 +386,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       agentPolicyService: plugins.fleet?.agentPolicyService,
       appClientFactory: this.appClientFactory,
       security: this.setupPlugins!.security!,
-      alerts: plugins.alerts,
+      alerting: plugins.alerting,
       config: this.config!,
       logger: this.logger,
       manifestManager,

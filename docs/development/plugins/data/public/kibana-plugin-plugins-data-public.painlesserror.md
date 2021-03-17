@@ -14,12 +14,13 @@ export declare class PainlessError extends EsError
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(err)](./kibana-plugin-plugins-data-public.painlesserror._constructor_.md) |  | Constructs a new instance of the <code>PainlessError</code> class |
+|  [(constructor)(err, indexPattern)](./kibana-plugin-plugins-data-public.painlesserror._constructor_.md) |  | Constructs a new instance of the <code>PainlessError</code> class |
 
 ## Properties
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [indexPattern](./kibana-plugin-plugins-data-public.painlesserror.indexpattern.md) |  | <code>IndexPattern</code> |  |
 |  [painlessStack](./kibana-plugin-plugins-data-public.painlesserror.painlessstack.md) |  | <code>string</code> |  |
 
 ## Methods

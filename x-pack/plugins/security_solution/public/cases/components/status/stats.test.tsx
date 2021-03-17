@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common';
 import { Stats } from './stats';
 
 describe('Stats', () => {

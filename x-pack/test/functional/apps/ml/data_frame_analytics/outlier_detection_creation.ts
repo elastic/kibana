@@ -58,8 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
             { key: '#F5F7FA', value: 2 },
             { key: '#D3DAE6', value: 1 },
             // scatterplot circles
-            { key: '#54B399', value: 1 },
-            { key: '#54B39A', value: 1 },
+            { key: '#69707D', value: 1 },
+            { key: '#98A1B3', value: 1 },
           ],
           scatterplotMatrixColorStatsResults: [
             // background
@@ -117,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
 
           await ml.testExecution.logTestStep('enables the source data preview histogram charts');
-          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts();
+          await ml.dataFrameAnalyticsCreation.enableSourceDataPreviewHistogramCharts(true);
 
           await ml.testExecution.logTestStep('displays the source data preview histogram charts');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramCharts(
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsScatterplot.assertScatterplotMatrix(
+          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
             'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
             testData.expected.scatterplotMatrixColorStatsWizard
           );
@@ -167,6 +167,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
             testData.createIndexPattern
           );
+
+          await ml.testExecution.logTestStep('continues to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('checks validation callouts exist');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(1);
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
@@ -249,7 +256,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsScatterplot.assertScatterplotMatrix(
+          await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
+          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
             'mlDFExpandableSection-splom',
             testData.expected.scatterplotMatrixColorStatsResults
           );

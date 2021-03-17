@@ -11,7 +11,7 @@
     "logs-okta*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Attempt to Modify an Okta Network Zone",
   "note": "The Okta Fleet integration or Filebeat module must be enabled to use this rule.",
   "query": "event.dataset:okta.system and event.action:(zone.update or network_zone.rule.disabled or zone.remove_blacklist)",
@@ -31,6 +31,7 @@
     "SecOps",
     "Network Security"
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 5
 }

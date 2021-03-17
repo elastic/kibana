@@ -164,7 +164,7 @@ export const GroupSourcePrioritization: React.FC = () => {
                     }
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ paddingLeft: 10 }}>
+                <EuiFlexItem grow={false} style={{ paddingLeft: 10, width: 32 }}>
                   <div style={{ margin: 0 }} className="input-container--range__count">
                     {activeSourcePriorities[id]}
                   </div>
