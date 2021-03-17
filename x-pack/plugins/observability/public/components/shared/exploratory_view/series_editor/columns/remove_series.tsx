@@ -14,11 +14,11 @@ interface Props {
   series: DataSeries;
 }
 
-export const RemoveSeries = ({ series }: Props) => {
+export function RemoveSeries({ series }: Props) {
   const { removeSeries } = useUrlStorage();
 
   const onClick = () => {
     removeSeries(series.id);
   };
-  return <EuiButtonIcon iconType="crossInACircleFilled" color="danger" onClick={onClick} />;
-};
+  return <EuiButtonIcon iconType="cross" color="primary" onClick={onClick} />;
+}

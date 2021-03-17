@@ -7,7 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiLoadingSpinner, EuiPageContentBody, EuiPanel } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
@@ -35,30 +35,28 @@ export function ExploratoryView() {
 
   return (
     <EuiPanel style={{ maxWidth: 1600, minWidth: 1200, margin: '0 auto' }}>
-      <EuiPageContentBody style={{ maxWidth: 1500, margin: '0 auto' }}>
-        {indexPattern ? (
-          <>
-            <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
-            {lensAttributes && seriesId ? (
-              <LensComponent
-                id=""
-                style={{ height: 550 }}
-                timeRange={series?.time}
-                attributes={lensAttributes}
-                onBrushEnd={(data) => {}}
-                onLoad={(val) => {}}
-              />
-            ) : (
-              <EmptyView />
-            )}
-            <SeriesEditor />
-          </>
-        ) : (
-          <SpinnerWrap>
-            <EuiLoadingSpinner size="xl" />
-          </SpinnerWrap>
-        )}
-      </EuiPageContentBody>
+      {indexPattern ? (
+        <>
+          <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
+          {lensAttributes && seriesId ? (
+            <LensComponent
+              id=""
+              style={{ height: 650 }}
+              timeRange={series?.time}
+              attributes={lensAttributes}
+              onBrushEnd={(data) => {}}
+              onLoad={(val) => {}}
+            />
+          ) : (
+            <EmptyView />
+          )}
+          <SeriesEditor />
+        </>
+      ) : (
+        <SpinnerWrap>
+          <EuiLoadingSpinner size="xl" />
+        </SpinnerWrap>
+      )}
     </EuiPanel>
   );
 }

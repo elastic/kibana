@@ -29,7 +29,7 @@ interface Props {
   goBack: () => void;
 }
 
-export const FilterExpanded = ({ seriesId, field, label, goBack }: Props) => {
+export function FilterExpanded({ seriesId, field, label, goBack }: Props) {
   const { indexPattern } = useIndexPatternContext();
 
   const [value, setValue] = useState('');
@@ -135,4 +135,4 @@ export const FilterExpanded = ({ seriesId, field, label, goBack }: Props) => {
         ))}
     </>
   );
-};
+}

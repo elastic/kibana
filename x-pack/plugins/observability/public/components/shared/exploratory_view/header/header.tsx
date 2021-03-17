@@ -10,11 +10,8 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../../plugin';
-import { ChartTemplates } from '../chart_templates/chart_templates';
-import { ChartTypes } from './chart_types';
 import { DataViewLabels, REPORT_TYPE } from '../configurations/constants';
 import { useUrlStorage } from '../hooks/use_url_strorage';
-import { MetricSelection } from './metric_selection';
 
 interface Props {
   seriesId: string;
@@ -32,14 +29,8 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiText>
-          <h2>{DataViewLabels[series[REPORT_TYPE]]}</h2>
+          <h2>{DataViewLabels[series[REPORT_TYPE]] ?? 'Exploratory view'}</h2>
         </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <MetricSelection seriesId={seriesId} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ChartTypes seriesId={seriesId} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
@@ -58,9 +49,6 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
         >
           Open in Lens
         </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ChartTemplates />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

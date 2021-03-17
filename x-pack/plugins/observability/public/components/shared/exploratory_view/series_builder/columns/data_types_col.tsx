@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AppDataType } from '../../types';
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
-
-interface Props {
-  selectedDataType: AppDataType | null;
-  onChange: Dispatch<SetStateAction<AppDataType | null>>;
-}
+import { useUrlStorage } from '../../hooks/use_url_strorage';
 
 const dataTypes: { id: AppDataType; label: string }[] = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
@@ -22,15 +18,19 @@ const dataTypes: { id: AppDataType; label: string }[] = [
   { id: 'metrics', label: 'Metrics' },
   { id: 'apm', label: 'APM' },
 ];
-export const DataTypesCol = ({ selectedDataType, onChange }: Props) => {
+export const DataTypesCol = () => {
+  const { newSeries, setNewSeries } = useUrlStorage();
+
   const { loadIndexPattern } = useIndexPatternContext();
 
-  const onDataTypeChange = (dataType: AppDataType | null) => {
-    onChange(dataType);
+  const onDataTypeChange = (dataType?: AppDataType) => {
     if (dataType) {
       loadIndexPattern(dataType);
     }
+    setNewSeries({ dataType });
   };
+
+  const selectedDataType = newSeries.dataType;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -42,7 +42,9 @@ export const DataTypesCol = ({ selectedDataType, onChange }: Props) => {
             iconType="arrowRight"
             color={selectedDataType === dt ? 'primary' : 'text'}
             fill={selectedDataType === dt}
-            onClick={() => onDataTypeChange(dt === selectedDataType ? null : dt)}
+            onClick={() => {
+              onDataTypeChange(dt === selectedDataType ? undefined : dt);
+            }}
           >
             {label}
           </EuiButton>

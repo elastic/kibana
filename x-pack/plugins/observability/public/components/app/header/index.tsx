@@ -19,7 +19,6 @@ import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import HeaderMenuPortal from '../../shared/header_menu_portal';
-import { Tabs } from './tabs';
 
 const Container = styled.div<{ color: string }>`
   background: ${(props) => props.color};
@@ -74,9 +73,6 @@ export function Header({ color, datePicker = null, restrictWidth }: Props) {
                     })}
                   </h1>
                 </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <Tabs />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

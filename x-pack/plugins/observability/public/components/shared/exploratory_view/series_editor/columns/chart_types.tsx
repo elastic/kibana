@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonGroup } from '@elastic/eui';
-import { VisualizationType } from '../../../../../../lens/public/types';
+import React, { useState } from 'react';
+import { EuiButton, EuiButtonGroup, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { LensIconChartBar } from '../assets/chart_bar';
-import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
-import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 // import { LensIconChartBarPercentage } from '../assets/chart_bar_percentage';
-import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizontal_stacked';
 // import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
-import { LensIconChartArea } from '../assets/chart_area';
 // import { LensIconChartAreaPercentage } from '../assets/chart_area_percentage';
-import { LensIconChartLine } from '../assets/chart_line';
-import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
 import styled from 'styled-components';
-import { useUrlStorage } from '../hooks/use_url_strorage';
-import { SERIES_TYPE } from '../configurations/constants';
+import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { LensIconChartBar } from '../../assets/chart_bar';
+import { VisualizationType } from '../../../../../../../lens/public/types';
+import { SERIES_TYPE } from '../../configurations/constants';
+import { LensIconChartBarHorizontal } from '../../assets/chart_bar_horizontal';
+import { LensIconChartBarStacked } from '../../assets/chart_bar_stacked';
+import { LensIconChartBarHorizontalStacked } from '../../assets/chart_bar_horizontal_stacked';
+import { LensIconChartArea } from '../../assets/chart_area';
+import { LensIconChartAreaStacked } from '../../assets/chart_area_stacked';
+import { LensIconChartLine } from '../../assets/chart_line';
 
 const ButtonGroup = styled(EuiButtonGroup)`
   &&& {
@@ -32,35 +32,63 @@ const ButtonGroup = styled(EuiButtonGroup)`
   }
 `;
 
-export const ChartTypes = ({ seriesId }: { seriesId: string }) => {
+export function ChartTypes({
+  seriesId,
+  defaultChartType,
+}: {
+  seriesId: string;
+  defaultChartType: string;
+}) {
   const { series, setSeries, allSeries } = useUrlStorage(seriesId);
 
-  return (
-    <ButtonGroup
-      isIconOnly
-      buttonSize="m"
-      legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
-        defaultMessage: 'Chart type',
-      })}
-      name="chartType"
-      className="eui-displayInlineBlock"
-      options={visualizationTypes.map((t) => ({
-        id: t.id,
-        label: t.label,
-        iconType: t.icon || 'empty',
-        'data-test-subj': `lnsXY_seriesType-${t.id}`,
-      }))}
-      idSelected={series?.[SERIES_TYPE] ?? 'line'}
-      onChange={(seriesType: string) => {
-        Object.keys(allSeries).forEach((seriesKey) => {
-          const series = allSeries[seriesKey];
+  const [isOpen, setIsOpen] = useState(false);
 
-          setSeries(seriesKey, { ...series, [SERIES_TYPE]: seriesType });
-        });
-      }}
-    />
+  const seriesType = series?.[SERIES_TYPE] ?? defaultChartType;
+
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      anchorPosition="downCenter"
+      button={
+        <EuiButton
+          size="s"
+          color="text"
+          iconType={visualizationTypes.find(({ id }) => id == seriesType)?.icon}
+          onClick={() => {
+            setIsOpen((prevState) => !prevState);
+          }}
+        >
+          Chart type
+        </EuiButton>
+      }
+      closePopover={() => setIsOpen(false)}
+    >
+      <ButtonGroup
+        isIconOnly
+        buttonSize="m"
+        legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
+          defaultMessage: 'Chart type',
+        })}
+        name="chartType"
+        className="eui-displayInlineBlock"
+        options={visualizationTypes.map((t) => ({
+          id: t.id,
+          label: t.label,
+          iconType: t.icon || 'empty',
+          'data-test-subj': `lnsXY_seriesType-${t.id}`,
+        }))}
+        idSelected={series?.[SERIES_TYPE] ?? 'line'}
+        onChange={(seriesType: string) => {
+          Object.keys(allSeries).forEach((seriesKey) => {
+            const series = allSeries[seriesKey];
+
+            setSeries(seriesKey, { ...series, [SERIES_TYPE]: seriesType });
+          });
+        }}
+      />
+    </EuiPopover>
   );
-};
+}
 
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',

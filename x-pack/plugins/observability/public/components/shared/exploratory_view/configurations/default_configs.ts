@@ -7,33 +7,32 @@
 
 import { ReportViewTypes } from '../types';
 import { getPageLoadDistLensConfig } from './page_load_dist_config';
-import { getPageViewLensConfig } from './page_view_config';
 import { getMonitorDurationConfig } from './monitor_duration_config';
 import { getServiceLatencyLensConfig } from './service_latency_config';
 import { getMonitorPingsConfig } from './monitor_pings_config';
 import { getServiceThroughputLensConfig } from './service_throughput_config';
+import { getKPITrendsLensConfig } from './kpi_trends_config';
 
 interface Props {
   reportType: keyof typeof ReportViewTypes;
   seriesId: string;
-  serviceName: string;
 }
 
-export const getDefaultConfigs = ({ reportType, seriesId, serviceName }: Props) => {
+export const getDefaultConfigs = ({ reportType, seriesId }: Props) => {
   switch (ReportViewTypes[reportType]) {
     case 'page-load-dist':
-      return getPageLoadDistLensConfig({ seriesId, serviceName });
+      return getPageLoadDistLensConfig({ seriesId });
     case 'page-views':
-      return getPageViewLensConfig({ seriesId, serviceName });
+      return getKPITrendsLensConfig({ seriesId });
     case 'uptime-duration':
       return getMonitorDurationConfig();
     case 'uptime-pings':
       return getMonitorPingsConfig({ seriesId });
     case 'service-latency':
-      return getServiceLatencyLensConfig({ seriesId, serviceName });
+      return getServiceLatencyLensConfig({ seriesId });
     case 'service-throughput':
-      return getServiceThroughputLensConfig({ seriesId, serviceName });
+      return getServiceThroughputLensConfig({ seriesId });
     default:
-      return getPageViewLensConfig({ seriesId, serviceName });
+      return getKPITrendsLensConfig({ seriesId });
   }
 };

@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext, Context } from 'react';
 import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { SeriesUrl } from '../types';
+import { NewSeriesUrl, SeriesUrl } from '../types';
 
 export const UrlStorageContext = createContext<IKbnUrlStateStorage | null>(null);
 
@@ -20,6 +20,8 @@ export const UrlStorageContextProvider: React.FC<ProviderProps> = ({ children, s
 };
 
 export type AllSeries = Record<string, SeriesUrl>;
+
+export const NEW_SERIES_KEY = 'newSeries';
 
 export const useUrlStorage = (seriesId?: string) => {
   const allSeriesKey = 'sr';
@@ -45,6 +47,12 @@ export const useUrlStorage = (seriesId?: string) => {
 
   const firstSeriesId = allSeriesIds?.[0];
 
+  const newSeries = storage.get<NewSeriesUrl>('newSeries') ?? {};
+
+  const setNewSeries = (newValue: NewSeriesUrl) => {
+    storage.set(NEW_SERIES_KEY, newValue);
+  };
+
   return {
     storage,
     setSeries,
@@ -53,6 +61,8 @@ export const useUrlStorage = (seriesId?: string) => {
     firstSeriesId,
     allSeries,
     allSeriesIds,
+    newSeries,
+    setNewSeries,
     firstSeries: allSeries?.[firstSeriesId],
   };
 };

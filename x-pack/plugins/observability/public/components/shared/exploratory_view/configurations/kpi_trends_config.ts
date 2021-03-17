@@ -6,17 +6,17 @@
  */
 
 import { DataSeries } from '../types';
+import { FieldLabels } from './constants';
 
 interface Props {
   seriesId: string;
-  serviceName: string;
 }
 
-export function getPageViewLensConfig({ seriesId, serviceName }: Props): DataSeries {
+export function getKPITrendsLensConfig({ seriesId }: Props): DataSeries {
   return {
     id: seriesId,
     defaultSeriesType: 'bar_stacked',
-    reportType: 'page-views',
+    reportType: 'kpi-trends',
     indexPattern: 'apm_static_index_pattern_id',
     seriesTypes: ['bar', 'bar_stacked'],
     xAxisColumn: {
@@ -24,7 +24,9 @@ export function getPageViewLensConfig({ seriesId, serviceName }: Props): DataSer
     },
     yAxisColumn: {
       operationType: 'count',
+      label: 'Page views',
     },
+    metricType: false,
     defaultFilters: [
       'user_agent.name',
       'user_agent.os.name',
@@ -41,7 +43,16 @@ export function getPageViewLensConfig({ seriesId, serviceName }: Props): DataSer
       {
         query: { match_phrase: { 'transaction.type': 'page-load' } },
       },
-      ...(serviceName ? [{ query: { match_phrase: { 'service.name': serviceName } } }] : []),
+    ],
+    labels: { ...FieldLabels },
+    reportDefinitions: [
+      {
+        field: 'service.name',
+        required: true,
+      },
+      {
+        field: 'service.environment',
+      },
     ],
   };
 }

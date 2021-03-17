@@ -6,13 +6,13 @@
  */
 
 import { DataSeries } from '../types';
+import { FieldLabels } from './constants';
 
 interface Props {
   seriesId: string;
-  monitorId: string;
 }
 
-export function getMonitorPingsConfig({ seriesId, monitorId }: Props): DataSeries {
+export function getMonitorPingsConfig({ seriesId }: Props): DataSeries {
   return {
     id: seriesId,
     reportType: 'uptime-pings',
@@ -26,14 +26,15 @@ export function getMonitorPingsConfig({ seriesId, monitorId }: Props): DataSerie
       operationType: 'count',
       label: 'Monitor pings',
     },
+    metricType: false,
     defaultFilters: ['observer.geo.name'],
     breakdowns: ['monitor.status', 'observer.geo.name'],
-    filters: monitorId
-      ? [
-          {
-            query: { match_phrase: { 'monitor.id': 'android-homepage' } },
-          },
-        ]
-      : [],
+    filters: [],
+    reportDefinitions: [
+      {
+        field: 'monitor.id',
+      },
+    ],
+    labels: { ...FieldLabels },
   };
 }

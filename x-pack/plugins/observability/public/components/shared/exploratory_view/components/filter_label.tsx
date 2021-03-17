@@ -15,12 +15,13 @@ import { useSeriesFilters } from '../hooks/use_series_filters';
 
 interface Props {
   field: string;
+  label: string;
   value: string;
   seriesId: string;
   negate: boolean;
   removeFilter: (field: string, value: string, notVal: boolean) => void;
 }
-export const FilterLabel = ({ seriesId, field, value, negate, removeFilter }: Props) => {
+export const FilterLabel = ({ label, seriesId, field, value, negate, removeFilter }: Props) => {
   const FilterItem = injectI18n(esFilters.FilterItem);
 
   const { indexPattern } = useIndexPatternContext();
@@ -30,7 +31,7 @@ export const FilterLabel = ({ seriesId, field, value, negate, removeFilter }: Pr
   const filter = esFilters.buildPhraseFilter(indexField, value, indexPattern);
 
   filter.meta.value = value;
-  filter.meta.key = FieldLabels[field];
+  filter.meta.key = label;
   filter.meta.alias = null;
   filter.meta.negate = negate;
   filter.meta.disabled = false;

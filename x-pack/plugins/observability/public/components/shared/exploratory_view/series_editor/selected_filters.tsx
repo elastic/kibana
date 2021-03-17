@@ -10,11 +10,13 @@ import { useUrlStorage } from '../hooks/use_url_strorage';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FILTERS } from '../configurations/constants';
 import { FilterLabel } from '../components/filter_label';
+import { DataSeries } from '../types';
 
 interface Props {
   seriesId: string;
+  series: DataSeries;
 }
-export const SelectedFilters = ({ seriesId }: Props) => {
+export const SelectedFilters = ({ seriesId, series: { labels } }: Props) => {
   const { series, setSeries } = useUrlStorage(seriesId);
 
   const filters = series?.[FILTERS] ?? [];
@@ -36,34 +38,38 @@ export const SelectedFilters = ({ seriesId }: Props) => {
     setSeries(seriesId, { ...series, [FILTERS]: filtersN });
   };
 
-  return (
-    <EuiFlexGroup wrap gutterSize="xs">
-      {filters.map(({ field, values, notValues }) => (
-        <Fragment key={field}>
-          {(values ?? []).map((val) => (
-            <EuiFlexItem key={field + val} grow={false}>
-              <FilterLabel
-                seriesId={seriesId}
-                field={field}
-                value={val}
-                removeFilter={() => removeFilter(field, val, false)}
-                negate={false}
-              />
-            </EuiFlexItem>
-          ))}
-          {(notValues ?? []).map((val) => (
-            <EuiFlexItem key={field + val} grow={false}>
-              <FilterLabel
-                seriesId={seriesId}
-                field={field}
-                value={val}
-                negate={true}
-                removeFilter={() => removeFilter(field, val, true)}
-              />
-            </EuiFlexItem>
-          ))}
-        </Fragment>
-      ))}
-    </EuiFlexGroup>
-  );
+  return filters.length > 0 ? (
+    <EuiFlexItem>
+      <EuiFlexGroup wrap gutterSize="xs">
+        {filters.map(({ field, values, notValues }) => (
+          <Fragment key={field}>
+            {(values ?? []).map((val) => (
+              <EuiFlexItem key={field + val} grow={false}>
+                <FilterLabel
+                  seriesId={seriesId}
+                  field={field}
+                  label={labels[field]}
+                  value={val}
+                  removeFilter={() => removeFilter(field, val, false)}
+                  negate={false}
+                />
+              </EuiFlexItem>
+            ))}
+            {(notValues ?? []).map((val) => (
+              <EuiFlexItem key={field + val} grow={false}>
+                <FilterLabel
+                  seriesId={seriesId}
+                  field={field}
+                  label={labels[field]}
+                  value={val}
+                  negate={true}
+                  removeFilter={() => removeFilter(field, val, true)}
+                />
+              </EuiFlexItem>
+            ))}
+          </Fragment>
+        ))}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  ) : null;
 };

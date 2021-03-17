@@ -9,14 +9,16 @@ import { IIndexPattern } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../plugin';
 import { useFetcher } from './use_fetcher';
+import { ESFilter } from '../../../../../typings/elasticsearch';
 
 interface Props {
   sourceField: string;
   query?: string;
   indexPattern: IIndexPattern;
+  filters: ESFilter[];
 }
 
-export const useValuesList = ({ sourceField, indexPattern, query }: Props) => {
+export const useValuesList = ({ sourceField, indexPattern, query, filters }: Props) => {
   const {
     services: { data },
   } = useKibana<ObservabilityClientPluginsStart>();
@@ -25,8 +27,9 @@ export const useValuesList = ({ sourceField, indexPattern, query }: Props) => {
     return data.autocomplete.getValueSuggestions({
       indexPattern,
       query: query || '',
-      useTimeRange: false,
+      // useTimeRange: false,
       field: indexPattern.fields.find(({ name }) => name === sourceField)!,
+      boolFilter: filters,
     });
   }, [sourceField, query]);
 

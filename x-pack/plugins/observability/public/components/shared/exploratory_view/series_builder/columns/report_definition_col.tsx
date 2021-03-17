@@ -5,80 +5,57 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FieldValueSelection } from '../../../field_value_selection';
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { AppDataType, ReportViewTypeId } from '../../types';
+import { getDefaultConfigs } from '../../configurations/default_configs';
+import { useUrlStorage } from '../../hooks/use_url_strorage';
 
-const ReportDefinitionMap: Record<
-  ReportViewTypeId,
-  Array<{ field: string; required?: boolean }>
-> = {
-  pld: [
-    {
-      field: 'service.name',
-      required: true,
-    },
-  ],
-  upp: [
-    {
-      field: 'monitor.id',
-    },
-  ],
-  kpi: [],
-  pgv: [
-    {
-      field: 'service.name',
-      required: true,
-    },
-  ],
-  svl: [
-    {
-      field: 'service.name',
-      required: true,
-    },
-  ],
-  tpt: [
-    {
-      field: 'service.name',
-      required: true,
-    },
-  ],
-  upd: [],
-};
-
-interface Props {
-  dataType: AppDataType;
-  reportType: ReportViewTypeId;
-  selectedReportDefinitions: Record<string, string>;
-  onChange: Dispatch<SetStateAction<string | null>>;
-}
-
-export const ReportDefinitionCol = ({ reportType, selectedReportDefinitions, onChange }: Props) => {
+export const ReportDefinitionCol = () => {
   const { indexPattern } = useIndexPatternContext();
 
+  const { newSeries, setNewSeries } = useUrlStorage();
+
+  const { reportType, reportDefinitions: rtd = {} } = newSeries;
+
+  const { reportDefinitions, labels, filters } = getDefaultConfigs({
+    reportType: reportType!,
+    seriesId: 'newSeries',
+  });
+
+  const onChange = (field: string, value: string) => {
+    setNewSeries({
+      ...newSeries,
+      reportDefinitions: { ...rtd, [field]: value },
+    });
+  };
+
   return (
-    <div>
-      {selectedReportDefinitions && (
-        <EuiFlexGroup gutterSize="xs" wrap>
-          <EuiFlexItem grow={false}>
-            <EuiBadge iconSide="right" iconType="cross">
-              Web App: {selectedReportDefinitions}
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      <EuiSpacer size="s" />
-      {ReportDefinitionMap[reportType].map(({ field }) => (
-        <FieldValueSelection
-          key={field}
-          sourceField={field}
-          indexPattern={indexPattern}
-          value={selectedReportDefinitions?.[field]}
-          onChange={(val: string) => onChange(val)}
-        />
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {reportDefinitions.map(({ field }) => (
+        <EuiFlexItem key={field}>
+          <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <FieldValueSelection
+                label={labels[field]}
+                sourceField={field}
+                indexPattern={indexPattern}
+                value={reportDefinitions?.[field]}
+                onChange={(val: string) => onChange(field, val)}
+                filters={(filters ?? []).map(({ query }) => query)}
+              />
+            </EuiFlexItem>
+            {rtd?.[field] && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge iconSide="right" iconType="cross">
+                  {rtd?.[field]}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       ))}
-    </div>
+    </EuiFlexGroup>
   );
 };

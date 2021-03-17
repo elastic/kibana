@@ -13,9 +13,10 @@ import { Breakdowns } from './columns/breakdowns';
 import { DataSeries } from '../types';
 import { SeriesBuilder } from '../series_builder/series_builder';
 import { useUrlStorage } from '../hooks/use_url_strorage';
-import { RemoveSeries } from './columns/remove_series';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { REPORT_TYPE } from '../configurations/constants';
+import { DatePickerCol } from './columns/date_picker_col';
+import { RemoveSeries } from './columns/remove_series';
 
 export const SeriesEditor = () => {
   const columns = [
@@ -32,27 +33,35 @@ export const SeriesEditor = () => {
     {
       name: 'Filter',
       field: 'defaultFilters',
-      width: '30%',
+      width: '20%',
       render: (defaultFilters: string[], series: DataSeries) => (
-        <SeriesFilter defaultFilters={defaultFilters} seriesId={series.id} />
+        <SeriesFilter defaultFilters={defaultFilters} seriesId={series.id} series={series} />
       ),
     },
     {
       name: 'Breakdowns',
       field: 'breakdowns',
-      width: '25%',
+      width: '15%',
       render: (val: string[], item: DataSeries) => (
         <Breakdowns seriesId={item.id} breakdowns={val} />
       ),
     },
     {
-      name: 'Time',
-      width: '25%',
+      name: '',
+      align: 'center' as const,
+      width: '15%',
       field: 'id',
       render: (val: string, item: DataSeries) => <ActionsCol series={item} />,
     },
     {
-      name: 'Remove',
+      name: 'Time',
+      width: '20%',
+      field: 'id',
+      render: (val: string, item: DataSeries) => <DatePickerCol series={item} />,
+    },
+    {
+      name: 'Actions',
+      align: 'center' as const,
       width: '5%',
       field: 'id',
       render: (val: string, item: DataSeries) => <RemoveSeries series={item} />,
@@ -67,7 +76,6 @@ export const SeriesEditor = () => {
     const series = allSeries[seriesKey];
     return getDefaultConfigs({
       reportType: series[REPORT_TYPE],
-      serviceName: series.serviceName,
       seriesId: seriesKey,
     });
   });
@@ -81,6 +89,11 @@ export const SeriesEditor = () => {
         columns={columns}
         rowProps={() => ({ height: 100 })}
         noItemsMessage={'No series found, please add a series.'}
+        cellProps={{
+          style: {
+            verticalAlign: 'top',
+          },
+        }}
       />
       <EuiSpacer />
       <SeriesBuilder />

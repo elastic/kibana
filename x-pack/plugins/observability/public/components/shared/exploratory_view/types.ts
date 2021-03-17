@@ -18,14 +18,14 @@ import {
   REPORT_TYPE,
   SERIES_TYPE,
 } from './configurations/constants';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 
 export const ReportViewTypes = {
   pld: 'page-load-dist',
-  pgv: 'page-views',
+  kpi: 'kpi-trends',
   upd: 'uptime-duration',
   upp: 'uptime-pings',
   svl: 'service-latency',
-  kpi: 'service-latency',
   tpt: 'service-throughput',
 };
 
@@ -33,7 +33,7 @@ export type ReportViewTypeId = keyof typeof ReportViewTypes;
 
 export type ReportViewType =
   | 'page-load-dist'
-  | 'page-views'
+  | 'kpi-trends'
   | 'uptime-duration'
   | 'uptime-pings'
   | 'service-latency';
@@ -50,8 +50,15 @@ export interface DataSeries {
   breakdowns: string[];
   defaultSeriesType: string;
   defaultFilters: string[];
-  seriesTypes?: string[];
-  filters?: Array<Record<string, any>>;
+  seriesTypes: string[];
+  filters?: ESFilter[];
+  reportDefinitions: {
+    field: string;
+    required?: boolean;
+    custom?: boolean;
+  }[];
+  labels: Record<string, string>;
+  metricType: boolean;
 }
 
 export interface SeriesUrl {
@@ -63,8 +70,13 @@ export interface SeriesUrl {
   [FILTERS]?: UrlFilter[];
   [SERIES_TYPE]?: string;
   [REPORT_TYPE]: ReportViewTypeId;
-  serviceName: string;
   [METRIC_TYPE]?: string;
+}
+
+export interface NewSeriesUrl {
+  dataType?: AppDataType;
+  reportType?: ReportViewTypeId;
+  reportDefinitions?: Record<string, string>;
 }
 
 export interface UrlFilter {

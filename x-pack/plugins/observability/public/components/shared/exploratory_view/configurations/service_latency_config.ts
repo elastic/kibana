@@ -6,13 +6,13 @@
  */
 
 import { DataSeries } from '../types';
+import { FieldLabels } from './constants';
 
 interface Props {
   seriesId: string;
-  serviceName: string;
 }
 
-export function getServiceLatencyLensConfig({ seriesId, serviceName }: Props): DataSeries {
+export function getServiceLatencyLensConfig({ seriesId }: Props): DataSeries {
   return {
     id: seriesId,
     reportType: 'service-latency',
@@ -27,6 +27,7 @@ export function getServiceLatencyLensConfig({ seriesId, serviceName }: Props): D
       sourceField: 'transaction.duration.us',
       label: 'Latency',
     },
+    metricType: true,
     defaultFilters: [
       'user_agent.name',
       'user_agent.os.name',
@@ -39,9 +40,16 @@ export function getServiceLatencyLensConfig({ seriesId, serviceName }: Props): D
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: [
-      { query: { match_phrase: { 'transaction.type': 'request' } } },
-      ...(serviceName ? [{ query: { match_phrase: { 'service.name': serviceName } } }] : []),
+    filters: [{ query: { match_phrase: { 'transaction.type': 'request' } } }],
+    labels: { ...FieldLabels },
+    reportDefinitions: [
+      {
+        field: 'service.name',
+        required: true,
+      },
+      {
+        field: 'service.environment',
+      },
     ],
   };
 }

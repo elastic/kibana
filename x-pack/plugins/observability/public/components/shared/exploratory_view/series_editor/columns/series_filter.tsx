@@ -18,14 +18,11 @@ import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../../configurations/constants';
 import { SelectedFilters } from '../selected_filters';
-import { DefaultFilters } from '../default_filters';
-import { usePluginContext } from '../../../../../hooks/use_plugin_context';
-import { StatefulSearchBarProps } from '../../../../../../../../../src/plugins/data/public';
-import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 
 interface Props {
   seriesId: string;
   defaultFilters: DataSeries['defaultFilters'];
+  series: DataSeries;
 }
 
 export interface Field {
@@ -33,7 +30,7 @@ export interface Field {
   field: string;
 }
 
-export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
+export function SeriesFilter({ series, seriesId, defaultFilters = [] }: Props) {
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 
   const [selectedField, setSelectedField] = useState<Field | null>(null);
@@ -51,14 +48,6 @@ export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
       Add filter
     </EuiButtonEmpty>
   );
-
-  const {
-    plugins: { data },
-  } = usePluginContext();
-
-  const SearchBar: React.ComponentType<StatefulSearchBarProps> = data.ui.SearchBar;
-
-  const { indexPattern } = useIndexPatternContext();
 
   const mainPanel = (
     <>
@@ -78,14 +67,6 @@ export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
           <EuiSpacer size="s" />
         </Fragment>
       ))}
-      <SearchBar
-        showDatePicker={false}
-        showFilterBar={true}
-        showQueryBar={true}
-        appName="observability"
-        useDefaultBehaviors={false}
-        indexPatterns={[indexPattern]}
-      />
     </>
   );
 
@@ -107,9 +88,7 @@ export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
 
   return (
     <EuiFlexGroup wrap direction="column" gutterSize="xs">
-      <EuiFlexItem>
-        <SelectedFilters seriesId={seriesId} />
-      </EuiFlexItem>
+      <SelectedFilters seriesId={seriesId} series={series} />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -122,11 +101,8 @@ export const SeriesFilter = ({ seriesId, defaultFilters = [] }: Props) => {
               {!selectedField ? mainPanel : childPanel}
             </EuiPopover>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DefaultFilters seriesId={seriesId} />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}

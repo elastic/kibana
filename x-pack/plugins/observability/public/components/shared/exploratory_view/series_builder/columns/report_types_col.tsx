@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ReportViewTypeId } from '../../types';
+import { useUrlStorage } from '../../hooks/use_url_strorage';
 
 interface Props {
-  selectedReportType: ReportViewTypeId | null;
   reportTypes: { id: ReportViewTypeId; label: string }[];
-  onChange: Dispatch<SetStateAction<ReportViewTypeId | null>>;
 }
 
-export const ReportTypesCol = ({ selectedReportType, reportTypes, onChange }: Props) => {
+export const ReportTypesCol = ({ reportTypes }: Props) => {
+  const {
+    newSeries: { reportType: selectedReportType, ...restSeries },
+    setNewSeries,
+  } = useUrlStorage();
+
   return reportTypes?.length > 0 ? (
     <EuiFlexGroup direction="column" gutterSize="xs">
       {reportTypes.map(({ id: reportType, label }) => (
@@ -26,7 +30,12 @@ export const ReportTypesCol = ({ selectedReportType, reportTypes, onChange }: Pr
             iconType="arrowRight"
             color={selectedReportType === reportType ? 'primary' : 'text'}
             fill={selectedReportType === reportType}
-            onClick={() => onChange(reportType === selectedReportType ? null : reportType)}
+            onClick={() =>
+              setNewSeries({
+                ...restSeries,
+                reportType: reportType === selectedReportType ? undefined : reportType,
+              })
+            }
           >
             {label}
           </EuiButton>

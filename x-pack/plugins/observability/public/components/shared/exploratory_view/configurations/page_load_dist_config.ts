@@ -6,13 +6,13 @@
  */
 
 import { DataSeries } from '../types';
+import { FieldLabels } from './constants';
 
 interface Props {
   seriesId: string;
-  serviceName: string;
 }
 
-export function getPageLoadDistLensConfig({ seriesId, serviceName }: Props): DataSeries {
+export function getPageLoadDistLensConfig({ seriesId }: Props): DataSeries {
   return {
     id: seriesId ?? 'unique-key',
     reportType: 'page-load-dist',
@@ -24,7 +24,9 @@ export function getPageLoadDistLensConfig({ seriesId, serviceName }: Props): Dat
     },
     yAxisColumn: {
       operationType: 'count',
+      label: 'Pages loaded',
     },
+    metricType: false,
     defaultFilters: [
       'user_agent.name',
       'user_agent.os.name',
@@ -37,10 +39,19 @@ export function getPageLoadDistLensConfig({ seriesId, serviceName }: Props): Dat
       'client.geo.country_name',
       'user_agent.device.name',
     ],
+    reportDefinitions: [
+      {
+        field: 'service.name',
+        required: true,
+      },
+      {
+        field: 'service.environment',
+      },
+    ],
     filters: [
       { query: { match_phrase: { 'transaction.type': 'page-load' } } },
       { query: { match_phrase: { 'processor.event': 'transaction' } } },
-      ...(serviceName ? [{ query: { match_phrase: { 'service.name': serviceName } } }] : []),
     ],
+    labels: { ...FieldLabels, 'service.name': 'Web Application' },
   };
 }

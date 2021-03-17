@@ -6,13 +6,13 @@
  */
 
 import { DataSeries } from '../types';
+import { FieldLabels } from './constants';
 
 interface Props {
   seriesId: string;
-  serviceName: string;
 }
 
-export function getServiceThroughputLensConfig({ seriesId, serviceName }: Props): DataSeries {
+export function getServiceThroughputLensConfig({ seriesId }: Props): DataSeries {
   return {
     id: seriesId,
     reportType: 'service-latency',
@@ -27,6 +27,7 @@ export function getServiceThroughputLensConfig({ seriesId, serviceName }: Props)
       sourceField: 'transaction.duration.us',
       label: 'Throughput',
     },
+    metricType: true,
     defaultFilters: [
       'user_agent.name',
       'user_agent.os.name',
@@ -39,9 +40,16 @@ export function getServiceThroughputLensConfig({ seriesId, serviceName }: Props)
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: [
-      { query: { match_phrase: { 'transaction.type': 'request' } } },
-      ...(serviceName ? [{ query: { match_phrase: { 'service.name': serviceName } } }] : []),
+    filters: [{ query: { match_phrase: { 'transaction.type': 'request' } } }],
+    labels: { ...FieldLabels },
+    reportDefinitions: [
+      {
+        field: 'service.name',
+        required: true,
+      },
+      {
+        field: 'service.environment',
+      },
     ],
   };
 }

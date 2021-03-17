@@ -6,21 +6,22 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiSuperSelect } from '@elastic/eui';
 import { BREAK_DOWN, FieldLabels } from '../../configurations/constants';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   seriesId: string;
   breakdowns: string[];
 }
 
-export const Breakdowns = ({ seriesId, breakdowns = [] }: Props) => {
-  const options = breakdowns.map((breakdown) => ({ id: breakdown, label: FieldLabels[breakdown] }));
+export function Breakdowns({ seriesId, breakdowns = [] }: Props) {
+  const items = breakdowns.map((breakdown) => ({ id: breakdown, label: FieldLabels[breakdown] }));
 
   const [selectedBreakdown, setSelectedBreakdown] = useState<string>();
 
-  const onClick = (optionId: string) => {
+  const onOptionChange = (optionId: string) => {
     setSelectedBreakdown((prevState) => (prevState === optionId ? undefined : optionId));
   };
 
@@ -30,23 +31,31 @@ export const Breakdowns = ({ seriesId, breakdowns = [] }: Props) => {
     setSeries(seriesId, { ...series, [BREAK_DOWN]: selectedBreakdown });
   }, [selectedBreakdown]);
 
+  const NO_BREAKDOWN = 'no_breakdown';
+
+  items.push({
+    id: NO_BREAKDOWN,
+    label: i18n.translate('xpack.observability.exp.breakDownFilter.noBreakdown', {
+      defaultMessage: 'No breakdown',
+    }),
+  });
+
+  const options = items.map(({ id, label }) => ({
+    inputDisplay: id === NO_BREAKDOWN ? label : <strong>{label}</strong>,
+    value: id,
+    dropdownDisplay: label,
+  }));
+
   return (
     <div style={{ width: 200 }}>
-      {options.map(({ id, label }) => (
-        <div key={id}>
-          <EuiButton
-            fullWidth={true}
-            iconType={id === selectedBreakdown ? 'check' : undefined}
-            size="s"
-            color={id === selectedBreakdown ? 'primary' : 'text'}
-            fill={id === selectedBreakdown}
-            onClick={() => onClick(id)}
-          >
-            {label}
-          </EuiButton>
-          <EuiSpacer size="xs" />
-        </div>
-      ))}
+      <EuiSuperSelect
+        fullWidth
+        compressed
+        options={options}
+        valueOfSelected={selectedBreakdown ?? NO_BREAKDOWN}
+        onChange={(value) => onOptionChange(value)}
+        data-test-subj={'seriesBreakdown'}
+      />
     </div>
   );
-};
+}

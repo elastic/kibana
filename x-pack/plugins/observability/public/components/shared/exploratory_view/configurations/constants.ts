@@ -19,18 +19,19 @@ export const FieldLabels: Record<string, string> = {
   'client.geo.country_name': 'Location',
   'user_agent.device.name': 'Device',
   'observer.geo.name': 'Observer location',
-  'service.name': 'Service',
+  'service.name': 'Service Name',
+  'service.environment': 'Environment',
+
   'monitor.id': 'Monitor Id',
   'monitor.status': 'Monitor Status',
 };
 
 export const DataViewLabels: Record<ReportViewTypeId, string> = {
-  pld: 'Page load distribution',
-  pgv: 'Page views',
+  pld: 'Performance Distribution',
   upd: 'Uptime monitor duration',
   upp: 'Uptime pings',
   svl: 'APM Service latency',
-  kpi: 'Business KPI',
+  kpi: 'Business KPI over time',
   tpt: 'APM Service throughput',
 };
 
@@ -39,7 +40,6 @@ export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
   upp: 'synthetics',
   tpt: 'apm',
   svl: 'apm',
-  pgv: 'rum',
   kpi: 'rum',
   pld: 'rum',
 };

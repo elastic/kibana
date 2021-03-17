@@ -16,7 +16,7 @@ import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
 import { useUrlStorage } from '../hooks/use_url_strorage';
-import { REPORT_TYPE } from '../configurations/constants';
+import { FILTERS, REPORT_TYPE } from '../configurations/constants';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
@@ -25,7 +25,6 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   ],
   rum: [
     { id: 'pld', label: 'Performance distribution' },
-    { id: 'pgv', label: 'Page views' },
     { id: 'kpi', label: 'KPI over time' },
   ],
   apm: [
@@ -39,79 +38,70 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
 export const SeriesBuilder = () => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  const [dataType, setDataType] = useState<AppDataType | null>(null);
-  const [reportType, setReportType] = useState<ReportViewTypeId | null>(null);
-  const [serviceName, setServiceName] = useState<string | null>(null);
+  const { newSeries, setNewSeries, setSeries, allSeriesIds } = useUrlStorage();
+
+  const { dataType, reportType } = newSeries;
 
   const columns = [
     {
       name: 'DataType',
-      field: 'dataType',
       width: '20%',
-      render: (val: string) => <DataTypesCol selectedDataType={dataType} onChange={setDataType} />,
+      render: (val: string) => <DataTypesCol />,
     },
     {
       name: 'Report',
-      field: 'defaultFilters',
-      width: '30%',
+      width: '20%',
       render: (val: string) => (
-        <ReportTypesCol
-          selectedReportType={reportType}
-          reportTypes={dataType ? ReportTypes[dataType] : []}
-          onChange={setReportType}
-        />
+        <ReportTypesCol reportTypes={dataType ? ReportTypes[dataType] : []} />
       ),
     },
     {
       name: 'Definition',
-      field: 'defaultFilters',
       width: '30%',
-      render: (val: string) =>
-        reportType ? (
-          <ReportDefinitionCol
-            dataType={dataType}
-            selectedReportDefinitions={null}
-            reportType={reportType}
-            onChange={setServiceName}
-          />
-        ) : null,
+      render: (val: string) => (reportType ? <ReportDefinitionCol /> : null),
     },
     {
       name: 'Filters',
-      field: 'filters',
       width: '25%',
-      render: (val: string[]) => (reportType ? <ReportFilters /> : null),
+      render: (val: string) => (reportType ? <ReportFilters /> : null),
     },
     {
       name: 'Breakdowns',
       width: '25%',
       field: 'id',
-      render: (val: string[]) => (reportType ? <ReportBreakdowns /> : null),
+      render: (val: string) => (reportType ? <ReportBreakdowns /> : null),
     },
   ];
 
-  const { setSeries, allSeriesIds } = useUrlStorage();
-
   const addSeries = () => {
-    if (reportType) {
-      const newSeriesId = `${serviceName!}-${reportType}`;
+    const { reportDefinitions = {} } = newSeries;
 
-      const newSeries = {
+    const getFiltersFromDefs = () => {
+      return Object.entries(reportDefinitions).map(([field, value]) => ({
+        field,
+        values: [value],
+      }));
+    };
+
+    if (reportType) {
+      const newSeriesId = `${
+        reportDefinitions?.['service.name'] || reportDefinitions?.['monitor.id']
+      }`;
+
+      const newSeriesN = {
         [REPORT_TYPE]: reportType,
-        serviceName,
         time: { from: 'now-30m', to: 'now' },
+        [FILTERS]: getFiltersFromDefs(),
       } as SeriesUrl;
-      setSeries(newSeriesId, newSeries);
+      setSeries(newSeriesId, newSeriesN);
 
       // reset state
-      setDataType(null);
-      setReportType(null);
-      setServiceName(null);
+      setNewSeries({});
       setIsFlyoutVisible(false);
     }
   };
 
-  const items = [{ dataTypes: ['APM'] }];
+  const items = [{ id: 'newSeries' }];
 
   let flyout;
 
@@ -126,12 +116,19 @@ export const SeriesBuilder = () => {
         <EuiSpacer />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plus" color="primary" disabled={!serviceName} onClick={addSeries}>
+            <EuiButton fill iconType="plus" color="primary" onClick={addSeries}>
               Add
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="cross" color="danger">
+            <EuiButton
+              iconType="cross"
+              color="danger"
+              onClick={() => {
+                setNewSeries({});
+                setIsFlyoutVisible(false);
+              }}
+            >
               Cancel
             </EuiButton>
           </EuiFlexItem>
@@ -144,7 +141,7 @@ export const SeriesBuilder = () => {
     <div>
       <EuiButton
         iconType={isFlyoutVisible ? 'arrowDown' : 'arrowRight'}
-        color="secondary"
+        color="primary"
         iconSide="right"
         onClick={() => setIsFlyoutVisible((prevState) => !prevState)}
         disabled={allSeriesIds.length > 0}

@@ -6,15 +6,24 @@
  */
 
 import React from 'react';
-import { SeriesDatePicker } from '../../series_date_picker';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { DataSeries } from '../../types';
+import { ChartTypes } from './chart_types';
+import { MetricSelection } from './metric_selection';
 
 interface Props {
-  series: any;
+  series: DataSeries;
 }
-export const ActionsCol = ({ series }: Props) => {
+
+export function ActionsCol({ series }: Props) {
   return (
-    <div style={{ maxWidth: 300 }}>
-      <SeriesDatePicker seriesId={series.id} />
-    </div>
+    <EuiFlexGroup direction="row" gutterSize="s" justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <ChartTypes seriesId={series.id} defaultChartType={series.seriesTypes[0]} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <MetricSelection seriesId={series.id} isDisabled={!series.metricType} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
-};
+}
