@@ -512,7 +512,9 @@ export const InnerVisualizationWrapper = ({
                     defaultMessage="Index pattern not found"
                   />
                 </p>
-                <p className="eui-textBreakAll">{localState.missingRefsErrors[0].longMessage}</p>
+                <p className="eui-textBreakWord lnsSelectableErrorMessage">
+                  {localState.missingRefsErrors[0].longMessage}
+                </p>
               </>
             }
             iconColor="danger"
