@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsServiceMock,
+} from 'src/core/server/mocks';
+
 import { KibanaRequest } from 'kibana/server';
-import { createExternalCasesClient } from '../../../client';
 import {
   AlertService,
   CaseService,
@@ -21,6 +25,7 @@ import { createActionsClient } from './mock_actions_client';
 import { featuresPluginMock } from '../../../../../features/server/mocks';
 import { securityMock } from '../../../../../security/server/mocks';
 import { CasesClientFactory } from '../../../client/factory';
+import { xpackMocks } from '../../../../../../mocks';
 
 export const createRouteContext = async (client: any, badAuth = false) => {
   const actionsMock = createActionsClient();
@@ -39,6 +44,18 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   const caseConfigureService = await caseConfigureServicePlugin.setup();
   const userActionService = await caseUserActionsServicePlugin.setup();
   const alertsService = new AlertService();
+
+  // since the cases saved objects are hidden we need to use getScopedClient(), we'll just have it return the mock client
+  // that is passed in to createRouteContext
+  const savedObjectsService = savedObjectsServiceMock.createStartContract();
+  savedObjectsService.getScopedClient.mockReturnValue(client);
+
+  const contextMock = xpackMocks.createRequestHandlerContext();
+  // The tests check the calls on the saved object client, so we need to make sure it is the same one returned by
+  // getScopedClient and .client
+  contextMock.core.savedObjects.getClient = jest.fn(() => client);
+  contextMock.core.savedObjects.client = client;
+
   const factory = new CasesClientFactory(log);
   factory.initialize({
     alertsService,
@@ -48,34 +65,27 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     userActionService,
     featuresPluginStart: featuresPluginMock.createStart(),
     getSpace: async (req: KibanaRequest) => undefined,
-    isAuthEnabled: true,
+    isAuthEnabled: false,
     securityPluginSetup: securityMock.createSetup(),
     securityPluginStart: securityMock.createStart(),
   });
 
+  // create a single reference to the caseClient so we can mock its methods
+  const caseClient = factory.create({
+    savedObjectsService,
+    // Since authorization is disabled for these unit tests we don't need any information from the request object
+    // so just pass in an empty one
+    request: {} as KibanaRequest,
+    scopedClusterClient: esClient,
+  });
+
   const context = ({
-    core: {
-      savedObjects: {
-        client,
-      },
-    },
+    ...contextMock,
     actions: { getActionsClient: () => actionsMock },
     cases: {
-      getCasesClient: async () => casesClient,
+      getCasesClient: async () => caseClient,
     },
   } as unknown) as CasesRequestHandlerContext;
-
-  const casesClient = createExternalCasesClient({
-    savedObjectsClient: client,
-    user: authc.getCurrentUser(),
-    caseService,
-    caseConfigureService,
-    connectorMappingsService,
-    userActionService,
-    alertsService,
-    scopedClusterClient: esClient,
-    logger: log,
-  });
 
   return { context, services: { userActionService } };
 };

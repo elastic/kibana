@@ -51,6 +51,9 @@ export class CasesClientFactory {
     this.logger = logger;
   }
 
+  /**
+   * This should be called by the plugin's start() method.
+   */
   public initialize(options: CasesClientFactoryArgs) {
     if (this.isInitialized) {
       throw new Error('CasesClientFactory already initialized');
@@ -69,7 +72,7 @@ export class CasesClientFactory {
     savedObjectsService?: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
   }): Promise<CasesClientHandler> {
-    if (!this.options) {
+    if (!this.isInitialized || !this.options) {
       throw new Error('CasesClientFactory must be initialized before calling create');
     }
 
