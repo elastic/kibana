@@ -160,7 +160,7 @@ function transformCcr(legacyDoc: any) {
 
 const hashes: any = {};
 
-function applyCustomRules(item: any, legacyDoc: any, mbDoc: any) {
+function applyCustomESRules(item: any, legacyDoc: any, mbDoc: any) {
   const extraMbDocs = [];
 
   set(mbDoc, 'elasticsearch.node', {
@@ -243,6 +243,24 @@ function applyCustomRules(item: any, legacyDoc: any, mbDoc: any) {
   ];
 }
 
+function applyCustomKibanaRules(item: any, legacyDoc: any, mbDoc: any) {
+  set(mbDoc, '@timestamp', legacyDoc.kibana_stats?.timestamp);
+  set(mbDoc, 'kibana.stats.uuid', legacyDoc.kibana_stats?.kibana?.uuid ?? undefined);
+  set(mbDoc, 'kibana.kibana', legacyDoc.kibana_stats?.kibana ?? undefined);
+  return [
+    {
+      ...item,
+      value: {
+        ...item.value,
+        index: `metricbeat-8.0.0`,
+        source: {
+          ...mbDoc,
+        },
+      },
+    },
+  ];
+}
+
 export async function rebuildAllAction({
   dataDir,
   log,
@@ -289,7 +307,7 @@ export async function rebuildAllAction({
           if (
             item &&
             (item.type === '_doc' || item.type === 'doc') &&
-            item.value.index.indexOf('-es') > -1
+            (item.value.index.indexOf('-es') > -1 || item.value.index.indexOf('-kibana') > -1)
           ) {
             const legacyDoc = item.value.source;
             const mbDoc = {
@@ -297,17 +315,23 @@ export async function rebuildAllAction({
                 name: convertLegacyTypeToMetricsetName(legacyDoc.type),
               },
             };
-            // const debug = legacyDoc.type === 'index_recovery';
             for (const alias of aliases) {
               let value = _.get(legacyDoc, alias.key, null);
-              if (value === null && alias.key.includes('.shards.')) {
-                value = _.get(legacyDoc, alias.key.replace('.shards.', '.shards[0].'), null);
+              if (item.value.index.indexOf('-es') > -1) {
+                if (value === null && alias.key.includes('.shards.')) {
+                  value = _.get(legacyDoc, alias.key.replace('.shards.', '.shards[0].'), null);
+                }
               }
               if (value !== null) {
                 set(mbDoc, alias.path, value);
               }
             }
-            const mbDocs = applyCustomRules(item, legacyDoc, mbDoc);
+            const mbDocs = [];
+            if (item.value.index.indexOf('-es') > -1) {
+              mbDocs.push(...applyCustomESRules(item, legacyDoc, mbDoc));
+            } else if (item.value.index.indexOf('-kibana') > -1) {
+              mbDocs.push(...applyCustomKibanaRules(item, legacyDoc, mbDoc));
+            }
             if (mbDocs && mbDocs.length && !_.isEmpty(mbDocs[0])) {
               foundMbFiles = true;
               return mbDocs;

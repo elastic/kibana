@@ -44,10 +44,24 @@ export interface ElasticsearchSourceKibanaStats {
     memory?: {
       free_in_bytes?: number;
     };
+    load?: {
+      '1m'?: number;
+    };
+  };
+  response_times?: {
+    average?: number;
+    max?: number;
+  };
+  requests?: {
+    total?: number;
   };
   process?: {
     uptime_in_millis?: number;
+    memory?: {
+      resident_set_size_in_bytes?: number;
+    };
   };
+  concurrent_connections?: number;
 }
 
 export interface ElasticsearchSourceLogstashPipelineVertex {
@@ -450,6 +464,44 @@ export interface ElasticsearchMetricbeatSource {
               };
             };
           };
+        };
+      };
+    };
+  };
+  kibana?: {
+    kibana?: {};
+    stats?: {
+      concurrent_connections?: number;
+      process?: {
+        memory?: {
+          heap?: {
+            size_limit?: {
+              bytes?: number;
+            };
+          };
+          resident_set_size?: {
+            bytes?: number;
+          };
+        };
+      };
+      os?: {
+        load?: {
+          '1m'?: number;
+        };
+        memory?: {
+          free_in_bytes?: number;
+        };
+      };
+      request?: {
+        disconnects?: number;
+        total?: number;
+      };
+      response_time?: {
+        avg?: {
+          ms?: number;
+        };
+        max?: {
+          ms?: number;
         };
       };
     };

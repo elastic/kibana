@@ -6991,6 +6991,13 @@
             "containerized": {
               "type": "boolean"
             },
+            "cpu": {
+              "properties": {
+                "pct": {
+                  "type": "long"
+                }
+              }
+            },
             "domain": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -7048,6 +7055,30 @@
             "name": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "network": {
+              "properties": {
+                "in": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    },
+                    "packets": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "out": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    },
+                    "packets": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
             },
             "os": {
               "properties": {
@@ -8045,13 +8076,48 @@
                 },
                 "os": {
                   "properties": {
+                    "distro": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "distroRelease": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "load": {
+                      "properties": {
+                        "15m": {
+                          "type": "half_float"
+                        },
+                        "1m": {
+                          "type": "half_float"
+                        },
+                        "5m": {
+                          "type": "half_float"
+                        }
+                      }
+                    },
                     "memory": {
                       "properties": {
                         "free_in_bytes": {
                           "ignore_above": 1024,
                           "type": "keyword"
+                        },
+                        "total_in_bytes": {
+                          "type": "long"
+                        },
+                        "used_in_bytes": {
+                          "type": "long"
                         }
                       }
+                    },
+                    "platform": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "platformRelease": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
@@ -8096,6 +8162,13 @@
                                   "type": "long"
                                 }
                               }
+                            }
+                          }
+                        },
+                        "resident_set_size": {
+                          "properties": {
+                            "bytes": {
+                              "type": "long"
                             }
                           }
                         }
@@ -8152,6 +8225,10 @@
                       "type": "keyword"
                     }
                   }
+                },
+                "uuid": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 }
               }
             },
@@ -8196,6 +8273,10 @@
         },
         "kibana_stats": {
           "properties": {
+            "concurrent_connections": {
+              "path": "kibana.stats.concurrent_connections",
+              "type": "alias"
+            },
             "kibana": {
               "properties": {
                 "response_time": {
@@ -8209,11 +8290,31 @@
                 "status": {
                   "path": "kibana.stats.kibana.status",
                   "type": "alias"
+                },
+                "uuid": {
+                  "path": "kibana.stats.uuid",
+                  "type": "alias"
                 }
               }
             },
             "os": {
               "properties": {
+                "load": {
+                  "properties": {
+                    "15m": {
+                      "path": "kibana.stats.os.load.15m",
+                      "type": "alias"
+                    },
+                    "1m": {
+                      "path": "kibana.stats.os.load.1m",
+                      "type": "alias"
+                    },
+                    "5m": {
+                      "path": "kibana.stats.os.load.5m",
+                      "type": "alias"
+                    }
+                  }
+                },
                 "memory": {
                   "properties": {
                     "free_in_bytes": {
@@ -8226,8 +8327,52 @@
             },
             "process": {
               "properties": {
+                "event_loop_delay": {
+                  "path": "kibana.stats.process.event_loop_delay.ms",
+                  "type": "alias"
+                },
+                "memory": {
+                  "properties": {
+                    "heap": {
+                      "properties": {
+                        "size_limit": {
+                          "path": "kibana.stats.process.memory.heap.size_limit.bytes",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "resident_set_size_in_bytes": {
+                      "path": "kibana.stats.process.memory.resident_set_size.bytes",
+                      "type": "alias"
+                    }
+                  }
+                },
                 "uptime_in_millis": {
                   "path": "kibana.stats.process.uptime.ms",
+                  "type": "alias"
+                }
+              }
+            },
+            "requests": {
+              "properties": {
+                "disconnects": {
+                  "path": "kibana.stats.request.disconnects",
+                  "type": "alias"
+                },
+                "total": {
+                  "path": "kibana.stats.request.total",
+                  "type": "alias"
+                }
+              }
+            },
+            "response_times": {
+              "properties": {
+                "average": {
+                  "path": "kibana.stats.response_time.avg.ms",
+                  "type": "alias"
+                },
+                "max": {
+                  "path": "kibana.stats.response_time.max.ms",
                   "type": "alias"
                 }
               }
@@ -20428,6 +20573,11 @@
             "kafka.partition.topic.name",
             "kafka.partition.broker.address",
             "kafka.producer.mbean",
+            "kibana.stats.uuid",
+            "kibana.stats.os.distro",
+            "kibana.stats.os.distroRelease",
+            "kibana.stats.os.platform",
+            "kibana.stats.os.platformRelease",
             "kibana.settings.uuid",
             "kibana.settings.name",
             "kibana.settings.index",
