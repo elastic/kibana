@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
@@ -16,7 +15,7 @@ import { UpgradeAssistantTabProps } from './types';
 export const LoadingErrorBanner: React.FunctionComponent<
   Pick<UpgradeAssistantTabProps, 'loadingError'>
 > = ({ loadingError }) => {
-  if (get(loadingError, 'response.status') === 403) {
+  if (loadingError?.statusCode === 403) {
     return (
       <EuiCallOut
         title={
@@ -27,6 +26,7 @@ export const LoadingErrorBanner: React.FunctionComponent<
         }
         color="danger"
         iconType="cross"
+        data-test-subj="permissionsError"
       />
     );
   }

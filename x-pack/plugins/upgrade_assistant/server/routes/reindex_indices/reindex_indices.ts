@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../../common/constants';
 import {
   ElasticsearchServiceStart,
   kibanaResponseFactory,
@@ -85,7 +86,7 @@ export function registerReindexIndicesRoutes(
   { credentialStore, router, licensing, log }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
-  const BASE_PATH = '/api/upgrade_assistant/reindex';
+  const BASE_PATH = `${API_BASE_PATH}/reindex`;
 
   // Start reindex for an index
   router.post(

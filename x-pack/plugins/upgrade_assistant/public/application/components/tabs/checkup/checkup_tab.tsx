@@ -175,6 +175,7 @@ export const CheckupTab: FunctionComponent<CheckupTabProps> = ({
           ) : (
             <EuiEmptyPrompt
               iconType="faceHappy"
+              data-test-subj="noDeprecationsPrompt"
               title={
                 <h2>
                   <FormattedMessage

@@ -79,6 +79,16 @@ export class ApiService {
 
     return result;
   }
+
+  public async updateIndexSettings(indexName: string, settings: string[]) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/${indexName}/index_settings`,
+      method: 'post',
+      body: JSON.stringify(settings),
+    });
+
+    return result;
+  }
 }
 
 export const apiService = new ApiService();
