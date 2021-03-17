@@ -20,7 +20,6 @@ import type {
 } from '../../../../../../src/plugins/data/server';
 import {
   LogSourceColumnConfiguration,
-  LogSourceConfigurationProperties,
   logSourceFieldColumnConfigurationRT,
 } from '../../../common/http_api/log_sources';
 import {
@@ -107,7 +106,10 @@ export const logEntriesSearchStrategyProvider = ({
                       params.size + 1,
                       configuration.fields.timestamp,
                       configuration.fields.tiebreaker,
-                      getRequiredFields(configuration, messageFormattingRules, params.columns),
+                      getRequiredFields(
+                        params.columns ?? configuration.logColumns,
+                        messageFormattingRules
+                      ),
                       params.query,
                       params.highlightPhrase
                     ),
@@ -131,7 +133,7 @@ export const logEntriesSearchStrategyProvider = ({
               .slice(0, request.params.size)
               .map(
                 getLogEntryFromHit(
-                  request.params.columns ? request.params.columns : configuration.logColumns,
+                  request.params.columns ?? configuration.logColumns,
                   messageFormattingRules
                 )
               );
@@ -257,12 +259,9 @@ function getResponseCursors(entries: LogEntry[]) {
 const VIEW_IN_CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
 
 const getRequiredFields = (
-  configuration: LogSourceConfigurationProperties,
-  messageFormattingRules: CompiledLogMessageFormattingRule,
-  columnOverrides?: LogSourceColumnConfiguration[]
+  columns: LogSourceColumnConfiguration[],
+  messageFormattingRules: CompiledLogMessageFormattingRule
 ): string[] => {
-  const columns = columnOverrides ? columnOverrides : configuration.logColumns;
-
   const fieldsFromColumns = columns.reduce<string[]>((accumulatedFields, logColumn) => {
     if (logSourceFieldColumnConfigurationRT.is(logColumn)) {
       return [...accumulatedFields, logColumn.fieldColumn.field];

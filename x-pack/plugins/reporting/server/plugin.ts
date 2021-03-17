@@ -122,6 +122,8 @@ export class ReportingPlugin
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
         store,
+        esClient: core.elasticsearch.client,
+        data: plugins.data,
         taskManager: plugins.taskManager,
       });
 

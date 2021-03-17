@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  BaseSyntheticEvent,
-  KeyboardEvent,
-  memo,
-  useCallback,
-  useMemo,
-  useState,
-  useEffect,
-} from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import {
   Chart,
@@ -28,8 +20,6 @@ import {
   TooltipType,
   SeriesIdentifier,
 } from '@elastic/charts';
-import { keys } from '@elastic/eui';
-
 import {
   LegendToggle,
   ClickTriggerEvent,
@@ -68,7 +58,11 @@ export interface PieComponentProps {
 const PieComponent = (props: PieComponentProps) => {
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
-  const [showLegend, setShowLegend] = useState(true);
+  const [showLegend, setShowLegend] = useState<boolean>(() => {
+    const bwcLegendStateDefault =
+      props.visParams.addLegend == null ? true : props.visParams.addLegend;
+    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+  });
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
 
   const onRenderChange = useCallback<RenderChangeListener>(
@@ -143,10 +137,7 @@ const PieComponent = (props: PieComponentProps) => {
   }, [props.uiState]);
 
   const setColor = useCallback(
-    (newColor: string | null, seriesLabel: string | number, event: BaseSyntheticEvent) => {
-      if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
-        return;
-      }
+    (newColor: string | null, seriesLabel: string | number) => {
       const colors = props.uiState?.get('vis.colors') || {};
       if (colors[seriesLabel] === newColor || !newColor) {
         delete colors[seriesLabel];
@@ -214,6 +205,12 @@ const PieComponent = (props: PieComponentProps) => {
     visParams.legendPosition,
   ]);
 
+  const legendColorPicker = useMemo(
+    () =>
+      getColorPicker(legendPosition, setColor, bucketColumns, visParams.palette.name, visData.rows),
+    [bucketColumns, legendPosition, setColor, visData.rows, visParams.palette.name]
+  );
+
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
       <div className="pieChart__wrapper">
@@ -227,13 +224,7 @@ const PieComponent = (props: PieComponentProps) => {
             showLegend={showLegend}
             legendPosition={legendPosition}
             legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-            legendColorPicker={getColorPicker(
-              legendPosition,
-              setColor,
-              bucketColumns,
-              visParams.palette.name,
-              visData.rows
-            )}
+            legendColorPicker={legendColorPicker}
             tooltip={tooltip}
             onElementClick={(args) => {
               handleSliceClick(args[0][0] as LayerValue[], bucketColumns, visData);

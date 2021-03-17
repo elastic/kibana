@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { BaseSyntheticEvent, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import Color from 'color';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import { DatatableRow } from '../../../expressions/public';
 import { ColorPicker } from '../../../charts/public';
 import { BucketColumns } from '../types';
+
+const KEY_CODE_ENTER = 13;
 
 function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
   switch (legendPosition) {
@@ -47,11 +49,7 @@ function isOnInnerLayer(
 
 export const getColorPicker = (
   legendPosition: Position,
-  setColor: (
-    newColor: string | null,
-    seriesKey: string | number,
-    event: BaseSyntheticEvent
-  ) => void,
+  setColor: (newColor: string | null, seriesKey: string | number) => void,
   bucketColumns: Array<Partial<BucketColumns>>,
   palette: string,
   data: DatatableRow[]
@@ -63,12 +61,23 @@ export const getColorPicker = (
   seriesIdentifiers: [seriesIdentifier],
 }) => {
   const seriesName = seriesIdentifier.key;
-  const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
+  let keyDownEventOn = false;
+  const handleChange = (newColor: string | null) => {
     if (newColor) {
       onChange(newColor);
     }
-    setColor(newColor, seriesName, event);
-    onClose();
+    setColor(newColor, seriesName);
+    // close the popover if no color is applied or the user has clicked a color
+    if (!newColor || !keyDownEventOn) {
+      onClose();
+    }
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.keyCode === KEY_CODE_ENTER) {
+      onClose?.();
+    }
+    keyDownEventOn = true;
   };
 
   const handleOutsideClick = useCallback(() => {
@@ -93,11 +102,13 @@ export const getColorPicker = (
         panelPaddingSize="s"
       >
         <ColorPicker
-          color={hexColor}
-          onChange={handlChange}
+          color={palette === 'kibana_palette' ? hexColor : hexColor.toLowerCase()}
+          onChange={handleChange}
           label={seriesName}
           maxDepth={bucketColumns.length}
           layerIndex={getLayerIndex(seriesName, data, bucketColumns)}
+          useLegacyColors={palette === 'kibana_palette'}
+          onKeyDown={onKeyDown}
         />
       </EuiPopover>
     </EuiOutsideClickDetector>

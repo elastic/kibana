@@ -9,9 +9,8 @@
 import React from 'react';
 import { LegendColorPickerProps } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ComponentType, ReactWrapper } from 'enzyme';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { getColorPicker } from './get_color_picker';
 import { ColorPicker } from '../../../charts/public';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
@@ -55,23 +54,23 @@ describe('getColorPicker', function () {
   });
 
   it('renders the color picker for default palette and inner layer', () => {
-    wrapper = mount(<Component {...wrapperProps} />);
-    expect(findTestSubject(wrapper, 'visColorPicker').length).toBe(1);
+    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    expect(wrapper.find(ColorPicker).length).toBe(1);
   });
 
   it('renders the picker on the correct position', () => {
-    wrapper = mount(<Component {...wrapperProps} />);
+    wrapper = mountWithIntl(<Component {...wrapperProps} />);
     expect(wrapper.find(EuiPopover).prop('anchorPosition')).toEqual('rightCenter');
   });
 
   it('converts the color to the right hex and passes it to the color picker', () => {
-    wrapper = mount(<Component {...wrapperProps} />);
-    expect(wrapper.find(ColorPicker).prop('color')).toEqual('#6DCCB1');
+    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    expect(wrapper.find(ColorPicker).prop('color')).toEqual('#6dccb1');
   });
 
   it('doesnt render the picker for default palette and not inner layer', () => {
     const newProps = { ...wrapperProps, seriesIdentifier: { key: '1', specId: 'pie' } };
-    wrapper = mount(<Component {...newProps} />);
+    wrapper = mountWithIntl(<Component {...newProps} />);
     expect(wrapper).toEqual({});
   });
 
@@ -84,7 +83,8 @@ describe('getColorPicker', function () {
       visData.rows
     );
     const newProps = { ...wrapperProps, seriesIdentifier: { key: '1', specId: 'pie' } };
-    wrapper = mount(<LegacyPaletteComponent {...newProps} />);
-    expect(findTestSubject(wrapper, 'visColorPicker').length).toBe(1);
+    wrapper = mountWithIntl(<LegacyPaletteComponent {...newProps} />);
+    expect(wrapper.find(ColorPicker).length).toBe(1);
+    expect(wrapper.find(ColorPicker).prop('useLegacyColors')).toBe(true);
   });
 });

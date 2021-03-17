@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
@@ -106,11 +106,14 @@ async function getErrorStats({
   searchAggregatedTransactions: boolean;
 }) {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
+    const { start, end } = setup;
     const { noHits, average } = await getErrorRate({
       environment,
       setup,
       serviceName,
       searchAggregatedTransactions,
+      start,
+      end,
     });
 
     return { avgErrorRate: noHits ? null : average };
