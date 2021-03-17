@@ -6,7 +6,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { NewPackagePolicy } from '../../../../fleet/public';
-import { ConfigKeys, Config, DataStream } from './types';
+import { ConfigKeys, Config, DataStream, Validation } from './types';
 
 interface Props {
   defaultConfig: Config;
@@ -17,20 +17,21 @@ interface Props {
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: NewPackagePolicy;
   }) => void;
+  validate: Record<DataStream, Validation>;
 }
 
-export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) => {
+export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }: Props) => {
   // Update the integration policy with our custom fields
   const [config, setConfig] = useState<Config>(defaultConfig);
   const currentConfig = useRef<Config>(defaultConfig);
 
   useEffect(() => {
     const { type } = config;
-    const configKeys = Object.keys(config) as ConfigKeys[]; // all keys for determining if the form has been changed
+    const configKeys = Object.keys(config) as ConfigKeys[];
+    const validationKeys = Object.keys(validate[type]) as ConfigKeys[];
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
-    // TO DO: Update validation
     const isValid =
-      !!newPolicy.name && getIsValid({ requiredFieldList: requiredFields[type], input: config });
+      !!newPolicy.name && !validationKeys.find((key) => validate[type][key]?.(config[key]));
     const updatedPolicy = { ...newPolicy };
     const currentInput = updatedPolicy.inputs.find((input) => input.type === `synthetics/${type}`);
     const dataStream = currentInput?.streams[0];
@@ -52,13 +53,14 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
             case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
             case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
             case ConfigKeys.RESPONSE_HEADERS_CHECK:
+            case ConfigKeys.RESPONSE_RECEIVE_CHECK:
             case ConfigKeys.RESPONSE_STATUS_CHECK:
             case ConfigKeys.REQUEST_HEADERS_CHECK:
             case ConfigKeys.TAGS:
               configItem.value = JSON.stringify(config[key]); // convert to yaml string
               break;
             case ConfigKeys.WAIT:
-              configItem.value = `${config[key]}s`; // convert to cron
+              configItem.value = config[key] ? `${config[key]}s` : null; // convert to cron
               break;
             case ConfigKeys.REQUEST_BODY_CHECK:
               configItem.value = config[key].value; // only need value of REEQUEST_BODY_CHECK for outputted policy
@@ -75,7 +77,7 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
         updatedPolicy,
       });
     }
-  }, [config, currentConfig, newPolicy, onChange]);
+  }, [config, currentConfig, newPolicy, onChange, validate]);
 
   // update our local config state ever time name, which is managed by fleet, changes
   useEffect(() => {
@@ -83,30 +85,7 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange }: Props) =
   }, [newPolicy.name, setConfig]);
 
   return {
+    config,
     setConfig,
   };
-};
-
-const requiredFields = {
-  [DataStream.HTTP]: [ConfigKeys.URLS, ConfigKeys.SCHEDULE],
-  [DataStream.TCP]: [ConfigKeys.HOSTS, ConfigKeys.SCHEDULE],
-  [DataStream.ICMP]: [ConfigKeys.HOSTS, ConfigKeys.SCHEDULE],
-};
-
-// also ensure that optional fields are valid when filled in
-const getIsValid = ({
-  requiredFieldList,
-  input,
-}: {
-  requiredFieldList: ConfigKeys[];
-  input: Config;
-}) => {
-  return !requiredFieldList.some((field) => {
-    switch (typeof field) {
-      case 'number':
-        return input[field] < 1;
-      case 'string':
-        return !Boolean(input[field]);
-    }
-  });
 };

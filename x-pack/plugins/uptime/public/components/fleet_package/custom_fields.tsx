@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, memo } from 'react';
+import React, { useCallback, useEffect, useState, memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
@@ -20,7 +20,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
-import { ConfigKeys, DataStream, ICustomFields } from './types';
+import { ConfigKeys, DataStream, ICustomFields, Validation } from './types';
 import { ComboBox } from './combo_box';
 import { OptionalLabel } from './optional_label';
 import { HTTPAdvancedFields } from './http_advanced_fields';
@@ -29,10 +29,11 @@ import { ScheduleField } from './schedule_field';
 
 interface Props {
   defaultValues: ICustomFields;
+  validate: Validation;
   onChange: (fields: ICustomFields) => void;
 }
 
-export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
+export const CustomFields = memo<Props>(({ defaultValues, onChange, validate }) => {
   const [fields, setFields] = useState<ICustomFields>(defaultValues);
   const { type } = fields;
 
@@ -58,27 +59,18 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
     [onChange, fields]
   );
 
-  const handleInputChange = ({
-    event,
-    configKey,
-  }: {
-    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>;
-    configKey: ConfigKeys;
-  }) => {
-    const value = event.target.value;
+  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
     setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
   };
 
-  const handleCheckboxChange = ({
-    event,
-    configKey,
-  }: {
-    event: React.ChangeEvent<HTMLInputElement>;
-    configKey: ConfigKeys;
-  }) => {
-    const checked = event.target.checked;
-    setFields((prevFields) => ({ ...prevFields, [configKey]: checked }));
-  };
+  const onChangeAdvancedFields = useCallback(
+    (values) =>
+      setFields((prevFields) => ({
+        ...prevFields,
+        ...values,
+      })),
+    [setFields]
+  );
 
   return (
     <EuiForm>
@@ -121,9 +113,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                     defaultMessage="Monitor Type"
                   />
                 }
-                isInvalid={!fields[ConfigKeys.MONITOR_TYPE]}
+                isInvalid={!!validate[ConfigKeys.MONITOR_TYPE]?.(fields[ConfigKeys.MONITOR_TYPE])}
                 error={
-                  !fields[ConfigKeys.MONITOR_TYPE]
+                  validate[ConfigKeys.MONITOR_TYPE]?.(fields[ConfigKeys.MONITOR_TYPE])
                     ? [
                         <FormattedMessage
                           id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.error"
@@ -137,7 +129,10 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                   options={dataStreamOptions}
                   value={fields[ConfigKeys.MONITOR_TYPE]}
                   onChange={(event) =>
-                    handleInputChange({ event, configKey: ConfigKeys.MONITOR_TYPE })
+                    handleInputChange({
+                      value: event.target.value,
+                      configKey: ConfigKeys.MONITOR_TYPE,
+                    })
                   }
                 />
               </EuiFormRow>
@@ -149,9 +144,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                       defaultMessage="URL"
                     />
                   }
-                  isInvalid={!fields[ConfigKeys.URLS]}
+                  isInvalid={!!validate[ConfigKeys.URLS]?.(fields[ConfigKeys.URLS])}
                   error={
-                    !fields[ConfigKeys.URLS]
+                    validate[ConfigKeys.URLS]?.(fields[ConfigKeys.URLS])
                       ? [
                           <FormattedMessage
                             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL.error"
@@ -163,7 +158,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                 >
                   <EuiFieldText
                     value={fields[ConfigKeys.URLS]}
-                    onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.URLS })}
+                    onChange={(event) =>
+                      handleInputChange({ value: event.target.value, configKey: ConfigKeys.URLS })
+                    }
                   />
                 </EuiFormRow>
               )}
@@ -175,9 +172,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                       defaultMessage="Host"
                     />
                   }
-                  isInvalid={!fields[ConfigKeys.HOSTS]}
+                  isInvalid={!!validate[ConfigKeys.HOSTS]?.(fields[ConfigKeys.HOSTS])}
                   error={
-                    !fields[ConfigKeys.HOSTS]
+                    validate[ConfigKeys.HOSTS]?.(fields[ConfigKeys.HOSTS])
                       ? [
                           <FormattedMessage
                             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.hosts.error"
@@ -189,7 +186,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                 >
                   <EuiFieldText
                     value={fields[ConfigKeys.HOSTS]}
-                    onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.HOSTS })}
+                    onChange={(event) =>
+                      handleInputChange({ value: event.target.value, configKey: ConfigKeys.HOSTS })
+                    }
                   />
                 </EuiFormRow>
               )}
@@ -206,7 +205,10 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                   <EuiFieldText
                     value={fields[ConfigKeys.PROXY_URL]}
                     onChange={(event) =>
-                      handleInputChange({ event, configKey: ConfigKeys.PROXY_URL })
+                      handleInputChange({
+                        value: event.target.value,
+                        configKey: ConfigKeys.PROXY_URL,
+                      })
                     }
                   />
                 </EuiFormRow>
@@ -223,8 +225,8 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                       />
                     }
                     onChange={(event) =>
-                      handleCheckboxChange({
-                        event,
+                      handleInputChange({
+                        value: event.target.checked,
                         configKey: ConfigKeys.PROXY_USE_LOCAL_RESOLVER,
                       })
                     }
@@ -238,9 +240,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                     defaultMessage="Monitor interval"
                   />
                 }
-                isInvalid={!fields[ConfigKeys.SCHEDULE] || fields[ConfigKeys.SCHEDULE].number < 1}
+                isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields[ConfigKeys.SCHEDULE])}
                 error={
-                  !fields[ConfigKeys.SCHEDULE] || fields[ConfigKeys.SCHEDULE].number < 1
+                  validate[ConfigKeys.SCHEDULE]?.(fields[ConfigKeys.SCHEDULE])
                     ? [
                         <FormattedMessage
                           id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
@@ -251,8 +253,12 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                 }
               >
                 <ScheduleField
-                  configKey={ConfigKeys.SCHEDULE}
-                  setFields={setFields}
+                  onChange={(schedule) =>
+                    handleInputChange({
+                      value: schedule,
+                      configKey: ConfigKeys.SCHEDULE,
+                    })
+                  }
                   number={fields[ConfigKeys.SCHEDULE].number}
                   unit={fields[ConfigKeys.SCHEDULE].unit}
                 />
@@ -265,9 +271,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                       defaultMessage="Wait in seconds"
                     />
                   }
-                  isInvalid={fields[ConfigKeys.WAIT] < 0}
+                  isInvalid={!!validate[ConfigKeys.WAIT]?.(fields[ConfigKeys.WAIT])}
                   error={
-                    fields[ConfigKeys.WAIT] < 0
+                    validate[ConfigKeys.WAIT]?.(fields[ConfigKeys.WAIT])
                       ? [
                           <FormattedMessage
                             id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.error"
@@ -281,7 +287,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                   <EuiFieldNumber
                     min={0}
                     value={fields[ConfigKeys.WAIT]}
-                    onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.WAIT })}
+                    onChange={(event) =>
+                      handleInputChange({ value: event.target.value, configKey: ConfigKeys.WAIT })
+                    }
                   />
                 </EuiFormRow>
               )}
@@ -297,7 +305,10 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                 <EuiFieldText
                   value={fields[ConfigKeys.SERVICE_NAME]}
                   onChange={(event) =>
-                    handleInputChange({ event, configKey: ConfigKeys.SERVICE_NAME })
+                    handleInputChange({
+                      value: event.target.value,
+                      configKey: ConfigKeys.SERVICE_NAME,
+                    })
                   }
                 />
               </EuiFormRow>
@@ -308,9 +319,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                     defaultMessage="Max redirects"
                   />
                 }
-                isInvalid={fields[ConfigKeys.MAX_REDIRECTS] < 0}
+                isInvalid={!!validate[ConfigKeys.MAX_REDIRECTS]?.(fields[ConfigKeys.MAX_REDIRECTS])}
                 error={
-                  fields[ConfigKeys.MAX_REDIRECTS] < 0
+                  validate[ConfigKeys.MAX_REDIRECTS]?.(fields[ConfigKeys.MAX_REDIRECTS])
                     ? [
                         <FormattedMessage
                           id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.error"
@@ -325,7 +336,10 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                   min={0}
                   value={fields[ConfigKeys.MAX_REDIRECTS]}
                   onChange={(event) =>
-                    handleInputChange({ event, configKey: ConfigKeys.MAX_REDIRECTS })
+                    handleInputChange({
+                      value: event.target.value,
+                      configKey: ConfigKeys.MAX_REDIRECTS,
+                    })
                   }
                 />
               </EuiFormRow>
@@ -352,7 +366,9 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                 <EuiFieldNumber
                   min={0}
                   value={fields[ConfigKeys.TIMEOUT]}
-                  onChange={(event) => handleInputChange({ event, configKey: ConfigKeys.TIMEOUT })}
+                  onChange={(event) =>
+                    handleInputChange({ value: event.target.value, configKey: ConfigKeys.TIMEOUT })
+                  }
                 />
               </EuiFormRow>
               <EuiFormRow
@@ -365,9 +381,8 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
                 labelAppend={<OptionalLabel />}
               >
                 <ComboBox
-                  configKey={ConfigKeys.TAGS}
                   selectedOptions={fields[ConfigKeys.TAGS]}
-                  setFields={setFields}
+                  onChange={(value) => handleInputChange({ value, configKey: ConfigKeys.TAGS })}
                 />
               </EuiFormRow>
             </EuiForm>
@@ -389,15 +404,17 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange }) => {
             [ConfigKeys.REQUEST_HEADERS_CHECK]: defaultValues[ConfigKeys.RESPONSE_HEADERS_CHECK],
             [ConfigKeys.REQUEST_METHOD_CHECK]: defaultValues[ConfigKeys.REQUEST_METHOD_CHECK],
           }}
-          setFields={setFields}
+          onChange={onChangeAdvancedFields}
+          validate={validate}
         />
       )}
       {isTCP && (
         <TCPAdvancedFields
-          fields={fields}
-          onCheckboxChange={handleCheckboxChange}
-          onInputChange={handleInputChange}
-          setFields={setFields}
+          defaultValues={{
+            [ConfigKeys.REQUEST_SEND_CHECK]: defaultValues[ConfigKeys.REQUEST_SEND_CHECK],
+            [ConfigKeys.RESPONSE_RECEIVE_CHECK]: defaultValues[ConfigKeys.RESPONSE_RECEIVE_CHECK],
+          }}
+          onChange={onChangeAdvancedFields}
         />
       )}
     </EuiForm>
