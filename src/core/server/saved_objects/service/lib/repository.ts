@@ -16,6 +16,7 @@ import {
 import { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
+  IPointInTimeFinder,
   PointInTimeFinder,
   SavedObjectsPointInTimeFinderOptions,
   SavedObjectsPointInTimeFinderDependencies,
@@ -1918,8 +1919,10 @@ export class SavedObjectsRepository {
    *
    * Once you have retrieved all of the results you need, it is recommended
    * to call `close()` to clean up the PIT and prevent Elasticsearch from
-   * consuming resources unnecessarily. This will automatically be done for
-   * you if you reach the last page of results.
+   * consuming resources unnecessarily. This is only required if you are
+   * done iterating and have not yet paged through all of the results: the
+   * PIT will automatically be closed for you once you reach the last page
+   * of results, or if the underlying call to `find` fails for any reason.
    *
    * @example
    * ```ts
@@ -1943,7 +1946,7 @@ export class SavedObjectsRepository {
   createPointInTimeFinder(
     findOptions: SavedObjectsPointInTimeFinderOptions,
     dependencies?: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>
-  ) {
+  ): IPointInTimeFinder {
     return new PointInTimeFinder(findOptions, {
       logger: this._logger,
       client: this,

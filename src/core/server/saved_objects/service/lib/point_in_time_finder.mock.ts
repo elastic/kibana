@@ -24,15 +24,15 @@ const createPointInTimeFinderMock = ({
   // mocked dependencies. This allows users to set their own `mockResolvedValue` on
   // the SO client mock and have it reflected when using `createPointInTimeFinder`.
   mock.mockImplementation((findOptions) => {
-    return new PointInTimeFinder(findOptions, {
+    const finder = new PointInTimeFinder(findOptions, {
       logger,
       client: savedObjectsMock,
-      // client: {
-      //   find: savedObjectsMock.find,
-      //   openPointInTimeForType: savedObjectsMock.openPointInTimeForType,
-      //   closePointInTime: savedObjectsMock.closePointInTime,
-      // },
     });
+
+    jest.spyOn(finder, 'find');
+    jest.spyOn(finder, 'close');
+
+    return finder;
   });
 
   return mock;

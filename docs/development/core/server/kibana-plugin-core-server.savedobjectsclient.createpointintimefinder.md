@@ -9,7 +9,7 @@ Returns a generator help page through large sets of saved objects by wrapping ca
 <b>Signature:</b>
 
 ```typescript
-createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): PointInTimeFinder;
+createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): IPointInTimeFinder;
 ```
 
 ## Parameters
@@ -21,5 +21,5 @@ createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions,
 
 <b>Returns:</b>
 
-`PointInTimeFinder`
+`IPointInTimeFinder`
 

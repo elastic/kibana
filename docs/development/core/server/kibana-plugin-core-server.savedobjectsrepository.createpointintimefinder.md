@@ -8,12 +8,12 @@ Returns a generator to help page through large sets of saved objects.
 
 The generator wraps calls to `SavedObjects.find` and iterates over multiple pages of results using `_pit` and `search_after`<!-- -->. This will open a new Point In Time (PIT), and continue paging until a set of results is received that's smaller than the designated `perPage`<!-- -->.
 
-Once you have retrieved all of the results you need, it is recommended to call `close()` to clean up the PIT and prevent Elasticsearch from consuming resources unnecessarily. This will automatically be done for you if you reach the last page of results.
+Once you have retrieved all of the results you need, it is recommended to call `close()` to clean up the PIT and prevent Elasticsearch from consuming resources unnecessarily. This is only required if you are done iterating and have not yet paged through all of the results: the PIT will automatically be closed for you once you reach the last page of results, or if the underlying call to `find` fails for any reason.
 
 <b>Signature:</b>
 
 ```typescript
-createPointInTimeFinder(findOptions: SavedObjectsPointInTimeFinderOptions, dependencies: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>): PointInTimeFinder;
+createPointInTimeFinder(findOptions: SavedObjectsPointInTimeFinderOptions, dependencies?: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>): IPointInTimeFinder;
 ```
 
 ## Parameters
@@ -25,7 +25,7 @@ createPointInTimeFinder(findOptions: SavedObjectsPointInTimeFinderOptions, depen
 
 <b>Returns:</b>
 
-`PointInTimeFinder`
+`IPointInTimeFinder`
 
 ## Example
 

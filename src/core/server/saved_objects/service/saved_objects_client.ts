@@ -8,7 +8,7 @@
 
 import type {
   ISavedObjectsRepository,
-  PointInTimeFinder,
+  IPointInTimeFinder,
   SavedObjectsPointInTimeFinderOptions,
   SavedObjectsPointInTimeFinderDependencies,
 } from './lib';
@@ -629,7 +629,7 @@ export class SavedObjectsClient {
   createPointInTimeFinder(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
-  ): PointInTimeFinder {
+  ): IPointInTimeFinder {
     return this._repository.createPointInTimeFinder(findOptions, {
       client: this,
       // Include dependencies last so that SO client wrappers have their settings applied.

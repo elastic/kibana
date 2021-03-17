@@ -1147,6 +1147,12 @@ export interface IndexSettingsDeprecationInfo {
 }
 
 // @public (undocumented)
+export interface IPointInTimeFinder {
+    close: () => Promise<void>;
+    find: () => AsyncGenerator<SavedObjectsFindResponse>;
+}
+
+// @public (undocumented)
 export interface IRenderOptions {
     includeUserSettings?: boolean;
     // @internal @deprecated
@@ -2219,8 +2225,7 @@ export class SavedObjectsClient {
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    // Warning: (ae-forgotten-export) The symbol "PointInTimeFinder" needs to be exported by the entry point index.d.ts
-    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): PointInTimeFinder;
+    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): IPointInTimeFinder;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
@@ -2823,7 +2828,7 @@ export class SavedObjectsRepository {
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    createPointInTimeFinder(findOptions: SavedObjectsPointInTimeFinderOptions, dependencies: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>): PointInTimeFinder;
+    createPointInTimeFinder(findOptions: SavedObjectsPointInTimeFinderOptions, dependencies?: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>): IPointInTimeFinder;
     // Warning: (ae-forgotten-export) The symbol "IKibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
