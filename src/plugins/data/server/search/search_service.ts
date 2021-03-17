@@ -52,6 +52,9 @@ import {
   kibana,
   kibanaContext,
   kibanaContextFunction,
+  kibanaTimerangeFunction,
+  kqlFunction,
+  luceneFunction,
   SearchSourceDependencies,
   searchSourceRequiredUiSettings,
   SearchSourceService,
@@ -142,6 +145,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(kibana);
+    expressions.registerFunction(luceneFunction);
+    expressions.registerFunction(kqlFunction);
+    expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerFunction(kibanaContextFunction);
     expressions.registerType(kibanaContext);
 
