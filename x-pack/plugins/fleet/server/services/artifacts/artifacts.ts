@@ -16,7 +16,7 @@ import type { ElasticsearchClient } from 'kibana/server';
 
 import type { ListResult } from '../../../common';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
-import type { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import type { ESSearchHit, ESSearchResponse } from '../../../../../../typings/elasticsearch';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
