@@ -634,6 +634,7 @@ export interface DocLinksStart {
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
+        readonly ingest: Record<string, string>;
     };
 }
 
