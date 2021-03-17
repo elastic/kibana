@@ -229,7 +229,7 @@ function ensurePreconfiguredPackagesAndPolicies(
             throw new Error(
               i18n.translate('xpack.fleet.preconfiguredPackageMissingError', {
                 defaultMessage:
-                  'Agent policy {agentPolicyName} could not be configured. Package policy {packagePolicyName} uses the package {pkgName}, which is not installed. Add {pkgName} to {packagesConfigValue} or remove it from this agent policy.',
+                  '{agentPolicyName} could not be added. {pkgName} is not installed, add {pkgName} to `{packagesConfigValue}` or remove it from {packagePolicyName}.',
                 values: {
                   agentPolicyName: newAgentPolicy.name,
                   packagePolicyName: name,
