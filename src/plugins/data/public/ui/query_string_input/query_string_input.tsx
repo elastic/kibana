@@ -53,6 +53,7 @@ export interface QueryStringInputProps {
   onChange?: (query: Query) => void;
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query) => void;
+  submitOnBlur?: boolean;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
