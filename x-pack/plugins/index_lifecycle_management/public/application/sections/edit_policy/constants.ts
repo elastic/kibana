@@ -20,3 +20,9 @@ export const ROLLOVER_FORM_PATHS = {
 };
 
 export const policyNamePath = 'name';
+
+/**
+ * This repository is provisioned by Elastic Cloud and will always
+ * exist as a "managed" repository.
+ */
+export const CLOUD_DEFAULT_REPO = 'found-snapshots';

@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { ListItemArraySchema, SearchEsListItemSchema, Type } from '../../../common/schemas';
-import { getQueryFilterFromTypeValue, transformElasticToListItem } from '../utils';
+import {
+  TransformElasticToListItemOptions,
+  getQueryFilterFromTypeValue,
+  transformElasticToListItem,
+} from '../utils';
 
 export interface GetListItemByValuesOptions {
   listId: string;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listItemIndex: string;
   type: Type;
   value: string[];
@@ -20,12 +24,12 @@ export interface GetListItemByValuesOptions {
 
 export const getListItemByValues = async ({
   listId,
-  callCluster,
+  esClient,
   listItemIndex,
   type,
   value,
 }: GetListItemByValuesOptions): Promise<ListItemArraySchema> => {
-  const response = await callCluster<SearchEsListItemSchema>('search', {
+  const { body: response } = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {
         bool: {
@@ -33,9 +37,12 @@ export const getListItemByValues = async ({
         },
       },
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: listItemIndex,
     size: 10000, // TODO: This has a limit on the number which is 10,000 the default of Elastic but we might want to provide a way to increase that number
   });
-  return transformElasticToListItem({ response, type });
+  return transformElasticToListItem(({
+    response,
+    type,
+  } as unknown) as TransformElasticToListItemOptions);
 };
