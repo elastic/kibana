@@ -284,6 +284,11 @@ export class DocLinksService {
           registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
         },
+        ingest: {
+          pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
+          pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
+          processors: `${ELASTICSEARCH_DOCS}processors.html`,
+        },
       },
     });
   }
@@ -448,5 +453,6 @@ export interface DocLinksStart {
     readonly ccs: Record<string, string>;
     readonly plugins: Record<string, string>;
     readonly snapshotRestore: Record<string, string>;
+    readonly ingest: Record<string, string>;
   };
 }
