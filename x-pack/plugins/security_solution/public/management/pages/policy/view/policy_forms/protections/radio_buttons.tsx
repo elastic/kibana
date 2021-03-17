@@ -10,38 +10,25 @@ import { useDispatch } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { htmlIdGenerator, EuiRadio } from '@elastic/eui';
 import {
-  Immutable,
   ImmutableArray,
-  OperatingSystem,
-  PolicyConfig,
   ProtectionModes,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
 // need to remove this eventually?
-import { MalwareProtectionOSes, OS } from '../../../types';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { AppAction } from '../../../../../../common/store/actions';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
+import { PolicyProtection } from '../../../types';
 
-// const OSes: Immutable<MalwareProtectionOSes[]> = [OS.windows, OS.mac];
-//
-
-// type Aprotection = 'malware' | 'ransomware';
-type Aprotection =
-  | Pick<PolicyConfig['windows'], 'malware' | 'ransomware'>
-  | Pick<PolicyConfig['mac'], 'malware'>;
-
-// const a: Aprotection = '';
-
-const ProtectionRadio = React.memo(
+export const ProtectionRadio = React.memo(
   ({
     protection,
     protectionMode,
     oses,
     label,
   }: {
-    protection: Aprotection;
+    protection: PolicyProtection;
     protectionMode: ProtectionModes;
     oses: ImmutableArray<Partial<keyof UIPolicyConfig>>;
     label: string;
@@ -57,12 +44,30 @@ const ProtectionRadio = React.memo(
       if (policyDetailsConfig) {
         const newPayload = cloneDeep(policyDetailsConfig);
         for (const os of oses) {
-          newPayload[os][protection].mode = protectionMode;
+          if (os === 'windows') {
+            newPayload[os][protection].mode = protectionMode;
+          } else if (os === 'mac') {
+            newPayload[os][
+              protection as keyof Pick<UIPolicyConfig['mac'], 'malware'>
+            ].mode = protectionMode;
+          }
           if (isPlatinumPlus) {
-            if (protectionMode === ProtectionModes.prevent) {
-              newPayload[os].popup[protection].enabled = true;
-            } else {
-              newPayload[os].popup[protection].enabled = false;
+            if (os === 'windows') {
+              if (protectionMode === ProtectionModes.prevent) {
+                newPayload[os].popup[protection].enabled = true;
+              } else {
+                newPayload[os].popup[protection].enabled = false;
+              }
+            } else if (os === 'mac') {
+              if (protectionMode === ProtectionModes.prevent) {
+                newPayload[os].popup[
+                  protection as keyof Pick<UIPolicyConfig['mac'], 'malware'>
+                ].enabled = true;
+              } else {
+                newPayload[os].popup[
+                  protection as keyof Pick<UIPolicyConfig['mac'], 'malware'>
+                ].enabled = false;
+              }
             }
           }
         }
