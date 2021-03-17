@@ -11,7 +11,7 @@ When you've completed the tutorial, you'll have a dashboard that provides you wi
 image::images/lens_advanced_result.png[Dashboard view]
 
 [discrete]
-[[add-the-data-and-create-the-dashboard]]
+[[add-the-data-and-create-the-dashboard-advanced]]
 === Add the data and create the dashboard
 
 To create visualizations of the data from your store, add the data set, then create the dashboard.
@@ -25,7 +25,7 @@ To create visualizations of the data from your store, add the data set, then cre
 . On the *Dashboards* page, click *Create dashboard*.
 
 [float]
-[[open-and-set-up-lens]]
+[[open-and-set-up-lens-advanced]]
 === Open and set up Lens
 
 Open the *Lens* editor, then make sure the correct fields appear.
@@ -38,8 +38,6 @@ Open the *Lens* editor, then make sure the correct fields appear.
 image::images/lens_end_to_end_1_1.png[New visualization popover]
 
 . Make sure the *kibana_sample_data_ecommerce_* index appears.
-+
-The list of fields that appear depend on the <<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters. 
 
 [discrete]
 [[view-the-number-of-transactions-per-day]]
@@ -146,7 +144,7 @@ image::images/lens_advanced_2_2.png[Line chart with cumulative sum of orders mad
 . Click *Save and return*.
 
 [discrete]
-[[add-a-data-layer]]
+[[add-a-data-layer-advanced]]
 === Create multiple key percentiles of product prices 
 
 To view the price distribution of products sold over time, create a percentile chart, then add it to the dashboard.
@@ -209,7 +207,7 @@ image::images/lens_advanced_3_3.png[Percentiles for product prices chart]
 . Click *Save and return*.
 
 [discrete]
-[[add-the-response-code-filters]]
+[[add-the-response-code-filters-advanced]]
 === View the moving average of inventory prices
 
 To view and analyze the prices of shoes, accessories, and clothing in the store inventory, create a line chart.

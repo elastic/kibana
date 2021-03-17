@@ -38,8 +38,6 @@ With *Lens*, you identify the data fields you want to visualize, drag and drop t
 image::images/lens_end_to_end_1_1.png[New visualization popover]
 
 . Make sure the *kibana_sample_data_logs* index appears.
-+
-The list of fields are dependent on the <<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters. 
 
 [discrete]
 [[view-the-number-of-website-visitors]]

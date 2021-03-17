@@ -6,28 +6,28 @@
 [cols="2"]
 |===
 
-| <<lens-editor,*Lens*>>
-| The drag and drop editor that creates visualizations of your data. *Lens* is recommended for most users.
+| <<lens,*Lens*>>
+| Create visualizations with the drag and drop editor. *Lens* is recommended for most users.
 
 | <<maps,*Maps*>>
 | Create visualizations with your geographical data.
 
-| <<create-panels-with-tsvb,*TSVB*>>
+| <<tsvb,*TSVB*>>
 | Create visualizations with your time series data.
 
-| <<create-panels-with-vega,*Vega*>>
+| <<vega,*Vega*>>
 | Create custom visualizations with the *Vega* and *Vega-Lite* grammars.
 
-| <<add-aggregation-based-visualization-panels,Aggregation-based visualization panels>>
+| <<add-aggregation-based-visualization-panels,*Aggregation based*>>
 | Build most visualization types using {es} <<aggregation-reference,aggregations>>. 
 
-| <<create-panels-with-timelion,*Timelion*>>
+| <<timelion,*Timelion*>>
 | Create visualizations with your time series data using a simple expression language.
 
 |===
 
 [float]
-[[lens-recommended-editor]]
+[[lens-editor]]
 === Lens
 
 *Lens* is the drag and drop editor that creates visualizations of your data.
@@ -38,11 +38,11 @@ With *Lens*, you can:
 * Create visualizations with multiple layers and indices.
 * Change the aggregation and labels to customize the data.
 
-//[role="screenshot"]
-//image:dashboard/images/lens.png[Lens]
+[role="screenshot"]
+image:dashboard/images/lens.png[Lens]
 
 [float]
-[[tsvb-advanced-editor]]
+[[tsvb-editor]]
 === TSVB
 
 *TSVB* is a time series data visualization editor that allows you to use the full power of the {es} aggregation framework. 
@@ -59,7 +59,7 @@ With *TSVB*, you can:
 image::images/tsvb.png[TSVB UI]
 
 [float]
-[[vega-advanced-editor]]
+[[custom-visualizations]]
 === Custom visualizations
 
 *Vega* and *Vega-Lite* are visualization grammars that are integrated into {kib} for custom visualizations.
@@ -89,7 +89,30 @@ image::images/vega.png[Vega UI]
 For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resources-and-examples,Resources and examples>>. 
 
 [float]
-[[timelion-advanced-editor]]
+[[aggregation-based]]
+=== Aggregation-based
+
+With aggregation-based visualizations, you can:
+
+* Create heat map, tag cloud, gauge, and goal visualizations
+* Split charts up to three aggregation levels, which is more than *Lens* and *TSVB*
+* Time series data is not required
+* Use a <<save-open-search,saved search>> as an input
+* Sort data tables and use the summary row and percentage column features
+* Assign colors to series
+* Extend features with plugins
+
+[role="screenshot"]
+image:dashboard/images/aggregation_based.png[Aggregation-based editor]
+
+Aggregation-based visualizations include the following limitations:
+
+* Limited styling options
+* Math is unsupported
+* Multiple indices is unsupported
+
+[float]
+[[timelion-editor]]
 === Timelion
 
 *Timelion* is driven by a simple expression language that you use to:

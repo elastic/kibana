@@ -12,24 +12,17 @@ then compare the panels side-by-side to identify the patterns and connections in
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
-[[tsvb]]
-
 Dashboards support many types of panels, and provide several editors that you can use to create panels.
 
 [cols="2"]
 |===
 
-| <<create-panels-with-lens,Lens>>
-| The drag and drop editor that creates visualizations of your data. *Lens* is recommended for most users.
+| <<create-panels-with-editors,Visualization editors>>
+| Use the *Lens*, *TSVB*, *Vega*, and *Timelion* editors to help you create visualizations of your data, or create aggregation-based visualizations using {es} <<aggregation-reference,aggregations>>. 
+*Lens* is recommended for most users.
 
 | <<maps,Maps>>
 | Create beautiful displays of your geographical data.
-
-| <<add-panels-with-advanced-editors,Advanced editors>>
-| Visualize time series data with *TSVB* or *Timelion*, or create a custom visualization using *Vega* or *Vega-Lite*.
-
-| <<add-aggregation-based-visualization-panels,Aggregation-based visualization panels>>
-| Build most visualization types using {es} <<aggregation-reference,aggregations>>. 
 
 | <<enhance-dashboards,Tools>>
 | Add context to your panels with <<add-text,text>>, or add dynamic filters with <<add-controls,*Controls*>>.
@@ -334,11 +327,13 @@ for *Lens* panels.
 [role="xpack"]
 To download *Lens* panel data in a CSV file:
 
-Open the *Lens* panel menu, then select *More > Download as CSV*.
+. Open the *Lens* panel menu.
 
+. Select *More > Download as CSV*.
++
 [role="screenshot"]
 image::images/download_csv_context_menu.png[Download as CSV from panel context menu]
-+
+
 Each layer produces a single CSV file with columns.
 When you download multiple layers, the file names combine the visualization and layer index names.
 
@@ -391,6 +386,8 @@ To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,i
 
 --
 include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]
+
+include::lens-advanced.asciidoc[]
 
 include::create-panels-with-editors.asciidoc[]
 
