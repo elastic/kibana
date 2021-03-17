@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Schema } from '../../../../shared/types';
-import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from '../constants';
+import { Schema } from '../../../shared/types';
+
+import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from './constants';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
   ServerFieldResultSetting,
   ServerFieldResultSettingObject,
-} from '../types';
+} from './types';
 
 const updateAllFields = (
   fields: FieldResultSettingObject | ServerFieldResultSettingObject,

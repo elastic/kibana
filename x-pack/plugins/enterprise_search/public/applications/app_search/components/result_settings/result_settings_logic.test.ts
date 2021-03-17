@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../../__mocks__';
+import { LogicMounter } from '../../../__mocks__';
 
-import { Schema, SchemaConflicts, SchemaTypes } from '../../../../shared/types';
-import { OpenModal, ServerFieldResultSettingObject } from '../types';
+import { Schema, SchemaConflicts, SchemaTypes } from '../../../shared/types';
+
+import { OpenModal, ServerFieldResultSettingObject } from './types';
 
 import { ResultSettingsLogic } from '.';
 

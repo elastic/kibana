@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SchemaTypes } from '../../../../shared/types';
+import { SchemaTypes } from '../../../shared/types';
 
 import {
   convertServerResultFieldsToResultFields,
@@ -15,7 +15,7 @@ import {
   resetAllServerFields,
   resetAllFields,
   splitResultFields,
-} from './helpers';
+} from './utils';
 
 describe('clearAllFields', () => {
   it('will reset every key in an object back to an empty object', () => {

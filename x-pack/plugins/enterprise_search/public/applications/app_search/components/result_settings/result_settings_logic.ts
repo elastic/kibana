@@ -7,14 +7,14 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Schema, SchemaConflicts } from '../../../../shared/types';
+import { Schema, SchemaConflicts } from '../../../shared/types';
 
 import {
   FieldResultSetting,
   FieldResultSettingObject,
   OpenModal,
   ServerFieldResultSettingObject,
-} from '../types';
+} from './types';
 
 import {
   clearAllFields,
@@ -24,7 +24,7 @@ import {
   resetAllFields,
   resetAllServerFields,
   splitResultFields,
-} from './helpers';
+} from './utils';
 
 interface ResultSettingsActions {
   openConfirmResetModal(): void;
