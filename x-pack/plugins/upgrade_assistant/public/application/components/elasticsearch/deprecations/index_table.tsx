@@ -10,15 +10,17 @@ import React from 'react';
 
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReindexButton } from './reindex';
-import { AppContext } from '../../../app_context';
 import { EnrichedDeprecationInfo } from '../../../../../common/types';
+import { AppContext } from '../../../app_context';
+import { ReindexButton } from './reindex';
+import { FixIndexSettingsButton } from './index_settings';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
 export interface IndexDeprecationDetails {
   index: string;
   reindex: boolean;
+  deprecatedIndexSettings?: string[];
   blockerForReindexing?: EnrichedDeprecationInfo['blockerForReindexing'];
   details?: string;
 }
@@ -97,6 +99,11 @@ export class IndexDeprecationTable extends React.Component<
         pagination={pagination}
         onChange={this.onTableChange}
         hasActions={false}
+        rowProps={(indexDetails) => {
+          return {
+            'data-test-subj': `indexTableRow-${indexDetails.index}`,
+          };
+        }}
       />
     );
   }
@@ -142,12 +149,15 @@ export class IndexDeprecationTable extends React.Component<
   }
 
   private generateActionsColumn() {
-    // NOTE: this naive implementation assumes all indices in the table are
-    // should show the reindex button. This should work for known use cases.
+    // NOTE: this naive implementation assumes all indices in the table
+    // should show the reindex button or fix indices button. This should work for known use cases.
     const { indices } = this.props;
-    const hasActionsColumn = Boolean(indices.find((i) => i.reindex === true));
+    const showReindexButton = Boolean(indices.find((i) => i.reindex === true));
+    const showFixSettingsButton = Boolean(
+      indices.find((i) => i.deprecatedIndexSettings && i.deprecatedIndexSettings.length > 0)
+    );
 
-    if (hasActionsColumn === false) {
+    if (showReindexButton === false && showFixSettingsButton === false) {
       return null;
     }
 
@@ -155,19 +165,28 @@ export class IndexDeprecationTable extends React.Component<
       actions: [
         {
           render(indexDep: IndexDeprecationDetails) {
+            if (showReindexButton) {
+              return (
+                <AppContext.Consumer>
+                  {({ http, docLinks }) => {
+                    return (
+                      <ReindexButton
+                        docLinks={docLinks}
+                        reindexBlocker={indexDep.blockerForReindexing}
+                        indexName={indexDep.index!}
+                        http={http}
+                      />
+                    );
+                  }}
+                </AppContext.Consumer>
+              );
+            }
+
             return (
-              <AppContext.Consumer>
-                {({ http, docLinks }) => {
-                  return (
-                    <ReindexButton
-                      docLinks={docLinks}
-                      reindexBlocker={indexDep.blockerForReindexing}
-                      indexName={indexDep.index!}
-                      http={http}
-                    />
-                  );
-                }}
-              </AppContext.Consumer>
+              <FixIndexSettingsButton
+                settings={indexDep.deprecatedIndexSettings!}
+                index={indexDep.index}
+              />
             );
           },
         },
