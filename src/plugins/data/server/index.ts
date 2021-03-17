@@ -220,6 +220,7 @@ export {
 } from '../common';
 
 export {
+  IScopedSearchClient,
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
