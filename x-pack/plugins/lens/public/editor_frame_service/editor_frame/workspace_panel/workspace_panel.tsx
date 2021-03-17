@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Ast } from '@kbn/interpreter/common';
+import { toExpression } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -159,13 +159,21 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     () => {
       if (!configurationValidationError?.length) {
         try {
-          return buildExpression({
+          const ast = buildExpression({
             visualization: activeVisualization,
             visualizationState,
             datasourceMap,
             datasourceStates,
             datasourceLayers: framePublicAPI.datasourceLayers,
           });
+          if (ast) {
+            // expression has to be turned into a string for dirty checking - if the ast is rebuilt,
+            // turning it into a string will make sure the expression renderer only re-renders if the
+            // expression actually changed.
+            return toExpression(ast);
+          } else {
+            return null;
+          }
         } catch (e) {
           const buildMessages = activeVisualization?.getErrorMessages(visualizationState);
           const defaultMessage = {
@@ -347,7 +355,7 @@ export const InnerVisualizationWrapper = ({
   ExpressionRendererComponent,
   dispatch,
 }: {
-  expression: Ast | null | undefined;
+  expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
   timefilter: TimefilterContract;
   onEvent: (event: ExpressionRendererEvent) => void;

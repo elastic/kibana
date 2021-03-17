@@ -14,7 +14,6 @@ Table of Contents
 	- [Terminology](#terminology)
 	- [Usage](#usage)
 	- [Alerts API keys](#alerts-api-keys)
-	- [Limitations](#limitations)
 	- [Plugin status](#plugin-status)
 	- [Alert types](#alert-types)
 		- [Methods](#methods)
@@ -67,20 +66,6 @@ For security plugin invalidation, we schedule a task to check if the`api_key_pen
 To change the schedule for the invalidation task, use the kibana.yml configuration option `xpack.alerting.invalidateApiKeysTask.interval`.
 To change the default delay for the API key invalidation, use the kibana.yml configuration option `xpack.alerting.invalidateApiKeysTask.removalDelay`.
 
-## Limitations
-
-When security is enabled, an SSL connection to Elasticsearch is required in order to use alerting.
-
-When security is enabled, users who create alerts will need the `manage_api_key` cluster privilege. There is currently work in progress to remove this requirement.
-
-Note that the `manage_own_api_key` cluster privilege is not enough - it can be used to create API keys, but not invalidate them, and the alerting plugin currently both creates and invalidates APIs keys as part of it's processing.  When using only the `manage_own_api_key` privilege, you will see the following message logged in the server when the alerting plugin attempts to invalidate an API key:
-
-```
-[error][alerting][plugins] Failed to invalidate API Key: [security_exception] \
-    action [cluster:admin/xpack/security/api_key/invalidate] \
-    is unauthorized for user [user-name-here]
-```
-
 ## Plugin status
 
 The plugin status of an alert is customized by including information about checking failures for the framework decryption:
@@ -131,9 +116,8 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 
 |Property|Description|
 |---|---|
-|services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but in the context of the user who created the alert when security is enabled.|
+|services.scopedClusterClient|This is an instance of the Elasticsearch client. Use this to do Elasticsearch queries in the context of the user who created the alert when security is enabled.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user who created the alert (only when security isenabled).|
-|services.getLegacyScopedClusterClient|This function returns an instance of the LegacyScopedClusterClient scoped to the user who created the alert when security is enabled.|
 |services.alertInstanceFactory(id)|This [alert instance factory](#alert-instance-factory) creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |startedAt|The date and time the alert type started execution.|

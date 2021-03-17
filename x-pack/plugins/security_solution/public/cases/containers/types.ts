@@ -6,20 +6,20 @@
  */
 
 import {
-  User,
-  UserActionField,
-  UserAction,
-  CaseConnector,
-  CommentRequest,
-  CaseStatuses,
-  CaseAttributes,
-  CasePatchRequest,
-  CaseType,
   AssociationType,
-} from '../../../../case/common/api';
+  CaseAttributes,
+  CaseConnector,
+  CasePatchRequest,
+  CaseStatuses,
+  CaseType,
+  CommentRequest,
+  User,
+  UserAction,
+  UserActionField,
+} from '../../../../cases/common';
 import { CaseStatusWithAllStatus } from '../components/status';
 
-export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../case/common/api';
+export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../cases/common';
 
 export type Comment = CommentRequest & {
   associationType: AssociationType;
@@ -167,7 +167,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, subCaseId?: string) => void;
+  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;

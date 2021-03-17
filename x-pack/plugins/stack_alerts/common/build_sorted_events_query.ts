@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESSearchBody, ESSearchRequest } from '../../../typings/elasticsearch';
-import { SortOrder } from '../../../typings/elasticsearch/aggregations';
+import { ESSearchBody, ESSearchRequest } from '../../../../typings/elasticsearch';
+import { SortOrder } from '../../../../typings/elasticsearch/aggregations';
 
 type BuildSortedEventsQueryOpts = Pick<ESSearchBody, 'aggs' | 'track_total_hits'> &
   Pick<Required<ESSearchRequest>, 'index' | 'size'>;
@@ -53,10 +53,10 @@ export const buildSortedEventsQuery = ({
   const filterWithTime = [filter, { bool: { filter: rangeFilter } }];
 
   const searchQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index,
     size,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: track_total_hits ?? false,
     body: {
       docvalue_fields: docFields,
