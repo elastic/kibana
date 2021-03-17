@@ -6,33 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { createReadStream, Stats } from 'fs';
 import { createHash } from 'crypto';
-import Fs from 'fs';
-
 import * as Rx from 'rxjs';
-import { takeUntil, map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 
-import { FileHashCache } from './file_hash_cache';
-
-/**
- *  Get the hash of a file via a file descriptor
- */
-export async function getFileHash(cache: FileHashCache, path: string, stat: Fs.Stats, fd: number) {
-  const key = `${path}:${stat.ino}:${stat.size}:${stat.mtime.getTime()}`;
-
-  const cached = cache.get(key);
-  if (cached) {
-    return await cached;
-  }
-
+export const generateFileHash = (fd: number): Promise<string> => {
   const hash = createHash('sha1');
-  const read = Fs.createReadStream(null as any, {
+  const read = createReadStream(null as any, {
     fd,
     start: 0,
     autoClose: false,
   });
-
-  const promise = Rx.merge(
+  return Rx.merge(
     Rx.fromEvent<Buffer>(read, 'data'),
     Rx.fromEvent<Error>(read, 'error').pipe(
       map((error) => {
@@ -42,13 +28,8 @@ export async function getFileHash(cache: FileHashCache, path: string, stat: Fs.S
   )
     .pipe(takeUntil(Rx.fromEvent(read, 'end')))
     .forEach((chunk) => hash.update(chunk))
-    .then(() => hash.digest('hex'))
-    .catch((error) => {
-      // don't cache failed attempts
-      cache.del(key);
-      throw error;
-    });
+    .then(() => hash.digest('hex'));
+};
 
-  cache.set(key, promise);
-  return await promise;
-}
+export const getFileCacheKey = (path: string, stat: Stats) =>
+  `${path}:${stat.ino}:${stat.size}:${stat.mtime.getTime()}`;

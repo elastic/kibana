@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { optimizeMixin } from './optimize_mixin';
+// can't use fs/promises when working with streams using file descriptors
+// see https://github.com/nodejs/node/issues/35862
+
+import Fs from 'fs';
+import { promisify } from 'util';
+
+export const open = promisify(Fs.open);
+export const close = promisify(Fs.close);
+export const fstat = promisify(Fs.fstat);
