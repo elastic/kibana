@@ -373,7 +373,7 @@ describe('QueryStringInput', () => {
     const component = mount(
       wrapQueryStringInputInContext({
         query: kqlQuery,
-        onSubmit: mockCallback,
+        onChange: mockCallback,
         indexPatterns: [stubIndexPatternWithFields],
         disableAutoFocus: true,
       })
@@ -382,8 +382,8 @@ describe('QueryStringInput', () => {
     const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
     const input = instance.inputRef;
     const inputWrapper = component.find(EuiTextArea).find('textarea');
-    (inputWrapper.getDOMNode() as HTMLTextAreaElement).value = 'foo\u00A0bar';
-    inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
+    input!.value = 'foo\u00A0bar';
+    inputWrapper.simulate('change');
 
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith({ query: 'foo bar', language: 'kuery' });
