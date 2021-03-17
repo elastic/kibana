@@ -76,16 +76,18 @@ export const handleRequest = async ({
 
   const partialResponses = await Promise.all(
     Object.values(timeShifts).map(async (timeShift) => {
+      let currentAggs = aggs;
       if (timeShift) {
-        aggs = originalAggs.clone();
-        aggs.aggs = aggs.aggs.filter(
+        currentAggs = originalAggs.clone();
+        currentAggs.aggs = currentAggs.aggs.filter(
           (agg) =>
             agg.schema !== 'metric' ||
             (agg.getTimeShift() &&
               agg.getTimeShift()!.asMilliseconds() === timeShift.asMilliseconds())
         );
       } else {
-        aggs = originalAggs;
+        currentAggs = Object.values(timeShifts).length === 1 ? originalAggs : originalAggs.clone();
+        currentAggs.aggs = currentAggs.aggs.filter((agg) => !agg.getTimeShift());
       }
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
@@ -111,7 +113,7 @@ export const handleRequest = async ({
         }
       }
 
-      aggs.setTimeRange(currentTimeRange as TimeRange);
+      currentAggs.setTimeRange(currentTimeRange as TimeRange);
 
       // For now we need to mirror the history of the passed search source, since
       // the request inspector wouldn't work otherwise.
@@ -125,11 +127,11 @@ export const handleRequest = async ({
       });
 
       requestSearchSource.setField('aggs', function () {
-        return aggs.toDsl(metricsAtAllLevels);
+        return currentAggs.toDsl(metricsAtAllLevels);
       });
 
       requestSearchSource.onRequestStart((paramSearchSource, options) => {
-        return aggs.onSearchRequestStart(paramSearchSource, options);
+        return currentAggs.onSearchRequestStart(paramSearchSource, options);
       });
 
       // If timeFields have been specified, use the specified ones, otherwise use primary time field of index
@@ -200,11 +202,11 @@ export const handleRequest = async ({
       // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
       // response data incorrectly in the inspector.
       let response = (requestSearchSource as any).rawResponse;
-      for (const agg of aggs.aggs) {
+      for (const agg of currentAggs.aggs) {
         if (agg.enabled && typeof agg.type.postFlightRequest === 'function') {
           response = await agg.type.postFlightRequest(
             response,
-            aggs,
+            currentAggs,
             agg,
             requestSearchSource,
             inspectorAdapters.requests,
@@ -225,7 +227,7 @@ export const handleRequest = async ({
           : undefined,
       };
 
-      const tabifiedResponse = tabifyAggResponse(aggs, response, tabifyParams);
+      const tabifiedResponse = tabifyAggResponse(currentAggs, response, tabifyParams);
       console.log(tabifiedResponse);
 
       return tabifiedResponse;
@@ -233,5 +235,17 @@ export const handleRequest = async ({
   );
 
   // todo - do an outer join on all partial responses
+  // if (partialResponses.length === 1) {
+  //   return partialResponses[0];
+  // } else {
+  //   const joinAggs = aggs
+  //     .bySchemaName('bucket')
+  //     .filter((agg) => !timeFields || !timeFields.includes(agg.fieldName()));
+  //   const fullResponse = partialResponses[0];
+  //   partialResponses.shift();
+  //   partialResponses.forEach(partialResponse => {
+
+  //   });
+  // }
   return partialResponses[0];
 };
