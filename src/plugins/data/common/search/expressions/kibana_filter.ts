@@ -55,7 +55,7 @@ export const kibanaFilterFunction: ExpressionFunctionKibanaFilter = {
         alias: '',
         disabled: false,
       },
-      query: args.query,
+      query: JSON.parse(args.query),
     };
   },
 };

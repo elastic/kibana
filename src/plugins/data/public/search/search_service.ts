@@ -33,6 +33,7 @@ import {
   existsFilterFunction,
   rangeFilterFunction,
   kibanaFilterFunction,
+  phraseFilterFunction,
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
@@ -118,6 +119,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(kibanaFilterFunction);
     expressions.registerFunction(existsFilterFunction);
     expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
 
     expressions.registerFunction(esdsl);

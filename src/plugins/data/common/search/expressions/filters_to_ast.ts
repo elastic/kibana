@@ -14,7 +14,7 @@ export const filtersToAst = (filters: Filter[] | Filter) => {
   return (Array.isArray(filters) ? filters : [filters]).map((filter) => {
     return buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaFilter>('kibanaFilter', {
-        query: filter.query,
+        query: JSON.stringify(filter.query),
       }),
     ]);
   });

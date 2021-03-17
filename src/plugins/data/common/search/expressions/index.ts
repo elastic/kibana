@@ -20,5 +20,6 @@ export * from './field';
 export * from './phrase_filter';
 export * from './exists_filter';
 export * from './range_filter';
+export * from './kibana_filter';
 export * from './filters_to_ast';
 export * from './timerange';

@@ -25,9 +25,7 @@ describe('interpreter/functions#filtersToAst', () => {
     expect(actual[0].functions[0].arguments).toMatchInlineSnapshot(`
       Object {
         "query": Array [
-          Object {
-            "test": "something",
-          },
+          "{\\"test\\":\\"something\\"}",
         ],
       }
     `);
@@ -35,9 +33,7 @@ describe('interpreter/functions#filtersToAst', () => {
     expect(actual[1].functions[0].arguments).toMatchInlineSnapshot(`
       Object {
         "query": Array [
-          Object {
-            "test": "something",
-          },
+          "{\\"test\\":\\"something\\"}",
         ],
       }
     `);

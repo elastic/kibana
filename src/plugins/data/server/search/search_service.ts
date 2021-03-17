@@ -62,6 +62,7 @@ import {
   SearchSourceDependencies,
   searchSourceRequiredUiSettings,
   SearchSourceService,
+  phraseFilterFunction,
 } from '../../common/search';
 import { getEsaggs } from './expressions';
 import {
@@ -159,6 +160,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(kibanaFilterFunction);
     expressions.registerFunction(existsFilterFunction);
     expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });

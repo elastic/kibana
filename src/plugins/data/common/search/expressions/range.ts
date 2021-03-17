@@ -29,32 +29,32 @@ export const rangeFunction: ExpressionFunctionRange = {
   name: 'range',
   type: 'kibana_range',
   inputTypes: ['null'],
-  help: i18n.translate('data.search.functions.field.help', {
+  help: i18n.translate('data.search.functions.range.help', {
     defaultMessage: 'Create kibana range filter',
   }),
   args: {
     gt: {
       types: ['string', 'number'],
-      help: i18n.translate('data.search.functions.field.name.help', {
-        defaultMessage: 'Specify Lucene free form text query',
+      help: i18n.translate('data.search.functions.range.gt.help', {
+        defaultMessage: 'Greater than',
       }),
     },
     lt: {
       types: ['string', 'number'],
-      help: i18n.translate('data.search.functions.field.name.help', {
-        defaultMessage: 'Specify Lucene free form text query',
+      help: i18n.translate('data.search.functions.range.lt.help', {
+        defaultMessage: 'Less than',
       }),
     },
     gte: {
       types: ['string', 'number'],
-      help: i18n.translate('data.search.functions.field.name.help', {
-        defaultMessage: 'Specify Lucene free form text query',
+      help: i18n.translate('data.search.functions.range.gte.help', {
+        defaultMessage: 'Greater or equal than',
       }),
     },
     lte: {
       types: ['string', 'number'],
-      help: i18n.translate('data.search.functions.field.name.help', {
-        defaultMessage: 'Specify Lucene free form text query',
+      help: i18n.translate('data.search.functions.range.lte.help', {
+        defaultMessage: 'Less or equal than',
       }),
     },
   },
