@@ -13,7 +13,7 @@ import {
   ActionType,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../actions/server/types';
-import { CaseResponse, ConnectorTypes } from '../../common/api';
+import { CaseResponse, ConnectorTypes } from '../../common';
 import { CasesClientGetAlertsResponse } from '../client/alerts/types';
 import {
   CaseServiceSetup,
