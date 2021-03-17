@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.8.15>>
 * <<release-notes-6.8.14>>
 * <<release-notes-6.8.13>>
 * <<release-notes-6.8.12>>
@@ -100,6 +101,14 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known issues
 ////
+
+[[release-notes-6.8.15]]
+== {kib} 6.8.15
+
+The 6.8.15 release includes the following bug fix.
+
+Security::
+* Fixes session idle timeout {kibana-pull}91070[#91070]
 
 [[release-notes-6.8.14]]
 == {kib} 6.8.14
