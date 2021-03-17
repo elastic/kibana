@@ -22,8 +22,8 @@ const rewriteBodyRes: RewriteResponseCase<AlertTaskState> = ({
   ...rest
 }) => ({
   ...rest,
-  alert_type_state: alertTypeState,
-  alert_instances: alertInstances,
+  rule_type_state: alertTypeState,
+  alerts: alertInstances,
   previous_started_at: previousStartedAt,
 });
 
