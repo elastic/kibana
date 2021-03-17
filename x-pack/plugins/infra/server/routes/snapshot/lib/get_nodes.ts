@@ -13,15 +13,22 @@ import { queryAllData } from './query_all_data';
 import { transformMetricsApiResponseToSnapshotResponse } from './trasform_metrics_ui_response';
 import { copyMissingMetrics } from './copy_missing_metrics';
 
+export interface SourceOverrides {
+  indexPattern: string;
+  timestamp: string;
+}
+
 export const getNodes = async (
   client: ESSearchClient,
   snapshotRequest: SnapshotRequest,
-  source: InfraSource
+  source: InfraSource,
+  sourceOverrides?: SourceOverrides
 ) => {
   const metricsApiRequest = await transformRequestToMetricsAPIRequest(
     client,
     source,
-    snapshotRequest
+    snapshotRequest,
+    sourceOverrides
   );
   const metricsApiResponse = await queryAllData(client, metricsApiRequest);
   const snapshotResponse = transformMetricsApiResponseToSnapshotResponse(

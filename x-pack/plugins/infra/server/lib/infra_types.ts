@@ -13,6 +13,7 @@ import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
 import { InfraConfig } from '../plugin';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+import { GetLogRateFields } from '../services/log_rate/get_log_rate_fields';
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
@@ -25,6 +26,7 @@ export interface InfraBackendLibs extends InfraDomainLibs {
   framework: KibanaFramework;
   sources: InfraSources;
   sourceStatus: InfraSourceStatus;
+  getLogRateFields: GetLogRateFields;
 }
 
 export interface InfraConfiguration {
