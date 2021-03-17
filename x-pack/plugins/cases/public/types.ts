@@ -7,13 +7,16 @@
 
 import { CoreStart } from 'kibana/public';
 import { ReactElement } from 'react';
+import { SecurityPluginSetup } from '../../security/public';
 import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
+import { AllCasesProps } from './components/all_cases';
 import { CreateCaseProps } from './components/create';
 
 export interface SetupPlugins {
+  security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
 }
 
@@ -21,9 +24,18 @@ export interface StartPlugins {
   triggersActionsUi: TriggersActionsStart;
 }
 
-export type StartServices = CoreStart & StartPlugins;
+/**
+ * TODO: The extra security service is one that should be implemented in the kibana context of the consuming application.
+ * Security is needed for access to authc for the `useCurrentUser` hook. Security_Solution currently passes it via renderApp in public/plugin.tsx
+ * Leaving it out currently in lieu of RBAC changes
+ */
+
+export type StartServices = CoreStart &
+  StartPlugins & {
+    security: SecurityPluginSetup;
+  };
 
 export interface CasesUiStart {
-  casesComponent: () => JSX.Element;
+  getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
   getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
 }
