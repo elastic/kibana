@@ -27,7 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createActionManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdAction } = await supertest
-      .post(`/api/actions/action`)
+      .post(`/api/actions/connector`)
       .set('kbn-xsrf', 'foo')
       .send(getTestActionData(overwrites))
       .expect(200);
@@ -372,7 +372,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
         const action = await createActionManualCleanup({
           name: `index-${testRunUuid}-${0}`,
-          actionTypeId: '.index',
+          connector_type_id: '.index',
           config: {
             index: `index-${testRunUuid}-${0}`,
           },
