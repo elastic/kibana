@@ -15,7 +15,7 @@ import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
 import { isAgentUpgradeable } from '../../../common/services';
-import { getAgent } from '../../services/agents';
+import { getAgentById } from '../../services/agents';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -36,7 +36,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  const agent = await getAgent(esClient, request.params.agentId);
+  const agent = await getAgentById(esClient, request.params.agentId);
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return response.customError({
       statusCode: 400,

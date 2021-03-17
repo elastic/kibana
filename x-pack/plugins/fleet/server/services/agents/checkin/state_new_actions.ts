@@ -38,7 +38,7 @@ import {
   getAgentPolicyActionByIds,
 } from '../actions';
 import { appContextService } from '../../app_context';
-import { getAgent, updateAgent } from '../crud';
+import { getAgentById, updateAgent } from '../crud';
 
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
@@ -265,7 +265,7 @@ export function agentCheckinStateNewActionsFactory() {
           (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
         );
         if (hasConfigReassign) {
-          return from(getAgent(esClient, agent.id)).pipe(
+          return from(getAgentById(esClient, agent.id)).pipe(
             concatMap((refreshedAgent) => {
               if (!refreshedAgent.policy_id) {
                 throw new Error('Agent does not have a policy assigned');
