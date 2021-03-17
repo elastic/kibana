@@ -118,10 +118,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     nonTextResultFields: [
       {},
       {
-        initializeResultFields: (
-          _,
-          { nonTextResultFields }: { nonTextResultFields: FieldResultSettingObject }
-        ) => nonTextResultFields,
+        initializeResultFields: (_, { nonTextResultFields }) => nonTextResultFields,
         clearAllFields: (nonTextResultFields) => clearAllFields(nonTextResultFields),
         resetAllFields: (nonTextResultFields) => resetAllFields(nonTextResultFields),
         updateField: (nonTextResultFields, { fieldName, settings }) =>
@@ -133,10 +130,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     textResultFields: [
       {},
       {
-        initializeResultFields: (
-          _,
-          { textResultFields }: { textResultFields: FieldResultSettingObject }
-        ) => textResultFields,
+        initializeResultFields: (_, { textResultFields }) => textResultFields,
         clearAllFields: (textResultFields) => clearAllFields(textResultFields),
         resetAllFields: (textResultFields) => resetAllFields(textResultFields),
         updateField: (textResultFields, { fieldName, settings }) =>
@@ -148,8 +142,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     resultFields: [
       {},
       {
-        initializeResultFields: (_, { resultFields }: { resultFields: FieldResultSettingObject }) =>
-          resultFields,
+        initializeResultFields: (_, { resultFields }) => resultFields,
         clearAllFields: (resultFields) => clearAllFields(resultFields),
         resetAllFields: (resultFields) => resetAllFields(resultFields),
         updateField: (resultFields, { fieldName, settings }) =>
@@ -159,10 +152,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     serverResultFields: [
       {},
       {
-        initializeResultFields: (
-          _,
-          { serverResultFields }: { serverResultFields: ServerFieldResultSettingObject }
-        ) => serverResultFields,
+        initializeResultFields: (_, { serverResultFields }) => serverResultFields,
         clearAllFields: (serverResultFields) => clearAllServerFields(serverResultFields),
         resetAllFields: (serverResultFields) => resetAllServerFields(serverResultFields),
         updateField: (serverResultFields, { fieldName, settings }) => {
@@ -178,8 +168,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     lastSavedResultFields: [
       {},
       {
-        initializeResultFields: (_, { resultFields }: { resultFields: FieldResultSettingObject }) =>
-          resultFields,
+        initializeResultFields: (_, { resultFields }) => resultFields,
       },
     ],
     schema: [
