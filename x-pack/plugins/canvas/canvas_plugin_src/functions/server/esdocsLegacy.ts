@@ -22,16 +22,16 @@ interface Arguments {
   count: number;
 }
 
-export function esdocs(): ExpressionFunctionDefinition<
-  'esdocs',
+export function esdocsLegacy(): ExpressionFunctionDefinition<
+  'esdocsLegacy',
   ExpressionValueFilter,
   Arguments,
   any
 > {
-  const { help, args: argHelp } = getFunctionHelp().esdocs;
+  const { help, args: argHelp } = getFunctionHelp().esdocsLegacy;
 
   return {
-    name: 'esdocs',
+    name: 'esdocsLegacy',
     type: 'datatable',
     context: {
       types: ['filter'],

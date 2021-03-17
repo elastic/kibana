@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-/* eslint-disable */
-import { queryEsSQL } from '../../../server/lib/query_es_sql';
-/* eslint-enable */
-import { ExpressionValueFilter } from '../../../types';
+import {
+  ExpressionFunctionDefinition,
+  ExpressionValueFilter,
+} from 'src/plugins/expressions/common';
+import { searchService } from '../../../public/services';
+import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   query: string;
+  parameter: Array<string | number | boolean>;
   count: number;
   timezone: string;
 }
@@ -39,6 +41,13 @@ export function essql(): ExpressionFunctionDefinition<
         types: ['string'],
         help: argHelp.query,
       },
+      parameter: {
+        aliases: ['param'],
+        types: ['string', 'number', 'boolean'],
+        default: '""',
+        multi: true,
+        help: argHelp.parameter,
+      },
       count: {
         types: ['number'],
         help: argHelp.count,
@@ -51,11 +60,27 @@ export function essql(): ExpressionFunctionDefinition<
         help: argHelp.timezone,
       },
     },
-    fn: (input, args, context) => {
-      return queryEsSQL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
-        ...args,
+    fn: (input, args, handlers) => {
+      const search = searchService.getService().search;
+      const { parameter, ...restOfArgs } = args;
+      const req = {
+        ...restOfArgs,
+        params: parameter,
         filter: input.and,
-      });
+      };
+
+      return search
+        .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, { strategy: 'essql' })
+        .toPromise()
+        .then((resp: EssqlSearchStrategyResponse) => {
+          return {
+            type: 'datatable',
+            meta: {
+              type: 'essql',
+            },
+            ...resp,
+          };
+        });
     },
   };
 }

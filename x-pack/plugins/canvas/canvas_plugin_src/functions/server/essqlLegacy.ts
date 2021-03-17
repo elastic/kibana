@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
-  ExpressionFunctionDefinition,
-  ExpressionValueFilter,
-} from 'src/plugins/expressions/common';
-import { searchService } from '../../../public/services';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+/* eslint-disable */
+import { queryEsSQL } from '../../../server/lib/query_es_sql';
+/* eslint-enable */
+import { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -18,16 +18,16 @@ interface Arguments {
   timezone: string;
 }
 
-export function essqlOther(): ExpressionFunctionDefinition<
-  'essqlOther',
+export function essqlLegacy(): ExpressionFunctionDefinition<
+  'essqlLegacy',
   ExpressionValueFilter,
   Arguments,
   any
 > {
-  const { help, args: argHelp } = getFunctionHelp().essql;
+  const { help, args: argHelp } = getFunctionHelp().essqlLegacy;
 
   return {
-    name: 'essqlOther',
+    name: 'essqlLegacy',
     type: 'datatable',
     context: {
       types: ['filter'],
@@ -51,25 +51,11 @@ export function essqlOther(): ExpressionFunctionDefinition<
         help: argHelp.timezone,
       },
     },
-    fn: (input, args, handlers) => {
-      const search = searchService.getService().search;
-      const req = {
+    fn: (input, args, context) => {
+      return queryEsSQL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
         ...args,
         filter: input.and,
-      };
-
-      return search
-        .search<any, any>(req, { strategy: 'essql' })
-        .toPromise()
-        .then((resp: any) => {
-          return {
-            type: 'datatable',
-            meta: {
-              type: 'essql',
-            },
-            ...resp,
-          };
-        });
+      });
     },
   };
 }

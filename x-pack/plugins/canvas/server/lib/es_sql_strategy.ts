@@ -32,7 +32,7 @@ export const ESSqlSearchStrategyProvider = (
 ): ISearchStrategy<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse> => {
   return {
     search: (request, options, { esClient }) => {
-      const { count, query, filter, timezone } = request;
+      const { count, query, filter, timezone, params } = request;
 
       const searchUntilEnd = async () => {
         let response = await esClient.asCurrentUser.transport.request({
@@ -40,6 +40,7 @@ export const ESSqlSearchStrategyProvider = (
           method: 'POST',
           body: {
             query,
+            params,
             time_zone: timezone,
             fetch_size: count,
             client_id: 'canvas',

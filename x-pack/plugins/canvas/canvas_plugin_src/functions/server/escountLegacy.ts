@@ -12,8 +12,6 @@ import {
 /* eslint-disable */
 // @ts-expect-error untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
-
-import { searchService } from '../../../public/services';
 /* eslint-enable */
 import { getFunctionHelp } from '../../../i18n';
 
@@ -22,16 +20,16 @@ interface Arguments {
   query: string;
 }
 
-export function escountOther(): ExpressionFunctionDefinition<
-  'escountOther',
+export function escountLegacy(): ExpressionFunctionDefinition<
+  'escountLegacy',
   ExpressionValueFilter,
   Arguments,
   any
 > {
-  const { help, args: argHelp } = getFunctionHelp().escount;
+  const { help, args: argHelp } = getFunctionHelp().escountLegacy;
 
   return {
-    name: 'escountOther',
+    name: 'escountLegacy',
     type: 'number',
     context: {
       types: ['filter'],
@@ -64,8 +62,6 @@ export function escountOther(): ExpressionFunctionDefinition<
         {
           index: args.index,
           body: {
-            track_total_hits: true,
-            size: 0,
             query: {
               bool: {
                 must: [{ match_all: {} }],
@@ -76,19 +72,9 @@ export function escountOther(): ExpressionFunctionDefinition<
         input
       );
 
-      const search = searchService.getService().search;
-      const req = {
-        params: {
-          ...esRequest,
-        },
-      };
-
-      return search
-        .search(req)
-        .toPromise()
-        .then((resp: any) => {
-          return resp.rawResponse.hits.total;
-        });
+      return ((handlers as any) as { elasticsearchClient: any })
+        .elasticsearchClient('count', esRequest)
+        .then((resp: { count: number }) => resp.count);
     },
   };
 }

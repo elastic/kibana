@@ -11,6 +11,7 @@ import { ExpressionValueFilter } from '.';
 export interface EssqlSearchStrategyRequest extends IKibanaSearchRequest {
   count: number;
   query: string;
+  params?: Array<string | number | boolean>;
   timezone?: string;
   filter: ExpressionValueFilter[];
 }

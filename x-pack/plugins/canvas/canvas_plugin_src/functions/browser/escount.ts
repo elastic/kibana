@@ -12,6 +12,8 @@ import {
 /* eslint-disable */
 // @ts-expect-error untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
+
+import { searchService } from '../../../public/services';
 /* eslint-enable */
 import { getFunctionHelp } from '../../../i18n';
 
@@ -62,6 +64,8 @@ export function escount(): ExpressionFunctionDefinition<
         {
           index: args.index,
           body: {
+            track_total_hits: true,
+            size: 0,
             query: {
               bool: {
                 must: [{ match_all: {} }],
@@ -72,9 +76,19 @@ export function escount(): ExpressionFunctionDefinition<
         input
       );
 
-      return ((handlers as any) as { elasticsearchClient: any })
-        .elasticsearchClient('count', esRequest)
-        .then((resp: { count: number }) => resp.count);
+      const search = searchService.getService().search;
+      const req = {
+        params: {
+          ...esRequest,
+        },
+      };
+
+      return search
+        .search(req)
+        .toPromise()
+        .then((resp: any) => {
+          return resp.rawResponse.hits.total;
+        });
     },
   };
 }
