@@ -75,9 +75,6 @@ There are plans to support multiple other schedule formats in the near future.
   `id`:::
     (Required, string) The ID of the connector saved object to execute.
 
-  `connector_type_id`:::
-    (Required, string) The ID of the <<action-types,connector type>>.
-
   `params`:::
     (Required, object) The map to the `params` that the <<action-types,connector type>> will receive. ` params` are handled as Mustache templates and passed a default set of context.
 =====
