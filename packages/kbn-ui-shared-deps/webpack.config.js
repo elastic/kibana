@@ -109,7 +109,16 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
 
   optimization: {
     minimizer: [
-      new CssMinimizerPlugin(),
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: [
+            'default',
+            {
+              discardComments: false,
+            },
+          ],
+        },
+      }),
       new TerserPlugin({
         cache: false,
         sourceMap: false,
