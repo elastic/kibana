@@ -33,7 +33,7 @@ describe('interpreter/functions#kql', () => {
     expect(actual).toMatchInlineSnapshot(
       `
       Object {
-        "language": "kql",
+        "language": "kuery",
         "query": "test",
         "type": "kibana_query",
       }

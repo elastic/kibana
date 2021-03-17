@@ -42,7 +42,7 @@ export const kqlFunction: ExpressionFunctionKql = {
   fn(input, args) {
     return {
       type: 'kibana_query',
-      language: 'kql',
+      language: 'kuery',
       query: args.q,
     };
   },
