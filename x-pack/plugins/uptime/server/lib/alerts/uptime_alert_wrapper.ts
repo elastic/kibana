@@ -58,7 +58,10 @@ export const uptimeAlertWrapper = <ActionGroupIds extends string>(
       options.services.savedObjectsClient
     );
 
-    const uptimeEsClient = createUptimeESClient({ esClient, savedObjectsClient });
+    const uptimeEsClient = createUptimeESClient({
+      esClient: esClient.asCurrentUser,
+      savedObjectsClient,
+    });
 
     return uptimeAlert.executor({ options, dynamicSettings, uptimeEsClient, savedObjectsClient });
   },
