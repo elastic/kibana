@@ -18,7 +18,6 @@ import {
   EuiFormFieldset,
   EuiSpacer,
 } from '@elastic/eui';
-import { ConfigKeys } from './types';
 
 const StyledFieldset = styled(EuiFormFieldset)`
   &&& {
@@ -47,7 +46,6 @@ export type Pair = [
 ];
 
 interface Props {
-  configKey: ConfigKeys;
   defaultPairs: Pair[];
   onChange: (pairs: Pair[]) => void;
 }
