@@ -72,11 +72,12 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     closeModals: () => true,
     initializeResultFields: (serverResultFields, schema, schemaConflicts) => {
       const resultFields = convertServerResultFieldsToResultFields(serverResultFields, schema);
-      for (const fieldName of Object.keys(schema)) {
-        if (!(fieldName in serverResultFields)) {
+      Object.keys(schema).forEach((fieldName) => {
+        if (!serverResultFields.hasOwnProperty(fieldName)) {
           serverResultFields[fieldName] = {};
         }
-      }
+      });
+
       return {
         serverResultFields,
         resultFields,
@@ -122,7 +123,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         clearAllFields: (nonTextResultFields) => clearAllFields(nonTextResultFields),
         resetAllFields: (nonTextResultFields) => resetAllFields(nonTextResultFields),
         updateField: (nonTextResultFields, { fieldName, settings }) =>
-          fieldName in nonTextResultFields
+          nonTextResultFields.hasOwnProperty(fieldName)
             ? { ...nonTextResultFields, [fieldName]: settings }
             : nonTextResultFields,
       },
@@ -134,7 +135,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         clearAllFields: (textResultFields) => clearAllFields(textResultFields),
         resetAllFields: (textResultFields) => resetAllFields(textResultFields),
         updateField: (textResultFields, { fieldName, settings }) =>
-          fieldName in textResultFields
+          textResultFields.hasOwnProperty(fieldName)
             ? { ...textResultFields, [fieldName]: settings }
             : textResultFields,
       },
@@ -146,7 +147,9 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         clearAllFields: (resultFields) => clearAllFields(resultFields),
         resetAllFields: (resultFields) => resetAllFields(resultFields),
         updateField: (resultFields, { fieldName, settings }) =>
-          fieldName in resultFields ? { ...resultFields, [fieldName]: settings } : resultFields,
+          resultFields.hasOwnProperty(fieldName)
+            ? { ...resultFields, [fieldName]: settings }
+            : resultFields,
       },
     ],
     serverResultFields: [
@@ -156,7 +159,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         clearAllFields: (serverResultFields) => clearAllServerFields(serverResultFields),
         resetAllFields: (serverResultFields) => resetAllServerFields(serverResultFields),
         updateField: (serverResultFields, { fieldName, settings }) => {
-          return fieldName in serverResultFields
+          return serverResultFields.hasOwnProperty(fieldName)
             ? {
                 ...serverResultFields,
                 [fieldName]: convertToServerFieldResultSetting(settings),
