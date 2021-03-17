@@ -137,7 +137,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                 content={
                   <FormattedMessage
                     id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
-                    defaultMessage="Items added to the Visualize Library are available to all dashboards. Editing a library item affects all instances."
+                    defaultMessage="items added to the Visualize Library are available to all dashboards. Edits to a library item appear everywhere it is used."
                   />
                 }
               />
