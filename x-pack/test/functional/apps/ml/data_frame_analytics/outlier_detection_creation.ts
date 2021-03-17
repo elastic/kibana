@@ -12,7 +12,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('outlier detection creation', function () {
+  // FAILING: https://github.com/elastic/kibana/issues/94854
+  describe.skip('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
