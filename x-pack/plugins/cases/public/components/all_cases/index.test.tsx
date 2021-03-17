@@ -342,7 +342,7 @@ describe('AllCases', () => {
       getCasesColumns({
         actions: [],
         filterStatus: CaseStatuses.open,
-        isModal: false,
+        isModal: true,
         getCaseDetailsHref: jest.fn(),
         onCaseDetailsNavClick: jest.fn(),
       }).map((i, key) => i.name != null && checkIt(`${i.name}`));
