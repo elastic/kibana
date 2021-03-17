@@ -184,6 +184,7 @@ export async function getNumberHistogram(
         };
 
   const topValuesBuckets = {
+    // @ts-expect-error @elastic/elasticsearch Aggregate does not include `buckets`
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
       key: bucket.key,
@@ -234,6 +235,7 @@ export async function getNumberHistogram(
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
     sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
     histogram: {
+      // @ts-expect-error @elastic/elasticsearch Aggregate does not include `buckets`
       buckets: histogramResult.aggregations!.sample.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
         key: bucket.key,
@@ -273,6 +275,7 @@ export async function getStringSamples(
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
     sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
     topValues: {
+      // @ts-expect-error @elastic/elasticsearch Aggregate does not include `buckets`
       buckets: topValuesResult.aggregations!.sample.top_values.buckets.map((bucket) => ({
         count: bucket.doc_count,
         key: bucket.key,
@@ -318,6 +321,7 @@ export async function getDateHistogram(
   return {
     totalDocuments: results.hits.total.value,
     histogram: {
+      // @ts-expect-error @elastic/elasticsearch Aggregate does not include `buckets`
       buckets: results.aggregations!.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
         key: bucket.key,
