@@ -166,15 +166,9 @@ export const RequestBodyField = ({ configKey, setFields, type, value }: Props) =
       ),
     },
     {
-      id: modeLabels[Mode.FORM],
-      name: 'Form',
-      content: (
-        <KeyValuePairsField
-          configKey={ConfigKeys.RESPONSE_HEADERS_CHECK}
-          defaultPairs={defaultFormPairs}
-          onChange={onChangeFormFields}
-        />
-      ),
+      id: Mode.FORM,
+      name: modeLabels[Mode.FORM],
+      content: <KeyValuePairsField defaultPairs={defaultFormPairs} onChange={onChangeFormFields} />,
     },
   ];
 
