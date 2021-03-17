@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { CertResult, GetCertsParams, Ping } from '../../../common/runtime_types';
 
@@ -143,8 +144,8 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     body: searchBody,
   });
 
-  const certs = (result?.hits?.hits ?? []).map((hit) => {
-    const ping = hit._source as Ping;
+  const certs = (result?.hits?.hits ?? []).map((hit: estypes.Hit<Ping>) => {
+    const ping = hit._source!;
     const server = ping.tls?.server!;
 
     const notAfter = server?.x509?.not_after;
