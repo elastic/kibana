@@ -670,6 +670,33 @@ describe('7.11.2', () => {
       },
     });
   });
+
+  test('custom action does not get migrated/loss', () => {
+    const migration7112 = getMigrations(encryptedSavedObjectsSetup)['7.11.2'];
+    const alert = getMockData({
+      actions: [
+        {
+          actionTypeId: '.mike',
+          group: 'threshold met',
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              short_description: 'SN short desc',
+              description: 'SN desc',
+              severity: '2',
+              impact: '2',
+              urgency: '2',
+              incident: {},
+              comments: [{ commentId: '1', comment: 'sn comment' }],
+            },
+          },
+          id: '1266562a-4e1f-4305-99ca-1b44c469b26e',
+        },
+      ],
+    });
+
+    expect(migration7112(alert, migrationContext)).toEqual(alert);
+  });
 });
 
 function getUpdatedAt(): string {
