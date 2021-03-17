@@ -83,9 +83,8 @@ simply navigate back to *Dashboard*.
 [[runtime-fields-7-12]]
 === Runtime fields in Discover
 
-With 7.12, runtime fields are now fully usable and available for use in
-*Discover*. This enables you to open *Discover* and display schema-on-write
-fields and schema-on-read fields side by side. For more information, refer to
+Runtime fields are now available in *Discover*. You can view runtime fields in
+*Discover* like any other field. Refer to the {ref}/runtime.html[runtime fields] documentation for more information.
 
 [float]
 [[alerting-7-12]]
