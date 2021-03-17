@@ -7,7 +7,7 @@
 
 import { SavedObjectsClientContract, Logger } from 'src/core/server';
 import { ActionsClient } from '../../../../actions/server';
-import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
+import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server/saved_objects';
 import { ConnectorMappingsServiceSetup } from '../../services';

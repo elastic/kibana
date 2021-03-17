@@ -8,7 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useConfigurationIssues } from '../../../form';
+import { useConfiguration } from '../../../form';
 import {
   DataTierAllocationField,
   SearchableSnapshotField,
@@ -29,7 +29,7 @@ const i18nTexts = {
 };
 
 export const ColdPhase: FunctionComponent = () => {
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   return (
     <Phase phase="cold" topLevelSettings={<SearchableSnapshotField phase="cold" />}>

@@ -7,7 +7,8 @@
 
 import semverParse from 'semver/functions/parse';
 import semverLt from 'semver/functions/lt';
-import { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { timer, from, TimeoutError, of, EMPTY } from 'rxjs';
 import { omit } from 'lodash';
 import {
   shareReplay,
@@ -21,7 +22,7 @@ import {
   timeout,
   take,
 } from 'rxjs/operators';
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 
 import type { Agent, AgentAction, AgentPolicyAction, AgentPolicyActionV7_9 } from '../../../types';
@@ -38,7 +39,7 @@ import {
   getAgentPolicyActionByIds,
 } from '../actions';
 import { appContextService } from '../../app_context';
-import { getAgent, updateAgent } from '../crud';
+import { getAgentById, updateAgent } from '../crud';
 
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
@@ -265,7 +266,7 @@ export function agentCheckinStateNewActionsFactory() {
           (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
         );
         if (hasConfigReassign) {
-          return from(getAgent(esClient, agent.id)).pipe(
+          return from(getAgentById(esClient, agent.id)).pipe(
             concatMap((refreshedAgent) => {
               if (!refreshedAgent.policy_id) {
                 throw new Error('Agent does not have a policy assigned');
