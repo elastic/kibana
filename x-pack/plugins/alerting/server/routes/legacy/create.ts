@@ -12,7 +12,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
 import { handleDisabledApiKeysError } from './../lib/error_handler';
 import {
-  Alert,
+  SanitizedAlert,
   AlertNotifyWhenType,
   AlertTypeParams,
   LEGACY_BASE_ALERT_API_PATH,
@@ -68,10 +68,12 @@ export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         const params = req.params;
         const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
         try {
-          const alertRes: Alert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>({
-            data: { ...alert, notifyWhen },
-            options: { id: params?.id },
-          });
+          const alertRes: SanitizedAlert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>(
+            {
+              data: { ...alert, notifyWhen },
+              options: { id: params?.id },
+            }
+          );
           return res.ok({
             body: alertRes,
           });
