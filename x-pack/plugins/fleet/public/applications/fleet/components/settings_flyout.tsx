@@ -71,13 +71,14 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
   });
   const fleetServerUrlsInput = useComboInput([], (value) => {
-    if (value.length === 0) {
-      return [
-        i18n.translate('xpack.fleet.settings.fleetServerUrlsEmptyError', {
-          defaultMessage: 'At least one URL is required',
-        }),
-      ];
-    }
+    // TODO enable as part of https://github.com/elastic/kibana/issues/94303
+    // if (value.length === 0) {
+    //   return [
+    //     i18n.translate('xpack.fleet.settings.fleetServerUrlsEmptyError', {
+    //       defaultMessage: 'At least one URL is required',
+    //     }),
+    //   ];
+    // }
     if (value.some((v) => !v.match(URL_REGEX))) {
       return [
         i18n.translate('xpack.fleet.settings.fleetServerUrlsError', {
@@ -85,7 +86,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
         }),
       ];
     }
-    if (isDiffPathProtocol(value)) {
+    if (value.length && isDiffPathProtocol(value)) {
       return [
         i18n.translate('xpack.fleet.settings.fleetServerUrlsDifferentPathOrProtocolError', {
           defaultMessage: 'Protocol and path must be the same for each URL',

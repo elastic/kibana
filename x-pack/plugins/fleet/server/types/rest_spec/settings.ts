@@ -18,7 +18,7 @@ export const PutSettingsRequestSchema = {
     fleet_server_urls: schema.maybe(
       schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
         validate: (value) => {
-          if (isDiffPathProtocol(value)) {
+          if (value.length && isDiffPathProtocol(value)) {
             return 'Protocol and path must be the same for each URL';
           }
         },
