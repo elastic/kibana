@@ -51,7 +51,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
-
   if (opts.oss) {
     delete rawConfig.xpack;
   }
@@ -113,7 +112,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.port) set('server.port', opts.port);
   if (opts.host) set('server.host', opts.host);
   if (opts.silent) {
-    set('logging.silent', true) && set('logging.root.level', 'off');
+    set('logging.silent', true);
+    set('logging.root.level', 'off');
   }
   if (opts.verbose) {
     // Only set logging.verbose to true when KP logging isn't configured.

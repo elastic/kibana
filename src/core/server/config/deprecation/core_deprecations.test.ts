@@ -438,4 +438,28 @@ describe('core deprecations', () => {
       `);
     });
   });
+
+  describe('logging.filter', () => {
+    it('warns when filter.cookie is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { filter: { cookie: 'none' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.filter\\" has been deprecated and will be removed in 8.0. ",
+        ]
+      `);
+    });
+
+    it('warns when filter.authorization is used', () => {
+      const { messages } = applyCoreDeprecations({
+        logging: { filter: { authorization: 'none' } },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"logging.filter\\" has been deprecated and will be removed in 8.0. ",
+        ]
+      `);
+    });
+  });
 });

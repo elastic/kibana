@@ -9,9 +9,6 @@
 import { setupLogging, setupLoggingRotate } from '@kbn/legacy-logging';
 
 export async function loggingMixin(kbnServer, server, config) {
-  // eslint-disable-next-line no-unused-vars
-  server.decorate('server', 'logWithMetadata', (tags, message, metadata = {}) => {});
-
   const loggingConfig = config.get('logging');
   const opsInterval = config.get('ops.interval');
 

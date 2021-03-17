@@ -196,13 +196,7 @@ const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 };
 
 const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
-  if (
-    has(settings, 'logging.rotate.enabled') ||
-    has(settings, 'logging.rotate.usePolling') ||
-    has(settings, 'logging.rotate.pollingInterval') ||
-    has(settings, 'logging.rotate.everyBytes') ||
-    has(settings, 'logging.rotate.keepFiles')
-  ) {
+  if (has(settings, 'logging.rotate')) {
     log(
       '"logging.rotate" and sub-options have been deprecated and will be removed in 8.0. ' +
         'Moving forward, you can enable log rotation using the "rolling-file" appender for a logger ' +
@@ -229,6 +223,14 @@ const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, log) =
       '"logging.events.error" has been deprecated and will be removed ' +
         'in 8.0. Moving forward, you can use "logging.root.level: error" in your logging configuration. '
     );
+  }
+  return settings;
+};
+
+const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  if (has(settings, 'logging.filter')) {
+    // usage: logging.filter.cookie=none or logging.filter.authorization=none
+    log('"logging.filter" has been deprecated and will be removed ' + 'in 8.0. ');
   }
   return settings;
 };
@@ -278,4 +280,5 @@ export const coreDeprecationProvider: ConfigDeprecationProvider = ({ rename, unu
   logRotateDeprecation,
   logEventsLogDeprecation,
   logEventsErrorDeprecation,
+  logFilterDeprecation,
 ];

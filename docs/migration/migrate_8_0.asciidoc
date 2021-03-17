@@ -88,9 +88,8 @@ See https://github.com/elastic/kibana/pull/87939 for more details.
 [source,yaml]
 -------------------
 logging:
-  loggers:
-    - name: plugins.myPlugin
-      appenders: [console]
+  root:
+    appenders: [default, console]
 -------------------
 
 To send logs to `file` with a given file path, you should define a custom appender with `type:file`:

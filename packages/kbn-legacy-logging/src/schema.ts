@@ -19,7 +19,7 @@ const HANDLED_IN_KIBANA_PLATFORM = Joi.any().description(
  */
 export interface LegacyLoggingConfig {
   silent: boolean;
-  quiet?: boolean;
+  quiet: boolean;
   verbose: boolean;
   events: Record<string, any>;
   dest: string;
