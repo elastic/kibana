@@ -15,6 +15,12 @@ type HeatmapDebugState = Required<Pick<DebugState, 'heatmap' | 'axes' | 'legend'
 export function SwimLaneProvider({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
+
+  /**
+   * Y axis labels width + padding
+   */
+  const xOffset = 170 + 8;
 
   return {
     async getDebugState(testSubj: string): Promise<HeatmapDebugState> {
@@ -70,11 +76,6 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       const renderCount = await elasticChart.getVisualizationRenderingCount();
       const el = await elasticChart.getCanvas(testSubj);
 
-      /**
-       * Y axis labels width + padding
-       */
-      const xOffset = 170 + 8;
-
       const resultX = xOffset + Math.round(x);
 
       await browser
@@ -83,7 +84,16 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
         .click()
         .perform();
 
-      await elasticChart.waitForRenderingCount(renderCount + 1, testSubj);
+      if (testSubj === 'mlAnomalyExplorerSwimlaneViewBy') {
+        // We have a glitchy behaviour when clicking on the View By swim lane.
+        // The entire charts is re-rendered, hence it requires a different check
+        // await testSubjects.waitForHidden(testSubj);
+        // await testSubjects.waitForHidden('mlSwimLaneLoadingIndicator');
+        await testSubjects.existOrFail(testSubj);
+        await elasticChart.waitForRenderComplete(testSubj);
+      } else {
+        await elasticChart.waitForRenderingCount(renderCount + 1, testSubj);
+      }
     },
 
     async assertSwimlaneSelection() {},

@@ -173,6 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
           await ml.anomaliesTable.assertTableRowsCount(25);
 
+          await ml.testExecution.logTestStep('clicks on the Overall swim lane cell');
           const sampleCell = (await ml.swimLane.getCells(overallSwimLaneTestSubj))[0];
           await ml.swimLane.selectSingleCell(overallSwimLaneTestSubj, {
             x: sampleCell.x,
@@ -184,6 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
             y: ['Overall'],
           });
           await ml.anomalyExplorer.assertClearSelectionButtonVisible(true);
+
           await ml.testExecution.logTestStep('updates the View By swim lane');
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', ['AMX', 'TRS', 'VRD']);
 
@@ -206,6 +208,34 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.assertCurrentURL(
             "/app/ml/explorer?_g=(ml%3A(jobIds%3A!(fq_multi_1_ae))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2016-02-07T00%3A00%3A00.000Z'%2Cto%3A'2016-02-11T23%3A59%3A54.000Z'))&_a=(explorer%3A(mlExplorerFilter%3A()%2CmlExplorerSwimlane%3A(viewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10))%2Cquery%3A(query_string%3A(analyze_wildcard%3A!t%2Cquery%3A'*')))"
           );
+          await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
+          await ml.anomaliesTable.assertTableRowsCount(25);
+        });
+
+        it('support cell selection by click on View By swim lane', async () => {
+          await ml.testExecution.logTestStep('clicks on the View By swim lane cell');
+          await ml.anomalyExplorer.assertSwimlaneViewByExists();
+          await ml.testExecution.logTestStep('check after existance ');
+          const sampleCell = (await ml.swimLane.getCells('mlAnomalyExplorerSwimlaneViewBy'))[0];
+
+          await ml.swimLane.selectSingleCell(viewBySwimLaneTestSubj, {
+            x: sampleCell.x,
+            y: sampleCell.y,
+          });
+
+          await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
+            x: [1455105600000, 1455120000000],
+            y: ['AAL'],
+          });
+
+          await ml.testExecution.logTestStep('highlights the Overall swim lane');
+          await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
+            x: [1455105600000, 1455120000000],
+            y: ['Overall'],
+          });
+
+          await ml.testExecution.logTestStep('clears the selection');
+          await ml.anomalyExplorer.clearSwimLaneSelection();
         });
 
         it('supports cell selection by brush action', async () => {});
