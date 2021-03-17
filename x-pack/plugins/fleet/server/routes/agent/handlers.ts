@@ -20,7 +20,7 @@ import type {
   PostAgentEnrollRequest,
   PostBulkAgentReassignResponse,
 } from '../../../common/types';
-import {
+import type {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
@@ -44,8 +44,7 @@ export const getAgentHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
-    const agent = await AgentService.getAgent(esClient, request.params.agentId);
-
+    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
     const body: GetOneAgentResponse = {
       item: {
         ...agent,
@@ -134,8 +133,7 @@ export const updateAgentHandler: RequestHandler<
     await AgentService.updateAgent(esClient, request.params.agentId, {
       user_provided_metadata: request.body.user_provided_metadata,
     });
-    const agent = await AgentService.getAgent(esClient, request.params.agentId);
-
+    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
     const body = {
       item: {
         ...agent,
@@ -245,7 +243,7 @@ export const getAgentsHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
-    const { agents, total, page, perPage } = await AgentService.listAgents(esClient, {
+    const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -310,6 +308,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
 
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
+
   try {
     const results = await AgentService.reassignAgents(
       soClient,
