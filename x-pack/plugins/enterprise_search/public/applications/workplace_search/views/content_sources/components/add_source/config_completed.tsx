@@ -48,7 +48,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
   header,
   privateSourcesEnabled,
 }) => (
-  <div className="step-3">
+  <>
     {header}
     <EuiSpacer size="xxl" />
     <EuiFlexGroup
@@ -162,5 +162,5 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  </div>
+  </>
 );

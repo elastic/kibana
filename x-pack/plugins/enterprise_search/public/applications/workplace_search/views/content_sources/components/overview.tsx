@@ -127,12 +127,10 @@ export const Overview: React.FC = () => {
     );
 
     return (
-      <div className="content-section">
-        <div className="section-header">
-          <EuiTitle size="xs">
-            <h4>{CONTENT_SUMMARY_TITLE}</h4>
-          </EuiTitle>
-        </div>
+      <>
+        <EuiTitle size="xs">
+          <h4>{CONTENT_SUMMARY_TITLE}</h4>
+        </EuiTitle>
         <EuiSpacer size="s" />
         {!summary && <ComponentLoader text="Loading summary details..." />}
         {!!summary &&
@@ -157,7 +155,7 @@ export const Overview: React.FC = () => {
               </EuiTableBody>
             </EuiTable>
           ))}
-      </div>
+      </>
     );
   };
 
@@ -213,15 +211,13 @@ export const Overview: React.FC = () => {
     );
 
     return (
-      <div className="content-section">
-        <div className="section-header">
-          <EuiTitle size="xs">
-            <h3>{RECENT_ACTIVITY_TITLE}</h3>
-          </EuiTitle>
-        </div>
+      <>
+        <EuiTitle size="xs">
+          <h3>{RECENT_ACTIVITY_TITLE}</h3>
+        </EuiTitle>
         <EuiSpacer size="s" />
         {activities.length === 0 ? emptyState : activitiesTable}
-      </div>
+      </>
     );
   };
 

@@ -37,12 +37,7 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
     <EuiFlexItem>
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={null}>
-          <SourceIcon
-            className="content-source-meta__icon"
-            serviceType={sourceType}
-            name={sourceType}
-            size="l"
-          />
+          <SourceIcon serviceType={sourceType} name={sourceType} size="l" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="s">

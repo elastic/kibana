@@ -73,7 +73,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   };
 
   const visibleSources = (
-    <EuiFlexGrid columns={3} gutterSize="m" className="source-grid" responsive={false}>
+    <EuiFlexGrid columns={3} gutterSize="m" responsive={false}>
       {sources.map((source, i) => (
         <EuiFlexItem key={i} data-test-subj="AvailableSourceCard">
           {getSourceCard(source)}

@@ -38,7 +38,7 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="m">
-            <h3 className="adding-a-source__name">
+            <h3>
               <EuiTextColor color="default">{name}</EuiTextColor>
             </h3>
           </EuiText>
