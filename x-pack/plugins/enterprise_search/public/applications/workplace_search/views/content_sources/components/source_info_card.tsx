@@ -41,7 +41,6 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
             className="content-source-meta__icon"
             serviceType={sourceType}
             name={sourceType}
-            fullBleed
             size="l"
           />
         </EuiFlexItem>

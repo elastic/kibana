@@ -11,7 +11,7 @@ export {
   ServiceNowGetFieldsResponse,
 } from '../../../../actions/server/types';
 import { createDefaultMapping, formatFields } from './utils';
-import { ConnectorTypes } from '../../../common/api/connectors';
+import { ConnectorTypes } from '../../../common';
 import { mappings, formatFieldsTestData } from './mock';
 
 describe('client/configure/utils', () => {

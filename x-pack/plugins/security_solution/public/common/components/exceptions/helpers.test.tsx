@@ -29,6 +29,7 @@ import {
   defaultEndpointExceptionItems,
   getFileCodeSignature,
   getProcessCodeSignature,
+  retrieveAlertOsTypes,
 } from './helpers';
 import { AlertData, EmptyEntry } from './types';
 import {
@@ -529,6 +530,25 @@ describe('Exception helpers', () => {
           os_types: ['windows', 'macos'],
         },
       ];
+      expect(result).toEqual(expected);
+    });
+  });
+
+  describe('#retrieveAlertOsTypes', () => {
+    test('it should retrieve os type if alert data is provided', () => {
+      const alertDataMock: AlertData = {
+        '@timestamp': '1234567890',
+        _id: 'test-id',
+        host: { os: { family: 'windows' } },
+      };
+      const result = retrieveAlertOsTypes(alertDataMock);
+      const expected = ['windows'];
+      expect(result).toEqual(expected);
+    });
+
+    test('it should return default os types if alert data is not provided', () => {
+      const result = retrieveAlertOsTypes();
+      const expected = ['windows', 'macos'];
       expect(result).toEqual(expected);
     });
   });

@@ -216,6 +216,7 @@ describe('<EditPolicy /> node allocation', () => {
 
     test('shows view node attributes link when attribute selected and shows flyout when clicked', async () => {
       const { actions, component } = testBed;
+
       await actions.cold.enable(true);
 
       expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
@@ -250,23 +251,37 @@ describe('<EditPolicy /> node allocation', () => {
       expect(actions.cold.hasDefaultAllocationWarning()).toBeTruthy();
     });
 
-    test('shows default allocation notice when warm or hot tiers exists, but not cold tier', async () => {
-      httpRequestsMockHelpers.setListNodes({
-        nodesByAttributes: {},
+    [
+      {
+        nodesByRoles: { data_hot: ['test'] },
+        previousActiveRole: 'hot',
+      },
+      {
         nodesByRoles: { data_hot: ['test'], data_warm: ['test'] },
-        isUsingDeprecatedDataRoleConfig: false,
+        previousActiveRole: 'warm',
+      },
+    ].forEach(({ nodesByRoles, previousActiveRole }) => {
+      test(`shows default allocation notice when ${previousActiveRole} tiers exists, but not cold tier`, async () => {
+        httpRequestsMockHelpers.setListNodes({
+          nodesByAttributes: {},
+          nodesByRoles,
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+
+        await act(async () => {
+          testBed = await setup();
+        });
+        const { actions, component, find } = testBed;
+
+        component.update();
+        await actions.cold.enable(true);
+
+        expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
+        expect(actions.cold.hasDefaultAllocationNotice()).toBeTruthy();
+        expect(find('defaultAllocationNotice').text()).toContain(
+          `This policy will move data in the cold phase to ${previousActiveRole} tier nodes`
+        );
       });
-
-      await act(async () => {
-        testBed = await setup();
-      });
-      const { actions, component } = testBed;
-
-      component.update();
-      await actions.cold.enable(true);
-
-      expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
-      expect(actions.cold.hasDefaultAllocationNotice()).toBeTruthy();
     });
 
     test(`doesn't show default allocation notice when node with "data" role exists`, async () => {
@@ -350,9 +365,9 @@ describe('<EditPolicy /> node allocation', () => {
         await act(async () => {
           testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
         });
-        const { actions, component, exists, find } = testBed;
+        testBed.component.update();
 
-        component.update();
+        const { actions, component, exists, find } = testBed;
         await actions.warm.enable(true);
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
@@ -360,31 +375,29 @@ describe('<EditPolicy /> node allocation', () => {
         expect(exists('defaultDataAllocationOption')).toBeTruthy();
         expect(exists('customDataAllocationOption')).toBeTruthy();
         expect(exists('noneDataAllocationOption')).toBeTruthy();
-        // We should not be showing the call-to-action for users to activate data tier in cloud
-        expect(exists('cloudDataTierCallout')).toBeFalsy();
         // Do not show the call-to-action for users to migrate their cluster to use node roles
         expect(find('cloudDataTierCallout').exists()).toBeFalsy();
       });
-
-      test('shows cloud notice when cold tier nodes do not exist', async () => {
+      test('do not show node allocation specific warnings on cloud', async () => {
         httpRequestsMockHelpers.setListNodes({
-          nodesByAttributes: {},
-          nodesByRoles: { data: ['test'], data_hot: ['test'], data_warm: ['test'] },
+          nodesByAttributes: { test: ['123'] },
+          // No nodes with node roles like "data_hot" or "data_warm"
+          nodesByRoles: {},
           isUsingDeprecatedDataRoleConfig: false,
         });
         await act(async () => {
           testBed = await setup({ appServicesContext: { cloud: { isCloudEnabled: true } } });
         });
-        const { actions, component, exists } = testBed;
+        testBed.component.update();
 
-        component.update();
+        const { actions, component, exists } = testBed;
+        await actions.warm.enable(true);
         await actions.cold.enable(true);
         expect(component.find('.euiLoadingSpinner').exists()).toBeFalsy();
 
-        expect(exists('cloudMissingColdTierCallout')).toBeTruthy();
-        // Assert that other notices are not showing
-        expect(actions.cold.hasDefaultAllocationNotice()).toBeFalsy();
-        expect(actions.cold.hasNoNodeAttrsWarning()).toBeFalsy();
+        expect(exists('cloudDataTierCallout')).toBeFalsy();
+        expect(exists('defaultAllocationNotice')).toBeFalsy();
+        expect(exists('defaultAllocationWarning')).toBeFalsy();
       });
     });
   });
@@ -480,6 +493,7 @@ describe('<EditPolicy /> node allocation', () => {
         const { find } = testBed;
         expect(find('warm-dataTierAllocationControls.dataTierSelect').text()).toBe('Custom');
       });
+
       test('detecting use of the "off" allocation type', () => {
         const { find } = testBed;
         expect(find('cold-dataTierAllocationControls.dataTierSelect').text()).toContain('Off');

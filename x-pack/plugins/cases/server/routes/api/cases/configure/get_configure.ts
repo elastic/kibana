@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { CaseConfigureResponseRt, ConnectorMappingsAttributes } from '../../../../../common/api';
+import { CaseConfigureResponseRt, ConnectorMappingsAttributes } from '../../../../../common';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_CONFIGURE_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { CASE_CONFIGURE_URL, SAVED_OBJECT_TYPES } from '../../../../../common';
 import { transformESConnectorToCaseConnector } from '../helpers';
 
 export function initGetCaseConfigure({ caseConfigureService, router, logger }: RouteDeps) {

@@ -14,7 +14,6 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { CommentableCase } from '../../../../common';
-import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
@@ -23,7 +22,10 @@ import {
   SAVED_OBJECT_TYPES,
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
-} from '../../../../../common/constants';
+  CommentPatchRequestRt,
+  throwErrors,
+  User,
+} from '../../../../../common';
 import { CaseServiceSetup } from '../../../../services';
 
 interface CombinedCaseParams {

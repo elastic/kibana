@@ -50,9 +50,7 @@ exports[`ChecklistFlyout renders 1`] = `
           "lastCompletedStep": undefined,
           "loadingState": 1,
           "reindexTaskPercComplete": null,
-          "reindexWarnings": Array [
-            0,
-          ],
+          "reindexWarnings": Array [],
           "status": undefined,
         }
       }

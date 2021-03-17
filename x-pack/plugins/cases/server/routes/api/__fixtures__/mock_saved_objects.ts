@@ -17,7 +17,7 @@ import {
   ConnectorTypes,
   ESCaseAttributes,
   ESCasesConfigureAttributes,
-} from '../../../../common/api';
+} from '../../../../common';
 import {
   CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,

@@ -59,7 +59,7 @@ export interface AvailableTotal {
   total: number;
 }
 
-type BaseJobTypes = 'csv' | 'PNG' | 'printable_pdf';
+type BaseJobTypes = 'csv' | 'csv_searchsource' | 'PNG' | 'printable_pdf';
 export interface LayoutCounts {
   print: number;
   preserve_layout: number;
@@ -106,7 +106,7 @@ export type ReportingUsageType = RangeStats & {
   last7Days: RangeStats;
 };
 
-export type ExportType = 'csv' | 'printable_pdf' | 'PNG';
+export type ExportType = 'csv' | 'csv_searchsource' | 'printable_pdf' | 'PNG';
 export type FeatureAvailabilityMap = { [F in ExportType]: boolean };
 
 export interface KeyCountBucket {

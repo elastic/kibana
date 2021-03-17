@@ -13,9 +13,7 @@ import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
-  ElasticsearchClient,
-  ILegacyClusterClient,
-  ILegacyScopedClusterClient,
+  IScopedClusterClient,
   KibanaRequest,
   SavedObjectAttributes,
   SavedObjectsClientContract,
@@ -63,13 +61,8 @@ export interface AlertingRequestHandlerContext extends RequestHandlerContext {
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 
 export interface Services {
-  /**
-   * @deprecated Use `scopedClusterClient` instead.
-   */
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
-  scopedClusterClient: ElasticsearchClient;
-  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
+  scopedClusterClient: IScopedClusterClient;
 }
 
 export interface AlertServices<

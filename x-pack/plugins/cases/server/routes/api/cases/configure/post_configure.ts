@@ -15,10 +15,10 @@ import {
   CaseConfigureResponseRt,
   throwErrors,
   ConnectorMappingsAttributes,
-} from '../../../../../common/api';
+} from '../../../../../common';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
-import { CASE_CONFIGURE_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import { CASE_CONFIGURE_URL, SAVED_OBJECT_TYPES } from '../../../../../common';
 import {
   transformCaseConnectorToEsConnector,
   transformESConnectorToCaseConnector,

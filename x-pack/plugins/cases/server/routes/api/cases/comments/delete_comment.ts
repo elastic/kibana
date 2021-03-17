@@ -16,7 +16,7 @@ import {
   SAVED_OBJECT_TYPES,
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
-} from '../../../../../common/constants';
+} from '../../../../../common';
 
 export function initDeleteCommentApi({
   caseService,
