@@ -104,7 +104,7 @@ The API returns the following:
       "created_by": "elastic",
       "updated_by": "elastic",
       "mute_all": false,
-      "muted_instance_ids": [],
+      "muted_alert_ids": [],
       "updated_at": "2021-02-10T05:37:19.086Z",
       "created_at": "2021-02-10T05:37:19.086Z",
       "scheduled_task_id": "0b092d90-6b62-11eb-9e0d-85d233e3ee35",

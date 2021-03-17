@@ -185,7 +185,7 @@ The API returns the following:
   "created_by": "elastic",
   "updated_by": "elastic",
   "mute_all": false,
-  "muted_instance_ids": [],
+  "muted_alert_ids": [],
   "updated_at": "2021-02-10T18:03:19.961Z",
   "created_at": "2021-02-10T18:03:19.961Z",
   "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
