@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient, KibanaRequest } from 'kibana/server';
 import { DeeplyMockedKeys } from 'packages/kbn-utility-types/target/jest';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import {
+  loggingSystemMock,
+  elasticsearchServiceMock,
+  savedObjectsServiceMock,
+} from '../../../../../src/core/server/mocks';
 import {
   AlertServiceContract,
   CaseConfigureService,
@@ -17,7 +21,9 @@ import {
 } from '../services';
 import { CasesClient } from './types';
 import { authenticationMock } from '../routes/api/__fixtures__';
-import { createExternalCasesClient } from '.';
+import { featuresPluginMock } from '../../../features/server/mocks';
+import { securityMock } from '../../../security/server/mocks';
+import { CasesClientFactory } from './factory';
 
 export type CasesClientPluginContractMock = jest.Mocked<CasesClient>;
 export const createExternalCasesClientMock = (): CasesClientPluginContractMock => ({
@@ -31,6 +37,7 @@ export const createExternalCasesClientMock = (): CasesClientPluginContractMock =
   getUserActions: jest.fn(),
   update: jest.fn(),
   updateAlertsStatus: jest.fn(),
+  find: jest.fn(),
 });
 
 export const createCasesClientWithMockSavedObjectsClient = async ({
@@ -71,17 +78,34 @@ export const createCasesClientWithMockSavedObjectsClient = async ({
     getAlerts: jest.fn(),
   };
 
-  const casesClient = createExternalCasesClient({
-    savedObjectsClient,
-    user: auth.getCurrentUser(),
-    caseService,
+  // since the cases saved objects are hidden we need to use getScopedClient(), we'll just have it return the mock client
+  // that is passed in to createRouteContext
+  const savedObjectsService = savedObjectsServiceMock.createStartContract();
+  savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
+
+  const factory = new CasesClientFactory(log);
+  factory.initialize({
+    alertsService,
     caseConfigureService,
+    caseService,
     connectorMappingsService,
     userActionService,
-    alertsService,
-    scopedClusterClient: esClient,
-    logger: log,
+    featuresPluginStart: featuresPluginMock.createStart(),
+    getSpace: async (req: KibanaRequest) => undefined,
+    isAuthEnabled: false,
+    securityPluginSetup: securityMock.createSetup(),
+    securityPluginStart: securityMock.createStart(),
   });
+
+  // create a single reference to the caseClient so we can mock its methods
+  const casesClient = await factory.create({
+    savedObjectsService,
+    // Since authorization is disabled for these unit tests we don't need any information from the request object
+    // so just pass in an empty one
+    request: {} as KibanaRequest,
+    scopedClusterClient: esClient,
+  });
+
   return {
     client: casesClient,
     services: { userActionService, alertsService },

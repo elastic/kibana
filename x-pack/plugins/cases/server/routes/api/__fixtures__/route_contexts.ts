@@ -71,7 +71,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   });
 
   // create a single reference to the caseClient so we can mock its methods
-  const caseClient = factory.create({
+  const caseClient = await factory.create({
     savedObjectsService,
     // Since authorization is disabled for these unit tests we don't need any information from the request object
     // so just pass in an empty one

@@ -35,6 +35,8 @@ import {
   CaseUserActionServiceSetup,
 } from '../../services';
 import { createCaseError } from '../../common/error';
+import { Authorization } from '../../authorization/authorization';
+import { WriteOperations } from '../../authorization/types';
 
 interface CreateCaseArgs {
   caseConfigureService: CaseConfigureServiceSetup;
@@ -44,6 +46,7 @@ interface CreateCaseArgs {
   userActionService: CaseUserActionServiceSetup;
   theCase: CasePostRequest;
   logger: Logger;
+  auth: Authorization;
 }
 
 /**
@@ -57,6 +60,7 @@ export const create = async ({
   user,
   theCase,
   logger,
+  auth,
 }: CreateCaseArgs): Promise<CaseResponse> => {
   // default to an individual case if the type is not defined.
   const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
@@ -67,6 +71,13 @@ export const create = async ({
   );
 
   try {
+    try {
+      await auth.ensureAuthorized(query.class, WriteOperations.Create);
+    } catch (error) {
+      // TODO: log error using audit logger
+      throw error;
+    }
+
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
     const createdDate = new Date().toISOString();

@@ -3,7 +3,7 @@
   "id": "cases",
   "kibanaVersion": "kibana",
   "extraPublicDirs": ["common"],
-  "requiredPlugins": ["actions", "esUiShared", "kibanaReact", "triggersActionsUi"],
+  "requiredPlugins": ["actions", "esUiShared", "kibanaReact", "triggersActionsUi", "features"],
   "optionalPlugins": [
     "spaces",
     "security"

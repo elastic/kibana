@@ -45,12 +45,12 @@ function createConfig(context: PluginInitializerContext) {
 }
 
 export interface PluginsSetup {
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   actions: ActionsPluginSetup;
 }
 
 export interface PluginsStart {
-  security: SecurityPluginStart;
+  security?: SecurityPluginStart;
   features: FeaturesPluginStart;
   spaces?: SpacesPluginStart;
 }

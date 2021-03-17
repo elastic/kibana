@@ -46,6 +46,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
+        class: 'awesome',
       },
     });
 
@@ -85,6 +86,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
+        class: 'awesome',
       },
     });
 
@@ -118,6 +120,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
+        class: 'awesome',
       },
     });
 
@@ -143,6 +146,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
+        class: 'awesome',
       },
     });
 
@@ -176,6 +180,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
+        class: 'awesome',
       },
     });
 
@@ -191,6 +196,7 @@ describe('POST cases', () => {
     expect(response.status).toEqual(200);
     expect(response.payload).toMatchInlineSnapshot(`
       Object {
+        "class": "awesome",
         "closed_at": null,
         "closed_by": null,
         "comments": Array [],

@@ -83,6 +83,8 @@ export const FormContext: React.FC<Props> = ({
           type: caseType,
           connector: connectorToUpdate,
           settings: { syncAlerts },
+          // TODO: need to replace this with the value that the plugin registers in the feature registration
+          class: 'securitySolution',
         });
 
         if (afterCaseCreated && updatedCase) {

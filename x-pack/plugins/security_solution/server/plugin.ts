@@ -217,6 +217,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: [SIGNALS_ID, NOTIFICATIONS_ID],
+      // TODO: move this to a sub feature
       cases: ['securitySolution'],
       privileges: {
         all: {

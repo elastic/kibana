@@ -38,6 +38,8 @@ const CaseBasicRt = rt.type({
   [caseTypeField]: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
+  // TODO: should a user be able to update the class?
+  class: rt.string,
 });
 
 const CaseExternalServiceBasicRt = rt.type({
@@ -78,6 +80,7 @@ const CasePostRequestNoTypeRt = rt.type({
   title: rt.string,
   connector: CaseConnectorRt,
   settings: SettingsRt,
+  class: rt.string,
 });
 
 /**
@@ -95,7 +98,7 @@ export const CasesClientPostRequestRt = rt.type({
  * has all the necessary fields. CasesClientPostRequestRt is used for validation.
  */
 export const CasePostRequestRt = rt.intersection([
-  rt.partial({ type: CaseTypeRt }),
+  rt.partial({ [caseTypeField]: CaseTypeRt }),
   CasePostRequestNoTypeRt,
 ]);
 

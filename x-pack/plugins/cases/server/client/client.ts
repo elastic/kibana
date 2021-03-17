@@ -79,6 +79,7 @@ export class CasesClientHandler implements CasesClient {
         user: this.user,
         theCase: caseInfo,
         logger: this.logger,
+        auth: this.authorization,
       });
     } catch (error) {
       throw createCaseError({

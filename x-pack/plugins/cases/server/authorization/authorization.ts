@@ -9,21 +9,7 @@ import { KibanaRequest } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { GetSpaceFn } from './types';
-
-// TODO: probably should move these to the types.ts file
-// TODO: Larry would prefer if we have an operation per entity route so I think we need to create a bunch like
-//  getCase, getComment, getSubCase etc for each, need to think of a clever way of creating them for all the routes easily?
-export enum ReadOperations {
-  Get = 'get',
-  Find = 'find',
-}
-
-export enum WriteOperations {
-  Create = 'create',
-  Delete = 'delete',
-  Update = 'update',
-}
+import { GetSpaceFn, ReadOperations, WriteOperations } from './types';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -94,8 +80,14 @@ export class Authorization {
   }
 
   public async ensureAuthorized(className: string, operation: ReadOperations | WriteOperations) {
+    // TODO: remove
+    if (!this.isAuthEnabled) {
+      return;
+    }
+
     const { securityAuth } = this;
     const isAvailableClass = this.featureCaseClasses.has(className);
+
     // TODO: throw if the request is not authorized
     if (securityAuth && this.shouldCheckAuthorization()) {
       // TODO: implement ensure logic
@@ -115,6 +107,7 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
+        // TODO: audit log using `username`
         throw Boom.forbidden('User does not have permissions for this class');
       }
 
@@ -136,9 +129,11 @@ export class Authorization {
         // TODO: User unauthorized. throw an error. authorizedPrivileges & unauthorizedPrivilages are needed for logging.
         throw Boom.forbidden('Not authorized for this class');
       }
-    } else {
+    } else if (!isAvailableClass) {
       // TODO: throw an error
-      throw Boom.forbidden('Security is disabled');
+      throw Boom.forbidden('Security is disabled but no class was found');
     }
+
+    // else security is disabled so let the operation proceed
   }
 }
