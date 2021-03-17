@@ -66,9 +66,7 @@ describe(`#createPointInTimeFinder`, () => {
     const result = client.createPointInTimeFinder(options);
 
     expect(mockRepository.createPointInTimeFinder).toHaveBeenCalledWith(options, {
-      find: expect.any(Function),
-      openPointInTimeForType: expect.any(Function),
-      closePointInTime: expect.any(Function),
+      client,
     });
     expect(result).toBe(returnValue);
   });
@@ -82,9 +80,11 @@ describe(`#createPointInTimeFinder`, () => {
 
     const options = Symbol();
     const dependencies = {
-      find: Symbol(),
-      openPointInTimeForType: Symbol(),
-      closePointInTime: Symbol(),
+      client: {
+        find: Symbol(),
+        openPointInTimeForType: Symbol(),
+        closePointInTime: Symbol(),
+      },
     };
     const result = client.createPointInTimeFinder(options, dependencies);
 

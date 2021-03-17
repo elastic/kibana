@@ -26,9 +26,12 @@ const createPointInTimeFinderMock = ({
   mock.mockImplementation((findOptions) => {
     return new PointInTimeFinder(findOptions, {
       logger,
-      find: savedObjectsMock.find,
-      openPointInTimeForType: savedObjectsMock.openPointInTimeForType,
-      closePointInTime: savedObjectsMock.closePointInTime,
+      client: savedObjectsMock,
+      // client: {
+      //   find: savedObjectsMock.find,
+      //   openPointInTimeForType: savedObjectsMock.openPointInTimeForType,
+      //   closePointInTime: savedObjectsMock.closePointInTime,
+      // },
     });
   });
 

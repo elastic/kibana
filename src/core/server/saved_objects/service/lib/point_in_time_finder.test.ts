@@ -80,9 +80,11 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        find,
-        openPointInTimeForType,
-        closePointInTime,
+        client: {
+          find,
+          openPointInTimeForType,
+          closePointInTime,
+        },
       });
       await finder.find().next();
 
@@ -116,9 +118,11 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        find,
-        openPointInTimeForType,
-        closePointInTime,
+        client: {
+          find,
+          openPointInTimeForType,
+          closePointInTime,
+        },
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -173,9 +177,11 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        find,
-        openPointInTimeForType,
-        closePointInTime,
+        client: {
+          find,
+          openPointInTimeForType,
+          closePointInTime,
+        },
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -220,9 +226,11 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        find,
-        openPointInTimeForType,
-        closePointInTime,
+        client: {
+          find,
+          openPointInTimeForType,
+          closePointInTime,
+        },
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -267,9 +275,11 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        find,
-        openPointInTimeForType,
-        closePointInTime,
+        client: {
+          find,
+          openPointInTimeForType,
+          closePointInTime,
+        },
       });
       const hits: SavedObjectsFindResult[] = [];
       for await (const result of finder.find()) {
@@ -295,9 +305,11 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        find,
-        openPointInTimeForType,
-        closePointInTime,
+        client: {
+          find,
+          openPointInTimeForType,
+          closePointInTime,
+        },
       });
       const hits: SavedObjectsFindResult[] = [];
       try {
@@ -338,9 +350,11 @@ describe('createPointInTimeFinder()', () => {
 
       const finder = new PointInTimeFinder(findOptions, {
         logger,
-        find,
-        openPointInTimeForType,
-        closePointInTime,
+        client: {
+          find,
+          openPointInTimeForType,
+          closePointInTime,
+        },
       });
 
       const findA = finder.find();

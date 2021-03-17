@@ -1942,10 +1942,11 @@ export class SavedObjectsRepository {
    */
   createPointInTimeFinder(
     findOptions: SavedObjectsPointInTimeFinderOptions,
-    dependencies: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>
+    dependencies?: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>
   ) {
     return new PointInTimeFinder(findOptions, {
       logger: this._logger,
+      client: this,
       ...dependencies,
     });
   }

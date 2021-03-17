@@ -660,9 +660,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         expect(baseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
         expect(baseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, {
-          find: expect.any(Function),
-          openPointInTimeForType: expect.any(Function),
-          closePointInTime: expect.any(Function),
+          client,
         });
       });
 
@@ -671,9 +669,11 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         const options = { type: ['a', 'b'], search: 'query' };
         const dependencies = {
-          find: jest.fn(),
-          openPointInTimeForType: jest.fn(),
-          closePointInTime: jest.fn(),
+          client: {
+            find: jest.fn(),
+            openPointInTimeForType: jest.fn(),
+            closePointInTime: jest.fn(),
+          },
         };
         client.createPointInTimeFinder(options, dependencies);
 

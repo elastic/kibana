@@ -1065,18 +1065,18 @@ describe('#createPointInTimeFinder', () => {
 
     expect(clientOpts.baseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
     expect(clientOpts.baseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, {
-      find: expect.any(Function),
-      openPointInTimeForType: expect.any(Function),
-      closePointInTime: expect.any(Function),
+      client,
     });
   });
 
   it('redirects request to underlying base client with custom dependencies', () => {
     const options = { type: ['a', 'b'], search: 'query' };
     const dependencies = {
-      find: jest.fn(),
-      openPointInTimeForType: jest.fn(),
-      closePointInTime: jest.fn(),
+      client: {
+        find: jest.fn(),
+        openPointInTimeForType: jest.fn(),
+        closePointInTime: jest.fn(),
+      },
     };
     client.createPointInTimeFinder(options, dependencies);
 

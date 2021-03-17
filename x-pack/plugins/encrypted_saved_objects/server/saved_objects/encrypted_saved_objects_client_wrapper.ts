@@ -270,9 +270,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ) {
     return this.options.baseClient.createPointInTimeFinder(findOptions, {
-      find: this.find.bind(this),
-      openPointInTimeForType: this.openPointInTimeForType.bind(this),
-      closePointInTime: this.closePointInTime.bind(this),
+      client: this,
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,
     });

@@ -4650,9 +4650,11 @@ describe('SavedObjectsRepository', () => {
     it('calls PointInTimeFinder with the provided options and dependencies', async () => {
       const options = Symbol();
       const dependencies = {
-        find: Symbol(),
-        openPointInTimeForType: Symbol(),
-        closePointInTime: Symbol(),
+        client: {
+          find: Symbol(),
+          openPointInTimeForType: Symbol(),
+          closePointInTime: Symbol(),
+        },
       };
 
       await savedObjectsRepository.createPointInTimeFinder(options, dependencies);

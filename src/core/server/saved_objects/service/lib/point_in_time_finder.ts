@@ -10,9 +10,10 @@ import type { Logger } from '../../../logging';
 import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
 import type { SavedObjectsFindResponse } from '../';
 
-type SavedObjectsFind = SavedObjectsClientContract['find'];
-type SavedObjectsOpenPointInTimeForType = SavedObjectsClientContract['openPointInTimeForType'];
-type SavedObjectsClosePointInTime = SavedObjectsClientContract['closePointInTime'];
+type PointInTimeFinderClient = Pick<
+  SavedObjectsClientContract,
+  'find' | 'openPointInTimeForType' | 'closePointInTime'
+>;
 
 /**
  * @internal
@@ -27,9 +28,7 @@ export type SavedObjectsPointInTimeFinderOptions = Omit<
  */
 export interface SavedObjectsPointInTimeFinderDependencies {
   logger: Logger;
-  find: SavedObjectsFind;
-  openPointInTimeForType: SavedObjectsOpenPointInTimeForType;
-  closePointInTime: SavedObjectsClosePointInTime;
+  client: Pick<SavedObjectsClientContract, 'find' | 'openPointInTimeForType' | 'closePointInTime'>;
 }
 
 /**
@@ -37,26 +36,17 @@ export interface SavedObjectsPointInTimeFinderDependencies {
  */
 export class PointInTimeFinder {
   readonly #log: Logger;
-  readonly #find: SavedObjectsFind;
-  readonly #openPointInTimeForType: SavedObjectsOpenPointInTimeForType;
-  readonly #closePointInTime: SavedObjectsClosePointInTime;
+  readonly #client: PointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions;
   #open: boolean = false;
   #pitId?: string;
 
   constructor(
     findOptions: SavedObjectsPointInTimeFinderOptions,
-    {
-      logger,
-      find,
-      openPointInTimeForType,
-      closePointInTime,
-    }: SavedObjectsPointInTimeFinderDependencies
+    { logger, client }: SavedObjectsPointInTimeFinderDependencies
   ) {
     this.#log = logger.get('point-in-time-finder');
-    this.#find = find;
-    this.#openPointInTimeForType = openPointInTimeForType;
-    this.#closePointInTime = closePointInTime;
+    this.#client = client;
     this.#findOptions = {
       // Default to 1000 items per page as a tradeoff between
       // speed and memory consumption.
@@ -107,7 +97,7 @@ export class PointInTimeFinder {
     try {
       if (this.#pitId) {
         this.#log.debug(`Closing PIT for types [${this.#findOptions.type}]`);
-        await this.#closePointInTime(this.#pitId);
+        await this.#client.closePointInTime(this.#pitId);
         this.#pitId = undefined;
       }
       this.#open = false;
@@ -119,7 +109,7 @@ export class PointInTimeFinder {
 
   private async open() {
     try {
-      const { id } = await this.#openPointInTimeForType(this.#findOptions.type);
+      const { id } = await this.#client.openPointInTimeForType(this.#findOptions.type);
       this.#pitId = id;
       this.#open = true;
     } catch (e) {
@@ -143,7 +133,7 @@ export class PointInTimeFinder {
     searchAfter?: unknown[];
   }) {
     try {
-      return await this.#find({
+      return await this.#client.find({
         // Sort fields are required to use searchAfter, so we set some defaults here
         sortField: 'updated_at',
         sortOrder: 'desc',

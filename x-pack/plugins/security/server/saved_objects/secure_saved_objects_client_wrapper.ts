@@ -626,9 +626,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // `createPointInTimeFinder` is simply a helper that calls `find`, `openPointInTimeForType`,
     // and `closePointInTime` internally, so authz checks and audit logs will already be applied.
     return this.baseClient.createPointInTimeFinder(findOptions, {
-      find: this.find.bind(this),
-      openPointInTimeForType: this.openPointInTimeForType.bind(this),
-      closePointInTime: this.closePointInTime.bind(this),
+      client: this,
       // Include dependencies last so that subsequent SO client wrappers have their settings applied.
       ...dependencies,
     });
