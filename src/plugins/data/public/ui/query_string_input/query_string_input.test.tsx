@@ -280,6 +280,56 @@ describe('QueryStringInput', () => {
     expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
+  it('Should call onSubmit after a delay when submitOnBlur is on and blurs input', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+        submitOnBlur: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    jest.advanceTimersByTime(10);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(100);
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith(kqlQuery);
+  });
+
+  it("Shouldn't call onSubmit on blur by default", () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    jest.advanceTimersByTime(10);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(100);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+  });
+
   it('Should use PersistedLog for recent search suggestions', async () => {
     const component = mount(
       wrapQueryStringInputInContext({
