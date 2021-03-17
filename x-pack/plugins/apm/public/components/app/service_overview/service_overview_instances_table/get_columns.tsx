@@ -9,7 +9,7 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
-import { LatencyAggregationType } from '../../../../../target/types/common/latency_aggregation_types';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../../common/service_nodes';
