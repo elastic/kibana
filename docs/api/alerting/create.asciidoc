@@ -118,7 +118,6 @@ $ curl -X POST api/alerting/rule  -H 'kbn-xsrf: true' -H 'Content-Type: applicat
    "actions":[
       {
          "id":"dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
-         "connector_type_id":".server-log",
          "group":"threshold met",
          "params":{
             "level":"info",

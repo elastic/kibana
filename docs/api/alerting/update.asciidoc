@@ -64,9 +64,6 @@ Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ i
   `id`:::
     (Required, string) The ID of the action that saved object executes.
 
-  `connector_type_id`:::
-    (Required, string) The id of the <<action-types,connector type>>.
-
   `params`:::
     (Required, object) The map to the `params` that the <<action-types,connector type>> will receive. `params` are handled as Mustache templates and passed a default set of context.
 =====
