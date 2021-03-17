@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
 import { mapTo, filter, take, tap, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -91,6 +91,7 @@ export class CliDevMode {
   private readonly watcher: Watcher;
   private readonly devServer: DevServer;
   private readonly optimizer: Optimizer;
+  private startTime?: number;
 
   private subscription?: Rx.Subscription;
 
@@ -164,6 +165,30 @@ export class CliDevMode {
     }
 
     this.subscription = new Rx.Subscription();
+    this.startTime = Date.now();
+
+    this.subscription.add(
+      firstAllTrue(this.devServer.isReady$(), this.optimizer.isReady$())
+        .pipe(
+          switchMap(async () => {
+            const reporter = CiStatsReporter.fromEnv(this.log.toolingLog);
+            await reporter.timings({
+              timings: [
+                {
+                  group: 'yarn start',
+                  id: 'dev cli start => ready',
+                  ms: Date.now() - this.startTime!,
+                },
+              ],
+            });
+          })
+        )
+        .subscribe({
+          error: (error) => {
+            this.log.bad(`[ci-stats/timings] unable to record startup time:`, error.stack);
+          },
+        })
+    );
 
     if (basePathProxy) {
       const serverReady$ = new Rx.BehaviorSubject(false);
