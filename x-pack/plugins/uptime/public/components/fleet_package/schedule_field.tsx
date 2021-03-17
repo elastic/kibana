@@ -11,43 +11,32 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/e
 import { ConfigKeys, ICustomFields, ScheduleUnit } from './types';
 
 interface Props {
-  configKey: ConfigKeys;
-  number: number;
-  setFields: React.Dispatch<React.SetStateAction<ICustomFields>>;
+  number: string;
+  onChange: (schedule: ICustomFields[ConfigKeys.SCHEDULE]) => void;
   unit: string;
 }
 
-export const ScheduleField = ({ configKey, setFields, unit, number }: Props) => {
+export const ScheduleField = ({ number, onChange, unit }: Props) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiFieldNumber
-          min={1}
+          min={0}
           value={number}
-          onChange={(event) =>
-            setFields((prevFields) => ({
-              ...prevFields,
-              [configKey]: {
-                number: event.target.value,
-                unit,
-              },
-            }))
-          }
+          onChange={(event) => {
+            const updatedNumber = event.target.value;
+            onChange({ number: updatedNumber, unit });
+          }}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSelect
           options={options}
           value={unit}
-          onChange={(event) =>
-            setFields((prevFields) => ({
-              ...prevFields,
-              [configKey]: {
-                number,
-                unit: event.target.value,
-              },
-            }))
-          }
+          onChange={(event) => {
+            const updatedUnit = event.target.value;
+            onChange({ number, unit: updatedUnit });
+          }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
