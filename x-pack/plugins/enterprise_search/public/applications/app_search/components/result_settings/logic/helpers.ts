@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
-
 import { Schema } from '../../../../shared/types';
 import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from '../constants';
 import {
@@ -115,13 +113,4 @@ export const convertServerResultFieldsToResultFields = (
     {}
   );
   return resultFields;
-};
-
-export const areFieldsAtDefaultSettings = (fields: FieldResultSettingObject) => {
-  for (const [, resultSettings] of Object.entries(fields)) {
-    if (!isEqual(resultSettings, DEFAULT_FIELD_SETTINGS)) {
-      return false;
-    }
-  }
-  return true;
 };

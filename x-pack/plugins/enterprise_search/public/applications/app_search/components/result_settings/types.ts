@@ -7,7 +7,6 @@
 
 export enum OpenModal {
   None,
-  ConfirmModifyModal,
   ConfirmResetModal,
   ConfirmSaveModal,
 }

@@ -8,7 +8,6 @@
 import { SchemaTypes } from '../../../../shared/types';
 
 import {
-  areFieldsAtDefaultSettings,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   clearAllServerFields,
@@ -139,42 +138,6 @@ describe('convertToServerFieldResultSetting', () => {
       raw: {},
       snippet: {},
     });
-  });
-});
-
-describe('areFieldsAtDefaultSettings', () => {
-  it('will return true if all settings for all fields are at their defaults', () => {
-    expect(
-      areFieldsAtDefaultSettings({
-        foo: {
-          raw: true,
-          snippet: false,
-          snippetFallback: false,
-        },
-        bar: {
-          raw: true,
-          snippet: false,
-          snippetFallback: false,
-        },
-      })
-    ).toEqual(true);
-  });
-
-  it('will return false otherwise', () => {
-    expect(
-      areFieldsAtDefaultSettings({
-        foo: {
-          raw: true,
-          snippet: false,
-          snippetFallback: false,
-        },
-        bar: {
-          raw: false,
-          snippet: true,
-          snippetFallback: true,
-        },
-      })
-    ).toEqual(false);
   });
 });
 

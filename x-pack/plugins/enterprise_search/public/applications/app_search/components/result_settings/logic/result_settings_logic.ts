@@ -17,7 +17,6 @@ import {
 } from '../types';
 
 import {
-  areFieldsAtDefaultSettings,
   clearAllFields,
   clearAllServerFields,
   convertServerResultFieldsToResultFields,
@@ -108,8 +107,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     openModal: [
       OpenModal.None,
       {
-        initializeResultFields: (_, { resultFields }: { resultFields: FieldResultSettingObject }) =>
-          areFieldsAtDefaultSettings(resultFields) ? OpenModal.ConfirmModifyModal : OpenModal.None,
+        initializeResultFields: () => OpenModal.None,
         closeModals: () => OpenModal.None,
         resetAllFields: () => OpenModal.None,
         openConfirmResetModal: () => OpenModal.ConfirmResetModal,

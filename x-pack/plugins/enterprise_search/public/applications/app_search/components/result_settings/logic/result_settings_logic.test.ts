@@ -169,24 +169,6 @@ describe('ResultSettingsLogic', () => {
         });
       });
 
-      it('will open a modal to confirm modification if all fields are at their default settings', () => {
-        mount({
-          openModal: OpenModal.ConfirmSaveModal,
-        });
-
-        ResultSettingsLogic.actions.initializeResultFields(
-          {
-            foo: { raw: true },
-          },
-          {
-            foo: 'text' as SchemaTypes,
-          },
-          schemaConflicts
-        );
-
-        expect(ResultSettingsLogic.values.openModal).toEqual(OpenModal.ConfirmModifyModal);
-      });
-
       it('default schema conflicts data if none was provided', () => {
         mount();
 
