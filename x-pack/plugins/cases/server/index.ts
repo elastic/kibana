@@ -10,6 +10,11 @@ import { ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
 export { CaseRequestContext } from './types';
-export const config = { schema: ConfigSchema };
+export const config = {
+  schema: ConfigSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
+  ],
+};
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);
