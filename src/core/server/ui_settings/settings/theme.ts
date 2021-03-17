@@ -27,14 +27,14 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
         defaultMessage: 'Theme version',
       }),
-      value: 'v7',
+      value: 'v8',
       type: 'select',
-      options: ['v7', 'v8 (beta)'],
+      options: ['v7', 'v8'],
       description: i18n.translate('core.ui_settings.params.themeVersionText', {
         defaultMessage: `Switch between the theme used for the current and next version of Kibana. A page refresh is required for the setting to be applied.`,
       }),
       requiresPageReload: true,
-      schema: schema.oneOf([schema.literal('v7'), schema.literal('v8 (beta)')]),
+      schema: schema.oneOf([schema.literal('v7'), schema.literal('v8')]),
     },
   };
 };

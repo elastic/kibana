@@ -149,8 +149,8 @@ OptimizerConfig {
   "profileWebpack": false,
   "repoRoot": <absolute path>/packages/kbn-optimizer/src/__fixtures__/__tmp__/mock_repo,
   "themeTags": Array [
-    "v7dark",
-    "v7light",
+    "v8dark",
+    "v8light",
   ],
   "watch": false,
 }
