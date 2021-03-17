@@ -278,7 +278,6 @@ EscapedWhitespace
   = '\\t' { return '\t'; }
   / '\\r' { return '\r'; }
   / '\\n' { return '\n'; }
-  / '\\u00A0' { return '\u00A0'; }
 
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
