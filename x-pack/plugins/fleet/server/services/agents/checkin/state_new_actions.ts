@@ -115,7 +115,7 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agent: Agent,
-  permissions: FullAgentPolicyPermission[]
+  permissions: { [role: string]: FullAgentPolicyPermission[] }
 ): Promise<string> {
   const defaultAPIKey = await getAgentDefaultOutputAPIKey(soClient, esClient, agent);
   if (defaultAPIKey) {

@@ -705,7 +705,7 @@ class AgentPolicyService {
       const output = fullAgentPolicy.outputs[outputName];
       if (output && output.type === 'elasticsearch') {
         // TODO Extract to a method
-        permissions[outputName] = [
+        permissions[outputName].fallback = [
           {
             names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
             privileges: ['auto_configure', 'create_doc'],

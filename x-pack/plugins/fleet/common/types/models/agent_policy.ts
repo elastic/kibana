@@ -72,7 +72,9 @@ export interface FullAgentPolicy {
     };
   };
   outputPermissions?: {
-    [key: string]: FullAgentPolicyPermission[];
+    [output: string]: {
+      [role: string]: FullAgentPolicyPermission[];
+    };
   };
   fleet?: {
     kibana: FullAgentPolicyKibanaConfig;
