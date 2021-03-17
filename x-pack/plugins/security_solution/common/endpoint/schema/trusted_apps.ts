@@ -31,6 +31,9 @@ export const GetTrustedAppsRequestSchema = {
 const ConditionEntryTypeSchema = schema.literal('match');
 const ConditionEntryOperatorSchema = schema.literal('included');
 
+/*
+ * A generic Entry schema to be used for a specific entry schema depending on the OS
+ */
 const CommonEntrySchema = {
   field: schema.oneOf([
     schema.literal(ConditionEntryField.HASH),
@@ -38,6 +41,7 @@ const CommonEntrySchema = {
   ]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
+  // If field === HASH then validate hash with custom method, else validate string with minLength = 1
   value: schema.conditional(
     schema.siblingRef('field'),
     ConditionEntryField.HASH,
@@ -65,29 +69,38 @@ const MacEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
-const EntriesSchema = schema.arrayOf(
+/*
+ * Entry Schema depending on Os type using schema.conditional.
+ * If OS === WINDOWS then use Windows schema,
+ * else if OS === LINUX then use Linux schema,
+ * else use Mac schema
+ */
+const EntrySchemaDependingOnOS = schema.conditional(
+  schema.siblingRef('os'),
+  OperatingSystem.WINDOWS,
+  WindowsEntrySchema,
   schema.conditional(
     schema.siblingRef('os'),
-    OperatingSystem.WINDOWS,
-    WindowsEntrySchema,
-    schema.conditional(
-      schema.siblingRef('os'),
-      OperatingSystem.LINUX,
-      LinuxEntrySchema,
-      MacEntrySchema
-    )
-  ),
-  {
-    minSize: 1,
-    validate(entries) {
-      return (
-        getDuplicateFields(entries)
-          .map((field) => `[${entryFieldLabels[field]}] field can only be used once`)
-          .join(', ') || undefined
-      );
-    },
-  }
+    OperatingSystem.LINUX,
+    LinuxEntrySchema,
+    MacEntrySchema
+  )
 );
+
+/*
+ * Entities array schema.
+ * The validate function checks there is no duplicated entry inside the array
+ */
+const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
+  minSize: 1,
+  validate(entries) {
+    return (
+      getDuplicateFields(entries)
+        .map((field) => `[${entryFieldLabels[field]}] field can only be used once`)
+        .join(', ') || undefined
+    );
+  },
+});
 
 export const PostTrustedAppCreateRequestSchema = {
   body: schema.object({
