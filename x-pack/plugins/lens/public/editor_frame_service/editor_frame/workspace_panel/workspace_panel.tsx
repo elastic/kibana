@@ -25,6 +25,7 @@ import {
   ExecutionContextSearch,
   TimefilterContract,
 } from 'src/plugins/data/public';
+import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   ExpressionRendererEvent,
   ExpressionRenderError,
@@ -490,18 +491,18 @@ export const InnerVisualizationWrapper = ({
           <EuiEmptyPrompt
             actions={
               isManagementEnabled && isIndexPatternManagementEnabled ? (
-                <EuiButtonEmpty
-                  onClick={() =>
-                    application.navigateToApp('management', {
-                      path: `/kibana/indexPatterns/create`,
-                    })
-                  }
-                  data-test-subj="configuration-failure-reconfigure-indexpatterns"
-                >
-                  {i18n.translate('xpack.lens.editorFrame.indexPatternReconfigure', {
-                    defaultMessage: `Recreate it in the index pattern management page`,
-                  })}
-                </EuiButtonEmpty>
+                <RedirectAppLinks application={application}>
+                  <a
+                    href={application.getUrlForApp('management', {
+                      path: '/kibana/indexPatterns/create',
+                    })}
+                    data-test-subj="configuration-failure-reconfigure-indexpatterns"
+                  >
+                    {i18n.translate('xpack.lens.editorFrame.indexPatternReconfigure', {
+                      defaultMessage: `Recreate it in the index pattern management page`,
+                    })}
+                  </a>
+                </RedirectAppLinks>
               ) : null
             }
             body={
