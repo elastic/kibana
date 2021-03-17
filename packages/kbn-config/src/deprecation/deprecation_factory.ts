@@ -9,12 +9,12 @@
 import { get } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 import { unset } from '@kbn/std';
-import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
+import { ConfigDeprecation, ConfigDeprecationHook, ConfigDeprecationFactory } from './types';
 
 const _rename = (
   config: Record<string, any>,
   rootPath: string,
-  log: ConfigDeprecationLogger,
+  configDeprecationHook: ConfigDeprecationHook,
   oldKey: string,
   newKey: string,
   silent?: boolean
@@ -32,23 +32,33 @@ const _rename = (
   if (newValue === undefined) {
     set(config, fullNewPath, oldValue);
 
-    if (!silent) {
-      log(`"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`);
-    }
+    configDeprecationHook({
+      silent,
+      message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`,
+      correctionActions: {
+        manualSteps: [`Replace "${fullOldPath}" in the kibana.yml file with "${fullNewPath}"`],
+      },
+    });
   } else {
-    if (!silent) {
-      log(
-        `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`
-      );
-    }
+    configDeprecationHook({
+      silent,
+      message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`,
+      correctionActions: {
+        manualSteps: [
+          `Make sure "${fullNewPath}" contains the correct value in the kibana.yml file."`,
+          `Remove "${fullOldPath}" from the kibana.yml file."`,
+        ],
+      },
+    });
   }
+
   return config;
 };
 
 const _unused = (
   config: Record<string, any>,
   rootPath: string,
-  log: ConfigDeprecationLogger,
+  configDeprecationHook: ConfigDeprecationHook,
   unusedKey: string
 ) => {
   const fullPath = getPath(rootPath, unusedKey);
@@ -56,24 +66,38 @@ const _unused = (
     return config;
   }
   unset(config, fullPath);
-  log(`${fullPath} is deprecated and is no longer used`);
+  configDeprecationHook({
+    message: `${fullPath} is deprecated and is no longer used`,
+    correctionActions: {
+      manualSteps: [`Remove "${fullPath}" from the kibana.yml file."`],
+    },
+  });
   return config;
 };
 
-const rename = (oldKey: string, newKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _rename(config, rootPath, log, oldKey, newKey);
+const rename = (oldKey: string, newKey: string): ConfigDeprecation => (
+  config,
+  rootPath,
+  configDeprecationHook
+) => _rename(config, rootPath, configDeprecationHook, oldKey, newKey);
 
 const renameFromRoot = (oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation => (
   config,
   rootPath,
-  log
-) => _rename(config, '', log, oldKey, newKey, silent);
+  configDeprecationHook
+) => _rename(config, '', configDeprecationHook, oldKey, newKey, silent);
 
-const unused = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _unused(config, rootPath, log, unusedKey);
+const unused = (unusedKey: string): ConfigDeprecation => (
+  config,
+  rootPath,
+  configDeprecationHook
+) => _unused(config, rootPath, configDeprecationHook, unusedKey);
 
-const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
-  _unused(config, '', log, unusedKey);
+const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (
+  config,
+  rootPath,
+  configDeprecationHook
+) => _unused(config, '', configDeprecationHook, unusedKey);
 
 const getPath = (rootPath: string, subPath: string) =>
   rootPath !== '' ? `${rootPath}.${subPath}` : subPath;

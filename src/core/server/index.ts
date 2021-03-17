@@ -57,7 +57,7 @@ import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-
+import { DeprecationsServiceSetup, DeprecationsServiceStart } from './deprecations';
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -88,8 +88,8 @@ export type {
   ConfigService,
   ConfigDeprecation,
   ConfigDeprecationProvider,
-  ConfigDeprecationLogger,
   ConfigDeprecationFactory,
+  ConfigDeprecationHook,
   EnvironmentMode,
   PackageInfo,
 } from './config';
@@ -378,6 +378,11 @@ export type {
 } from './metrics';
 
 export type { I18nServiceSetup } from './i18n';
+export type {
+  DeprecationsDetails,
+  DeprecationsContext,
+  DeprecationsServiceSetup,
+} from './deprecations';
 
 export type { AppCategory } from '../types';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
@@ -480,6 +485,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   uiSettings: UiSettingsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+  /** {@link DeprecationsServiceSetup} */
+  deprecations: DeprecationsServiceSetup;
 }
 
 /**
@@ -515,6 +522,8 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
+  /** @internal {@link CoreUsageDataStart} */
+  deprecations: DeprecationsServiceStart;
 }
 
 export type {

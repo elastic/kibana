@@ -7,23 +7,24 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { ConfigDeprecationWithContext, ConfigDeprecationLogger } from './types';
+import { ConfigDeprecationWithContext, ConfigDeprecationHook } from './types';
 
-const noopLogger = (msg: string) => undefined;
-
+const noopConfigDeprecationHook: () => ConfigDeprecationHook = () => () => undefined;
 /**
- * Applies deprecations on given configuration and logs any deprecation warning using provided logger.
+ * Applies deprecations on given configuration and passes handled deprecation configDeprecationHook
+ * This hook is used for logging any deprecation warning using provided logger.
+ * This hook is used for exposing deprecated configs that must be handled by the user before upgrading to next major.
  *
  * @internal
  */
 export const applyDeprecations = (
   config: Record<string, any>,
   deprecations: ConfigDeprecationWithContext[],
-  logger: ConfigDeprecationLogger = noopLogger
+  configDeprecationHook: (pluginId: string) => ConfigDeprecationHook = noopConfigDeprecationHook
 ) => {
   let processed = cloneDeep(config);
   deprecations.forEach(({ deprecation, path }) => {
-    processed = deprecation(processed, path, logger);
+    processed = deprecation(processed, path, configDeprecationHook(path));
   });
   return processed;
 };

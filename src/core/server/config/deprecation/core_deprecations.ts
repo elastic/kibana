@@ -9,40 +9,47 @@
 import { has, get } from 'lodash';
 import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
-const configPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+const configPathDeprecation: ConfigDeprecation = (settings, fromPath, configDeprecationHook) => {
   if (has(process.env, 'CONFIG_PATH')) {
-    log(
-      `Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder`
-    );
+    configDeprecationHook({
+      message: `Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder`,
+    });
   }
   return settings;
 };
 
-const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, configDeprecationHook) => {
   if (has(process.env, 'DATA_PATH')) {
-    log(
-      `Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`
-    );
+    configDeprecationHook({
+      message: `Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`,
+    });
   }
   return settings;
 };
 
-const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+const rewriteBasePathDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  configDeprecationHook
+) => {
   if (has(settings, 'server.basePath') && !has(settings, 'server.rewriteBasePath')) {
-    log(
-      'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana ' +
+    configDeprecationHook({
+      message:
+        'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana ' +
         'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
         'the requests in your reverse proxy. Set server.rewriteBasePath to false to preserve the ' +
-        'current behavior and silence this warning.'
-    );
+        'current behavior and silence this warning.',
+    });
   }
   return settings;
 };
 
-const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, log) => {
+const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, configDeprecationHook) => {
   const corsSettings = get(settings, 'server.cors');
   if (typeof get(settings, 'server.cors') === 'boolean') {
-    log('"server.cors" is deprecated and has been replaced by "server.cors.enabled"');
+    configDeprecationHook({
+      message: '"server.cors" is deprecated and has been replaced by "server.cors.enabled"',
+    });
     settings.server.cors = {
       enabled: corsSettings,
     };
@@ -50,7 +57,7 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
-const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, configDeprecationHook) => {
   const NONCE_STRING = `{nonce}`;
   // Policies that should include the 'self' source
   const SELF_POLICIES = Object.freeze(['script-src', 'style-src']);
@@ -67,7 +74,9 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
 
     settings.csp.rules = [...parsed].map(([policy, sourceList]) => {
       if (sourceList.find((source) => source.includes(NONCE_STRING))) {
-        log(`csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in ${policy}`);
+        configDeprecationHook({
+          message: `csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in ${policy}`,
+        });
         sourceList = sourceList.filter((source) => !source.includes(NONCE_STRING));
 
         // Add 'self' if not present
@@ -80,7 +89,9 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
         SELF_POLICIES.includes(policy) &&
         !sourceList.find((source) => source.includes(SELF_STRING))
       ) {
-        log(`csp.rules must contain the 'self' source. Automatically adding to ${policy}.`);
+        configDeprecationHook({
+          message: `csp.rules must contain the 'self' source. Automatically adding to ${policy}.`,
+        });
         sourceList.push(SELF_STRING);
       }
 
@@ -91,50 +102,70 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   return settings;
 };
 
-const mapManifestServiceUrlDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+const mapManifestServiceUrlDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  configDeprecationHook
+) => {
   if (has(settings, 'map.manifestServiceUrl')) {
-    log(
-      'You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure the location ' +
+    configDeprecationHook({
+      message:
+        'You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure the location ' +
         'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
         '"map.emsFileApiUrl" settings instead. These settings are for development use only and should not be ' +
-        'modified for use in production environments.'
-    );
+        'modified for use in production environments.',
+    });
   }
   return settings;
 };
 
-const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+const opsLoggingEventDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  configDeprecationHook
+) => {
   if (has(settings, 'logging.events.ops')) {
-    log(
-      '"logging.events.ops" has been deprecated and will be removed ' +
+    configDeprecationHook({
+      message:
+        '"logging.events.ops" has been deprecated and will be removed ' +
         'in 8.0. To access ops data moving forward, please enable debug logs for the ' +
         '"metrics.ops" context in your logging configuration. For more details, see ' +
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
-    );
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md',
+    });
   }
   return settings;
 };
 
-const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+const requestLoggingEventDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  configDeprecationHook
+) => {
   if (has(settings, 'logging.events.request') || has(settings, 'logging.events.response')) {
-    log(
-      '"logging.events.request" and "logging.events.response" have been deprecated and will be removed ' +
+    configDeprecationHook({
+      message:
+        '"logging.events.request" and "logging.events.response" have been deprecated and will be removed ' +
         'in 8.0. To access request and/or response data moving forward, please enable debug logs for the ' +
         '"http.server.response" context in your logging configuration. For more details, see ' +
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
-    );
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md',
+    });
   }
   return settings;
 };
 
-const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+const timezoneLoggingDeprecation: ConfigDeprecation = (
+  settings,
+  fromPath,
+  configDeprecationHook
+) => {
   if (has(settings, 'logging.timezone')) {
-    log(
-      '"logging.timezone" has been deprecated and will be removed ' +
+    configDeprecationHook({
+      message:
+        '"logging.timezone" has been deprecated and will be removed ' +
         'in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern ' +
         'in your logging configuration. For more details, see ' +
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md'
-    );
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.md',
+    });
   }
   return settings;
 };

@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
+export type { DeprecationsDetails, DeprecationsContext } from './types';
+
 export type {
-  ConfigDeprecation,
-  ConfigDeprecationWithContext,
-  ConfigDeprecationFactory,
-  ConfigDeprecationHook,
-  ConfigDeprecationProvider,
-  DeprecatedConfigContext,
-} from './types';
-export { configDeprecationFactory } from './deprecation_factory';
-export { applyDeprecations } from './apply_deprecations';
+  DeprecationsServiceSetup,
+  InternalDeprecationsServiceSetup,
+} from './deprecations_service';
+
+export { DeprecationsService } from './deprecations_service';

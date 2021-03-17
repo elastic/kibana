@@ -11,7 +11,23 @@
  *
  * @public
  */
-export type ConfigDeprecationLogger = (message: string) => void;
+export type ConfigDeprecationHook = (context: DeprecatedConfigContext) => void;
+
+export interface DeprecatedConfigContext {
+  message: string;
+  silent?: boolean;
+  documentationUrl?: string;
+  correctionActions?: {
+    api?: {
+      path: string;
+      method: 'POST' | 'PUT';
+      body?: {
+        [key: string]: any;
+      };
+    };
+    manualSteps?: string[];
+  };
+}
 
 /**
  * Configuration deprecation returned from {@link ConfigDeprecationProvider} that handles a single deprecation from the configuration.
@@ -25,7 +41,7 @@ export type ConfigDeprecationLogger = (message: string) => void;
 export type ConfigDeprecation = (
   config: Record<string, any>,
   fromPath: string,
-  logger: ConfigDeprecationLogger
+  onDeprecationHook: ConfigDeprecationHook
 ) => Record<string, any>;
 
 /**
@@ -62,6 +78,7 @@ export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => C
  *
  * @public
  */
+
 export interface ConfigDeprecationFactory {
   /**
    * Rename a configuration property from inside a plugin's configuration path.

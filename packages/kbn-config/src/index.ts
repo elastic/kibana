@@ -11,7 +11,7 @@ export {
   ConfigDeprecation,
   ConfigDeprecationFactory,
   configDeprecationFactory,
-  ConfigDeprecationLogger,
+  ConfigDeprecationHook,
   ConfigDeprecationProvider,
   ConfigDeprecationWithContext,
 } from './deprecation';

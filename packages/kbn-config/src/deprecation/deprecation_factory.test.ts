@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ConfigDeprecationLogger } from './types';
+import { ConfigDeprecationHook } from './types';
 import { configDeprecationFactory } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
   const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
 
   let deprecationMessages: string[];
-  const logger: ConfigDeprecationLogger = (msg) => deprecationMessages.push(msg);
+  const logger: ConfigDeprecationHook = ({ message }) => deprecationMessages.push(message);
 
   beforeEach(() => {
     deprecationMessages = [];
