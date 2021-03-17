@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  ConnectorTypes,
-  CaseStatuses,
-  CaseType,
-  CasesClientPostRequest,
-} from '../../../common/api';
+import { ConnectorTypes, CaseStatuses, CaseType, CasesClientPostRequest } from '../../../common';
 import { isCaseError } from '../../common/error';
 
 import {
