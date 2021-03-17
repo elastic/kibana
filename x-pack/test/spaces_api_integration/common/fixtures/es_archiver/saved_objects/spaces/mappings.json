@@ -2,10 +2,10 @@
   "type": "index",
   "value": {
     "aliases": {
-      ".kibana_8.0.0": {},
+      ".kibana_7.13.0": {},
       ".kibana": {}
     },
-    "index": ".kibana_8.0.0_001",
+    "index": ".kibana_7.13.0_001",
     "mappings": {
       "dynamic": "false"
     },
