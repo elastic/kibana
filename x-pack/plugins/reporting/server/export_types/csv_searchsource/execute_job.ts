@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CSV_JOB_TYPE } from '../../../common/constants';
 import { getFieldFormats } from '../../services';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
