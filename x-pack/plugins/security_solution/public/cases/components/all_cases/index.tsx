@@ -20,6 +20,7 @@ import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/t
 import { isEmpty, memoize } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import classnames from 'classnames';
+import { useHistory } from 'react-router-dom';
 
 import * as i18n from './translations';
 import { CaseStatuses, CaseType } from '../../../../../cases/common';
@@ -37,7 +38,12 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../common/components/utility_bar';
-import { getCreateCaseUrl, useFormatUrl } from '../../../common/components/link_to';
+import {
+  getCaseDetailsUrl,
+  getConfigureCasesUrl,
+  getCreateCaseUrl,
+  useFormatUrl,
+} from '../../../common/components/link_to';
 import { getBulkItems } from '../bulk_actions';
 import { CaseHeaderPage } from '../case_header_page';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
@@ -52,11 +58,17 @@ import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/transla
 import { LinkButton } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
-import { APP_ID } from '../../../../common/constants';
+import { APP_ID, USE_RAC_CASES_UI } from '../../../../common/constants';
 import { Stats } from '../status';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../translations';
 import { getExpandedRowMap } from './expanded_row';
 import { isSelectedCasesIncludeCollections } from './helpers';
+
+interface AllCasesNavProps {
+  detailName: string;
+  search?: string;
+  subCaseId?: string;
+}
 
 const Div = styled.div`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
@@ -124,6 +136,8 @@ interface AllCasesProps {
 }
 export const AllCases = React.memo<AllCasesProps>(
   ({ onRowClick, isModal = false, userCanCrud, disabledStatuses, disabledCases = [] }) => {
+    const { cases: casesUi } = useKibana().services;
+    const history = useHistory();
     const { navigateToApp } = useKibana().services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
     const { actionLicense } = useGetActionLicense();
@@ -414,7 +428,35 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const enableBuckActions = userCanCrud && !isModal;
 
-    return (
+    const goToCaseConfigure = useCallback(
+      (ev) => {
+        ev.preventDefault();
+        history.push(getConfigureCasesUrl(urlSearch));
+      },
+      [history, urlSearch]
+    );
+
+    return USE_RAC_CASES_UI ? (
+      casesUi.getAllCases({
+        configureCasesHref: formatUrl(getConfigureCasesUrl()),
+        createCaseHref: formatUrl(getCreateCaseUrl()),
+        getCaseDetailsHref: ({ detailName, subCaseId }: AllCasesNavProps) => {
+          return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
+        },
+        onCaseDetailsNavClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
+          navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
+            path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
+          });
+        },
+        onConfigureCasesNavClick: goToCaseConfigure,
+        disabledCases,
+        disabledStatuses,
+        isModal,
+        onCreateCaseNavClick: goToCreateCase,
+        onRowClick,
+        userCanCrud,
+      })
+    ) : (
       <>
         {!isEmpty(actionsErrors) && (
           <CaseCallOut title={ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={actionsErrors} />

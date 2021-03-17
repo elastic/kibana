@@ -6,9 +6,9 @@
  */
 
 import { CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { TestComponent } from '.';
 import { CasesUiStart, SetupPlugins, StartPlugins } from './types';
 import { getCreateCaseLazy } from './get_create_case';
+import { getAllCasesLazy } from './get_all_cases';
 import { KibanaServices } from './common/lib/kibana';
 
 export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, StartPlugins> {
@@ -22,9 +22,11 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     return {
-      casesComponent: TestComponent,
       getCreateCase: (props) => {
         return getCreateCaseLazy(props);
+      },
+      getAllCases: (props) => {
+        return getAllCasesLazy(props);
       },
     };
   }
