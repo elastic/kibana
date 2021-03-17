@@ -54,6 +54,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
 
   return (
     <EuiConfirmModal
+      role="dialog"
       title={i18n.translate('xpack.security.management.users.confirmEnableUsers.title', {
         defaultMessage: "Activate {count, plural, one{user '{username}'} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },

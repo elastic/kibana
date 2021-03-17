@@ -17717,7 +17717,6 @@
     "xpack.security.components.sessionIdleTimeoutWarning.title": "警告",
     "xpack.security.components.sessionLifespanWarning.message": "您的会话将达到最大时间限制 {timeout}。您将需要重新登录。",
     "xpack.security.components.sessionLifespanWarning.title": "警告",
-    "xpack.security.confirmModal.cancelButton": "取消",
     "xpack.security.conflictingSessionError": "抱歉，您已有活动的 Kibana 会话。如果希望开始新的会话，请首先从现有会话注销。",
     "xpack.security.formFlyout.cancelButton": "取消",
     "xpack.security.loggedOut.login": "登录",

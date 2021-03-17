@@ -17479,7 +17479,6 @@
     "xpack.security.components.sessionIdleTimeoutWarning.title": "警告",
     "xpack.security.components.sessionLifespanWarning.message": "セッションは最大時間制限{timeout}に達しました。もう一度ログインする必要があります。",
     "xpack.security.components.sessionLifespanWarning.title": "警告",
-    "xpack.security.confirmModal.cancelButton": "キャンセル",
     "xpack.security.conflictingSessionError": "申し訳ありません。すでに有効なKibanaセッションがあります。新しいセッションを開始する場合は、先に既存のセッションからログアウトしてください。",
     "xpack.security.formFlyout.cancelButton": "キャンセル",
     "xpack.security.loggedOut.login": "ログイン",

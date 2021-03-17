@@ -54,6 +54,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
 
   return (
     <EuiConfirmModal
+      role="dialog"
       title={i18n.translate('xpack.security.management.users.confirmDeleteUsers.title', {
         defaultMessage: "Delete {count, plural, one{user '{username}'} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },

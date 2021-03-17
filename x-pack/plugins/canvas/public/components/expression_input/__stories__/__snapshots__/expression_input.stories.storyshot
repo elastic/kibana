@@ -16,7 +16,27 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
         id="generated-id"
         onBlur={[Function]}
         onFocus={[Function]}
-      />
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--group"
+          style={
+            Object {
+              "backgroundColor": "#fbfcfd",
+              "height": undefined,
+              "padding": "16px",
+              "width": undefined,
+            }
+          }
+        >
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          />
+          <div
+            className="euiFormControlLayout__append"
+            hidden={true}
+          />
+        </div>
+      </div>
     </div>
   </div>
 </div>
