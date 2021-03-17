@@ -122,7 +122,7 @@ export function registerTransactionDurationAlertType({
         },
       };
 
-      const response = await alertingEsClient(services, searchParams);
+      const { body: response } = await alertingEsClient(services, searchParams);
 
       if (!response.aggregations) {
         return;

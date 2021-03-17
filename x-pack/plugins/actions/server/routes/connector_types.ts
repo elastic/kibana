@@ -7,10 +7,9 @@
 
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
-import { ActionType, BASE_ACTION_API_PATH } from '../../common';
+import { ActionType, BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { RewriteResponseCase } from './rewrite_request_case';
 
 const rewriteBodyRes: RewriteResponseCase<ActionType[]> = (results) => {
   return results.map(({ enabledInConfig, enabledInLicense, minimumLicenseRequired, ...res }) => ({
