@@ -19591,7 +19591,6 @@
     "xpack.securitySolution.detectionEngine.ruleDescription.mlJobStoppedDescription": "已停止",
     "xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAggregatedByDescription": "结果聚合依据",
     "xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription": "所有结果",
-    "xpack.securitySolution.detectionEngine.ruleDetails.activateRuleLabel": "激活",
     "xpack.securitySolution.detectionEngine.ruleDetails.backToRulesDescription": "返回到检测规则",
     "xpack.securitySolution.detectionEngine.ruleDetails.errorCalloutTitle": "规则错误位置",
     "xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab": "例外",
