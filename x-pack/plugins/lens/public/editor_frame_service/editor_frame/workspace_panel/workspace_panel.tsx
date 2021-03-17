@@ -149,9 +149,11 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         {
           shortMessage: '',
           longMessage: i18n.translate('xpack.lens.indexPattern.missingIndexPattern', {
-            defaultMessage: 'The index pattern (id: {indexpattern}) cannot be found',
+            defaultMessage:
+              'The {count, plural, one {index pattern} other {index patterns}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
             values: {
-              indexpattern: missingIndexPatterns[0],
+              count: missingIndexPatterns.length,
+              indexpatterns: missingIndexPatterns.join(', '),
             },
           }),
         },

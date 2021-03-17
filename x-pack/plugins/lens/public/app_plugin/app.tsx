@@ -338,7 +338,7 @@ export function App({
           doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
         );
         getAllIndexPatterns(indexPatternIds, data.indexPatterns)
-          .then((indexPatterns) => {
+          .then(({ indexPatterns }) => {
             // Don't overwrite any pinned filters
             data.query.filterManager.setAppFilters(
               injectFilterReferences(doc.state.filters, doc.references)
@@ -787,7 +787,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
             )
           ) {
             getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
-              (indexPatterns) => {
+              ({ indexPatterns }) => {
                 if (indexPatterns) {
                   setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
                 }
@@ -803,11 +803,15 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
 export async function getAllIndexPatterns(
   ids: string[],
   indexPatternsService: IndexPatternsContract
-): Promise<IndexPatternInstance[]> {
+): Promise<{ indexPatterns: IndexPatternInstance[]; rejectedIds: string[] }> {
   const responses = await Promise.allSettled(ids.map((id) => indexPatternsService.get(id)));
   const fullfilled = responses.filter(
     (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
       response.status === 'fulfilled'
   );
-  return fullfilled.map((response) => response.value);
+  const rejectedIds = responses
+    .map((_response, i) => ids[i])
+    .filter((id, i) => responses[i].status === 'rejected');
+  // return also the rejected ids in case we want to show something later on
+  return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
 }

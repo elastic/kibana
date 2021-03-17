@@ -487,6 +487,7 @@ describe('workspace_panel', () => {
 
   it('should show an error message if there are missing indexpatterns in the visualization', () => {
     mockDatasource.getLayers.mockReturnValue(['first']);
+    mockDatasource.checkIntegrity.mockReturnValue(['a']);
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {
       first: mockDatasource.publicAPIMock,

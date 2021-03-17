@@ -298,6 +298,7 @@ describe('suggestion_panel', () => {
       layers: { indexPatternId: 'a' },
       indexPatterns: {},
     };
+    mockDatasource.checkIntegrity.mockReturnValue(['a']);
     const newProps = {
       ...defaultProps,
       datasourceStates: {
