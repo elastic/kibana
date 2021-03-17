@@ -37,15 +37,17 @@ export interface ExpressionWrapperProps {
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
   style?: React.CSSProperties;
   className?: string;
+  canEdit: boolean;
 }
 
 interface VisualizationErrorProps {
   errors: ExpressionWrapperProps['errors'];
+  canEdit: boolean;
 }
 
-export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
+export function VisualizationErrorPanel({ errors, canEdit }: VisualizationErrorProps) {
   const showMore = errors && errors.length > 1;
-  const canFixInLens = errors?.some(({ type }) => type === 'fixable');
+  const canFixInLens = canEdit && errors?.some(({ type }) => type === 'fixable');
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
@@ -103,11 +105,12 @@ export function ExpressionWrapper({
   style,
   className,
   errors,
+  canEdit,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
       {errors || expression === null || expression === '' ? (
-        <VisualizationErrorPanel errors={errors} />
+        <VisualizationErrorPanel errors={errors} canEdit={canEdit} />
       ) : (
         <div className={classNames('lnsExpressionRenderer', className)} style={style}>
           <ExpressionRendererComponent
