@@ -62,9 +62,12 @@ export async function unenrollAgents(
   const agents = await getAgents(esClient, options);
 
   // Filter to those not already unenrolled, or unenrolling
-  const agentsEnrolled = agents.filter(
-    (agent) => !agent.unenrollment_started_at && !agent.unenrolled_at
-  );
+  const agentsEnrolled = agents.filter((agent) => {
+    if (options.force) {
+      return !agent.unenrolled_at;
+    }
+    return !agent.unenrollment_started_at && !agent.unenrolled_at;
+  });
   // And which are allowed to unenroll
   const settled = await Promise.allSettled(
     agentsEnrolled.map((agent) =>
