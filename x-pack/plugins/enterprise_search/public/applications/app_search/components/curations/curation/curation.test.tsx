@@ -30,10 +30,7 @@ describe('Curation', () => {
   };
   const values = {
     dataLoading: false,
-    curation: {
-      id: 'cur-123456789',
-      queries: ['query A', 'query B'],
-    },
+    queries: ['query A', 'query B'],
   };
   const actions = {
     loadCuration: jest.fn(),

@@ -16,12 +16,12 @@ import type { MlClient } from '../../lib/ml_client';
 
 export function jobServiceProvider(client: IScopedClusterClient, mlClient: MlClient) {
   return {
-    ...datafeedsProvider(mlClient),
+    ...datafeedsProvider(client, mlClient),
     ...jobsProvider(client, mlClient),
     ...groupsProvider(mlClient),
     ...newJobCapsProvider(client),
     ...newJobChartsProvider(client),
     ...topCategoriesProvider(mlClient),
-    ...modelSnapshotProvider(mlClient),
+    ...modelSnapshotProvider(client, mlClient),
   };
 }
