@@ -7,7 +7,6 @@
 
 import React, { useCallback, useState, memo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
@@ -20,24 +19,25 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { ConfigKeys, HTTPMethod, ICustomFields, IHTTPAdvancedFields } from './types';
+import { ConfigKeys, HTTPMethod, IHTTPAdvancedFields, Validation } from './types';
 
 import { OptionalLabel } from './optional_label';
 import { HeaderField } from './header_field';
 import { RequestBodyField } from './request_body_field';
 import { ResponseBodyIndexField } from './index_response_body_field';
-import { ComboBox, Props as ComboBoxProps } from './combo_box';
+import { ComboBox } from './combo_box';
 
 interface Props {
   defaultValues: IHTTPAdvancedFields;
-  setFields: React.Dispatch<React.SetStateAction<ICustomFields>>;
+  onChange: (values: IHTTPAdvancedFields) => void;
+  validate: Validation;
 }
 
-export const HTTPAdvancedFields = memo<Props>(({ defaultValues, setFields }) => {
+export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, validate }) => {
   const [advancedHTTPFields, setAdvancedHTTPFields] = useState<IHTTPAdvancedFields>(defaultValues);
 
   const handleInputChange = useCallback(
-    ({ value, configKey }: { value: string | number | boolean; configKey: ConfigKeys }) => {
+    ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
       setAdvancedHTTPFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
     [setAdvancedHTTPFields]
@@ -45,10 +45,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, setFields }) => 
 
   useDebounce(
     () => {
-      setFields((prevFields) => ({
-        ...prevFields,
-        ...advancedHTTPFields,
-      }));
+      onChange(advancedHTTPFields);
     },
     250,
     [advancedHTTPFields]
@@ -122,9 +119,20 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, setFields }) => 
             defaultMessage="Request headers"
           />
         }
-        configKey={ConfigKeys.REQUEST_HEADERS_CHECK}
         contentMode={advancedHTTPFields[ConfigKeys.REQUEST_BODY_CHECK].type}
-        setFields={setAdvancedHTTPFields}
+        onChange={useCallback(
+          (value) =>
+            handleInputChange({
+              value,
+              configKey: ConfigKeys.REQUEST_HEADERS_CHECK,
+            }),
+          [handleInputChange]
+        )}
+        isInvalid={
+          !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(
+            advancedHTTPFields[ConfigKeys.REQUEST_HEADERS_CHECK]
+          )
+        }
       />
       <EuiFormRow
         label={
@@ -234,9 +242,13 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, setFields }) => 
           labelAppend={<OptionalLabel />}
         >
           <ComboBox
-            configKey={ConfigKeys.RESPONSE_STATUS_CHECK}
             selectedOptions={advancedHTTPFields[ConfigKeys.RESPONSE_STATUS_CHECK]}
-            setFields={setAdvancedHTTPFields as ComboBoxProps['setFields']}
+            onChange={(value) =>
+              handleInputChange({
+                value,
+                configKey: ConfigKeys.RESPONSE_STATUS_CHECK,
+              })
+            }
           />
         </EuiFormRow>
         <EuiFormRow
@@ -249,9 +261,15 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, setFields }) => 
           labelAppend={<OptionalLabel />}
         >
           <ComboBox
-            configKey={ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE}
             selectedOptions={advancedHTTPFields[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]}
-            setFields={setAdvancedHTTPFields as ComboBoxProps['setFields']}
+            onChange={useCallback(
+              (value) =>
+                handleInputChange({
+                  value,
+                  configKey: ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE,
+                }),
+              [handleInputChange]
+            )}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -271,9 +289,15 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, setFields }) => 
           helpText="Sample help text"
         >
           <ComboBox
-            configKey={ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE}
             selectedOptions={advancedHTTPFields[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]}
-            setFields={setAdvancedHTTPFields as ComboBoxProps['setFields']}
+            onChange={useCallback(
+              (value) =>
+                handleInputChange({
+                  value,
+                  configKey: ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE,
+                }),
+              [handleInputChange]
+            )}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -284,8 +308,19 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, setFields }) => 
             defaultMessage="Check response headers contain"
           />
         }
-        configKey={ConfigKeys.RESPONSE_HEADERS_CHECK}
-        setFields={setAdvancedHTTPFields}
+        onChange={useCallback(
+          (value) =>
+            handleInputChange({
+              value,
+              configKey: ConfigKeys.RESPONSE_HEADERS_CHECK,
+            }),
+          [handleInputChange]
+        )}
+        isInvalid={
+          !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(
+            advancedHTTPFields[ConfigKeys.RESPONSE_HEADERS_CHECK]
+          )
+        }
       />
     </EuiAccordion>
   );
