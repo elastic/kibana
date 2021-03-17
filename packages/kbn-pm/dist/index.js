@@ -8912,11 +8912,12 @@ const BootstrapCommand = {
     const kibanaProjectPath = ((_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path) || '';
     const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true; // Force install is set in case a flag is passed or
     // if the `.yarn-integrity` file is not found which
-    // will be indicated by the return of ensureYarnIntegrityFileExists.
-    // The mentioned function ensure we have a `node_modules/.yarn-integrity` file as we depend on it
-    // for bazel to know it has to re-install the node_modules after a reset or a clean.
+    // will be indicated by the return of yarnIntegrityFileExists.
 
-    const forceInstall = !!options && options['force-install'] === true || !(await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["ensureYarnIntegrityFileExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules'))); // Install bazel machinery tools if needed
+    const forceInstall = !!options && options['force-install'] === true || !(await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["yarnIntegrityFileExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules'))); // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
+    // for bazel to know it has to re-install the node_modules after a reset or a clean
+
+    await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["ensureYarnIntegrityFileExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules')); // Install bazel machinery tools if needed
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["installBazelTools"])(rootPath); // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
@@ -48080,8 +48081,10 @@ function addProjectToTree(tree, pathParts, project) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _ensure_yarn_integrity_exists__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(373);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ensureYarnIntegrityFileExists", function() { return _ensure_yarn_integrity_exists__WEBPACK_IMPORTED_MODULE_0__["ensureYarnIntegrityFileExists"]; });
+/* harmony import */ var _yarn_integrity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(373);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "yarnIntegrityFileExists", function() { return _yarn_integrity__WEBPACK_IMPORTED_MODULE_0__["yarnIntegrityFileExists"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ensureYarnIntegrityFileExists", function() { return _yarn_integrity__WEBPACK_IMPORTED_MODULE_0__["ensureYarnIntegrityFileExists"]; });
 
 /* harmony import */ var _get_cache_folders__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(374);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getBazelDiskCacheFolder", function() { return _get_cache_folders__WEBPACK_IMPORTED_MODULE_1__["getBazelDiskCacheFolder"]; });
@@ -48114,6 +48117,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "yarnIntegrityFileExists", function() { return yarnIntegrityFileExists; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ensureYarnIntegrityFileExists", function() { return ensureYarnIntegrityFileExists; });
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
@@ -48127,25 +48131,31 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
-async function ensureYarnIntegrityFileExists(nodeModulesPath) {
+async function yarnIntegrityFileExists(nodeModulesPath) {
   try {
     const nodeModulesRealPath = await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["tryRealpath"])(nodeModulesPath);
-    const yarnIntegrityFilePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(nodeModulesRealPath, '.yarn-integrity'); // assure node_modules folder exist
-
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["mkdirp"])(nodeModulesRealPath); // check if the file already exists
+    const yarnIntegrityFilePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(nodeModulesRealPath, '.yarn-integrity'); // check if the file already exists
 
     if (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["isFile"])(yarnIntegrityFilePath)) {
       return true;
-    } // write a blank file in case it doesn't exists
+    }
+  } catch {// no-op
+  }
 
+  return false;
+}
+async function ensureYarnIntegrityFileExists(nodeModulesPath) {
+  try {
+    const nodeModulesRealPath = await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["tryRealpath"])(nodeModulesPath);
+    const yarnIntegrityFilePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(nodeModulesRealPath, '.yarn-integrity'); // ensure node_modules folder is created
+
+    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["mkdirp"])(nodeModulesRealPath); // write a blank file in case it doesn't exists
 
     await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["writeFile"])(yarnIntegrityFilePath, '', {
       flag: 'wx'
     });
   } catch {// no-op
   }
-
-  return false;
 }
 
 /***/ }),
