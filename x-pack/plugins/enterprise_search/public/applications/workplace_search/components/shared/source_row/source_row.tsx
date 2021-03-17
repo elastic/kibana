@@ -102,11 +102,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <SourceIcon
-              serviceType={isIndexing ? 'loadingSmall' : serviceType}
-              name={name}
-              size="m"
-            />
+            <SourceIcon serviceType={isIndexing ? 'loadingSmall' : serviceType} name={name} />
           </EuiFlexItem>
           <EuiFlexItem>{name}</EuiFlexItem>
         </EuiFlexGroup>

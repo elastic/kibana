@@ -48,7 +48,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
         title={name}
         description={<></>}
         isDisabled={disabled}
-        icon={<SourceIcon serviceType={serviceType} name={name} />}
+        icon={<SourceIcon serviceType={serviceType} name={name} size="xxl" />}
       />
     );
 

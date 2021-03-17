@@ -20,11 +20,6 @@ interface SourceIconProps {
   size?: IconSize;
 }
 
-export const SourceIcon: React.FC<SourceIconProps> = ({
-  name,
-  serviceType,
-  className,
-  size = 'xxl',
-}) => (
+export const SourceIcon: React.FC<SourceIconProps> = ({ name, serviceType, className, size }) => (
   <EuiIcon type={images[camelCase(serviceType)]} title={name} className={className} size={size} />
 );
