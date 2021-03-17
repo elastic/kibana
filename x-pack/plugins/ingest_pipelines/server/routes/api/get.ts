@@ -44,7 +44,7 @@ export const registerGetRoutes = ({
           });
         }
 
-        return res.internalError({ body: error });
+        throw error;
       }
     })
   );
@@ -78,7 +78,7 @@ export const registerGetRoutes = ({
           });
         }
 
-        return res.internalError({ body: error });
+        throw error;
       }
     })
   );

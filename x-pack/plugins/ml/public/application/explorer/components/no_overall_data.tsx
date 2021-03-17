@@ -12,7 +12,7 @@ export const NoOverallData: FC = () => {
   return (
     <FormattedMessage
       id="xpack.ml.anomalySwimLane.noOverallDataMessage"
-      defaultMessage="No overall data found"
+      defaultMessage="No anomalies found in the overall bucket results for this time range"
     />
   );
 };

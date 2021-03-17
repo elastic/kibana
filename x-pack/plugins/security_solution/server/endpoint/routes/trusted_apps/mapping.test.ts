@@ -35,7 +35,7 @@ const createExceptionListItemOptions = (
   name: '',
   namespaceType: 'agnostic',
   osTypes: [],
-  tags: [],
+  tags: ['policy:all'],
   type: 'simple',
   ...options,
 });
@@ -56,7 +56,7 @@ const exceptionListItemSchema = (
   name: '',
   namespace_type: 'agnostic',
   os_types: [],
-  tags: [],
+  tags: ['policy:all'],
   type: 'simple',
   tie_breaker_id: '123',
   updated_at: '11/11/2011T11:11:11.111',

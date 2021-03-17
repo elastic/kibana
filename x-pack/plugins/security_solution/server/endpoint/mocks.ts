@@ -9,13 +9,14 @@ import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/s
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
 import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
-import { alertsMock } from '../../../alerts/server/mocks';
+import { alertsMock } from '../../../alerting/server/mocks';
 import { xpackMocks } from '../../../../mocks';
 import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
+  createArtifactsClientMock,
 } from '../../../fleet/server/mocks';
 import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
@@ -75,7 +76,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     manifestManager: getManifestManagerMock(),
     appClientFactory: factory,
     security: securityMock.createSetup(),
-    alerts: alertsMock.createStart(),
+    alerting: alertsMock.createStart(),
     config,
     licenseService: new LicenseService(),
     registerIngestCallback: jest.fn<
@@ -113,6 +114,7 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
     agentPolicyService: createMockAgentPolicyService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
+    createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
   };
 };
 

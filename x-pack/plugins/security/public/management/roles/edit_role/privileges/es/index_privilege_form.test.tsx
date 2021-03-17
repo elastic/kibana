@@ -7,7 +7,9 @@
 
 import { EuiButtonIcon, EuiTextArea } from '@elastic/eui';
 import React from 'react';
+
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+
 import { RoleValidator } from '../../validate_role';
 import { IndexPrivilegeForm } from './index_privilege_form';
 

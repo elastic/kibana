@@ -7,6 +7,7 @@
 
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+
 import { getProxyAgent, getProxyAgentOptions } from './proxy';
 
 describe('getProxyAgent', () => {

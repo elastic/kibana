@@ -199,13 +199,20 @@ export async function calculateMinInterval(
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
-
-  if (!isTimeViz) return;
-  const dateColumn = data.tables[filteredLayers[0].layerId].columns.find(
+  const xColumn = data.tables[filteredLayers[0].layerId].columns.find(
     (column) => column.id === filteredLayers[0].xAccessor
   );
-  if (!dateColumn) return;
-  const dateMetaData = await getIntervalByColumn(dateColumn);
+
+  if (!xColumn) return;
+  if (!isTimeViz) {
+    const histogramInterval = search.aggs.getNumberHistogramIntervalByDatatableColumn(xColumn);
+    if (typeof histogramInterval === 'number') {
+      return histogramInterval;
+    } else {
+      return undefined;
+    }
+  }
+  const dateMetaData = await getIntervalByColumn(xColumn);
   if (!dateMetaData) return;
   const intervalDuration = search.aggs.parseInterval(dateMetaData.interval);
   if (!intervalDuration) return;
@@ -387,6 +394,8 @@ export function XYChart({
         max: data.dateRange?.toDate.getTime(),
         minInterval,
       }
+    : isHistogramViz
+    ? { minInterval }
     : undefined;
 
   const getYAxesTitles = (
@@ -639,6 +648,14 @@ export function XYChart({
             layersAlreadyFormatted
           );
 
+          const isStacked = seriesType.includes('stacked');
+          const isPercentage = seriesType.includes('percentage');
+          const isBarChart = seriesType.includes('bar');
+          const enableHistogramMode =
+            isHistogram &&
+            (isStacked || !splitAccessor) &&
+            (isStacked || !isBarChart || !chartHasMoreThanOneBarSeries);
+
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
           const rows = tableConverted.rows.filter(
@@ -665,7 +682,7 @@ export function XYChart({
 
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
-            stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
+            stackAccessors: isStacked ? [xAccessor as string] : [],
             id: `${splitAccessor}-${accessor}`,
             xAccessor: xAccessor || 'unifiedX',
             yAccessors: [accessor],
@@ -701,13 +718,8 @@ export function XYChart({
               );
             },
             groupId: yAxis?.groupId,
-            enableHistogramMode:
-              isHistogram &&
-              (seriesType.includes('stacked') || !splitAccessor) &&
-              (seriesType.includes('stacked') ||
-                !seriesType.includes('bar') ||
-                !chartHasMoreThanOneBarSeries),
-            stackMode: seriesType.includes('percentage') ? StackMode.Percentage : undefined,
+            enableHistogramMode,
+            stackMode: isPercentage ? StackMode.Percentage : undefined,
             timeZone,
             areaSeriesStyle: {
               point: {
@@ -788,7 +800,11 @@ export function XYChart({
             case 'area_stacked':
             case 'area_percentage_stacked':
               return (
-                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+                <AreaSeries
+                  key={index}
+                  {...seriesProps}
+                  fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
+                />
               );
             case 'area':
               return (

@@ -26,34 +26,22 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
       esClient: esClient.asCurrentUser,
     });
 
-    try {
-      const res = await uptimeRoute.handler({
-        uptimeEsClient,
-        savedObjectsClient,
-        context,
-        request,
-        response,
-      });
+    const res = await uptimeRoute.handler({
+      uptimeEsClient,
+      savedObjectsClient,
+      context,
+      request,
+      response,
+    });
 
-      if (res instanceof KibanaResponse) {
-        return res;
-      }
-
-      return response.ok({
-        body: {
-          ...res,
-        },
-      });
-    } catch (e) {
-      // please don't remove this, this will be really helpful during debugging
-      /* eslint-disable-next-line no-console */
-      console.error(e);
-
-      return response.internalError({
-        body: {
-          message: e.message,
-        },
-      });
+    if (res instanceof KibanaResponse) {
+      return res;
     }
+
+    return response.ok({
+      body: {
+        ...res,
+      },
+    });
   },
 });

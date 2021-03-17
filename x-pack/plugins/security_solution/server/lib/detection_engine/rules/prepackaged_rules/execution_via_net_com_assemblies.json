@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Execution via Regsvcs/Regasm",
   "query": "event.category:process and event.type:(start or process_started) and process.name:(RegAsm.exe or RegSvcs.exe)",
   "risk_score": 21,
@@ -55,6 +56,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

@@ -6,15 +6,17 @@
  */
 
 import { pick, transform, uniq } from 'lodash';
-import { IClusterClient, KibanaRequest } from '../../../../../src/core/server';
+
+import type { IClusterClient, KibanaRequest } from 'src/core/server';
+
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
-import {
+import type {
+  CheckPrivileges,
+  CheckPrivilegesPayload,
+  CheckPrivilegesResponse,
   HasPrivilegesResponse,
   HasPrivilegesResponseApplication,
-  CheckPrivilegesPayload,
-  CheckPrivileges,
-  CheckPrivilegesResponse,
 } from './types';
 import { validateEsPrivilegeResponse } from './validate_es_response';
 

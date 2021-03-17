@@ -11,7 +11,7 @@ import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
-import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
+import { ElasticsearchClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { PreviewResult } from '../common/types';
@@ -21,7 +21,7 @@ import { evaluateAlert } from './lib/evaluate_alert';
 const MAX_ITERATIONS = 50;
 
 interface PreviewMetricThresholdAlertParams {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   params: {
     criteria: MetricExpressionParams[];
     groupBy: string | undefined | string[];
@@ -31,6 +31,7 @@ interface PreviewMetricThresholdAlertParams {
   lookback: Unit;
   alertInterval: string;
   alertThrottle: string;
+  alertNotifyWhen: string;
   alertOnNoData: boolean;
   end?: number;
   overrideLookbackIntervalInSeconds?: number;
@@ -42,12 +43,13 @@ export const previewMetricThresholdAlert: (
   precalculatedNumberOfGroups?: number
 ) => Promise<PreviewResult[]> = async (
   {
-    callCluster,
+    esClient,
     params,
     config,
     lookback,
     alertInterval,
     alertThrottle,
+    alertNotifyWhen,
     alertOnNoData,
     end = Date.now(),
     overrideLookbackIntervalInSeconds,
@@ -77,7 +79,7 @@ export const previewMetricThresholdAlert: (
 
   // Get a date histogram using the bucket interval and the lookback interval
   try {
-    const alertResults = await evaluateAlert(callCluster, params, config, timeframe);
+    const alertResults = await evaluateAlert(esClient, params, config, timeframe);
     const groups = Object.keys(first(alertResults)!);
 
     // Now determine how to interpolate this histogram based on the alert interval
@@ -104,9 +106,17 @@ export const previewMetricThresholdAlert: (
         let numberOfErrors = 0;
         let numberOfNotifications = 0;
         let throttleTracker = 0;
-        const notifyWithThrottle = () => {
-          if (throttleTracker === 0) numberOfNotifications++;
-          throttleTracker += alertIntervalInSeconds;
+        let previousActionGroup: string | null = null;
+        const notifyWithThrottle = (actionGroup: string) => {
+          if (alertNotifyWhen === 'onActionGroupChange') {
+            if (previousActionGroup !== actionGroup) numberOfNotifications++;
+            previousActionGroup = actionGroup;
+          } else if (alertNotifyWhen === 'onThrottleInterval') {
+            if (throttleTracker === 0) numberOfNotifications++;
+            throttleTracker += alertIntervalInSeconds;
+          } else {
+            numberOfNotifications++;
+          }
         };
         for (let i = 0; i < numberOfExecutionBuckets; i++) {
           const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
@@ -126,21 +136,24 @@ export const previewMetricThresholdAlert: (
           if (someConditionsErrorInMappedBucket) {
             numberOfErrors++;
             if (alertOnNoData) {
-              notifyWithThrottle();
+              notifyWithThrottle('fired'); // TODO: Update this when No Data alerts move to an action group
             }
           } else if (someConditionsNoDataInMappedBucket) {
             numberOfNoDataResults++;
             if (alertOnNoData) {
-              notifyWithThrottle();
+              notifyWithThrottle('fired'); // TODO: Update this when No Data alerts move to an action group
             }
           } else if (allConditionsFiredInMappedBucket) {
             numberOfTimesFired++;
-            notifyWithThrottle();
+            notifyWithThrottle('fired');
           } else if (allConditionsWarnInMappedBucket) {
             numberOfTimesWarned++;
-            notifyWithThrottle();
-          } else if (throttleTracker > 0) {
-            throttleTracker += alertIntervalInSeconds;
+            notifyWithThrottle('warning');
+          } else {
+            previousActionGroup = 'recovered';
+            if (throttleTracker > 0) {
+              throttleTracker += alertIntervalInSeconds;
+            }
           }
           if (throttleTracker >= throttleIntervalInSeconds) {
             throttleTracker = 0;
@@ -161,19 +174,20 @@ export const previewMetricThresholdAlert: (
       // If there's too much data on the first request, recursively slice the lookback interval
       // until all the data can be retrieved
       const basePreviewParams = {
-        callCluster,
+        esClient,
         params,
         config,
         lookback,
         alertInterval,
         alertThrottle,
         alertOnNoData,
+        alertNotifyWhen,
       };
       const { maxBuckets } = e;
       // If this is still the first iteration, try to get the number of groups in order to
       // calculate max buckets. If this fails, just estimate based on 1 group
       const currentAlertResults = !precalculatedNumberOfGroups
-        ? await evaluateAlert(callCluster, params, config)
+        ? await evaluateAlert(esClient, params, config)
         : [];
       const numberOfGroups =
         precalculatedNumberOfGroups ?? Math.max(Object.keys(first(currentAlertResults)!).length, 1);

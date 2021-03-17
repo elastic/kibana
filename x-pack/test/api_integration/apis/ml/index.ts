@@ -70,5 +70,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./calendars'));
     loadTestFile(require.resolve('./annotations'));
     loadTestFile(require.resolve('./saved_objects'));
+    loadTestFile(require.resolve('./system'));
   });
 }

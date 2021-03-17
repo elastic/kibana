@@ -89,7 +89,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
 
     async clickAddVisualizationButton() {
       log.debug('DashboardVisualizations.clickAddVisualizationButton');
-      await testSubjects.click('addVisualizationButton');
+      await testSubjects.click('dashboardAddNewPanelButton');
     }
 
     async isNewVisDialogShowing() {

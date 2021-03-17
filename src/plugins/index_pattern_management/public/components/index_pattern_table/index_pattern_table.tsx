@@ -69,13 +69,13 @@ interface Props extends RouteComponentProps {
 export const IndexPatternTable = ({ canSave, history }: Props) => {
   const {
     setBreadcrumbs,
-    savedObjects,
     uiSettings,
     indexPatternManagementStart,
     chrome,
     docLinks,
     application,
     http,
+    data,
     getMlCardState,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
@@ -92,21 +92,15 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         history.push
       );
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-        savedObjects.client,
         uiSettings.get('defaultIndex'),
-        indexPatternManagementStart
+        indexPatternManagementStart,
+        data.indexPatterns
       );
       setIsLoadingIndexPatterns(false);
       setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
     })();
-  }, [
-    history.push,
-    indexPatterns.length,
-    indexPatternManagementStart,
-    uiSettings,
-    savedObjects.client,
-  ]);
+  }, [history.push, indexPatterns.length, indexPatternManagementStart, uiSettings, data]);
 
   const removeAliases = (item: MatchedItem) =>
     !((item as unknown) as ResolveIndexResponseItemAlias).indices;

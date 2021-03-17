@@ -3,12 +3,14 @@
     "Elastic"
   ],
   "description": "Identifies script engines creating files in the startup folder, or the creation of script files in the startup folder.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Persistent Scripts in the Startup Directory",
   "query": "file where event.type != \"deletion\" and user.domain != \"NT AUTHORITY\" and\n  \n  /* detect shortcuts created by wscript.exe or cscript.exe */\n  (file.path : \"C:\\\\*\\\\Programs\\\\Startup\\\\*.lnk\" and\n     process.name : (\"wscript.exe\", \"cscript.exe\")) or\n\n  /* detect vbs or js files created by any process */\n  file.path : (\"C:\\\\*\\\\Programs\\\\Startup\\\\*.vbs\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.vbe\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.wsh\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.wsf\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.js\")\n",
   "risk_score": 47,
@@ -45,6 +47,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

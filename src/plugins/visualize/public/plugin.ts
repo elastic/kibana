@@ -116,10 +116,7 @@ export class VisualizePlugin
       ],
       getHistory: () => this.currentHistory!,
       onBeforeNavLinkSaved: (urlToSave: string) => {
-        if (
-          !urlToSave.includes(`${VisualizeConstants.EDIT_PATH}/`) &&
-          this.isLinkedToOriginatingApp?.()
-        ) {
+        if (this.isLinkedToOriginatingApp?.()) {
           return core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH);
         }
         return urlToSave;
@@ -133,7 +130,7 @@ export class VisualizePlugin
 
     core.application.register({
       id: VisualizeConstants.APP_ID,
-      title: 'Visualize',
+      title: 'Visualize Library',
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -224,7 +221,7 @@ export class VisualizePlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'visualize',
-        title: 'Visualize',
+        title: 'Visualize Library',
         description: i18n.translate('visualize.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',

@@ -12,43 +12,43 @@ import { PatternLayout } from './pattern_layout';
 
 test('`configSchema` creates correct schema for `pattern` layout.', () => {
   const layoutsSchema = Layouts.configSchema;
-  const validConfigWithOptional = { kind: 'pattern' };
+  const validConfigWithOptional = { type: 'pattern' };
   expect(layoutsSchema.validate(validConfigWithOptional)).toEqual({
     highlight: undefined,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: undefined,
   });
 
   const validConfig = {
     highlight: true,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '%message',
   };
   expect(layoutsSchema.validate(validConfig)).toEqual({
     highlight: true,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '%message',
   });
 
-  const wrongConfig2 = { kind: 'pattern', pattern: 1 };
+  const wrongConfig2 = { type: 'pattern', pattern: 1 };
   expect(() => layoutsSchema.validate(wrongConfig2)).toThrow();
 });
 
 test('`createConfigSchema()` creates correct schema for `json` layout.', () => {
   const layoutsSchema = Layouts.configSchema;
 
-  const validConfig = { kind: 'json' };
-  expect(layoutsSchema.validate(validConfig)).toEqual({ kind: 'json' });
+  const validConfig = { type: 'json' };
+  expect(layoutsSchema.validate(validConfig)).toEqual({ type: 'json' });
 });
 
 test('`create()` creates correct layout.', () => {
   const patternLayout = Layouts.create({
     highlight: false,
-    kind: 'pattern',
+    type: 'pattern',
     pattern: '[%date][%level][%logger] %message',
   });
   expect(patternLayout).toBeInstanceOf(PatternLayout);
 
-  const jsonLayout = Layouts.create({ kind: 'json' });
+  const jsonLayout = Layouts.create({ type: 'json' });
   expect(jsonLayout).toBeInstanceOf(JsonLayout);
 });

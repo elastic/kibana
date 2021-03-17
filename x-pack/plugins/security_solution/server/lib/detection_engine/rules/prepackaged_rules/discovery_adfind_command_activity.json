@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "logs-endpoint.events.*",
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "AdFind Command Activity",
   "note": "`AdFind.exe` is a legitimate domain query tool. Rule alerts should be investigated to identify if the user has a role that would explain using this tool and that it is being run from an expected directory and endpoint. Leverage the exception workflow in the Kibana Security App or Elasticsearch API to tune this rule to your environment.",
   "query": "process where event.type in (\"start\", \"process_started\") and \n  (process.name : \"AdFind.exe\" or process.pe.original_file_name == \"AdFind.exe\") and \n  process.args : (\"objectcategory=computer\", \"(objectcategory=computer)\", \n                  \"objectcategory=person\", \"(objectcategory=person)\",\n                  \"objectcategory=subnet\", \"(objectcategory=subnet)\",\n                  \"objectcategory=group\", \"(objectcategory=group)\", \n                  \"objectcategory=organizationalunit\", \"(objectcategory=organizationalunit)\",\n                  \"objectcategory=attributeschema\", \"(objectcategory=attributeschema)\",\n                  \"domainlist\", \"dcmodes\", \"adinfo\", \"dclist\", \"computers_pwnotreqd\", \"trustdmp\")\n",
@@ -72,6 +73,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

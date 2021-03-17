@@ -64,6 +64,7 @@ export {
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getPivotQuery,
+  getRequestPayload,
   isDefaultQuery,
   isMatchAllQuery,
   isSimpleQuery,

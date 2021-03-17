@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses } from '../../../../../cases/common';
 import { StatusActionButton } from './button';
 
 describe('StatusActionButton', () => {
@@ -50,7 +50,7 @@ describe('StatusActionButton', () => {
 
       expect(
         wrapper.find(`[data-test-subj="case-view-status-action-button"]`).first().prop('iconType')
-      ).toBe('folderCheck');
+      ).toBe('folderOpen');
     });
   });
 

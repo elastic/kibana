@@ -25,6 +25,7 @@
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
+    { "path": "../security/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
 
     { "path": "../features/tsconfig.json" },

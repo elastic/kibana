@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 import { useDispatch } from '../../mappings_state_context';
 import { NormalizedRuntimeField } from '../../types';
@@ -68,22 +68,20 @@ export const DeleteRuntimeFieldProvider = ({ children }: Props) => {
       {children(deleteField)}
 
       {state.isModalOpen && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={modalTitle}
-            data-test-subj="runtimeFieldDeleteConfirmModal"
-            onCancel={closeModal}
-            onConfirm={confirmDelete}
-            cancelButtonText={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.deleteRuntimeField.confirmationModal.cancelButtonLabel',
-              {
-                defaultMessage: 'Cancel',
-              }
-            )}
-            buttonColor="danger"
-            confirmButtonText={confirmButtonText}
-          />
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          title={modalTitle}
+          data-test-subj="runtimeFieldDeleteConfirmModal"
+          onCancel={closeModal}
+          onConfirm={confirmDelete}
+          cancelButtonText={i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.deleteRuntimeField.confirmationModal.cancelButtonLabel',
+            {
+              defaultMessage: 'Cancel',
+            }
+          )}
+          buttonColor="danger"
+          confirmButtonText={confirmButtonText}
+        />
       )}
     </>
   );

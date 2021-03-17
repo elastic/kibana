@@ -45,6 +45,7 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
 }) => (
   <div className="step-1">
     {header}
+    <EuiSpacer />
     <EuiFlexGroup
       justifyContent="flexStart"
       alignItems="flexStart"

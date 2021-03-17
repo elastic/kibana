@@ -618,3 +618,37 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharecapabletype:only_default_space",
+    "index": ".kibana",
+    "source": {
+      "sharecapabletype": {
+        "title": "A share-capable (isolated) saved-object only in the default space"
+      },
+      "type": "sharecapabletype",
+      "namespaces": ["default"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "sharecapabletype:only_space_1",
+    "index": ".kibana",
+    "source": {
+      "sharecapabletype": {
+        "title": "A share-capable (isolated) saved-object only in space_1"
+      },
+      "type": "sharecapabletype",
+      "namespaces": ["space_1"],
+      "updated_at": "2017-09-21T18:59:16.270Z"
+    },
+    "type": "doc"
+  }
+}

@@ -229,6 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
             docValueFields: [],
             hostName: 'raspberrypi',
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
         expect(hostDetails).to.eql(expectedResult.hostDetails);

@@ -7,6 +7,7 @@
 
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { sampleSignalHit } from '../__mocks__/es_results';
+import { ThreatMatchNamedQuery } from './types';
 
 import {
   calculateAdditiveMax,
@@ -14,6 +15,8 @@ import {
   calculateMaxLookBack,
   combineConcurrentResults,
   combineResults,
+  decodeThreatMatchNamedQuery,
+  encodeThreatMatchNamedQuery,
 } from './utils';
 
 describe('utils', () => {
@@ -578,6 +581,61 @@ describe('utils', () => {
           errors: ['error 1', 'error 2', 'error 3', 'error 4', 'error 5'],
         })
       );
+    });
+  });
+
+  describe('threat match queries', () => {
+    describe('encodeThreatMatchNamedQuery()', () => {
+      it('generates a string that can be later decoded', () => {
+        const encoded = encodeThreatMatchNamedQuery({
+          id: 'id',
+          index: 'index',
+          field: 'field',
+          value: 'value',
+        });
+
+        expect(typeof encoded).toEqual('string');
+      });
+    });
+
+    describe('decodeThreatMatchNamedQuery()', () => {
+      it('can decode an encoded query', () => {
+        const query: ThreatMatchNamedQuery = {
+          id: 'my_id',
+          index: 'index',
+          field: 'threat.indicator.domain',
+          value: 'host.name',
+        };
+
+        const encoded = encodeThreatMatchNamedQuery(query);
+        const decoded = decodeThreatMatchNamedQuery(encoded);
+
+        expect(decoded).not.toBe(query);
+        expect(decoded).toEqual(query);
+      });
+
+      it('raises an error if the input is invalid', () => {
+        const badInput = 'nope';
+
+        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
+          'Decoded query is invalid. Decoded value: {"id":"nope"}'
+        );
+      });
+
+      it('raises an error if the query is missing a value', () => {
+        const badQuery: ThreatMatchNamedQuery = {
+          id: 'my_id',
+          index: 'index',
+          // @ts-expect-error field intentionally undefined
+          field: undefined,
+          value: 'host.name',
+        };
+        const badInput = encodeThreatMatchNamedQuery(badQuery);
+
+        expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
+          'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name"}'
+        );
+      });
     });
   });
 });

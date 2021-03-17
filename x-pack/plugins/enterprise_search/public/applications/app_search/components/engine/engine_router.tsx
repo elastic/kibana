@@ -28,17 +28,20 @@ import {
   // META_ENGINE_SOURCE_ENGINES_PATH,
   ENGINE_RELEVANCE_TUNING_PATH,
   // ENGINE_SYNONYMS_PATH,
-  // ENGINE_CURATIONS_PATH,
-  // ENGINE_RESULT_SETTINGS_PATH,
+  ENGINE_CURATIONS_PATH,
+  ENGINE_RESULT_SETTINGS_PATH,
   // ENGINE_SEARCH_UI_PATH,
   // ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { AnalyticsRouter } from '../analytics';
+import { CurationsRouter } from '../curations';
 import { DocumentDetail, Documents } from '../documents';
 import { OVERVIEW_TITLE } from '../engine_overview';
 import { EngineOverview } from '../engine_overview';
 import { ENGINES_TITLE } from '../engines';
 import { RelevanceTuning } from '../relevance_tuning';
+
+import { ResultSettings } from '../result_settings';
 
 import { EngineLogic } from './';
 
@@ -46,14 +49,14 @@ export const EngineRouter: React.FC = () => {
   const {
     myRole: {
       canViewEngineAnalytics,
-      canManageEngineRelevanceTuning,
       // canViewEngineDocuments,
       // canViewEngineSchema,
       // canViewEngineCrawler,
       // canViewMetaEngineSourceEngines,
+      canManageEngineRelevanceTuning,
       // canManageEngineSynonyms,
-      // canManageEngineCurations,
-      // canManageEngineResultSettings,
+      canManageEngineCurations,
+      canManageEngineResultSettings,
       // canManageEngineSearchUi,
       // canViewEngineApiLogs,
     },
@@ -97,9 +100,19 @@ export const EngineRouter: React.FC = () => {
       <Route path={ENGINE_DOCUMENTS_PATH}>
         <Documents engineBreadcrumb={engineBreadcrumb} />
       </Route>
+      {canManageEngineCurations && (
+        <Route path={ENGINE_CURATIONS_PATH}>
+          <CurationsRouter engineBreadcrumb={engineBreadcrumb} />
+        </Route>
+      )}
       {canManageEngineRelevanceTuning && (
         <Route path={ENGINE_RELEVANCE_TUNING_PATH}>
           <RelevanceTuning engineBreadcrumb={engineBreadcrumb} />
+        </Route>
+      )}
+      {canManageEngineResultSettings && (
+        <Route path={ENGINE_RESULT_SETTINGS_PATH}>
+          <ResultSettings engineBreadcrumb={engineBreadcrumb} />
         </Route>
       )}
       <Route>

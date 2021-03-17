@@ -13,7 +13,6 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -104,58 +103,56 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
       </EuiButton>
 
       {this.props.location.pathname === '/overview/enrolled_beats/enroll' && (
-        <EuiOverlayMask>
-          <EuiModal
-            onClose={() => {
-              this.props.setUrlState({
-                enrollmentToken: '',
-              });
-              this.props.goTo(`/overview/enrolled_beats`);
-            }}
-            style={{ width: '640px' }}
-          >
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                <FormattedMessage
-                  id="xpack.beatsManagement.beats.enrollNewBeatsTitle"
-                  defaultMessage="Enroll a new Beat"
-                />
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <EnrollBeat
-                frameworkBasePath={this.props.libs.framework.info.basePath}
-                enrollmentToken={this.props.urlState.enrollmentToken}
-                getBeatWithToken={this.props.containers.beats.getBeatWithToken}
-                createEnrollmentToken={async () => {
-                  const enrollmentTokens = await this.props.libs.tokens.createEnrollmentTokens();
-                  this.props.setUrlState({
-                    enrollmentToken: enrollmentTokens[0],
-                  });
-                }}
-                onBeatEnrolled={() => {
-                  this.props.setUrlState({
-                    enrollmentToken: '',
-                  });
-                }}
+        <EuiModal
+          onClose={() => {
+            this.props.setUrlState({
+              enrollmentToken: '',
+            });
+            this.props.goTo(`/overview/enrolled_beats`);
+          }}
+          style={{ width: '640px' }}
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
+              <FormattedMessage
+                id="xpack.beatsManagement.beats.enrollNewBeatsTitle"
+                defaultMessage="Enroll a new Beat"
               />
-              {!this.props.urlState.enrollmentToken && (
-                <React.Fragment>
-                  <EuiButton
-                    size="s"
-                    color="primary"
-                    style={{ marginLeft: 10 }}
-                    onClick={async () => {
-                      this.props.goTo('/overview/enrolled_beats');
-                    }}
-                  >
-                    Done
-                  </EuiButton>
-                </React.Fragment>
-              )}
-            </EuiModalBody>
-          </EuiModal>
-        </EuiOverlayMask>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EnrollBeat
+              frameworkBasePath={this.props.libs.framework.info.basePath}
+              enrollmentToken={this.props.urlState.enrollmentToken}
+              getBeatWithToken={this.props.containers.beats.getBeatWithToken}
+              createEnrollmentToken={async () => {
+                const enrollmentTokens = await this.props.libs.tokens.createEnrollmentTokens();
+                this.props.setUrlState({
+                  enrollmentToken: enrollmentTokens[0],
+                });
+              }}
+              onBeatEnrolled={() => {
+                this.props.setUrlState({
+                  enrollmentToken: '',
+                });
+              }}
+            />
+            {!this.props.urlState.enrollmentToken && (
+              <React.Fragment>
+                <EuiButton
+                  size="s"
+                  color="primary"
+                  style={{ marginLeft: 10 }}
+                  onClick={async () => {
+                    this.props.goTo('/overview/enrolled_beats');
+                  }}
+                >
+                  Done
+                </EuiButton>
+              </React.Fragment>
+            )}
+          </EuiModalBody>
+        </EuiModal>
       )}
     </React.Fragment>
   );

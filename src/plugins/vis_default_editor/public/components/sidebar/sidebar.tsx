@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
+import React, {
+  memo,
+  useMemo,
+  useState,
+  useCallback,
+  KeyboardEventHandler,
+  useEffect,
+} from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -39,7 +46,7 @@ interface DefaultEditorSideBarProps {
   timeRange: TimeRange;
 }
 
-function DefaultEditorSideBar({
+function DefaultEditorSideBarComponent({
   embeddableHandler,
   isCollapsed,
   onClickCollapse,
@@ -173,7 +180,7 @@ function DefaultEditorSideBar({
         gutterSize="none"
         responsive={false}
       >
-        <EuiFlexItem className="visEditorSidebar__formWrapper">
+        <EuiFlexItem>
           <form
             className="visEditorSidebar__form"
             name="visualizeEditor"
@@ -235,5 +242,7 @@ function DefaultEditorSideBar({
     </>
   );
 }
+
+const DefaultEditorSideBar = memo(DefaultEditorSideBarComponent);
 
 export { DefaultEditorSideBar };

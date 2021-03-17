@@ -211,9 +211,7 @@ describe('TelemetryService', () => {
       originalFetch = window.fetch;
     });
 
-    // @ts-ignore
     beforeEach(() => (window.fetch = mockFetch = jest.fn()));
-    // @ts-ignore
     afterAll(() => (window.fetch = originalFetch));
 
     it('reports opt-in status to telemetry url', async () => {

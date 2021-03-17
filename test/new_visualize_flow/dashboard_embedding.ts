@@ -47,8 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('adding a metric visualization', async function () {
       const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(originalPanelCount).to.eql(0);
-      await testSubjects.exists('addVisualizationButton');
-      await testSubjects.click('addVisualizationButton');
+      await testSubjects.exists('dashboardAddNewPanelButton');
+      await testSubjects.click('dashboardAddNewPanelButton');
       await dashboardVisualizations.createAndEmbedMetric('Embedding Vis Test');
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.metricValuesExist(['0']);

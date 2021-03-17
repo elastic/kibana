@@ -9,6 +9,7 @@
 import { Transform } from 'stream';
 import { Client } from '@elastic/elasticsearch';
 import { Stats } from '../stats';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
   return new Transform({
@@ -17,22 +18,27 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
     async transform(indexOrAlias, enc, callback) {
       try {
         const resp = (
-          await client.indices.get({
-            index: indexOrAlias,
-            filter_path: [
-              '*.settings',
-              '*.mappings',
-              // remove settings that aren't really settings
-              '-*.settings.index.creation_date',
-              '-*.settings.index.uuid',
-              '-*.settings.index.version',
-              '-*.settings.index.provided_name',
-              '-*.settings.index.frozen',
-              '-*.settings.index.search.throttled',
-              '-*.settings.index.query',
-              '-*.settings.index.routing',
-            ],
-          })
+          await client.indices.get(
+            {
+              index: indexOrAlias,
+              filter_path: [
+                '*.settings',
+                '*.mappings',
+                // remove settings that aren't really settings
+                '-*.settings.index.creation_date',
+                '-*.settings.index.uuid',
+                '-*.settings.index.version',
+                '-*.settings.index.provided_name',
+                '-*.settings.index.frozen',
+                '-*.settings.index.search.throttled',
+                '-*.settings.index.query',
+                '-*.settings.index.routing',
+              ],
+            },
+            {
+              headers: ES_CLIENT_HEADERS,
+            }
+          )
         ).body as Record<string, any>;
 
         for (const [index, { settings, mappings }] of Object.entries(resp)) {
@@ -40,7 +46,12 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
             body: {
               [index]: { aliases },
             },
-          } = await client.indices.getAlias({ index });
+          } = await client.indices.getAlias(
+            { index },
+            {
+              headers: ES_CLIENT_HEADERS,
+            }
+          );
 
           stats.archivedIndex(index, { settings, mappings });
           this.push({

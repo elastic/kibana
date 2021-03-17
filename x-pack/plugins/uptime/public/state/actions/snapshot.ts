@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
 import { Snapshot } from '../../../common/runtime_types';
+import { createAsyncAction } from './utils';
+import { SnapShotQueryParams } from '../api';
 
-export interface GetSnapshotPayload {
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  filters?: string;
-}
-
-export const getSnapshotCountAction = createAction<GetSnapshotPayload>('GET_SNAPSHOT_COUNT');
-export const getSnapshotCountActionSuccess = createAction<Snapshot>('GET_SNAPSHOT_COUNT_SUCCESS');
-export const getSnapshotCountActionFail = createAction<Error>('GET_SNAPSHOT_COUNT_FAIL');
+export const getSnapshotCountAction = createAsyncAction<SnapShotQueryParams, Snapshot>(
+  'GET_SNAPSHOT_COUNT'
+);

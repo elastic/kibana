@@ -5,8 +5,7 @@
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
-      "kibana/server": ["src/core/server"],
-      "fixtures/*": ["src/fixtures/*"]
+      "kibana/server": ["src/core/server"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
@@ -37,10 +36,12 @@
     // Resolve modules in the same way as Node.js. Aka make `require` works the
     // same in TypeScript as it does in Node.js.
     "moduleResolution": "node",
+    // Do not resolve the real path of symlinks
+    "preserveSymlinks": true,
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": false,
     // Forbid unused local variables as the rule was deprecated by ts-lint
     "noUnusedLocals": true,
     // Provide full support for iterables in for..of, spread and destructuring when targeting ES5 or ES3.

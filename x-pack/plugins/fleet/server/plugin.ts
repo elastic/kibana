@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import {
+import type {
   CoreSetup,
   CoreStart,
   ElasticsearchServiceStart,
@@ -20,15 +20,24 @@ import {
   RequestHandlerContext,
   KibanaRequest,
 } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { LicensingPluginSetup, ILicense } from '../../licensing/server';
-import {
+import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
+import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '../../encrypted_saved_objects/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type {
+  EsAssetReference,
+  FleetConfigType,
+  NewPackagePolicy,
+  UpdatePackagePolicy,
+} from '../common';
+import type { CloudSetup } from '../../cloud/server';
+
 import {
   PLUGIN_ID,
   OUTPUT_SAVED_OBJECT_TYPE,
@@ -55,22 +64,18 @@ import {
   registerSettingsRoutes,
   registerAppRoutes,
 } from './routes';
-import {
-  EsAssetReference,
-  FleetConfigType,
-  NewPackagePolicy,
-  UpdatePackagePolicy,
-} from '../common';
+import type {
+  ESIndexPatternService,
+  AgentService,
+  AgentPolicyServiceInterface,
+  PackageService,
+} from './services';
 import {
   appContextService,
   licenseService,
   ESIndexPatternSavedObjectService,
-  ESIndexPatternService,
-  AgentService,
-  AgentPolicyServiceInterface,
   agentPolicyService,
   packagePolicyService,
-  PackageService,
 } from './services';
 import {
   getAgentStatusById,
@@ -78,12 +83,12 @@ import {
   listAgents,
   getAgent,
 } from './services/agents';
-import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
 import { makeRouterEnforcingSuperuser } from './routes/security';
-import { isFleetServerSetup } from './services/fleet_server_migration';
+import { startFleetServerSetup } from './services/fleet_server';
+import { FleetArtifactsClient } from './services/artifacts';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
@@ -166,6 +171,12 @@ export interface FleetStartContract {
    * @param args
    */
   registerExternalCallback: (...args: ExternalCallback) => void;
+
+  /**
+   * Create a Fleet Artifact Client instance
+   * @param packageName
+   */
+  createArtifactsClient: (packageName: string) => FleetArtifactsClient;
 }
 
 export class FleetPlugin
@@ -297,19 +308,7 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
     agentCheckinState.start();
 
-    const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
-    if (fleetServerEnabled) {
-      // We need licence to be initialized before using the SO service.
-      await this.licensing$.pipe(first()).toPromise();
-
-      const fleetSetup = await isFleetServerSetup();
-
-      if (!fleetSetup) {
-        this.logger?.warn(
-          'Extra setup is needed to be able to use central management for agent, please visit the Fleet app in Kibana.'
-        );
-      }
-    }
+    startFleetServerSetup();
 
     return {
       esIndexPatternService: new ESIndexPatternSavedObjectService(),
@@ -337,6 +336,9 @@ export class FleetPlugin
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
         return appContextService.addExternalCallback(type, callback);
+      },
+      createArtifactsClient(packageName: string) {
+        return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
     };
   }

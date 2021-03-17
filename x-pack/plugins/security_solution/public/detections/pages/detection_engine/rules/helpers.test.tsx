@@ -84,6 +84,10 @@ describe('rule helpers', () => {
         threshold: {
           field: ['host.name'],
           value: '50',
+          cardinality: {
+            field: ['process.name'],
+            value: '2',
+          },
         },
         threatIndex: [],
         threatMapping: [],

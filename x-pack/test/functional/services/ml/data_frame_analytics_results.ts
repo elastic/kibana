@@ -32,6 +32,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
     async assertClassificationEvaluatePanelElementsExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-ClassificationEvaluation');
       await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationConfusionMatrix');
+      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationRocCurveChart');
     },
 
     async assertClassificationTablePanelExists() {
@@ -110,6 +111,21 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
         '[data-test-subj="dataGridRowCell"][class*="featureImportance"]'
       );
       return featureImportanceCell;
+    },
+
+    async assertFeatureInfluenceCellNotEmpty() {
+      // get first row of the data grid
+      const dataGrid = await testSubjects.find('mlExplorationDataGrid loaded');
+      // find the feature influence cell in that row
+      const featureInfluenceCell = await dataGrid.findByCssSelector(
+        '[data-test-subj="dataGridRowCell"][class*="featureInfluence"]'
+      );
+      const contentString = await featureInfluenceCell.getVisibleText();
+
+      expect(contentString.length).to.be.greaterThan(
+        0,
+        'Expected feature influence cell to have content but it is empty.'
+      );
     },
 
     async waitForInteractionButtonToDisplay(interactionButton: WebElementWrapper) {

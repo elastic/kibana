@@ -34,5 +34,6 @@ fieldFormats: {
     UrlFormat: typeof UrlFormat;
     StringFormat: typeof StringFormat;
     TruncateFormat: typeof TruncateFormat;
+    HistogramFormat: typeof HistogramFormat;
 }
 ```

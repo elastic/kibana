@@ -50,6 +50,7 @@ export const hostsSchema = gql`
     success
     failure
     warning
+    unsupported
   }
 
   type EndpointFields {

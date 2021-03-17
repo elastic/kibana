@@ -54,6 +54,8 @@ const createTestCases = (overwrite: boolean) => {
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...destinationId() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...destinationId() },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_DEFAULT_SPACE, ...fail409(!overwrite) },
+    { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...destinationId() },
     { ...CASES.CONFLICT_1A_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
     { ...CASES.CONFLICT_1B_OBJ, ...newCopy() }, // "ambiguous source" conflict which results in a new destination ID and empty origin ID
     { ...CASES.CONFLICT_3A_OBJ, ...fail409(!overwrite), ...destinationId() }, // "inexact match" conflict
@@ -103,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
               'globaltype',
               'isolatedtype',
               'sharedtype',
+              'sharecapabletype',
             ]),
           }),
         ].flat(),

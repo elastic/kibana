@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ImportRetry } from '../types';
-import { SummarizedCopyToSpaceResult, SummarizedSavedObjectResult } from '..';
+
+import type { SummarizedCopyToSpaceResult, SummarizedSavedObjectResult } from '../lib';
+import type { ImportRetry } from '../types';
 
 interface Props {
   summarizedCopyResult: SummarizedCopyToSpaceResult;

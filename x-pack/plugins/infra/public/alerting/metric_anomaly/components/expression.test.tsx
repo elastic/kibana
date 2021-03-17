@@ -25,6 +25,12 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_kibana_space', () => ({
+  useActiveKibanaSpace: () => ({
+    space: { id: 'default' },
+  }),
+}));
+
 jest.mock('../../../containers/ml/infra_ml_capabilities', () => ({
   useInfraMLCapabilities: () => ({
     isLoading: false,
@@ -43,8 +49,9 @@ describe('Expression', () => {
       <Expression
         alertInterval="1m"
         alertThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
         alertParams={alertParams as any}
-        errors={[]}
+        errors={{}}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
         setAlertProperty={() => {}}
         metadata={currentOptions}

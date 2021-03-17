@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import { SavedObject, CoreStart, KibanaRequest, SavedObjectsImportRetry } from 'src/core/server';
+import type { Readable } from 'stream';
+
+import type {
+  CoreStart,
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsImportRetry,
+} from 'src/core/server';
+
 import { spaceIdToNamespace } from '../utils/namespace';
-import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
+import { getIneligibleTypes } from './lib/get_ineligible_types';
 import { readStreamToCompletion } from './lib/read_stream_to_completion';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
 import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from './lib/saved_objects_client_opts';
-import { getIneligibleTypes } from './lib/get_ineligible_types';
+import type { CopyOptions, CopyResponse, ResolveConflictsOptions } from './types';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
   savedObjects: CoreStart['savedObjects'],

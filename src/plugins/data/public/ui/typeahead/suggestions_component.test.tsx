@@ -115,7 +115,7 @@ describe('SuggestionsComponent', () => {
 
     component.find(SuggestionComponent).at(1).simulate('click');
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith(mockSuggestions[1]);
+    expect(mockCallback).toHaveBeenCalledWith(mockSuggestions[1], 1);
   });
 
   it('Should call onMouseEnter with the index of the suggestion that was entered', () => {

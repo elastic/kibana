@@ -3,6 +3,7 @@
 exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
 <div>
   <Table
+    deleteField={[Function]}
     editField={[Function]}
     indexPattern={
       Object {
@@ -14,12 +15,17 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
       Array [
         Object {
           "displayName": "Elastic",
+          "esTypes": Array [
+            "keyword",
+          ],
           "excluded": false,
           "format": "",
           "info": Array [],
+          "isMapped": false,
+          "kbnType": undefined,
           "name": "Elastic",
           "searchable": true,
-          "type": "string",
+          "type": "keyword",
         },
       ]
     }
@@ -30,6 +36,7 @@ exports[`IndexedFieldsTable should filter based on the query bar 1`] = `
 exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
 <div>
   <Table
+    deleteField={[Function]}
     editField={[Function]}
     indexPattern={
       Object {
@@ -41,9 +48,14 @@ exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
       Array [
         Object {
           "displayName": "timestamp",
+          "esTypes": Array [
+            "date",
+          ],
           "excluded": false,
           "format": "",
           "info": Array [],
+          "isMapped": false,
+          "kbnType": undefined,
           "name": "timestamp",
           "type": "date",
         },
@@ -56,6 +68,7 @@ exports[`IndexedFieldsTable should filter based on the type filter 1`] = `
 exports[`IndexedFieldsTable should render normally 1`] = `
 <div>
   <Table
+    deleteField={[Function]}
     editField={[Function]}
     indexPattern={
       Object {
@@ -67,28 +80,44 @@ exports[`IndexedFieldsTable should render normally 1`] = `
       Array [
         Object {
           "displayName": "Elastic",
+          "esTypes": Array [
+            "keyword",
+          ],
           "excluded": false,
           "format": "",
           "info": Array [],
+          "isMapped": false,
+          "kbnType": undefined,
           "name": "Elastic",
           "searchable": true,
-          "type": "string",
+          "type": "keyword",
         },
         Object {
           "displayName": "timestamp",
+          "esTypes": Array [
+            "date",
+          ],
           "excluded": false,
           "format": "",
           "info": Array [],
+          "isMapped": false,
+          "kbnType": undefined,
           "name": "timestamp",
           "type": "date",
         },
         Object {
           "displayName": "conflictingField",
+          "esTypes": Array [
+            "keyword",
+            "long",
+          ],
           "excluded": false,
           "format": "",
           "info": Array [],
+          "isMapped": false,
+          "kbnType": undefined,
           "name": "conflictingField",
-          "type": "conflict",
+          "type": "keyword, long",
         },
       ]
     }

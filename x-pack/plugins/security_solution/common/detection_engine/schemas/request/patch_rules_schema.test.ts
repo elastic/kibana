@@ -973,7 +973,7 @@ describe('patch_rules_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('threat is invalid when updated with missing technique', () => {
+  test('threat is valid when updated with missing technique', () => {
     const threat: Omit<PatchRulesSchema['threat'], 'technique'> = [
       {
         framework: 'fake',
@@ -993,10 +993,8 @@ describe('patch_rules_schema', () => {
     const decoded = patchRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threat,technique"',
-    ]);
-    expect(message.schema).toEqual({});
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
   });
 
   test('validates with timeline_id and timeline_title', () => {

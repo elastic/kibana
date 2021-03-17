@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
 export interface HasPrivilegesResponseApplication {
   [resource: string]: {

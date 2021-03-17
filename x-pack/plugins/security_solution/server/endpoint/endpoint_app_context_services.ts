@@ -20,11 +20,11 @@ import {
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
-import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
+import { PluginStartContract as AlertsPluginStartContract } from '../../../alerting/server';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
-} from './ingest_integration';
+} from '../fleet_integration/fleet_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
 import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
@@ -88,7 +88,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
   security: SecurityPluginSetup;
-  alerts: AlertsPluginStartContract;
+  alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
@@ -125,7 +125,7 @@ export class EndpointAppContextService {
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
           dependencies.security,
-          dependencies.alerts,
+          dependencies.alerting,
           dependencies.licenseService,
           dependencies.exceptionListsClient
         )

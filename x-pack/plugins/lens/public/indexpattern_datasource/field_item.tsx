@@ -122,14 +122,15 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   });
 
   function fetchData() {
-    if (state.isLoading) {
+    // Range types don't have any useful stats we can show
+    if (state.isLoading || field.type === 'document' || field.type.includes('range')) {
       return;
     }
 
     setState((s) => ({ ...s, isLoading: true }));
 
     core.http
-      .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
+      .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
             indexPattern as IIndexPattern,
@@ -139,8 +140,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           ),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
-          timeFieldName: indexPattern.timeFieldName,
-          field,
+          fieldName: field.name,
         }),
       })
       .then((results: FieldStatsResponse<string | number>) => {
@@ -289,7 +289,7 @@ function FieldPanelHeader({
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h5 className="lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
+          <h5 className="eui-textBreakWord lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
         </EuiTitle>
       </EuiFlexItem>
 
@@ -377,6 +377,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   if (props.isLoading) {
     return <EuiLoadingSpinner />;
+  } else if (field.type.includes('range')) {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsLimited', {
+            defaultMessage: `Summary information is not available for range type fields.`,
+          })}
+        </EuiText>
+      </>
+    );
   } else if (
     (!props.histogram || props.histogram.buckets.length === 0) &&
     (!props.topValues || props.topValues.buckets.length === 0)

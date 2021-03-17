@@ -10,7 +10,7 @@ import { DiscoverProps } from './types';
 import { getTopNavLinks } from './top_nav/get_top_nav_links';
 import { Query, TimeRange } from '../../../../data/common/query';
 
-export type DiscoverTopNavProps = Pick<DiscoverProps, 'indexPattern' | 'opts'> & {
+export type DiscoverTopNavProps = Pick<DiscoverProps, 'indexPattern' | 'opts' | 'searchSource'> & {
   onOpenInspector: () => void;
   query?: Query;
   savedQuery?: string;
@@ -24,6 +24,7 @@ export const DiscoverTopNav = ({
   query,
   savedQuery,
   updateQuery,
+  searchSource,
 }: DiscoverTopNavProps) => {
   const showDatePicker = useMemo(() => indexPattern.isTimeBased(), [indexPattern]);
   const { TopNavMenu } = opts.services.navigation.ui;
@@ -38,8 +39,9 @@ export const DiscoverTopNav = ({
         services: opts.services,
         state: opts.stateContainer,
         onOpenInspector,
+        searchSource,
       }),
-    [indexPattern, opts, onOpenInspector]
+    [indexPattern, opts, onOpenInspector, searchSource]
   );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {

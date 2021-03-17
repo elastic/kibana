@@ -13,6 +13,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
+import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../../../common';
 
 const mockSearchApi = jest.fn();
 
@@ -34,6 +35,13 @@ jest.mock('../../../kibana_services', () => {
           apis: {
             indexExists: 'mockUrl',
           },
+        },
+      },
+      uiSettings: {
+        get: (key: string) => {
+          if (key === mockSearchFieldsFromSource) {
+            return false;
+          }
         },
       },
     }),

@@ -40,6 +40,9 @@ export const configSchema = schema.object({
       elasticsearch: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
+      apm: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
       logstash: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),

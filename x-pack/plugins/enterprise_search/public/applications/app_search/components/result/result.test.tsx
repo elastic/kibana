@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
@@ -93,6 +94,53 @@ describe('Result', () => {
       expect(wrapper.hasClass('appSearchResult--link')).toBe(false);
       expect(wrapper.find('.appSearchResult__content--link').exists()).toBe(false);
       expect(wrapper.find('.appSearchResult__actionButton--link').exists()).toBe(false);
+    });
+  });
+
+  describe('actions', () => {
+    const actions = [
+      {
+        title: 'Hide',
+        onClick: jest.fn(),
+        iconType: 'eyeClosed',
+        iconColor: 'danger',
+      },
+      {
+        title: 'Bookmark',
+        onClick: jest.fn(),
+        iconType: 'starFilled',
+        iconColor: 'primary',
+      },
+    ];
+
+    it('will render an action button for each action passed', () => {
+      const wrapper = shallow(<Result {...props} actions={actions} />);
+      expect(wrapper.find('.appSearchResult__actionButton')).toHaveLength(2);
+
+      wrapper.find('.appSearchResult__actionButton').first().simulate('click');
+      expect(actions[0].onClick).toHaveBeenCalled();
+
+      wrapper.find('.appSearchResult__actionButton').last().simulate('click');
+      expect(actions[1].onClick).toHaveBeenCalled();
+    });
+
+    it('will render custom actions seamlessly next to the document detail link', () => {
+      const wrapper = shallow(<Result {...props} actions={actions} shouldLinkToDetailPage />);
+      expect(wrapper.find('.appSearchResult__actionButton')).toHaveLength(3);
+    });
+  });
+
+  describe('dragging', () => {
+    // In the real world, the drag library sets data attributes, role, tabIndex, etc.
+    const mockDragHandleProps = ({
+      someMockProp: true,
+    } as unknown) as DraggableProvidedDragHandleProps;
+
+    it('will render a drag handle with the passed props', () => {
+      const wrapper = shallow(<Result {...props} dragHandleProps={mockDragHandleProps} />);
+
+      expect(wrapper.find('.appSearchResult__dragHandle')).toHaveLength(1);
+      expect(wrapper.find('.appSearchResult__dragHandle').prop('someMockProp')).toEqual(true);
     });
   });
 

@@ -63,7 +63,7 @@ const records: LogRecord[] = [
 test('`createConfigSchema()` creates correct schema.', () => {
   const layoutSchema = JsonLayout.configSchema;
 
-  expect(layoutSchema.validate({ kind: 'json' })).toEqual({ kind: 'json' });
+  expect(layoutSchema.validate({ type: 'json' })).toEqual({ type: 'json' });
 });
 
 test('`format()` correctly formats record.', () => {

@@ -22,6 +22,7 @@ import {
   getTimeFilters,
   getLayerList,
   getSearchSessionId,
+  getSearchSessionMapBuffer,
 } from '../selectors/map_selectors';
 import {
   CLEAR_GOTO,
@@ -229,12 +230,14 @@ export function setQuery({
   filters = [],
   forceRefresh = false,
   searchSessionId,
+  searchSessionMapBuffer,
 }: {
   filters?: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
   forceRefresh?: boolean;
   searchSessionId?: string;
+  searchSessionMapBuffer?: MapExtent;
 }) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -255,6 +258,7 @@ export function setQuery({
       },
       filters: filters ? filters : getFilters(getState()),
       searchSessionId,
+      searchSessionMapBuffer,
     };
 
     const prevQueryContext = {
@@ -262,6 +266,7 @@ export function setQuery({
       query: getQuery(getState()),
       filters: getFilters(getState()),
       searchSessionId: getSearchSessionId(getState()),
+      searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),
     };
 
     if (_.isEqual(nextQueryContext, prevQueryContext)) {

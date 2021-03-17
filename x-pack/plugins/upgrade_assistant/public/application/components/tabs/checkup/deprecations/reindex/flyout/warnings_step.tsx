@@ -11,58 +11,34 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCheckbox,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiLink,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../app_context';
-import { ReindexWarning } from '../../../../../../../../common/types';
+import {
+  CustomTypeNameWarningCheckbox,
+  DeprecatedSettingWarningCheckbox,
+  WarningCheckboxProps,
+} from './warning_step_checkbox';
 
 interface CheckedIds {
   [id: string]: boolean;
 }
 
-export const idForWarning = (warning: ReindexWarning) => `reindexWarning-${warning}`;
+const warningToComponentMap: {
+  [key in ReindexWarningTypes]: React.FunctionComponent<WarningCheckboxProps>;
+} = {
+  customTypeName: CustomTypeNameWarningCheckbox,
+  indexSetting: DeprecatedSettingWarningCheckbox,
+};
 
-const WarningCheckbox: React.FunctionComponent<{
-  checkedIds: CheckedIds;
-  warning: ReindexWarning;
-  label: React.ReactNode;
-  description: React.ReactNode;
-  documentationUrl: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}> = ({ checkedIds, warning, label, onChange, description, documentationUrl }) => (
-  <>
-    <EuiText>
-      <EuiCheckbox
-        id={idForWarning(warning)}
-        label={<strong>{label}</strong>}
-        checked={checkedIds[idForWarning(warning)]}
-        onChange={onChange}
-      />
-      <p className="upgWarningsStep__warningDescription">
-        {description}
-        <br />
-        <EuiLink href={documentationUrl} target="_blank" external>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel"
-            defaultMessage="Documentation"
-          />
-        </EuiLink>
-      </p>
-    </EuiText>
-
-    <EuiSpacer />
-  </>
-);
-
+export const idForWarning = (id: number) => `reindexWarning-${id}`;
 interface WarningsConfirmationFlyoutProps {
   renderGlobalCallouts: () => React.ReactNode;
   closeFlyout: () => void;
@@ -80,9 +56,12 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   closeFlyout,
   advanceNextStep,
 }) => {
+  const { docLinks } = useAppContext();
+  const { links } = docLinks;
+
   const [checkedIds, setCheckedIds] = useState<CheckedIds>(
-    warnings.reduce((initialCheckedIds, warning) => {
-      initialCheckedIds[idForWarning(warning)] = false;
+    warnings.reduce((initialCheckedIds, warning, index) => {
+      initialCheckedIds[idForWarning(index)] = false;
       return initialCheckedIds;
     }, {} as { [id: string]: boolean })
   );
@@ -101,16 +80,11 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
     }));
   };
 
-  const { docLinks } = useAppContext();
-  const { ELASTIC_WEBSITE_URL } = docLinks;
-  const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference`;
-  const observabilityDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/observability`;
-
-  // TODO: Revisit warnings returned for 8.0 upgrade; many of these are likely obselete now
   return (
     <>
       <EuiFlyoutBody>
         {renderGlobalCallouts()}
+
         <EuiCallOut
           title={
             <FormattedMessage
@@ -131,87 +105,19 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
 
         <EuiSpacer />
 
-        {warnings.includes(ReindexWarning.allField) && (
-          <WarningCheckbox
-            checkedIds={checkedIds}
-            onChange={onChange}
-            warning={ReindexWarning.allField}
-            label={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningTitle"
-                defaultMessage="{allField} will be removed"
-                values={{
-                  allField: <EuiCode>_all</EuiCode>,
-                }}
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningDetail"
-                defaultMessage="The {allField} meta field is no longer supported in 7.0. Reindexing removes
-                      the {allField} field in the new index. Ensure that no application code or scripts reply on
-                      this field."
-                values={{
-                  allField: <EuiCode>_all</EuiCode>,
-                }}
-              />
-            }
-            documentationUrl={`${esDocBasePath}/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default`}
-          />
-        )}
-
-        {warnings.includes(ReindexWarning.apmReindex) && (
-          <WarningCheckbox
-            checkedIds={checkedIds}
-            onChange={onChange}
-            warning={ReindexWarning.apmReindex}
-            label={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningTitle"
-                defaultMessage="This index will be converted to ECS format"
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail"
-                defaultMessage="Starting in version 7.0.0, APM data will be represented in the Elastic Common Schema.
-                      Historical APM data will not visible until it's reindexed."
-              />
-            }
-            documentationUrl={`${observabilityDocBasePath}/master/whats-new.html`}
-          />
-        )}
-
-        {warnings.includes(ReindexWarning.booleanFields) && (
-          <WarningCheckbox
-            checkedIds={checkedIds}
-            onChange={onChange}
-            warning={ReindexWarning.booleanFields}
-            label={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningTitle"
-                defaultMessage="Boolean data in {_source} might change"
-                values={{ _source: <EuiCode>_source</EuiCode> }}
-              />
-            }
-            description={
-              <FormattedMessage
-                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningDetail"
-                defaultMessage="If a document contain a boolean field that is neither {true} or {false}
-                   (for example, {yes}, {on}, {one}), reindexing converts these fields to {true} or {false}.
-                   Ensure that no application code or scripts rely on boolean fields in the deprecated format."
-                values={{
-                  true: <EuiCode>true</EuiCode>,
-                  false: <EuiCode>false</EuiCode>,
-                  yes: <EuiCode>&quot;yes&quot;</EuiCode>,
-                  on: <EuiCode>&quot;on&quot;</EuiCode>,
-                  one: <EuiCode>1</EuiCode>,
-                }}
-              />
-            }
-            documentationUrl={`${esDocBasePath}/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_field`}
-          />
-        )}
+        {warnings.map((warning, index) => {
+          const WarningCheckbox = warningToComponentMap[warning.warningType];
+          return (
+            <WarningCheckbox
+              key={idForWarning(index)}
+              isChecked={checkedIds[idForWarning(index)]}
+              onChange={onChange}
+              docLinks={links}
+              id={idForWarning(index)}
+              meta={warning.meta}
+            />
+          );
+        })}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

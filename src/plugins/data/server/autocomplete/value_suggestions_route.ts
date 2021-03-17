@@ -57,17 +57,13 @@ export function registerValueSuggestionsRoute(
       const field = indexPattern && getFieldByName(fieldName, indexPattern);
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, filters);
 
-      try {
-        const result = await client.callAsCurrentUser('search', { index, body }, { signal });
+      const result = await client.callAsCurrentUser('search', { index, body }, { signal });
 
-        const buckets: any[] =
-          get(result, 'aggregations.suggestions.buckets') ||
-          get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
+      const buckets: any[] =
+        get(result, 'aggregations.suggestions.buckets') ||
+        get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
 
-        return response.ok({ body: map(buckets || [], 'key') });
-      } catch (error) {
-        return response.internalError({ body: error });
-      }
+      return response.ok({ body: map(buckets || [], 'key') });
     }
   );
 }

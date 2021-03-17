@@ -8,16 +8,20 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionEntries } from './exception_entries';
 import { getFormattedEntryMock } from '../../exceptions.mock';
 import { getEmptyValue } from '../../../empty_value';
+import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
+
+const mockTheme = getMockTheme({
+  eui: { euiSize: '10px', euiColorPrimary: '#ece', euiColorDanger: '#ece' },
+});
 
 describe('ExceptionEntries', () => {
   test('it does NOT render the and badge if only one exception item entry exists', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock()]}
@@ -32,7 +36,7 @@ describe('ExceptionEntries', () => {
 
   test('it renders the and badge if more than one exception item exists', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock(), getFormattedEntryMock()]}
@@ -48,7 +52,7 @@ describe('ExceptionEntries', () => {
   test('it invokes "onEdit" when edit button clicked', () => {
     const mockOnEdit = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock()]}
@@ -66,7 +70,7 @@ describe('ExceptionEntries', () => {
   test('it invokes "onDelete" when delete button clicked', () => {
     const mockOnDelete = jest.fn();
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock()]}
@@ -83,7 +87,7 @@ describe('ExceptionEntries', () => {
 
   test('it renders edit button disabled if "disableDelete" is "true"', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
           disableDelete={true}
           entries={[getFormattedEntryMock()]}
@@ -99,7 +103,7 @@ describe('ExceptionEntries', () => {
 
   test('it renders delete button in loading state if "disableDelete" is "true"', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
           disableDelete={true}
           entries={[getFormattedEntryMock()]}
@@ -120,7 +124,7 @@ describe('ExceptionEntries', () => {
     parentEntry.value = undefined;
 
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
           disableDelete={false}
           entries={[parentEntry, getFormattedEntryMock(true)]}
@@ -162,7 +166,7 @@ describe('ExceptionEntries', () => {
 
   test('it renders non-nested entries', () => {
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+      <ThemeProvider theme={mockTheme}>
         <ExceptionEntries
           disableDelete={false}
           entries={[getFormattedEntryMock()]}

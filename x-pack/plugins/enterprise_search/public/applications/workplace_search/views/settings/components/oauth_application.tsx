@@ -18,7 +18,6 @@ import {
   EuiSwitch,
   EuiCode,
   EuiSpacer,
-  EuiOverlayMask,
   EuiLink,
   EuiModal,
   EuiModalBody,
@@ -93,25 +92,28 @@ export const OauthApplication: React.FC = () => {
   };
 
   const licenseModal = (
-    <EuiOverlayMask className="oauth-platinum-modal">
-      <EuiModal maxWidth={500} onClose={closeLicenseModal} data-test-subj="LicenseModal">
-        <EuiModalBody>
-          <EuiSpacer size="xl" />
-          <LicenseBadge />
-          <EuiSpacer />
-          <EuiTitle size="l">
-            <h1>{LICENSE_MODAL_TITLE}</h1>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText color="subdued">{LICENSE_MODAL_DESCRIPTION}</EuiText>
-          <EuiSpacer />
-          <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-            {LICENSE_MODAL_LINK}
-          </EuiLink>
-          <EuiSpacer />
-        </EuiModalBody>
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal
+      className="oauth-platinum-modal"
+      maxWidth={500}
+      onClose={closeLicenseModal}
+      data-test-subj="LicenseModal"
+    >
+      <EuiModalBody>
+        <EuiSpacer size="xl" />
+        <LicenseBadge />
+        <EuiSpacer />
+        <EuiTitle size="l">
+          <h1>{LICENSE_MODAL_TITLE}</h1>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText color="subdued">{LICENSE_MODAL_DESCRIPTION}</EuiText>
+        <EuiSpacer />
+        <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+          {LICENSE_MODAL_LINK}
+        </EuiLink>
+        <EuiSpacer />
+      </EuiModalBody>
+    </EuiModal>
   );
 
   return (

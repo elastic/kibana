@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -42,15 +43,21 @@ export function AgentConfigurations() {
       <EuiTitle size="l">
         <h1>
           {i18n.translate('xpack.apm.agentConfig.titleText', {
-            defaultMessage: 'Agent remote configuration',
+            defaultMessage: 'Agent central configuration',
           })}
         </h1>
       </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.agentConfig.descriptionText', {
+          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
+        })}
+      </EuiText>
       <EuiSpacer size="l" />
       <EuiPanel>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle size="s">
               <h2>
                 {i18n.translate(
                   'xpack.apm.agentConfig.configurationsPanelTitle',

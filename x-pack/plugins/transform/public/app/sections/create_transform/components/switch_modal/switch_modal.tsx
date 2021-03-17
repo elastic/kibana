@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 interface Props {
   onCancel: () => void;
@@ -59,19 +59,17 @@ const cancelButtonText = i18n.translate(
 );
 
 export const SwitchModal: FC<Props> = ({ onCancel, onConfirm, type }) => (
-  <EuiOverlayMask>
-    <EuiConfirmModal
-      title={type === 'pivot' ? pivotModalTitle : sourceModalTitle}
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      cancelButtonText={cancelButtonText}
-      confirmButtonText={
-        type === 'pivot' ? pivotModalConfirmButtonText : sourceModalConfirmButtonText
-      }
-      buttonColor="danger"
-      defaultFocusedButton="confirm"
-    >
-      <p>{type === 'pivot' ? pivotModalMessage : sourceModalMessage}</p>
-    </EuiConfirmModal>
-  </EuiOverlayMask>
+  <EuiConfirmModal
+    title={type === 'pivot' ? pivotModalTitle : sourceModalTitle}
+    onCancel={onCancel}
+    onConfirm={onConfirm}
+    cancelButtonText={cancelButtonText}
+    confirmButtonText={
+      type === 'pivot' ? pivotModalConfirmButtonText : sourceModalConfirmButtonText
+    }
+    buttonColor="danger"
+    defaultFocusedButton="confirm"
+  >
+    <p>{type === 'pivot' ? pivotModalMessage : sourceModalMessage}</p>
+  </EuiConfirmModal>
 );

@@ -13,9 +13,20 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('fleet_agents_setup', () => {
     skipIfNoDockerRegistry(providerContext);
+    before(async () => {
+      await esArchiver.load('empty_kibana');
+      await esArchiver.load('fleet/empty_fleet_server');
+    });
+
+    after(async () => {
+      await esArchiver.unload('empty_kibana');
+      await esArchiver.load('fleet/empty_fleet_server');
+    });
+
     beforeEach(async () => {
       try {
         await es.security.deleteUser({
