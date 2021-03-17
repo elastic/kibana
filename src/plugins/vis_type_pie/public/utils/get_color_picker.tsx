@@ -11,6 +11,7 @@ import Color from 'color';
 import { LegendColorPicker, Position } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiPopover, EuiOutsideClickDetector } from '@elastic/eui';
 import { DatatableRow } from '../../../expressions/public';
+import type { PersistedState } from '../../../visualizations/public';
 import { ColorPicker } from '../../../charts/public';
 import { BucketColumns } from '../types';
 
@@ -52,7 +53,8 @@ export const getColorPicker = (
   setColor: (newColor: string | null, seriesKey: string | number) => void,
   bucketColumns: Array<Partial<BucketColumns>>,
   palette: string,
-  data: DatatableRow[]
+  data: DatatableRow[],
+  uiState: PersistedState
 ): LegendColorPicker => ({
   anchor,
   color,
@@ -61,6 +63,8 @@ export const getColorPicker = (
   seriesIdentifiers: [seriesIdentifier],
 }) => {
   const seriesName = seriesIdentifier.key;
+  const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
+  const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
   let keyDownEventOn = false;
   const handleChange = (newColor: string | null) => {
     if (newColor) {
@@ -108,6 +112,7 @@ export const getColorPicker = (
           maxDepth={bucketColumns.length}
           layerIndex={getLayerIndex(seriesName, data, bucketColumns)}
           useLegacyColors={palette === 'kibana_palette'}
+          colorIsOverwritten={colorIsOverwritten}
           onKeyDown={onKeyDown}
         />
       </EuiPopover>

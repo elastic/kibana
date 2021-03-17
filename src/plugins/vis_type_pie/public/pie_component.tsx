@@ -207,8 +207,15 @@ const PieComponent = (props: PieComponentProps) => {
 
   const legendColorPicker = useMemo(
     () =>
-      getColorPicker(legendPosition, setColor, bucketColumns, visParams.palette.name, visData.rows),
-    [bucketColumns, legendPosition, setColor, visData.rows, visParams.palette.name]
+      getColorPicker(
+        legendPosition,
+        setColor,
+        bucketColumns,
+        visParams.palette.name,
+        visData.rows,
+        props.uiState
+      ),
+    [bucketColumns, legendPosition, setColor, visData.rows, visParams.palette.name, props.uiState]
   );
 
   return (

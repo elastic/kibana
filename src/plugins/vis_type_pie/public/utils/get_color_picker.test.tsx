@@ -13,6 +13,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { ComponentType, ReactWrapper } from 'enzyme';
 import { getColorPicker } from './get_color_picker';
 import { ColorPicker } from '../../../charts/public';
+import type { PersistedState } from '../../../visualizations/public';
 import { createMockBucketColumns, createMockVisData } from '../mocks';
 
 const bucketColumns = createMockBucketColumns();
@@ -28,13 +29,24 @@ jest.mock('@elastic/charts', () => {
 });
 
 describe('getColorPicker', function () {
+  const mockState = new Map();
+  const uiState = ({
+    get: jest
+      .fn()
+      .mockImplementation((key, fallback) => (mockState.has(key) ? mockState.get(key) : fallback)),
+    set: jest.fn().mockImplementation((key, value) => mockState.set(key, value)),
+    emit: jest.fn(),
+    setSilent: jest.fn(),
+  } as unknown) as PersistedState;
+
   let wrapperProps: LegendColorPickerProps;
   const Component: ComponentType<LegendColorPickerProps> = getColorPicker(
     'left',
     jest.fn(),
     bucketColumns,
     'default',
-    visData.rows
+    visData.rows,
+    uiState
   );
   let wrapper: ReactWrapper<LegendColorPickerProps>;
 
@@ -74,13 +86,25 @@ describe('getColorPicker', function () {
     expect(wrapper).toEqual({});
   });
 
+  it('renders the color picker with the colorIsOverwritten prop set to false if color is not overwritten for the specific series', () => {
+    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    expect(wrapper.find(ColorPicker).prop('colorIsOverwritten')).toBe(false);
+  });
+
+  it('renders the color picker with the colorIsOverwritten prop set to true if color is overwritten for the specific series', () => {
+    uiState.set('vis.colors', { 'Logstash Airways': '#6092c0' });
+    wrapper = mountWithIntl(<Component {...wrapperProps} />);
+    expect(wrapper.find(ColorPicker).prop('colorIsOverwritten')).toBe(true);
+  });
+
   it('renders the picker for kibana palette and not inner layer', () => {
     const LegacyPaletteComponent: ComponentType<LegendColorPickerProps> = getColorPicker(
       'left',
       jest.fn(),
       bucketColumns,
       'kibana_palette',
-      visData.rows
+      visData.rows,
+      uiState
     );
     const newProps = { ...wrapperProps, seriesIdentifier: { key: '1', specId: 'pie' } };
     wrapper = mountWithIntl(<LegacyPaletteComponent {...newProps} />);
