@@ -125,7 +125,7 @@ export const registerAPIRoutes = (router: IRouter, config: FleetConfigType) => {
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postNewAgentActionHandlerBuilder({
-      getAgent: AgentService.getAgent,
+      getAgent: AgentService.getAgentById,
       createAgentAction: AgentService.createAgentAction,
     })
   );
