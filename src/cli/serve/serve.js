@@ -116,11 +116,11 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     set('logging.root.level', 'off');
   }
   if (opts.verbose) {
-    // Only set logging.verbose to true when KP logging isn't configured.
-    if (!has('rawConfig.logging.root.appenders')) {
-      set('logging.verbose', true);
-    } else {
+    if (has('logging.root.appenders')) {
       set('logging.root.level', 'all');
+    } else {
+      // Only set logging.verbose to true for legacy logging when KP logging isn't configured.
+      set('logging.verbose', true);
     }
   }
 

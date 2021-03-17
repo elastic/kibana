@@ -420,7 +420,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.events.log\\" has been deprecated and will be removed in 8.0. Moving forward, you can use \\"logging.root.level\\" in your logging configuration. ",
+          "\\"logging.events.log\\" has been deprecated and will be removed in 8.0. Moving forward, log levels can be customized on a per-logger basis using the new logging configuration. ",
         ]
       `);
     });

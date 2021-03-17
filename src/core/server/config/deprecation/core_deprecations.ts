@@ -182,6 +182,10 @@ const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) =
 };
 
 const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
+  // We silence the deprecation warning when running in development mode because
+  // the dev CLI code in src/dev/cli_dev_mode/using_server_process.ts manually
+  // specifies `--logging.json=false`. Since it's executed in a child process, the
+  // ` legacyLoggingConfigSchema` returns `true` for the TTY check on `process.stdout.isTTY`
   if (has(settings, 'logging.json') && settings.env !== 'development') {
     log(
       '"logging.json" has been deprecated and will be removed ' +
@@ -211,7 +215,7 @@ const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, log) => 
   if (has(settings, 'logging.events.log')) {
     log(
       '"logging.events.log" has been deprecated and will be removed ' +
-        'in 8.0. Moving forward, you can use "logging.root.level" in your logging configuration. '
+        'in 8.0. Moving forward, log levels can be customized on a per-logger basis using the new logging configuration. '
     );
   }
   return settings;
@@ -229,7 +233,6 @@ const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, log) =
 
 const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, log) => {
   if (has(settings, 'logging.filter')) {
-    // usage: logging.filter.cookie=none or logging.filter.authorization=none
     log('"logging.filter" has been deprecated and will be removed ' + 'in 8.0. ');
   }
   return settings;
