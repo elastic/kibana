@@ -47,6 +47,7 @@ import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleProvider } from './menu_toggle';
+import { MonacoEditorProvider } from './monaco_editor';
 
 export const services = {
   ...commonServiceProviders,
@@ -83,5 +84,6 @@ export const services = {
   elasticChart: ElasticChartProvider,
   supertest: KibanaSupertestProvider,
   managementMenu: ManagementMenuProvider,
+  monacoEditor: MonacoEditorProvider,
   MenuToggle: MenuToggleProvider,
 };

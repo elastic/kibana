@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { useValues } from 'kea';
 
@@ -18,9 +19,10 @@ import { Result as ResultType, ResultAction } from '../../../result/types';
 interface Props {
   result: ResultType;
   actions: ResultAction[];
+  dragHandleProps?: DraggableProvidedDragHandleProps;
 }
 
-export const CurationResult: React.FC<Props> = ({ result, actions }) => {
+export const CurationResult: React.FC<Props> = ({ result, actions, dragHandleProps }) => {
   const {
     isMetaEngine,
     engine: { schema },
@@ -33,6 +35,7 @@ export const CurationResult: React.FC<Props> = ({ result, actions }) => {
         actions={actions}
         isMetaEngine={isMetaEngine}
         schemaForTypeHighlights={schema}
+        dragHandleProps={dragHandleProps}
       />
       <EuiSpacer size="m" />
     </>
