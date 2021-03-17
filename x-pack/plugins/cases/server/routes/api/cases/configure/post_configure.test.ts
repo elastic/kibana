@@ -18,8 +18,7 @@ import {
 
 import { initPostCaseConfigure } from './post_configure';
 import { newConfiguration } from '../../__mocks__/request_responses';
-import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
-import { ConnectorTypes } from '../../../../../common/api/connectors';
+import { CASE_CONFIGURE_URL, ConnectorTypes } from '../../../../../common';
 import { CasesClient } from '../../../../client';
 
 describe('POST configuration', () => {
