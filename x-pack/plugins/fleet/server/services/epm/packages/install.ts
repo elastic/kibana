@@ -119,6 +119,7 @@ export async function ensureInstalledPackage(options: {
       savedObjectsClient,
       pkgkey,
       esClient,
+      force: true,
     });
   } else {
     await installLatestPackage({
