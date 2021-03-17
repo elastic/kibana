@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { PreConfiguredAction } from '../../types';
 import { ActionTypeId as EsIndexActionTypeId } from '../es_index';
-import { AlertHistoryEsIndexConnectorId, getInitialIndexName } from './types';
+import { AlertHistoryEsIndexConnectorId } from '../../../common';
+import { getInitialIndexName } from './types';
 
 export function getAlertHistoryEsIndex(kibanaVersion: string): Readonly<PreConfiguredAction> {
   return Object.freeze({

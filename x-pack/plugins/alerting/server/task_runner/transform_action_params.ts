@@ -16,6 +16,7 @@ import { PluginStartContract as ActionsPluginStartContract } from '../../../acti
 interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
   alertId: string;
+  alertType: string;
   actionTypeId: string;
   alertName: string;
   spaceId: string;
@@ -34,6 +35,7 @@ interface TransformActionParamsOptions {
 export function transformActionParams({
   actionsPlugin,
   alertId,
+  alertType,
   actionTypeId,
   alertName,
   spaceId,
@@ -68,6 +70,7 @@ export function transformActionParams({
     rule: {
       id: alertId,
       name: alertName,
+      type: alertType,
       spaceId,
       tags,
     },

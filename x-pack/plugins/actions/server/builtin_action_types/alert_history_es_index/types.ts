@@ -7,7 +7,6 @@
 
 export const ALERT_HISTORY = 'alert-history';
 
-export const AlertHistoryEsIndexConnectorId = 'preconfigured-alert-history-es-index';
 export const AlertHistoryEsIndexConnectorIndexName = `${ALERT_HISTORY}-index`;
 export const AlertHistoryIlmPolicyName = `${ALERT_HISTORY}-policy`;
 

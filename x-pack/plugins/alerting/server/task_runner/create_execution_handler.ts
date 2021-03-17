@@ -117,6 +117,7 @@ export function createExecutionHandler<
           params: transformActionParams({
             actionsPlugin,
             alertId,
+            alertType: alertType.id,
             actionTypeId: action.actionTypeId,
             alertName,
             spaceId,

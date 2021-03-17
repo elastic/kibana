@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLink } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { EuiCodeBlock, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ActionParamsProps } from '../../../../types';
+import {
+  ActionParamsProps,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentSchema,
+} from '../../../../types';
 import { IndexActionParams } from '.././types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -20,9 +24,23 @@ export const IndexParamsFields = ({
   editAction,
   messageVariables,
   errors,
+  actionConnector,
 }: ActionParamsProps<IndexActionParams>) => {
   const { docLinks } = useKibana().services;
   const { documents } = actionParams;
+
+  const [usePreconfiguredSchema, setUsePreconfiguredSchema] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (actionConnector?.id === AlertHistoryEsIndexConnectorId) {
+      setUsePreconfiguredSchema(true);
+      onDocumentsChange(JSON.stringify(AlertHistoryDocumentSchema));
+    } else {
+      onDocumentsChange('{}');
+      setUsePreconfiguredSchema(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionConnector?.id]);
 
   const onDocumentsChange = (updatedDocuments: string) => {
     try {
@@ -34,7 +52,16 @@ export const IndexParamsFields = ({
     }
   };
 
-  return (
+  return usePreconfiguredSchema ? (
+    <EuiCodeBlock
+      language="json"
+      fontSize="s"
+      paddingSize="s"
+      data-test-subj="preconfiguredDocumentToIndex"
+    >
+      {JSON.stringify(AlertHistoryDocumentSchema, null, 2)}
+    </EuiCodeBlock>
+  ) : (
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'documents'}
