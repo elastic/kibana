@@ -24,16 +24,62 @@ const updateAllFields = (
   );
 };
 
+const convertToFieldResultSetting = (serverFieldResultSetting: ServerFieldResultSetting) => {
+  const fieldResultSetting: FieldResultSetting = {
+    raw: !!serverFieldResultSetting.raw,
+    snippet: !!serverFieldResultSetting.snippet,
+    snippetFallback: !!(
+      serverFieldResultSetting.snippet &&
+      typeof serverFieldResultSetting.snippet === 'object' &&
+      serverFieldResultSetting.snippet.fallback
+    ),
+  };
+
+  if (
+    serverFieldResultSetting.raw &&
+    typeof serverFieldResultSetting.raw === 'object' &&
+    serverFieldResultSetting.raw.size
+  ) {
+    fieldResultSetting.rawSize = serverFieldResultSetting.raw.size;
+  }
+
+  if (
+    serverFieldResultSetting.snippet &&
+    typeof serverFieldResultSetting.snippet === 'object' &&
+    serverFieldResultSetting.snippet.size
+  ) {
+    fieldResultSetting.snippetSize = serverFieldResultSetting.snippet.size;
+  }
+
+  return fieldResultSetting;
+};
+
+export const clearAllFields = (fields: FieldResultSettingObject) => updateAllFields(fields, {});
+
 export const clearAllServerFields = (fields: ServerFieldResultSettingObject) =>
   updateAllFields(fields, {});
 
-export const clearAllFields = (fields: FieldResultSettingObject) => updateAllFields(fields, {});
+export const resetAllFields = (fields: FieldResultSettingObject) =>
+  updateAllFields(fields, DEFAULT_FIELD_SETTINGS);
 
 export const resetAllServerFields = (fields: ServerFieldResultSettingObject) =>
   updateAllFields(fields, { raw: {} });
 
-export const resetAllFields = (fields: FieldResultSettingObject) =>
-  updateAllFields(fields, DEFAULT_FIELD_SETTINGS);
+export const convertServerResultFieldsToResultFields = (
+  serverResultFields: ServerFieldResultSettingObject,
+  schema: Schema
+) => {
+  const resultFields: FieldResultSettingObject = Object.keys(schema).reduce(
+    (acc: FieldResultSettingObject, fieldName: string) => ({
+      ...acc,
+      [fieldName]: serverResultFields[fieldName]
+        ? convertToFieldResultSetting(serverResultFields[fieldName])
+        : DISABLED_FIELD_SETTINGS,
+    }),
+    {}
+  );
+  return resultFields;
+};
 
 export const convertToServerFieldResultSetting = (fieldResultSetting: FieldResultSetting) => {
   const serverFieldResultSetting: ServerFieldResultSetting = {};
@@ -67,50 +113,4 @@ export const splitResultFields = (resultFields: FieldResultSettingObject, schema
   });
 
   return { textResultFields, nonTextResultFields };
-};
-
-const convertToFieldResultSetting = (serverFieldResultSetting: ServerFieldResultSetting) => {
-  const fieldResultSetting: FieldResultSetting = {
-    raw: !!serverFieldResultSetting.raw,
-    snippet: !!serverFieldResultSetting.snippet,
-    snippetFallback: !!(
-      serverFieldResultSetting.snippet &&
-      typeof serverFieldResultSetting.snippet === 'object' &&
-      serverFieldResultSetting.snippet.fallback
-    ),
-  };
-
-  if (
-    serverFieldResultSetting.raw &&
-    typeof serverFieldResultSetting.raw === 'object' &&
-    serverFieldResultSetting.raw.size
-  ) {
-    fieldResultSetting.rawSize = serverFieldResultSetting.raw.size;
-  }
-
-  if (
-    serverFieldResultSetting.snippet &&
-    typeof serverFieldResultSetting.snippet === 'object' &&
-    serverFieldResultSetting.snippet.size
-  ) {
-    fieldResultSetting.snippetSize = serverFieldResultSetting.snippet.size;
-  }
-
-  return fieldResultSetting;
-};
-
-export const convertServerResultFieldsToResultFields = (
-  serverResultFields: ServerFieldResultSettingObject,
-  schema: Schema
-) => {
-  const resultFields: FieldResultSettingObject = Object.keys(schema).reduce(
-    (acc: FieldResultSettingObject, fieldName: string) => ({
-      ...acc,
-      [fieldName]: serverResultFields[fieldName]
-        ? convertToFieldResultSetting(serverResultFields[fieldName])
-        : DISABLED_FIELD_SETTINGS,
-    }),
-    {}
-  );
-  return resultFields;
 };
