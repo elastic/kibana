@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
+  EuiSwitch,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -29,6 +30,7 @@ import { getRenderCellValueFn } from './get_render_cell_value';
 import { DiscoverGridSettings } from './types';
 import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
 import {
+  getDocId,
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
@@ -152,14 +154,27 @@ export const DiscoverGrid = ({
   sort,
   useNewFieldsApi,
 }: DiscoverGridProps) => {
+  const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
+  const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
+  const displayedRows = useMemo(() => {
+    if (!rows) {
+      return [];
+    }
+    if (!isFilterActive || selectedDocs.length === 0) {
+      return rows;
+    }
+    return rows.filter((row) => {
+      return selectedDocs.includes(getDocId(row));
+    });
+  }, [rows, selectedDocs, isFilterActive]);
 
   /**
    * Pagination
    */
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: defaultPageSize });
-  const rowCount = useMemo(() => (rows ? rows.length : 0), [rows]);
+  const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
   const pageCount = useMemo(() => Math.ceil(rowCount / pagination.pageSize), [
     rowCount,
     pagination,
@@ -201,11 +216,11 @@ export const DiscoverGrid = ({
     () =>
       getRenderCellValueFn(
         indexPattern,
-        rows,
-        rows ? rows.map((hit) => indexPattern.flattenHit(hit)) : [],
+        displayedRows,
+        displayedRows ? displayedRows.map((hit) => indexPattern.flattenHit(hit)) : [],
         useNewFieldsApi
       ),
-    [rows, indexPattern, useNewFieldsApi]
+    [displayedRows, indexPattern, useNewFieldsApi]
   );
 
   /**
@@ -235,6 +250,18 @@ export const DiscoverGrid = ({
   ]);
   const lead = useMemo(() => getLeadControlColumns(), []);
 
+  const additionalControls = useMemo(
+    () =>
+      selectedDocs.length ? (
+        <EuiSwitch
+          label={`Filter selection (${selectedDocs.length})`}
+          checked={isFilterActive}
+          onChange={() => setIsFilterActive(!isFilterActive)}
+        />
+      ) : null,
+    [isFilterActive, selectedDocs, setIsFilterActive]
+  );
+
   if (!rowCount) {
     return (
       <div className="euiDataGrid__noResults">
@@ -252,10 +279,12 @@ export const DiscoverGrid = ({
       value={{
         expanded: expandedDoc,
         setExpanded: setExpandedDoc,
-        rows: rows || [],
+        rows: displayedRows,
         onFilter,
         indexPattern,
         isDarkMode: services.uiSettings.get('theme:darkMode'),
+        selectedDocs,
+        setSelectedDocs,
       }}
     >
       <>
@@ -283,8 +312,12 @@ export const DiscoverGrid = ({
               ? {
                   ...toolbarVisibility,
                   showColumnSelector: false,
+                  additionalControls,
                 }
-              : toolbarVisibility
+              : {
+                  ...toolbarVisibility,
+                  additionalControls,
+                }
           }
         />
 
