@@ -46,9 +46,21 @@ const CommonEntrySchema = {
     schema.siblingRef('field'),
     ConditionEntryField.HASH,
     schema.string({
-      validate: (hash) => (isValidHash(hash) ? undefined : `Invalid hash value [${hash}]`),
+      validate: (hash) =>
+        isValidHash(hash) ? undefined : `invalidField.${ConditionEntryField.HASH}`,
     }),
-    schema.string({ minLength: 1 })
+    schema.conditional(
+      schema.siblingRef('field'),
+      ConditionEntryField.PATH,
+      schema.string({
+        validate: (field) =>
+          field.length > 0 ? undefined : `invalidField.${ConditionEntryField.PATH}`,
+      }),
+      schema.string({
+        validate: (field) =>
+          field.length > 0 ? undefined : `invalidField.${ConditionEntryField.SIGNER}`,
+      })
+    )
   ),
 };
 
@@ -96,7 +108,7 @@ const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
   validate(entries) {
     return (
       getDuplicateFields(entries)
-        .map((field) => `[${entryFieldLabels[field]}] field can only be used once`)
+        .map((field) => `duplicatedEntry.${entryFieldLabels[field]}`)
         .join(', ') || undefined
     );
   },
