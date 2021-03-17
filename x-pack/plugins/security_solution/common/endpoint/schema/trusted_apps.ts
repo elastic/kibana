@@ -9,12 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { ConditionEntryField, OperatingSystem } from '../types';
 import { getDuplicateFields, isValidHash } from '../validation/trusted_apps';
 
-const entryFieldLabels: { [k in ConditionEntryField]: string } = {
-  [ConditionEntryField.HASH]: 'Hash',
-  [ConditionEntryField.PATH]: 'Path',
-  [ConditionEntryField.SIGNER]: 'Signer',
-};
-
 export const DeleteTrustedAppsRequestSchema = {
   params: schema.object({
     id: schema.string(),
@@ -108,7 +102,7 @@ const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
   validate(entries) {
     return (
       getDuplicateFields(entries)
-        .map((field) => `duplicatedEntry.${entryFieldLabels[field]}`)
+        .map((field) => `duplicatedEntry.${field}`)
         .join(', ') || undefined
     );
   },
