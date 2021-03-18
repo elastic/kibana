@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { estypes } from '@elastic/elasticsearch';
 import { EuiDataGridColumn } from '@elastic/eui';
@@ -13,6 +13,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
@@ -34,23 +35,31 @@ import { getRuntimeFieldsMapping } from '../../../../components/data_grid/common
 
 type IndexSearchResponse = estypes.SearchResponse;
 
+function getRuntimeFieldColumns(runtimeMappings: any) {
+  return Object.keys(runtimeMappings).map((id) => {
+    const field = runtimeMappings[id];
+    const schema = getDataGridSchemaFromKibanaFieldType(field);
+    return { id, schema, isExpandable: schema !== 'boolean' };
+  });
+}
+
 export const useIndexData = (
   indexPattern: IndexPattern,
   query: Record<string, any> | undefined,
-  toastNotifications: CoreSetup['notifications']['toasts']
+  toastNotifications: CoreSetup['notifications']['toasts'],
+  runtimeMappings?: Record<string, RuntimeField>
 ): UseIndexDataReturnType => {
   const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
     indexPattern,
   ]);
 
-  // EuiDataGrid State
-  const columns: EuiDataGridColumn[] = [
+  const [columns, setColumns] = useState<EuiDataGridColumn[]>([
     ...indexPatternFields.map((id) => {
       const field = indexPattern.fields.getByName(id);
       const schema = getDataGridSchemaFromKibanaFieldType(field);
       return { id, schema, isExpandable: schema !== 'boolean' };
     }),
-  ];
+  ]);
 
   const dataGrid = useDataGrid(columns);
 
@@ -88,14 +97,24 @@ export const useIndexData = (
         fields: ['*'],
         _source: false,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern),
+        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern, runtimeMappings),
       },
     };
 
     try {
       const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
-
       const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
+      if (runtimeMappings) {
+        setColumns([...columns, ...getRuntimeFieldColumns(runtimeMappings)]);
+      } else {
+        setColumns([
+          ...indexPatternFields.map((id) => {
+            const field = indexPattern.fields.getByName(id);
+            const schema = getDataGridSchemaFromKibanaFieldType(field);
+            return { id, schema, isExpandable: schema !== 'boolean' };
+          }),
+        ]);
+      }
       setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
       setRowCountRelation(
         typeof resp.hits.total === 'number'
@@ -115,7 +134,11 @@ export const useIndexData = (
       getIndexData();
     }
     // custom comparison
-  }, [indexPattern.title, indexPatternFields, JSON.stringify([query, pagination, sortingColumns])]);
+  }, [
+    indexPattern.title,
+    indexPatternFields,
+    JSON.stringify([query, pagination, sortingColumns, runtimeMappings]),
+  ]);
 
   const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
     indexPattern,

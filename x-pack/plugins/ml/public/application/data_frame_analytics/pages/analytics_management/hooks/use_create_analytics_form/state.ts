@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
@@ -94,6 +95,8 @@ export interface State {
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
     resultsField: undefined | string;
+    runtimeMappings: undefined | Record<string, RuntimeField>;
+    runtimeMappingsUpdated: boolean;
     softTreeDepthLimit: undefined | number;
     softTreeDepthTolerance: undefined | number;
     sourceIndex: EsIndexName;
@@ -171,6 +174,8 @@ export const getInitialState = (): State => ({
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     resultsField: undefined,
+    runtimeMappings: undefined,
+    runtimeMappingsUpdated: false,
     softTreeDepthLimit: undefined,
     softTreeDepthTolerance: undefined,
     sourceIndex: '',
@@ -212,6 +217,9 @@ export const getJobConfigFromFormState = (
         ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
       query: formState.jobConfigQuery,
+      ...(formState.runtimeMappings && Object.keys(formState.runtimeMappings).length > 0
+        ? { runtime_mappings: formState.runtimeMappings }
+        : {}),
     },
     dest: {
       index: formState.destinationIndex,
