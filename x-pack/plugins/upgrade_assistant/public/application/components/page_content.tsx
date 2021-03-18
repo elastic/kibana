@@ -6,24 +6,14 @@
  */
 
 import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useAppContext } from '../app_context';
 import { ComingSoonPrompt } from './coming_soon_prompt';
 import { UpgradeAssistantTabs } from './tabs';
-import { Tabs } from './types';
-interface MatchParams {
-  tabName: Tabs;
-}
 
-export const PageContent: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { tabName },
-  },
-  history,
-}) => {
+export const PageContent: React.FunctionComponent = () => {
   const { kibanaVersionInfo, isReadOnlyMode } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
