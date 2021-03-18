@@ -304,7 +304,7 @@ export function claimAvailableTasks(
               `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
             );
             observer.next(asErr(FillPoolResult.Failed));
-            observer.complete();
+            observer.unsubscribe();
           } else {
             // as we could't identify the reason - we'll error out the wrapping Observable too
             observer.error(ex);
