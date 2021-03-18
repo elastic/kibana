@@ -4,7 +4,9 @@
 
 ## SavedObjectsRepository.createPointInTimeFinder() method
 
-Returns a [ISavedObjectsPointInTimeFinder](./kibana-plugin-core-server.isavedobjectspointintimefinder.md) to help page through large sets of saved objects. We strongly recommend using this API for any find queries that might return more than 1000 saved objects.
+Returns a [ISavedObjectsPointInTimeFinder](./kibana-plugin-core-server.isavedobjectspointintimefinder.md) to help page through large sets of saved objects. We strongly recommend using this API for any `find` queries that might return more than 1000 saved objects, however this API is only intended for use in server-side "batch" processing of objects where you are collecting all objects in memory or streaming them back to the client.
+
+Do NOT use this API in a route handler to facilitate paging through saved objects on the client-side unless you are streaming all of the results back to the client at once. Because the returned generator is stateful, you cannot rely on subsequent http requests retrieving new pages from the same Kibana server in multi-instance deployments.
 
 This generator wraps calls to [SavedObjectsRepository.find()](./kibana-plugin-core-server.savedobjectsrepository.find.md) and iterates over multiple pages of results using `_pit` and `search_after`<!-- -->. This will open a new Point-In-Time (PIT), and continue paging until a set of results is received that's smaller than the designated `perPage`<!-- -->.
 
