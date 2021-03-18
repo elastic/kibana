@@ -8,7 +8,11 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
-import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { getExperimentalAllowedValues } from '../common/experimental_features';
+
+const allowedExperimentalValues = getExperimentalAllowedValues().map((value) =>
+  schema.literal(value)
+);
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -26,18 +30,14 @@ export const configSchema = schema.object({
    * under the `allowedExperimentalValues` object
    *
    * @example
-   * xpack.securitySolution.enableExperimental: "fleetServerEnabled, trustedAppsByPolicyEnabled"
+   * xpack.securitySolution.enableExperimental:
+   *   - fleetServerEnabled
+   *   - trustedAppsByPolicyEnabled
    */
-  enableExperimental: schema.string({
-    defaultValue: '',
-    validate(value) {
-      try {
-        parseExperimentalConfigValue(value);
-      } catch (e) {
-        return e.message;
-      }
-    },
-  }),
+  enableExperimental:
+    allowedExperimentalValues.length > 0
+      ? schema.arrayOf(schema.oneOf(allowedExperimentalValues))
+      : schema.never(),
 
   /**
    * Host Endpoint Configuration
