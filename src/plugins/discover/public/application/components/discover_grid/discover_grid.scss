@@ -40,6 +40,10 @@
   white-space: nowrap;
 }
 
+.dscTable__flyoutDocumentNavigation {
+  justify-content: end;
+}
+
 // We only truncate if the cell is not a control column.
 .euiDataGridHeader {
   .euiDataGridHeaderCell__content {
