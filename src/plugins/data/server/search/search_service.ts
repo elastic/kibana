@@ -29,7 +29,6 @@ import type {
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
-  DataRequestHandlerContext,
 } from './types';
 
 import { AggsService } from './aggs';
@@ -69,6 +68,7 @@ import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
+import { DataRequestHandlerContext } from '../types';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 

@@ -37,7 +37,7 @@ import {
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
-import { FleetConfigType } from '../..';
+import type { FleetConfigType } from '../..';
 
 import {
   getAgentsHandler,
