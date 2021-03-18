@@ -19,10 +19,14 @@ export const configSchema = schema.object({
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
 
   /**
-   * For internal use. A list of string values that will enable experimental type of functionality that is
-   * not yet released. Valid values for this settings need to be defined in:
+   * For internal use. A list of string values (comma delimited) that will enable experimental
+   * type of functionality that is not yet released. Valid values for this settings need to
+   * be defined in:
    * `x-pack/plugins/security_solution/common/experimental_features.ts`
    * under the `allowedExperimentalValues` object
+   *
+   * @example
+   * xpack.securitySolution.enableExperimental: "fleetServerEnabled, trustedAppsByPolicyEnabled"
    */
   enableExperimental: schema.string({
     defaultValue: '',

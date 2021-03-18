@@ -50,7 +50,7 @@ export const parseExperimentalConfigValue = (configValue: string): ExperimentalF
 
     if (!allowedKey) {
       throw new SecuritySolutionInvalidExperimentalValueError(
-        `'${value} is not a valid value for 'xpack.securitySolution.enableExperimental'. Valid values are: ${Object.keys(
+        `[${value}] is not a valid value for 'xpack.securitySolution.enableExperimental'. Valid values are: ${Object.keys(
           allowedExperimentalValues
         ).join(', ')}`
       );
