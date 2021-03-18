@@ -226,6 +226,7 @@ QuotedString
 
 QuotedCharacter
   = EscapedWhitespace
+  / EscapedUnicodeSequence
   / '\\' char:[\\"] { return char; }
   / !Cursor char:[^"] { return char; }
 

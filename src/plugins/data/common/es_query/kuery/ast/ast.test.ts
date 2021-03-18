@@ -342,6 +342,12 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    test('should support escaped unicode sequences inside quoted strings', () => {
+      const expected = nodeTypes.literal.buildNode('\\u00A0');
+      const actual = fromLiteralExpression('"\\\\u00A0"');
+      expect(actual).toEqual(expected);
+    });
+
     test('should detect wildcards and build wildcard AST nodes', () => {
       const expected = nodeTypes.wildcard.buildNode('foo*bar');
       const actual = fromLiteralExpression('foo*bar');
