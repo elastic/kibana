@@ -79,6 +79,7 @@ export async function loadIndexPatterns({
               meta: indexPattern.metaFields.includes(field.name),
               esTypes: field.esTypes,
               scripted: field.scripted,
+              runtime: Boolean(field.runtimeField),
             };
 
             // Simplifies tests by hiding optional properties instead of undefined

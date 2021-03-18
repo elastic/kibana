@@ -21,6 +21,7 @@ import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/ch
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import { EditorFrameService } from './editor_frame_service';
+import { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
 import {
   IndexPatternDatasource,
   IndexPatternDatasourceSetupPlugins,
@@ -74,6 +75,7 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export interface LensPublicStart {
