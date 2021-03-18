@@ -13,26 +13,25 @@ import { SearchSource } from '../../../../../data/common/search/search_source';
 import { applyAggsToSearchSource } from './apply_aggs_to_search_source';
 import { calculateBounds } from '../../../../../data/common/query/timefilter';
 
-describe('getDimesions', () => {
-  test('usage', () => {
-    const indexPattern = indexPatternWithTimefieldMock;
-    const setField = jest.fn();
-    const searchSource = ({
-      setField,
-      removeField: jest.fn(),
-    } as unknown) as SearchSource;
+test('getDimensions', () => {
+  const indexPattern = indexPatternWithTimefieldMock;
+  const setField = jest.fn();
+  const searchSource = ({
+    setField,
+    removeField: jest.fn(),
+  } as unknown) as SearchSource;
 
-    const dataMock = dataPluginMock.createStartContract();
-    dataMock.query.timefilter.timefilter.getTime = () => {
-      return { from: 'now-30y', to: 'now' };
-    };
-    dataMock.query.timefilter.timefilter.calculateBounds = (timeRange) => {
-      return calculateBounds(timeRange);
-    };
+  const dataMock = dataPluginMock.createStartContract();
+  dataMock.query.timefilter.timefilter.getTime = () => {
+    return { from: 'now-30y', to: 'now' };
+  };
+  dataMock.query.timefilter.timefilter.calculateBounds = (timeRange) => {
+    return calculateBounds(timeRange);
+  };
 
-    const aggsConfig = applyAggsToSearchSource(true, searchSource, 'auto', indexPattern, dataMock);
-    const actual = getDimensions(aggsConfig!, dataMock);
-    expect(actual).toMatchInlineSnapshot(`
+  const aggsConfig = applyAggsToSearchSource(true, searchSource, 'auto', indexPattern, dataMock);
+  const actual = getDimensions(aggsConfig!, dataMock);
+  expect(actual).toMatchInlineSnapshot(`
       Object {
         "x": Object {
           "accessor": 0,
@@ -61,5 +60,4 @@ describe('getDimesions', () => {
         },
       }
     `);
-  });
 });
