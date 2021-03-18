@@ -9,11 +9,11 @@ import type { SavedObjectMigrationFn } from 'kibana/server';
 
 import type { PackagePolicy } from '../../../../common';
 import { relativeDownloadUrlFromArtifact } from '../../../services/artifacts/mappings';
-import type { Artifact } from '../../../services';
+import type { ArtifactElasticsearchProperties } from '../../../services';
 
 type ArtifactManifestList = Record<
   string,
-  Pick<Artifact, 'decodedSha256' | 'identifier' | 'relative_url'>
+  Pick<ArtifactElasticsearchProperties, 'identifier' | 'decoded_sha256' | 'relative_url'>
 >;
 
 export const migrateEndpointPackagePolicyToV7130: SavedObjectMigrationFn<
@@ -26,8 +26,11 @@ export const migrateEndpointPackagePolicyToV7130: SavedObjectMigrationFn<
       packagePolicyDoc.attributes?.inputs[0]?.config?.artifact_manifest.value.artifacts;
 
     if (artifactList) {
-      for (const artifactManifest of Object.values(artifactList)) {
-        artifactManifest.relative_url = relativeDownloadUrlFromArtifact(artifactManifest);
+      for (const [identifier, artifactManifest] of Object.entries(artifactList)) {
+        artifactManifest.relative_url = relativeDownloadUrlFromArtifact({
+          identifier,
+          decodedSha256: artifactManifest.decoded_sha256,
+        });
       }
     }
   }

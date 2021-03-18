@@ -6,11 +6,16 @@
  */
 
 import type { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { cloneDeepWith, cloneDeep } from 'lodash';
 
 import type { PackagePolicy } from '../../../../common';
 
+import { migrationMocks } from '../../../../../../../src/core/server/mocks';
+
+import { migrateEndpointPackagePolicyToV7130 } from './to_v7_13_0';
+
 describe('7.13.0 Endpoint Package Policy migration', () => {
-  const createPackagePolicySO = (): SavedObjectUnsanitizedDoc<PackagePolicy> => {
+  const createOldPackagePolicySO = (): SavedObjectUnsanitizedDoc<PackagePolicy> => {
     return {
       id: 'mock-saved-object-id',
       attributes: {
@@ -111,4 +116,30 @@ describe('7.13.0 Endpoint Package Policy migration', () => {
       type: ' nested',
     };
   };
+  const createNewPackagePolicySO = (): SavedObjectUnsanitizedDoc<PackagePolicy> => {
+    return cloneDeepWith(createOldPackagePolicySO(), (value, key) => {
+      if (key === 'relative_url') {
+        return value.replace('/api/endpoint/artifacts/download/', '/api/fleet/artifacts/');
+      }
+    });
+  };
+
+  const migrationContext = migrationMocks.createContext();
+
+  it('should adjust the relative url for all artifact manifests', () => {
+    expect(
+      migrateEndpointPackagePolicyToV7130(createOldPackagePolicySO(), migrationContext)
+    ).toEqual(createNewPackagePolicySO());
+  });
+
+  it('should NOT touch non-endpoint package policies', () => {
+    const packagePolicySo = createOldPackagePolicySO();
+    packagePolicySo.attributes.package!.name = 'not endpoint';
+
+    const unchangedPackagePolicySo = cloneDeep(packagePolicySo);
+
+    expect(migrateEndpointPackagePolicyToV7130(packagePolicySo, migrationContext)).toEqual(
+      unchangedPackagePolicySo
+    );
+  });
 });
