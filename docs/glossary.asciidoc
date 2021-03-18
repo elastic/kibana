@@ -13,9 +13,8 @@
 +
 --
 // tag::action-def[]
-The rule-specific response that occurs when an alerting rule fires.
-A rule can have multiple actions.
-See
+The rule-specific response that occurs when an alerting <<glossary-rule,rule>>
+fires. A rule can have multiple actions. See
 {kibana-ref}/action-types.html[Connectors and actions].
 // end::action-def[]
 --
@@ -92,7 +91,8 @@ a useful connection in a graph.
 
 [[glossary-condition]] condition ::
 // tag::condition-def[]
-Specifies the circumstances that must be met to trigger an alerting rule.
+Specifies the circumstances that must be met to trigger an alerting
+<<glossary-rule,rule>>.
 // end::condition-def[]
 
 [[glossary-connector]] connector ::

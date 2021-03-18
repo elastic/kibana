@@ -24,6 +24,7 @@ import {
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
   API_ROOT_PATH,
+  INDEX_SOURCE_API_PATH,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
@@ -33,6 +34,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
+import { createDocSource } from './create_doc_source';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -53,9 +55,18 @@ const EMPTY_EMS_CLIENT = {
   addQueryParams() {},
 };
 
-export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger) {
+export async function initRoutes(
+  core,
+  getLicenseId,
+  emsSettings,
+  kbnVersion,
+  logger,
+  drawingFeatureEnabled
+) {
   let emsClient;
   let lastLicenseId;
+  const router = core.http.createRouter();
+  const [, { data: dataPlugin }] = await core.getStartServices();
 
   function getEMSClient() {
     const currentLicenseId = getLicenseId();
@@ -555,7 +566,6 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
     },
     async (context, request, response) => {
       const { query } = request;
-
       if (!query.indexPatternTitle) {
         logger.warn(`Required query parameter 'indexPatternTitle' not provided.`);
         return response.custom({
@@ -586,6 +596,47 @@ export function initRoutes(router, getLicenseId, emsSettings, kbnVersion, logger
       }
     }
   );
+
+  if (drawingFeatureEnabled) {
+    router.post(
+      {
+        path: `/${INDEX_SOURCE_API_PATH}`,
+        validate: {
+          body: schema.object({
+            index: schema.string(),
+            mappings: schema.any(),
+          }),
+        },
+        options: {
+          body: {
+            accepts: ['application/json'],
+          },
+        },
+      },
+      async (context, request, response) => {
+        const { index, mappings } = request.body;
+        const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
+          context.core.savedObjects.client,
+          context.core.elasticsearch.client.asCurrentUser
+        );
+        const result = await createDocSource(
+          index,
+          mappings,
+          context.core.elasticsearch.client,
+          indexPatternsService
+        );
+        if (result.success) {
+          return response.ok({ body: result });
+        } else {
+          logger.error(result.error);
+          return response.custom({
+            body: result.error.message,
+            statusCode: 500,
+          });
+        }
+      }
+    );
+  }
 
   function checkEMSProxyEnabled() {
     const proxyEMSInMaps = emsSettings.isProxyElasticMapsServiceInMaps();

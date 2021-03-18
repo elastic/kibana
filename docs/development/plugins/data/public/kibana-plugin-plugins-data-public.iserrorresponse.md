@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined
+isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean
 ```
