@@ -18,7 +18,6 @@ import {
   FIELDS_BROWSER_CHECKBOX,
   CLOSE_BTN,
 } from '../screens/fields_browser';
-import { KQL_SEARCH_BAR } from '../screens/hosts/main';
 
 export const addsFields = (fields: string[]) => {
   fields.forEach((field) => {

@@ -16,7 +16,6 @@ import {
   OPERATOR_INPUT,
   VALUES_INPUT,
 } from '../screens/exceptions';
-import { CLOSE_BTN } from '../screens/fields_browser';
 import {
   ALERTS_TAB,
   BACK_TO_RULES,
