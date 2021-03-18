@@ -16,6 +16,9 @@ const allowedExperimentalValues = Object.freeze({
   trustedAppsByPolicy: false,
 });
 
+const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ConfigValue>;
+
+type ConfigValue = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 /**
@@ -25,9 +28,7 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
  * @param configValue
  * @throws SecuritySolutionInvalidExperimentalValue
  */
-export const parseExperimentalConfigValue = (
-  configValue: Array<keyof ExperimentalFeatures>
-): ExperimentalFeatures => {
+export const parseExperimentalConfigValue = (configValue: ConfigValue): ExperimentalFeatures => {
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
 
   for (const value of configValue) {
@@ -40,4 +41,8 @@ export const parseExperimentalConfigValue = (
   };
 };
 
-export const getExperimentalAllowedValues = (): string[] => Object.keys(allowedExperimentalValues);
+export const isValidExperimentalValue = (value: string): boolean => {
+  return allowedKeys.includes(value as keyof ExperimentalFeatures);
+};
+
+export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];
