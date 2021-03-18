@@ -54,6 +54,7 @@ export const AddResultLogic = kea<MakeLogicType<AddResultValues, AddResultAction
       '',
       {
         search: (_, { query }) => query,
+        openFlyout: () => '',
       },
     ],
     searchResults: [

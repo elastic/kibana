@@ -43,14 +43,15 @@ describe('AddResultLogic', () => {
 
   describe('actions', () => {
     describe('openFlyout', () => {
-      it('sets isFlyoutOpen to true', () => {
-        mount({ isFlyoutOpen: false });
+      it('sets isFlyoutOpen to true and resets the searchQuery term', () => {
+        mount({ isFlyoutOpen: false, searchQuery: 'a previous search' });
 
         AddResultLogic.actions.openFlyout();
 
         expect(AddResultLogic.values).toEqual({
           ...DEFAULT_VALUES,
           isFlyoutOpen: true,
+          searchQuery: '',
         });
       });
     });
