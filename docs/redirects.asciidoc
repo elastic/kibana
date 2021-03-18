@@ -297,6 +297,13 @@ This content has moved. Refer to <<dashboard, **Dashboard**>>.
 [role="exclude",id="explore-dashboard-data"]
 This content has moved. Refer to <<dashboard, **Dashboard**>>.
 
+
 [role="exclude",id="breaking-changes"]
 
 This content has moved. Refer to <<release-notes, Release notes>>.
+
+[role="exclude",id="ingest-node-pipelines"]
+== Ingest Node Pipelines
+
+This content has moved. See {ref}/ingest.html[Ingest pipelines].
+
