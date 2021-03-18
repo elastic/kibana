@@ -8,8 +8,18 @@
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { PublicDrilldownManagerProps, DrilldownManagerDependencies } from '../types';
-import { ActionFactory, BaseActionFactoryContext, SerializedEvent } from '../../../dynamic_actions';
+import { SerializableState } from 'src/plugins/kibana_utils/common';
+import {
+  PublicDrilldownManagerProps,
+  DrilldownManagerDependencies,
+  DrilldownTemplate,
+} from '../types';
+import {
+  ActionFactory,
+  BaseActionFactoryContext,
+  SerializedAction,
+  SerializedEvent,
+} from '../../../dynamic_actions';
 import { DrilldownState } from './drilldown_state';
 import {
   toastDrilldownCreated,
@@ -299,6 +309,33 @@ export class DrilldownManagerState {
       }
     })().catch(console.error); // eslint-disable-line
   };
+
+  /**
+   * Clone a list of selected templates.
+   */
+  public readonly onClone = async (templateIds: string[]) => {
+    const { templates } = this.deps;
+    if (!templates) return;
+    const templatesToClone: DrilldownTemplate[] = templateIds
+      .map((templateId) => templates.find(({ id }) => id === templateId))
+      .filter(Boolean) as DrilldownTemplate[];
+
+    for (const template of templatesToClone) {
+      await this.cloneTemplate(template);
+    }
+
+    this.setRoute(['manage']);
+  };
+
+  private async cloneTemplate(template: DrilldownTemplate) {
+    const { dynamicActionManager } = this.deps;
+    const action: SerializedAction = {
+      factoryId: template.factoryId,
+      name: template.name,
+      config: (template.config || {}) as SerializableState,
+    };
+    await dynamicActionManager.createEvent(action, template.triggers);
+  }
 
   /**
    * Returns the state object of an existing drilldown for editing purposes.

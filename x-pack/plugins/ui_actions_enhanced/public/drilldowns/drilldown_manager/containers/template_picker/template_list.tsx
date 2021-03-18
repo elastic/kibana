@@ -11,14 +11,15 @@ import {
   DrilldownTemplateTableItem,
 } from '../../components/drilldown_template_table';
 import { DrilldownTemplate } from '../../types';
+import { useDrilldownManager } from '../context';
 import { StartFromTemplate } from './start_from_template';
 
 export interface TemplateListProps {
   items: DrilldownTemplate[];
-  onSelect: (index: number) => void;
 }
 
-export const TemplateList: React.FC<TemplateListProps> = ({ items, onSelect }) => {
+export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
+  const drilldowns = useDrilldownManager();
   const tableItems: DrilldownTemplateTableItem[] = React.useMemo<
     DrilldownTemplateTableItem[]
   >(() => {
@@ -30,11 +31,14 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items, onSelect }) =
   }, [items]);
 
   const handleCreate = (id: string) => {};
-  const handleClone = (ids: string[]) => {};
 
   return (
     <StartFromTemplate>
-      <DrilldownTemplateTable items={tableItems} onCreate={handleCreate} onClone={handleClone} />
+      <DrilldownTemplateTable
+        items={tableItems}
+        onCreate={handleCreate}
+        onClone={drilldowns.onClone}
+      />
     </StartFromTemplate>
   );
 };
