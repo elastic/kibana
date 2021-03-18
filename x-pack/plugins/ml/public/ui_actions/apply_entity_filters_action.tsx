@@ -49,7 +49,7 @@ export function createApplyEntityFieldFiltersAction(
               },
               meta: {
                 alias: i18n.translate('xpack.ml.actions.entityFieldFilterAliasLabel', {
-                  defaultMessage: 'Influencer {labelValue}',
+                  defaultMessage: '{labelValue}',
                   values: {
                     labelValue: `${fieldName}:${fieldValue}`,
                   },
