@@ -9,7 +9,11 @@ import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/data/publ
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
+  IEmbeddable,
+  Container as EmbeddableContainer,
 } from '../../../../../../../src/plugins/embeddable/public';
+import { isEnhancedEmbeddable } from '../../../../../embeddable_enhanced/public';
+import { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '../../../../../ui_actions_enhanced/public';
 
 /**
  * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.
@@ -31,3 +35,39 @@ export function ensureNestedTriggers(triggers: string[]): string[] {
 
   return triggers;
 }
+
+const isEmbeddableContainer = (x: unknown): x is EmbeddableContainer =>
+  x instanceof EmbeddableContainer;
+
+/**
+ * Given a dashboard panel embeddable, it will find the parent (dashboard
+ * container embeddable), then iterate through all the dashboard panels and
+ * generate DrilldownTemplate for each existing drilldown.
+ */
+export const createDrilldownTemplatesFromSiblings = (
+  embeddable: IEmbeddable
+): DrilldownTemplate[] => {
+  const templates: DrilldownTemplate[] = [];
+  const container = embeddable.getRoot();
+
+  if (!container) return templates;
+  if (!isEmbeddableContainer(container)) return templates;
+
+  for (const child of Object.values(container.children)) {
+    if (!isEnhancedEmbeddable(child)) continue;
+    const events = child.enhancements.dynamicActions.state.get().events;
+
+    for (const event of events) {
+      const template: DrilldownTemplate = {
+        name: event.action.name,
+        description: child.getTitle() || child.id,
+        config: event.action.config,
+        factoryId: event.action.factoryId,
+        triggers: event.triggers,
+      };
+      templates.push(template);
+    }
+  }
+
+  return templates;
+};
