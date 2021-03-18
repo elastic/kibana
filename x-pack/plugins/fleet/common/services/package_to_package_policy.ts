@@ -170,7 +170,7 @@ export const packageToPackagePolicyInputs = (
               deepMergeVars(stream as InputsOverride, originalStream);
             } catch (e) {
               throw new Error(
-                i18n.translate('xpack.fleet.packagePolicyVarOverrideError', {
+                i18n.translate('xpack.fleet.packagePolicyStreamVarOverrideError', {
                   defaultMessage:
                     'Var {varName} does not exist on {streamSet} for {inputType} of package {packageName}',
                   values: {
