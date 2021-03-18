@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../../common/types';
+import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { ReindexState } from '../polling_service';
 import { ReindexProgress } from './progress';
 

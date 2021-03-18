@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../../common/types';
+import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';

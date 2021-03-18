@@ -14,8 +14,8 @@ import {
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
-} from '../../../../../../../common/types';
-import { LoadingState } from '../../../../types';
+} from '../../../../../../common/types';
+import { LoadingState } from '../../../types';
 
 const POLL_INTERVAL = 1000;
 

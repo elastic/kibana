@@ -9,14 +9,14 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { ReindexWarning } from '../../../../../../../../common/types';
-import { mockKibanaSemverVersion } from '../../../../../../../../common/constants';
+import { ReindexWarning } from '../../../../../../../common/types';
+import { mockKibanaSemverVersion } from '../../../../../../../common/constants';
 
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
-jest.mock('../../../../../../app_context', () => {
+jest.mock('../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual(
-    '../../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
+    '../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
   );
 
   return {

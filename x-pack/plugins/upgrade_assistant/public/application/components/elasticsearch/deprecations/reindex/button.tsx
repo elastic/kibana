@@ -17,8 +17,8 @@ import {
   EnrichedDeprecationInfo,
   ReindexStatus,
   UIReindexOption,
-} from '../../../../../../../common/types';
-import { LoadingState } from '../../../../types';
+} from '../../../../../../common/types';
+import { LoadingState } from '../../../types';
 import { ReindexFlyout } from './flyout';
 import { ReindexPollingService, ReindexState } from './polling_service';
 

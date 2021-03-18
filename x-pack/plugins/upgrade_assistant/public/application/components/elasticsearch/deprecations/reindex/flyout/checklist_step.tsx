@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ReindexStatus } from '../../../../../../../../common/types';
-import { LoadingState } from '../../../../../types';
+import { ReindexStatus } from '../../../../../../../common/types';
+import { LoadingState } from '../../../../types';
 import { ReindexState } from '../polling_service';
 import { ReindexProgress } from './progress';
 

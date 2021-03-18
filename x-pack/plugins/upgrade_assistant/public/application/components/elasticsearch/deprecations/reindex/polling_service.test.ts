@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
 import { ReindexPollingService } from './polling_service';
 import { httpServiceMock } from 'src/core/public/mocks';
 

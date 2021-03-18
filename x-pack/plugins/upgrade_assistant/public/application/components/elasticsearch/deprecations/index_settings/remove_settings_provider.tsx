@@ -8,7 +8,7 @@
 import React, { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCode, EuiConfirmModal } from '@elastic/eui';
-import { useAppContext } from '../../../../../app_context';
+import { useAppContext } from '../../../../app_context';
 
 interface Props {
   children: (
