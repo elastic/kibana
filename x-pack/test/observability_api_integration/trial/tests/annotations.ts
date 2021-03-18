@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { Annotation } from '../../../../plugins/observability/common/annotations';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
+import { SearchHit } from '../../../../../typings/elasticsearch';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
@@ -244,7 +244,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
         expect(initialSearch.body.hits.total.value).to.be(2);
 
         const [id1, id2] = initialSearch.body.hits.hits.map(
-          (hit: ESSearchHit<Annotation>) => hit._id
+          (hit: SearchHit<Annotation>) => hit._id
         );
 
         expect(

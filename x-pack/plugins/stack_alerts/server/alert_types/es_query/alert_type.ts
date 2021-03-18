@@ -18,7 +18,6 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import { parseDuration } from '../../../../alerting/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
-import { ESSearchHit } from '../../../../../../typings/elasticsearch';
 
 export const ES_QUERY_ID = '.es-query';
 
@@ -251,7 +250,7 @@ export function getAlertType(
 
         // update the timestamp based on the current search results
         const firstValidTimefieldSort = getValidTimefieldSort(
-          searchResult.hits.hits.find((hit: ESSearchHit) => getValidTimefieldSort(hit.sort))?.sort
+          searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
         );
         if (firstValidTimefieldSort) {
           timestamp = firstValidTimefieldSort;

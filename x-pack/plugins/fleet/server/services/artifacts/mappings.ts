@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { ESSearchHit } from '../../../../../../typings/elasticsearch';
+import type { SearchHit } from '../../../../../../typings/elasticsearch';
 
 import type { Artifact, ArtifactElasticsearchProperties } from './types';
 import { ARTIFACT_DOWNLOAD_RELATIVE_PATH } from './constants';
 
 export const esSearchHitToArtifact = <
-  T extends Pick<ESSearchHit<ArtifactElasticsearchProperties>, '_id' | '_source'>
+  T extends Pick<SearchHit<ArtifactElasticsearchProperties>, '_id' | '_source'>
 >(
   searchHit: T
 ): Artifact => {
-  // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
   return {
     ...searchHit._source,
     id: searchHit._id,

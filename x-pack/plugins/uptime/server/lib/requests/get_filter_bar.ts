@@ -78,9 +78,9 @@ export const getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, OverviewFi
   const { tags, locations, ports, schemes } = aggregations ?? {};
 
   return {
-    locations: locations?.term?.buckets.map((item: { key: string }) => item.key),
-    ports: ports?.term?.buckets.map((item: { key: number }) => item.key),
-    schemes: schemes?.term?.buckets.map((item: { key: string }) => item.key),
-    tags: tags?.term?.buckets.map((item: { key: string }) => item.key),
+    locations: locations?.term?.buckets.map((item) => item.key as string),
+    ports: ports?.term?.buckets.map((item) => item.key as number),
+    schemes: schemes?.term?.buckets.map((item) => item.key as string),
+    tags: tags?.term?.buckets.map((item) => item.key as string),
   };
 };

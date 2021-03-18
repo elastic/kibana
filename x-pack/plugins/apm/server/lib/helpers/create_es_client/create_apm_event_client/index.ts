@@ -13,7 +13,7 @@ import {
 } from '../../../../../../../../src/core/server';
 import {
   ESSearchRequest,
-  ESSearchResponse,
+  InferSearchResponseOf,
 } from '../../../../../../../../typings/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
