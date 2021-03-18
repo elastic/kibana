@@ -7,12 +7,14 @@
     },
     "index": ".kibana_7.12.0_001",
     "mappings": {
-      "dynamic": "false",
-      "properties": {
-        "type": { "type": "keyword" },
-        "migrationVersion": {
-          "dynamic": "true",
-          "type": "object"
+      "doc": {
+        "dynamic": "false",
+        "properties": {
+          "type": { "type": "keyword" },
+          "migrationVersion": {
+            "dynamic": "true",
+            "type": "object"
+          }
         }
       }
     },
