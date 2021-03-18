@@ -22,8 +22,9 @@ export interface EnvOptions {
 export interface CliArgs {
   dev: boolean;
   envName?: string;
-  quiet: boolean;
-  silent: boolean;
+  /** @deprecated */
+  quiet?: boolean;
+  silent?: boolean;
   watch: boolean;
   basePath: boolean;
   oss: boolean;

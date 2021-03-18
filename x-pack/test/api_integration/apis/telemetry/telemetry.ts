@@ -7,8 +7,19 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import multiClusterFixture from './fixtures/multicluster';
-import basicClusterFixture from './fixtures/basiccluster';
+import type { SuperTest } from 'supertest';
+import type supertestAsPromised from 'supertest-as-promised';
+import deepmerge from 'deepmerge';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+
+import multiClusterFixture from './fixtures/multicluster.json';
+import basicClusterFixture from './fixtures/basiccluster.json';
+import ossRootTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_root.json';
+import xpackRootTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_root.json';
+import monitoringRootTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_monitoring.json';
+import ossPluginsTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_plugins.json';
+import xpackPluginsTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_plugins.json';
+import { assertTelemetryPayload } from '../../../../../test/api_integration/apis/telemetry/utils';
 
 /**
  * Update the .monitoring-* documents loaded via the archiver to the recent `timestamp`
@@ -17,7 +28,12 @@ import basicClusterFixture from './fixtures/basiccluster';
  * @param toTimestamp The upper timestamp limit to query the documents from
  * @param timestamp The new timestamp to be set
  */
-function updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp) {
+function updateMonitoringDates(
+  esSupertest: SuperTest<supertestAsPromised.Test>,
+  fromTimestamp: string,
+  toTimestamp: string,
+  timestamp: string
+) {
   return Promise.all([
     esSupertest
       .post('/.monitoring-es-*/_update_by_query?refresh=true')
@@ -58,7 +74,7 @@ function updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestam
   ]);
 }
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const esSupertest = getService('esSupertest');
@@ -66,23 +82,52 @@ export default function ({ getService }) {
   describe('/api/telemetry/v2/clusters/_stats', () => {
     const timestamp = new Date().toISOString();
     describe('monitoring/multicluster', () => {
+      let localXPack: Record<string, unknown>;
+      let monitoring: Array<Record<string, unknown>>;
+
       const archive = 'monitoring/multicluster';
       const fromTimestamp = '2017-08-15T21:00:00.000Z';
       const toTimestamp = '2017-08-16T00:00:00.000Z';
+
       before(async () => {
         await esArchiver.load(archive);
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
-      });
-      after(() => esArchiver.unload(archive));
-      it('should load multiple trial-license clusters', async () => {
+
         const { body } = await supertest
           .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
           .send({ unencrypted: true })
           .expect(200);
 
-        expect(body).length(4);
-        const [localXPack, ...monitoring] = body;
+        expect(body.length).to.be.greaterThan(1);
+        localXPack = body.shift();
+        monitoring = body;
+      });
+      after(() => esArchiver.unload(archive));
+
+      it('should pass the schema validations', () => {
+        const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
+
+        // Merging root to monitoring because `kibana` may be passed in some cases for old collection methods reporting to a newer monitoring cluster
+        const monitoringRoot = deepmerge(
+          root,
+          // It's nested because of the way it's collected and declared
+          monitoringRootTelemetrySchema.properties.monitoringTelemetry.properties.stats.items
+        );
+        const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+        try {
+          assertTelemetryPayload({ root, plugins }, localXPack);
+          monitoring.forEach((stats) => {
+            assertTelemetryPayload({ root: monitoringRoot, plugins }, stats);
+          });
+        } catch (err) {
+          err.message = `The telemetry schemas in 'x-pack/plugins/telemetry_collection_xpack/schema/' are out-of-date, please update it as required: ${err.message}`;
+          throw err;
+        }
+      });
+
+      it('should load multiple trial-license clusters', async () => {
+        expect(monitoring).length(3);
         expect(localXPack.collectionSource).to.eql('local_xpack');
         expect(monitoring).to.eql(multiClusterFixture.map((item) => ({ ...item, timestamp })));
       });
