@@ -163,11 +163,6 @@ This content has moved. See <<discover, **Discover**>>.
 
 This content has moved. See <<discover, **Discover**>>.
 
-[role="exclude",id="lens"]
-== Lens
-
-This content has moved. See <<create-panels-with-lens>>.
-
 [role="exclude",id="known-plugins"]
 == Known plugins
 
@@ -241,7 +236,7 @@ This page has been moved. Refer to <<vega-tutorial-create-a-stacked-area-chart>>
 [[heatmap-chart]]
 === Heatmap Chart
 
-This page has been moved. Refer to <<types-of-visualization-panels>>.
+This page has been moved. Refer to <<types-of-visualizations>>.
 
 [float]
 [[interface-overview]]
