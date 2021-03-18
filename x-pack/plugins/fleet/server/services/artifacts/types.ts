@@ -82,7 +82,7 @@ export interface ArtifactsClientInterface {
 
   deleteArtifact(id: string): Promise<void>;
 
-  listArtifacts(options?: ListWithKuery): Promise<ListResult<Artifact>>;
+  listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 
   encodeContent(content: ArtifactsClientCreateOptions['content']): Promise<ArtifactEncodedMetadata>;
 
