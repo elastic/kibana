@@ -33,6 +33,7 @@ const WAIT_FOR_RELEASE_STEP = (majorVersion: number, nextMajorVersion: number) =
       nextEsVersion: `${nextMajorVersion}.0`,
     },
   }),
+  'data-test-subj': 'waitForReleaseStep',
   children: (
     <>
       <EuiText grow={false}>
@@ -58,6 +59,7 @@ const START_UPGRADE_STEP = (isCloudEnabled: boolean, esDocBasePath: string) => (
   title: i18n.translate('xpack.upgradeAssistant.overviewTab.steps.startUpgradeStep.stepTitle', {
     defaultMessage: 'Start your upgrade',
   }),
+  'data-test-subj': 'startUpgradeStep',
   children: (
     <Fragment>
       <EuiText grow={false}>
@@ -100,7 +102,7 @@ export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
   }, {} as { [checkupType: string]: number });
 
   // Uncomment when START_UPGRADE_STEP is in use!
-  const { kibanaVersionInfo, docLinks, http /* , isCloudEnabled */ } = useAppContext();
+  const { kibanaVersionInfo, docLinks /* , isCloudEnabled */ } = useAppContext();
 
   const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
   const esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
@@ -127,6 +129,7 @@ export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
                 }
               ),
           status: countByType.cluster ? 'warning' : 'complete',
+          'data-test-subj': 'clusterIssuesStep',
           children: (
             <EuiText>
               {countByType.cluster ? (
@@ -185,6 +188,7 @@ export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
                 }
               ),
           status: countByType.indices ? 'warning' : 'complete',
+          'data-test-subj': 'indicesIssuesStep',
           children: (
             <EuiText>
               {countByType.indices ? (
@@ -235,6 +239,7 @@ export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
               defaultMessage: 'Review the Elasticsearch deprecation logs',
             }
           ),
+          'data-test-subj': 'deprecationLoggingStep',
           children: (
             <Fragment>
               <EuiText grow={false}>
@@ -273,7 +278,7 @@ export const Steps: FunctionComponent<UpgradeAssistantTabProps> = ({
                 )}
                 describedByIds={['deprecation-logging']}
               >
-                <DeprecationLoggingToggle http={http} />
+                <DeprecationLoggingToggle />
               </EuiFormRow>
             </Fragment>
           ),

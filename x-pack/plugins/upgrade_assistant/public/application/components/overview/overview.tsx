@@ -18,9 +18,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+<<<<<<< HEAD:x-pack/plugins/upgrade_assistant/public/application/components/overview/overview.tsx
 import { useAppContext } from '../../app_context';
 import { LoadingErrorBanner } from '../error_banner';
 import { LoadingState, UpgradeAssistantTabProps } from '../types';
+=======
+import { useAppContext } from '../../../app_context';
+import { LoadingErrorBanner } from '../../error_banner';
+import { UpgradeAssistantTabProps } from '../../types';
+>>>>>>> 8a54a3d90420523859bcfb44923386c3b7df238c:x-pack/plugins/upgrade_assistant/public/application/components/tabs/overview/index.tsx
 import { Steps } from './steps';
 
 export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) => {
@@ -56,9 +62,7 @@ export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) 
 
       <EuiPageContent>
         <EuiPageContentBody>
-          {props.loadingState === LoadingState.Success && <Steps {...props} />}
-
-          {props.loadingState === LoadingState.Loading && (
+          {props.isLoading && (
             <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false}>
                 <EuiLoadingSpinner />
@@ -66,9 +70,9 @@ export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) 
             </EuiFlexGroup>
           )}
 
-          {props.loadingState === LoadingState.Error && (
-            <LoadingErrorBanner loadingError={props.loadingError} />
-          )}
+          {props.checkupData && <Steps {...props} />}
+
+          {props.loadingError && <LoadingErrorBanner loadingError={props.loadingError} />}
         </EuiPageContentBody>
       </EuiPageContent>
     </>

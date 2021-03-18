@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LoadingErrorBanner } from '../error_banner';
 import { useAppContext } from '../../app_context';
-import { GroupByOption, LevelFilterOption, LoadingState, UpgradeAssistantTabProps } from '../types';
+import { GroupByOption, LevelFilterOption, UpgradeAssistantTabProps } from '../types';
 import { CheckupControls } from './controls';
 import { GroupedDeprecations } from './deprecations/grouped';
 
@@ -39,7 +39,7 @@ export const DeprecationTab: FunctionComponent<CheckupTabProps> = ({
   checkupLabel,
   deprecations,
   loadingError,
-  loadingState,
+  isLoading,
   refreshCheckupData,
   setSelectedTabIndex,
   showBackupWarning = false,
@@ -154,13 +154,13 @@ export const DeprecationTab: FunctionComponent<CheckupTabProps> = ({
 
       <EuiPageContent>
         <EuiPageContentBody>
-          {loadingState === LoadingState.Error ? (
+          {loadingError ? (
             <LoadingErrorBanner loadingError={loadingError} />
           ) : deprecations && deprecations.length > 0 ? (
             <div data-test-subj="deprecationsContainer">
               <CheckupControls
                 allDeprecations={deprecations}
-                loadingState={loadingState}
+                isLoading={isLoading}
                 loadData={refreshCheckupData}
                 currentFilter={currentFilter}
                 onFilterChange={changeFilter}
@@ -175,6 +175,7 @@ export const DeprecationTab: FunctionComponent<CheckupTabProps> = ({
           ) : (
             <EuiEmptyPrompt
               iconType="faceHappy"
+              data-test-subj="noDeprecationsPrompt"
               title={
                 <h2>
                   <FormattedMessage
