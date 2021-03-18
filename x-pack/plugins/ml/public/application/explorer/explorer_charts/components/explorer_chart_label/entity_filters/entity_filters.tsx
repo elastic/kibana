@@ -12,9 +12,9 @@ import {
   ENTITY_FIELD_OPERATIONS,
   EntityFieldOperations,
 } from '../../../../../../../common/util/anomaly_utils';
-import './influencer_filter.scss';
+import './entity_filter.scss';
 
-interface InfluencerFilterProps {
+interface EntityFilterProps {
   onFilter: (params: {
     influencerFieldName: string;
     influencerFieldValue: string;
@@ -23,7 +23,7 @@ interface InfluencerFilterProps {
   influencerFieldName: string;
   influencerFieldValue: string;
 }
-export const InfluencerFilter: FC<InfluencerFilterProps> = ({
+export const EntityFilter: FC<EntityFilterProps> = ({
   onFilter,
   influencerFieldName,
   influencerFieldValue,

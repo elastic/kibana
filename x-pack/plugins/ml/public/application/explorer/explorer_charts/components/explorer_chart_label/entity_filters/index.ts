@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { InfluencerFilter } from './influencer_filter';
+export { EntityFilter } from './entity_filters';

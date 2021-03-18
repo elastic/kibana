@@ -13,7 +13,7 @@ import { EuiIconTip } from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
-import { InfluencerFilter } from './influencer_filters';
+import { EntityFilter } from './entity_filters';
 
 export function ExplorerChartLabel({
   detectorLabel,
@@ -45,7 +45,7 @@ export function ExplorerChartLabel({
       <Fragment key={`badge-wrapper-${key}`}>
         <ExplorerChartLabelBadge entity={entity} key={`badge-${key}`} />
         {onSelectEntity !== undefined && (
-          <InfluencerFilter
+          <EntityFilter
             onFilter={({ operation }) =>
               onSelectEntity({
                 ...entity,
