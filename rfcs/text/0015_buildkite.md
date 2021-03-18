@@ -17,6 +17,7 @@
       - [Public access](#public-access)
       - [Secrets handling](#secrets-handling)
       - [Support or Documentation](#support-or-documentation)
+      - [Scheduled Builds](#scheduled-builds)
       - [Container support](#container-support)
     - [Desired](#desired)
       - [Customization](#customization)
@@ -37,6 +38,7 @@
       - [Public access](#public-access-1)
       - [Secrets handling](#secrets-handling-1)
       - [Support or Documentation](#support-or-documentation-1)
+      - [Scheduled Builds](#scheduled-builds-1)
     - [Desired](#desired-1)
       - [Customization](#customization-1)
       - [Core functionality is first-party](#core-functionality-is-first-party-1)
@@ -147,6 +149,10 @@ Good, first-class support for handling secrets is a must-have for any CI system.
 For paid systems, both self-hosted and as a service, good support is important. If a problem specific to Elastic is causing us downtime, we expect quick and efficient support. Again, 100s of developers are potentially affected by downtime.
 
 For open source solutions, good documentation is especially important. If much of the operational knowledge of a system can only be gained by working with the system and/or reading the source code, it will be harder to solve problems quickly.
+
+#### Scheduled Builds
+
+We have certain pipelines (ES Snapshots) that run once daily, and `master` CI currently only runs once an hour. We need the ability to configure scheduled builds.
 
 #### Container support
 
@@ -288,28 +294,35 @@ However, since Buildkite doesn't really have a concept of secrets, it's up to us
 
 Besides this, [Enterprise](https://buildkite.com/enterprise) customers get 24/7 emergency help, prioritized support, a dedicated chat channel, and guaranteed response times. They will also consult on best practices, etc.
 
+#### Scheduled Builds
+
+[Build has scheduled build](https://buildkite.com/docs/pipelines/scheduled-builds) support with a cron-like syntax. Schedules are defined separately from the pipeline yaml, and can be managed via the UI, API, or terraform.
+
 ### Desired
 
 #### Customization
 
 We have very large CI pipelines which generate a lot of information (bundle sizes, performance numbers, etc). Being able to attach this information to builds, so that it lives with the builds in the CI system, is highly desireable. The alternative is building custom reports and UIs outside of the system.
 
-TODO annotations
+[Annotations](https://buildkite.com/docs/agent/v3/cli-annotate) provide a way to add rich, well-formatted, custom information to build pages using CommonMark Markdown. There are several built-in CSS classes for formatting and several visual styles. Images, emojis, and links can be embedded as well. Just for some examples: Metrics such as bundle sizes, links to the distro builds for that build, and screenshots for test failures could all be embedded directly into the build pages.
 
-TODO mention log output customization https://buildkite.com/docs/pipelines/managing-log-output
+The structure of logs can also be easily customized by adding [collapsible groups](https://buildkite.com/docs/pipelines/managing-log-output#collapsing-output) for log messages.
 
 #### Core functionality is first-party
 
-Any core functionality that we depend on should be created and maintained by the organization maintaining the CI software. There is a large amount of risk associated with relying on third-part solutions for too much functionality.
-
-<!-- Functionality can break with updates to the CI system, have security problems that are not addressed, and  -->
+There's a large number of [plugins for Buildkite](https://buildkite.com/plugins), but, so far, there are only two plugins we've been considering using (one for Docker and one for test results), and they're both maintained by Buildkite. All other functionality we've assessed that we need is either built directly into Buildkite, or [we are building it](#what-we-will-build-and-manage).
 
 #### First-class support for test results
 
+Buildkite doesn't really have any built-in support specifically for handling test results. Test result reports (e.g. JUnit) can be uploaded as artifacts, and test results can be rendered on the build page using annotations. They have [a plugin](https://github.com/buildkite-plugins/junit-annotate-buildkite-plugin) for automatically annotating builds with test results from JUnit reports in a simple fashion. We would likely want to build our own annotation for this.
+
+This does mean that Buildkite lacks test-related features of other CI systems: tracking tests over time across build, flagging flaky tests, etc. We would likely need to ingest test results into Elasticsearch and build out Kibana dashboards/visualizations for this, or similar.
+
 #### GitHub Integration
 
-- Ability to trigger jobs based on webhooks
-- Integrate GitHub-specific information into UI, e.g. a build for a PR should link back to the PR
+Buildkite's [GitHub Integration](https://buildkite.com/docs/integrations/github) can trigger builds based on GitHub webhooks (e.g. on commit/push for branches and PRs), and update commit statuses. Buildkite also adds basic information to build pages, such as links to commits on GitHub and links to PRs. This should cover what we need for tracked branch builds.
+
+However, for Pull Requests, because we have a lot of requirements around when builds should run and who can run them, we will need to [build a solution](#elastic-buildkite-pr-bot) for handling PRs ourselves. The work for this is already close to complete.
 
 ## What we will build and manage
 
