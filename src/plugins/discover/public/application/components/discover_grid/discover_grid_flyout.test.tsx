@@ -139,8 +139,8 @@ describe('Discover flyout', function () {
     const props = getProps();
     props.hit = props.hits[props.hits.length - 1];
     const component = mountWithIntl(<DiscoverGridFlyout {...props} />);
-    findTestSubject(component, 'pagination-button-prev').simulate('click');
+    findTestSubject(component, 'pagination-button-previous').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(1);
-    expect(props.setExpandedDoc.mock.calls[0][0]._id).toBe('2');
+    expect(props.setExpandedDoc.mock.calls[0][0]._id).toBe('4');
   });
 });
