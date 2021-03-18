@@ -67,6 +67,46 @@ describe('<EditPolicy /> searchable snapshots', () => {
     expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
   });
 
+  test('should set the repository from previously defined repository', async () => {
+    const { actions } = testBed;
+
+    const repository = 'myRepo';
+    await actions.hot.setSearchableSnapshot(repository);
+    await actions.cold.enable(true);
+    await actions.cold.toggleSearchableSnapshot(true);
+    await actions.frozen.enable(true);
+
+    await actions.savePolicy();
+    const latestRequest = server.requests[server.requests.length - 1];
+    expect(latestRequest.method).toBe('POST');
+    expect(latestRequest.url).toBe('/api/index_lifecycle_management/policies');
+    const reqBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+    expect(reqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe(repository);
+    expect(reqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toBe(repository);
+    expect(reqBody.phases.frozen.actions.searchable_snapshot.snapshot_repository).toBe(repository);
+  });
+
+  test('should update the repository in all searchable snapshot actions', async () => {
+    const { actions } = testBed;
+
+    await actions.hot.setSearchableSnapshot('myRepo');
+    await actions.cold.enable(true);
+    await actions.cold.toggleSearchableSnapshot(true);
+    await actions.frozen.enable(true);
+
+    // We update the repository in one phase
+    await actions.frozen.setSearchableSnapshot('changed');
+    await actions.savePolicy();
+    const latestRequest = server.requests[server.requests.length - 1];
+    const reqBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+    // And all phases should be updated
+    expect(reqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe('changed');
+    expect(reqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toBe('changed');
+    expect(reqBody.phases.frozen.actions.searchable_snapshot.snapshot_repository).toBe('changed');
+  });
+
   describe('on cloud', () => {
     describe('new policy', () => {
       beforeEach(async () => {
@@ -86,6 +126,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
         const { component } = testBed;
         component.update();
       });
+
       test('defaults searchable snapshot to true on cloud', async () => {
         const { find, actions } = testBed;
         await actions.cold.enable(true);
@@ -94,6 +135,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
         ).toBe(true);
       });
     });
+
     describe('existing policy', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
@@ -111,19 +153,23 @@ describe('<EditPolicy /> searchable snapshots', () => {
         const { component } = testBed;
         component.update();
       });
+
       test('correctly sets snapshot repository default to "found-snapshots"', async () => {
         const { actions } = testBed;
         await actions.cold.enable(true);
         await actions.cold.toggleSearchableSnapshot(true);
         await actions.savePolicy();
         const latestRequest = server.requests[server.requests.length - 1];
-        const request = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-        expect(request.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+        expect(latestRequest.method).toBe('POST');
+        expect(latestRequest.url).toBe('/api/index_lifecycle_management/policies');
+        const reqBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+        expect(reqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
           'found-snapshots'
         );
       });
     });
   });
+
   describe('on non-enterprise license', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
@@ -145,11 +191,13 @@ describe('<EditPolicy /> searchable snapshots', () => {
       const { component } = testBed;
       component.update();
     });
+
     test('disable setting searchable snapshots', async () => {
       const { actions } = testBed;
 
-      expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
       expect(actions.hot.searchableSnapshotsExists()).toBeFalsy();
+      expect(actions.cold.searchableSnapshotsExists()).toBeFalsy();
+      expect(actions.frozen.searchableSnapshotsExists()).toBeFalsy();
 
       await actions.cold.enable(true);
 

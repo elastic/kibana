@@ -25,7 +25,6 @@ import {
   DefaultAllocationNotice,
   DefaultAllocationWarning,
   NoNodeAttributesWarning,
-  MissingColdTierCallout,
   CloudDataTierCallout,
   LoadingError,
 } from './components';
@@ -59,10 +58,6 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
 
   const { nodesByRoles, nodesByAttributes, isUsingDeprecatedDataRoleConfig } = data!;
 
-  const hasDataNodeRoles = Object.keys(nodesByRoles).some((nodeRole) =>
-    // match any of the "data_" roles, including data_content.
-    nodeRole.trim().startsWith('data_')
-  );
   const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
   const isCloudEnabled = cloud?.isCloudEnabled ?? false;
   const cloudDeploymentUrl = cloud?.cloudDeploymentUrl;
@@ -71,22 +66,12 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
     switch (allocationType) {
       case 'node_roles':
         /**
-         * We'll drive Cloud users to add a cold tier to their deployment if there are no nodes with the cold node role.
+         * On cloud most users should be using autoscaling which will provision tiers as they are needed. We do not surface any
+         * of the notices below.
          */
-        if (isCloudEnabled && phase === 'cold' && !isUsingDeprecatedDataRoleConfig) {
-          const hasNoNodesWithNodeRole = !nodesByRoles.data_cold?.length;
-
-          if (hasDataNodeRoles && hasNoNodesWithNodeRole) {
-            // Tell cloud users they can deploy nodes on cloud.
-            return (
-              <>
-                <EuiSpacer size="s" />
-                <MissingColdTierCallout linkToCloudDeployment={cloudDeploymentUrl} />
-              </>
-            );
-          }
+        if (isCloudEnabled) {
+          return null;
         }
-
         /**
          * Node role allocation moves data in a phase to a corresponding tier of the same name. To prevent policy execution from getting
          * stuck ILM allocation will fall back to a previous tier if possible. We show the WARNING below to inform a user when even
