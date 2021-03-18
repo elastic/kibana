@@ -72,12 +72,12 @@ export const createTopNodesQuery = (options: TopNodesRequest, source: InfraSourc
           },
           rx: {
             sum: {
-              field: 'host.network.in.bytes',
+              field: 'host.network.ingress.bytes',
             },
           },
           tx: {
             sum: {
-              field: 'host.network.out.bytes',
+              field: 'host.network.egress.bytes',
             },
           },
           timeseries: {
@@ -107,12 +107,12 @@ export const createTopNodesQuery = (options: TopNodesRequest, source: InfraSourc
               },
               rx: {
                 rate: {
-                  field: 'host.network.in.bytes',
+                  field: 'host.network.ingress.bytes',
                 },
               },
               tx: {
                 rate: {
-                  field: 'host.network.out.bytes',
+                  field: 'host.network.egress.bytes',
                 },
               },
             },
