@@ -8,9 +8,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { coreMock } from 'src/core/public/mocks';
+import { createKibanaReactContext } from '../../../../../../kibana_react/public';
 import { FieldFormat } from 'src/plugins/data/public';
 
 import { NumberFormatEditor } from './number';
+
+type NumberFormatEditorProps = React.ComponentProps<typeof NumberFormatEditor>;
 
 const fieldType = 'number';
 const format = {
@@ -25,7 +29,20 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const KibanaReactContext = createKibanaReactContext(
+  coreMock.createStart({ basePath: 'my-base-path' })
+);
+
 describe('NumberFormatEditor', () => {
+  beforeAll(() => {
+    // Enzyme does not support the new Context API in shallow rendering.
+    // @see https://github.com/enzymejs/enzyme/issues/2189
+    (NumberFormatEditor as React.ComponentType<NumberFormatEditorProps>).contextTypes = {
+      services: () => null,
+    };
+    delete (NumberFormatEditor as Partial<typeof NumberFormatEditor>).contextType;
+  });
+
   it('should have a formatId', () => {
     expect(NumberFormatEditor.formatId).toEqual('number');
   });
@@ -38,7 +55,8 @@ describe('NumberFormatEditor', () => {
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
-      />
+      />,
+      { context: KibanaReactContext.value }
     );
     expect(component).toMatchSnapshot();
   });
