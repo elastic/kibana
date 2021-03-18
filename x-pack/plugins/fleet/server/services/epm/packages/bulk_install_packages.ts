@@ -53,7 +53,8 @@ export async function bulkInstallPackages({
     })
   );
 
-  // only install index patterns if we installed any package for the first time
+  // only install index patterns if we completed install for any package-version for the
+  // first time, aka fresh installs or upgrades
   if (
     installResults.find(
       (result) => result.status === 'fulfilled' && result.value.result?.status === 'installed'
