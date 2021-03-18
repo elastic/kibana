@@ -138,7 +138,12 @@ export class Authorization {
     // else security is disabled so let the operation proceed
   }
 
-  public async getFindAuthorizationFilter(savedObjectType: string) {
+  public async getFindAuthorizationFilter(
+    savedObjectType: string
+  ): Promise<{
+    filter?: string;
+    ensureSavedObjectIsAuthorized: (className: string) => void;
+  }> {
     const { securityAuth } = this;
     if (securityAuth && this.shouldCheckAuthorization()) {
       const { authorizedClassNames } = await this.getAuthorizedClassNames([ReadOperations.Find]);
@@ -158,6 +163,8 @@ export class Authorization {
         },
       };
     }
+
+    return { ensureSavedObjectIsAuthorized: (className: string) => {} };
   }
 
   private async getAuthorizedClassNames(

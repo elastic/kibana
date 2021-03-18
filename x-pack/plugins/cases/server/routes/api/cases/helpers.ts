@@ -101,12 +101,14 @@ export const constructQueryOptions = ({
   status,
   sortByField,
   caseType,
+  authorizationFilter,
 }: {
   tags?: string | string[];
   reporters?: string | string[];
   status?: CaseStatuses;
   sortByField?: string;
   caseType?: CaseType;
+  authorizationFilter?: string;
 }): { case: SavedObjectFindOptions; subCase?: SavedObjectFindOptions } => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'OR' });
   const reportersFilter = buildFilter({

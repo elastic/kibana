@@ -97,6 +97,7 @@ export class CasesClientHandler implements CasesClient {
         savedObjectsClient: this._savedObjectsClient,
         caseService: this._caseService,
         logger: this.logger,
+        auth: this.authorization,
         options,
       });
     } catch (error) {

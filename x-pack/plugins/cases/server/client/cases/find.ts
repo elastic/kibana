@@ -18,16 +18,19 @@ import {
   throwErrors,
   caseStatuses,
   CasesFindResponseRt,
+  CASE_SAVED_OBJECT,
 } from '../../../common';
 import { CaseServiceSetup } from '../../services';
 import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../../routes/api/cases/helpers';
 import { transformCases } from '../../routes/api/utils';
+import { Authorization } from '../../authorization/authorization';
 
 interface FindParams {
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   logger: Logger;
+  auth: Authorization;
   options: CasesFindRequest;
 }
 
@@ -38,6 +41,7 @@ export const find = async ({
   savedObjectsClient,
   caseService,
   logger,
+  auth,
   options,
 }: FindParams): Promise<CasesFindResponse> => {
   try {
@@ -45,6 +49,12 @@ export const find = async ({
       CasesFindRequestRt.decode(options),
       fold(throwErrors(Boom.badRequest), identity)
     );
+
+    // TODO: Maybe surround it with try/catch
+    const {
+      filter: authorizationFilter,
+      ensureSavedObjectIsAuthorized,
+    } = await auth.getFindAuthorizationFilter(CASE_SAVED_OBJECT);
 
     const queryArgs = {
       tags: queryParams.tags,
@@ -54,16 +64,20 @@ export const find = async ({
       caseType: queryParams.type,
     };
 
-    const caseQueries = constructQueryOptions(queryArgs);
+    const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
     const cases = await caseService.findCasesGroupedByID({
       client: savedObjectsClient,
       caseOptions: { ...queryParams, ...caseQueries.case },
       subCaseOptions: caseQueries.subCase,
     });
 
+    for (const theCase of cases.casesMap.values()) {
+      ensureSavedObjectIsAuthorized(theCase.class);
+    }
+
     const [openCases, inProgressCases, closedCases] = await Promise.all([
       ...caseStatuses.map((status) => {
-        const statusQuery = constructQueryOptions({ ...queryArgs, status });
+        const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
         return caseService.findCaseStatusStats({
           client: savedObjectsClient,
           caseOptions: statusQuery.case,
