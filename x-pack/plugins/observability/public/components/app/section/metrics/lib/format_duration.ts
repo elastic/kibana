@@ -11,10 +11,10 @@ const DAY = 86400;
 
 export const formatDuration = (seconds: number) => {
   if (seconds < MINUTE) {
-    return `${seconds}s`;
+    return `${Math.floor(seconds)}s`;
   }
   if (seconds < HOUR) {
-    return `${Math.floor(seconds / MINUTE)}m ${seconds % MINUTE}s`;
+    return `${Math.floor(seconds / MINUTE)}m ${Math.floor(seconds % MINUTE)}s`;
   }
   if (seconds < DAY) {
     return `${Math.floor(seconds / HOUR)}h ${Math.floor((seconds % HOUR) / MINUTE)}m`;
