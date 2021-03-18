@@ -122,10 +122,7 @@ describe('#run$', () => {
               "ELASTIC_APM_SERVICE_NAME": "kibana",
               "isDevCliChild": "true",
             },
-            "nodeOptions": Array [
-              "--preserve-symlinks-main",
-              "--preserve-symlinks",
-            ],
+            "nodeOptions": Array [],
             "stdio": "pipe",
           },
         ],
