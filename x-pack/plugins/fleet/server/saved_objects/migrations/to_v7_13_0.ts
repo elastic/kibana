@@ -10,7 +10,7 @@ import type { SavedObjectMigrationFn } from 'kibana/server';
 import type { Settings } from '../../types';
 
 export const migrateSettingsToV7130: SavedObjectMigrationFn<
-  Exclude<Settings, 'kibana_urls'> & {
+  Settings & {
     package_auto_upgrade: string;
     agent_auto_upgrade: string;
   },
