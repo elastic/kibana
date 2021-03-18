@@ -141,26 +141,32 @@ export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trusted
 export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
   [`duplicatedEntry.${ConditionEntryField.HASH}`]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.hash',
-    { defaultMessage: 'Field Hash is only accepted once' }
+    { defaultMessage: 'Hash value can only be used once. Please enter a single valid hash.' }
   ),
   [`duplicatedEntry.${ConditionEntryField.PATH}`]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.path',
-    { defaultMessage: 'Field Path is only accepted once' }
+    { defaultMessage: 'Path value can only be used once. Please enter a single valid path.' }
   ),
   [`duplicatedEntry.${ConditionEntryField.SIGNER}`]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.signature',
-    { defaultMessage: 'Field Signature is only accepted once' }
+    {
+      defaultMessage:
+        'Signature value can only be used once. Please enter a single valid signature.',
+    }
   ),
   [`invalidField.${ConditionEntryField.HASH}`]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.hash',
-    { defaultMessage: 'Invalid field hash' }
+    {
+      defaultMessage:
+        'An invalid Hash was entered. Please enter in a valid Hash (md5, sha1, or sha256).',
+    }
   ),
   [`invalidField.${ConditionEntryField.PATH}`]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.path',
-    { defaultMessage: 'Invalid field path' }
+    { defaultMessage: 'An invalid Path was entered. Please enter in a valid Path.' }
   ),
   [`invalidField.${ConditionEntryField.SIGNER}`]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.signature',
-    { defaultMessage: 'Invalid field Signature' }
+    { defaultMessage: 'An invalid Signature was entered. Please enter in a valid Signature.' }
   ),
 };
