@@ -25,7 +25,7 @@ interface CaseAttributes {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
-  describe.only('find_cases', () => {
+  describe('find_cases', () => {
     describe('basic tests', () => {
       afterEach(async () => {
         await deleteAllCaseItems(es);
