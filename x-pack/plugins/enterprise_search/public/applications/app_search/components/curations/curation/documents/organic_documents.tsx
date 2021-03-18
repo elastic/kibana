@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import { EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,11 +15,16 @@ import { i18n } from '@kbn/i18n';
 import { DataPanel } from '../../../data_panel';
 import { Result } from '../../../result/types';
 
-import { RESULT_ACTIONS_DIRECTIONS } from '../../constants';
+import {
+  RESULT_ACTIONS_DIRECTIONS,
+  PROMOTE_DOCUMENT_ACTION,
+  HIDE_DOCUMENT_ACTION,
+} from '../../constants';
 import { CurationLogic } from '../curation_logic';
 import { CurationResult } from '../results';
 
 export const OrganicDocuments: React.FC = () => {
+  const { addPromotedId, addHiddenId } = useActions(CurationLogic);
   const { curation, activeQuery, organicDocumentsLoading } = useValues(CurationLogic);
 
   const documents = curation.organic;
@@ -48,7 +53,16 @@ export const OrganicDocuments: React.FC = () => {
           <CurationResult
             result={document}
             key={document.id.raw}
-            actions={[]} // TODO: Next Curation PR
+            actions={[
+              {
+                ...HIDE_DOCUMENT_ACTION,
+                onClick: () => addHiddenId(document.id.raw),
+              },
+              {
+                ...PROMOTE_DOCUMENT_ACTION,
+                onClick: () => addPromotedId(document.id.raw),
+              },
+            ]}
           />
         ))
       ) : organicDocumentsLoading ? (

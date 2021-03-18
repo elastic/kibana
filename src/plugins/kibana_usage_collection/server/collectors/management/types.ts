@@ -68,7 +68,6 @@ export interface UsageStats {
   'discover:sampleSize': number;
   defaultColumns: string[];
   'context:defaultSize': number;
-  'discover:aggs:terms:size': number;
   'context:tieBreakerFields': string[];
   'discover:sort:defaultOrder': string;
   'context:step': number;
