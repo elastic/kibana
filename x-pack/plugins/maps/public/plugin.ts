@@ -65,6 +65,7 @@ import {
 import { EMSSettings } from '../common/ems_settings';
 import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
+import { suggestEMSTermJoinConfig } from './api/register';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -174,10 +175,13 @@ export class MapsPlugin
       plugins.visualizations.unRegisterAlias(APP_ID);
     }
 
+    window._suggestEMSTermJoinConfig = suggestEMSTermJoinConfig;
+
     return {
       createLayerDescriptors,
       registerLayerWizard,
       registerSource,
+      suggestEMSTermJoinConfig,
     };
   }
 }

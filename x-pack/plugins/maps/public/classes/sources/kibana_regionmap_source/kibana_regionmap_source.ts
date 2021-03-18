@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
-import { getKibanaRegionList } from '../../../meta';
+import { getKibanaRegionList } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { FIELD_ORIGIN, FORMAT_TYPE, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';

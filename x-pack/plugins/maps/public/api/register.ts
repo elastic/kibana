@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SourceRegistryEntry } from '../classes/sources/source_registry';
-import { LayerWizard } from '../classes/layers/layer_wizard_registry';
+import type { SourceRegistryEntry } from '../classes/sources/source_registry';
+import type { LayerWizard } from '../classes/layers/layer_wizard_registry';
+import type { IEMSTermJoinConfig, ISampleValuesConfig } from '../ems_autosuggest';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 export async function registerLayerWizard(layerWizard: LayerWizard): Promise<void> {
@@ -17,4 +18,11 @@ export async function registerLayerWizard(layerWizard: LayerWizard): Promise<voi
 export async function registerSource(entry: SourceRegistryEntry): Promise<void> {
   const mapModules = await lazyLoadMapModules();
   return mapModules.registerSource(entry);
+}
+
+export async function suggestEMSTermJoinConfig(
+  sampleValuesConfig: ISampleValuesConfig
+): Promise<IEMSTermJoinConfig | null> {
+  const mapModules = await lazyLoadMapModules();
+  return await mapModules.suggestEMSTermJoinConfig(sampleValuesConfig);
 }

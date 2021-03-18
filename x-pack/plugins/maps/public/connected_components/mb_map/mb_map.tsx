@@ -33,7 +33,7 @@ import {
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
-import { getGlyphUrl, isRetina } from '../../meta';
+import { getGlyphUrl, isRetina } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 // @ts-expect-error
 import { removeOrphanedSourcesAndLayers, addSpritesheetToMap } from './utils';

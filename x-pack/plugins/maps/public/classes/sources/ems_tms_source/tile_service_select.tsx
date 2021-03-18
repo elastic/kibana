@@ -9,7 +9,7 @@ import React, { ChangeEvent, Component } from 'react';
 import { EuiSelect, EuiSelectOption, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { getEmsTmsServices } from '../../../meta';
+import { getEmsTmsServices } from '../../../util';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 
 export const AUTO_SELECT = 'auto_select';

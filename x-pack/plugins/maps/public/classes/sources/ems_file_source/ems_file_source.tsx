@@ -18,7 +18,7 @@ import {
   VECTOR_SHAPE_TYPE,
   FORMAT_TYPE,
 } from '../../../../common/constants';
-import { getEmsFileLayers } from '../../../meta';
+import { getEmsFileLayers } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
