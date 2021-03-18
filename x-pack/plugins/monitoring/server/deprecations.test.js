@@ -16,8 +16,8 @@ describe('monitoring plugin deprecations', function () {
 
   beforeAll(function () {
     const deprecations = deprecationsModule({ rename, renameFromRoot });
-    transformDeprecations = (settings, fromPath, log = noop) => {
-      deprecations.forEach((deprecation) => deprecation(settings, fromPath, log));
+    transformDeprecations = (settings, fromPath, deprecationHook = noop) => {
+      deprecations.forEach((deprecation) => deprecation(settings, fromPath, deprecationHook));
     };
   });
 
@@ -31,9 +31,9 @@ describe('monitoring plugin deprecations', function () {
         },
       };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).not.toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).not.toHaveBeenCalled();
     });
 
     it(`shouldn't log when cluster alerts are disabled`, function () {
@@ -46,9 +46,9 @@ describe('monitoring plugin deprecations', function () {
         },
       };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).not.toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).not.toHaveBeenCalled();
     });
 
     it(`shouldn't log when email_address is specified`, function () {
@@ -62,9 +62,9 @@ describe('monitoring plugin deprecations', function () {
         },
       };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).not.toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).not.toHaveBeenCalled();
     });
 
     it(`should log when email_address is missing, but alerts/notifications are both enabled`, function () {
@@ -77,9 +77,9 @@ describe('monitoring plugin deprecations', function () {
         },
       };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).toHaveBeenCalled();
     });
   });
 
@@ -87,65 +87,65 @@ describe('monitoring plugin deprecations', function () {
     it('logs a warning if elasticsearch.username is set to "elastic"', () => {
       const settings = { elasticsearch: { username: 'elastic' } };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).toHaveBeenCalled();
     });
 
     it('logs a warning if elasticsearch.username is set to "kibana"', () => {
       const settings = { elasticsearch: { username: 'kibana' } };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).toHaveBeenCalled();
     });
 
     it('does not log a warning if elasticsearch.username is set to something besides "elastic" or "kibana"', () => {
       const settings = { elasticsearch: { username: 'otheruser' } };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).not.toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).not.toHaveBeenCalled();
     });
 
     it('does not log a warning if elasticsearch.username is unset', () => {
       const settings = { elasticsearch: { username: undefined } };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).not.toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).not.toHaveBeenCalled();
     });
 
     it('logs a warning if ssl.key is set and ssl.certificate is not', () => {
       const settings = { elasticsearch: { ssl: { key: '' } } };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).toHaveBeenCalled();
     });
 
     it('logs a warning if ssl.certificate is set and ssl.key is not', () => {
       const settings = { elasticsearch: { ssl: { certificate: '' } } };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).toHaveBeenCalled();
     });
 
     it('does not log a warning if both ssl.key and ssl.certificate are set', () => {
       const settings = { elasticsearch: { ssl: { key: '', certificate: '' } } };
 
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).not.toHaveBeenCalled();
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
+      expect(deprecationHook).not.toHaveBeenCalled();
     });
   });
 
   describe('xpack_api_polling_frequency_millis', () => {
     it('should call rename for this renamed config key', () => {
       const settings = { xpack_api_polling_frequency_millis: 30000 };
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
+      const deprecationHook = jest.fn();
+      transformDeprecations(settings, fromPath, deprecationHook);
       expect(rename).toHaveBeenCalled();
     });
   });
