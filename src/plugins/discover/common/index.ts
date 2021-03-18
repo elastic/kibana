@@ -8,7 +8,6 @@
 
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
-export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
 export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
 export const DOC_HIDE_TIME_COLUMN_SETTING = 'doc_table:hideTimeColumn';

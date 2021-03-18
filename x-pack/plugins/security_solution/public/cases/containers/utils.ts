@@ -13,22 +13,22 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
-  CasesFindResponse,
-  CasesFindResponseRt,
+  CaseConfigureResponseRt,
+  CasePatchRequest,
   CaseResponse,
   CaseResponseRt,
+  CasesConfigureResponse,
+  CasesFindResponse,
+  CasesFindResponseRt,
   CasesResponse,
   CasesResponseRt,
-  CasesStatusResponseRt,
   CasesStatusResponse,
-  throwErrors,
-  CasesConfigureResponse,
-  CaseConfigureResponseRt,
+  CasesStatusResponseRt,
   CaseUserActionsResponse,
   CaseUserActionsResponseRt,
   CommentType,
-  CasePatchRequest,
-} from '../../../../cases/common/api';
+  throwErrors,
+} from '../../../../cases/common';
 import { AppToast, ToasterError } from '../../common/components/toasters';
 import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';
