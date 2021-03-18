@@ -18,7 +18,7 @@ import {
   txtNameColumnTitle,
   txtSelectableMessage,
   txtCloneButtonLabel,
-  txtCreateAction,
+  txtSingleItemCloneActionLabel,
 } from './i18n';
 
 export interface DrilldownTemplateTableItem {
@@ -60,7 +60,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
             disabled={!!selected.length}
             onClick={() => onCreate(drilldown.id)}
           >
-            {txtCreateAction}
+            {txtSingleItemCloneActionLabel}
           </EuiButtonEmpty>
         ),
     },

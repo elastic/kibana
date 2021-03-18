@@ -22,6 +22,7 @@ import {
   txtCreateDrilldown,
   txtDeleteDrilldowns,
   txtEditDrilldown,
+  txtCloneDrilldown,
   txtSelectDrilldown,
   txtName,
   txtAction,
@@ -49,6 +50,7 @@ export interface DrilldownTableProps {
   onCreate?: () => void;
   onDelete?: (ids: string[]) => void;
   onEdit?: (id: string) => void;
+  onClone?: (id: string) => void;
 }
 
 export const DrilldownTable: React.FC<DrilldownTableProps> = ({
@@ -56,6 +58,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
   onCreate,
   onDelete,
   onEdit,
+  onClone,
 }) => {
   const [selectedDrilldowns, setSelectedDrilldowns] = useState<string[]>([]);
 
@@ -114,16 +117,28 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
     },
     {
       align: 'right',
-      render: (drilldown: DrilldownTableItem) =>
-        !!onEdit ? (
-          <EuiButtonEmpty
-            size="xs"
-            disabled={!!selectedDrilldowns.length}
-            onClick={() => onEdit(drilldown.id)}
-          >
-            {txtEditDrilldown}
-          </EuiButtonEmpty>
-        ) : null,
+      render: (drilldown: DrilldownTableItem) => (
+        <>
+          {!!onEdit && (
+            <EuiButtonEmpty
+              size="xs"
+              disabled={!!selectedDrilldowns.length}
+              onClick={() => onEdit(drilldown.id)}
+            >
+              {txtEditDrilldown}
+            </EuiButtonEmpty>
+          )}
+          {!!onClone && (
+            <EuiButtonEmpty
+              size="xs"
+              disabled={!!selectedDrilldowns.length}
+              onClick={() => onClone(drilldown.id)}
+            >
+              {txtCloneDrilldown}
+            </EuiButtonEmpty>
+          )}
+        </>
+      ),
     },
   ].filter(Boolean) as Array<EuiBasicTableColumn<DrilldownTableItem>>;
 

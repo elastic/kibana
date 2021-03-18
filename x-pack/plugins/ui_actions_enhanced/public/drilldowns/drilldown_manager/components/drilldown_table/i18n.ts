@@ -21,6 +21,13 @@ export const txtEditDrilldown = i18n.translate(
   }
 );
 
+export const txtCloneDrilldown = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownTable.cloneDrilldownButtonLabel',
+  {
+    defaultMessage: 'Clone',
+  }
+);
+
 export const txtDeleteDrilldowns = (count: number) =>
   i18n.translate('xpack.uiActionsEnhanced.components.DrilldownTable.deleteDrilldownsButtonLabel', {
     defaultMessage: 'Delete ({count})',

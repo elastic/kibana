@@ -9,6 +9,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SerializableState } from 'src/plugins/kibana_utils/common';
+import { reactRouterNavigate } from 'src/plugins/kibana_react/public';
 import {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,
@@ -340,6 +341,22 @@ export class DrilldownManagerState {
       drilldownState.setName(template.name);
       drilldownState.setTriggers(template.triggers);
       drilldownState.setConfig(template.config as SerializableState);
+    }
+  };
+
+  public readonly onCreateFromDrilldown = async (eventId: string) => {
+    const { dynamicActionManager } = this.deps;
+    const { events } = dynamicActionManager.state.get();
+    const event = events.find((ev) => ev.eventId === eventId);
+    if (!event) return;
+    const actionFactory = this.deps.actionFactories.find(({ id }) => id === event.action.factoryId);
+    if (!actionFactory) return;
+    this.setActionFactory(actionFactory);
+    const drilldownState = this.getDrilldownState();
+    if (drilldownState) {
+      drilldownState.setName(event.action.name);
+      drilldownState.setTriggers(event.triggers);
+      drilldownState.setConfig(event.action.config);
     }
   };
 

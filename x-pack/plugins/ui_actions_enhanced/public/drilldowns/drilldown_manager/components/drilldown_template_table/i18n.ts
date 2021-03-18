@@ -22,11 +22,11 @@ export const txtNameColumnTitle = i18n.translate(
   }
 );
 
-export const txtCreateAction = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.createAction',
+export const txtSingleItemCloneActionLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.singleItemCloneAction',
   {
-    defaultMessage: 'Create',
-    description: '"Create" action button label in drilldown template cloning table.',
+    defaultMessage: 'Clone',
+    description: '"Clone" action button label in drilldown template cloning table.',
   }
 );
 

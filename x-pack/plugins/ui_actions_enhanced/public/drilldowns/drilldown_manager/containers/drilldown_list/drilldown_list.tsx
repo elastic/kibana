@@ -20,6 +20,7 @@ export const DrilldownList: React.FC = ({}) => {
       onEdit={(id) => {
         drilldowns.setRoute(['manage', id]);
       }}
+      onClone={drilldowns.onCreateFromDrilldown}
     />
   );
 };
