@@ -96,12 +96,12 @@ image::images/lens_drag_drop_2.png[Lens drag and drop focus state]
 
 * To select where you want to drop the item, use the Left and Right arrows.
 
+* To reorder the fields in the group, use Up and Down arrows.
+
 * To duplicate an operation, use the Left and Right arrows to select the `Drop a field or click to add` in the same group.
 +
 [role="screenshot"]
 image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
-
-* To reorder the fields in the group, use Up and Down arrows.
 
 . Press Space bar to confirm, or to cancel, press Esc.
 

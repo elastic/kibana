@@ -39,7 +39,7 @@ With *Lens*, you can:
 * Change the aggregation and labels to customize the data.
 
 [role="screenshot"]
-image:dashboard/images/lens.png[Lens]
+image:dashboard/images/lens_advanced_1_1.png[Lens]
 
 [float]
 [[tsvb-editor]]
@@ -64,9 +64,9 @@ image::images/tsvb.png[TSVB UI]
 
 *Vega* and *Vega-Lite* are visualization grammars that are integrated into {kib} for custom visualizations.
 
-* *Vega-Lite* &mdash; A high-level grammar for rapid analysis
+* *Vega-Lite* &mdash; A high-level grammar for rapid analysis.
 
-* *Vega* &mdash; A declarative language with support for interactivity
+* *Vega* &mdash; A declarative language with support for interactivity.
 
 *Vega* and *Vega-Lite* panels can display one or more data sources, including {es}, Elastic Map Service,
 URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
