@@ -40,6 +40,7 @@ describe('DragDrop', () => {
   };
 
   const value = { id: '1', humanData: { label: 'hello' } };
+  describe('DragDrop', () => {});
   test('renders if nothing is being dragged', () => {
     const component = render(
       <DragDrop value={value} draggable order={[2, 0, 1, 0]}>
@@ -109,7 +110,9 @@ describe('DragDrop', () => {
 
     component.find('[data-test-subj="lnsDragDrop"]').at(0).simulate('dragstart', { dataTransfer });
 
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
 
     expect(dataTransfer.setData).toBeCalledWith('text', 'hello');
     expect(setDragging).toBeCalledWith({ ...value });
@@ -134,10 +137,9 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    component
-      .find('[data-test-subj="lnsDragDrop"]')
-      .at(0)
-      .simulate('drop', { preventDefault, stopPropagation });
+    const dragDrop = component.find('[data-test-subj="lnsDragDrop"]').at(0);
+    dragDrop.simulate('dragOver');
+    dragDrop.simulate('drop', { preventDefault, stopPropagation });
 
     expect(preventDefault).toBeCalled();
     expect(stopPropagation).toBeCalled();
@@ -163,10 +165,9 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    component
-      .find('[data-test-subj="lnsDragDrop"]')
-      .at(0)
-      .simulate('drop', { preventDefault, stopPropagation });
+    const dragDrop = component.find('[data-test-subj="lnsDragDrop"]').at(0);
+    dragDrop.simulate('dragOver');
+    dragDrop.simulate('drop', { preventDefault, stopPropagation });
 
     expect(preventDefault).toBeCalled();
     expect(stopPropagation).toBeCalled();
@@ -250,11 +251,14 @@ describe('DragDrop', () => {
       .find('[data-test-subj="lnsDragDrop"]')
       .first()
       .simulate('dragstart', { dataTransfer });
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
     expect(setA11yMessage).toBeCalledWith('Lifted ignored');
 
-    component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragover');
-    component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('drop');
+    const dragDrop = component.find('[data-test-subj="lnsDragDrop"]').at(1);
+    dragDrop.simulate('dragOver');
+    dragDrop.simulate('drop');
     expect(component.find('.additional')).toHaveLength(0);
   });
 
@@ -302,7 +306,9 @@ describe('DragDrop', () => {
       .find('[data-test-subj="lnsDragDrop"]')
       .first()
       .simulate('dragstart', { dataTransfer });
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
 
     component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragover');
     expect(component.find('.additional')).toHaveLength(2);
@@ -427,7 +433,9 @@ describe('DragDrop', () => {
       .simulate('focus');
 
     keyboardHandler.simulate('keydown', { key: 'Enter' });
-    jest.runAllTimers();
+    act(() => {
+      jest.runAllTimers();
+    });
 
     expect(setDragging).toBeCalledWith({
       ...value,
@@ -502,20 +510,17 @@ describe('DragDrop', () => {
         id: '1',
         humanData: { label: 'Label1', position: 1, groupLabel: 'X' },
         onDrop,
-        dropTypes: ['reorder'] as DropType[],
         draggable: true,
       },
       {
         id: '2',
         humanData: { label: 'label2', position: 2, groupLabel: 'X' },
         onDrop,
-        dropTypes: ['reorder'] as DropType[],
       },
       {
         id: '3',
         humanData: { label: 'label3', position: 3, groupLabel: 'X' },
         onDrop,
-        dropTypes: ['reorder'] as DropType[],
       },
     ];
     const mountComponent = (
@@ -549,7 +554,6 @@ describe('DragDrop', () => {
       const dragDropSharedProps = {
         draggable: true,
         dragType: 'move' as 'copy' | 'move',
-        dropType: 'reorder' as DropType,
         reorderableGroup: items.map(({ id }) => ({ id })),
         onDrop: onDropHandler || onDrop,
       };
@@ -565,10 +569,20 @@ describe('DragDrop', () => {
             >
               <span>1</span>
             </DragDrop>
-            <DragDrop {...dragDropSharedProps} value={items[1]} order={[2, 0, 1]}>
+            <DragDrop
+              {...dragDropSharedProps}
+              value={items[1]}
+              order={[2, 0, 1]}
+              dropTypes={['reorder']}
+            >
               <span>2</span>
             </DragDrop>
-            <DragDrop {...dragDropSharedProps} value={items[2]} order={[2, 0, 2]}>
+            <DragDrop
+              {...dragDropSharedProps}
+              value={items[2]}
+              order={[2, 0, 2]}
+              dropTypes={['reorder']}
+            >
               <span>3</span>
             </DragDrop>
           </ReorderProvider>
@@ -577,7 +591,10 @@ describe('DragDrop', () => {
     };
     test(`Inactive group renders properly`, () => {
       const component = mountComponent(undefined);
-      expect(component.find('[data-test-subj="lnsDragDrop"]')).toHaveLength(3);
+      act(() => {
+        jest.runAllTimers();
+      });
+      expect(component.find('[data-test-subj="lnsDragDrop"]')).toHaveLength(5);
     });
 
     test(`Reorderable group with lifted element renders properly`, () => {
@@ -588,31 +605,32 @@ describe('DragDrop', () => {
         setDragging,
         setA11yMessage,
       });
+
       act(() => {
-        component
-          .find('[data-test-subj="lnsDragDrop"]')
-          .first()
-          .simulate('dragstart', { dataTransfer });
+        jest.runAllTimers();
+      });
+      component
+        .find('[data-test-subj="lnsDragDrop"]')
+        .first()
+        .simulate('dragstart', { dataTransfer });
+
+      act(() => {
         jest.runAllTimers();
       });
 
       expect(setDragging).toBeCalledWith({ ...items[0] });
       expect(setA11yMessage).toBeCalledWith('Lifted Label1');
-      expect(
-        component
-          .find('[data-test-subj="lnsDragDrop-reorderableGroup"]')
-          .hasClass('lnsDragDrop-isActiveGroup')
-      ).toEqual(true);
     });
 
     test(`Reordered elements get extra styles to show the reorder effect when dragging`, () => {
       const component = mountComponent({ dragging: { ...items[0] } });
 
+      component
+        .find('[data-test-subj="lnsDragDrop"]')
+        .first()
+        .simulate('dragstart', { dataTransfer });
+
       act(() => {
-        component
-          .find('[data-test-subj="lnsDragDrop"]')
-          .first()
-          .simulate('dragstart', { dataTransfer });
         jest.runAllTimers();
       });
 
@@ -659,11 +677,13 @@ describe('DragDrop', () => {
         setA11yMessage,
       });
 
-      component
-        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
-        .at(1)
-        .simulate('drop', { preventDefault, stopPropagation });
-      jest.runAllTimers();
+      const dragDrop = component.find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]').at(1);
+      dragDrop.simulate('dragOver');
+      dragDrop.simulate('drop', { preventDefault, stopPropagation });
+
+      act(() => {
+        jest.runAllTimers();
+      });
 
       expect(setA11yMessage).toBeCalledWith(
         'Reordered Label1 in X group from position 1 to positon 3'
@@ -699,7 +719,7 @@ describe('DragDrop', () => {
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
 
-      expect(setActiveDropTarget).toBeCalledWith(items[1]);
+      expect(setActiveDropTarget).toBeCalledWith({ ...items[1], dropType: 'reorder' });
       expect(setA11yMessage).toBeCalledWith(
         'Reorder Label1 in X group from position 1 to position 2. Press space or enter to reorder'
       );
@@ -738,7 +758,9 @@ describe('DragDrop', () => {
       const keyboardHandler = component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]');
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'Escape' });
-      jest.runAllTimers();
+      act(() => {
+        jest.runAllTimers();
+      });
 
       expect(onDropHandler).not.toHaveBeenCalled();
       expect(setA11yMessage).toBeCalledWith(

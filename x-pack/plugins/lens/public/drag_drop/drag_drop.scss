@@ -5,6 +5,7 @@
   user-select: none;
   transition: $euiAnimSpeedFast ease-in-out;
   transition-property: background-color, border-color, opacity;
+  z-index: $euiZLevel1;
 }
 
 .lnsDragDrop_ghost {

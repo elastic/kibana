@@ -95,7 +95,9 @@ interface BaseProps {
    * Order for keyboard dragging. This takes an array of numbers which will be used to order hierarchically
    */
   order: number[];
-
+  /**
+   * Extra drop targets by dropType
+   */
   customDropTargets?: Partial<{ [dropType in DropType]: ReactElement }>;
 }
 
@@ -377,7 +379,7 @@ const DragInner = memo(function DragInner({
           data-test-subj="lnsDragDrop-keyboardHandler"
           onBlur={() => {
             if (activeDraggingProps) {
-              // dragEnd();
+              dragEnd();
             }
           }}
           onKeyDown={(e: KeyboardEvent<HTMLButtonElement>) => {
@@ -520,7 +522,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
   const drop = (e: DroppableEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     if (onDrop && activeDropType && dragging) {
       onDrop(dragging, activeDropType);
       setTimeout(() =>
@@ -591,6 +592,11 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
       onDragEnter={dragEnter}
       ref={firstDropRef}
     >
+      <SingleDropInner
+        {...mainTargetProps}
+        className={classNames(mainTargetProps.className, getMainTargetClasses())}
+        children={children}
+      />
       {dropTypes && dropTypes.length > 1 && (
         <div
           className="lnsDragDrop__diamondPath"
@@ -609,11 +615,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
           onDragEnter={dragEnter}
         />
       )}
-      <SingleDropInner
-        {...mainTargetProps}
-        className={classNames(mainTargetProps.className, getMainTargetClasses())}
-        children={children}
-      />
       <EuiFlexGroup
         gutterSize="s"
         ref={extraDropsHeightRef}

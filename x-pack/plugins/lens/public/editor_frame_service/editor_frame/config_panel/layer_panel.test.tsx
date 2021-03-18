@@ -480,7 +480,12 @@ describe('LayerPanel', () => {
         })
       );
 
-      component.find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop').first().simulate('drop');
+      const dragDropElement = component
+        .find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop')
+        .first();
+
+      dragDropElement.simulate('dragOver');
+      dragDropElement.simulate('drop');
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -532,11 +537,13 @@ describe('LayerPanel', () => {
         component.find('[data-test-subj="lnsGroup"] DragDrop').first().prop('dropType')
       ).toEqual(undefined);
 
-      component
+      const dragDropElement = component
         .find('[data-test-subj="lnsGroup"] DragDrop')
         .first()
-        .find('.lnsLayerPanel__dimension')
-        .simulate('drop');
+        .find('.lnsLayerPanel__dimension');
+
+      dragDropElement.simulate('dragOver');
+      dragDropElement.simulate('drop');
 
       expect(mockDatasource.onDrop).not.toHaveBeenCalled();
     });
@@ -595,7 +602,13 @@ describe('LayerPanel', () => {
       );
 
       // Simulate drop on the pre-populated dimension
-      component.find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop').at(0).simulate('drop');
+
+      const dragDropElement = component
+        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
+        .at(0);
+      dragDropElement.simulate('dragOver');
+      dragDropElement.simulate('drop');
+
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'b',
@@ -604,7 +617,14 @@ describe('LayerPanel', () => {
       );
 
       // Simulate drop on the empty dimension
-      component.find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop').at(2).simulate('drop');
+
+      const updatedDragDropElement = component
+        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
+        .at(2);
+
+      updatedDragDropElement.simulate('dragOver');
+      updatedDragDropElement.simulate('drop');
+
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'newid',
