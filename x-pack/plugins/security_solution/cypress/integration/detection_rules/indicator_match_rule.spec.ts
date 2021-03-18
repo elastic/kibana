@@ -476,7 +476,7 @@ describe('indicator match', () => {
     });
 
     describe('Enrichment', () => {
-      beforeEach(() => {
+      before(() => {
         cleanKibana();
         esArchiverLoad('threat_indicator');
         esArchiverLoad('threat_data');
@@ -484,10 +484,15 @@ describe('indicator match', () => {
         goToManageAlertsDetectionRules();
         createCustomIndicatorRule(newThreatIndicatorRule);
         reload();
+      });
+
+      beforeEach(() => {
+        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        goToManageAlertsDetectionRules();
         goToRuleDetails();
       });
 
-      afterEach(() => {
+      after(() => {
         esArchiverUnload('threat_indicator');
         esArchiverUnload('threat_data');
       });
