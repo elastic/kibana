@@ -9,9 +9,9 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
-import { CommentsResponse, CommentType } from '../../../../../../plugins/case/common/api';
+import { CommentsResponse, CommentType } from '../../../../../../plugins/cases/common/api';
 import {
   defaultUser,
   postCaseReq,
