@@ -10,12 +10,14 @@ import {
   TIMELINE_DATA_PROVIDERS_EMPTY,
   TIMELINE_DROPPED_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS_ACTION_MENU,
+  IS_DRAGGING_DATA_PROVIDERS,
 } from '../../screens/timeline';
 import { HOSTS_NAMES_DRAGGABLE } from '../../screens/hosts/all_hosts';
 
 import {
   dragAndDropFirstHostToTimeline,
   dragFirstHostToEmptyTimelineDataProviders,
+  unDragFirstHostToEmptyTimelineDataProviders,
   dragFirstHostToTimeline,
   waitForAllHostsToBeLoaded,
 } from '../../tasks/hosts/all_hosts';
@@ -32,6 +34,7 @@ describe('timeline data providers', () => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
+    cy.scrollTo('bottom');
   });
 
   afterEach(() => {
@@ -66,31 +69,24 @@ describe('timeline data providers', () => {
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
 
-  it('sets the background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers', () => {
+  it('sets correct classes when the user starts dragging a host, but is not hovering over the data providers', () => {
     dragFirstHostToTimeline();
 
-    cy.get(TIMELINE_DATA_PROVIDERS)
+    cy.get(IS_DRAGGING_DATA_PROVIDERS)
+      .find(TIMELINE_DATA_PROVIDERS)
       .filter(':visible')
-      .should(
-        'have.css',
-        'background',
-        'rgba(1, 125, 115, 0.1) none repeat scroll 0% 0% / auto padding-box border-box'
-      );
+      .should('have.class', 'drop-target-data-providers');
   });
 
-  it('sets the background to euiColorSuccess with a 20% alpha channel and renders the dashed border color as euiColorSuccess when the user starts dragging a host AND is hovering over the data providers', () => {
+  it('render an extra highlighted area in dataProvider when the user starts dragging a host AND is hovering over the data providers', () => {
     dragFirstHostToEmptyTimelineDataProviders();
 
-    cy.get(TIMELINE_DATA_PROVIDERS_EMPTY)
-      .filter(':visible')
-      .should(
-        'have.css',
-        'background',
-        'rgba(1, 125, 115, 0.2) none repeat scroll 0% 0% / auto padding-box border-box'
-      );
+    cy.get(IS_DRAGGING_DATA_PROVIDERS)
+      .find(TIMELINE_DATA_PROVIDERS_EMPTY)
+      .children()
+      .should('exist');
 
-    cy.get(TIMELINE_DATA_PROVIDERS)
-      .filter(':visible')
-      .should('have.css', 'border', '3.1875px dashed rgb(1, 125, 115)');
+    // Release the dragging item so the cursor can peform other action
+    unDragFirstHostToEmptyTimelineDataProviders();
   });
 });
