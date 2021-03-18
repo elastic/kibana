@@ -10,13 +10,16 @@ import { i18n } from '@kbn/i18n';
 import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
+  CONTEXT_MENU_TRIGGER,
+  IEmbeddable,
+  EmbeddableContext,
+  Container as EmbeddableContainer,
+} from '../../../../../../../../src/plugins/embeddable/public';
+import {
   isEnhancedEmbeddable,
   embeddableEnhancedDrilldownGrouping,
 } from '../../../../../../embeddable_enhanced/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableContext,
-} from '../../../../../../../../src/plugins/embeddable/public';
+import { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '../../../../../../ui_actions_enhanced/public';
 import { StartDependencies } from '../../../../plugin';
 import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { ensureNestedTriggers } from '../drilldown_shared';
@@ -26,6 +29,31 @@ export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
 export interface OpenFlyoutAddDrilldownParams {
   start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
+
+const isEmbeddableContainer = (x: unknown): x is EmbeddableContainer =>
+  x instanceof EmbeddableContainer;
+
+const createDrilldownTemplatesFromSiblings = (embeddable: IEmbeddable): DrilldownTemplate[] => {
+  const templates: DrilldownTemplate[] = [];
+  const container = embeddable.getRoot();
+  if (!container) return templates;
+  if (!isEmbeddableContainer(container)) return templates;
+  for (const child of Object.values(container.children)) {
+    if (!isEnhancedEmbeddable(child)) continue;
+    const events = child.enhancements.dynamicActions.state.get().events;
+    for (const event of events) {
+      const template: DrilldownTemplate = {
+        name: event.action.name,
+        description: child.getTitle() || child.id,
+        config: event.action.config,
+        factoryId: event.action.factoryId,
+        triggers: event.triggers,
+      };
+      templates.push(template);
+    }
+  }
+  return templates;
+};
 
 export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
@@ -81,6 +109,8 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
       );
     }
 
+    const templates = createDrilldownTemplatesFromSiblings(embeddable);
+
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
@@ -88,15 +118,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
           dynamicActionManager={embeddable.enhancements.dynamicActions}
           triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
-          templates={[
-            {
-              factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
-              name: 'Hello world',
-              description: 'Panel A',
-              triggers: [],
-              config: {},
-            },
-          ]}
+          templates={templates}
           onClose={() => handle.close()}
         />
       ),

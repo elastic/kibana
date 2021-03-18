@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './types';
 export * from './containers';
