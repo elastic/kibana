@@ -7,13 +7,43 @@
  */
 
 import { withTimeout, isPromise } from '@kbn/std';
-import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { PluginWrapper } from './plugin';
-import { DiscoveredPlugin, PluginName } from './types';
+import { isPlainObject } from 'lodash';
+import type { CoreContext } from '../core_context';
+import type { Logger } from '../logging';
+import type { PluginWrapper } from './plugin';
+import type { DiscoveredPlugin, PluginName } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { PluginDependencies } from '.';
+import type { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
+import { PluginScopedAPI } from './plugin_scoped_api';
+import type { PluginDependencies } from '.';
+
+/**
+ * For all the registered
+ * @param pluginName
+ * @param contract
+ */
+function injectPluginName(
+  pluginName: string,
+  contract: Record<string, unknown>
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(contract).map(([apiName, apiImplementation]) => {
+      if (apiImplementation instanceof PluginScopedAPI) {
+        return [apiName, apiImplementation.setScope(pluginName)];
+      } else if (isRecord(apiImplementation)) {
+        return [apiName, injectPluginName(pluginName, apiImplementation)];
+      } else {
+        return [apiName, apiImplementation];
+      }
+    })
+  );
+}
+
+// There is not an easy guard to validate Record types :(
+function isRecord(potentialObject: unknown): potentialObject is Record<string, unknown> {
+  // return false;
+  return isPlainObject(potentialObject);
+}
 
 const Sec = 1000;
 /** @internal */
@@ -88,7 +118,13 @@ export class PluginsSystem {
         // Only set if present. Could be absent if plugin does not have server-side code or is a
         // missing optional dependency.
         if (contracts.has(dependencyName)) {
-          depContracts[dependencyName] = contracts.get(dependencyName);
+          const contract = contracts.get(dependencyName);
+          depContracts[dependencyName] = contract;
+          if (isRecord(contract)) {
+            depContracts[dependencyName] = injectPluginName(pluginName, contract);
+          } else {
+            depContracts[dependencyName] = contract;
+          }
         }
 
         return depContracts;

@@ -185,6 +185,11 @@ export class LegacyService implements CoreService {
         collectionInterval: startDeps.core.metrics.collectionInterval,
         getOpsMetrics$: startDeps.core.metrics.getOpsMetrics$,
       },
+      plugins: {
+        createScopedApi: () => {
+          throw new Error('core.start.plugins.createScopedApi is unsupported in legacy');
+        },
+      },
       uiSettings: { asScopedToClient: startDeps.core.uiSettings.asScopedToClient },
       coreUsageData: {
         getCoreUsageData: () => {

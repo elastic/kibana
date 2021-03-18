@@ -17,6 +17,7 @@ import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
+import type { PluginScopedAPI, PluginScopeableAPI, IPluginScopedAPI } from './plugin_scoped_api';
 
 /**
  * Dedicated type for plugin configuration schema.
@@ -238,6 +239,16 @@ export interface InternalPluginInfo {
   readonly publicAssetsDir: string;
 }
 
+export type APILeaves = Function | string | number | boolean | null;
+
+export type UnwrapScopedApi<Base> = Base extends APILeaves | APILeaves[]
+  ? Base
+  : {
+      [Key in keyof Base]: Base[Key] extends PluginScopedAPI<infer API>
+        ? IPluginScopedAPI<API>
+        : UnwrapScopedApi<Base[Key]>;
+    };
+
 /**
  * The interface that should be returned by a `PluginInitializer`.
  *
@@ -411,3 +422,9 @@ export type PluginInitializer<
 ) =>
   | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
   | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+
+export interface PluginServiceSetup {
+  createScopedApi: <API extends PluginScopeableAPI>(scopeableApi: API) => PluginScopedAPI<API>;
+}
+
+export type PluginServiceStart = PluginServiceSetup;

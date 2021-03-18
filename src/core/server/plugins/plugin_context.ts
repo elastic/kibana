@@ -15,6 +15,7 @@ import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './type
 import { IRouter, RequestHandlerContextProvider } from '../http';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { CoreSetup, CoreStart } from '..';
+import { PluginScopedAPI } from './plugin_scoped_api';
 
 export interface InstanceInfo {
   uuid: string;
@@ -148,6 +149,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       collectionInterval: deps.metrics.collectionInterval,
       getOpsMetrics$: deps.metrics.getOpsMetrics$,
     },
+    plugins: {
+      createScopedApi: (scopeableApi) => PluginScopedAPI.from(scopeableApi),
+    },
     savedObjects: {
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
@@ -199,6 +203,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+    },
+    plugins: {
+      createScopedApi: (scopeableApi) => PluginScopedAPI.from(scopeableApi),
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,

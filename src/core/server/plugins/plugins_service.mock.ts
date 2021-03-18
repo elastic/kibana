@@ -8,6 +8,8 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PluginsService, PluginsServiceSetup } from './plugins_service';
+import type { PluginServiceSetup, PluginServiceStart } from './types';
+import { PluginScopedAPI } from './plugin_scoped_api';
 
 type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 
@@ -32,9 +34,19 @@ function createUiPlugins() {
   };
 }
 
+const createSetupPluginContextMock = (): jest.Mocked<PluginServiceSetup> => ({
+  createScopedApi: jest.fn().mockImplementation((api) => PluginScopedAPI.from(api)),
+});
+
+const createStartPluginContextMock = (): jest.Mocked<PluginServiceStart> => ({
+  createScopedApi: jest.fn().mockImplementation((api) => PluginScopedAPI.from(api)),
+});
+
 export const pluginServiceMock = {
   create: createServiceMock,
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
   createUiPlugins,
+  createSetupPluginContext: createSetupPluginContextMock,
+  createStartPluginContext: createStartPluginContextMock,
 };

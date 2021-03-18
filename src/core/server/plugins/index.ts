@@ -8,6 +8,7 @@
 
 export { PluginsService } from './plugins_service';
 export type { PluginsServiceSetup, PluginsServiceStart, UiPlugins } from './plugins_service';
+export type { PluginScopedAPI } from './plugin_scoped_api';
 export { config } from './plugins_config';
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';

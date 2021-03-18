@@ -39,7 +39,13 @@ import {
 import { HttpServiceSetup, HttpServiceStart } from './http';
 import { HttpResources } from './http_resources';
 
-import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
+import type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginOpaqueId,
+  PluginServiceSetup,
+  PluginServiceStart,
+} from './plugins';
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
@@ -256,6 +262,8 @@ export type {
   PluginManifest,
   PluginName,
   SharedGlobalConfig,
+  PluginScopedAPI,
+  UnwrapScopedApi,
 } from './plugins';
 
 export {
@@ -481,6 +489,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   logging: LoggingServiceSetup;
   /** {@link MetricsServiceSetup} */
   metrics: MetricsServiceSetup;
+  /** {@link PluginServiceSetup} */
+  plugins: PluginServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
   /** {@link StatusServiceSetup} */
@@ -520,6 +530,8 @@ export interface CoreStart {
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */
   metrics: MetricsServiceStart;
+  /** {@link PluginServiceStart} */
+  plugins: PluginServiceStart;
   /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
   /** {@link UiSettingsServiceStart} */

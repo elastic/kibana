@@ -29,11 +29,11 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { CoreStart } from 'src/core/server';
 import { LegacyAPICaller } from '../server/elasticsearch';
 import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
 import KbnServer from '../../legacy/server/kbn_server';
+import type { InternalCoreStart } from '../server/internal_types';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
@@ -164,7 +164,7 @@ export interface TestElasticsearchUtils {
 
 export interface TestKibanaUtils {
   root: Root;
-  coreStart: CoreStart;
+  coreStart: InternalCoreStart;
   kbnServer: KbnServer;
   stop: () => Promise<void>;
 }
