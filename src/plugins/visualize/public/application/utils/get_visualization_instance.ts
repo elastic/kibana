@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import {
   SerializedVis,
   Vis,
@@ -21,14 +17,12 @@ import { SearchSourceFields } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
-import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { createSavedSearchesLoader } from '../../../../discover/public';
 import { VisualizeServices } from '../types';
 
 const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
-  visualizeServices: VisualizeServices,
-  opts?: Record<string, unknown> | string
+  visualizeServices: VisualizeServices
 ) => {
   const {
     data,
@@ -125,8 +119,7 @@ export const getVisualizationInstance = async (
 
   const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
     vis,
-    visualizeServices,
-    opts
+    visualizeServices
   );
   return {
     vis,
