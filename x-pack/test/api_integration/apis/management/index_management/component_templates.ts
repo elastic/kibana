@@ -349,7 +349,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it.skip('should return an error for any component templates not sucessfully deleted', async () => {
+      it('should return an error for any component templates not sucessfully deleted', async () => {
         const COMPONENT_DOES_NOT_EXIST = 'component_does_not_exist';
         const { name: componentTemplateName } = componentTemplateD;
 
