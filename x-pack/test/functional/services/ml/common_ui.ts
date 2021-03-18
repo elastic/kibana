@@ -225,7 +225,10 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
     async assertColorsInCanvasElement(
       dataTestSubj: string,
       expectedColorStats: CanvasElementColorStats,
-      exclude?: string[]
+      exclude?: string[],
+      percentageThreshold = 0,
+      channelTolerance = 10,
+      valueTolerance = 10
     ) {
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail(dataTestSubj);
@@ -233,7 +236,10 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
         const actualColorStatsWithTolerance = await canvasElement.getColorStatsWithColorTolerance(
           `[data-test-subj="${dataTestSubj}"] canvas`,
           expectedColorStats,
-          exclude
+          exclude,
+          percentageThreshold,
+          channelTolerance,
+          valueTolerance
         );
 
         expect(actualColorStatsWithTolerance.every((d) => d.withinTolerance)).to.eql(

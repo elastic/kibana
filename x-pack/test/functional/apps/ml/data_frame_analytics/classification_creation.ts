@@ -241,7 +241,12 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.commonUI.assertColorsInCanvasElement(
             'mlDFAnalyticsClassificationExplorationRocCurveChart',
             testData.expected.rocCurveColorState,
-            ['#000000']
+            ['#000000'],
+            undefined,
+            undefined,
+            // increased tolerance for ROC curve chart up from 10 to 20
+            // since the returned colors vary quite a bit on each run.
+            20
           );
           await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
