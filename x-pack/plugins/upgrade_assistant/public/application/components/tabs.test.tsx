@@ -12,7 +12,7 @@ import { mockKibanaSemverVersion } from '../../../common/constants';
 import { UpgradeAssistantTabs } from './tabs';
 import { LoadingState } from './types';
 
-import { OverviewTab } from './tabs/overview';
+import { OverviewTab } from './overview';
 
 // Used to wait for promises to resolve and renders to finish before reading updates
 const promisesToResolve = () => new Promise((resolve) => setTimeout(resolve, 0));

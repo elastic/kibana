@@ -9,8 +9,8 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 
-import { ReindexStatus } from '../../../../../../../../common/types';
-import { LoadingState } from '../../../../../types';
+import { ReindexStatus } from '../../../../../../../common/types';
+import { LoadingState } from '../../../../types';
 import { ReindexState } from '../polling_service';
 import { ChecklistFlyoutStep } from './checklist_step';
 
