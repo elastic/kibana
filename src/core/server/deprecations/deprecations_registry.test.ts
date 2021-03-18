@@ -6,15 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { RegisterDeprecationsConfig, DeprecationDependencies } from './types';
+/* eslint-disable dot-notation */
+import { RegisterDeprecationsConfig, GetDeprecationsContext } from './types';
 import { DeprecationsRegistry } from './deprecations_registry';
 
 describe('DeprecationsRegistry', () => {
   describe('registerDeprecations', () => {
     it('throws if getDeprecations is not a function', async () => {
       const deprecationsRegistry = new DeprecationsRegistry();
-      const context = ({ getDeprecations: null } as unknown) as RegisterDeprecationsConfig;
-      expect(() => deprecationsRegistry.registerDeprecations(context)).toThrowError(
+      const deprecationsConfig = ({
+        getDeprecations: null,
+      } as unknown) as RegisterDeprecationsConfig;
+      expect(() => deprecationsRegistry.registerDeprecations(deprecationsConfig)).toThrowError(
         /getDeprecations must be a function/
       );
     });
@@ -22,31 +25,34 @@ describe('DeprecationsRegistry', () => {
     it('registers deprecation context', () => {
       const deprecationsRegistry = new DeprecationsRegistry();
       const getDeprecations = jest.fn();
-      const context = { getDeprecations };
-      deprecationsRegistry.registerDeprecations(context);
-      expect(deprecationsRegistry.deprecationContexts).toStrictEqual([context]);
+      const deprecationsConfig = { getDeprecations };
+      deprecationsRegistry.registerDeprecations(deprecationsConfig);
+      expect(deprecationsRegistry['deprecationContexts']).toStrictEqual([deprecationsConfig]);
     });
 
     it('allows registering multiple contexts', async () => {
       const deprecationsRegistry = new DeprecationsRegistry();
-      const contextA = { getDeprecations: jest.fn() };
-      const contextB = { getDeprecations: jest.fn() };
-      deprecationsRegistry.registerDeprecations(contextA);
-      deprecationsRegistry.registerDeprecations(contextB);
-      expect(deprecationsRegistry.deprecationContexts).toStrictEqual([contextA, contextB]);
+      const deprecationsConfigA = { getDeprecations: jest.fn() };
+      const deprecationsConfigB = { getDeprecations: jest.fn() };
+      deprecationsRegistry.registerDeprecations(deprecationsConfigA);
+      deprecationsRegistry.registerDeprecations(deprecationsConfigB);
+      expect(deprecationsRegistry['deprecationContexts']).toStrictEqual([
+        deprecationsConfigA,
+        deprecationsConfigB,
+      ]);
     });
   });
 
   describe('getDeprecations', () => {
     it('returns all settled deprecations', async () => {
       const deprecationsRegistry = new DeprecationsRegistry();
-      const mockDependencies = ({} as unknown) as DeprecationDependencies;
+      const mockContext = ({} as unknown) as GetDeprecationsContext;
       const mockError = new Error();
-      const contextA = { getDeprecations: jest.fn().mockResolvedValue('hi') };
-      const contextB = { getDeprecations: jest.fn().mockRejectedValue(mockError) };
-      deprecationsRegistry.registerDeprecations(contextA);
-      deprecationsRegistry.registerDeprecations(contextB);
-      const deprecations = await deprecationsRegistry.getDeprecations(mockDependencies);
+      const deprecationsConfigA = { getDeprecations: jest.fn().mockResolvedValue('hi') };
+      const deprecationsConfigB = { getDeprecations: jest.fn().mockRejectedValue(mockError) };
+      deprecationsRegistry.registerDeprecations(deprecationsConfigA);
+      deprecationsRegistry.registerDeprecations(deprecationsConfigB);
+      const deprecations = await deprecationsRegistry.getDeprecations(mockContext);
       expect(deprecations).toStrictEqual([
         {
           status: 'fulfilled',
@@ -61,12 +67,12 @@ describe('DeprecationsRegistry', () => {
 
     it('passes dependencies to registered getDeprecations function', async () => {
       const deprecationsRegistry = new DeprecationsRegistry();
-      const mockDependencies = ({} as unknown) as DeprecationDependencies;
-      const context = { getDeprecations: jest.fn().mockResolvedValue('hi') };
-      deprecationsRegistry.registerDeprecations(context);
-      const deprecations = await deprecationsRegistry.getDeprecations(mockDependencies);
+      const mockContext = ({} as unknown) as GetDeprecationsContext;
+      const deprecationsConfig = { getDeprecations: jest.fn().mockResolvedValue('hi') };
+      deprecationsRegistry.registerDeprecations(deprecationsConfig);
+      const deprecations = await deprecationsRegistry.getDeprecations(mockContext);
       expect(deprecations).toHaveLength(1);
-      expect(context.getDeprecations).toBeCalledWith(mockDependencies);
+      expect(deprecationsConfig.getDeprecations).toBeCalledWith(mockContext);
     });
   });
 });

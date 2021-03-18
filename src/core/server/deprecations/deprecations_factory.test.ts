@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DeprecationDependencies } from './types';
+import { GetDeprecationsContext } from './types';
 import { DeprecationsFactory } from './deprecations_factory';
 import { loggerMock } from '../logging/logger.mock';
 
@@ -52,7 +52,7 @@ describe('DeprecationsFactory', () => {
     const mockDependencies = ({
       esClient: jest.fn(),
       savedObjectsClient: jest.fn(),
-    } as unknown) as DeprecationDependencies;
+    } as unknown) as GetDeprecationsContext;
 
     it('returns a flattened array of deprecations', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
@@ -175,7 +175,7 @@ describe('DeprecationsFactory', () => {
     const mockDependencies = ({
       esClient: jest.fn(),
       savedObjectsClient: jest.fn(),
-    } as unknown) as DeprecationDependencies;
+    } as unknown) as GetDeprecationsContext;
 
     it('returns a flattened array of DeprecationInfo', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });

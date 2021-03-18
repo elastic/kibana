@@ -42,7 +42,7 @@ const createDeprecationsServiceMock = () => {
   return mocked;
 };
 
-export const savedObjectsServiceMock = {
+export const deprecationsServiceMock = {
   create: createDeprecationsServiceMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createSetupContract: createSetupContractMock,

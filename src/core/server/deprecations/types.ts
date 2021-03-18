@@ -31,7 +31,7 @@ export interface DeprecationsDetails {
 }
 
 export interface RegisterDeprecationsConfig {
-  getDeprecations: (dependencies: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
+  getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
 }
 
 export interface GetDeprecationsContext {

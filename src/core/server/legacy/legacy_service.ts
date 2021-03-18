@@ -288,6 +288,11 @@ export class LegacyService implements CoreService {
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
       },
+      deprecations: {
+        registerDeprecations: () => {
+          throw new Error('core.setup.deprecations.registerDeprecations is unsupported in legacy');
+        },
+      },
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };
 

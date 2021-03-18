@@ -29,6 +29,7 @@ import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
 import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
+import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -49,6 +50,7 @@ export { contextServiceMock } from './context/context_service.mock';
 export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 export { i18nServiceMock } from './i18n/i18n_service.mock';
+export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
@@ -137,6 +139,7 @@ function createCoreSetupMock({
     uiSettings: uiSettingsMock,
     logging: loggingServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createSetupContract(),
+    deprecations: deprecationsServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
@@ -174,6 +177,7 @@ function createInternalCoreSetupMock() {
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
+    deprecations: deprecationsServiceMock.createInternalSetupContract(),
   };
   return setupDeps;
 }
