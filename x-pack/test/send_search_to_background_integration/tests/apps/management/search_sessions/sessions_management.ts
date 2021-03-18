@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import uuid from 'uuid/v4';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -42,7 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
         await PageObjects.dashboard.waitForRenderComplete();
         await searchSessions.expectState('completed');
-        await searchSessions.save();
+        const searchSessionName = `Session - ${uuid()}`;
+        await searchSessions.save({ searchSessionName });
         await searchSessions.expectState('backgroundCompleted');
 
         await searchSessions.openPopover();
@@ -63,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const searchSessionList = await PageObjects.searchSessionsManagement.getList();
         expect(searchSessionList.length).to.be(1);
         expect(searchSessionList[0].expires).not.to.eql('--');
-        expect(searchSessionList[0].name).to.contain('Not Delayed');
+        expect(searchSessionList[0].name).to.be(searchSessionName);
 
         // navigate to dashboard
         await searchSessionList[0].view();

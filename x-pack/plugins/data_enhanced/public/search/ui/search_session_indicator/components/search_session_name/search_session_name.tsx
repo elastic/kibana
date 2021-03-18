@@ -48,6 +48,7 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
         aria-label={i18n.translate('xpack.data.searchSessionName.editAriaLabelText', {
           defaultMessage: 'Edit search session name',
         })}
+        data-test-subj={'searchSessionNameEdit'}
         onClick={() => setIsEditing(true)}
       />
     </EuiFlexGroup>
@@ -65,6 +66,7 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
       aria-label={i18n.translate('xpack.data.searchSessionName.ariaLabelText', {
         defaultMessage: 'Search session name',
       })}
+      data-test-subj={'searchSessionNameInput'}
       append={
         <EuiButtonEmpty
           size={'xs'}
@@ -85,6 +87,7 @@ export const SearchSessionName: React.FC<SearchSessionNameProps> = ({ name, edit
           }}
           disabled={!isNewNameValid}
           isLoading={isSaving}
+          data-test-subj={'searchSessionNameSave'}
         >
           <FormattedMessage
             id="xpack.data.searchSessionName.saveButtonText"
