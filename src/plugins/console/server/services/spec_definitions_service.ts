@@ -24,7 +24,7 @@ export class SpecDefinitionsService {
 
   private hasLoadedSpec = false;
 
-  public addGlobalAutocompleteRules(parentNode: string, rules: any) {
+  public addGlobalAutocompleteRules(parentNode: string, rules: unknown) {
     this.globalRules[parentNode] = rules;
   }
 
@@ -70,7 +70,7 @@ export class SpecDefinitionsService {
     this.extensionSpecFilePaths.push(path);
   }
 
-  public addProcessorDefinition(processor: any) {
+  public addProcessorDefinition(processor: unknown) {
     if (!this.hasLoadedSpec) {
       throw new Error(
         'Cannot add a processor definition because spec definitions have not loaded!'

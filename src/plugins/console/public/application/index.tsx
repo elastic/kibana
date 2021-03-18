@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HttpSetup, NotificationsSetup } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
@@ -20,7 +20,7 @@ import { createApi, createEsHostService } from './lib';
 export interface BootDependencies {
   http: HttpSetup;
   docLinkVersion: string;
-  I18nContext: any;
+  I18nContext: FunctionComponent;
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;

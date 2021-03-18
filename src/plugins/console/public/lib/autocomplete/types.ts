@@ -44,4 +44,5 @@ export interface AutoCompleteContext {
   bodyTokenPath?: string[] | null;
   endpointComponentResolver?: unknown;
   globalComponentResolver?: unknown;
+  documentation?: string;
 }
