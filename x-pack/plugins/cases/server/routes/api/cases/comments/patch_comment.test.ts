@@ -17,8 +17,8 @@ import {
   mockCases,
 } from '../../__fixtures__';
 import { initPatchCommentApi } from './patch_comment';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
-import { CommentType } from '../../../../../common/api';
+import { CASE_COMMENTS_URL } from '../../../../../common';
+import { CommentType } from '../../../../../common';
 
 describe('PATCH comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
