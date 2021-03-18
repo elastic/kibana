@@ -45,7 +45,9 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
 });
 
 jest.mock('../../../timeline/utils/check_timelines_status', () => {
+  const actual = jest.requireActual('../../../timeline/utils/check_timelines_status');
   return {
+    ...actual,
     checkTimelinesStatus: jest.fn(),
   };
 });
