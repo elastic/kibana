@@ -6,13 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { RouteDependencies } from '../types';
 
 export function registerUpdateSettingsRoute({ router }: RouteDependencies) {
   router.post(
     {
-      path: '/api/upgrade_assistant/{indexName}/index_settings',
+      path: `${API_BASE_PATH}/{indexName}/index_settings`,
       validate: {
         params: schema.object({
           indexName: schema.string(),
