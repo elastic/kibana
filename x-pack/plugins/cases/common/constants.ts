@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
-
+// The DEFAULT_MAX_SIGNALS value should match the one in `x-pack/plugins/security_solution/common/constants.ts`
+// If either changes, engineer should ensure both values are updated
+const DEFAULT_MAX_SIGNALS = 100;
 export const APP_ID = 'cases';
 
 /**
