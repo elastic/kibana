@@ -14,7 +14,7 @@ import {
   ProtectionModes,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { PolicyProtection } from '../../../types';
+import { MacPolicyProtection, PolicyProtection } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { AppAction } from '../../../../../../common/store/actions';
@@ -45,9 +45,7 @@ export const ProtectionRadio = React.memo(
           if (os === 'windows') {
             newPayload[os][protection].mode = protectionMode;
           } else if (os === 'mac') {
-            newPayload[os][
-              protection as keyof Pick<UIPolicyConfig['mac'], 'malware'>
-            ].mode = protectionMode;
+            newPayload[os][protection as MacPolicyProtection].mode = protectionMode;
           }
           if (isPlatinumPlus) {
             if (os === 'windows') {
@@ -58,13 +56,9 @@ export const ProtectionRadio = React.memo(
               }
             } else if (os === 'mac') {
               if (protectionMode === ProtectionModes.prevent) {
-                newPayload[os].popup[
-                  protection as keyof Pick<UIPolicyConfig['mac'], 'malware'>
-                ].enabled = true;
+                newPayload[os].popup[protection as MacPolicyProtection].enabled = true;
               } else {
-                newPayload[os].popup[
-                  protection as keyof Pick<UIPolicyConfig['mac'], 'malware'>
-                ].enabled = false;
+                newPayload[os].popup[protection as MacPolicyProtection].enabled = false;
               }
             }
           }

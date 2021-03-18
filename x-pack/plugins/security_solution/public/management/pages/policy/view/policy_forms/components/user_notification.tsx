@@ -100,8 +100,8 @@ export const UserNotification = React.memo(
         <SupportedVersionNotice optionName={protection} />
         <EuiSpacer size="s" />
         <EuiCheckbox
-          data-test-subj={`${protection} UserNotificationCheckbox`}
-          id={`${protection} UserNotificationCheckbox}`}
+          data-test-subj={`${protection}UserNotificationCheckbox`}
+          id={`${protection}UserNotificationCheckbox}`}
           onChange={handleUserNotificationCheckbox}
           checked={userNotificationSelected}
           disabled={selected === ProtectionModes.off}
@@ -158,7 +158,7 @@ export const UserNotification = React.memo(
               value={userNotificationMessage}
               onChange={handleCustomUserNotification}
               fullWidth={true}
-              data-test-subj={`${protection} + "UserNotificationCustomMessage"`}
+              data-test-subj={`${protection}UserNotificationCustomMessage`}
             />
           </>
         )}

@@ -29,7 +29,6 @@ export const RadioFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
-// TODO: rename this
 export const RadioButtons = React.memo(
   ({
     protection,

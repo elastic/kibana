@@ -32,7 +32,7 @@ export const ProtectionSwitch = React.memo(
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const dispatch = useDispatch<(action: AppAction) => void>();
-    const selected = policyDetailsConfig && policyDetailsConfig.windows.malware.mode;
+    const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
 
     const handleSwitchChange = useCallback(
       (event) => {
@@ -80,18 +80,16 @@ export const ProtectionSwitch = React.memo(
       [dispatch, policyDetailsConfig, isPlatinumPlus, protection, oses]
     );
 
-    // TODO fix the default message
     return (
       <EuiSwitch
-        label={i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.malwareProtectionsEnabled',
-          {
-            defaultMessage: 'Malware protections {mode, select, true {enabled} false {disabled}}',
-            values: {
-              mode: selected !== ProtectionModes.off,
-            },
-          }
-        )}
+        label={i18n.translate('xpack.securitySolution.endpoint.policy.details.protectionsEnabled', {
+          defaultMessage:
+            '{protectionName} protections {mode, select, true {enabled} false {disabled}}',
+          values: {
+            protectionName: protection.charAt(0).toUpperCase() + protection.substring(1),
+            mode: selected !== ProtectionModes.off,
+          },
+        })}
         checked={selected !== ProtectionModes.off}
         onChange={handleSwitchChange}
       />
