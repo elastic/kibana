@@ -97,7 +97,7 @@ To send logs to `file` with a given file path, you should define a custom append
 -------------------
 logging:
   appenders:
-    file: <1>
+    file:
       type: file
       fileName: /var/log/kibana.log
       layout:
@@ -105,7 +105,6 @@ logging:
   root:
     appenders: [default, file]
 -------------------
-<1> custom appender name
 
 [float]
 ==== Set log verbosity with root
@@ -139,8 +138,6 @@ logging:
     level: all
 -------------------
 
-NOTE: You must specify the `root` appender for your log records to show.
-
 [float]
 ==== Declare log message format
 *Details:* Previously all events would be logged in `json` format when `logging.json` was true. With the new logging configuration you can specify the output format with <<logging-layouts,layouts>>. You can choose between <<logging-json-format-old-and-new-example,`json`>> and <<logging-pattern-format-old-and-new-example,pattern>> format depending on your needs.
@@ -171,7 +168,7 @@ logging:
 ==== Configure log rotation with the rolling-file appender
 *Details:* Previously log rotation would be enabled when `logging.rotate.enabled` was true.
 
-*Impact:* To restore the previous behavior, in `kibana.yml` use the `rolling-file` appender.
+*Impact:* To restore the previous behavior, in `kibana.yml` use the <<rolling-file-appender,`rolling-file`>> appender.
 
 [source,yaml]
 -------------------
