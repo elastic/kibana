@@ -19,7 +19,10 @@ export function registerTimeseriesUsageCollector(
     type: 'vis_type_timeseries',
     isReady: () => true,
     schema: {
-      timeseries_use_last_value_mode_total: { type: 'long' },
+      timeseries_use_last_value_mode_total: {
+        type: 'long',
+        _meta: { description: 'Number of TSVB visualizations using "last value" as a time range' },
+      },
     },
     fetch: async ({ esClient, soClient }) => {
       const { index } = (await config.pipe(first()).toPromise()).kibana;
