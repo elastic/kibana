@@ -5,4 +5,6 @@
  * 2.0.
  */
 
+export { AddResultButton } from './add_result_button';
 export { CurationResult } from './curation_result';
+export { convertToResultFormat } from './utils';
