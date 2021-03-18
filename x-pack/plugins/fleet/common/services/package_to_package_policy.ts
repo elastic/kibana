@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import type {
   PackageInfo,
   RegistryPolicyTemplate,
   RegistryVarsEntry,
   RegistryStream,
   PackagePolicyConfigRecord,
-  PackagePolicyConfigRecordEntry,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   NewPackagePolicy,
+  PackagePolicyConfigRecordEntry,
 } from '../types';
+
+export type InputsOverride = Partial<NewPackagePolicyInput> & {
+  vars?: Array<NewPackagePolicyInput['vars'] & { key: string }>;
+};
 
 const getStreamsForInputType = (
   inputType: string,
@@ -44,7 +50,8 @@ const getStreamsForInputType = (
  * This service creates a package policy inputs definition from defaults provided in package info
  */
 export const packageToPackagePolicyInputs = (
-  packageInfo: PackageInfo
+  packageInfo: PackageInfo,
+  inputsOverride?: InputsOverride[]
 ): NewPackagePolicy['inputs'] => {
   const inputs: NewPackagePolicy['inputs'] = [];
 
@@ -102,6 +109,85 @@ export const packageToPackagePolicyInputs = (
     });
   }
 
+  if (inputsOverride) {
+    for (const override of inputsOverride) {
+      const originalInput = inputs.find((i) => i.type === override.type);
+      if (!originalInput) {
+        throw new Error(
+          i18n.translate('xpack.fleet.packagePolicyInputOverrideError', {
+            defaultMessage: 'Input type {inputType} does not exist on package {packageName}',
+            values: {
+              inputType: override.type,
+              packageName: packageInfo.name,
+            },
+          })
+        );
+      }
+
+      if (typeof override.enabled !== 'undefined') originalInput.enabled = override.enabled;
+
+      if (override.vars) {
+        try {
+          deepMergeVars(override, originalInput);
+        } catch (e) {
+          throw new Error(
+            i18n.translate('xpack.fleet.packagePolicyVarOverrideError', {
+              defaultMessage:
+                'Var {varName} does not exist on {inputType} of package {packageName}',
+              values: {
+                varName: e.message,
+                inputType: override.type,
+                packageName: packageInfo.name,
+              },
+            })
+          );
+        }
+      }
+
+      if (override.streams) {
+        for (const stream of override.streams) {
+          const originalStream = originalInput.streams.find(
+            (s) => s.data_stream.dataset === stream.data_stream.dataset
+          );
+          if (!originalStream) {
+            throw new Error(
+              i18n.translate('xpack.fleet.packagePolicyStreamOverrideError', {
+                defaultMessage:
+                  'Data stream {streamSet} does not exist on {inputType} of package {packageName}',
+                values: {
+                  streamSet: stream.data_stream.dataset,
+                  inputType: override.type,
+                  packageName: packageInfo.name,
+                },
+              })
+            );
+          }
+
+          if (typeof stream.enabled !== 'undefined') originalStream.enabled = stream.enabled;
+
+          if (stream.vars) {
+            try {
+              deepMergeVars(stream as InputsOverride, originalStream);
+            } catch (e) {
+              throw new Error(
+                i18n.translate('xpack.fleet.packagePolicyVarOverrideError', {
+                  defaultMessage:
+                    'Var {varName} does not exist on {streamSet} for {inputType} of package {packageName}',
+                  values: {
+                    varName: e.message,
+                    streamSet: stream.data_stream.dataset,
+                    inputType: override.type,
+                    packageName: packageInfo.name,
+                  },
+                })
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+
   return inputs;
 };
 
@@ -119,7 +205,8 @@ export const packageToPackagePolicy = (
   outputId: string,
   namespace: string = '',
   packagePolicyName?: string,
-  description?: string
+  description?: string,
+  inputsOverride?: InputsOverride[]
 ): NewPackagePolicy => {
   return {
     name: packagePolicyName || `${packageInfo.name}-1`,
@@ -133,6 +220,19 @@ export const packageToPackagePolicy = (
     enabled: true,
     policy_id: agentPolicyId,
     output_id: outputId,
-    inputs: packageToPackagePolicyInputs(packageInfo),
+    inputs: packageToPackagePolicyInputs(packageInfo, inputsOverride),
   };
+};
+
+const deepMergeVars = (
+  override: InputsOverride,
+  original: NewPackagePolicyInput | NewPackagePolicyInputStream
+) => {
+  for (const { key, ...val } of override.vars!) {
+    if (!original.vars || !Reflect.has(original.vars, key)) {
+      throw new Error(key);
+    }
+    const originalVar = original.vars[key];
+    Reflect.set(original.vars, key, { ...originalVar, ...val });
+  }
 };

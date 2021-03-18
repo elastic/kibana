@@ -7,6 +7,9 @@
 
 export * from './models';
 export * from './rest_spec';
+
+import type { InputsOverride } from '../services';
+
 import type { NewAgentPolicy } from './models';
 import type { NewPackagePolicy, PackagePolicyPackage } from './models';
 
@@ -34,7 +37,11 @@ export interface FleetConfigType {
     NewAgentPolicy & {
       id: string | number;
       package_policies: Array<
-        Partial<NewPackagePolicy> & { name: string; package: Partial<PackagePolicyPackage> }
+        Partial<Omit<NewPackagePolicy, 'inputs'>> & {
+          name: string;
+          package: Partial<PackagePolicyPackage>;
+          inputs?: InputsOverride[];
+        }
       >;
     }
   >;

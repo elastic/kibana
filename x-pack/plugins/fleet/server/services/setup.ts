@@ -16,7 +16,14 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../common';
 
-import type { PackagePolicy, AgentPolicy, Installation, Output } from '../../common';
+import type {
+  PackagePolicy,
+  NewPackagePolicy,
+  AgentPolicy,
+  Installation,
+  Output,
+  InputsOverride,
+} from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
@@ -56,25 +63,17 @@ async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  const { policiesPromise, packagesPromise } = ensurePreconfiguredPackagesAndPolicies(
-    soClient,
-    esClient
-  );
-
   const [
     installedPackages,
     defaultOutput,
     { created: defaultAgentPolicyCreated, policy: defaultAgentPolicy },
     { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
-    preconfiguredPolicies,
   ] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, esClient),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
     agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient),
-    policiesPromise,
-    packagesPromise,
     updateFleetRoleIfExists(esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
@@ -85,6 +84,13 @@ async function createSetupSideEffects(
       return Promise.reject(e);
     }),
   ]);
+
+  const { policiesPromise, packagesPromise } = ensurePreconfiguredPackagesAndPolicies(
+    soClient,
+    esClient
+  );
+
+  const [preconfiguredPolicies] = await Promise.all([policiesPromise, packagesPromise]);
 
   // Keeping this outside of the Promise.all because it introduces a race condition.
   // If one of the required packages fails to install/upgrade it might get stuck in the installing state.
@@ -220,7 +226,7 @@ function ensurePreconfiguredPackagesAndPolicies(
   const policiesPromise = Promise.all(
     policies.map(async ({ package_policies: packagePolicies, id, ...newAgentPolicy }) => {
       const installedPackagePolicies = await Promise.all(
-        packagePolicies.map(async ({ package: pkg, name }) => {
+        packagePolicies.map(async ({ package: pkg, name, ...newPackagePolicy }) => {
           const installedPackage = await isPackageInstalled({
             savedObjectsClient: soClient,
             pkgName: pkg.name,
@@ -239,7 +245,7 @@ function ensurePreconfiguredPackagesAndPolicies(
               })
             );
           }
-          return { name, installedPackage };
+          return { name, installedPackage, ...newPackagePolicy };
         })
       );
 
@@ -266,18 +272,26 @@ async function addPreconfiguredPolicyPackages(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
-  installedPackagePolicies: Array<{ name: string; installedPackage: Installation }>,
+  installedPackagePolicies: Array<
+    Partial<Omit<NewPackagePolicy, 'inputs'>> & {
+      name: string;
+      installedPackage: Installation;
+      inputs?: InputsOverride[];
+    }
+  >,
   defaultOutput: Output
 ) {
   return await Promise.all(
-    installedPackagePolicies.map(async ({ installedPackage, name }) =>
+    installedPackagePolicies.map(async ({ installedPackage, name, description, inputs }) =>
       addPackageToAgentPolicy(
         soClient,
         esClient,
         installedPackage,
         agentPolicy,
         defaultOutput,
-        name
+        name,
+        description,
+        inputs
       )
     )
   );
@@ -400,7 +414,9 @@ async function addPackageToAgentPolicy(
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
   defaultOutput: Output,
-  packagePolicyName?: string
+  packagePolicyName?: string,
+  packagePolicyDescription?: string,
+  inputsOverride?: InputsOverride[]
 ) {
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
@@ -413,7 +429,9 @@ async function addPackageToAgentPolicy(
     agentPolicy.id,
     defaultOutput.id,
     agentPolicy.namespace,
-    packagePolicyName
+    packagePolicyName,
+    packagePolicyDescription,
+    inputsOverride
   );
 
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {

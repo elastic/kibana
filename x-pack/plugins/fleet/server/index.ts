@@ -35,9 +35,9 @@ export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallbac
 export { AgentNotFoundError } from './errors';
 
 const varsSchema = schema.maybe(
-  schema.recordOf(
-    schema.string(),
+  schema.arrayOf(
     schema.object({
+      key: schema.string(),
       type: schema.maybe(schema.string()),
       value: schema.oneOf([schema.string(), schema.number()]),
     })
@@ -130,7 +130,7 @@ export const config: PluginConfigDescriptor = {
                       schema.arrayOf(
                         schema.object({
                           data_stream: schema.object({
-                            type: schema.string(),
+                            type: schema.maybe(schema.string()),
                             dataset: schema.string(),
                           }),
                           enabled: schema.maybe(schema.boolean()),
