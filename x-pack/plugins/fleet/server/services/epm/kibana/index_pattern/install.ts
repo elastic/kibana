@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import type { IndexPatternFieldMap, FieldSpec } from 'src/plugins/data/common';
+import type { FieldSpec } from 'src/plugins/data/common';
 
 import { loadFieldsFromYaml } from '../../fields/field';
 import type { Fields, Field } from '../../fields/field';
