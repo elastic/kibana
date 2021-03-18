@@ -68,22 +68,22 @@ function findFieldsInJob(job: Job, datafeed: Datafeed) {
 
   const aggs = datafeed.aggregations ?? datafeed.aggs;
   if (aggs !== undefined) {
-    findFieldsInAgg(aggs).forEach((f) => usedFields.add(f));
+    findFieldsInObject(aggs).forEach((f) => usedFields.add(f));
   }
 
   const query = datafeed.query;
   if (query !== undefined) {
-    findFieldsInAgg(query).forEach((f) => usedFields.add(f));
+    findFieldsInObject(query).forEach((f) => usedFields.add(f));
   }
 
   return [...usedFields];
 }
 
-function findFieldsInAgg(obj: Record<string, any>) {
+function findFieldsInObject(obj: Record<string, any>) {
   const fields: string[] = [];
   Object.entries(obj).forEach(([key, val]) => {
     if (typeof val === 'object' && val !== null) {
-      fields.push(...findFieldsInAgg(val));
+      fields.push(...findFieldsInObject(val));
     } else if (typeof val === 'string' && key === 'field') {
       fields.push(val);
     }
