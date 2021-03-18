@@ -90,7 +90,7 @@ NOTE: If you define an appender for a logger name, the log messages aren't handl
 
 | @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | Absolute `23:33:22.011`
 
-| context name | `parent.child` | `['parent', 'child']`
+| logger | `parent.child` | `['parent', 'child']`
 
 | level | `DEBUG` | `['debug']`
 
@@ -108,7 +108,7 @@ NOTE: If you define an appender for a logger name, the log messages aren't handl
 
 | @timestamp | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`
 
-| context name | `log.logger: parent.child` | `tags: ['parent', 'child']`
+| logger | `log.logger: parent.child` | `tags: ['parent', 'child']`
 
 | level | `log.level: DEBUG` | `tags: ['debug']`
 
@@ -122,19 +122,20 @@ NOTE: If you define an appender for a logger name, the log messages aren't handl
 
 |===
 
+[[logging-cli-migration]]
 === Logging configuration via CLI migration guide
 
 NOTE: The `--verbose` and `--silent` cli flags are supported and have build-in behavior. You can override the default behavior using the following equivalent platform logging configurations:
 [options="header"]
 |===
 
-| legacy logging | {kib} Platform logging
+| legacy logging | {kib} Platform logging | cli shortcuts
 
-|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=console
+|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=console | --verbose
 
-|--quiet| --logging.root.level=error --logging.root.appenders[0]=default --logging.root.appenders[1]=console
+|--quiet| --logging.root.level=error --logging.root.appenders[0]=default --logging.root.appenders[1]=console | not supported
 
-|--silent| --logging.root.level=off
+|--silent| --logging.root.level=off | --silent
 |===
 
 NOTE: you have to pass the `default` appender until the legacy logging system is removed in v8.0

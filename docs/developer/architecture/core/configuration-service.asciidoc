@@ -31,7 +31,8 @@ export const config = {
 export type MyPluginConfigType = TypeOf<typeof config.schema>;
 ----
 
-* Read config value exposed via `PluginInitializerContext`.
+* Read config value exposed via `PluginInitializerContext`:
+
 *my_plugin/server/index.ts*
 [source,typescript]
 ----
@@ -42,6 +43,8 @@ export class MyPlugin {
     // or if config is optional:
     this.config$ = initializerContext.config.createIfExists<MyPluginConfigType>();
   }
+  ...
+}
 ----
 
 If your plugin also has a client-side part, you can also expose

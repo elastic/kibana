@@ -62,8 +62,9 @@ Levels are ordered, so _all_ > _fatal_ > _error_ > _warn_ > _info_ > _debug_ > _
 A log record is being logged by the logger if its level is higher than or equal to the level of its logger. Otherwise,
 the log record is ignored.
 
-The _all_ and _off_ levels can be used only in configuration and are just handy shortcuts that allow developer to log every
-log record or disable logging entirely for the specific context name.
+The _all_ and _off_ levels can be used only in configuration and are just handy shortcuts that allow you to log every
+log record or disable logging entirely  or for a specific logger. These levels are also configurable as <<logging-cli-migration,cli arguments>>.
+
 
 [[logging-layouts]]
 === Layouts
@@ -156,7 +157,7 @@ to a terminal with color support.
 
 [[json-layout]]
 ==== JSON layout
-With `json` layout log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, context name, message text and any other metadata that may be associated with the log message itself.
+With `json` layout log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself.
 
 [[logging-appenders]]
 === Appenders
@@ -412,10 +413,11 @@ logging:
       level: debug
 ----
 
+[[dedicated-loggers]]
 ==== Dedicated loggers
 
-*Root**
-The `root` logger has a dedicated configuration node since this context name is special and should always exist. By default `root` is configured with `info` level and `default` appender that is also always available. This is the configuration that all custom loggers will use unless they're re-configured explicitly.
+**Root**
+The `root` logger has a dedicated configuration node since this logger is special and should always exist. By default `root` is configured with `info` level and `default` appender that is also always available. This is the configuration that all custom loggers will use unless they're re-configured explicitly.
 
 For example to see _all_ log messages that fall back on the `root` logger configuration, just add one line to the configuration:
 
@@ -499,7 +501,7 @@ The message contains some high-level information, and the corresponding log meta
 
 === Usage
 
-Usage is very straightforward, one should just get a logger for a specific context name and use it to log messages with
+Usage is very straightforward, one should just get a logger for a specific context and use it to log messages with
 different log level.
 
 [source,typescript]
@@ -532,7 +534,7 @@ And assuming logger for `server` name with `console` appender and `trace` level 
 [2017-07-25T11:54:41.639-07:00][DEBUG][server.http] Message with `debug` log level.
 ----
 
-The log will be less verbose with `warn` level for the `server` context name:
+The log will be less verbose with `warn` level for the `server` logger:
 [source,bash]
 ----
 [2017-07-25T11:54:41.639-07:00][WARN ][server] Message with `warn` log level.

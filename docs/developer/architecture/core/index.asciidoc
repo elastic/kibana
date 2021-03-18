@@ -30,6 +30,7 @@ export class MyPlugin {
 The server and client services that are available are:
 
 === Server-side
+* <<configuration-service, Configuration service>>
 * <<elasticsearch-service, Elasticsearch service>>
 * <<http-service, HTTP service>>
 * <<logging-service, Logging service>>
