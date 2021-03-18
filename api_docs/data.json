@@ -21764,7 +21764,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 245
+                  "lineNumber": 246
                 },
                 "signature": [
                   "typeof ",
@@ -21785,7 +21785,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 246
+                  "lineNumber": 247
                 },
                 "signature": [
                   "typeof ",
@@ -21806,7 +21806,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 247
+                  "lineNumber": 248
                 },
                 "signature": [
                   "({ display: string; val: string; enabled(agg: ",
@@ -21828,7 +21828,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 248
+                  "lineNumber": 249
                 },
                 "signature": [
                   "typeof ",
@@ -21849,7 +21849,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 249
+                  "lineNumber": 250
                 },
                 "signature": [
                   "typeof ",
@@ -21870,7 +21870,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 250
+                  "lineNumber": 251
                 },
                 "signature": [
                   "typeof ",
@@ -21891,7 +21891,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 251
+                  "lineNumber": 252
                 },
                 "signature": [
                   "(agg: ",
@@ -21913,7 +21913,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 252
+                  "lineNumber": 253
                 },
                 "signature": [
                   "(agg: ",
@@ -21935,7 +21935,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 253
+                  "lineNumber": 254
                 },
                 "signature": [
                   "(...types: string[]) => (agg: ",
@@ -21957,7 +21957,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 254
+                  "lineNumber": 255
                 },
                 "signature": [
                   "typeof ",
@@ -21978,7 +21978,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 255
+                  "lineNumber": 256
                 },
                 "signature": [
                   "typeof ",
@@ -21999,7 +21999,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 256
+                  "lineNumber": 257
                 }
               },
               {
@@ -22010,7 +22010,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 257
+                  "lineNumber": 258
                 },
                 "signature": [
                   "typeof ",
@@ -22031,7 +22031,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 258
+                  "lineNumber": 259
                 },
                 "signature": [
                   "typeof ",
@@ -22052,7 +22052,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 259
+                  "lineNumber": 260
                 },
                 "signature": [
                   "typeof ",
@@ -22073,7 +22073,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 260
+                  "lineNumber": 261
                 }
               },
               {
@@ -22084,7 +22084,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 261
+                  "lineNumber": 262
                 },
                 "signature": [
                   "string[]"
@@ -22098,7 +22098,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 262
+                  "lineNumber": 263
                 },
                 "signature": [
                   "typeof ",
@@ -22119,7 +22119,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index.ts",
-                  "lineNumber": 263
+                  "lineNumber": 264
                 },
                 "signature": [
                   "typeof ",
@@ -22137,7 +22137,7 @@
             "label": "aggs",
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 244
+              "lineNumber": 245
             }
           },
           {
@@ -22148,7 +22148,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 265
+              "lineNumber": 266
             },
             "signature": [
               "typeof ",
@@ -22169,7 +22169,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 266
+              "lineNumber": 267
             },
             "signature": [
               "typeof ",
@@ -22190,7 +22190,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 267
+              "lineNumber": 268
             },
             "signature": [
               "typeof ",
@@ -22211,7 +22211,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/index.ts",
-              "lineNumber": 268
+              "lineNumber": 269
             },
             "signature": [
               "typeof ",
@@ -22229,7 +22229,7 @@
         "label": "search",
         "source": {
           "path": "src/plugins/data/server/index.ts",
-          "lineNumber": 243
+          "lineNumber": 244
         },
         "initialIsOpen": false
       },
