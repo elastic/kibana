@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { AGENT_TYPE_EPHEMERAL, AGENT_TYPE_PERMANENT, AGENT_TYPE_TEMPORARY } from '../../constants';
+import type {
+  AGENT_TYPE_EPHEMERAL,
+  AGENT_TYPE_PERMANENT,
+  AGENT_TYPE_TEMPORARY,
+} from '../../constants';
 
 import type { FullAgentPolicy } from './agent_policy';
 
