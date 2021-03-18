@@ -282,7 +282,7 @@ export type {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
-  IPointInTimeFinder,
+  ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,

@@ -2,11 +2,18 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [SavedObjectsCreatePointInTimeFinderDependencies](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.md)
 
-## SavedObjectsCreatePointInTimeFinderDependencies type
+## SavedObjectsCreatePointInTimeFinderDependencies interface
 
 
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsCreatePointInTimeFinderDependencies = Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>;
+export interface SavedObjectsCreatePointInTimeFinderDependencies 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [client](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.client.md) | <code>Pick&lt;SavedObjectsClientContract, 'find' &#124; 'openPointInTimeForType' &#124; 'closePointInTime'&gt;</code> |  |
+

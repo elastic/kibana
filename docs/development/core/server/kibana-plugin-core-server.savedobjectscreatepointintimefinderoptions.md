@@ -8,5 +8,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsCreatePointInTimeFinderOptions = SavedObjectsPointInTimeFinderOptions;
+export declare type SavedObjectsCreatePointInTimeFinderOptions = Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'>;
 ```

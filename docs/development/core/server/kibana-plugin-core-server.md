@@ -96,9 +96,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
 |  [ImageValidation](./kibana-plugin-core-server.imagevalidation.md) |  |
 |  [IndexSettingsDeprecationInfo](./kibana-plugin-core-server.indexsettingsdeprecationinfo.md) |  |
-|  [IPointInTimeFinder](./kibana-plugin-core-server.ipointintimefinder.md) |  |
 |  [IRenderOptions](./kibana-plugin-core-server.irenderoptions.md) |  |
 |  [IRouter](./kibana-plugin-core-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-core-server.routeconfig.md) and [RequestHandler](./kibana-plugin-core-server.requesthandler.md) for more information about arguments to route registrations. |
+|  [ISavedObjectsPointInTimeFinder](./kibana-plugin-core-server.isavedobjectspointintimefinder.md) |  |
 |  [IScopedClusterClient](./kibana-plugin-core-server.iscopedclusterclient.md) | Serves the same purpose as the normal [cluster client](./kibana-plugin-core-server.iclusterclient.md) but exposes an additional <code>asCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>asInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API instead. |
 |  [IUiSettingsClient](./kibana-plugin-core-server.iuisettingsclient.md) | Server-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. |
 |  [KibanaRequestEvents](./kibana-plugin-core-server.kibanarequestevents.md) | Request events. |
@@ -159,6 +159,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsComplexFieldMapping](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCoreFieldMapping](./kibana-plugin-core-server.savedobjectscorefieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md) |  |
+|  [SavedObjectsCreatePointInTimeFinderDependencies](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.md) |  |
 |  [SavedObjectsDeleteFromNamespacesOptions](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesoptions.md) |  |
 |  [SavedObjectsDeleteFromNamespacesResponse](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesresponse.md) |  |
@@ -306,7 +307,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientFactoryProvider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) | Provider to invoke to retrieve a [SavedObjectsClientFactory](./kibana-plugin-core-server.savedobjectsclientfactory.md)<!-- -->. |
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
 |  [SavedObjectsClosePointInTimeOptions](./kibana-plugin-core-server.savedobjectsclosepointintimeoptions.md) |  |
-|  [SavedObjectsCreatePointInTimeFinderDependencies](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.md) |  |
 |  [SavedObjectsCreatePointInTimeFinderOptions](./kibana-plugin-core-server.savedobjectscreatepointintimefinderoptions.md) |  |
 |  [SavedObjectsExportTransform](./kibana-plugin-core-server.savedobjectsexporttransform.md) | Transformation function used to mutate the exported objects of the associated type.<!-- -->A type's export transform function will be executed once per user-initiated export, for all objects of that type. |
 |  [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) | Describe a [saved object type mapping](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) field.<!-- -->Please refer to [elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html) For the mapping documentation |

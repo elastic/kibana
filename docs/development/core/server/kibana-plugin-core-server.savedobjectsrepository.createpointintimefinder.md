@@ -4,28 +4,28 @@
 
 ## SavedObjectsRepository.createPointInTimeFinder() method
 
-Returns a generator to help page through large sets of saved objects.
+Returns a [ISavedObjectsPointInTimeFinder](./kibana-plugin-core-server.isavedobjectspointintimefinder.md) to help page through large sets of saved objects. We strongly recommend using this API for any find queries that might return more than 1000 saved objects.
 
-The generator wraps calls to `SavedObjects.find` and iterates over multiple pages of results using `_pit` and `search_after`<!-- -->. This will open a new Point In Time (PIT), and continue paging until a set of results is received that's smaller than the designated `perPage`<!-- -->.
+This generator wraps calls to [SavedObjectsRepository.find()](./kibana-plugin-core-server.savedobjectsrepository.find.md) and iterates over multiple pages of results using `_pit` and `search_after`<!-- -->. This will open a new Point-In-Time (PIT), and continue paging until a set of results is received that's smaller than the designated `perPage`<!-- -->.
 
 Once you have retrieved all of the results you need, it is recommended to call `close()` to clean up the PIT and prevent Elasticsearch from consuming resources unnecessarily. This is only required if you are done iterating and have not yet paged through all of the results: the PIT will automatically be closed for you once you reach the last page of results, or if the underlying call to `find` fails for any reason.
 
 <b>Signature:</b>
 
 ```typescript
-createPointInTimeFinder(findOptions: SavedObjectsPointInTimeFinderOptions, dependencies?: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>): IPointInTimeFinder;
+createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  findOptions | <code>SavedObjectsPointInTimeFinderOptions</code> |  |
-|  dependencies | <code>Omit&lt;SavedObjectsPointInTimeFinderDependencies, 'logger'&gt;</code> |  |
+|  findOptions | <code>SavedObjectsCreatePointInTimeFinderOptions</code> |  |
+|  dependencies | <code>SavedObjectsCreatePointInTimeFinderDependencies</code> |  |
 
 <b>Returns:</b>
 
-`IPointInTimeFinder`
+`ISavedObjectsPointInTimeFinder`
 
 ## Example
 

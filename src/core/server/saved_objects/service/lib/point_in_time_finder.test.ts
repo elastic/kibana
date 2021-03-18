@@ -11,7 +11,10 @@ import type { SavedObjectsClientContract } from '../../types';
 import type { SavedObjectsFindResult } from '../';
 import { savedObjectsRepositoryMock } from './repository.mock';
 
-import { PointInTimeFinder, SavedObjectsPointInTimeFinderOptions } from './point_in_time_finder';
+import {
+  PointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderOptions,
+} from './point_in_time_finder';
 
 const mockHits = [
   {
@@ -72,7 +75,7 @@ describe('createPointInTimeFinder()', () => {
         page: 1,
       });
 
-      const findOptions: SavedObjectsPointInTimeFinderOptions = {
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 1,
@@ -111,7 +114,7 @@ describe('createPointInTimeFinder()', () => {
         page: 0,
       });
 
-      const findOptions: SavedObjectsPointInTimeFinderOptions = {
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
         search: 'foo*',
       };
@@ -169,7 +172,7 @@ describe('createPointInTimeFinder()', () => {
         page: 0,
       });
 
-      const findOptions: SavedObjectsPointInTimeFinderOptions = {
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 1,
@@ -218,7 +221,7 @@ describe('createPointInTimeFinder()', () => {
         page: 0,
       });
 
-      const findOptions: SavedObjectsPointInTimeFinderOptions = {
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 2,
@@ -267,7 +270,7 @@ describe('createPointInTimeFinder()', () => {
         page: 0,
       });
 
-      const findOptions: SavedObjectsPointInTimeFinderOptions = {
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 1,
@@ -297,7 +300,7 @@ describe('createPointInTimeFinder()', () => {
       });
       find.mockRejectedValueOnce(new Error('oops'));
 
-      const findOptions: SavedObjectsPointInTimeFinderOptions = {
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 2,
@@ -342,7 +345,7 @@ describe('createPointInTimeFinder()', () => {
         page: 1,
       });
 
-      const findOptions: SavedObjectsPointInTimeFinderOptions = {
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: ['visualization'],
         search: 'foo*',
         perPage: 1,

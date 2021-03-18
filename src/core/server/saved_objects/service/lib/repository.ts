@@ -16,10 +16,10 @@ import {
 import { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
-  IPointInTimeFinder,
+  ISavedObjectsPointInTimeFinder,
   PointInTimeFinder,
-  SavedObjectsPointInTimeFinderOptions,
-  SavedObjectsPointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
 } from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
@@ -1801,6 +1801,9 @@ export class SavedObjectsRepository {
    * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
    * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
    *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsRepository.createPointInTimeFinder} method.
+   *
    * @example
    * ```ts
    * const { id } = await savedObjectsClient.openPointInTimeForType(
@@ -1866,6 +1869,9 @@ export class SavedObjectsRepository {
    * via the Elasticsearch client, and is included in the Saved Objects Client
    * as a convenience for consumers who are using `openPointInTimeForType`.
    *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsRepository.createPointInTimeFinder} method.
+   *
    * @remarks
    * While the `keepAlive` that is provided will cause a PIT to automatically close,
    * it is highly recommended to explicitly close a PIT when you are done with it
@@ -1910,12 +1916,14 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Returns a generator to help page through large sets of saved objects.
+   * Returns a {@link ISavedObjectsPointInTimeFinder} to help page through
+   * large sets of saved objects. We strongly recommend using this API for
+   * any find queries that might return more than 1000 saved objects.
    *
-   * The generator wraps calls to `SavedObjects.find` and iterates over
-   * multiple pages of results using `_pit` and `search_after`. This will
-   * open a new Point In Time (PIT), and continue paging until a set of
-   * results is received that's smaller than the designated `perPage`.
+   * This generator wraps calls to {@link SavedObjectsRepository.find} and
+   * iterates over multiple pages of results using `_pit` and `search_after`.
+   * This will open a new Point-In-Time (PIT), and continue paging until a
+   * set of results is received that's smaller than the designated `perPage`.
    *
    * Once you have retrieved all of the results you need, it is recommended
    * to call `close()` to clean up the PIT and prevent Elasticsearch from
@@ -1944,9 +1952,9 @@ export class SavedObjectsRepository {
    * ```
    */
   createPointInTimeFinder(
-    findOptions: SavedObjectsPointInTimeFinderOptions,
-    dependencies?: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>
-  ): IPointInTimeFinder {
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ): ISavedObjectsPointInTimeFinder {
     return new PointInTimeFinder(findOptions, {
       logger: this._logger,
       client: this,

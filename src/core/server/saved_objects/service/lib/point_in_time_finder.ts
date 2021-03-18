@@ -16,28 +16,35 @@ type PointInTimeFinderClient = Pick<
 >;
 
 /**
- * @internal
+ * @public
  */
-export type SavedObjectsPointInTimeFinderOptions = Omit<
+export type SavedObjectsCreatePointInTimeFinderOptions = Omit<
   SavedObjectsFindOptions,
   'page' | 'pit' | 'searchAfter'
 >;
 
 /**
- * @internal
+ * @public
  */
-export interface SavedObjectsPointInTimeFinderDependencies {
-  logger: Logger;
+export interface SavedObjectsCreatePointInTimeFinderDependencies {
   client: Pick<SavedObjectsClientContract, 'find' | 'openPointInTimeForType' | 'closePointInTime'>;
 }
 
+/**
+ * @internal
+ */
+export interface PointInTimeFinderDependencies
+  extends SavedObjectsCreatePointInTimeFinderDependencies {
+  logger: Logger;
+}
+
 /** @public */
-export interface IPointInTimeFinder {
+export interface ISavedObjectsPointInTimeFinder {
   /**
-   * An async generator which wraps calls to `SavedObjects.find` and iterates over
-   * multiple pages of results using `_pit` and `search_after`. This will open a
-   * new Point In Time (PIT), and continue paging until a set of results is
-   * received that's smaller than the designated `perPage` size.
+   * An async generator which wraps calls to `savedObjectsClient.find` and
+   * iterates over multiple pages of results using `_pit` and `search_after`.
+   * This will open a new Point-In-Time (PIT), and continue paging until a set
+   * of results is received that's smaller than the designated `perPage` size.
    */
   find: () => AsyncGenerator<SavedObjectsFindResponse>;
   /**
@@ -56,7 +63,7 @@ export interface IPointInTimeFinder {
 /**
  * @internal
  */
-export class PointInTimeFinder implements IPointInTimeFinder {
+export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
   readonly #log: Logger;
   readonly #client: PointInTimeFinderClient;
   readonly #findOptions: SavedObjectsFindOptions;
@@ -64,8 +71,8 @@ export class PointInTimeFinder implements IPointInTimeFinder {
   #pitId?: string;
 
   constructor(
-    findOptions: SavedObjectsPointInTimeFinderOptions,
-    { logger, client }: SavedObjectsPointInTimeFinderDependencies
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    { logger, client }: PointInTimeFinderDependencies
   ) {
     this.#log = logger.get('point-in-time-finder');
     this.#client = client;

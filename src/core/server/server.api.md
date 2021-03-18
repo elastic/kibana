@@ -1147,12 +1147,6 @@ export interface IndexSettingsDeprecationInfo {
 }
 
 // @public (undocumented)
-export interface IPointInTimeFinder {
-    close: () => Promise<void>;
-    find: () => AsyncGenerator<SavedObjectsFindResponse>;
-}
-
-// @public (undocumented)
 export interface IRenderOptions {
     includeUserSettings?: boolean;
     // @internal @deprecated
@@ -1182,6 +1176,12 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
 
 // @public (undocumented)
 export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
+
+// @public (undocumented)
+export interface ISavedObjectsPointInTimeFinder {
+    close: () => Promise<void>;
+    find: () => AsyncGenerator<SavedObjectsFindResponse>;
+}
 
 // @public
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
@@ -2225,7 +2225,7 @@ export class SavedObjectsClient {
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): IPointInTimeFinder;
+    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
@@ -2328,15 +2328,14 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     version?: string;
 }
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectsPointInTimeFinderDependencies" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export type SavedObjectsCreatePointInTimeFinderDependencies = Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>;
+export interface SavedObjectsCreatePointInTimeFinderDependencies {
+    // (undocumented)
+    client: Pick<SavedObjectsClientContract, 'find' | 'openPointInTimeForType' | 'closePointInTime'>;
+}
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectsPointInTimeFinderOptions" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export type SavedObjectsCreatePointInTimeFinderOptions = SavedObjectsPointInTimeFinderOptions;
+export type SavedObjectsCreatePointInTimeFinderOptions = Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'>;
 
 // @public (undocumented)
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
@@ -2828,7 +2827,7 @@ export class SavedObjectsRepository {
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
-    createPointInTimeFinder(findOptions: SavedObjectsPointInTimeFinderOptions, dependencies?: Omit<SavedObjectsPointInTimeFinderDependencies, 'logger'>): IPointInTimeFinder;
+    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
     // Warning: (ae-forgotten-export) The symbol "IKibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
