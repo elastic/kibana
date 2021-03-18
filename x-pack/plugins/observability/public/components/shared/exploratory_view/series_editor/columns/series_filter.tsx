@@ -18,11 +18,13 @@ import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../../configurations/constants';
 import { SelectedFilters } from '../selected_filters';
+import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
 
 interface Props {
   seriesId: string;
   defaultFilters: DataSeries['defaultFilters'];
   series: DataSeries;
+  isNew?: boolean;
 }
 
 export interface Field {
@@ -30,12 +32,13 @@ export interface Field {
   field: string;
 }
 
-export function SeriesFilter({ series, seriesId, defaultFilters = [] }: Props) {
+export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: Props) {
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 
   const [selectedField, setSelectedField] = useState<Field | null>(null);
 
   const options = defaultFilters.map((field) => ({ label: FieldLabels[field], field }));
+  const disabled = seriesId === NEW_SERIES_KEY && !isNew;
 
   const button = (
     <EuiButtonEmpty
@@ -44,6 +47,8 @@ export function SeriesFilter({ series, seriesId, defaultFilters = [] }: Props) {
       onClick={() => {
         setIsPopoverVisible(true);
       }}
+      isDisabled={disabled}
+      size="s"
     >
       Add filter
     </EuiButtonEmpty>
@@ -88,20 +93,16 @@ export function SeriesFilter({ series, seriesId, defaultFilters = [] }: Props) {
 
   return (
     <EuiFlexGroup wrap direction="column" gutterSize="xs">
-      <SelectedFilters seriesId={seriesId} series={series} />
+      {!disabled && <SelectedFilters seriesId={seriesId} series={series} isNew={isNew} />}
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={button}
-              isOpen={isPopoverVisible}
-              closePopover={closePopover}
-              anchorPosition="rightCenter"
-            >
-              {!selectedField ? mainPanel : childPanel}
-            </EuiPopover>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiPopover
+          button={button}
+          isOpen={isPopoverVisible}
+          closePopover={closePopover}
+          anchorPosition="rightCenter"
+        >
+          {!selectedField ? mainPanel : childPanel}
+        </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

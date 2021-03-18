@@ -5,19 +5,14 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { LensAttributes } from '../configurations/lens_attributes';
 import { useUrlStorage } from './use_url_strorage';
-import { useMemo } from 'react';
 import { getDefaultConfigs } from '../configurations/default_configs';
-import {
-  BREAK_DOWN,
-  FILTERS,
-  METRIC_TYPE,
-  REPORT_TYPE,
-  SERIES_TYPE,
-} from '../configurations/constants';
+
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { UrlFilter } from '../types';
 
 interface Props {
   seriesId: string;
@@ -30,21 +25,27 @@ export const useLensAttributes = ({
 }: Props): TypedLensByValueInput['attributes'] | null => {
   const { series } = useUrlStorage(seriesId);
 
+  const { breakdown, seriesType, metric: metricType, reportType, reportDefinitions = {} } =
+    series ?? {};
+
+  const getFiltersFromDefs = () => {
+    return Object.entries(reportDefinitions).map(([field, value]) => ({
+      field,
+      values: [value],
+    })) as UrlFilter[];
+  };
+
+  const filters: UrlFilter[] = useMemo(() => {
+    return (series.filters ?? []).concat(getFiltersFromDefs());
+  }, [series.filters, reportDefinitions]);
+
   const dataViewConfig = getDefaultConfigs({
-    reportType: series[REPORT_TYPE],
-    serviceName: series.serviceName,
     seriesId,
+    reportType,
   });
 
-  const {
-    [FILTERS]: filters = [],
-    [BREAK_DOWN]: breakdown,
-    [SERIES_TYPE]: seriesType,
-    [METRIC_TYPE]: metricType,
-  } = series ?? {};
-
   return useMemo(() => {
-    if (!indexPattern) {
+    if (!indexPattern || !reportType) {
       return null;
     }
 
@@ -61,5 +62,5 @@ export const useLensAttributes = ({
     }
 
     return lensAttributes.getJSON();
-  }, [indexPattern, breakdown, seriesType, filters, metricType]);
+  }, [indexPattern, breakdown, seriesType, filters, metricType, reportType]);
 };

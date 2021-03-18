@@ -10,8 +10,8 @@ import { useFetcher } from '../../../..';
 import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../../plugin';
-import { AllSeries } from './use_url_strorage';
-import { REPORT_TYPE, ReportToDataTypeMap } from '../configurations/constants';
+import { AllShortSeries } from './use_url_strorage';
+import { ReportToDataTypeMap } from '../configurations/constants';
 import { ObservabilityIndexPatterns } from '../../../../utils/observability_Index_patterns';
 
 export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
@@ -21,7 +21,7 @@ export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
 
   const allSeriesKey = 'sr';
 
-  const allSeries = storage.get<AllSeries>(allSeriesKey) ?? {};
+  const allSeries = storage.get<AllShortSeries>(allSeriesKey) ?? {};
 
   const allSeriesIds = Object.keys(allSeries);
 
@@ -31,8 +31,10 @@ export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
 
   const { data: indexPattern, status } = useFetcher(() => {
     const obsvIndexP = new ObservabilityIndexPatterns(data);
-    return obsvIndexP.getIndexPattern(ReportToDataTypeMap[firstSeries?.[REPORT_TYPE]] ?? 'apm');
-  }, [firstSeries?.[REPORT_TYPE]]);
+    return obsvIndexP.getIndexPattern(
+      firstSeries?.rt ? ReportToDataTypeMap[firstSeries?.rt] : 'apm'
+    );
+  }, [firstSeries?.rt]);
 
   return useMemo(() => {
     return indexPattern;

@@ -7,12 +7,6 @@
 
 import { AppDataType, ReportViewTypeId } from '../types';
 
-export const METRIC_TYPE = 'mt';
-export const REPORT_TYPE = 'rt';
-export const SERIES_TYPE = 'st';
-export const BREAK_DOWN = 'bd';
-export const FILTERS = 'ft';
-
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': 'Browser family',
   'user_agent.os.name': 'Operating system',
@@ -24,6 +18,13 @@ export const FieldLabels: Record<string, string> = {
 
   'monitor.id': 'Monitor Id',
   'monitor.status': 'Monitor Status',
+
+  'agent.hostname': 'Agent host',
+  'host.hostname': 'Host name',
+  'monitor.name': 'Monitor name',
+  'monitor.type': 'Monitor Type',
+  'url.port': 'Port',
+  tags: 'Tags',
 };
 
 export const DataViewLabels: Record<ReportViewTypeId, string> = {
@@ -33,6 +34,10 @@ export const DataViewLabels: Record<ReportViewTypeId, string> = {
   svl: 'APM Service latency',
   kpi: 'Business KPI over time',
   tpt: 'APM Service throughput',
+  cpu: 'System CPU Usage',
+  logs: 'Logs Frequency',
+  mem: 'System Memory Usage',
+  nwk: 'Network Activity',
 };
 
 export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
@@ -42,4 +47,8 @@ export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
   svl: 'apm',
   kpi: 'rum',
   pld: 'rum',
+  nwk: 'metrics',
+  mem: 'metrics',
+  logs: 'logs',
+  cpu: 'metrics',
 };

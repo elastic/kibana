@@ -14,6 +14,7 @@ import { usePluginContext } from '../hooks/use_plugin_context';
 import { useTimeRange } from '../hooks/use_time_range';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
 import { ObservabilityFetchDataPlugins, UXHasDataResponse } from '../typings/fetch_overview_data';
+import { useRouteMatch } from 'react-router';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
 
@@ -41,35 +42,38 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   const [hasData, setHasData] = useState<HasDataContextValue['hasData']>({});
 
+  const isExploratoryView = useRouteMatch('/exploratory-view');
+
   useEffect(
     () => {
-      apps.forEach(async (app) => {
-        try {
-          if (app !== 'alert') {
-            const params =
-              app === 'ux'
-                ? { absoluteTime: { start: absoluteStart, end: absoluteEnd } }
-                : undefined;
+      if (!isExploratoryView)
+        apps.forEach(async (app) => {
+          try {
+            if (app !== 'alert') {
+              const params =
+                app === 'ux'
+                  ? { absoluteTime: { start: absoluteStart, end: absoluteEnd } }
+                  : undefined;
 
-            const result = await getDataHandler(app)?.hasData(params);
+              const result = await getDataHandler(app)?.hasData(params);
+              setHasData((prevState) => ({
+                ...prevState,
+                [app]: {
+                  hasData: result,
+                  status: FETCH_STATUS.SUCCESS,
+                },
+              }));
+            }
+          } catch (e) {
             setHasData((prevState) => ({
               ...prevState,
               [app]: {
-                hasData: result,
-                status: FETCH_STATUS.SUCCESS,
+                hasData: undefined,
+                status: FETCH_STATUS.FAILURE,
               },
             }));
           }
-        } catch (e) {
-          setHasData((prevState) => ({
-            ...prevState,
-            [app]: {
-              hasData: undefined,
-              status: FETCH_STATUS.FAILURE,
-            },
-          }));
-        }
-      });
+        });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []

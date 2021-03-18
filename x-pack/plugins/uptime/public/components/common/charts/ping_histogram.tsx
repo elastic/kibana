@@ -183,7 +183,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   }
 
   const analyzeHref = {
-    ['uptime-pings-pgv']: {
+    ['uptime-pings-histogram']: {
       rt: 'upp',
       time: { from: dateRangeStart, to: dateRangeEnd },
       bd: 'monitor.status',

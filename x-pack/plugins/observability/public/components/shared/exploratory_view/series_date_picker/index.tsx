@@ -46,7 +46,7 @@ export function SeriesDatePicker({ seriesId }: Props) {
 
   useEffect(() => {
     if (!series || !series.time) {
-      setSeries(seriesId, { ...series, time: { from: 'now-15m', to: 'now' } });
+      setSeries(seriesId, { ...series, time: { from: 'now-5h', to: 'now' } });
     }
   }, []);
 

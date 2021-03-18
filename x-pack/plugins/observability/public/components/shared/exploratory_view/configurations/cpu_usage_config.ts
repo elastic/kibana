@@ -12,10 +12,10 @@ interface Props {
   seriesId: string;
 }
 
-export function getServiceThroughputLensConfig({ seriesId }: Props): DataSeries {
+export function getCPUUsageLensConfig({ seriesId }: Props): DataSeries {
   return {
     id: seriesId,
-    reportType: 'service-latency',
+    reportType: 'cpu-usage',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
@@ -23,31 +23,18 @@ export function getServiceThroughputLensConfig({ seriesId }: Props): DataSeries 
     },
     yAxisColumn: {
       operationType: 'avg',
-      sourceField: 'transaction.duration.us',
-      label: 'Throughput',
+      sourceField: 'system.cpu.user.pct',
+      label: 'CPU Usage %',
     },
     metricType: true,
-    defaultFilters: [
-      'user_agent.name',
-      'user_agent.os.name',
-      'client.geo.country_name',
-      'user_agent.device.name',
-    ],
-    breakdowns: [
-      'user_agent.name',
-      'user_agent.os.name',
-      'client.geo.country_name',
-      'user_agent.device.name',
-    ],
-    filters: [{ query: { match_phrase: { 'transaction.type': 'request' } } }],
-    labels: { ...FieldLabels },
+    defaultFilters: [],
+    breakdowns: ['host.hostname'],
+    filters: [],
+    labels: { ...FieldLabels, 'host.hostname': 'Host name' },
     reportDefinitions: [
       {
-        field: 'service.name',
+        field: 'agent.hostname',
         required: true,
-      },
-      {
-        field: 'service.environment',
       },
     ],
   };

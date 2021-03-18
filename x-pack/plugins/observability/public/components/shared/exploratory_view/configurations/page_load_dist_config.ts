@@ -17,7 +17,6 @@ export function getPageLoadDistLensConfig({ seriesId }: Props): DataSeries {
     id: seriesId ?? 'unique-key',
     reportType: 'page-load-dist',
     defaultSeriesType: 'line',
-    indexPattern: 'apm_static_index_pattern_id',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
       sourceField: 'transaction.duration.us',

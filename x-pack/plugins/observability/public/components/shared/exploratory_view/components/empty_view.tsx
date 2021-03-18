@@ -26,4 +26,5 @@ export const EmptyView = () => {
 const Wrapper = styled.div`
   text-align: center;
   opacity: 0.4;
+  height: 550pz;
 `;

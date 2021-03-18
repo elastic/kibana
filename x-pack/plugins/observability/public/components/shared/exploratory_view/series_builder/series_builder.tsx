@@ -9,14 +9,13 @@ import React, { useState } from 'react';
 
 import { EuiButton, EuiBasicTable, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { AppDataType, ReportViewTypeId, SeriesUrl } from '../types';
+import { AppDataType, ReportViewTypeId, ReportViewTypes, SeriesUrl, UrlFilter } from '../types';
 import { DataTypesCol } from './columns/data_types_col';
 import { ReportTypesCol } from './columns/report_types_col';
 import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
-import { useUrlStorage } from '../hooks/use_url_strorage';
-import { FILTERS, REPORT_TYPE } from '../configurations/constants';
+import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
@@ -31,16 +30,25 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
     { id: 'svl', label: 'Latency' },
     { id: 'tpt', label: 'Throughput' },
   ],
-  logs: [],
-  metrics: [],
+  logs: [
+    {
+      id: 'logs',
+      label: 'Logs Frequency',
+    },
+  ],
+  metrics: [
+    { id: 'cpu', label: 'CPU usage' },
+    { id: 'mem', label: 'Memory usage' },
+    { id: 'nwk', label: 'Network activity' },
+  ],
 };
 
 export const SeriesBuilder = () => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const { series, setSeries, allSeriesIds, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { newSeries, setNewSeries, setSeries, allSeriesIds } = useUrlStorage();
+  const { dataType, reportType, reportDefinitions = {}, filters = [] } = series;
 
-  const { dataType, reportType } = newSeries;
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(!!series.dataType);
 
   const columns = [
     {
@@ -63,7 +71,7 @@ export const SeriesBuilder = () => {
     {
       name: 'Filters',
       width: '25%',
-      render: (val: string) => (reportType ? <ReportFilters /> : null),
+      render: (val: string) => (reportType ? <ReportFilters reportType={reportType} /> : null),
     },
     {
       name: 'Breakdowns',
@@ -74,9 +82,7 @@ export const SeriesBuilder = () => {
   ];
 
   const addSeries = () => {
-    const { reportDefinitions = {} } = newSeries;
-
-    const getFiltersFromDefs = () => {
+    const getFiltersFromDefs = (): UrlFilter[] => {
       return Object.entries(reportDefinitions).map(([field, value]) => ({
         field,
         values: [value],
@@ -85,23 +91,24 @@ export const SeriesBuilder = () => {
 
     if (reportType) {
       const newSeriesId = `${
-        reportDefinitions?.['service.name'] || reportDefinitions?.['monitor.id']
+        reportDefinitions?.['service.name'] ||
+        reportDefinitions?.['monitor.id'] ||
+        ReportViewTypes[reportType]
       }`;
 
       const newSeriesN = {
-        [REPORT_TYPE]: reportType,
+        reportType: reportType,
         time: { from: 'now-30m', to: 'now' },
-        [FILTERS]: getFiltersFromDefs(),
+        filters: getFiltersFromDefs().concat(filters),
       } as SeriesUrl;
-      setSeries(newSeriesId, newSeriesN);
-
-      // reset state
-      setNewSeries({});
-      setIsFlyoutVisible(false);
+      setSeries(newSeriesId, newSeriesN).then(() => {
+        removeSeries(NEW_SERIES_KEY);
+        setIsFlyoutVisible(false);
+      });
     }
   };
 
-  const items = [{ id: 'newSeries' }];
+  const items = [{ id: NEW_SERIES_KEY }];
 
   let flyout;
 
@@ -109,7 +116,7 @@ export const SeriesBuilder = () => {
     flyout = (
       <BottomFlyout aria-labelledby="flyoutTitle">
         <EuiBasicTable
-          items={items}
+          items={items as any}
           columns={columns}
           cellProps={{ style: { borderRight: '1px solid #d3dae6' } }}
         />
@@ -125,7 +132,7 @@ export const SeriesBuilder = () => {
               iconType="cross"
               color="danger"
               onClick={() => {
-                setNewSeries({});
+                removeSeries(NEW_SERIES_KEY);
                 setIsFlyoutVisible(false);
               }}
             >
@@ -139,16 +146,20 @@ export const SeriesBuilder = () => {
 
   return (
     <div>
-      <EuiButton
-        iconType={isFlyoutVisible ? 'arrowDown' : 'arrowRight'}
-        color="primary"
-        iconSide="right"
-        onClick={() => setIsFlyoutVisible((prevState) => !prevState)}
-        disabled={allSeriesIds.length > 0}
-      >
-        {'Add series'}
-      </EuiButton>
-      <EuiSpacer />
+      {!isFlyoutVisible && (
+        <>
+          <EuiButton
+            iconType={isFlyoutVisible ? 'arrowDown' : 'arrowRight'}
+            color="primary"
+            iconSide="right"
+            onClick={() => setIsFlyoutVisible((prevState) => !prevState)}
+            disabled={allSeriesIds.length > 0}
+          >
+            {'Add series'}
+          </EuiButton>
+          <EuiSpacer />
+        </>
+      )}
       {flyout}
     </div>
   );

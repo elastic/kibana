@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
-import { BREAK_DOWN, FieldLabels } from '../../configurations/constants';
+import { FieldLabels } from '../../configurations/constants';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
 import { i18n } from '@kbn/i18n';
 
@@ -19,19 +19,26 @@ interface Props {
 export function Breakdowns({ seriesId, breakdowns = [] }: Props) {
   const items = breakdowns.map((breakdown) => ({ id: breakdown, label: FieldLabels[breakdown] }));
 
-  const [selectedBreakdown, setSelectedBreakdown] = useState<string>();
-
-  const onOptionChange = (optionId: string) => {
-    setSelectedBreakdown((prevState) => (prevState === optionId ? undefined : optionId));
-  };
-
   const { setSeries, series } = useUrlStorage(seriesId);
 
-  useEffect(() => {
-    setSeries(seriesId, { ...series, [BREAK_DOWN]: selectedBreakdown });
-  }, [selectedBreakdown]);
-
+  const selectedBreakdown = series.breakdown;
   const NO_BREAKDOWN = 'no_breakdown';
+
+  const onOptionChange = (optionId: string) => {
+    if (optionId === NO_BREAKDOWN) {
+      setSeries(seriesId, {
+        ...series,
+        breakdown: undefined,
+      });
+    } else {
+      setSeries(seriesId, {
+        ...series,
+        breakdown: selectedBreakdown === optionId ? undefined : optionId,
+      });
+    }
+  };
+
+  useEffect(() => {}, [selectedBreakdown]);
 
   items.push({
     id: NO_BREAKDOWN,

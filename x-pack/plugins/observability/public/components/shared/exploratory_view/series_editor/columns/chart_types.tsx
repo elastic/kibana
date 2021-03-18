@@ -16,7 +16,6 @@ import styled from 'styled-components';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
 import { LensIconChartBar } from '../../assets/chart_bar';
 import { VisualizationType } from '../../../../../../../lens/public/types';
-import { SERIES_TYPE } from '../../configurations/constants';
 import { LensIconChartBarHorizontal } from '../../assets/chart_bar_horizontal';
 import { LensIconChartBarStacked } from '../../assets/chart_bar_stacked';
 import { LensIconChartBarHorizontalStacked } from '../../assets/chart_bar_horizontal_stacked';
@@ -43,7 +42,7 @@ export function ChartTypes({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const seriesType = series?.[SERIES_TYPE] ?? defaultChartType;
+  const seriesType = series?.seriesType ?? defaultChartType;
 
   return (
     <EuiPopover
@@ -77,12 +76,12 @@ export function ChartTypes({
           iconType: t.icon || 'empty',
           'data-test-subj': `lnsXY_seriesType-${t.id}`,
         }))}
-        idSelected={series?.[SERIES_TYPE] ?? 'line'}
+        idSelected={series?.seriesType ?? seriesType}
         onChange={(seriesType: string) => {
           Object.keys(allSeries).forEach((seriesKey) => {
             const series = allSeries[seriesKey];
 
-            setSeries(seriesKey, { ...series, [SERIES_TYPE]: seriesType });
+            setSeries(seriesKey, { ...series, seriesType });
           });
         }}
       />

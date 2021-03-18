@@ -21,9 +21,11 @@ export function ActionsCol({ series }: Props) {
       <EuiFlexItem grow={false}>
         <ChartTypes seriesId={series.id} defaultChartType={series.seriesTypes[0]} />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <MetricSelection seriesId={series.id} isDisabled={!series.metricType} />
-      </EuiFlexItem>
+      {series.metricType && (
+        <EuiFlexItem grow={false}>
+          <MetricSelection seriesId={series.id} isDisabled={!series.metricType} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

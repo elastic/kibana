@@ -17,7 +17,6 @@ export function getServiceLatencyLensConfig({ seriesId }: Props): DataSeries {
     id: seriesId,
     reportType: 'service-latency',
     defaultSeriesType: 'line',
-    indexPattern: 'apm_static_index_pattern_id',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
       sourceField: '@timestamp',

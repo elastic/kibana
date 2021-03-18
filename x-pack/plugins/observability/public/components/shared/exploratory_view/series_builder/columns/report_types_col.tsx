@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ReportViewTypeId } from '../../types';
-import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 
 interface Props {
   reportTypes: { id: ReportViewTypeId; label: string }[];
@@ -16,9 +16,9 @@ interface Props {
 
 export const ReportTypesCol = ({ reportTypes }: Props) => {
   const {
-    newSeries: { reportType: selectedReportType, ...restSeries },
-    setNewSeries,
-  } = useUrlStorage();
+    series: { reportType: selectedReportType, ...restSeries },
+    setSeries,
+  } = useUrlStorage(NEW_SERIES_KEY);
 
   return reportTypes?.length > 0 ? (
     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -30,12 +30,19 @@ export const ReportTypesCol = ({ reportTypes }: Props) => {
             iconType="arrowRight"
             color={selectedReportType === reportType ? 'primary' : 'text'}
             fill={selectedReportType === reportType}
-            onClick={() =>
-              setNewSeries({
-                ...restSeries,
-                reportType: reportType === selectedReportType ? undefined : reportType,
-              })
-            }
+            onClick={() => {
+              if (reportType === selectedReportType) {
+                setSeries(NEW_SERIES_KEY, {
+                  dataType: restSeries.dataType,
+                  reportType: undefined,
+                });
+              } else {
+                setSeries(NEW_SERIES_KEY, {
+                  ...restSeries,
+                  reportType: reportType,
+                });
+              }
+            }}
           >
             {label}
           </EuiButton>

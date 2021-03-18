@@ -12,6 +12,10 @@ import { getServiceLatencyLensConfig } from './service_latency_config';
 import { getMonitorPingsConfig } from './monitor_pings_config';
 import { getServiceThroughputLensConfig } from './service_throughput_config';
 import { getKPITrendsLensConfig } from './kpi_trends_config';
+import { getCPUUsageLensConfig } from './cpu_usage_config';
+import { getMemoryUsageLensConfig } from './memory_usage_config';
+import { getNetworkActivityLensConfig } from './network_activity_config';
+import { getLogsFrequencyLensConfig } from './logs_frequency_config';
 
 interface Props {
   reportType: keyof typeof ReportViewTypes;
@@ -22,16 +26,24 @@ export const getDefaultConfigs = ({ reportType, seriesId }: Props) => {
   switch (ReportViewTypes[reportType]) {
     case 'page-load-dist':
       return getPageLoadDistLensConfig({ seriesId });
-    case 'page-views':
+    case 'kpi-trends':
       return getKPITrendsLensConfig({ seriesId });
     case 'uptime-duration':
-      return getMonitorDurationConfig();
+      return getMonitorDurationConfig({ seriesId });
     case 'uptime-pings':
       return getMonitorPingsConfig({ seriesId });
     case 'service-latency':
       return getServiceLatencyLensConfig({ seriesId });
     case 'service-throughput':
       return getServiceThroughputLensConfig({ seriesId });
+    case 'cpu-usage':
+      return getCPUUsageLensConfig({ seriesId });
+    case 'memory-usage':
+      return getMemoryUsageLensConfig({ seriesId });
+    case 'network-activity':
+      return getNetworkActivityLensConfig({ seriesId });
+    case 'logs-frequency':
+      return getLogsFrequencyLensConfig({ seriesId });
     default:
       return getKPITrendsLensConfig({ seriesId });
   }

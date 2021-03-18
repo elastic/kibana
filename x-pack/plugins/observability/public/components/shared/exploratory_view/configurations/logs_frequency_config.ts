@@ -12,36 +12,28 @@ interface Props {
   seriesId: string;
 }
 
-export function getMonitorDurationConfig({ seriesId }: Props): DataSeries {
+export function getLogsFrequencyLensConfig({ seriesId }: Props): DataSeries {
   return {
     id: seriesId,
-    reportType: 'uptime-duration',
+    reportType: 'logs-frequency',
     defaultSeriesType: 'line',
-    seriesTypes: ['line', 'bar_stacked'],
+    seriesTypes: ['line', 'bar'],
     xAxisColumn: {
       sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'avg',
-      sourceField: 'monitor.duration.us',
-      label: 'Monitor duration (ms)',
+      operationType: 'count',
     },
-    metricType: true,
-    defaultFilters: ['monitor.type', 'observer.geo.name', 'tags'],
-    breakdowns: [
-      'observer.geo.name',
-      'monitor.name',
-      'monitor.id',
-      'monitor.type',
-      'tags',
-      'url.port',
-    ],
+    metricType: false,
+    defaultFilters: [],
+    breakdowns: ['agent.hostname'],
     filters: [],
+    labels: { ...FieldLabels },
     reportDefinitions: [
       {
-        field: 'monitor.id',
+        field: 'agent.hostname',
+        required: true,
       },
     ],
-    labels: { ...FieldLabels },
   };
 }

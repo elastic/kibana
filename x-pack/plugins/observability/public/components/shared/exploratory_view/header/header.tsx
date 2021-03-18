@@ -29,7 +29,7 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiText>
-          <h2>{DataViewLabels[series[REPORT_TYPE]] ?? 'Exploratory view'}</h2>
+          <h2>{DataViewLabels[series.reportType] ?? 'Exploratory view'}</h2>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

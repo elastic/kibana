@@ -11,13 +11,7 @@ import {
   DateHistogramIndexPatternColumn,
   LastValueIndexPatternColumn,
 } from '../../../../../lens/public';
-import {
-  BREAK_DOWN,
-  FILTERS,
-  METRIC_TYPE,
-  REPORT_TYPE,
-  SERIES_TYPE,
-} from './configurations/constants';
+
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
 
 export const ReportViewTypes = {
@@ -27,20 +21,20 @@ export const ReportViewTypes = {
   upp: 'uptime-pings',
   svl: 'service-latency',
   tpt: 'service-throughput',
-};
+  logs: 'logs-frequency',
+  cpu: 'cpu-usage',
+  mem: 'memory-usage',
+  nwk: 'network-activity',
+} as const;
+
+type ValueOf<T> = T[keyof T];
 
 export type ReportViewTypeId = keyof typeof ReportViewTypes;
 
-export type ReportViewType =
-  | 'page-load-dist'
-  | 'kpi-trends'
-  | 'uptime-duration'
-  | 'uptime-pings'
-  | 'service-latency';
+export type ReportViewType = ValueOf<typeof ReportViewTypes>;
 
 export interface DataSeries {
   reportType: ReportViewType;
-  indexPattern: string;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumn:
@@ -59,6 +53,7 @@ export interface DataSeries {
   }[];
   labels: Record<string, string>;
   metricType: boolean;
+  palette?: Record<string, string>;
 }
 
 export interface SeriesUrl {
@@ -66,16 +61,12 @@ export interface SeriesUrl {
     to: string;
     from: string;
   };
-  [BREAK_DOWN]?: string;
-  [FILTERS]?: UrlFilter[];
-  [SERIES_TYPE]?: string;
-  [REPORT_TYPE]: ReportViewTypeId;
-  [METRIC_TYPE]?: string;
-}
-
-export interface NewSeriesUrl {
+  breakdown?: string;
+  filters?: UrlFilter[];
+  seriesType?: string;
+  reportType: ReportViewTypeId;
+  metric?: string;
   dataType?: AppDataType;
-  reportType?: ReportViewTypeId;
   reportDefinitions?: Record<string, string>;
 }
 

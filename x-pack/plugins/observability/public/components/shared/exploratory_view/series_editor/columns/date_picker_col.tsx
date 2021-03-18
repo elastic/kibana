@@ -9,12 +9,12 @@ import React from 'react';
 import { SeriesDatePicker } from '../../series_date_picker';
 
 interface Props {
-  series: any;
+  seriesId: string;
 }
-export function DatePickerCol({ series }: Props) {
+export function DatePickerCol({ seriesId }: Props) {
   return (
     <div style={{ maxWidth: 300 }}>
-      <SeriesDatePicker seriesId={series.id} />
+      <SeriesDatePicker seriesId={seriesId} />
     </div>
   );
 }

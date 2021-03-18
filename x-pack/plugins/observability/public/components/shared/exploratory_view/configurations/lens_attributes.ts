@@ -115,7 +115,7 @@ export class LensAttributes {
 
     if (xAxisColumn)
       return {
-        label: 'Page load duration',
+        label: 'Page load duration (Seconds)',
         dataType: 'number',
         operationType: 'range',
         sourceField: 'transaction.duration.us',
@@ -168,6 +168,7 @@ export class LensAttributes {
           accessors: ['y-axis-column'],
           layerId: 'layer1',
           seriesType: this.seriesType ?? 'line',
+          palette: this.reportViewConfig.palette ?? undefined,
           yConfig: [{ forAccessor: 'y-axis-column', color: 'green' }],
           xAccessor: 'x-axis-column',
         },
@@ -182,6 +183,9 @@ export class LensAttributes {
     this.filters.forEach(({ field, values = [], notValues = [] }) => {
       values?.forEach((value) => {
         parsedFilters.push({ query: { match_phrase: { [field]: value } } });
+      });
+      notValues?.forEach((value) => {
+        parsedFilters.push({ query: { match_phrase: { [field]: value } }, meta: { negate: true } });
       });
     });
 

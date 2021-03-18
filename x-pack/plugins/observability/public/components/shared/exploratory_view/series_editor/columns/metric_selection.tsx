@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiButtonGroup, EuiPopover } from '@elastic/eui';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
-import { METRIC_TYPE } from '../../configurations/constants';
 
 const toggleButtons = [
   {
@@ -40,7 +39,7 @@ export function MetricSelection({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const [toggleIdSelected, setToggleIdSelected] = useState(series?.[METRIC_TYPE] ?? 'avg');
+  const [toggleIdSelected, setToggleIdSelected] = useState(series?.metric ?? 'avg');
 
   const onChange = (optionId: string) => {
     setToggleIdSelected(optionId);
@@ -48,7 +47,7 @@ export function MetricSelection({
     Object.keys(allSeries).forEach((seriesKey) => {
       const seriesN = allSeries[seriesKey];
 
-      setSeries(seriesKey, { ...seriesN, [METRIC_TYPE]: optionId });
+      setSeries(seriesKey, { ...seriesN, metric: optionId });
     });
   };
   const button = (

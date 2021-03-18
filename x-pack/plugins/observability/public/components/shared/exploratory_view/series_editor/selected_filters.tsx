@@ -5,21 +5,35 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { useUrlStorage } from '../hooks/use_url_strorage';
+import React, { Fragment, useMemo } from 'react';
+import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FILTERS } from '../configurations/constants';
 import { FilterLabel } from '../components/filter_label';
-import { DataSeries } from '../types';
+import { DataSeries, UrlFilter } from '../types';
+import { useIndexPatternContext } from '../../../../hooks/use_default_index_pattern';
 
 interface Props {
   seriesId: string;
   series: DataSeries;
+  isNew?: boolean;
 }
-export const SelectedFilters = ({ seriesId, series: { labels } }: Props) => {
+export const SelectedFilters = ({ seriesId, isNew, series: { labels } }: Props) => {
   const { series, setSeries } = useUrlStorage(seriesId);
 
-  const filters = series?.[FILTERS] ?? [];
+  const { reportDefinitions = {} } = series;
+  const getFiltersFromDefs = () => {
+    return Object.entries(reportDefinitions).map(([field, value]) => ({
+      field,
+      values: [value],
+    })) as UrlFilter[];
+  };
+
+  const filters: UrlFilter[] = useMemo(() => {
+    if (seriesId === NEW_SERIES_KEY && isNew) {
+      return series.filters ?? [];
+    }
+    return (series.filters ?? []).concat(getFiltersFromDefs());
+  }, [series.filters, reportDefinitions]);
 
   const removeFilter = (field: string, value: string, notVal: boolean) => {
     const filtersN = filters.map((filter) => {
@@ -35,10 +49,12 @@ export const SelectedFilters = ({ seriesId, series: { labels } }: Props) => {
 
       return filter;
     });
-    setSeries(seriesId, { ...series, [FILTERS]: filtersN });
+    setSeries(seriesId, { ...series, filters: filtersN });
   };
 
-  return filters.length > 0 ? (
+  const { indexPattern } = useIndexPatternContext();
+
+  return filters.length > 0 && indexPattern ? (
     <EuiFlexItem>
       <EuiFlexGroup wrap gutterSize="xs">
         {filters.map(({ field, values, notValues }) => (

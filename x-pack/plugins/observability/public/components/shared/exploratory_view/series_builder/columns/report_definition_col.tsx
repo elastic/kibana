@@ -10,14 +10,14 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FieldValueSelection } from '../../../field_value_selection';
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 import { getDefaultConfigs } from '../../configurations/default_configs';
-import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 
 export const ReportDefinitionCol = () => {
   const { indexPattern } = useIndexPatternContext();
 
-  const { newSeries, setNewSeries } = useUrlStorage();
+  const { series, setSeries } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { reportType, reportDefinitions: rtd = {} } = newSeries;
+  const { reportType, reportDefinitions: rtd = {} } = series;
 
   const { reportDefinitions, labels, filters } = getDefaultConfigs({
     reportType: reportType!,
@@ -25,37 +25,51 @@ export const ReportDefinitionCol = () => {
   });
 
   const onChange = (field: string, value: string) => {
-    setNewSeries({
-      ...newSeries,
+    setSeries(NEW_SERIES_KEY, {
+      ...series,
       reportDefinitions: { ...rtd, [field]: value },
+    });
+  };
+
+  const onRemove = (field: string) => {
+    delete rtd[field];
+    setSeries(NEW_SERIES_KEY, {
+      ...series,
+      reportDefinitions: rtd,
     });
   };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {reportDefinitions.map(({ field }) => (
-        <EuiFlexItem key={field}>
-          <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <FieldValueSelection
-                label={labels[field]}
-                sourceField={field}
-                indexPattern={indexPattern}
-                value={reportDefinitions?.[field]}
-                onChange={(val: string) => onChange(field, val)}
-                filters={(filters ?? []).map(({ query }) => query)}
-              />
-            </EuiFlexItem>
-            {rtd?.[field] && (
+      {indexPattern &&
+        reportDefinitions.map(({ field }) => (
+          <EuiFlexItem key={field}>
+            <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiBadge iconSide="right" iconType="cross">
-                  {rtd?.[field]}
-                </EuiBadge>
+                <FieldValueSelection
+                  label={labels[field]}
+                  sourceField={field}
+                  indexPattern={indexPattern}
+                  value={reportDefinitions?.[field]}
+                  onChange={(val: string) => onChange(field, val)}
+                  filters={(filters ?? []).map(({ query }) => query)}
+                />
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ))}
+              {rtd?.[field] && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    iconSide="right"
+                    iconType="cross"
+                    color="hollow"
+                    onClick={() => onRemove(field)}
+                  >
+                    {rtd?.[field]}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
     </EuiFlexGroup>
   );
 };

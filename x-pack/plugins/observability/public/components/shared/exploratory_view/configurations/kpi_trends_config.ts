@@ -17,7 +17,6 @@ export function getKPITrendsLensConfig({ seriesId }: Props): DataSeries {
     id: seriesId,
     defaultSeriesType: 'bar_stacked',
     reportType: 'kpi-trends',
-    indexPattern: 'apm_static_index_pattern_id',
     seriesTypes: ['bar', 'bar_stacked'],
     xAxisColumn: {
       sourceField: '@timestamp',
@@ -44,7 +43,7 @@ export function getKPITrendsLensConfig({ seriesId }: Props): DataSeries {
         query: { match_phrase: { 'transaction.type': 'page-load' } },
       },
     ],
-    labels: { ...FieldLabels },
+    labels: { ...FieldLabels, 'service.name': 'Web Application' },
     reportDefinitions: [
       {
         field: 'service.name',

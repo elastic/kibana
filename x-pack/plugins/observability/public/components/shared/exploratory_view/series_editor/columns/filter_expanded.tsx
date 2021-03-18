@@ -20,7 +20,6 @@ import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/p
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
 import { UrlFilter } from '../../types';
-import { FILTERS } from '../../configurations/constants';
 
 interface Props {
   seriesId: string;
@@ -49,7 +48,7 @@ export function FilterExpanded({ seriesId, field, label, goBack }: Props) {
     });
   }, [field]);
 
-  const filters = series?.[FILTERS] ?? [];
+  const filters = series?.filters ?? [];
 
   let currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
 
@@ -62,11 +61,11 @@ export function FilterExpanded({ seriesId, field, label, goBack }: Props) {
         currFilter.values = [id];
       }
       if (filters.length === 0) {
-        setSeries(seriesId, { ...series, [FILTERS]: [currFilter] });
+        setSeries(seriesId, { ...series, filters: [currFilter] });
       } else {
         setSeries(seriesId, {
           ...series,
-          [FILTERS]: [currFilter, ...filters.filter((ft) => ft.field != field)],
+          filters: [currFilter, ...filters.filter((ft) => ft.field != field)],
         });
       }
       return;
@@ -89,9 +88,9 @@ export function FilterExpanded({ seriesId, field, label, goBack }: Props) {
       currFilter.values = values.length > 0 ? values : undefined;
 
       if (notValues.length > 0 || values.length > 0) {
-        setSeries(seriesId, { ...series, [FILTERS]: [currFilter] });
+        setSeries(seriesId, { ...series, filters: [currFilter] });
       } else {
-        setSeries(seriesId, { ...series, [FILTERS]: undefined });
+        setSeries(seriesId, { ...series, filters: undefined });
       }
     }
   };
@@ -109,7 +108,11 @@ export function FilterExpanded({ seriesId, field, label, goBack }: Props) {
         }}
       />
       <EuiSpacer size="s" />
-      {status === 'loading' && <EuiLoadingSpinner />}
+      {status === 'loading' && (
+        <div style={{ textAlign: 'center' }}>
+          <EuiLoadingSpinner />
+        </div>
+      )}
       {(values || [])
         .filter((opt) => opt.toLowerCase().includes(value.toLowerCase()))
         .map((opt) => (

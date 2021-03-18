@@ -65,7 +65,7 @@ export const FieldValueSelection = ({
   };
 
   const onValueChange = (evt: FormEvent<HTMLInputElement>) => {
-    setQuery(evt.target.value);
+    setQuery((evt.target as HTMLInputElement).value);
   };
 
   const button = (
@@ -97,7 +97,7 @@ export const FieldValueSelection = ({
           compressed: true,
           onInput: onValueChange,
         }}
-        options={options}
+        options={options as any}
         onChange={onChange}
         isLoading={loading}
       >

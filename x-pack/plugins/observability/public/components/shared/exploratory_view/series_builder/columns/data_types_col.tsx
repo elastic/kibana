@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AppDataType } from '../../types';
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
-import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 
 const dataTypes: { id: AppDataType; label: string }[] = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
@@ -18,8 +18,9 @@ const dataTypes: { id: AppDataType; label: string }[] = [
   { id: 'metrics', label: 'Metrics' },
   { id: 'apm', label: 'APM' },
 ];
+
 export const DataTypesCol = () => {
-  const { newSeries, setNewSeries } = useUrlStorage();
+  const { series, setSeries } = useUrlStorage(NEW_SERIES_KEY);
 
   const { loadIndexPattern } = useIndexPatternContext();
 
@@ -27,10 +28,10 @@ export const DataTypesCol = () => {
     if (dataType) {
       loadIndexPattern(dataType);
     }
-    setNewSeries({ dataType });
+    setSeries(NEW_SERIES_KEY, { dataType } as any);
   };
 
-  const selectedDataType = newSeries.dataType;
+  const selectedDataType = series.dataType;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">

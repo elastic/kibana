@@ -21,8 +21,8 @@ const appToPatternMap: Record<DataType, string> = {
   synthetics: 'heartbeat-*',
   apm: 'apm-*',
   rum: 'apm-*',
-  logs: 'logs-*',
-  metrics: 'metrics-*',
+  logs: 'logs-*,filebeat-*',
+  metrics: 'metrics-*,metricbeat-*',
 };
 
 export class ObservabilityIndexPatterns {
