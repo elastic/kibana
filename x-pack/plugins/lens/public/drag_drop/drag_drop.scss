@@ -151,10 +151,11 @@
   visibility: hidden;
   position: absolute;
   z-index: $euiZLevel2;
-  right: calc(100% + 16px);
-  top: calc(50% + 4px);
+  right: calc(100% + #{$euiSize});
+  top: calc(50% + #{$euiSizeXS});
   transform: translateY(-50%);
   transition: opacity $euiAnimSpeedFast ease-in-out;
+  width:70%;
 }
 
 .lnsDragDrop__extraDrops-visible {
@@ -175,7 +176,7 @@
   height: $euiSizeXS * 10;
   font-size: $euiSize;
   min-width: $euiSize * 7;
-  color: $euiColorSuccess;
+  color: $euiColorSuccessText;
   border-radius: $euiSizeXS;
   &.lnsDragDrop-incompatibleExtraDrop {
     color: $euiColorWarningText;

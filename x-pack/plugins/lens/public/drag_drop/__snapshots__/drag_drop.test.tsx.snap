@@ -10,9 +10,6 @@ exports[`DragDrop defined dropTypes is reflected in the className 1`] = `
   >
     Hello!
   </button>
-  <div
-    class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn euiFlexGroup--responsive lnsDragDrop__extraDrops"
-  />
 </div>
 `;
 

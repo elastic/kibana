@@ -16,29 +16,35 @@ const getExtraDrop = ({
 }: {
   type: 'swap' | 'duplicate';
   isIncompatible?: boolean;
-}) => (
-  <EuiFlexGroup
-    gutterSize="s"
-    justifyContent="center"
-    alignItems="center"
-    className={classNames('lnsDragDrop__extraDrop', {
-      'lnsDragDrop-incompatibleExtraDrop': isIncompatible,
-    })}
-  >
-    <EuiFlexItem grow={false}>
-      <EuiIcon size="s" type={type === 'duplicate' ? 'copy' : 'expand'} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      {type === 'duplicate'
-        ? i18n.translate('xpack.lens.dragDrop.duplicate', {
-            defaultMessage: 'Duplicate',
-          })
-        : i18n.translate('xpack.lens.dragDrop.swap', {
-            defaultMessage: 'Swap',
-          })}
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+}) => {
+  const iconProps =
+    type === 'duplicate'
+      ? { type: 'copy' }
+      : { type: 'expand', style: { transform: 'rotate(-45deg)' } };
+  return (
+    <EuiFlexGroup
+      gutterSize="s"
+      justifyContent="center"
+      alignItems="center"
+      className={classNames('lnsDragDrop__extraDrop', {
+        'lnsDragDrop-incompatibleExtraDrop': isIncompatible,
+      })}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon size="m" {...iconProps} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {type === 'duplicate'
+          ? i18n.translate('xpack.lens.dragDrop.duplicate', {
+              defaultMessage: 'Duplicate',
+            })
+          : i18n.translate('xpack.lens.dragDrop.swap', {
+              defaultMessage: 'Swap',
+            })}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const customDropTargetsMap = {
   replace_duplicate_incompatible: getExtraDrop({ type: 'duplicate', isIncompatible: true }),
