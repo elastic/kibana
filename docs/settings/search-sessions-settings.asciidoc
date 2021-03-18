@@ -5,8 +5,7 @@
 <titleabbrev>Search sessions settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to use {kib} search session features. They are
-enabled by default.
+Configure the search session settings in your `kibana.yml` configuration file. 
 
 
 [cols="2*<"]
@@ -14,10 +13,10 @@ enabled by default.
 | `search:sessions:enabled`
   | Set to `true` (default) to enable search sessions.
 
-| `search:Sessions:trackingInterval`
+| `search:sessions:trackingInterval`
   | The frequency for updating the state of a search session. The default is 10s.
 
-| `search:Sessions:defaultExpiration`
+| `search:sessions:defaultExpiration`
   | How long search session results are stored before they are deleted.
   Extending a search session resets the expiration by the same value. The default is 7d.
 

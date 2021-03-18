@@ -39,8 +39,8 @@ You’re trying to understand a trend you see on a dashboard in {kib}. You
 need to look at several years of data, currently in
 {ref}/data-tiers.html#cold-tier[cold storage],
 but you don’t have time to wait. You want {kib} to
-continue working in the background, so tomorrow morning you can get your coffee,
-open your browser, and pick up where you left off.
+continue working in the background, so tomorrow you can
+open your browser and pick up where you left off.
 
 . Load your dashboard.
 +
@@ -49,21 +49,28 @@ displays the current state of the search. A clock indicates the session is in pr
 A checkmark indicates that the search session is complete.
 
 . To instruct {kib} to continue the search in the background, click the clock icon,
-and then click *Save session*. Once you save search session, you can start a new search,
+and then click *Save session*. Once you save a search session, you can start a new search,
 navigate to a different application, or close the browser.
 +
 [role="screenshot"]
 image::images/search-session-awhile.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session ]
 
 . To view your saved searches, open the main menu, and then click
-*Stack Management > Search Sessions*.  You can also open this view from the Search sessions popup once you save the session.
+*Stack Management > Search Sessions*.  You can also open this view from the search sessions popup once you save the session.
 +
 [role="screenshot"]
 image::images/search-sessions-menu.png[Search Sessions management view with actions for inspecting, extending, and deleting a session. ]
+
+. To restore a search session, click its name in the *Search Sessions* view.
 +
-. In *Search Sessions*, use the edit menu to:
-** *Inspect* the queries and filters that makeup the session.
-** *Extend* the expiration of a completed session.
-** *Restore* a session. Relative dates become
-absolute dates, panning is disabled for maps, and changing a filter, query, or drilldown starts a new search.
-** *Delete* a session.
+You're returned to the place from where you started the search session. The data is the same, but
+behaves differently:
++
+* Relative dates are converted to absolute dates.
+* Panning is disabled for maps.
+* Changing a filter, query, or drilldown starts a new search session, which can be slow.
+
+. Open the edit menu in *Search Sessions* to:
+* *Inspect* the queries and filters that makeup the session.
+* *Extend* the expiration of a completed session.
+* *Delete* a session.
