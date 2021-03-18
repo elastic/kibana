@@ -96,8 +96,17 @@ export const TimeSeries = ({
     if (!x) {
       return;
     }
+    // console.dir(series);
+    const table = {
+      type: 'datatable',
+      rows: series[0].data,
+      columns: [
+        { id: 0, name: 'timestamp' },
+        { id: 1, name: 'Count' },
+      ],
+    };
     const [min, max] = x;
-    onBrush(min, max);
+    onBrush(min, max, table);
   };
 
   return (

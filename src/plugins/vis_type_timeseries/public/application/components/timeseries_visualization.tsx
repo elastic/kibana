@@ -16,6 +16,7 @@ import { PersistedState } from 'src/plugins/visualizations/public';
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
 import { TimeseriesVisParams } from '../../types';
+import { getDataStart } from '../../services';
 import { TimeseriesVisData } from '../../../common/types';
 
 interface TimeseriesVisualizationProps {
@@ -36,23 +37,77 @@ function TimeseriesVisualization({
   getConfig,
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
-    (gte: string, lte: string) => {
-      handlers.event({
-        name: 'applyFilter',
-        data: {
-          timeFieldName: '*',
-          filters: [
-            {
-              range: {
-                '*': {
-                  gte,
-                  lte,
+    async (gte: string, lte: string, table: any) => {
+      const indexPattern = await getDataStart().indexPatterns.find(
+        model.index_pattern ?? model.default_index_pattern
+      );
+      // console.dir(model);
+      // console.dir(visData);
+      // console.dir(indexPattern);
+      const columns = table.columns.map((column) => {
+        const field = indexPattern[0].getFieldByName(column.name);
+        const cleanedColumn = {
+          id: column.id,
+          name: column.name,
+          meta: {
+            type: field?.spec.type || 'number',
+            field: column.name,
+            index: model.index_pattern ?? model.default_index_pattern,
+            source: 'esaggs',
+            sourceParams: {
+              enabled: true,
+              indexPatternId: indexPattern[0]?.id,
+              params: {
+                field: column.name,
+                timeRange: {
+                  from: '2021-03-16T20:05:35.357Z',
+                  to: '2021-03-16T22:53:00.776Z',
                 },
+                useNormalizedEsInterval: true,
+                scaleMetricValues: false,
+                interval: 'auto',
+                drop_partials: false,
+                min_doc_count: 1,
+                extended_bounds: {},
               },
+              appliedTimeRange: {
+                from: '2021-03-16T20:05:35.357Z',
+                to: '2021-03-16T22:53:00.776Z',
+              },
+              type: 'date_histogram',
+              schema: 'segment',
             },
-          ],
-        },
+          },
+        };
+        return cleanedColumn;
       });
+      const newTable = { ...table, columns };
+      const range: [number, number] = [parseInt(gte, 10), parseInt(lte, 10)];
+      const event = {
+        data: {
+          table: newTable,
+          column: 0,
+          range,
+        },
+        name: 'brush',
+      };
+      handlers.event(event);
+      // handlers.event({
+      //   name: 'brush',
+      //   data: {
+      //     timeFieldName: '*',
+      //     filters: [
+      //       {
+      //         range: {
+      //           '*': {
+      //             gte,
+      //             lte,
+      //           },
+      //         },
+      //       },
+      //     ],
+      //   },
+      // });
     },
     [handlers]
   );
