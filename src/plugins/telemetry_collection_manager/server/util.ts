@@ -7,5 +7,9 @@
  */
 
 export const isClusterOptedIn = (clusterUsage: any): boolean => {
-  return clusterUsage?.stack_stats?.kibana?.plugins?.telemetry?.opt_in_status === true;
+  return (
+    clusterUsage?.stack_stats?.kibana?.plugins?.telemetry?.opt_in_status === true ||
+    // If stack_stats.kibana does not exist, assume opted-in
+    !clusterUsage?.stack_stats?.kibana
+  );
 };

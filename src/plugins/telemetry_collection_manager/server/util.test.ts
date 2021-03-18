@@ -34,7 +34,7 @@ describe('isClusterOptedIn', () => {
   });
   it('returns false if cluster stats is malformed', () => {
     expect(isClusterOptedIn(createMockClusterUsage({}))).toBe(false);
-    expect(isClusterOptedIn({})).toBe(false);
-    expect(isClusterOptedIn(undefined)).toBe(false);
+    expect(isClusterOptedIn({})).toBe(true);
+    expect(isClusterOptedIn(undefined)).toBe(true);
   });
 });
