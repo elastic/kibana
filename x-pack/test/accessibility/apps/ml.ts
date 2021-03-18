@@ -13,8 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/94666
-  describe.skip('ml', () => {
+  describe('ml', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
@@ -279,6 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('data frame analytics create job validation step for outlier job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
           await a11y.testAppSnapshot();
         });
 
