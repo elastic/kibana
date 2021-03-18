@@ -18,9 +18,6 @@ export const configSchema = schema.object({
   maxTimelineImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
 
-  /** Fleet server integration */
-  fleetServerEnabled: schema.boolean({ defaultValue: false }),
-
   /**
    * For internal use. A list of string values that will enable experimental type of functionality that is
    * not yet released. Valid values for this settings need to be defined in:

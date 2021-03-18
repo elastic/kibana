@@ -39,7 +39,10 @@ const allowedKeys = (Object.keys(allowedExperimentalValues) as Array<
  * @throws SecuritySolutionInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (configValue: string): ExperimentalFeatures => {
-  const stringValues = configValue.split(/,/);
+  const stringValues = configValue
+    .split(/,/)
+    .filter(Boolean)
+    .map((value) => value.trim());
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
 
   for (const value of stringValues) {
