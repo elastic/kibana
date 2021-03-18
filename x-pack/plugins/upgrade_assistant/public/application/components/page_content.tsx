@@ -24,12 +24,8 @@ export const PageContent: React.FunctionComponent<RouteComponentProps<MatchParam
   },
   history,
 }) => {
-  const { kibanaVersionInfo, isReadOnlyMode, http } = useAppContext();
+  const { kibanaVersionInfo, isReadOnlyMode } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
-
-  const onTabChange = (newTab: Tabs) => {
-    history.push(`/${newTab}`);
-  };
 
   // Read-only mode will be enabled up until the last minor before the next major release
   if (isReadOnlyMode) {
@@ -52,7 +48,7 @@ export const PageContent: React.FunctionComponent<RouteComponentProps<MatchParam
         </EuiPageHeaderSection>
       </EuiPageHeader>
 
-      <UpgradeAssistantTabs http={http} tabName={tabName} onTabChange={onTabChange} />
+      <UpgradeAssistantTabs />
     </>
   );
 };

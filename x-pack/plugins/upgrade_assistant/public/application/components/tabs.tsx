@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
-import React from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
   EuiEmptyPrompt,
@@ -18,63 +17,114 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup } from 'src/core/public';
 
-import { UpgradeAssistantStatus } from '../../../common/types';
 import { LatestMinorBanner } from './latest_minor_banner';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
-import { LoadingState, Tabs, TelemetryState, UpgradeAssistantTabProps } from './types';
+import { TelemetryState, UpgradeAssistantTabProps, Tabs } from './types';
+import { useAppContext } from '../app_context';
 
-enum ClusterUpgradeState {
-  needsUpgrade,
-  partiallyUpgraded,
-  upgraded,
+interface MatchParams {
+  tabName: Tabs;
 }
 
-interface TabsState {
-  loadingState: LoadingState;
-  loadingError?: Error;
-  checkupData?: UpgradeAssistantStatus;
-  selectedTabIndex: number;
-  telemetryState: TelemetryState;
-  clusterUpgradeState: ClusterUpgradeState;
-}
+export const UpgradeAssistantTabs = withRouter(
+  ({
+    match: {
+      params: { tabName },
+    },
+    history,
+  }: RouteComponentProps<MatchParams>) => {
+    const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+    const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
-interface Props {
-  http: HttpSetup;
-  tabName: string;
-  onTabChange: (tabName: Tabs) => void;
-}
+    const { api } = useAppContext();
 
-export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      loadingState: LoadingState.Loading,
-      clusterUpgradeState: ClusterUpgradeState.needsUpgrade,
-      selectedTabIndex: 0,
-      telemetryState: TelemetryState.Complete,
+    const { data: checkupData, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
+
+    const tabs = useMemo(() => {
+      const commonTabProps: UpgradeAssistantTabProps = {
+        loadingError: error,
+        isLoading,
+        refreshCheckupData: resendRequest,
+        setSelectedTabIndex,
+        // Remove this in last minor of the current major (e.g., 7.15)
+        alertBanner: <LatestMinorBanner />,
+      };
+
+      return [
+        {
+          id: 'overview',
+          'data-test-subj': 'upgradeAssistantOverviewTab',
+          name: i18n.translate('xpack.upgradeAssistant.overviewTab.overviewTabTitle', {
+            defaultMessage: 'Overview',
+          }),
+          content: <OverviewTab checkupData={checkupData} {...commonTabProps} />,
+        },
+        {
+          id: 'cluster',
+          'data-test-subj': 'upgradeAssistantClusterTab',
+          name: i18n.translate('xpack.upgradeAssistant.checkupTab.clusterTabLabel', {
+            defaultMessage: 'Cluster',
+          }),
+          content: (
+            <CheckupTab
+              key="cluster"
+              deprecations={checkupData ? checkupData.cluster : undefined}
+              checkupLabel={i18n.translate('xpack.upgradeAssistant.tabs.checkupTab.clusterLabel', {
+                defaultMessage: 'cluster',
+              })}
+              {...commonTabProps}
+            />
+          ),
+        },
+        {
+          id: 'indices',
+          'data-test-subj': 'upgradeAssistantIndicesTab',
+          name: i18n.translate('xpack.upgradeAssistant.checkupTab.indicesTabLabel', {
+            defaultMessage: 'Indices',
+          }),
+          content: (
+            <CheckupTab
+              key="indices"
+              deprecations={checkupData ? checkupData.indices : undefined}
+              checkupLabel={i18n.translate('xpack.upgradeAssistant.checkupTab.indexLabel', {
+                defaultMessage: 'index',
+              })}
+              showBackupWarning
+              {...commonTabProps}
+            />
+          ),
+        },
+      ];
+    }, [checkupData, error, isLoading, resendRequest]);
+
+    useEffect(() => {
+      if (isLoading === false) {
+        setTelemetryState(TelemetryState.Running);
+
+        async function sendTelemetryData() {
+          await api.sendTelemetryData({
+            [tabName]: true,
+          });
+          setTelemetryState(TelemetryState.Complete);
+        }
+
+        sendTelemetryData();
+      }
+    }, [api, selectedTabIndex, tabName, isLoading]);
+
+    const onTabClick = (selectedTab: EuiTabbedContentTab) => {
+      history.push(`/${selectedTab.id}`);
     };
-  }
 
-  public async componentDidMount() {
-    await this.loadData();
-
-    // Send telemetry info about the default selected tab
-    this.sendTelemetryInfo(this.tabs[this.state.selectedTabIndex].id);
-  }
-
-  public render() {
-    const { telemetryState, clusterUpgradeState } = this.state;
-    const tabs = this.tabs;
-
-    if (clusterUpgradeState === ClusterUpgradeState.partiallyUpgraded) {
+    if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === false) {
       return (
         <EuiPageContent>
           <EuiPageContentBody>
             <EuiEmptyPrompt
               iconType="logoElasticsearch"
+              data-test-subj="partiallyUpgradedPrompt"
               title={
                 <h2>
                   <FormattedMessage
@@ -96,12 +146,13 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
           </EuiPageContentBody>
         </EuiPageContent>
       );
-    } else if (clusterUpgradeState === ClusterUpgradeState.upgraded) {
+    } else if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === true) {
       return (
         <EuiPageContent>
           <EuiPageContentBody>
             <EuiEmptyPrompt
               iconType="logoElasticsearch"
+              data-test-subj="upgradedPrompt"
               title={
                 <h2>
                   <FormattedMessage
@@ -130,121 +181,9 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
           telemetryState === TelemetryState.Running ? 'upgradeAssistantTelemetryRunning' : undefined
         }
         tabs={tabs}
-        onTabClick={this.onTabClick}
-        selectedTab={tabs.find((tab) => tab.id === this.props.tabName)}
+        onTabClick={onTabClick}
+        selectedTab={tabs.find((tab) => tab.id === tabName)}
       />
     );
   }
-
-  private onTabClick = (selectedTab: EuiTabbedContentTab) => {
-    // Send telemetry info about the current selected tab
-    // only in case the clicked tab id it's different from the
-    // current selected tab id
-    if (this.tabs[this.state.selectedTabIndex].id !== selectedTab.id) {
-      this.sendTelemetryInfo(selectedTab.id);
-    }
-
-    this.props.onTabChange(selectedTab.id as Tabs);
-  };
-
-  private setSelectedTabIndex = (selectedTabIndex: number) => {
-    this.setState({ selectedTabIndex });
-  };
-
-  private loadData = async () => {
-    try {
-      this.setState({ loadingState: LoadingState.Loading });
-      const resp = await this.props.http.get('/api/upgrade_assistant/status');
-      this.setState({
-        loadingState: LoadingState.Success,
-        // resp.data is specifically to handle the CITs which uses axios to mock HTTP requests
-        checkupData: resp.data ? resp.data : resp,
-      });
-    } catch (e) {
-      if (get(e, 'response.status') === 426) {
-        this.setState({
-          loadingState: LoadingState.Success,
-          clusterUpgradeState: get(e, 'response.data.attributes.allNodesUpgraded', false)
-            ? ClusterUpgradeState.upgraded
-            : ClusterUpgradeState.partiallyUpgraded,
-        });
-      } else {
-        this.setState({ loadingState: LoadingState.Error, loadingError: e });
-      }
-    }
-  };
-
-  private get tabs() {
-    const { loadingError, loadingState, checkupData } = this.state;
-    const commonProps: UpgradeAssistantTabProps = {
-      loadingError,
-      loadingState,
-      refreshCheckupData: this.loadData,
-      setSelectedTabIndex: this.setSelectedTabIndex,
-      // Remove this in last minor of the current major (eg. 6.7)
-      alertBanner: <LatestMinorBanner />,
-    };
-
-    return [
-      {
-        id: 'overview',
-        'data-test-subj': 'upgradeAssistantOverviewTab',
-        name: i18n.translate('xpack.upgradeAssistant.overviewTab.overviewTabTitle', {
-          defaultMessage: 'Overview',
-        }),
-        content: <OverviewTab checkupData={checkupData} {...commonProps} />,
-      },
-      {
-        id: 'cluster',
-        'data-test-subj': 'upgradeAssistantClusterTab',
-        name: i18n.translate('xpack.upgradeAssistant.checkupTab.clusterTabLabel', {
-          defaultMessage: 'Cluster',
-        }),
-        content: (
-          <CheckupTab
-            key="cluster"
-            deprecations={checkupData ? checkupData.cluster : undefined}
-            checkupLabel={i18n.translate('xpack.upgradeAssistant.tabs.checkupTab.clusterLabel', {
-              defaultMessage: 'cluster',
-            })}
-            {...commonProps}
-          />
-        ),
-      },
-      {
-        id: 'indices',
-        'data-test-subj': 'upgradeAssistantIndicesTab',
-        name: i18n.translate('xpack.upgradeAssistant.checkupTab.indicesTabLabel', {
-          defaultMessage: 'Indices',
-        }),
-        content: (
-          <CheckupTab
-            key="indices"
-            deprecations={checkupData ? checkupData.indices : undefined}
-            checkupLabel={i18n.translate('xpack.upgradeAssistant.checkupTab.indexLabel', {
-              defaultMessage: 'index',
-            })}
-            showBackupWarning
-            {...commonProps}
-          />
-        ),
-      },
-    ];
-  }
-
-  private async sendTelemetryInfo(tabName: string) {
-    // In case we don't have any data yet, we wanna to ignore the
-    // telemetry info update
-    if (this.state.loadingState !== LoadingState.Success) {
-      return;
-    }
-
-    this.setState({ telemetryState: TelemetryState.Running });
-
-    await this.props.http.put('/api/upgrade_assistant/stats/ui_open', {
-      body: JSON.stringify(set({}, tabName, true)),
-    });
-
-    this.setState({ telemetryState: TelemetryState.Complete });
-  }
-}
+);
