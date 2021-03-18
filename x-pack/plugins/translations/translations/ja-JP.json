@@ -17531,8 +17531,6 @@
     "xpack.security.management.apiKeys.table.emptyPromptDescription": "コンソールで {link} を作成できます。",
     "xpack.security.management.apiKeys.table.emptyPromptDocsLinkMessage": "API キー",
     "xpack.security.management.apiKeys.table.emptyPromptNonAdminTitle": "まだ API キーがありません",
-    "xpack.security.management.apiKeys.table.expirationDateColumnName": "有効期限",
-    "xpack.security.management.apiKeys.table.expirationDateNeverMessage": "なし",
     "xpack.security.management.apiKeys.table.fetchingApiKeysErrorMessage": "権限の確認エラー：{message}",
     "xpack.security.management.apiKeys.table.loadingApiKeysDescription": "API キーを読み込み中…",
     "xpack.security.management.apiKeys.table.nameColumnName": "名前",

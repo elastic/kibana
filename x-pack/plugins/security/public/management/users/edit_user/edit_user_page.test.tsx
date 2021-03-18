@@ -418,7 +418,7 @@ describe('EditUserPage', () => {
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/_enable');
   });
 
-  it.only('deletes user when confirming and redirects back', async () => {
+  it('deletes user when confirming and redirects back', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
     const authc = securityMock.createSetup().authc;
@@ -427,15 +427,15 @@ describe('EditUserPage', () => {
     coreStart.http.get.mockResolvedValueOnce([]);
     coreStart.http.delete.mockResolvedValueOnce({});
 
-    const { getByRole, findByRole, debug } = render(
+    const { getByRole, findByRole } = render(
       <Providers services={coreStart} authc={authc} history={history}>
         <EditUserPage username={userMock.username} />
       </Providers>
     );
 
     fireEvent.click(await findByRole('button', { name: 'Delete user' }));
-    // debug();
-    const dialog = await findByRole('dialog');
+
+    const dialog = getByRole('dialog');
     fireEvent.click(within(dialog).getByRole('button', { name: 'Delete user' }));
 
     expect(coreStart.http.delete).toHaveBeenLastCalledWith('/internal/security/users/jdoe');
