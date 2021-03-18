@@ -47,6 +47,9 @@
   - [What we will build and manage](#what-we-will-build-and-manage)
     - [Elastic Buildkite Agent Manager](#elastic-buildkite-agent-manager)
     - [Elastic Buildkite PR Bot](#elastic-buildkite-pr-bot)
+      - [Overview](#overview-1)
+      - [Configuration](#configuration)
+      - [Build / Deploy](#build--deploy)
     - [GCP Infrastructure](#gcp-infrastructure)
     - [Monitoring / Alerting](#monitoring--alerting)
     - [Agent Image management](#agent-image-management)
@@ -332,7 +335,9 @@ TODO
 
 ### Elastic Buildkite PR Bot
 
-For TeamCity, we built a bot that was going to handle webhooks from GitHub and trigger builds for PRs based on configuration, user permissions, etc. Since we will not be moving to TeamCity, we've repurposed this bot for Buildkite, since Buildkite does not support all of our requirements around triggering builds for PRs out-of-the-box.
+#### Overview
+
+For TeamCity, we built a bot that was going to handle webhooks from GitHub and trigger builds for PRs based on configuration, user permissions, etc. Since we will not be moving to TeamCity, we've repurposed this bot for Buildkite, since Buildkite does not support all of our requirements around triggering builds for PRs out-of-the-box. The bot supports everything we currently use in Jenkins, and has some additional features as well.
 
 TODO add link to repo when available
 
@@ -340,7 +345,51 @@ Features supported by the bot:
 
 - Triggering builds on commit / when the PR is opened
 - Triggering builds on comment
--
+- Permissions for who can trigger builds based on: Elastic org membership, write and/or admin access to the repo, or user present in an allowed list
+- Limit builds to PRs targeting a specific branch
+- Custom regex for trigger comment, e.g. "buildkite test this"
+- Triggering builds based on labels
+- Setting labels, comment body, and other PR info as env vars on triggered build
+- Skip triggering build if a customizable label is present
+- Option to set commit status on trigger
+- Capture custom arguments from comment text using capture groups and forward them to the triggered build
+
+TODO add link showing successful build triggers
+
+#### Configuration
+
+The configuration is stored in a `json` file (default: `.ci/pull-requests.json`) in the repo for which pull requests will be monitored. Multiple branches in the repo can store different configurations, or one configuration (e.g. in `master`) can cover the entire repo.
+
+Example configuration:
+
+```json
+{
+  "jobs": [
+    {
+      "repoOwner": "elastic",
+      "repoName": "kibana",
+      "pipelineSlug": "kibana",
+
+      "enabled": true,
+      "target_branch": "master",
+      "allow_org_users": true,
+      "allowed_repo_permissions": ["admin", "write"],
+      "allowed_list": ["renovate[bot]"],
+      "set_commit_status": true,
+      "commit_status_context": "kibana-buildkite",
+      "trigger_comment_regex": "^(?:(?:jenkins\\W+)?(?:build|test)\\W+(?:this|it))|^retest$"
+    }
+  ]
+}
+```
+
+Github Webhooks must also be configured to send events to the deployed bot.
+
+#### Build / Deploy
+
+Currently, the bot is built and deployed using [Google Cloud Build](https://cloud.google.com/build). It is deployed to and hosted on [Google Cloud Run](https://cloud.google.com/run). It uses [Google Secret Manager](https://cloud.google.com/secret-manager) for storing/retrieving tokens for accessing GitHub and Buildkite.
+
+TODO link to cloud build yaml once available
 
 ### GCP Infrastructure
 
