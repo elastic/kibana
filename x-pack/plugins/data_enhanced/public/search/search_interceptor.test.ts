@@ -7,7 +7,7 @@
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { coreMock } from '../../../../../src/core/public/mocks';
-import { EnhancedSearchInterceptor } from './search_interceptor';
+import { CLIENT_CACHE_EXPIRATION, EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
@@ -461,7 +461,7 @@ describe('EnhancedSearchInterceptor', () => {
     });
   });
 
-  describe('session', () => {
+  describe('session tracking', () => {
     beforeEach(() => {
       const responses = [
         {
@@ -566,6 +566,238 @@ describe('EnhancedSearchInterceptor', () => {
 
       await timeTravel(10);
       expect(sessionService.trackSearch).toBeCalledTimes(0);
+    });
+  });
+
+  describe('session client caching', () => {
+    const sessionId = 'sessionId';
+    const basicReq = {
+      params: {
+        test: 1,
+      },
+    };
+
+    const basicCompleteResponse = [
+      {
+        time: 10,
+        value: {
+          isPartial: false,
+          isRunning: false,
+          id: 1,
+          rawResponse: {
+            took: 1,
+          },
+        },
+      },
+    ];
+
+    beforeEach(() => {
+      sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
+      sessionService.getSessionId.mockImplementation(() => sessionId);
+    });
+
+    test('should be disabled by default', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => false);
+      mockFetchImplementation(basicCompleteResponse);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('should fetch different requests in a single session', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => true);
+      mockFetchImplementation(basicCompleteResponse);
+
+      const req2 = {
+        params: {
+          test: 2,
+        },
+      };
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(req2, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('should fetch the same request for two different sessions', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => true);
+      mockFetchImplementation(basicCompleteResponse);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor
+        .search(basicReq, { sessionId: 'anotherSession' })
+        .subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('should not cache partial responses', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => true);
+
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            id: 1,
+          },
+        },
+      ];
+
+      mockFetchImplementation(responses);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('should not cache error responses', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => true);
+
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: false,
+            id: 1,
+          },
+        },
+      ];
+
+      mockFetchImplementation(responses);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('should ignore anything outside params when hashing', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => true);
+      mockFetchImplementation(basicCompleteResponse);
+
+      const req = {
+        something: 123,
+        params: {
+          test: 1,
+        },
+      };
+
+      const req2 = {
+        something: 321,
+        params: {
+          test: 1,
+        },
+      };
+
+      searchInterceptor.search(req, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(req2, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+    });
+
+    test('should ignore preference when hashing', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => true);
+      mockFetchImplementation(basicCompleteResponse);
+
+      const req = {
+        params: {
+          test: 1,
+          preference: 123,
+        },
+      };
+
+      const req2 = {
+        params: {
+          test: 1,
+          preference: 321,
+        },
+      };
+
+      searchInterceptor.search(req, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(req2, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+    });
+
+    test('should return from cache for identical requests in the same session', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => true);
+      mockFetchImplementation(basicCompleteResponse);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+    });
+
+    test('cached responses should expire', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => true);
+      mockFetchImplementation(basicCompleteResponse);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      await timeTravel(CLIENT_CACHE_EXPIRATION);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('fetching a cached response should reset its expiration', async () => {
+      sessionService.shouldCacheOnClient.mockImplementation(() => true);
+      mockFetchImplementation(basicCompleteResponse);
+
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      // wait a little more than half the timeout
+      await timeTravel(CLIENT_CACHE_EXPIRATION / 2 + 1);
+
+      // fetch again
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      // wait a little more than half the timeout again (so the response should have expired now)
+      await timeTravel(CLIENT_CACHE_EXPIRATION / 2 + 1);
+
+      // fetch again and see that the cached response was still used
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
     });
   });
 });

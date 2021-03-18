@@ -21,6 +21,8 @@ import {
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 import { createRequestHash } from './utils';
 
+export const CLIENT_CACHE_EXPIRATION = 30000;
+
 interface ResponseCacheItem {
   response: IKibanaSearchResponse<any>;
   timeout: NodeJS.Timeout;
@@ -75,7 +77,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   private cacheResponse(requestHash: string, response: IKibanaSearchResponse<any>) {
     const timeout = setTimeout(() => {
       this.responseCache.delete(requestHash);
-    }, 30000);
+    }, CLIENT_CACHE_EXPIRATION);
 
     this.responseCache.set(requestHash, {
       response,
@@ -140,11 +142,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
           tap((response) => (id = response.id)),
           tap((response) => {
-            if (
-              requestHash &&
-              isCompleteResponse(response) &&
-              !this.responseCache.has(requestHash)
-            ) {
+            if (requestHash && isCompleteResponse(response)) {
               this.cacheResponse(requestHash, response);
             }
           }),
