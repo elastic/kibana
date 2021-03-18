@@ -396,11 +396,15 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
         const layer = createLayerInstance(layerDescriptor);
-        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        if (layer.isVisible()) {
+          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        }
       });
     } else {
       layerList.forEach((layer) => {
-        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        if (layer.isVisible()) {
+          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        }
       });
     }
     return _.uniq(indexPatternIds);
