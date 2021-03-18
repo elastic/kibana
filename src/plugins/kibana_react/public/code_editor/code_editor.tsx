@@ -11,7 +11,12 @@ import ReactResizeDetector from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
 import { monaco } from '@kbn/monaco';
 
-import { LIGHT_THEME, DARK_THEME } from './editor_theme';
+import {
+  DARK_THEME,
+  LIGHT_THEME,
+  DARK_THEME_TRANSPARENT,
+  LIGHT_THEME_TRANSPARENT,
+} from './editor_theme';
 
 import './editor.scss';
 
@@ -85,6 +90,8 @@ export interface Props {
    * Should the editor use the dark theme
    */
   useDarkTheme?: boolean;
+
+  transparentBackground?: boolean;
 }
 
 export class CodeEditor extends React.Component<Props, {}> {
@@ -131,8 +138,12 @@ export class CodeEditor extends React.Component<Props, {}> {
       }
     });
 
-    // Register the theme
+    // Register themes
     monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
+    monaco.editor.defineTheme(
+      'euiColorsTransparent',
+      this.props.useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+    );
   };
 
   _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
@@ -153,7 +164,7 @@ export class CodeEditor extends React.Component<Props, {}> {
     return (
       <>
         <MonacoEditor
-          theme="euiColors"
+          theme={this.props.transparentBackground ? 'euiColorsTransparent' : 'euiColors'}
           language={languageId}
           value={value}
           onChange={onChange}

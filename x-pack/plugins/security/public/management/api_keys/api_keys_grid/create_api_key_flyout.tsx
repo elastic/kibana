@@ -27,7 +27,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CodeEditor, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { CodeEditorField, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import type { FormFlyoutProps } from '../../../components/form_flyout';
@@ -255,7 +255,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                   error={form.errors.role_descriptors}
                   isInvalid={form.touched.role_descriptors && !!form.errors.role_descriptors}
                 >
-                  <CodeEditor
+                  <CodeEditorField
                     value={form.values.role_descriptors!}
                     onChange={(value) => form.setValue('role_descriptors', value)}
                     languageId="xjson"
