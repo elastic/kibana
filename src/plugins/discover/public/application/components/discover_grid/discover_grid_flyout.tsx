@@ -152,20 +152,18 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             )}
             {activePage !== -1 && (
-              <EuiHideFor sizes={['xs', 's', 'm']}>
-                <EuiFlexItem>
-                  <EuiPagination
-                    aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
-                      defaultMessage: 'Document navigation',
-                    })}
-                    pageCount={pageCount}
-                    activePage={activePage}
-                    onPageClick={setPage}
-                    className="dscTable__flyoutDocumentNavigation"
-                    compressed
-                  />
-                </EuiFlexItem>
-              </EuiHideFor>
+              <EuiFlexItem>
+                <EuiPagination
+                  aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
+                    defaultMessage: 'Document navigation',
+                  })}
+                  pageCount={pageCount}
+                  activePage={activePage}
+                  onPageClick={setPage}
+                  className="dscTable__flyoutDocumentNavigation"
+                  compressed
+                />
+              </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlyoutHeader>
