@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiButton,
+  EuiTextColor,
 } from '@elastic/eui';
 import {
   txtNameColumnTitle,
@@ -42,8 +43,13 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
   const columns: Array<EuiBasicTableColumn<DrilldownTemplateTableItem>> = [
     {
       name: txtNameColumnTitle,
-      'data-test-subj': 'drilldownListItemName',
       render: (item: DrilldownTemplateTableItem) => item.name,
+    },
+    {
+      name: 'Source...',
+      render: (item: DrilldownTemplateTableItem) => (
+        <EuiTextColor color={'subdued'}>{item.description}</EuiTextColor>
+      ),
     },
     {
       align: 'right',

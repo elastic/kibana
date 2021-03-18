@@ -35,6 +35,7 @@ const tabs: EuiTabbedContentProps['tabs'] = [
       <>
         <EuiSpacer />
         <FormDrilldownWizard />
+        <EuiSpacer size={'l'} />
         <TemplatePicker />
       </>
     ),
