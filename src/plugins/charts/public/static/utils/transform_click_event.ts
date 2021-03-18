@@ -259,7 +259,6 @@ export const getBrushFromChartBrushEventFn = (
   const range: [number, number] = [start, end];
   const column = table.columns.findIndex(({ id }) => validateAccessorId(id, xAccessor));
   console.dir(table);
-  console.log(column);
 
   return {
     data: {

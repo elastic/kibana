@@ -41,9 +41,6 @@ function TimeseriesVisualization({
       const indexPattern = await getDataStart().indexPatterns.find(
         model.index_pattern ?? model.default_index_pattern
       );
-      // console.dir(model);
-      // console.dir(visData);
-      // console.dir(indexPattern);
       const columns = table.columns.map((column) => {
         const field = indexPattern[0].getFieldByName(column.name);
         const cleanedColumn = {
@@ -57,25 +54,7 @@ function TimeseriesVisualization({
             sourceParams: {
               enabled: true,
               indexPatternId: indexPattern[0]?.id,
-              params: {
-                field: column.name,
-                timeRange: {
-                  from: '2021-03-16T20:05:35.357Z',
-                  to: '2021-03-16T22:53:00.776Z',
-                },
-                useNormalizedEsInterval: true,
-                scaleMetricValues: false,
-                interval: 'auto',
-                drop_partials: false,
-                min_doc_count: 1,
-                extended_bounds: {},
-              },
-              appliedTimeRange: {
-                from: '2021-03-16T20:05:35.357Z',
-                to: '2021-03-16T22:53:00.776Z',
-              },
               type: 'date_histogram',
-              schema: 'segment',
             },
           },
         };
@@ -88,6 +67,7 @@ function TimeseriesVisualization({
           table: newTable,
           column: 0,
           range,
+          timeFieldName: model.time_field ?? model.default_timefield,
         },
         name: 'brush',
       };

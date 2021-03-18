@@ -57,7 +57,7 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
   if (isDate) {
     range.format = 'strict_date_optional_time';
   }
-  console.dir(esFilters.buildRangeFilter(field, range, indexPattern));
+  // console.dir(esFilters.mapAndFlattenFilters([esFilters.buildRangeFilter(field, range, indexPattern)]));
 
   return esFilters.mapAndFlattenFilters([esFilters.buildRangeFilter(field, range, indexPattern)]);
 }
