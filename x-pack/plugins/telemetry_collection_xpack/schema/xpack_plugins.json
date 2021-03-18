@@ -2336,6 +2336,17 @@
         }
       }
     },
+    "kibana_settings": {
+      "properties": {
+        "xpack": {
+          "properties": {
+            "default_admin_email": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
     "monitoring": {
       "properties": {
         "hasMonitoringData": {

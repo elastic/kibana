@@ -610,7 +610,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await comboBox.setElement(groupBy, 'Terms', { clickWithMouse: true });
       await PageObjects.common.sleep(1000);
       const byField = await testSubjects.find('groupByField');
-      await comboBox.setElement(byField, field, { clickWithMouse: true });
+      await comboBox.setElement(byField, field);
     }
 
     public async checkSelectedMetricsGroupByValue(value: string) {
