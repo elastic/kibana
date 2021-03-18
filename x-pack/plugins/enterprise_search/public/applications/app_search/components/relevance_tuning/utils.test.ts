@@ -43,6 +43,7 @@ describe('removeBoostStateProps', () => {
             type: BoostType.Value,
             factor: 5,
             newBoost: true,
+            value: [''],
           },
         ],
       },
@@ -59,6 +60,7 @@ describe('removeBoostStateProps', () => {
           {
             type: BoostType.Value,
             factor: 5,
+            value: [''],
           },
         ],
       },

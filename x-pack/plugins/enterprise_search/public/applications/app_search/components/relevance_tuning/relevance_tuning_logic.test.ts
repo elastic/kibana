@@ -23,6 +23,7 @@ describe('RelevanceTuningLogic', () => {
         {
           type: BoostType.Value,
           factor: 5,
+          value: [],
         },
       ],
     },
@@ -483,6 +484,7 @@ describe('RelevanceTuningLogic', () => {
                 type: BoostType.Value,
                 factor: 5,
                 newBoost: true, // This should be deleted before sent to the server
+                value: [''],
               },
             ],
           },
@@ -494,6 +496,7 @@ describe('RelevanceTuningLogic', () => {
               {
                 type: BoostType.Value,
                 factor: 5,
+                value: [''],
               },
             ],
           },
@@ -700,6 +703,7 @@ describe('RelevanceTuningLogic', () => {
                 {
                   factor: 2,
                   type: BoostType.Value,
+                  value: [''],
                 },
               ],
             },
@@ -716,6 +720,7 @@ describe('RelevanceTuningLogic', () => {
               {
                 factor: 2,
                 type: BoostType.Value,
+                value: [''],
               },
               {
                 factor: 1,
@@ -773,6 +778,7 @@ describe('RelevanceTuningLogic', () => {
                 {
                   factor: 2,
                   type: BoostType.Value,
+                  value: [''],
                 },
               ],
             },

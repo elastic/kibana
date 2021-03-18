@@ -83,7 +83,7 @@ export const removeEmptyValueBoosts = (
       const valueBoost = boost as ValueBoost;
       return {
         ...boost,
-        value: (valueBoost.value || []).filter((v) => v.trim() !== ''),
+        value: valueBoost.value.filter((v) => v.trim() !== ''),
       };
     });
   };
