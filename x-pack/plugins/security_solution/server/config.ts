@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -19,6 +20,23 @@ export const configSchema = schema.object({
 
   /** Fleet server integration */
   fleetServerEnabled: schema.boolean({ defaultValue: false }),
+
+  /**
+   * For internal use. A list of string values that will enable experimental type of functionality that is
+   * not yet released. Valid values for this settings need to be defined in:
+   * `x-pack/plugins/security_solution/common/experimental_features.ts`
+   * under the `allowedExperimentalValues` object
+   */
+  enableExperimental: schema.string({
+    defaultValue: '',
+    validate(value) {
+      try {
+        parseExperimentalConfigValue(value);
+      } catch (e) {
+        return e.message;
+      }
+    },
+  }),
 
   /**
    * Host Endpoint Configuration
