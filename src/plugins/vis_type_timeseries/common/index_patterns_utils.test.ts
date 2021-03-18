@@ -135,19 +135,5 @@ describe('fetchIndexPattern', () => {
         }
       `);
     });
-
-    test('should return default index if Kibana index not found', async () => {
-      const value = await fetchIndexPattern({ id: 'indexId' }, indexPatternsService);
-
-      expect(value).toMatchInlineSnapshot(`
-        Object {
-          "indexPattern": Object {
-            "id": "default",
-            "title": "index",
-          },
-          "indexPatternString": "index",
-        }
-      `);
-    });
   });
 });

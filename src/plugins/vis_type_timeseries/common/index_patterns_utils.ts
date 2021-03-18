@@ -69,9 +69,7 @@ export const fetchIndexPattern = async (
         indexPatternString = indexPatternObject;
       }
     } else if (indexPatternObject.id) {
-      indexPattern =
-        (await indexPatternsService.get(indexPatternObject.id)) ??
-        (await indexPatternsService.getDefault());
+      indexPattern = await indexPatternsService.get(indexPatternObject.id);
     }
   }
 
