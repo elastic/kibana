@@ -48,7 +48,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
   header,
   privateSourcesEnabled,
 }) => (
-  <div className="step-3">
+  <>
     {header}
     <EuiSpacer size="xxl" />
     <EuiFlexGroup
@@ -139,7 +139,6 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
           to={getSourcesPath(ADD_SOURCE_PATH, true)}
           fill={accountContextOnly}
           color={accountContextOnly ? 'primary' : undefined}
-          className="eui-textNoWrap"
         >
           {CONFIG_COMPLETED_CONFIGURE_NEW_BUTTON}
         </EuiButtonTo>
@@ -148,7 +147,6 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             color="primary"
-            className="eui-textNoWrap"
             fill
             onClick={advanceStep}
             data-test-subj="ConfigCompletedConnectButton"
@@ -164,5 +162,5 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  </div>
+  </>
 );
