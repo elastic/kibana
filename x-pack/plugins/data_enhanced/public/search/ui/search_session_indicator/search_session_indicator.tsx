@@ -41,7 +41,7 @@ export interface SearchSessionIndicatorProps {
   onOpened?: (openedState: SearchSessionState) => void;
 
   searchSessionName?: string;
-  saveSearchSessionName?: (newName: string) => Promise<unknown>;
+  saveSearchSessionNameFn?: (newName: string) => Promise<unknown>;
 }
 
 type ActionButtonProps = SearchSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
@@ -369,11 +369,11 @@ export const SearchSessionIndicator = React.forwardRef<
       }
     >
       <div data-test-subj="searchSessionIndicatorPopoverContainer">
-        {props.searchSessionName && props.saveSearchSessionName ? (
+        {props.searchSessionName && props.saveSearchSessionNameFn ? (
           <>
             <SearchSessionName
               name={props.searchSessionName}
-              editName={props.saveSearchSessionName}
+              editName={props.saveSearchSessionNameFn}
             />
             <EuiSpacer size={'xs'} />
           </>

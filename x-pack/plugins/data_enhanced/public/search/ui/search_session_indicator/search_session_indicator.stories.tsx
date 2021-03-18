@@ -13,7 +13,7 @@ import { SearchSessionState } from '../../../../../../../src/plugins/data/public
 storiesOf('components/SearchSessionIndicator', module).add('default', () => {
   const [searchSessionName, setSearchSessionName] = React.useState('Discover session');
 
-  const saveSearchSessionName = (newName: string) =>
+  const saveSearchSessionNameFn = (newName: string) =>
     new Promise((resolve) => {
       setTimeout(() => {
         setSearchSessionName(newName);
@@ -33,21 +33,21 @@ storiesOf('components/SearchSessionIndicator', module).add('default', () => {
         <SearchSessionIndicator
           state={SearchSessionState.BackgroundLoading}
           searchSessionName={searchSessionName}
-          saveSearchSessionName={saveSearchSessionName}
+          saveSearchSessionNameFn={saveSearchSessionNameFn}
         />
       </div>
       <div>
         <SearchSessionIndicator
           state={SearchSessionState.BackgroundCompleted}
           searchSessionName={searchSessionName}
-          saveSearchSessionName={saveSearchSessionName}
+          saveSearchSessionNameFn={saveSearchSessionNameFn}
         />
       </div>
       <div>
         <SearchSessionIndicator
           state={SearchSessionState.Restored}
           searchSessionName={searchSessionName}
-          saveSearchSessionName={saveSearchSessionName}
+          saveSearchSessionNameFn={saveSearchSessionNameFn}
         />
       </div>
       <div>

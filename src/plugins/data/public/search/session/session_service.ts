@@ -295,6 +295,7 @@ export class SessionService {
 
   /**
    * Change user-facing name of a current session
+   * Doesn't throw in case of API error but presents a notification toast instead
    * @param newName - new session name
    */
   public async renameCurrentSession(newName: string) {

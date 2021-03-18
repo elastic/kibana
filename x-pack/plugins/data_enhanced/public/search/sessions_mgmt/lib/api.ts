@@ -204,7 +204,7 @@ export class SearchSessionsMgmtAPI {
     }
   }
 
-  // Extend
+  // Change the user-facing name of a search session
   public async sendRename(id: string, newName: string): Promise<void> {
     try {
       await this.sessionsClient.rename(id, newName);
