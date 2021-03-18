@@ -118,7 +118,10 @@ function renderParameterTemplates(
 
   if (actionId === AlertHistoryEsIndexConnectorId) {
     const alertHistoryDoc = buildAlertHistoryDocument(variables);
-    return { documents: alertHistoryDoc ? [alertHistoryDoc] : [] };
+    if (!alertHistoryDoc) {
+      throw new Error(`error creating alert history document for ${actionId} connector`);
+    }
+    return { documents: [alertHistoryDoc] };
   }
 
   return { documents };

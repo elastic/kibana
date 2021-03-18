@@ -12,11 +12,12 @@ export const AlertHistoryEsIndexConnectorId = 'preconfigured-alert-history-es-in
 export const buildAlertHistoryDocument = (variables: Record<string, unknown>) => {
   const {
     date,
-    alert: { actionGroup, actionGroupName, id: alertId },
+    alert: alertVariables,
     context,
     params,
     state,
-    rule: { tags, id: ruleId, name, spaceId, type },
+    tags,
+    rule: ruleVariables,
   } = variables as {
     date: string;
     alert: Record<string, unknown>;
@@ -24,16 +25,32 @@ export const buildAlertHistoryDocument = (variables: Record<string, unknown>) =>
     params: Record<string, unknown>;
     state: Record<string, unknown>;
     rule: Record<string, unknown>;
+    tags: string[];
   };
 
-  let ruleType = type as string;
+  if (!alertVariables || !ruleVariables) {
+    return null;
+  }
 
-  if (!ruleType) {
+  const { actionGroup, actionGroupName, id: alertId } = alertVariables as {
+    actionGroup: string;
+    actionGroupName: string;
+    id: string;
+  };
+
+  const { id: ruleId, name, spaceId, type } = ruleVariables as {
+    id: string;
+    name: string;
+    spaceId: string;
+    type: string;
+  };
+
+  if (!type) {
     // can't build the document without a type
     return null;
   }
 
-  ruleType = ruleType.replace('.', '__');
+  const ruleType = type.replace('.', '__');
 
   const rule = {
     ...(ruleId ? { id: ruleId } : {}),
@@ -51,8 +68,8 @@ export const buildAlertHistoryDocument = (variables: Record<string, unknown>) =>
   };
 
   const alertHistoryDoc = {
-    ...(date ? { '@timestamp': date } : {}),
-    ...(tags ? { tags } : {}),
+    '@timestamp': date ? date : new Date().toISOString(),
+    ...(tags && tags.length > 0 ? { tags } : {}),
     ...(context?.message ? { message: context.message } : {}),
     ...(!isEmpty(rule) ? { rule } : {}),
     ...(!isEmpty(alert) ? { alert } : {}),

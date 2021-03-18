@@ -336,6 +336,7 @@ describe('execute()', () => {
       documents: [{ hello: '{{who}}' }],
     };
     const variables = {
+      date: '2021-01-01T00:00:00.000Z',
       rule: {
         id: 'rule-id',
         name: 'rule-name',
@@ -369,6 +370,7 @@ describe('execute()', () => {
       Object {
         "documents": Array [
           Object {
+            "@timestamp": "2021-01-01T00:00:00.000Z",
             "alert": Object {
               "actionGroup": "action-group-id",
               "actionGroupName": "Action Group",
@@ -400,10 +402,32 @@ describe('execute()', () => {
               },
               "type": "rule-type",
             },
+            "tags": Array [
+              "abc",
+              "xyz",
+            ],
           },
         ],
       }
     `);
+  });
+
+  test('renders parameter templates as expected for preconfigured alert history index when no variables are available', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+    };
+    const variables = {};
+
+    expect(() =>
+      actionType.renderParameterTemplates!(
+        paramsWithTemplates,
+        variables,
+        AlertHistoryEsIndexConnectorId
+      )
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"error creating alert history document for ${AlertHistoryEsIndexConnectorId} connector"`
+    );
   });
 
   test('resolves with an error when an error occurs in the indexing operation', async () => {
