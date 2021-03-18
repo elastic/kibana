@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchService } from '../platform';
+import { SearchService } from '../search';
 
 const noop = (..._args: any[]): any => {};
 

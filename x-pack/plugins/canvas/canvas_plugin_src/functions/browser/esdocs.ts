@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import squel from 'squel';
 import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
@@ -70,7 +69,7 @@ export function esdocs(): ExpressionFunctionDefinition<
         help: argHelp.sort,
       },
     },
-    fn: (input, args, handlers) => {
+    fn: async (input, args, handlers) => {
       const { count, index, fields, sort } = args;
 
       input.and = input.and.concat([
@@ -81,6 +80,9 @@ export function esdocs(): ExpressionFunctionDefinition<
           and: [],
         },
       ]);
+
+      // Load ad-hoc to avoid adding to the page load bundle size
+      const squel = await import('squel');
 
       let query = squel.select({
         autoQuoteTableNames: true,
