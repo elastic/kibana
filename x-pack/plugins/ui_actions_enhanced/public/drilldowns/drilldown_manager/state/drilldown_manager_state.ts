@@ -327,6 +327,22 @@ export class DrilldownManagerState {
     this.setRoute(['manage']);
   };
 
+  public readonly onCreateFromTemplate = async (templateId: string) => {
+    const { templates } = this.deps;
+    if (!templates) return;
+    const template = templates.find(({ id }) => id === templateId);
+    if (!template) return;
+    const actionFactory = this.deps.actionFactories.find(({ id }) => id === template.factoryId);
+    if (!actionFactory) return;
+    this.setActionFactory(actionFactory);
+    const drilldownState = this.getDrilldownState();
+    if (drilldownState) {
+      drilldownState.setName(template.name);
+      drilldownState.setTriggers(template.triggers);
+      drilldownState.setConfig(template.config as SerializableState);
+    }
+  };
+
   private async cloneTemplate(template: DrilldownTemplate) {
     const { dynamicActionManager } = this.deps;
     const action: SerializedAction = {

@@ -30,13 +30,11 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
     }));
   }, [items]);
 
-  const handleCreate = (id: string) => {};
-
   return (
     <StartFromTemplate>
       <DrilldownTemplateTable
         items={tableItems}
-        onCreate={handleCreate}
+        onCreate={drilldowns.onCreateFromTemplate}
         onClone={drilldowns.onClone}
       />
     </StartFromTemplate>
