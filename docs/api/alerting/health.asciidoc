@@ -84,10 +84,10 @@ The health API response contains the following properties:
 | `decryption_health`
 | Returns the timestamp and status of the rule decryption: `ok`, `warn` or `error` .
 
-| `executionHealth`
+| `execution_health`
 | Returns the timestamp and status of the rule execution: `ok`, `warn` or `error`.
 
-| `readHealth`
+| `read_health`
 | Returns the timestamp and status of the rule reading events: `ok`, `warn` or `error`.
 
 |===
