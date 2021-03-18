@@ -61,4 +61,29 @@ describe('suggestEMSTermJoinConfig', () => {
       });
     });
   });
+
+  describe('validate well known formats', () => {
+    [
+      {
+        name: '5-digit zip code',
+        values: ['90201', 40204],
+        config: {
+          layerId: 'usa_zip_codes',
+          field: 'zip',
+        },
+      },
+      {
+        name: 'mismatch',
+        values: ['90201', 'foobar'],
+        config: null,
+      },
+    ].forEach((stub) => {
+      test(stub.name, async () => {
+        const termJoinConfig = await suggestEMSTermJoinConfig({
+          sampleValues: stub.values,
+        });
+        expect(termJoinConfig).toEqual(stub.config);
+      });
+    });
+  });
 });

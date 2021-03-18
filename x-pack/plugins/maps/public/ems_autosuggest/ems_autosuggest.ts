@@ -46,7 +46,15 @@ const wellKnownColumnNames = [
   },
 ];
 
-const wellKnownColumnFormats = [];
+const wellKnownColumnFormats = [
+  {
+    regex: /(^\d{5}$)/i, // 5-digit zipcode
+    emsConfig: {
+      layerId: 'usa_zip_codes',
+      field: 'zip',
+    },
+  },
+];
 
 interface UniqueMatch {
   config: { layerId: string; field: string };
@@ -60,6 +68,10 @@ export async function suggestEMSTermJoinConfig(
 
   if (sampleValuesConfig.sampleValuesColumnName) {
     matches.push(...suggestByName(sampleValuesConfig.sampleValuesColumnName));
+  }
+
+  if (sampleValuesConfig.sampleValues) {
+    matches.push(...suggestByBalue(sampleValuesConfig.sampleValues));
   }
 
   const uniqMatches: UniqueMatch[] = matches.reduce((accum: UniqueMatch[], match) => {
@@ -89,6 +101,22 @@ export async function suggestEMSTermJoinConfig(
 function suggestByName(columnName: string): IEMSTermJoinConfig[] {
   const matches = wellKnownColumnNames.filter((wellknown) => {
     return columnName.match(wellknown.regex);
+  });
+
+  return matches.map((m) => {
+    return m.emsConfig;
+  });
+}
+
+function suggestByBalue(values: Array<string | number>): IEMSTermJoinConfig[] {
+  const matches = wellKnownColumnFormats.filter((wellknown) => {
+    for (let i = 0; i < values.length; i++) {
+      const value = values[i].toString();
+      if (!value.match(wellknown.regex)) {
+        return false;
+      }
+    }
+    return true;
   });
 
   return matches.map((m) => {
