@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -76,11 +77,13 @@ export function getIndexPatternDatasource({
   storage,
   data,
   charts,
+  indexPatternFieldEditor,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   charts: ChartsPluginSetup;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }) {
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
@@ -191,7 +194,9 @@ export function getIndexPatternDatasource({
             changeIndexPattern={handleChangeIndexPattern}
             data={data}
             charts={charts}
+            indexPatternFieldEditor={indexPatternFieldEditor}
             {...props}
+            core={core}
           />
         </I18nProvider>,
         domElement

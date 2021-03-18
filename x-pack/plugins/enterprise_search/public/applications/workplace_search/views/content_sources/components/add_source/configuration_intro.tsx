@@ -43,7 +43,7 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
   advanceStep,
   header,
 }) => (
-  <div className="step-1">
+  <>
     {header}
     <EuiSpacer />
     <EuiFlexGroup
@@ -153,5 +153,5 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </div>
+  </>
 );
