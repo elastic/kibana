@@ -22,10 +22,11 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let accessAPIKeyId: string;
     let outputAPIKeyId: string;
+    before(async () => {
+      await esArchiver.load('fleet/agents');
+    });
     setupFleetAndAgents(providerContext);
     beforeEach(async () => {
-      await esArchiver.load('fleet/agents');
-
       const { body: accessAPIKeyBody } = await esClient.security.createApiKey({
         body: {
           name: `test access api key: ${uuid.v4()}`,
@@ -60,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
     });
-    afterEach(async () => {
+    after(async () => {
       await esArchiver.unload('fleet/agents');
     });
 
