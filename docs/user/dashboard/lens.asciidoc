@@ -112,6 +112,40 @@ image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
 For the answers to common *Lens* questions, review the following. 
 
 [float]
+[[kql-]]
+===== When should I use the Filter function instead of KQL filters?
+
+The easiest way to apply KQL filters is to use <<semi-structured-search>>, but you can also use the *Filters* function in the following scenarios:
+
+* When you want to apply more than one KQL filter to the visualization.
+
+* When you want to apply the KQL filter to a single layer, which allows you to visualize filtered and unfiltered data.
+
+[float]
+[[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]
+===== When should I normalize the data by unit or use a custom interval?
+
+* *Normalize by unit* &mdash; Calculates the average for the specified interval. When you normalize the data by unit, the data appears less granular, but *Lens* is able to calculate the data faster. 
+
+* *Customize time interval* &mdash; Creates a bucket for each specified interval. When you customize the time interval, you can use a large time range, but *Lens* calculates the data slower.
+
+To normalize the interval: 
+
+. In the editor, click a field.
+
+. Click *Add advanced options > Normalize by unit*. 
+
+. From the *Normalize by unit* dropdown, select an option, then click *Close*.
+
+To create a custom interval:
+
+. In the editor, click a field.
+
+. Select *Customize time interval*.
+
+. Change the *Minimum interval*, then click *Close*.
+
+[float]
 [[can-i-show-value-labels-for-my-chart]]
 ===== How do I display value labels?
 
