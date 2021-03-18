@@ -43,6 +43,12 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   indexpattern_dimension_operation_count: { type: 'long' },
   indexpattern_dimension_operation_cardinality: { type: 'long' },
   indexpattern_dimension_operation_filters: { type: 'long' },
+  open_field_editor_edit: { type: 'long' },
+  open_field_editor_add: { type: 'long' },
+  save_field_edit: { type: 'long' },
+  save_field_add: { type: 'long' },
+  open_field_delete_modal: { type: 'long' },
+  delete_field: { type: 'long' },
 };
 
 const suggestionEventsSchema: MakeSchemaFrom<LensUsage['suggestion_events_30_days']> = {
