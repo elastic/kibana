@@ -22,6 +22,23 @@ function parseThemeTags() {
   return process.env.KBN_OPTIMIZER_THEMES.split(',').map((t) => t.trim());
 }
 
+function getThemeInfo(options: GetThemeSettingsOptions) {
+  if (options?.isDist ?? true) {
+    return {
+      defaultDarkMode: false,
+      defaultVersion: 'v8',
+      availableVersions: ['v7', 'v8'],
+    };
+  }
+
+  const themeTags = parseThemeTags();
+  return {
+    defaultDarkMode: themeTags[0].endsWith('dark'),
+    defaultVersion: themeTags[0].slice(0, 2),
+    availableVersions: ['v7', 'v8'].filter((v) => themeTags.some((t) => t.startsWith(v))),
+  };
+}
+
 interface GetThemeSettingsOptions {
   isDist?: boolean;
 }
@@ -29,15 +46,7 @@ interface GetThemeSettingsOptions {
 export const getThemeSettings = (
   options: GetThemeSettingsOptions = {}
 ): Record<string, UiSettingsParams> => {
-  const isDist = options?.isDist ?? true;
-
-  const themeTags = parseThemeTags();
-  const availableVersions = ['v7', 'v8'].filter(
-    (v) => isDist || themeTags.some((t) => t.startsWith(v))
-  );
-
-  const defaultDarkMode = isDist ? false : themeTags[0].endsWith('dark');
-  const defaultVersion = isDist ? 'v8' : themeTags[0].slice(0, 2);
+  const { availableVersions, defaultDarkMode, defaultVersion } = getThemeInfo(options);
 
   return {
     'theme:darkMode': {
