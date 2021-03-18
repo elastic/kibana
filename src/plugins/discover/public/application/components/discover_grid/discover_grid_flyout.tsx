@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiPortal,
   EuiPagination,
+  EuiHideFor,
 } from '@elastic/eui';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { IndexPattern } from '../../../kibana_services';
@@ -87,45 +88,31 @@ export function DiscoverGridFlyout({
     <EuiPortal>
       <EuiFlyout onClose={onClose} size="m" data-test-subj="docTableDetailsFlyout">
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={true}>
-              <EuiTitle
-                size="s"
-                className="dscTable__flyoutHeader"
-                data-test-subj="docTableRowDetailsTitle"
-              >
-                <h2>
-                  {i18n.translate('discover.grid.tableRow.detailHeading', {
-                    defaultMessage: 'Expanded document',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            {activePage !== -1 && (
-              <EuiFlexItem grow={false}>
-                <EuiPagination
-                  aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
-                    defaultMessage: 'Document navigation',
-                  })}
-                  pageCount={pageCount}
-                  activePage={activePage}
-                  onPageClick={setPage}
-                  compressed
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiTitle
+            size="s"
+            className="dscTable__flyoutHeader"
+            data-test-subj="docTableRowDetailsTitle"
+          >
+            <h2>
+              {i18n.translate('discover.grid.tableRow.detailHeading', {
+                defaultMessage: 'Expanded document',
+              })}
+            </h2>
+          </EuiTitle>
+
           <EuiSpacer size="s" />
-          <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('discover.grid.tableRow.viewText', {
-                    defaultMessage: 'View:',
-                  })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
+          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+            <EuiHideFor sizes={['xs', 's', 'm']}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>
+                    {i18n.translate('discover.grid.tableRow.viewText', {
+                      defaultMessage: 'View:',
+                    })}
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiHideFor>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="xs"
@@ -143,7 +130,7 @@ export function DiscoverGridFlyout({
               </EuiButtonEmpty>
             </EuiFlexItem>
             {indexPattern.isTimeBased() && indexPattern.id && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiButtonEmpty
                   size="xs"
                   iconType="documents"
@@ -160,6 +147,19 @@ export function DiscoverGridFlyout({
                     defaultMessage: 'Surrounding documents',
                   })}
                 </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+            {activePage !== -1 && (
+              <EuiFlexItem grow={false}>
+                <EuiPagination
+                  aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
+                    defaultMessage: 'Document navigation',
+                  })}
+                  pageCount={pageCount}
+                  activePage={activePage}
+                  onPageClick={setPage}
+                  compressed
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
