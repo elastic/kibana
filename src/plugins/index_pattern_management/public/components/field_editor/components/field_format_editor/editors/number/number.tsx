@@ -14,13 +14,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { DefaultFormatEditor, defaultState } from '../default';
 
 import { FormatEditorSamples } from '../../samples';
+import { context as contextType } from '../../../../../../../../kibana_react/public';
 
 export interface NumberFormatEditorParams {
   pattern: string;
 }
 
 export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorParams> {
+  static contextType = contextType;
   static formatId = 'number';
+
+  context!: React.ContextType<typeof contextType>;
   state = {
     ...defaultState,
     sampleInputs: [10000, 12.345678, -1, -999, 0.52],
@@ -43,7 +47,10 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
           }
           helpText={
             <span>
-              <EuiLink target="_blank" href="https://adamwdraper.github.io/Numeral-js/">
+              <EuiLink
+                target="_blank"
+                href={this.context.services.docLinks?.links.indexPatterns.fieldFormattersNumber}
+              >
                 <FormattedMessage
                   id="indexPatternManagement.number.documentationLabel"
                   defaultMessage="Documentation"
