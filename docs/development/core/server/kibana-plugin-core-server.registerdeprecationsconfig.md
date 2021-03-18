@@ -14,5 +14,5 @@ export interface RegisterDeprecationsConfig
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [getDeprecations](./kibana-plugin-core-server.registerdeprecationsconfig.getdeprecations.md) | <code>(dependencies: GetDeprecationsContext) =&gt; MaybePromise&lt;DeprecationsDetails[]&gt;</code> |  |
+|  [getDeprecations](./kibana-plugin-core-server.registerdeprecationsconfig.getdeprecations.md) | <code>(context: GetDeprecationsContext) =&gt; MaybePromise&lt;DeprecationsDetails[]&gt;</code> |  |
 

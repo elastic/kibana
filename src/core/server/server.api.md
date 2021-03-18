@@ -1946,7 +1946,7 @@ export interface RegisterDeprecationsConfig {
     // Warning: (ae-forgotten-export) The symbol "MaybePromise" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    getDeprecations: (dependencies: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
+    getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
 }
 
 // @public

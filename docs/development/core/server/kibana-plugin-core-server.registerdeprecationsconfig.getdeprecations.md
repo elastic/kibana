@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-getDeprecations: (dependencies: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
+getDeprecations: (context: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
 ```

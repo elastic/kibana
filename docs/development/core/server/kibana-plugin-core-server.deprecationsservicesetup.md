@@ -4,7 +4,7 @@
 
 ## DeprecationsServiceSetup interface
 
-Deprecations Service is a mechanism to allow plugins to communiicate deprecated features.
+The deprecations service provides a way for the Kibana platform to communicate deprecated features and configs with its users. These deprecations are only communicated if the deployment is using these features. Allowing for a user tailored experience for upgrading the stack version.
 
 <b>Signature:</b>
 
