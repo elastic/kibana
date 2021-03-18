@@ -95,6 +95,88 @@ export const createTimelineTemplate = (timeline: CompleteTimeline) =>
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 
+export const createIndicatorMatchTimelineTemplate = (timeline: CompleteTimeline) =>
+  cy.request({
+    method: 'POST',
+    url: 'api/timeline',
+    body: {
+      timeline: {
+        columns: [
+          {
+            id: 'threat.indicator.match.atomic',
+          },
+          {
+            id: 'threat.indicator.match.field',
+          },
+          {
+            id: 'threat.indicator.match.type',
+          },
+        ],
+        kqlMode: 'filter',
+        kqlQuery: {
+          filterQuery: {
+            kuery: {
+              expression: timeline.query,
+              kind: 'kuery',
+            },
+          },
+        },
+        dateRange: {
+          end: '1577881376000',
+          start: '1514809376000',
+        },
+        description: timeline.description,
+        title: timeline.title,
+        templateTimelineVersion: 1,
+        timelineType: 'template',
+      },
+      dataProviders: [
+        {
+          id: 'timeline-1-d18ef97c-5b2f-4e77-bbcb-33f35db477eb',
+          name: '{threat.indicator.matched.atomic}',
+          enabled: true,
+          excluded: false,
+          kqlQuery: '',
+          type: 'template',
+          queryMatch: {
+            field: 'threat.indicator.matched.atomic',
+            value: '{threat.indicator.matched.atomic}',
+            operator: ':',
+          },
+          and: [
+            {
+              id: 'timeline-1-7f8013f9-3ccf-490a-8788-c358e0f17907',
+              name: '{threat.indicator.matched.field}',
+              enabled: true,
+              excluded: false,
+              kqlQuery: '',
+              type: 'template',
+              queryMatch: {
+                field: 'threat.indicator.matched.field',
+                value: '{threat.indicator.matched.field}',
+                operator: ':',
+              },
+            },
+            {
+              id: 'timeline-1-1edcf9f9-5c57-445c-9bdd-dbed9079c71b',
+              name: '{threat.indicator.matched.type}',
+              enabled: true,
+              excluded: false,
+              kqlQuery: '',
+              type: 'template',
+              queryMatch: {
+                field: 'threat.indicator.matched.type',
+                value: '{threat.indicator.matched.type}',
+                operator: ':',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+
 export const deleteTimeline = (timelineId: string) => {
   cy.request({
     method: 'POST',
