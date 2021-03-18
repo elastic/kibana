@@ -28,6 +28,7 @@ import {
   parseBoostCenter,
   removeBoostStateProps,
   normalizeBoostValues,
+  removeEmptyValueBoosts,
 } from './utils';
 
 interface RelevanceTuningProps {
@@ -273,13 +274,15 @@ export const RelevanceTuningLogic = kea<
 
       actions.setResultsLoading(true);
 
+      const filteredBoosts = removeEmptyValueBoosts(boosts);
+
       try {
         const response = await http.post(url, {
           query: {
             query,
           },
           body: JSON.stringify({
-            boosts: isEmpty(boosts) ? undefined : boosts,
+            boosts: isEmpty(filteredBoosts) ? undefined : filteredBoosts,
             search_fields: isEmpty(searchFields) ? undefined : searchFields,
           }),
         });

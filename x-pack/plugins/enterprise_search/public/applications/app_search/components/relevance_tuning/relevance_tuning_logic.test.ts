@@ -324,6 +324,7 @@ describe('RelevanceTuningLogic', () => {
                 type: BoostType.Value,
                 factor: 5,
                 newBoost: true, // This should be deleted before sent to the server
+                value: ['test'],
               },
             ],
           },
@@ -341,6 +342,7 @@ describe('RelevanceTuningLogic', () => {
               {
                 type: BoostType.Value,
                 factor: 5,
+                value: ['test'],
               },
             ],
           },
