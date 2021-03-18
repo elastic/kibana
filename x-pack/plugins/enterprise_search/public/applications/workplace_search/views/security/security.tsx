@@ -74,10 +74,6 @@ export const Security: React.FC = () => {
 
   if (dataLoading) return <Loading />;
 
-  const panelClass = classNames('euiPanel--noShadow', {
-    'euiPanel--disabled': !hasPlatinumLicense,
-  });
-
   const savePrivateSources = () => {
     saveSourceRestrictions();
     hideConfirmModal();
@@ -116,7 +112,13 @@ export const Security: React.FC = () => {
   );
 
   const allSourcesToggle = (
-    <EuiPanel paddingSize="none" hasShadow={false} className={panelClass}>
+    <EuiPanel
+      paddingSize="none"
+      hasShadow={false}
+      className={classNames({
+        'euiPanel--disabled': !hasPlatinumLicense,
+      })}
+    >
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiSwitch
