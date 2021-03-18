@@ -106,7 +106,7 @@ export const GroupSourcePrioritization: React.FC = () => {
   const hasSources = contentSources.length > 0;
 
   const zeroState = (
-    <EuiPanel paddingSize="none" className="euiPanel--inset">
+    <EuiPanel paddingSize="none">
       <EuiSpacer size="xxl" />
       <EuiEmptyPrompt
         iconType="advancedSettingsApp"
@@ -132,7 +132,7 @@ export const GroupSourcePrioritization: React.FC = () => {
   );
 
   const sourceTable = (
-    <EuiTable className="table table--emphasized" responsive={false} tableLayout="auto">
+    <EuiTable responsive={false} tableLayout="auto">
       <EuiTableHeader>
         <EuiTableHeaderCell>{SOURCE_TABLE_HEADER}</EuiTableHeaderCell>
         <EuiTableHeaderCell align="right">{PRIORITY_TABLE_HEADER}</EuiTableHeaderCell>
@@ -143,14 +143,12 @@ export const GroupSourcePrioritization: React.FC = () => {
             <EuiTableRowCell>
               <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <SourceIcon serviceType={serviceType} name={name} className="source-row__icon" />
+                  <SourceIcon serviceType={serviceType} name={name} />
                 </EuiFlexItem>
-                <EuiFlexItem>
-                  <span className="source-row__name">{name}</span>
-                </EuiFlexItem>
+                <EuiFlexItem>{name}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
-            <EuiTableRowCell align="right" style={{ padding: 0 }}>
+            <EuiTableRowCell align="right">
               <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceAround">
                 <EuiFlexItem grow={false}>
                   <EuiRange
@@ -158,16 +156,12 @@ export const GroupSourcePrioritization: React.FC = () => {
                     min={1}
                     max={10}
                     step={1}
+                    showInput
                     value={activeSourcePriorities[id]}
                     onChange={(e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) =>
                       handleSliderChange(id, e)
                     }
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ paddingLeft: 10, width: 32 }}>
-                  <div style={{ margin: 0 }} className="input-container--range__count">
-                    {activeSourcePriorities[id]}
-                  </div>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
