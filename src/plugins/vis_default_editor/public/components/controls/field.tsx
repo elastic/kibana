@@ -79,7 +79,7 @@ function FieldParamEditor({
         },
       })
     );
-  } else if (!indexedFields.find((field) => field.key === value?.name)) {
+  } else if (!getFieldTypes(agg).find((type: string) => type === value?.type)) {
     errors.push(
       i18n.translate('visDefaultEditor.controls.field.invalidFieldForAggregation', {
         defaultMessage:
@@ -145,10 +145,14 @@ function FieldParamEditor({
 }
 
 function getFieldTypesString(agg: IAggConfig) {
+  return formatListAsProse(parseCommaSeparatedList(getFieldTypes(agg)), { inclusive: false });
+}
+
+function getFieldTypes(agg: IAggConfig) {
   const param =
     get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') ||
     ({} as IFieldParamType);
-  return formatListAsProse(parseCommaSeparatedList(param.filterFieldTypes), { inclusive: false });
+  return param.filterFieldTypes;
 }
 
 export { FieldParamEditor };
