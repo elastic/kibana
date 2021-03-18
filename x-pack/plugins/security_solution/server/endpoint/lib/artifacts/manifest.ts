@@ -56,7 +56,10 @@ export class Manifest {
   private readonly policySpecificEntries: Map<string, Map<string, ManifestEntry>>;
   private version: ManifestVersion;
 
-  constructor(version?: Partial<ManifestVersion>) {
+  constructor(
+    version?: Partial<ManifestVersion>,
+    private readonly isFleetServerEnabled: boolean = false
+  ) {
     this.allEntries = new Map();
     this.defaultEntries = new Map();
     this.policySpecificEntries = new Map();
@@ -75,8 +78,8 @@ export class Manifest {
     this.version = validated;
   }
 
-  public static getDefault(schemaVersion?: ManifestSchemaVersion) {
-    return new Manifest({ schemaVersion, semanticVersion: '1.0.0' });
+  public static getDefault(schemaVersion?: ManifestSchemaVersion, isFleetServerEnabled?: boolean) {
+    return new Manifest({ schemaVersion, semanticVersion: '1.0.0' }, isFleetServerEnabled);
   }
 
   public bumpSemanticVersion() {
@@ -104,7 +107,7 @@ export class Manifest {
     const descriptor = {
       isDefaultEntry: existingDescriptor?.isDefaultEntry || policyId === undefined,
       specificTargetPolicies: addValueToSet(existingDescriptor?.specificTargetPolicies, policyId),
-      entry: existingDescriptor?.entry || new ManifestEntry(artifact),
+      entry: existingDescriptor?.entry || new ManifestEntry(artifact, this.isFleetServerEnabled),
     };
 
     this.allEntries.set(descriptor.entry.getDocId(), descriptor);

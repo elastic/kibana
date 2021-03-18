@@ -8,7 +8,7 @@
     "declarationMap": true
   },
   "include": [
-    "../../typings/**/*",
+    "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
     "scripts/**/*",

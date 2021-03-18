@@ -32,3 +32,43 @@ export const SUCCESS_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.curations.deleteSuccessMessage',
   { defaultMessage: 'Successfully removed curation.' }
 );
+export const RESTORE_CONFIRMATION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.restoreConfirmation',
+  {
+    defaultMessage:
+      'Are you sure you want to clear your changes and return to your default results?',
+  }
+);
+
+export const RESULT_ACTIONS_DIRECTIONS = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.curations.resultActionsDescription',
+  { defaultMessage: 'Promote results by clicking the star, hide them by clicking the eye.' }
+);
+export const PROMOTE_DOCUMENT_ACTION = {
+  title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.promoteButtonLabel', {
+    defaultMessage: 'Promote this result',
+  }),
+  iconType: 'starPlusEmpty',
+  iconColor: 'primary',
+};
+export const DEMOTE_DOCUMENT_ACTION = {
+  title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.demoteButtonLabel', {
+    defaultMessage: 'Demote this result',
+  }),
+  iconType: 'starMinusFilled',
+  iconColor: 'primary',
+};
+export const HIDE_DOCUMENT_ACTION = {
+  title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.hideButtonLabel', {
+    defaultMessage: 'Hide this result',
+  }),
+  iconType: 'eyeClosed',
+  iconColor: 'danger',
+};
+export const SHOW_DOCUMENT_ACTION = {
+  title: i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.showButtonLabel', {
+    defaultMessage: 'Show this result',
+  }),
+  iconType: 'eye',
+  iconColor: 'primary',
+};
