@@ -7,7 +7,6 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 
 import loadJsonFile from 'load-json-file';
 
@@ -31,7 +30,7 @@ const findKibanaPackageJson = () => {
   // search for the kibana directory, since this file is moved around it might
   // not be where we think but should always be a relatively close parent
   // of this directory
-  const startDir = Fs.realpathSync(__dirname);
+  const startDir = __dirname;
   const { root: rootDir } = Path.parse(startDir);
   let cursor = startDir;
   while (true) {
