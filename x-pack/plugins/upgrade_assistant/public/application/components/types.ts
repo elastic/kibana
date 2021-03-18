@@ -46,3 +46,5 @@ export enum TelemetryState {
   Running,
   Complete,
 }
+
+export type Tabs = 'overview' | 'cluster' | 'indices';

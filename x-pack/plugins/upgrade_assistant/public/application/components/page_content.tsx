@@ -6,16 +6,30 @@
  */
 
 import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useAppContext } from '../app_context';
 import { ComingSoonPrompt } from './coming_soon_prompt';
 import { UpgradeAssistantTabs } from './tabs';
+import { Tabs } from './types';
+interface MatchParams {
+  tabName: Tabs;
+}
 
-export const PageContent: React.FunctionComponent = () => {
+export const PageContent: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
+  match: {
+    params: { tabName },
+  },
+  history,
+}) => {
   const { kibanaVersionInfo, isReadOnlyMode, http } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
+
+  const onTabChange = (newTab: Tabs) => {
+    history.push(`/${newTab}`);
+  };
 
   // Read-only mode will be enabled up until the last minor before the next major release
   if (isReadOnlyMode) {
@@ -38,7 +52,7 @@ export const PageContent: React.FunctionComponent = () => {
         </EuiPageHeaderSection>
       </EuiPageHeader>
 
-      <UpgradeAssistantTabs http={http} />
+      <UpgradeAssistantTabs http={http} tabName={tabName} onTabChange={onTabChange} />
     </>
   );
 };

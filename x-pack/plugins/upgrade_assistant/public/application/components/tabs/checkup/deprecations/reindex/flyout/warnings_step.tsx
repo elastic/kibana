@@ -18,13 +18,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../../common/types';
 import { useAppContext } from '../../../../../../app_context';
+import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../../common/types';
 import {
+  WarningCheckboxProps,
   CustomTypeNameWarningCheckbox,
   DeprecatedSettingWarningCheckbox,
-  WarningCheckboxProps,
 } from './warning_step_checkbox';
 
 interface CheckedIds {

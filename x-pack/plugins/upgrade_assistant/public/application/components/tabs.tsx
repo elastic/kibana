@@ -6,7 +6,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { findIndex, get } from 'lodash';
+import { get } from 'lodash';
 import React from 'react';
 
 import {
@@ -24,7 +24,7 @@ import { UpgradeAssistantStatus } from '../../../common/types';
 import { LatestMinorBanner } from './latest_minor_banner';
 import { CheckupTab } from './tabs/checkup';
 import { OverviewTab } from './tabs/overview';
-import { LoadingState, TelemetryState, UpgradeAssistantTabProps } from './types';
+import { LoadingState, Tabs, TelemetryState, UpgradeAssistantTabProps } from './types';
 
 enum ClusterUpgradeState {
   needsUpgrade,
@@ -43,6 +43,8 @@ interface TabsState {
 
 interface Props {
   http: HttpSetup;
+  tabName: string;
+  onTabChange: (tabName: Tabs) => void;
 }
 
 export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
@@ -64,7 +66,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
   }
 
   public render() {
-    const { selectedTabIndex, telemetryState, clusterUpgradeState } = this.state;
+    const { telemetryState, clusterUpgradeState } = this.state;
     const tabs = this.tabs;
 
     if (clusterUpgradeState === ClusterUpgradeState.partiallyUpgraded) {
@@ -129,17 +131,12 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
         }
         tabs={tabs}
         onTabClick={this.onTabClick}
-        selectedTab={tabs[selectedTabIndex]}
+        selectedTab={tabs.find((tab) => tab.id === this.props.tabName)}
       />
     );
   }
 
   private onTabClick = (selectedTab: EuiTabbedContentTab) => {
-    const selectedTabIndex = findIndex(this.tabs, { id: selectedTab.id });
-    if (selectedTabIndex === -1) {
-      throw new Error(`Clicked tab did not exist in tabs array`);
-    }
-
     // Send telemetry info about the current selected tab
     // only in case the clicked tab id it's different from the
     // current selected tab id
@@ -147,7 +144,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
       this.sendTelemetryInfo(selectedTab.id);
     }
 
-    this.setSelectedTabIndex(selectedTabIndex);
+    this.props.onTabChange(selectedTab.id as Tabs);
   };
 
   private setSelectedTabIndex = (selectedTabIndex: number) => {

@@ -18,8 +18,9 @@ export async function mountManagementSection(
   kibanaVersionInfo: KibanaVersionContext
 ) {
   const [{ i18n, docLinks, notifications }] = await coreSetup.getStartServices();
+  const { element, history } = params;
   return renderApp({
-    element: params.element,
+    element,
     isCloudEnabled,
     http: coreSetup.http,
     i18n,
@@ -27,5 +28,6 @@ export async function mountManagementSection(
     kibanaVersionInfo,
     notifications,
     isReadOnlyMode: UA_READONLY_MODE,
+    history,
   });
 }
