@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../../../common/source_configuration/source_configuration';
 import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,

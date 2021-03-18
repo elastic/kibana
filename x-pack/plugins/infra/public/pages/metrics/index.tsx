@@ -12,7 +12,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/common';
-import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../common/source_configuration/source_configuration';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';

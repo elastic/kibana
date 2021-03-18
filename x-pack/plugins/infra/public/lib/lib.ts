@@ -14,7 +14,7 @@ import {
   SnapshotNodeMetric,
   SnapshotNodePath,
 } from '../../common/http_api/snapshot_api';
-import { InfraSourceConfigurationFields } from '../../common/http_api/source_api';
+import { InfraSourceConfigurationFields } from '../../common/source_configuration/source_configuration';
 import { WaffleSortOption } from '../pages/metrics/inventory_view/hooks/use_waffle_options';
 
 export interface InfraWaffleMapNode {

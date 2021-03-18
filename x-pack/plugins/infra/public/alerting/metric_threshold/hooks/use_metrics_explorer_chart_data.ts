@@ -7,7 +7,7 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import { useMemo } from 'react';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { MetricExpression } from '../types';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';

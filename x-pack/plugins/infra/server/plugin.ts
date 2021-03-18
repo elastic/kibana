@@ -9,7 +9,7 @@ import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/server';
-import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
+import { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';

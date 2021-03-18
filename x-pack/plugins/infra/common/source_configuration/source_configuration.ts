@@ -5,8 +5,19 @@
  * 2.0.
  */
 
+/**
+ * These are the core source configuration types that represent a source configuration in
+ * it's entirety. There are then subsets of this configuration that form the logs_source_configuration
+ * and metrics_source_configuration. The logs_source_configuration is further expanded to it's resolved form.
+ * -> Source Configuration
+ *  -> Logs source configuration
+ *    -> Resolved logs source configuration
+ *  -> Metrics Source Configuration
+ */
+
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
+import { omit, pick } from 'lodash';
 import * as rt from 'io-ts';
 import moment from 'moment';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -29,69 +40,90 @@ export const TimestampFromString = new rt.Type<number, string>(
 );
 
 /**
- * Stored source configuration as read from and written to saved objects
+ * Log columns
  */
 
-const SavedSourceConfigurationFieldsRuntimeType = rt.partial({
-  container: rt.string,
-  host: rt.string,
-  pod: rt.string,
-  tiebreaker: rt.string,
-  timestamp: rt.string,
-});
-
-export type InfraSavedSourceConfigurationFields = rt.TypeOf<
-  typeof SavedSourceConfigurationFieldColumnRuntimeType
->;
-
-export const SavedSourceConfigurationTimestampColumnRuntimeType = rt.type({
+export const SourceConfigurationTimestampColumnRuntimeType = rt.type({
   timestampColumn: rt.type({
     id: rt.string,
   }),
 });
 
 export type InfraSourceConfigurationTimestampColumn = rt.TypeOf<
-  typeof SavedSourceConfigurationTimestampColumnRuntimeType
+  typeof SourceConfigurationTimestampColumnRuntimeType
 >;
 
-export const SavedSourceConfigurationMessageColumnRuntimeType = rt.type({
+export const SourceConfigurationMessageColumnRuntimeType = rt.type({
   messageColumn: rt.type({
     id: rt.string,
   }),
 });
 
 export type InfraSourceConfigurationMessageColumn = rt.TypeOf<
-  typeof SavedSourceConfigurationMessageColumnRuntimeType
+  typeof SourceConfigurationMessageColumnRuntimeType
 >;
 
-export const SavedSourceConfigurationFieldColumnRuntimeType = rt.type({
+export const SourceConfigurationFieldColumnRuntimeType = rt.type({
   fieldColumn: rt.type({
     id: rt.string,
     field: rt.string,
   }),
 });
 
-export const SavedSourceConfigurationColumnRuntimeType = rt.union([
-  SavedSourceConfigurationTimestampColumnRuntimeType,
-  SavedSourceConfigurationMessageColumnRuntimeType,
-  SavedSourceConfigurationFieldColumnRuntimeType,
+export const SourceConfigurationColumnRuntimeType = rt.union([
+  SourceConfigurationTimestampColumnRuntimeType,
+  SourceConfigurationMessageColumnRuntimeType,
+  SourceConfigurationFieldColumnRuntimeType,
 ]);
 
-export type InfraSavedSourceConfigurationColumn = rt.TypeOf<
-  typeof SavedSourceConfigurationColumnRuntimeType
->;
+export type InfraSourceConfigurationColumn = rt.TypeOf<typeof SourceConfigurationColumnRuntimeType>;
 
-export const SavedSourceConfigurationRuntimeType = rt.partial({
+/**
+ * Fields
+ */
+
+const SourceConfigurationFieldsRT = rt.partial({
+  container: rt.string,
+  host: rt.string,
+  pod: rt.string,
+  tiebreaker: rt.string,
+  timestamp: rt.string,
+  message: rt.array(rt.string),
+});
+
+/**
+ * Properties that represent a full source configuration, which is the result of merging static values with
+ * saved values.
+ */
+const SourceConfigurationRT = rt.type({
   name: rt.string,
   description: rt.string,
   metricAlias: rt.string,
   logAlias: rt.string,
   inventoryDefaultView: rt.string,
   metricsExplorerDefaultView: rt.string,
-  fields: SavedSourceConfigurationFieldsRuntimeType,
-  logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
+  fields: SourceConfigurationFieldsRT,
+  logColumns: rt.array(SourceConfigurationColumnRuntimeType),
   anomalyThreshold: rt.number,
 });
+
+/**
+ * Stored source configuration as read from and written to saved objects
+ */
+const SavedSourceConfigurationFieldsRuntimeType = rt.partial(
+  omit(SourceConfigurationFieldsRT.props, ['message'])
+);
+
+export type InfraSavedSourceConfigurationFields = rt.TypeOf<
+  typeof SavedSourceConfigurationFieldsRuntimeType
+>;
+
+export const SavedSourceConfigurationRuntimeType = rt.intersection([
+  rt.partial(omit(SourceConfigurationRT.props, ['fields'])),
+  rt.partial({
+    fields: SavedSourceConfigurationFieldsRuntimeType,
+  }),
+]);
 
 export interface InfraSavedSourceConfiguration
   extends rt.TypeOf<typeof SavedSourceConfigurationRuntimeType> {}
@@ -99,52 +131,16 @@ export interface InfraSavedSourceConfiguration
 export const pickSavedSourceConfiguration = (
   value: InfraSourceConfiguration
 ): InfraSavedSourceConfiguration => {
-  const {
-    name,
-    description,
-    metricAlias,
-    logAlias,
-    fields,
-    inventoryDefaultView,
-    metricsExplorerDefaultView,
-    logColumns,
-    anomalyThreshold,
-  } = value;
-  const { container, host, pod, tiebreaker, timestamp } = fields;
-
-  return {
-    name,
-    description,
-    metricAlias,
-    logAlias,
-    inventoryDefaultView,
-    metricsExplorerDefaultView,
-    fields: { container, host, pod, tiebreaker, timestamp },
-    logColumns,
-    anomalyThreshold,
-  };
+  return value;
 };
 
 /**
- * Static source configuration as read from the configuration file
+ * Static source configuration, the result of merging values from the config file and
+ * hardcoded defaults.
  */
 
-const StaticSourceConfigurationFieldsRuntimeType = rt.partial({
-  ...SavedSourceConfigurationFieldsRuntimeType.props,
-  message: rt.array(rt.string),
-});
-
-export const StaticSourceConfigurationRuntimeType = rt.partial({
-  name: rt.string,
-  description: rt.string,
-  metricAlias: rt.string,
-  logAlias: rt.string,
-  inventoryDefaultView: rt.string,
-  metricsExplorerDefaultView: rt.string,
-  fields: StaticSourceConfigurationFieldsRuntimeType,
-  logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
-  anomalyThreshold: rt.number,
-});
+const StaticSourceConfigurationFieldsRuntimeType = SourceConfigurationFieldsRT;
+export const StaticSourceConfigurationRuntimeType = SourceConfigurationRT;
 
 export interface InfraStaticSourceConfiguration
   extends rt.TypeOf<typeof StaticSourceConfigurationRuntimeType> {}
@@ -153,18 +149,20 @@ export interface InfraStaticSourceConfiguration
  * Full source configuration type after all cleanup has been done at the edges
  */
 
-const SourceConfigurationFieldsRuntimeType = rt.type({
-  ...StaticSourceConfigurationFieldsRuntimeType.props,
-});
-
-export type InfraSourceConfigurationFields = rt.TypeOf<typeof SourceConfigurationFieldsRuntimeType>;
+export type InfraSourceConfigurationFields = rt.TypeOf<typeof SourceConfigurationFieldsRT>;
 
 export const SourceConfigurationRuntimeType = rt.type({
-  ...SavedSourceConfigurationRuntimeType.props,
-  fields: SourceConfigurationFieldsRuntimeType,
-  logColumns: rt.array(SavedSourceConfigurationColumnRuntimeType),
+  ...SourceConfigurationRT.props,
+  fields: SourceConfigurationFieldsRT,
+  logColumns: rt.array(SourceConfigurationColumnRuntimeType),
 });
 
+export interface InfraSourceConfiguration
+  extends rt.TypeOf<typeof SourceConfigurationRuntimeType> {}
+
+/**
+ * Source status
+ */
 const SourceStatusFieldRuntimeType = rt.type({
   name: rt.string,
   type: rt.string,
@@ -181,6 +179,11 @@ const SourceStatusRuntimeType = rt.type({
   indexFields: rt.array(SourceStatusFieldRuntimeType),
 });
 
+export interface InfraSourceStatus extends rt.TypeOf<typeof SourceStatusRuntimeType> {}
+
+/**
+ * Source configuration along with source status and metadata
+ */
 export const SourceRuntimeType = rt.intersection([
   rt.type({
     id: rt.string,
@@ -197,11 +200,6 @@ export const SourceRuntimeType = rt.intersection([
     status: SourceStatusRuntimeType,
   }),
 ]);
-
-export interface InfraSourceStatus extends rt.TypeOf<typeof SourceStatusRuntimeType> {}
-
-export interface InfraSourceConfiguration
-  extends rt.TypeOf<typeof SourceConfigurationRuntimeType> {}
 
 export interface InfraSource extends rt.TypeOf<typeof SourceRuntimeType> {}
 

@@ -11,7 +11,7 @@ import { first, last } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';

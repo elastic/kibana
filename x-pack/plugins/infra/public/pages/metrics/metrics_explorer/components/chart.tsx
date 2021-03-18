@@ -19,7 +19,7 @@ import {
 } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../../../common/source_configuration/source_configuration';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,

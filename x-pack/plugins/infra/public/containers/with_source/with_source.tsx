@@ -11,7 +11,7 @@ import { IIndexPattern } from 'src/plugins/data/public';
 import {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
-} from '../../../common/http_api/source_api';
+} from '../../../common/source_configuration/source_configuration';
 import { RendererFunction } from '../../utils/typed_react';
 import { Source } from '../source';
 

@@ -12,7 +12,7 @@ import {
   InfraSourceStatus,
   SavedSourceConfigurationRuntimeType,
   SourceResponseRuntimeType,
-} from '../../../common/http_api/source_api';
+} from '../../../common/source_configuration/source_configuration';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';

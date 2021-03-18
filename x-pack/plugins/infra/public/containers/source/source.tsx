@@ -12,7 +12,7 @@ import {
   InfraSavedSourceConfiguration,
   InfraSource,
   SourceResponse,
-} from '../../../common/http_api/source_api';
+} from '../../../common/source_configuration/source_configuration';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 

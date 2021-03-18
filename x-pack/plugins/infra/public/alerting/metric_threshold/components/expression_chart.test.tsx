@@ -10,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import { MetricExpression } from '../types';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import React from 'react';
 import { ExpressionChart } from './expression_chart';
 import { act } from 'react-dom/test-utils';

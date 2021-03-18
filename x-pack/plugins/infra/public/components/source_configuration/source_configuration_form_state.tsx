@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../common/source_configuration/source_configuration';
 
 import { useIndicesConfigurationFormState } from './indices_configuration_form_state';
 import { useLogColumnsConfigurationFormState } from './log_columns_configuration_form_state';

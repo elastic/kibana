@@ -16,7 +16,7 @@ import {
   SourceResponseRuntimeType,
   SourceResponse,
   InfraSource,
-} from '../../../common/http_api/source_api';
+} from '../../../common/source_configuration/source_configuration';
 import { useHTTPRequest } from '../../hooks/use_http_request';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../../../common/source_configuration/source_configuration';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {

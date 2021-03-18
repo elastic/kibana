@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useContext } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../../../common/source_configuration/source_configuration';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,

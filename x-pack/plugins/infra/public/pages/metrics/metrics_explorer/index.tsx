@@ -9,7 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSourceConfiguration } from '../../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
 import { useTrackPageview } from '../../../../../observability/public';
 import { DocumentTitle } from '../../../components/document_title';
 import { NoData } from '../../../components/empty_states';

@@ -22,7 +22,7 @@ import {
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { HttpHandler } from 'kibana/public';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../../../common/source_configuration/source_configuration';
 
 const mockedFetch = jest.fn();
 

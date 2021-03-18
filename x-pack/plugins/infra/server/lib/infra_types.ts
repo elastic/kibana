@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InfraSourceConfiguration } from '../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../common/source_configuration/source_configuration';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';

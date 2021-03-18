@@ -10,7 +10,7 @@ import {
   InfraSavedSourceConfigurationFields,
   InfraSourceConfigurationMessageColumn,
   InfraSourceConfigurationTimestampColumn,
-} from '../../common/http_api/source_api';
+} from '../../common/source_configuration/source_configuration';
 
 export type LogColumnConfiguration = InfraSavedSourceConfigurationColumn;
 export type FieldLogColumnConfiguration = InfraSavedSourceConfigurationFields;

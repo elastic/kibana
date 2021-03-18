@@ -14,7 +14,7 @@ import {
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
 import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { evaluateCondition } from './evaluate_condition';
