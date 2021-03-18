@@ -287,7 +287,7 @@ Platform::
 Security::
 * Allow custom index privileges for role management {kibana-pull}88076[#88076]
 * Redesign user management page, and allow disabling users {kibana-pull}87133[#87133]
-* Adds audit events for spaces {kibana-pull}86343[#86343]
+* Adds ECS audit events for Spaces {kibana-pull}86343[#86343]
 Sharing::
 * Expose anonymous access through a switch in sharing menu {kibana-pull}86965[#86965]
 Uptime::
