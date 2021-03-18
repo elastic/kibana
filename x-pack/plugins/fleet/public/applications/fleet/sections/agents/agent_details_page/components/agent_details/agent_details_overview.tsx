@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Agent, AgentPolicy } from '../../../../../types';
+import type { Agent, AgentPolicy } from '../../../../../types';
 import { useKibanaVersion, useLink } from '../../../../../hooks';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicyPackageBadges } from '../../../components/agent_policy_package_badges';

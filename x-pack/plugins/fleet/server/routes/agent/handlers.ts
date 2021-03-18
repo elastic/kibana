@@ -20,7 +20,7 @@ import type {
   PostAgentEnrollRequest,
   PostBulkAgentReassignResponse,
 } from '../../../common/types';
-import {
+import type {
   GetAgentsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,

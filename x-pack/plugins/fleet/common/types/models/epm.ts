@@ -9,7 +9,7 @@
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 
-import {
+import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,

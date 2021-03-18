@@ -122,6 +122,7 @@ export class DocLinksService {
         indexPatterns: {
           loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
+          fieldFormattersNumber: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/numeral.html`,
           fieldFormattersString: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/field-formatters-string.html`,
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
@@ -285,6 +286,11 @@ export class DocLinksService {
           registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
         },
+        ingest: {
+          pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
+          pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
+          processors: `${ELASTICSEARCH_DOCS}processors.html`,
+        },
       },
     });
   }
@@ -388,6 +394,8 @@ export interface DocLinksStart {
     readonly indexPatterns: {
       readonly loadingData: string;
       readonly introduction: string;
+      readonly fieldFormattersNumber: string;
+      readonly fieldFormattersString: string;
     };
     readonly addData: string;
     readonly kibana: string;
@@ -450,5 +458,6 @@ export interface DocLinksStart {
     readonly ccs: Record<string, string>;
     readonly plugins: Record<string, string>;
     readonly snapshotRestore: Record<string, string>;
+    readonly ingest: Record<string, string>;
   };
 }
