@@ -1,8 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/elastic-datemath"
-  },
   "include": [
     "index.d.ts"
   ]
