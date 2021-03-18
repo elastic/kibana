@@ -184,14 +184,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
-      core.getStartServices().then(([{ elasticsearch }]) => {
-        createAlertHistoryEsIndex({
-          client: elasticsearch.client.asInternalUser,
-          kibanaVersion: this.kibanaVersion,
-          logger: this.logger,
-        });
-      });
-
       this.preconfiguredActions.push(getAlertHistoryEsIndex(this.kibanaVersion));
     }
 
@@ -371,6 +363,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+
+    if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
+      createAlertHistoryEsIndex({
+        client: core.elasticsearch.client.asInternalUser,
+        kibanaVersion: this.kibanaVersion,
+        logger: this.logger,
+      });
+    }
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
