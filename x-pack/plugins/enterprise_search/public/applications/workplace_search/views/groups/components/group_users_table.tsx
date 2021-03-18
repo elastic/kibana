@@ -69,7 +69,7 @@ export const GroupUsersTable: React.FC = () => {
 
   return (
     <>
-      <EuiTable className="table table--emphasized">
+      <EuiTable>
         <TableHeader extraCell={isFederatedAuth} headerItems={headerItems} />
         <EuiTableBody>
           {users.slice(firstItem, lastItem + 1).map((user: User) => (

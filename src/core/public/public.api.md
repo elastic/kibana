@@ -570,7 +570,6 @@ export interface DocLinksStart {
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
-            readonly loadingData: string;
             readonly introduction: string;
         };
         readonly addData: string;
@@ -637,6 +636,7 @@ export interface DocLinksStart {
         readonly cloud: {
             readonly ccs: string;
         };
+        readonly ingest: Record<string, string>;
     };
 }
 

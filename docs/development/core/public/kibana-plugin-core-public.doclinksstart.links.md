@@ -99,7 +99,6 @@ readonly links: {
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
-            readonly loadingData: string;
             readonly introduction: string;
         };
         readonly addData: string;
@@ -166,5 +165,6 @@ readonly links: {
         readonly cloud: {
             readonly ccs: string;
         };
+        readonly ingest: Record<string, string>;
     };
 ```
