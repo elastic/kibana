@@ -56,14 +56,18 @@ export async function unenrollAgent(
 export async function unenrollAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options: GetAgentsOptions
+  options: GetAgentsOptions & { force?: boolean }
 ) {
+  // start with all agents specified
   const agents = await getAgents(esClient, options);
 
-  // Filter to agents that are not already unenrolled, or unenrolling
-  const agentsEnrolled = agents.filter(
-    (agent) => !agent.unenrollment_started_at && !agent.unenrolled_at
-  );
+  // Filter to those not already unenrolled, or unenrolling
+  const agentsEnrolled = agents.filter((agent) => {
+    if (options.force) {
+      return !agent.unenrolled_at;
+    }
+    return !agent.unenrollment_started_at && !agent.unenrolled_at;
+  });
   // And which are allowed to unenroll
   const settled = await Promise.allSettled(
     agentsEnrolled.map((agent) =>
@@ -71,30 +75,59 @@ export async function unenrollAgents(
     )
   );
   const agentsToUpdate = agentsEnrolled.filter((_, index) => settled[index].status === 'fulfilled');
-
   const now = new Date().toISOString();
 
-  // Create unenroll action for each agent
-  await bulkCreateAgentActions(
-    soClient,
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agent_id: agent.id,
-      created_at: now,
-      type: 'UNENROLL',
-    }))
-  );
+  if (options.force) {
+    // Get all API keys that need to be invalidated
+    const apiKeys = agentsToUpdate.reduce<string[]>((keys, agent) => {
+      if (agent.access_api_key_id) {
+        keys.push(agent.access_api_key_id);
+      }
+      if (agent.default_api_key_id) {
+        keys.push(agent.default_api_key_id);
+      }
 
-  // Update the necessary agents
-  return bulkUpdateAgents(
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agentId: agent.id,
-      data: {
-        unenrollment_started_at: now,
-      },
-    }))
-  );
+      return keys;
+    }, []);
+
+    // Invalidate all API keys
+    if (apiKeys.length) {
+      await APIKeyService.invalidateAPIKeys(soClient, apiKeys);
+    }
+    // Update the necessary agents
+    return bulkUpdateAgents(
+      esClient,
+      agentsToUpdate.map((agent) => ({
+        agentId: agent.id,
+        data: {
+          active: false,
+          unenrolled_at: now,
+        },
+      }))
+    );
+  } else {
+    // Create unenroll action for each agent
+    await bulkCreateAgentActions(
+      soClient,
+      esClient,
+      agentsToUpdate.map((agent) => ({
+        agent_id: agent.id,
+        created_at: now,
+        type: 'UNENROLL',
+      }))
+    );
+
+    // Update the necessary agents
+    return bulkUpdateAgents(
+      esClient,
+      agentsToUpdate.map((agent) => ({
+        agentId: agent.id,
+        data: {
+          unenrollment_started_at: now,
+        },
+      }))
+    );
+  }
 }
 
 export async function forceUnenrollAgent(
@@ -117,42 +150,4 @@ export async function forceUnenrollAgent(
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
-}
-
-export async function forceUnenrollAgents(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  options: GetAgentsOptions
-) {
-  // Filter to agents that are not already unenrolled
-  const agents = await getAgents(esClient, options);
-  const agentsToUpdate = agents.filter((agent) => !agent.unenrolled_at);
-  const now = new Date().toISOString();
-  const apiKeys: string[] = [];
-
-  // Get all API keys that need to be invalidated
-  agentsToUpdate.forEach((agent) => {
-    if (agent.access_api_key_id) {
-      apiKeys.push(agent.access_api_key_id);
-    }
-    if (agent.default_api_key_id) {
-      apiKeys.push(agent.default_api_key_id);
-    }
-  });
-
-  // Invalidate all API keys
-  if (apiKeys.length) {
-    APIKeyService.invalidateAPIKeys(soClient, apiKeys);
-  }
-  // Update the necessary agents
-  return bulkUpdateAgents(
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agentId: agent.id,
-      data: {
-        active: false,
-        unenrolled_at: now,
-      },
-    }))
-  );
 }

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-.content-section {
-  padding-bottom: 44px;
-}
+export * from './search_session_name';
