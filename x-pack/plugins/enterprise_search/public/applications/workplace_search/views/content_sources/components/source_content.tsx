@@ -106,7 +106,7 @@ export const SourceContent: React.FC = () => {
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
 
   const emptyState = (
-    <EuiPanel className="euiPanel--inset">
+    <EuiPanel>
       <EuiEmptyPrompt
         title={<h2>{emptyMessage}</h2>}
         iconType="documents"
@@ -151,7 +151,9 @@ export const SourceContent: React.FC = () => {
             </EuiLink>
           )}
         </EuiTableRowCell>
-        <EuiTableRowCell>{moment(updated).format('M/D/YYYY, h:mm:ss A')}</EuiTableRowCell>
+        <EuiTableRowCell align="right">
+          {moment(updated).format('M/D/YYYY, h:mm:ss A')}
+        </EuiTableRowCell>
       </EuiTableRow>
     );
   };
@@ -164,7 +166,7 @@ export const SourceContent: React.FC = () => {
         <EuiTableHeader>
           <EuiTableHeaderCell>{TITLE_HEADING}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{startCase(urlField)}</EuiTableHeaderCell>
-          <EuiTableHeaderCell>{LAST_UPDATED_HEADING}</EuiTableHeaderCell>
+          <EuiTableHeaderCell align="right">{LAST_UPDATED_HEADING}</EuiTableHeaderCell>
         </EuiTableHeader>
         <EuiTableBody>{contentItems.map(contentItem)}</EuiTableBody>
       </EuiTable>

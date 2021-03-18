@@ -126,7 +126,7 @@ export const AddSourceList: React.FC = () => {
           <EuiFlexGroup justifyContent="center" alignItems="stretch">
             <EuiFlexItem>
               <EuiSpacer size="xl" />
-              <EuiPanel className="euiPanel euiPanel--inset">
+              <EuiPanel>
                 <EuiSpacer size="s" />
                 <EuiSpacer size="xxl" />
                 <EuiEmptyPrompt

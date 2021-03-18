@@ -35,6 +35,7 @@ import {
 } from '../../kibana_services';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { getStateDefaults } from '../helpers/get_state_defaults';
+import { getResultState } from '../helpers/get_result_state';
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
@@ -47,6 +48,7 @@ import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { applyAggsToSearchSource, getDimensions } from '../components/histogram';
+import { fetchStatuses } from '../components/constants';
 
 const services = getServices();
 
@@ -61,13 +63,6 @@ const {
   toastNotifications,
   uiSettings: config,
 } = getServices();
-
-const fetchStatuses = {
-  UNINITIALIZED: 'uninitialized',
-  LOADING: 'loading',
-  COMPLETE: 'complete',
-  ERROR: 'error',
-};
 
 const app = getAngularModule();
 
@@ -397,24 +392,6 @@ function discoverController($route, $scope) {
   $scope.volatileSearchSource = volatileSearchSource;
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
-
-  const getResultState = (fetchStatus, rows) => {
-    const status = {
-      UNINITIALIZED: 'uninitialized',
-      LOADING: 'loading', // initial data load
-      READY: 'ready', // results came back
-      NO_RESULTS: 'none', // no results came back
-    };
-
-    if (fetchStatus === fetchStatuses.UNINITIALIZED) {
-      return status.UNINITIALIZED;
-    }
-
-    const rowsEmpty = _.isEmpty(rows);
-    if (rowsEmpty && fetchStatus === fetchStatuses.LOADING) return status.LOADING;
-    else if (!rowsEmpty) return status.READY;
-    else return status.NO_RESULTS;
-  };
 
   $scope.opts.fetch = $scope.fetch = function () {
     $scope.fetchCounter++;
