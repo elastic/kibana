@@ -35,6 +35,7 @@ import {
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { HelpPopover, HelpPopoverButton } from '../../help_popover';
+import { trackUiEvent } from '../../../lens_ui_telemetry';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -355,7 +356,12 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     <HelpPopover
       anchorPosition="upCenter"
       button={
-        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+            trackUiEvent('open_help_popover');
+          }}
+        >
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
             defaultMessage: 'How it works',
           })}

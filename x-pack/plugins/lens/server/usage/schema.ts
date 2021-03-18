@@ -10,6 +10,7 @@ import { LensUsage } from './types';
 
 const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   app_query_change: { type: 'long' },
+  open_help_popover: { type: 'long' },
   indexpattern_field_info_click: { type: 'long' },
   loaded: { type: 'long' },
   app_filters_updated: { type: 'long' },

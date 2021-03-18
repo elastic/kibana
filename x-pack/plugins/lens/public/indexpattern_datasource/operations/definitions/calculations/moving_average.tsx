@@ -23,6 +23,7 @@ import { getFormatFromPreviousColumn, isValidNumber, useDebounceWithOptions } fr
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
+import { trackUiEvent } from '../../../../lens_ui_telemetry';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.movingAverageOf', {
@@ -174,7 +175,12 @@ const MovingAveragePopup = () => {
     <HelpPopover
       anchorPosition="upCenter"
       button={
-        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+            trackUiEvent('open_help_popover');
+          }}
+        >
           {i18n.translate('xpack.lens.indexPattern.movingAverage.helpText', {
             defaultMessage: 'How it works',
           })}

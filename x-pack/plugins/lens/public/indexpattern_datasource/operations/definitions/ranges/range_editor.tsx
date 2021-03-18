@@ -25,6 +25,7 @@ import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
 import { useDebounceWithOptions } from '../helpers';
 import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
+import { trackUiEvent } from '../../../../lens_ui_telemetry';
 
 const GranularityHelpPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -33,7 +34,12 @@ const GranularityHelpPopover = () => {
     <HelpPopover
       anchorPosition="upCenter"
       button={
-        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+            trackUiEvent('open_help_popover');
+          }}
+        >
           {i18n.translate('xpack.lens.indexPattern.ranges.granularityHelpText', {
             defaultMessage: 'How it works',
           })}
