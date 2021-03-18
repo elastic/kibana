@@ -106,7 +106,7 @@ export const RemoveIndexSettingsProvider = ({ children }: Props) => {
           title={i18n.translate(
             'xpack.upgradeAssistant.checkupTab.indexSettings.confirmationModal.title',
             {
-              defaultMessage: `Remove deprecated settings for '{indexName}'?`,
+              defaultMessage: `Remove deprecated settings from '{indexName}'?`,
               values: {
                 indexName: indexName.current,
               },

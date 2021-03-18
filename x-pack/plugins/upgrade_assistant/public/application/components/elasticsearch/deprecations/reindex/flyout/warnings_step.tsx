@@ -89,7 +89,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
           title={
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutTitle"
-              defaultMessage="This index requires destructive changes that can't be undone"
+              defaultMessage="This index requires destructive changes that cannot be reversed"
             />
           }
           color="danger"
@@ -98,7 +98,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail"
-              defaultMessage="Back up your index, then proceed with the reindex by accepting each breaking change."
+              defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
             />
           </p>
         </EuiCallOut>
