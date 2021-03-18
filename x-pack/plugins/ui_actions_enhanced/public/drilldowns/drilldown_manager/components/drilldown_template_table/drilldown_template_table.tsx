@@ -6,8 +6,19 @@
  */
 
 import React, { useState } from 'react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { txtSelectableMessage } from './i18n';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiButton,
+} from '@elastic/eui';
+import {
+  txtNameColumnTitle,
+  txtSelectableMessage,
+  txtCloneButtonLabel,
+  txtCreateAction,
+} from './i18n';
 
 export interface DrilldownTemplateTableItem {
   id: string;
@@ -18,23 +29,24 @@ export interface DrilldownTemplateTableItem {
 export interface DrilldownTemplateTableProps {
   items: DrilldownTemplateTableItem[];
   onCreate?: (id: string) => void;
+  onClone?: (ids: string[]) => void;
 }
 
 export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
   items,
   onCreate,
+  onClone,
 }) => {
   const [selected, setSelected] = useState<string[]>([]);
 
   const columns: Array<EuiBasicTableColumn<DrilldownTemplateTableItem>> = [
     {
-      name: 'name...',
+      name: txtNameColumnTitle,
       'data-test-subj': 'drilldownListItemName',
       render: (item: DrilldownTemplateTableItem) => item.name,
     },
     {
       align: 'right',
-      width: '64px',
       render: (drilldown: DrilldownTemplateTableItem) =>
         !!onCreate && (
           <EuiButtonEmpty
@@ -42,7 +54,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
             disabled={!!selected.length}
             onClick={() => onCreate(drilldown.id)}
           >
-            {'create...'}
+            {txtCreateAction}
           </EuiButtonEmpty>
         ),
     },
@@ -54,7 +66,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
         itemId="id"
         items={items}
         columns={columns}
-        isSelectable={true}
+        isSelectable={!!onClone}
         responsive={false}
         selection={{
           onSelectionChange: (selection) => {
@@ -65,6 +77,11 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
         hasActions={true}
       />
       <EuiSpacer />
+      {!!onClone && !!selected.length && (
+        <EuiButton fill onClick={() => onClone(selected)}>
+          {txtCloneButtonLabel}
+        </EuiButton>
+      )}
     </>
   );
 };

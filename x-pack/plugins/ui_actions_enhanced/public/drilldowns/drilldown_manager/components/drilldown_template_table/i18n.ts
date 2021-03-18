@@ -13,3 +13,27 @@ export const txtSelectableMessage = i18n.translate(
     defaultMessage: 'Select this template',
   }
 );
+
+export const txtNameColumnTitle = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.nameColumnTitle',
+  {
+    defaultMessage: 'Template',
+    description: 'Title of the first column in drilldown template cloning table.',
+  }
+);
+
+export const txtCreateAction = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.createAction',
+  {
+    defaultMessage: 'Create',
+    description: '"Create" action button label in drilldown template cloning table.',
+  }
+);
+
+export const txtCloneButtonLabel = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.cloneButtonLabel',
+  {
+    defaultMessage: 'Clone',
+    description: 'Label of drilldown template table cloning button.',
+  }
+);

@@ -28,5 +28,10 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items, onSelect }) =
     }));
   }, [items]);
 
-  return <DrilldownTemplateTable items={tableItems} onCreate={() => {}} />;
+  const handleCreate = (id: string) => {};
+  const handleClone = (ids: string[]) => {};
+
+  return (
+    <DrilldownTemplateTable items={tableItems} onCreate={handleCreate} onClone={handleClone} />
+  );
 };

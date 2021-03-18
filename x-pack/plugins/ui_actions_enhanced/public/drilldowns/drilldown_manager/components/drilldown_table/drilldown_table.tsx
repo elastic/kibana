@@ -114,7 +114,6 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
     },
     {
       align: 'right',
-      width: '64px',
       render: (drilldown: DrilldownTableItem) =>
         !!onEdit ? (
           <EuiButtonEmpty
