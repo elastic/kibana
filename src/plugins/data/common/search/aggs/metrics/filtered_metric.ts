@@ -44,5 +44,13 @@ export const getFilteredMetricAgg = () => {
       const customBucket = agg.getParam('customBucket');
       return customMetric.getValue(bucket[customBucket.id]);
     },
+    getValueBucketPath(agg) {
+      const customBucket = agg.getParam('customBucket');
+      const customMetric = agg.getParam('customMetric');
+      if (customMetric.type.name === 'count') {
+        return customBucket.getValueBucketPath();
+      }
+      return `${customBucket.getValueBucketPath()}>${customMetric.getValueBucketPath()}`;
+    },
   });
 };

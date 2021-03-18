@@ -21,7 +21,14 @@ import { TimeRange } from '../../../common';
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
     if (prop === 'parentAggs') delete obj[prop];
-    else if (typeof obj[prop] === 'object') removeParentAggs(obj[prop]);
+    else if (typeof obj[prop] === 'object') {
+      const hasParentAggsKey = 'parentAggs' in obj[prop];
+      removeParentAggs(obj[prop]);
+      // delete object if parentAggs was the last key
+      if (hasParentAggsKey && Object.keys(obj[prop]).length === 0) {
+        delete obj[prop];
+      }
+    }
   }
 }
 
@@ -208,6 +215,11 @@ export class AggConfigs {
           subAggs = dsl.aggs || (dsl.aggs = {});
         }
 
+        if (subAggs) {
+          _.each(subAggs, (agg) => {
+            parseParentAggs(subAggs, agg);
+          });
+        }
         if (subAggs && nestedMetrics) {
           nestedMetrics.forEach((agg: any) => {
             subAggs[agg.config.id] = agg.dsl;
