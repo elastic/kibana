@@ -1,86 +1,13 @@
 [[logging-configuration-migration]]
 == Logging configuration migration
 
-Compatibility with the legacy logging system is assured until the end of the `v7` version.
+Compatibility with the legacy logging system is assured until the end of the `v7` version. 
 All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
 root appenders, make sure that it contains `default` appender to provide backward compatibility.
 
-NOTE: If you define an appender for a logger name, the log messages aren't handled by the
-`root` logger anymore and are not forwarded to the legacy logging service.
-
-// === logging.json
-// Defines the format of log output. Logs in JSON if `true`. With new logging config you can adjust
-// the output format with <<logging-layouts,layouts>>.
-
-// === logging.quiet
-// Suppresses all logging output other than error messages. With new logging, config can be achieved
-// with adjusting minimum required <<log-level,log level>>.
-
-// [source,yaml]
-// ----
-//   loggers:
-//     - name: plugins.myPlugin
-//       appenders: [console]
-//       level: error
-// # or for all output
-// logging.root.level: error
-// ----
-
-// === logging.silent:
-// Suppresses all logging output.
-// [source,yaml]
-// ----
-// logging.root.level: off
-// ----
-
-// === logging.verbose:
-// Logs all events
-// [source,yaml]
-// ----
-// logging.root.level: all
-// ----
-
-// === logging.timezone
-// NOTE: Mentioned
-// Set to the canonical timezone id to log events using that timezone. New logging config allows
-// to <<date-format,specify timezone>> for `layout: pattern`. Defaults to host timezone when not specified.
-
-// [source,yaml]
-// ----
-// logging:
-//   appenders:
-//     custom-console:
-//       type: console
-//       layout:
-//         type: pattern
-//         highlight: true
-//         pattern: "[%level] [%date{ISO8601_TZ}{America/Los_Angeles}][%logger] %message"
-// ----
-
-// === logging.events
-// Define a custom logger for a specific logger name.
-
-// **`logging.events.ops`** outputs sample system and process information at a regular interval.
-// With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
-// and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
-// [source,yaml]
-// ----
-//   loggers:
-//     - name: metrics.ops
-//       appenders: [console]
-//       level: debug
-// ----
-
-// **`logging.events.request` and `logging.events.response`** provide logs for each request handled
-// by the http service. With the new logging config, these are provided by a dedicated <<logger-hierarchy,context name>>,
-// and you can enable them by adjusting the minimum required <<log-level,log level>> to `debug`:
-// [source,yaml]
-// ----
-//   loggers:
-//     - name: http.server.response
-//       appenders: [console]
-//       level: debug
-// ----
+NOTE: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats. 
+These will be removed when the `default` appender is no longer required. If you define an appender for a logger, 
+the log messages aren't handled by the `root` logger anymore and are not forwarded to the legacy logging service.
 
 [[logging-pattern-format-old-and-new-example]]
 [options="header"]
