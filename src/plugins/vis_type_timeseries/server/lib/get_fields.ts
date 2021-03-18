@@ -27,19 +27,20 @@ export async function getFields(
     indexPatternString = defaultIndexPattern?.title ?? '';
   }
 
+  const fetchedIndex = await cachedIndexPatternFetcher(indexPatternString);
+
   const {
     searchStrategy,
     capabilities,
   } = (await framework.searchStrategyRegistry.getViableStrategy(
     requestContext,
     request,
-    indexPatternString
+    fetchedIndex
   ))!;
 
   const fields = await searchStrategy.getFieldsForWildcard(
-    indexPatternString,
+    fetchedIndex,
     indexPatternsService,
-    cachedIndexPatternFetcher,
     capabilities
   );
 

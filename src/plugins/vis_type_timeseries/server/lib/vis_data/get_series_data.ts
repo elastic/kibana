@@ -23,25 +23,18 @@ import type {
 import type { PanelSchema } from '../../../common/types';
 import { PANEL_TYPES } from '../../../common/panel_types';
 
-import {
-  convertIndexPatternObjectToStringRepresentation,
-  extractIndexPatternObjects,
-} from '../../../common/index_patterns_utils';
-
 export async function getSeriesData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
   req: VisTypeTimeseriesVisDataRequest,
   panel: PanelSchema,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const indexPattern = extractIndexPatternObjects(panel, panel.default_index_pattern)
-    .map(convertIndexPatternObjectToStringRepresentation)
-    .join(',');
+  const fetchedIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
 
   const strategy = await services.searchStrategyRegistry.getViableStrategy(
     requestContext,
     req,
-    indexPattern
+    fetchedIndex
   );
 
   if (!strategy) {

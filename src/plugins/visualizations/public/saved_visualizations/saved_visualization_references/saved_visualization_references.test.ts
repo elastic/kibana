@@ -7,8 +7,8 @@
  */
 
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { VisSavedObject } from '../types';
-import { SavedVisState } from '../../common';
+import { VisSavedObject } from '../../types';
+import { SavedVisState } from '../../../common';
 
 describe('extractReferences', () => {
   test('extracts nothing if savedSearchId is empty', () => {

@@ -12,7 +12,6 @@ import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import { getDataStart } from '../../../../services';
 
 import { SwitchModePopover } from './switch_mode_popover';
-import { isStringTypeIndexPattern } from '../../../../../common/index_patterns_utils';
 
 import type { SelectIndexComponentProps } from './types';
 import type { IndexPatternObject } from '../../../../../common/types';
@@ -21,39 +20,45 @@ import type { IndexPatternsService } from '../../../../../../data/public';
 /** @internal **/
 type IdsWithTitle = UnwrapPromise<ReturnType<IndexPatternsService['getIdsWithTitle']>>;
 
-const toSelectedOptions = (
-  value: IndexPatternObject
-): EuiComboBoxProps<IndexPatternObject>['selectedOptions'] => {
-  if (!value) {
-    return [];
-  }
-  return isStringTypeIndexPattern(value)
-    ? [{ label: value ?? '' }]
-    : [
-        {
-          id: value.id ?? '',
-          label: value.title ?? '',
-        },
-      ];
-};
+/** @internal **/
+type SelectedOptions = EuiComboBoxProps<string>['selectedOptions'];
 
 const toComboBoxOptions = (options: IdsWithTitle) =>
   options.map(({ title, id }) => ({ label: title, id }));
 
 export const ComboBoxSelect = ({
+  fetchedIndex,
   onIndexChange,
   onModeChange,
   disabled,
-  value,
   placeholder,
   allowSwitchMode,
   'data-test-subj': dataTestSubj,
 }: SelectIndexComponentProps) => {
   const [availableIndexes, setAvailableIndexes] = useState<IdsWithTitle>([]);
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>([]);
+
+  useEffect(() => {
+    let options: SelectedOptions = [];
+
+    if (fetchedIndex) {
+      if (!fetchedIndex.indexPattern) {
+        options = [{ label: fetchedIndex.indexPatternString ?? '' }];
+      } else {
+        options = [
+          {
+            id: fetchedIndex.indexPattern.id,
+            label: fetchedIndex.indexPattern.title,
+          },
+        ];
+      }
+    }
+    setSelectedOptions(options);
+  }, [fetchedIndex]);
 
   const onComboBoxChange: EuiComboBoxProps<IndexPatternObject>['onChange'] = useCallback(
     ([selected]) => {
-      onIndexChange(selected ? { id: selected.id, title: selected.label } : '');
+      onIndexChange(selected ? { id: selected.id } : '');
     },
     [onIndexChange]
   );
@@ -71,13 +76,17 @@ export const ComboBoxSelect = ({
       singleSelection={{ asPlainText: true }}
       onChange={onComboBoxChange}
       options={toComboBoxOptions(availableIndexes)}
-      selectedOptions={toSelectedOptions(value)}
+      selectedOptions={selectedOptions}
       isDisabled={disabled}
       placeholder={placeholder}
       data-test-subj={dataTestSubj}
       {...(allowSwitchMode && {
         append: (
-          <SwitchModePopover onModeChange={onModeChange} value={value} useKibanaIndices={true} />
+          <SwitchModePopover
+            onModeChange={onModeChange}
+            fetchedIndex={fetchedIndex}
+            useKibanaIndices={true}
+          />
         ),
       })}
     />

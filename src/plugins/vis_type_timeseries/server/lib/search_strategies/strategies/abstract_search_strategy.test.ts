@@ -23,7 +23,6 @@ class FooSearchStrategy extends AbstractSearchStrategy {}
 describe('AbstractSearchStrategy', () => {
   let abstractSearchStrategy: AbstractSearchStrategy;
   let mockedFields: IFieldType[];
-  let indexPattern: string;
   let requestContext: VisTypeTimeseriesRequestHandlerContext;
 
   beforeEach(() => {
@@ -51,7 +50,7 @@ describe('AbstractSearchStrategy', () => {
 
   test('should return fields for wildcard', async () => {
     const fields = await abstractSearchStrategy.getFieldsForWildcard(
-      indexPattern,
+      { indexPatternString: '', indexPattern: undefined },
       ({
         getDefault: jest.fn(),
         getFieldsForWildcard: jest.fn(() => Promise.resolve(mockedFields)),

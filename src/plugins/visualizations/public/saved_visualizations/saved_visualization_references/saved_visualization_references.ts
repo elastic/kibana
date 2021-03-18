@@ -10,13 +10,16 @@ import {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectReference,
-} from '../../../../core/public';
-import { VisSavedObject } from '../types';
+} from '../../../../../core/public';
+import { VisSavedObject } from '../../types';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   SearchSourceFields,
-} from '../../../data/public';
+} from '../../../../data/public';
+
+import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
+import { extractControlsReferences, injectControlsReferences } from './controls_references';
 
 export function extractReferences({
   attributes,
@@ -50,19 +53,10 @@ export function extractReferences({
   // Extract index patterns from controls
   if (updatedAttributes.visState) {
     const visState = JSON.parse(String(updatedAttributes.visState));
-    const controls = (visState.params && visState.params.controls) || [];
-    controls.forEach((control: Record<string, string>, i: number) => {
-      if (!control.indexPattern) {
-        return;
-      }
-      control.indexPatternRefName = `control_${i}_index_pattern`;
-      updatedReferences.push({
-        name: control.indexPatternRefName,
-        type: 'index-pattern',
-        id: control.indexPattern,
-      });
-      delete control.indexPattern;
-    });
+
+    extractControlsReferences(visState, updatedReferences);
+    extractTimeSeriesReferences(visState, updatedReferences);
+
     updatedAttributes.visState = JSON.stringify(visState);
   }
 
@@ -89,18 +83,9 @@ export function injectReferences(savedObject: VisSavedObject, references: SavedO
     savedObject.savedSearchId = savedSearchReference.id;
     delete savedObject.savedSearchRefName;
   }
-  if (savedObject.visState) {
-    const controls = (savedObject.visState.params && savedObject.visState.params.controls) || [];
-    controls.forEach((control: Record<string, string>) => {
-      if (!control.indexPatternRefName) {
-        return;
-      }
-      const reference = references.find((ref) => ref.name === control.indexPatternRefName);
-      if (!reference) {
-        throw new Error(`Could not find index pattern reference "${control.indexPatternRefName}"`);
-      }
-      control.indexPattern = reference.id;
-      delete control.indexPatternRefName;
-    });
+
+  if (savedObject.visState?.params) {
+    injectControlsReferences(savedObject.visState, references);
+    injectTimeSeriesReferences(savedObject.visState, references);
   }
 }

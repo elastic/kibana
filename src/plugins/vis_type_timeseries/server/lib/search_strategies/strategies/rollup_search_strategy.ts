@@ -7,21 +7,19 @@
  */
 
 import { getCapabilitiesForRollupIndices, IndexPatternsService } from '../../../../../data/server';
-import {
+import { AbstractSearchStrategy } from './abstract_search_strategy';
+import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
+
+import type { FetchedIndexPattern } from '../../../../common/types';
+import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
+import type {
   VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { AbstractSearchStrategy } from './abstract_search_strategy';
-import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
-import { IndexPatternObject } from '../../../../common/types';
-import { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
-import { convertIndexPatternObjectToStringRepresentation } from '../../../../common/index_patterns_utils';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');
-const isIndexPatternValid = (indexPattern: string) =>
-  indexPattern && typeof indexPattern === 'string' && !isIndexPatternContainsWildcard(indexPattern);
 
 export class RollupSearchStrategy extends AbstractSearchStrategy {
   async search(
@@ -52,15 +50,17 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
   async checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPatternObject: IndexPatternObject
+    { indexPatternString, indexPattern }: FetchedIndexPattern
   ) {
     let isViable = false;
     let capabilities = null;
 
-    const index = convertIndexPatternObjectToStringRepresentation(indexPatternObject);
-
-    if (isIndexPatternValid(index)) {
-      const rollupData = await this.getRollupData(requestContext, index);
+    if (
+      indexPatternString &&
+      !isIndexPatternContainsWildcard(indexPatternString) &&
+      (!indexPattern || indexPattern.type === 'rollup')
+    ) {
+      const rollupData = await this.getRollupData(requestContext, indexPatternString);
       const rollupIndices = getRollupIndices(rollupData);
 
       isViable = rollupIndices.length === 1;
@@ -80,20 +80,14 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
   }
 
   async getFieldsForWildcard(
-    indexPatternObject: IndexPatternObject,
+    fetchedIndexPattern: FetchedIndexPattern,
     indexPatternsService: IndexPatternsService,
     getCachedIndexPatternFetcher: CachedIndexPatternFetcher,
     capabilities?: unknown
   ) {
-    return super.getFieldsForWildcard(
-      indexPatternObject,
-      indexPatternsService,
-      getCachedIndexPatternFetcher,
-      capabilities,
-      {
-        type: 'rollup',
-        rollupIndex: convertIndexPatternObjectToStringRepresentation(indexPatternObject),
-      }
-    );
+    return super.getFieldsForWildcard(fetchedIndexPattern, indexPatternsService, capabilities, {
+      type: 'rollup',
+      rollupIndex: fetchedIndexPattern.indexPatternString,
+    });
   }
 }

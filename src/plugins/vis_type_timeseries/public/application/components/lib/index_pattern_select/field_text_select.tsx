@@ -5,42 +5,54 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React, { useCallback, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 
-import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
 import { SwitchModePopover } from './switch_mode_popover';
-import { convertIndexPatternObjectToStringRepresentation } from '../../../../../common/index_patterns_utils';
 
 import type { SelectIndexComponentProps } from './types';
 
 export const FieldTextSelect = ({
+  fetchedIndex,
   onIndexChange,
   disabled,
-  value,
   placeholder,
   onModeChange,
   allowSwitchMode,
   'data-test-subj': dataTestSubj,
 }: SelectIndexComponentProps) => {
-  const textualValue = convertIndexPatternObjectToStringRepresentation(value);
+  const textualValue = fetchedIndex?.indexPatternString ?? '';
+  const [inputValue, setInputValue] = useState(textualValue);
 
-  const onFieldTextChange: EuiFieldTextProps['onChange'] = useCallback(
-    (e) => {
-      onIndexChange(e.target.value);
+  const onFieldTextChange: EuiFieldTextProps['onChange'] = useCallback((e) => {
+    setInputValue(e.target.value);
+  }, []);
+
+  useDebounce(
+    () => {
+      if (inputValue !== textualValue) {
+        onIndexChange(inputValue);
+      }
     },
-    [onIndexChange]
+    150,
+    [inputValue, onIndexChange]
   );
 
   return (
     <EuiFieldText
       disabled={disabled}
       onChange={onFieldTextChange}
-      value={textualValue}
+      value={inputValue}
       placeholder={placeholder}
       data-test-subj={dataTestSubj}
       {...(allowSwitchMode && {
         append: (
-          <SwitchModePopover onModeChange={onModeChange} value={value} useKibanaIndices={false} />
+          <SwitchModePopover
+            onModeChange={onModeChange}
+            fetchedIndex={fetchedIndex}
+            useKibanaIndices={false}
+          />
         ),
       })}
     />

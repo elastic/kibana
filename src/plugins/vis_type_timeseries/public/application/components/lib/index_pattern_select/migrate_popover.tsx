@@ -28,7 +28,7 @@ const switchModeLabel = i18n.translate(
   }
 );
 
-const getReadyToSwitchCallOut = (value: PopoverProps['value'], onModeChange: () => void) => (
+const getReadyToSwitchCallOut = (value: string, onModeChange: () => void) => (
   <>
     <EuiText size="s" style={{ width: 300 }}>
       <p>
@@ -51,10 +51,7 @@ const getReadyToSwitchCallOut = (value: PopoverProps['value'], onModeChange: () 
   </>
 );
 
-const getNoMatchedIndicesCallOut = (
-  value: PopoverProps['value'],
-  onCreateIndexClick: () => void
-) => (
+const getNoMatchedIndicesCallOut = (value: string, onCreateIndexClick: () => void) => (
   <>
     <EuiText size="s" style={{ width: 300 }}>
       <p>
@@ -77,7 +74,7 @@ const getNoMatchedIndicesCallOut = (
   </>
 );
 
-export const MigrationPopover = ({ value, onModeChange, matchedIndex }: PopoverProps) => {
+export const MigrationPopover = ({ fetchedIndex, onModeChange }: PopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
@@ -88,9 +85,13 @@ export const MigrationPopover = ({ value, onModeChange, matchedIndex }: PopoverP
 
   const navigateToCreateIndexPatterns = useCallback(() => {
     getCoreStart().application.navigateToApp('management', {
-      path: `/kibana/indexPatterns/create?name=${value}`,
+      path: `/kibana/indexPatterns/create?name=${fetchedIndex?.indexPatternString ?? ''}`,
     });
-  }, [value]);
+  }, [fetchedIndex]);
+
+  if (!fetchedIndex) {
+    return null;
+  }
 
   return (
     <EuiPopover
@@ -104,8 +105,11 @@ export const MigrationPopover = ({ value, onModeChange, matchedIndex }: PopoverP
       closePopover={closePopover}
     >
       <EuiPopoverTitle> {switchModeLabel} </EuiPopoverTitle>
-      {matchedIndex && getReadyToSwitchCallOut(value, switchMode)}
-      {!matchedIndex && getNoMatchedIndicesCallOut(value, navigateToCreateIndexPatterns)}
+      {fetchedIndex.indexPattern &&
+        getReadyToSwitchCallOut(fetchedIndex.indexPatternString, switchMode)}
+
+      {!fetchedIndex.indexPattern &&
+        getNoMatchedIndicesCallOut(fetchedIndex.indexPatternString, navigateToCreateIndexPatterns)}
     </EuiPopover>
   );
 };

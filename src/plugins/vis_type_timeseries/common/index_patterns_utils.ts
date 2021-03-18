@@ -14,13 +14,6 @@ export const isStringTypeIndexPattern = (
   indexPatternObject: IndexPatternObject
 ): indexPatternObject is string => typeof indexPatternObject === 'string';
 
-export const convertIndexPatternObjectToStringRepresentation = (
-  indexPatternObject: IndexPatternObject
-) =>
-  isStringTypeIndexPattern(indexPatternObject)
-    ? indexPatternObject
-    : indexPatternObject?.title ?? '';
-
 export const getIndexPatternObjectKey = (indexPatternObject: IndexPatternObject) =>
   isStringTypeIndexPattern(indexPatternObject) ? indexPatternObject : indexPatternObject?.id ?? '';
 
@@ -67,7 +60,7 @@ export const fetchIndexPattern = async (
   if (!indexPatternObject) {
     indexPattern = await indexPatternsService.getDefault();
   } else {
-    if (typeof indexPatternObject === 'string') {
+    if (isStringTypeIndexPattern(indexPatternObject)) {
       indexPattern = (await indexPatternsService.find(indexPatternObject)).find(
         (index) => index.title === indexPatternObject
       );

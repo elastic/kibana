@@ -9,7 +9,6 @@
 import {
   extractIndexPatternObjects,
   isStringTypeIndexPattern,
-  convertIndexPatternObjectToStringRepresentation,
   fetchIndexPattern,
 } from './index_patterns_utils';
 import { PanelSchema } from './types';
@@ -20,18 +19,7 @@ describe('isStringTypeIndexPattern', () => {
     expect(isStringTypeIndexPattern('index')).toBeTruthy();
   });
   test('should returns false on object-based index', () => {
-    expect(isStringTypeIndexPattern({ title: 'title', id: 'id' })).toBeFalsy();
-  });
-});
-
-describe('convertIndexPatternObjectToStringRepresentation', () => {
-  test('should return the correct title on getting string-based index', () => {
-    expect(convertIndexPatternObjectToStringRepresentation('index')).toBe('index');
-  });
-  test('should return the correct title on getting object-based index', () => {
-    expect(convertIndexPatternObjectToStringRepresentation({ title: 'title', id: 'id' })).toBe(
-      'title'
-    );
+    expect(isStringTypeIndexPattern({ id: 'id' })).toBeFalsy();
   });
 });
 
@@ -149,10 +137,7 @@ describe('fetchIndexPattern', () => {
     });
 
     test('should return default index if Kibana index not found', async () => {
-      const value = await fetchIndexPattern(
-        { id: 'indexId', title: 'title' },
-        indexPatternsService
-      );
+      const value = await fetchIndexPattern({ id: 'indexId' }, indexPatternsService);
 
       expect(value).toMatchInlineSnapshot(`
         Object {

@@ -8,7 +8,7 @@
 
 import { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
 import { AbstractSearchStrategy } from './strategies';
-import { IndexPatternObject } from '../../../common/types';
+import { FetchedIndexPattern } from '../../../common/types';
 
 export class SearchStrategyRegistry {
   private strategies: AbstractSearchStrategy[] = [];
@@ -23,13 +23,13 @@ export class SearchStrategyRegistry {
   async getViableStrategy(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPatternObject: IndexPatternObject
+    fetchedIndexPattern: FetchedIndexPattern
   ) {
     for (const searchStrategy of this.strategies) {
       const { isViable, capabilities } = await searchStrategy.checkForViability(
         requestContext,
         req,
-        indexPatternObject
+        fetchedIndexPattern
       );
 
       if (isViable) {

@@ -99,7 +99,7 @@ describe('Rollup Search Strategy', () => {
       const result = await rollupSearchStrategy.checkForViability(
         requestContext,
         {} as VisTypeTimeseriesVisDataRequest,
-        (null as unknown) as string
+        { indexPatternString: (null as unknown) as string, indexPattern: undefined }
       );
 
       expect(result).toEqual({
@@ -154,7 +154,7 @@ describe('Rollup Search Strategy', () => {
 
     test('should return fields for wildcard', async () => {
       const fields = await rollupSearchStrategy.getFieldsForWildcard(
-        indexPattern,
+        { indexPatternString: 'indexPattern', indexPattern: undefined },
         {} as IndexPatternsService,
         (() => Promise.resolve({}) as unknown) as CachedIndexPatternFetcher,
         {

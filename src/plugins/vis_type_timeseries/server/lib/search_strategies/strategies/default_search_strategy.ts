@@ -8,32 +8,30 @@
 
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
-import { VisTypeTimeseriesRequestHandlerContext, VisTypeTimeseriesRequest } from '../../../types';
 import { IndexPatternsService } from '../../../../../data/server';
-import { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
+
+import type { FetchedIndexPattern } from '../../../../common/types';
+import type {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesRequest,
+} from '../../../types';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
-  checkForViability(
+  async checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest
   ) {
-    return Promise.resolve({
+    return {
       isViable: true,
       capabilities: new DefaultSearchCapabilities(req),
-    });
+    };
   }
 
   async getFieldsForWildcard(
-    indexPattern: string,
+    fetchedIndexPattern: FetchedIndexPattern,
     indexPatternsService: IndexPatternsService,
-    getCachedIndexPatternFetcher: CachedIndexPatternFetcher,
     capabilities?: unknown
   ) {
-    return super.getFieldsForWildcard(
-      indexPattern,
-      indexPatternsService,
-      getCachedIndexPatternFetcher,
-      capabilities
-    );
+    return super.getFieldsForWildcard(fetchedIndexPattern, indexPatternsService, capabilities);
   }
 }

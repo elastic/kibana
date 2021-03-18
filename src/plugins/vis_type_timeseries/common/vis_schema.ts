@@ -40,7 +40,6 @@ export const indexPattern = schema.oneOf([
   schema.maybe(schema.string()),
   schema.object({
     id: schema.string(),
-    title: schema.maybe(schema.string()),
   }),
 ]);
 

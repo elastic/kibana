@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import { Assign } from '@kbn/utility-types';
-import type { IndexPatternObject } from '../../../../../common/types';
+import type { FetchedIndexPattern, IndexPatternObject } from '../../../../../common/types';
 
 /** @internal **/
 export interface SelectIndexComponentProps {
-  value: IndexPatternObject;
+  fetchedIndex: FetchedIndexPattern | undefined;
   onIndexChange: (value: IndexPatternObject) => void;
   onModeChange: (useKibanaIndexes: boolean) => void;
   'data-test-subj': string;
@@ -21,9 +21,8 @@ export interface SelectIndexComponentProps {
 
 /** @internal **/
 export type PopoverProps = Assign<
-  Pick<SelectIndexComponentProps, 'onModeChange' | 'value'>,
+  Pick<SelectIndexComponentProps, 'onModeChange' | 'fetchedIndex'>,
   {
     useKibanaIndices: boolean;
-    matchedIndex?: IndexPatternObject;
   }
 >;

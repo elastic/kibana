@@ -98,7 +98,7 @@ describe('CachedIndexPatternFetcher', () => {
     });
 
     test('should return default index if Kibana index not found', async () => {
-      const value = await cachedIndexPatternFetcher({ id: 'indexId', title: 'title' });
+      const value = await cachedIndexPatternFetcher({ id: 'indexId' });
 
       expect(value).toMatchInlineSnapshot(`
         Object {

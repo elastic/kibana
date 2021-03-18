@@ -9,13 +9,12 @@
 import { indexPatterns, IndexPatternsService } from '../../../../../data/server';
 
 import type { FieldSpec } from '../../../../../data/common';
-import type { IndexPatternObject, SanitizedFieldType } from '../../../../common/types';
+import type { SanitizedFieldType, FetchedIndexPattern } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 
 export const toSanitizedFieldType = (fields: FieldSpec[]) => {
   return fields
@@ -64,30 +63,25 @@ export abstract class AbstractSearchStrategy {
   checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPatternObject: IndexPatternObject
+    fetchedIndexPattern: FetchedIndexPattern
   ): Promise<{ isViable: boolean; capabilities: any }> {
     throw new TypeError('Must override method');
   }
 
   async getFieldsForWildcard(
-    indexPatternObject: IndexPatternObject,
+    fetchedIndexPattern: FetchedIndexPattern,
     indexPatternsService: IndexPatternsService,
-    cachedIndexPatternFetcher: CachedIndexPatternFetcher,
     capabilities?: unknown,
     options?: Partial<{
       type: string;
       rollupIndex: string;
     }>
   ) {
-    const { indexPattern, indexPatternString } = await cachedIndexPatternFetcher(
-      indexPatternObject
-    );
-
     return toSanitizedFieldType(
-      indexPattern
-        ? indexPattern.getNonScriptedFields()
+      fetchedIndexPattern.indexPattern
+        ? fetchedIndexPattern.indexPattern.getNonScriptedFields()
         : await indexPatternsService.getFieldsForWildcard({
-            pattern: indexPatternString,
+            pattern: fetchedIndexPattern.indexPatternString,
             metaFields: [],
             ...options,
           })
