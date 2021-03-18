@@ -115,6 +115,7 @@ export const CasesFindRequestRt = rt.partial({
   searchFields: rt.array(rt.string),
   sortField: rt.string,
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+  class: rt.string,
 });
 
 export const CaseResponseRt = rt.intersection([
