@@ -83,24 +83,22 @@ simply navigate back to *Dashboard*.
 [[runtime-fields-7-12]]
 === Runtime fields in Discover
 
-Runtime fields are now available in *Discover*. You can view runtime fields in
-*Discover* like any other field. Refer to the {ref}/runtime.html[runtime fields] documentation for more information.
+Runtime fields are now available in *Discover*&mdash;view them like any other field.
+Refer to the {ref}/runtime.html[runtime fields] documentation for more information.
 
 [float]
 [[alerting-7-12]]
 === {es} query alert
 
-*Alerting* adds a number of new alert types, including the {kibana-ref-all}/7.12/alert-type-es-query.html[{es} query alert],
-which allows you to create alerts using Search DSL queries.
-Use the {es} query alert with any of your indices and get alerted on the number of matching documents.
-The {es} query alert is designed for
+The new {kibana-ref-all}/7.12/alert-type-es-query.html[{es} query alert] allows you
+to create alerts using {ref}/query-dsl.html[DSL queries].
+Use this alert with any of your indices and get alerted on the number of matching documents.
+The {es} query alert is especially good for
 advanced use cases where you want to create custom alerts with custom DSL queries.
 
 [role="screenshot"]
 image::user/images/highlights-es-query.png[Elasticsearch query alert]
 
-Other new alert types include the <<tracking-alert-7-12,tracking containment alert>> in *Maps*
-and the <<anomaly-alert-7-12,{anomaly-detect} alert>> in *Machine Learning*.
 
 [float]
 [[maps-7-12]]
@@ -112,8 +110,8 @@ and the <<anomaly-alert-7-12,{anomaly-detect} alert>> in *Machine Learning*.
 
 The {kibana-ref}/geo-alerting.html[tracking containment alert] allows you to monitor an entity’s
 location as it relates to a boundary, triggering a notification while contained,
-or when entering or leaving a boundary. Also
-known as “geo-fencing”, the tracking alert feature is common for tracking
+or when entering or leaving a boundary. Also known
+as “geo-fencing”, this feature is common for tracking
 the movement of devices, such as
 vehicles within a fleet. The tracking containment alert is a
 https://www.elastic.co/subscriptions[subscription feature].
@@ -121,8 +119,7 @@ https://www.elastic.co/subscriptions[subscription feature].
 [float]
 ==== Labels for polygons and lines
 
-You can now add labels to polygons and lines.
-This feature can help anyone working with your map to immediately have
+Adding labels to polygons and lines gives anyone working with your map
 the right context for analysis.
 
 [role="screenshot"]
@@ -139,7 +136,7 @@ refer to {kibana-ref}/drilldowns.html#url-drilldowns[URL drilldowns].
 
 [float]
 [[lens-7-12]]
-=== Lens&mdash;Functions, interactions, and improvements
+=== Lens&mdash;functions, interactions, and improvements
 
 [float]
 ==== New functions
