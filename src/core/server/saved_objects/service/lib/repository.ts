@@ -73,10 +73,16 @@ import {
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Left = { tag: 'Left'; error: Record<string, any> };
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Right = { tag: 'Right'; value: Record<string, any> };
+interface Left {
+  tag: 'Left';
+  error: Record<string, any>;
+}
+
+interface Right {
+  tag: 'Right';
+  value: Record<string, any>;
+}
+
 type Either = Left | Right;
 const isLeft = (either: Either): either is Left => either.tag === 'Left';
 const isRight = (either: Either): either is Right => either.tag === 'Right';
@@ -94,7 +100,7 @@ export interface SavedObjectsRepositoryOptions {
 /**
  * @public
  */
-export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsIncrementCounterOptions<T = unknown> extends SavedObjectsBaseOptions {
   /**
    * (default=false) If true, sets all the counter fields to 0 if they don't
    * already exist. Existing fields will be left as-is and won't be incremented.
@@ -107,6 +113,10 @@ export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOpt
    * operation. See {@link MutatingOperationRefreshSetting}
    */
   refresh?: MutatingOperationRefreshSetting;
+  /**
+   * Attributes to use when upserting the document if it doesn't exist.
+   */
+  upsertAttributes?: T;
 }
 
 /**
@@ -1658,6 +1668,20 @@ export class SavedObjectsRepository {
    *   .incrementCounter('dashboard_counter_type', 'counter_id', [
    *     'stats.apiCalls',
    *   ])
+   *
+   * // Increment the apiCalls field counter by 4
+   * repository
+   *   .incrementCounter('dashboard_counter_type', 'counter_id', [
+   *     { fieldName: 'stats.apiCalls' incrementBy: 4 },
+   *   ])
+   *
+   * // Initialize the document with arbitrary fields if not present
+   * repository.incrementCounter<{ appId: string }>(
+   *   'dashboard_counter_type',
+   *   'counter_id',
+   *   [ 'stats.apiCalls'],
+   *   { upsertAttributes: { appId: 'myId' } }
+   * )
    * ```
    *
    * @param type - The type of saved object whose fields should be incremented
@@ -1670,7 +1694,7 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
-    options: SavedObjectsIncrementCounterOptions = {}
+    options: SavedObjectsIncrementCounterOptions<T> = {}
   ): Promise<SavedObject<T>> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
@@ -1692,12 +1716,16 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const { migrationVersion, refresh = DEFAULT_REFRESH_SETTING, initialize = false } = options;
+    const {
+      migrationVersion,
+      refresh = DEFAULT_REFRESH_SETTING,
+      initialize = false,
+      upsertAttributes,
+    } = options;
 
     const normalizedCounterFields = counterFields.map((counterField) => {
       const fieldName = typeof counterField === 'string' ? counterField : counterField.fieldName;
       const incrementBy = typeof counterField === 'string' ? 1 : counterField.incrementBy || 1;
-
       return {
         fieldName,
         incrementBy: initialize ? 0 : incrementBy,
@@ -1721,11 +1749,14 @@ export class SavedObjectsRepository {
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: normalizedCounterFields.reduce((acc, counterField) => {
-        const { fieldName, incrementBy } = counterField;
-        acc[fieldName] = incrementBy;
-        return acc;
-      }, {} as Record<string, number>),
+      attributes: {
+        ...(upsertAttributes ?? {}),
+        ...normalizedCounterFields.reduce((acc, counterField) => {
+          const { fieldName, incrementBy } = counterField;
+          acc[fieldName] = incrementBy;
+          return acc;
+        }, {} as Record<string, number>),
+      },
       migrationVersion,
       updated_at: time,
     });

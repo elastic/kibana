@@ -102,6 +102,7 @@ export function registerApplicationUsageCollector(
         if (typeof savedObjectsClient === 'undefined') {
           return;
         }
+        // here
         const [
           { saved_objects: rawApplicationUsageTotals },
           { saved_objects: rawApplicationUsageDaily },

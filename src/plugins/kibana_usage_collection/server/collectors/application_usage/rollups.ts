@@ -18,6 +18,7 @@ import {
 } from './saved_objects_types';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
+import { getDailyId } from '../../../../usage_collection/common/application_usage';
 
 /**
  * For Rolling the daily data, we only care about the stored attributes and the version (to avoid overwriting via concurrent requests)
@@ -58,10 +59,7 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
         } = doc;
         const dayId = moment(timestamp).format('YYYY-MM-DD');
 
-        const dailyId =
-          !viewId || viewId === MAIN_APP_DEFAULT_VIEW_ID
-            ? `${appId}:${dayId}`
-            : `${appId}:${dayId}:${viewId}`;
+        const dailyId = getDailyId({ dayId, appId, viewId });
 
         const existingDoc =
           toCreate.get(dailyId) ||
@@ -125,7 +123,11 @@ async function getDailyDoc(
   dayId: string
 ): Promise<ApplicationUsageDailyWithVersion> {
   try {
-    return await savedObjectsClient.get<ApplicationUsageDaily>(SAVED_OBJECTS_DAILY_TYPE, id);
+    const { attributes, version } = await savedObjectsClient.get<ApplicationUsageDaily>(
+      SAVED_OBJECTS_DAILY_TYPE,
+      id
+    );
+    return { attributes, version };
   } catch (err) {
     if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
       return {
