@@ -5,18 +5,4 @@
  * 2.0.
  */
 
-.wrapped-icon {
-  width: 30px;
-  height: 30px;
-  overflow: hidden;
-  margin-right: 4px;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  img {
-    max-width: 100%;
-    max-height: 100%;
-  }
-}
+export * from './search_session_name';

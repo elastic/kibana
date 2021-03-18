@@ -57,6 +57,7 @@ export type IndexPatternField = IFieldType & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
   meta?: boolean;
+  runtime?: boolean;
 };
 
 export interface IndexPatternLayer {
