@@ -26,18 +26,18 @@
   padding-top: $euiSizeS + 3px;
   box-shadow: 0 0 0 1px $euiFormBorderColor;
 
-  &:not(:focus):not(:invalid) {
+  &:not(.kbnQueryBar__textarea--autoHeight):not(:invalid) {
     @include euiYScrollWithShadows;
   }
 
-  &:not(:focus) {
+  &:not(.kbnQueryBar__textarea--autoHeight) {
     white-space: nowrap;
     overflow-y: hidden;
     overflow-x: hidden;
   }
 
   // When focused, let it scroll
-  &:focus {
+  &.kbnQueryBar__textarea--autoHeight {
     overflow-x: auto;
     overflow-y: auto;
     white-space: normal;

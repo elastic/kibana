@@ -80,8 +80,8 @@ import {
 import {
   getAgentStatusById,
   authenticateAgentWithAccessToken,
-  listAgents,
-  getAgent,
+  getAgentsByKuery,
+  getAgentById,
 } from './services/agents';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerFleetUsageCollector } from './collectors/register';
@@ -322,8 +322,8 @@ export class FleetPlugin
         },
       },
       agentService: {
-        getAgent,
-        listAgents,
+        getAgent: getAgentById,
+        listAgents: getAgentsByKuery,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },

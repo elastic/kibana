@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from '../common/constants';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
 import { initializeBrowserDriverFactory } from './browsers';
-import { buildConfig, ReportingConfigType } from './config';
+import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { LevelLogger, ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
-import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
+import type {
+  ReportingRequestHandlerContext,
+  ReportingSetup,
+  ReportingSetupDeps,
+  ReportingStart,
+  ReportingStartDeps,
+} from './types';
 import { registerReportingUsageCollector } from './usage';
-import type { ReportingRequestHandlerContext } from './types';
-
-const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
 
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
@@ -44,28 +45,7 @@ export class ReportingPlugin
       }
     });
 
-    core.uiSettings.register({
-      [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
-        name: i18n.translate('xpack.reporting.pdfFooterImageLabel', {
-          defaultMessage: 'PDF footer image',
-        }),
-        value: null,
-        description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
-          defaultMessage: `Custom image to use in the PDF's footer`,
-        }),
-        sensitive: true,
-        type: 'image',
-        schema: schema.nullable(schema.byteSize({ max: '200kb' })),
-        category: [PLUGIN_ID],
-        // Used client-side for size validation
-        validation: {
-          maxSize: {
-            length: kbToBase64Length(200),
-            description: '200 kB',
-          },
-        },
-      },
-    });
+    registerUiSettings(core);
 
     const { elasticsearch, http } = core;
     const { features, licensing, security, spaces, taskManager } = plugins;
@@ -122,6 +102,8 @@ export class ReportingPlugin
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
         store,
+        esClient: core.elasticsearch.client,
+        data: plugins.data,
         taskManager: plugins.taskManager,
       });
 

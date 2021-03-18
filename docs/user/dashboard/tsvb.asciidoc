@@ -1,4 +1,4 @@
-[[TSVB]]
+[[tsvb]]
 === TSVB
 
 *TSVB* enables you to visualize the data from multiple data series, supports <<aggregation-reference, 
@@ -135,7 +135,7 @@ current time is 9:41, *TSVB* displays only the last 10 minutes &mdash; from 9:30
 [float]
 ===== How do I calculate the difference between two data series?
 
-Performing math across data series is unsupported in *TSVB*. To calculate the difference between two data series, use <<create-panels-with-timelion, Timelion>> or <<vega, Vega>>.
+Performing math across data series is unsupported in *TSVB*. To calculate the difference between two data series, use <<timelion, *Timelion*>> or <<vega, *Vega*>>.
 
 [float]
 ===== How do I compare the current versus previous month?
@@ -156,7 +156,7 @@ The ability to calculate a month over month change is not fully supported in *TS
 time filter is set to 3 months or more _and_ the *Interval* is `1m`. Use the *Derivative* to get the absolute monthly change. To convert to a percent, 
 add the *Math* function with the `params.current / (params.current - params.derivative)` formula, then select *Percent* from the *Data Formatter* dropdown.
 
-For other types of month over month calculations, use <<create-panels-with-timelion, Timelion>> or <<vega, Vega>>.
+For other types of month over month calculations, use <<timelion, *Timelion*>> or <<vega, *Vega*>>.
 
 [float]
 ===== How do I calculate the duration between the start and end of an event?
