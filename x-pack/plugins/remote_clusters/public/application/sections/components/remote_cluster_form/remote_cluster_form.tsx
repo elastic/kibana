@@ -96,12 +96,13 @@ export class RemoteClusterForm extends Component<Props, State> {
 
     // Connection mode should default to "proxy" in cloud
     const defaultMode = isCloudEnabled ? PROXY_MODE : SNIFF_MODE;
+    const isCloudUrlEnabled: boolean = isCloudUrl(cluster) && isCloudEnabled;
     const fieldsState: FormFields = merge(
       {},
       {
         ...defaultClusterValues,
         mode: defaultMode,
-        isCloudUrl: isCloudUrl(cluster) && isCloudEnabled,
+        isCloudUrl: isCloudUrlEnabled,
         cloudUrl: convertProxyConnectionToCloudUrl(cluster),
       },
       cluster

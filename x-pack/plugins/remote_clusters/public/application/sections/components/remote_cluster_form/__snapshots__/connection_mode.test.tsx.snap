@@ -1,0 +1,860 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConnectionMode not on cloud proxy mode renders cluster with errors 1`] = `
+<div
+  class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+  role="group"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <h2
+        class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+      >
+        Connection mode
+      </h2>
+      <div
+        class="euiText euiText--small euiDescribedFormGroup__description"
+      >
+        <div
+          class="euiTextColor euiTextColor--subdued"
+        >
+          Use seed nodes by default, or switch to proxy mode.
+          <div
+            class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
+            id="generated-id-row"
+          >
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                class="euiSwitch"
+              >
+                <button
+                  aria-checked="true"
+                  aria-labelledby="generated-id"
+                  class="euiSwitch__button"
+                  data-test-subj="remoteClusterFormConnectionModeToggle"
+                  id="generated-id"
+                  role="switch"
+                  type="button"
+                >
+                  <span
+                    class="euiSwitch__body"
+                  >
+                    <span
+                      class="euiSwitch__thumb"
+                    />
+                    <span
+                      class="euiSwitch__track"
+                    >
+                      <span
+                        class="euiSwitch__icon"
+                        data-euiicon-type="cross"
+                      />
+                      <span
+                        class="euiSwitch__icon euiSwitch__icon--checked"
+                        data-euiicon-type="check"
+                      />
+                    </span>
+                  </span>
+                </button>
+                <span
+                  class="euiSwitch__label"
+                  id="generated-id"
+                >
+                  Use proxy mode
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+    >
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormProxyAddressFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid="true"
+            class="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
+            for="generated-id"
+          >
+            Proxy address
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-describedby="generated-id-help generated-id-error-0"
+                class="euiFieldText euiFieldText--fullWidth"
+                data-test-subj="remoteClusterFormProxyAddressInput"
+                id="generated-id"
+                placeholder="host:port"
+                type="text"
+                value=""
+              />
+            </div>
+          </div>
+          <div
+            aria-live="polite"
+            class="euiFormErrorText euiFormRow__text"
+            id="generated-id-error-0"
+          >
+            <span>
+              some error
+            </span>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            The address to use for remote connections.
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormServerNameFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid="true"
+            class="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
+            for="generated-id"
+          >
+            Server name (optional)
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-describedby="generated-id-help generated-id-error-0"
+                class="euiFieldText euiFieldText--fullWidth"
+                id="generated-id"
+                type="text"
+                value=""
+              />
+            </div>
+          </div>
+          <div
+            aria-live="polite"
+            class="euiFormErrorText euiFormRow__text"
+            id="generated-id-error-0"
+          >
+            <span>
+              some error
+            </span>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. 
+            <button
+              class="euiLink euiLink--primary"
+              type="button"
+            >
+              Learn more.
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            class="euiFormLabel euiFormRow__label"
+            for="generated-id"
+          >
+            Socket connections
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-describedby="generated-id-help"
+                class="euiFieldNumber euiFieldNumber--fullWidth"
+                id="generated-id"
+                type="number"
+                value="18"
+              />
+            </div>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            The number of socket connections to open per remote cluster.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ConnectionMode not on cloud proxy mode renders cluster without errors 1`] = `
+<div
+  class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+  role="group"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <h2
+        class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+      >
+        Connection mode
+      </h2>
+      <div
+        class="euiText euiText--small euiDescribedFormGroup__description"
+      >
+        <div
+          class="euiTextColor euiTextColor--subdued"
+        >
+          Use seed nodes by default, or switch to proxy mode.
+          <div
+            class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
+            id="generated-id-row"
+          >
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                class="euiSwitch"
+              >
+                <button
+                  aria-checked="true"
+                  aria-labelledby="generated-id"
+                  class="euiSwitch__button"
+                  data-test-subj="remoteClusterFormConnectionModeToggle"
+                  id="generated-id"
+                  role="switch"
+                  type="button"
+                >
+                  <span
+                    class="euiSwitch__body"
+                  >
+                    <span
+                      class="euiSwitch__thumb"
+                    />
+                    <span
+                      class="euiSwitch__track"
+                    >
+                      <span
+                        class="euiSwitch__icon"
+                        data-euiicon-type="cross"
+                      />
+                      <span
+                        class="euiSwitch__icon euiSwitch__icon--checked"
+                        data-euiicon-type="check"
+                      />
+                    </span>
+                  </span>
+                </button>
+                <span
+                  class="euiSwitch__label"
+                  id="generated-id"
+                >
+                  Use proxy mode
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+    >
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormProxyAddressFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid="false"
+            class="euiFormLabel euiFormRow__label"
+            for="generated-id"
+          >
+            Proxy address
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-describedby="generated-id-help"
+                class="euiFieldText euiFieldText--fullWidth"
+                data-test-subj="remoteClusterFormProxyAddressInput"
+                id="generated-id"
+                placeholder="host:port"
+                type="text"
+                value=""
+              />
+            </div>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            The address to use for remote connections.
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormServerNameFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid="false"
+            class="euiFormLabel euiFormRow__label"
+            for="generated-id"
+          >
+            Server name (optional)
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-describedby="generated-id-help"
+                class="euiFieldText euiFieldText--fullWidth"
+                id="generated-id"
+                type="text"
+                value=""
+              />
+            </div>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. 
+            <button
+              class="euiLink euiLink--primary"
+              type="button"
+            >
+              Learn more.
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormProxySocketConnectionsFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            class="euiFormLabel euiFormRow__label"
+            for="generated-id"
+          >
+            Socket connections
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-describedby="generated-id-help"
+                class="euiFieldNumber euiFieldNumber--fullWidth"
+                id="generated-id"
+                type="number"
+                value="18"
+              />
+            </div>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            The number of socket connections to open per remote cluster.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ConnectionMode not on cloud sniff mode renders cluster with errors 1`] = `
+<div
+  class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+  role="group"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <h2
+        class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+      >
+        Connection mode
+      </h2>
+      <div
+        class="euiText euiText--small euiDescribedFormGroup__description"
+      >
+        <div
+          class="euiTextColor euiTextColor--subdued"
+        >
+          Use seed nodes by default, or switch to proxy mode.
+          <div
+            class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
+            id="generated-id-row"
+          >
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                class="euiSwitch"
+              >
+                <button
+                  aria-checked="false"
+                  aria-labelledby="generated-id"
+                  class="euiSwitch__button"
+                  data-test-subj="remoteClusterFormConnectionModeToggle"
+                  id="generated-id"
+                  role="switch"
+                  type="button"
+                >
+                  <span
+                    class="euiSwitch__body"
+                  >
+                    <span
+                      class="euiSwitch__thumb"
+                    />
+                    <span
+                      class="euiSwitch__track"
+                    >
+                      <span
+                        class="euiSwitch__icon"
+                        data-euiicon-type="cross"
+                      />
+                      <span
+                        class="euiSwitch__icon euiSwitch__icon--checked"
+                        data-euiicon-type="check"
+                      />
+                    </span>
+                  </span>
+                </button>
+                <span
+                  class="euiSwitch__label"
+                  id="generated-id"
+                >
+                  Use proxy mode
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+    >
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormSeedNodesFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid="true"
+            class="euiFormLabel euiFormRow__label euiFormLabel-isInvalid"
+            for="generated-id"
+          >
+            Seed nodes
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            aria-describedby="generated-id-help generated-id-error-0"
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            class="euiComboBox euiComboBox--fullWidth euiComboBox-isInvalid"
+            data-test-subj="remoteClusterFormSeedsInput"
+            role="combobox"
+          >
+            <div
+              class="euiFormControlLayout euiFormControlLayout--fullWidth"
+            >
+              <div
+                class="euiFormControlLayout__childrenWrapper"
+              >
+                <div
+                  class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap-isClearable"
+                  data-test-subj="comboBoxInput"
+                  tabindex="-1"
+                >
+                  <p
+                    class="euiComboBoxPlaceholder"
+                  >
+                    host:port
+                  </p>
+                  <div
+                    class="euiComboBox__input"
+                    style="font-size:14px;display:inline-block"
+                  >
+                    <input
+                      aria-controls=""
+                      data-test-subj="comboBoxSearchInput"
+                      id="generated-id"
+                      role="textbox"
+                      style="box-sizing:content-box;width:1px"
+                      value=""
+                    />
+                    <div
+                      style="position:absolute;top:0;left:0;visibility:hidden;height:0;overflow:scroll;white-space:pre"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            aria-live="polite"
+            class="euiFormErrorText euiFormRow__text"
+            id="generated-id-error-0"
+          >
+            <span>
+              some error
+            </span>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            An IP address or host name, followed by the 
+            <button
+              class="euiLink euiLink--primary"
+              type="button"
+            >
+              transport port
+            </button>
+             of the remote cluster. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormNodeConnectionsFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            class="euiFormLabel euiFormRow__label"
+            for="generated-id"
+          >
+            Node connections
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-describedby="generated-id-help"
+                class="euiFieldNumber euiFieldNumber--fullWidth"
+                id="generated-id"
+                type="number"
+                value="3"
+              />
+            </div>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            The number of gateway nodes to connect to for this cluster.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ConnectionMode not on cloud sniff mode renders cluster without errors 1`] = `
+<div
+  class="euiDescribedFormGroup euiDescribedFormGroup--fullWidth"
+  role="group"
+>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <h2
+        class="euiTitle euiTitle--small euiTitle euiTitle--xsmall euiDescribedFormGroup__title"
+      >
+        Connection mode
+      </h2>
+      <div
+        class="euiText euiText--small euiDescribedFormGroup__description"
+      >
+        <div
+          class="euiTextColor euiTextColor--subdued"
+        >
+          Use seed nodes by default, or switch to proxy mode.
+          <div
+            class="euiFormRow euiFormRow--hasEmptyLabelSpace euiFormRow--fullWidth"
+            id="generated-id-row"
+          >
+            <div
+              class="euiFormRow__fieldWrapper"
+            >
+              <div
+                class="euiSwitch"
+              >
+                <button
+                  aria-checked="false"
+                  aria-labelledby="generated-id"
+                  class="euiSwitch__button"
+                  data-test-subj="remoteClusterFormConnectionModeToggle"
+                  id="generated-id"
+                  role="switch"
+                  type="button"
+                >
+                  <span
+                    class="euiSwitch__body"
+                  >
+                    <span
+                      class="euiSwitch__thumb"
+                    />
+                    <span
+                      class="euiSwitch__track"
+                    >
+                      <span
+                        class="euiSwitch__icon"
+                        data-euiicon-type="cross"
+                      />
+                      <span
+                        class="euiSwitch__icon euiSwitch__icon--checked"
+                        data-euiicon-type="check"
+                      />
+                    </span>
+                  </span>
+                </button>
+                <span
+                  class="euiSwitch__label"
+                  id="generated-id"
+                >
+                  Use proxy mode
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiDescribedFormGroup__fields euiDescribedFormGroup__fieldPadding--xsmall"
+    >
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormSeedNodesFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            aria-invalid="false"
+            class="euiFormLabel euiFormRow__label"
+            for="generated-id"
+          >
+            Seed nodes
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            aria-describedby="generated-id-help"
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            class="euiComboBox euiComboBox--fullWidth"
+            data-test-subj="remoteClusterFormSeedsInput"
+            role="combobox"
+          >
+            <div
+              class="euiFormControlLayout euiFormControlLayout--fullWidth"
+            >
+              <div
+                class="euiFormControlLayout__childrenWrapper"
+              >
+                <div
+                  class="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap-isClearable"
+                  data-test-subj="comboBoxInput"
+                  tabindex="-1"
+                >
+                  <p
+                    class="euiComboBoxPlaceholder"
+                  >
+                    host:port
+                  </p>
+                  <div
+                    class="euiComboBox__input"
+                    style="font-size:14px;display:inline-block"
+                  >
+                    <input
+                      aria-controls=""
+                      data-test-subj="comboBoxSearchInput"
+                      id="generated-id"
+                      role="textbox"
+                      style="box-sizing:content-box;width:1px"
+                      value=""
+                    />
+                    <div
+                      style="position:absolute;top:0;left:0;visibility:hidden;height:0;overflow:scroll;white-space:pre"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            An IP address or host name, followed by the 
+            <button
+              class="euiLink euiLink--primary"
+              type="button"
+            >
+              transport port
+            </button>
+             of the remote cluster. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable.
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFormRow euiFormRow--fullWidth"
+        data-test-subj="remoteClusterFormNodeConnectionsFormRow"
+        id="generated-id-row"
+      >
+        <div
+          class="euiFormRow__labelWrapper"
+        >
+          <label
+            class="euiFormLabel euiFormRow__label"
+            for="generated-id"
+          >
+            Node connections
+          </label>
+        </div>
+        <div
+          class="euiFormRow__fieldWrapper"
+        >
+          <div
+            class="euiFormControlLayout euiFormControlLayout--fullWidth"
+          >
+            <div
+              class="euiFormControlLayout__childrenWrapper"
+            >
+              <input
+                aria-describedby="generated-id-help"
+                class="euiFieldNumber euiFieldNumber--fullWidth"
+                id="generated-id"
+                type="number"
+                value="3"
+              />
+            </div>
+          </div>
+          <div
+            class="euiFormHelpText euiFormRow__text"
+            id="generated-id-help"
+          >
+            The number of gateway nodes to connect to for this cluster.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

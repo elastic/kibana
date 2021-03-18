@@ -21,7 +21,7 @@ export function getUserHasLeftApp() {
   return _userHasLeftApp;
 }
 
-interface AppRouter {
+export interface AppRouter {
   history: ScopedHistory;
   route: { location: ScopedHistory['location'] };
 }

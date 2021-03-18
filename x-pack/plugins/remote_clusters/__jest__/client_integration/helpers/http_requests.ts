@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
+import sinon, { SinonFakeServer } from 'sinon';
+import { Cluster } from '../../../common/lib';
 
 // Register helpers to mock HTTP Requests
-const registerHttpRequestMockHelpers = (server) => {
-  const mockResponse = (response) => [
+const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
+  const mockResponse = (response: any[]) => [
     200,
     { 'Content-Type': 'application/json' },
     JSON.stringify(response),
   ];
 
-  const setLoadRemoteClustersResponse = (response) => {
-    server.respondWith('GET', '/api/remote_clusters', [
-      200,
-      { 'Content-Type': 'application/json' },
-      JSON.stringify(response),
-    ]);
+  const setLoadRemoteClustersResponse = (response: Cluster[] = []) => {
+    server.respondWith('GET', '/api/remote_clusters', mockResponse(response));
   };
 
-  const setDeleteRemoteClusterResponse = (response) => {
+  const setDeleteRemoteClusterResponse = (
+    response: { itemsDeleted: string[]; errors: string[] } = { itemsDeleted: [], errors: [] }
+  ) => {
     server.respondWith('DELETE', /api\/remote_clusters/, mockResponse(response));
   };
 

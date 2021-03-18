@@ -10,15 +10,19 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './special_characters';
 import { setup } from './remote_clusters_add.helpers';
+import { SinonFakeServer } from 'sinon';
+import { TestBed } from '@kbn/test/jest';
+
+const notInArray = (array: string[]) => (value: string) => array.indexOf(value) < 0;
 
 describe('Create Remote cluster', () => {
   describe('on component mount', () => {
-    let find;
-    let exists;
-    let actions;
-    let form;
-    let server;
-    let component;
+    let find: TestBed['find'];
+    let exists: TestBed['exists'];
+    let actions: { clickSaveForm: () => void };
+    let form: TestBed['form'];
+    let server: SinonFakeServer;
+    let component: TestBed['component'];
 
     beforeAll(() => {
       ({ server } = setupEnvironment());
@@ -30,7 +34,7 @@ describe('Create Remote cluster', () => {
 
     beforeEach(async () => {
       await act(async () => {
-        ({ form, exists, find, actions, component } = setup());
+        ({ form, exists, find, actions, component } = await setup());
       });
       component.update();
     });
@@ -93,13 +97,13 @@ describe('Create Remote cluster', () => {
 
   describe('form validation', () => {
     describe('remote cluster name', () => {
-      let component;
-      let actions;
-      let form;
+      let component: TestBed['component'];
+      let actions: { clickSaveForm: () => void };
+      let form: TestBed['form'];
 
       beforeEach(async () => {
         await act(async () => {
-          ({ component, form, actions } = setup());
+          ({ component, form, actions } = await setup());
         });
 
         component.update();
@@ -114,7 +118,7 @@ describe('Create Remote cluster', () => {
       });
 
       test('should only allow alpha-numeric characters, "-" (dash) and "_" (underscore)', async () => {
-        const expectInvalidChar = (char) => {
+        const expectInvalidChar = (char: string) => {
           if (char === '-' || char === '_') {
             return;
           }
@@ -137,13 +141,13 @@ describe('Create Remote cluster', () => {
     });
 
     describe('seeds', () => {
-      let actions;
-      let form;
-      let component;
+      let actions: { clickSaveForm: () => void };
+      let form: TestBed['form'];
+      let component: TestBed['component'];
 
       beforeEach(async () => {
         await act(async () => {
-          ({ form, actions, component } = setup());
+          ({ form, actions, component } = await setup());
         });
 
         component.update();
@@ -154,9 +158,7 @@ describe('Create Remote cluster', () => {
       test('should only allow alpha-numeric characters and "-" (dash) in the node "host" part', async () => {
         await actions.clickSaveForm(); // display form errors
 
-        const notInArray = (array) => (value) => array.indexOf(value) < 0;
-
-        const expectInvalidChar = (char) => {
+        const expectInvalidChar = (char: string) => {
           form.setComboBoxValue('remoteClusterFormSeedsInput', `192.16${char}:3000`);
           expect(form.getErrorsMessages()).toContain(
             `Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`
@@ -180,13 +182,13 @@ describe('Create Remote cluster', () => {
     });
 
     describe('proxy address', () => {
-      let actions;
-      let form;
-      let component;
+      let actions: { clickSaveForm: () => void };
+      let form: TestBed['form'];
+      let component: TestBed['component'];
 
       beforeEach(async () => {
         await act(async () => {
-          ({ form, actions, component } = setup());
+          ({ form, actions, component } = await setup());
         });
 
         component.update();
@@ -202,9 +204,7 @@ describe('Create Remote cluster', () => {
       test('should only allow alpha-numeric characters and "-" (dash) in the proxy address "host" part', async () => {
         await actions.clickSaveForm(); // display form errors
 
-        const notInArray = (array) => (value) => array.indexOf(value) < 0;
-
-        const expectInvalidChar = (char) => {
+        const expectInvalidChar = (char: string) => {
           form.setInputValue('remoteClusterFormProxyAddressInput', `192.16${char}:3000`);
           expect(form.getErrorsMessages()).toContain(
             'Address must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.'

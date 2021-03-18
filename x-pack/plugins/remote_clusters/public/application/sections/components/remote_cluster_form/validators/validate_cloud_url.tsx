@@ -13,7 +13,7 @@ export const i18nTexts = {
   urlEmpty: (
     <FormattedMessage
       id="xpack.remoteClusters.cloudDeploymentForm.urlRequiredError"
-      defaultMessage="A url is required"
+      defaultMessage="A url is required."
     />
   ),
   urlInvalid: (
@@ -54,7 +54,7 @@ const formatUrl = (url: string) => {
 };
 
 export const convertProxyConnectionToCloudUrl = (cluster?: Cluster): string => {
-  if (!isCloudUrl) {
+  if (!isCloudUrl(cluster)) {
     return '';
   }
   return cluster?.serverName ?? '';
@@ -77,10 +77,10 @@ export const convertCloudUrlToProxyConnection = (
 };
 
 export const validateCloudUrl = (cloudDeploymentUrl: string): JSX.Element | null => {
-  cloudDeploymentUrl = formatUrl(cloudDeploymentUrl);
   if (!cloudDeploymentUrl) {
     return i18nTexts.urlEmpty;
   }
+  cloudDeploymentUrl = formatUrl(cloudDeploymentUrl);
   try {
     new URL(cloudDeploymentUrl);
   } catch (err) {

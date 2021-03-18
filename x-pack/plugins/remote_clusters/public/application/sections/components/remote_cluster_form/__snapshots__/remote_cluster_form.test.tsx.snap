@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RemoteClusterForm proxy mode renders correct connection settings when user enables proxy mode 1`] = `
+exports[`RemoteClusterForm not on cloud proxy mode renders correct connection settings when user enables proxy mode 1`] = `
 <RemoteClusterForm
   fields={
     Object {
@@ -1429,7 +1429,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
 </RemoteClusterForm>
 `;
 
-exports[`RemoteClusterForm renders untouched state 1`] = `
+exports[`RemoteClusterForm not on cloud renders untouched state 1`] = `
 Array [
   <div
     class="euiForm"
@@ -1860,7 +1860,7 @@ Array [
 ]
 `;
 
-exports[`RemoteClusterForm validation renders invalid state and a global form error when the user tries to submit an invalid form 1`] = `
+exports[`RemoteClusterForm not on cloud validation renders invalid state and a global form error when the user tries to submit an invalid form 1`] = `
 Array [
   <div
     class="euiFormRow euiFormRow--fullWidth"

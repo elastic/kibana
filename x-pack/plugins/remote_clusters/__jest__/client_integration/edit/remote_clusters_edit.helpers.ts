@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 
-import { RemoteClusterEdit } from '../../../public/application/sections/remote_cluster_edit';
+import { RemoteClusterEdit } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
-import { registerRouter } from '../../../public/application/services/routing';
+import { AppRouter, registerRouter } from '../../../public/application/services';
 
 export const REMOTE_CLUSTER_EDIT_NAME = 'new-york';
 
@@ -19,14 +19,14 @@ export const REMOTE_CLUSTER_EDIT = {
   skipUnavailable: true,
 };
 
-const testBedConfig = {
+const testBedConfig: TestBedConfig = {
   store: createRemoteClustersStore,
   memoryRouter: {
-    onRouter: (router) => registerRouter(router),
+    onRouter: (router: AppRouter) => registerRouter(router),
     // The remote cluster name to edit is read from the router ":id" param
     // so we first set it in our initial entries
     initialEntries: [`/${REMOTE_CLUSTER_EDIT_NAME}`],
-    // and then we declarae the :id param on the component route path
+    // and then we declare the :id param on the component route path
     componentRoutePath: '/:name',
   },
 };

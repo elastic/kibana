@@ -47,7 +47,7 @@ const description = (
 const descriptionOnCloud = (
   <FormattedMessage
     id="xpack.remoteClusters.remoteClusterForm.sectionModeCloudDescription"
-    defaultMessage="Copy and paste the Elasticsearch endpoint URL of the remote deployment to
+    defaultMessage="Copy and paste the Elasticsearch endpoint url of the remote deployment to
   automatically configure the remote cluster or enter proxy address and server name manually."
   />
 );
@@ -223,7 +223,7 @@ export const ConnectionMode: FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.fieldCloudUrlLabel"
-                defaultMessage="Cloud deployment url"
+                defaultMessage="Elasticsearch endpoint url"
               />
             }
             isInvalid={Boolean(areErrorsVisible && cloudUrlError)}
@@ -238,7 +238,7 @@ export const ConnectionMode: FunctionComponent<Props> = ({
                     <EuiText size="xs">
                       <FormattedMessage
                         id="xpack.remoteClusters.remoteClusterForm.fieldCloudUrlHelpText"
-                        defaultMessage=" Where to find your Cloud endpoint url?"
+                        defaultMessage="Where to find your Elasticsearch endpoint url?"
                       />
                     </EuiText>
                   }
@@ -419,9 +419,8 @@ export const ConnectionMode: FunctionComponent<Props> = ({
               <EuiCallOut size="m">
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.manualModeFieldHelpText"
-                  defaultMessage="If you configured a custom endpoint alias, either in Elastic Cloud,
-                    in your reverse proxy or load-balancer, you will need to copy-paste the Proxy address and
-                    Server name manually. These values can be copied from the Remote parameters section
+                  defaultMessage="If you configured a custom endpoint alias in your reverse proxy or load-balancer, you will need to copy-paste the proxy address and
+                    server name manually. These values can be copied from the Remote parameters section
                     on the remote deployment Security page. More information is available {docsLink}"
                   values={{
                     docsLink: (

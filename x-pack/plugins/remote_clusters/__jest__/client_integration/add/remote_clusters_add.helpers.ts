@@ -9,21 +9,21 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed } from '@kbn/test/jest';
 
-import { RemoteClusterAdd } from '../../../public/application/sections/remote_cluster_add';
+import { RemoteClusterAdd } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
-import { registerRouter } from '../../../public/application/services/routing';
+import { AppRouter, registerRouter } from '../../../public/application/services';
 
 const testBedConfig = {
   store: createRemoteClustersStore,
   memoryRouter: {
-    onRouter: (router) => registerRouter(router),
+    onRouter: (router: AppRouter) => registerRouter(router),
   },
 };
 
 const initTestBed = registerTestBed(RemoteClusterAdd, testBedConfig);
 
-export const setup = (props) => {
-  const testBed = initTestBed(props);
+export const setup = async () => {
+  const testBed = await initTestBed();
 
   // User actions
   const clickSaveForm = async () => {
