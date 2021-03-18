@@ -13,7 +13,7 @@ describe('DeprecationFactory', () => {
   const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
 
   let deprecationMessages: string[];
-  const logger: ConfigDeprecationHook = ({ message }) => deprecationMessages.push(message);
+  const deprecationHook: ConfigDeprecationHook = ({ message }) => deprecationMessages.push(message);
 
   beforeEach(() => {
     deprecationMessages = [];
@@ -30,7 +30,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', logger);
+      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', deprecationHook);
       expect(processed).toEqual({
         myplugin: {
           renamed: 'toberenamed',
@@ -56,7 +56,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = rename('deprecated', 'new')(rawConfig, 'myplugin', logger);
+      const processed = rename('deprecated', 'new')(rawConfig, 'myplugin', deprecationHook);
       expect(processed).toEqual({
         myplugin: {
           new: 'new',
@@ -83,7 +83,7 @@ describe('DeprecationFactory', () => {
       const processed = rename('oldsection.deprecated', 'newsection.renamed')(
         rawConfig,
         'myplugin',
-        logger
+        deprecationHook
       );
       expect(processed).toEqual({
         myplugin: {
@@ -110,7 +110,7 @@ describe('DeprecationFactory', () => {
           renamed: 'renamed',
         },
       };
-      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', logger);
+      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', deprecationHook);
       expect(processed).toEqual({
         myplugin: {
           renamed: 'renamed',
@@ -138,7 +138,7 @@ describe('DeprecationFactory', () => {
       const processed = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
         rawConfig,
         'does-not-matter',
-        logger
+        deprecationHook
       );
       expect(processed).toEqual({
         myplugin: {
@@ -169,7 +169,7 @@ describe('DeprecationFactory', () => {
       const processed = renameFromRoot('oldplugin.deprecated', 'newplugin.renamed')(
         rawConfig,
         'does-not-matter',
-        logger
+        deprecationHook
       );
       expect(processed).toEqual({
         oldplugin: {
@@ -200,7 +200,7 @@ describe('DeprecationFactory', () => {
       const processed = renameFromRoot('myplugin.deprecated', 'myplugin.new')(
         rawConfig,
         'does-not-matter',
-        logger
+        deprecationHook
       );
       expect(processed).toEqual({
         myplugin: {
@@ -224,7 +224,7 @@ describe('DeprecationFactory', () => {
       const processed = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
         rawConfig,
         'does-not-matter',
-        logger
+        deprecationHook
       );
       expect(processed).toEqual({
         myplugin: {
@@ -250,7 +250,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unused('deprecated')(rawConfig, 'myplugin', logger);
+      const processed = unused('deprecated')(rawConfig, 'myplugin', deprecationHook);
       expect(processed).toEqual({
         myplugin: {
           valid: 'valid',
@@ -278,7 +278,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unused('section.deprecated')(rawConfig, 'myplugin', logger);
+      const processed = unused('section.deprecated')(rawConfig, 'myplugin', deprecationHook);
       expect(processed).toEqual({
         myplugin: {
           valid: 'valid',
@@ -304,7 +304,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unused('deprecated')(rawConfig, 'myplugin', logger);
+      const processed = unused('deprecated')(rawConfig, 'myplugin', deprecationHook);
       expect(processed).toEqual({
         myplugin: {
           valid: 'valid',
@@ -328,7 +328,11 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unusedFromRoot('myplugin.deprecated')(rawConfig, 'does-not-matter', logger);
+      const processed = unusedFromRoot('myplugin.deprecated')(
+        rawConfig,
+        'does-not-matter',
+        deprecationHook
+      );
       expect(processed).toEqual({
         myplugin: {
           valid: 'valid',
@@ -353,7 +357,11 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unusedFromRoot('myplugin.deprecated')(rawConfig, 'does-not-matter', logger);
+      const processed = unusedFromRoot('myplugin.deprecated')(
+        rawConfig,
+        'does-not-matter',
+        deprecationHook
+      );
       expect(processed).toEqual({
         myplugin: {
           valid: 'valid',

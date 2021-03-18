@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { IRouter } from '../../http';
-import { DeprecationDependencies } from '../types';
+import { GetDeprecationsContext } from '../types';
 import { DeprecationsFactory } from '../deprecations_factory';
 
 interface RouteDependencies {
@@ -20,7 +20,7 @@ export const registerGetRoute = (router: IRouter, { deprecationsFactory }: Route
       validate: false,
     },
     async (context, req, res) => {
-      const dependencies: DeprecationDependencies = {
+      const dependencies: GetDeprecationsContext = {
         esClient: context.core.elasticsearch.client,
         savedObjectsClient: context.core.savedObjects.client,
       };

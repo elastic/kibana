@@ -10,7 +10,7 @@ import {
   CoreStart,
   SavedObjectsClient,
   Logger,
-  DeprecationsContext,
+  RegisterDeprecationsConfig,
   DeprecationsDetails,
 } from 'src/core/server';
 
@@ -41,7 +41,7 @@ export const showWarningMessageIfTimelionSheetWasFound = async (
  *
  *  @link https://www.elastic.co/guide/en/kibana/master/timelion.html#timelion-deprecation
  **/
-export const getDeprecations: DeprecationsContext['getDeprecations'] = async ({
+export const getDeprecations: RegisterDeprecationsConfig['getDeprecations'] = async ({
   savedObjectsClient,
 }) => {
   const deprecations: DeprecationsDetails[] = [];
@@ -53,7 +53,7 @@ export const getDeprecations: DeprecationsContext['getDeprecations'] = async ({
       documentationUrl:
         'https://www.elastic.co/guide/en/kibana/master/dashboard.html#timelion-deprecation',
       level: 'warning',
-      correctionActions: {
+      correctiveActions: {
         manualSteps: [
           'Navigate to the Kibana Dashboard and click "Create dashboard".',
           'Select Timelion from the "New Visualization" window.',

@@ -8,6 +8,8 @@
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '../../server';
 
+type MaybePromise<T> = T | Promise<T>;
+
 export interface PluginDeprecationDetails extends DeprecationsDetails {
   pluginId: string;
 }
@@ -16,7 +18,7 @@ export interface DeprecationsDetails {
   message: string;
   level: 'warning' | 'critical';
   documentationUrl?: string;
-  correctionActions: {
+  correctiveActions: {
     api?: {
       path: string;
       method: 'POST' | 'PUT';
@@ -28,15 +30,11 @@ export interface DeprecationsDetails {
   };
 }
 
-export interface DeprecationsContext {
-  getDeprecations: (
-    dependencies: GetDeprecationsDependencies
-  ) => MaybePromise<DeprecationsDetails[]>;
+export interface RegisterDeprecationsConfig {
+  getDeprecations: (dependencies: GetDeprecationsContext) => MaybePromise<DeprecationsDetails[]>;
 }
 
-interface GetDeprecationsDependencies {
+export interface GetDeprecationsContext {
   esClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
 }
-
-type MaybePromise<T> = T | Promise<T>;

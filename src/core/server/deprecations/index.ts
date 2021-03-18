@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { DeprecationsDetails, DeprecationsContext } from './types';
+export type { DeprecationsDetails, RegisterDeprecationsConfig } from './types';
 
 export type {
   DeprecationsServiceSetup,

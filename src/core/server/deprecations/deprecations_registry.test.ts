@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { DeprecationsContext, DeprecationDependencies } from './types';
+import { RegisterDeprecationsConfig, DeprecationDependencies } from './types';
 import { DeprecationsRegistry } from './deprecations_registry';
 
 describe('DeprecationsRegistry', () => {
   describe('registerDeprecations', () => {
     it('throws if getDeprecations is not a function', async () => {
       const deprecationsRegistry = new DeprecationsRegistry();
-      const context = ({ getDeprecations: null } as unknown) as DeprecationsContext;
+      const context = ({ getDeprecations: null } as unknown) as RegisterDeprecationsConfig;
       expect(() => deprecationsRegistry.registerDeprecations(context)).toThrowError(
         /getDeprecations must be a function/
       );

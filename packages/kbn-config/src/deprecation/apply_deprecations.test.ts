@@ -33,7 +33,7 @@ describe('applyDeprecations', () => {
   });
 
   it('calls handlers with correct arguments', () => {
-    const configDeprecationHook = () => undefined;
+    const deprecationHook = () => undefined;
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
     const alteredConfig = { foo: 'bar' };
 
@@ -43,11 +43,11 @@ describe('applyDeprecations', () => {
     applyDeprecations(
       initialConfig,
       [wrapHandler(handlerA, 'pathA'), wrapHandler(handlerB, 'pathB')],
-      () => configDeprecationHook
+      () => deprecationHook
     );
 
-    expect(handlerA).toHaveBeenCalledWith(initialConfig, 'pathA', configDeprecationHook);
-    expect(handlerB).toHaveBeenCalledWith(alteredConfig, 'pathB', configDeprecationHook);
+    expect(handlerA).toHaveBeenCalledWith(initialConfig, 'pathA', deprecationHook);
+    expect(handlerB).toHaveBeenCalledWith(alteredConfig, 'pathB', deprecationHook);
   });
 
   it('returns the migrated config', () => {

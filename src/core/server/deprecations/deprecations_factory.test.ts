@@ -60,14 +60,14 @@ describe('DeprecationsFactory', () => {
         {
           message: 'mockPlugin message',
           level: 'critical',
-          correctionActions: {
+          correctiveActions: {
             manualSteps: ['mockPlugin step 1', 'mockPlugin step 2'],
           },
         },
         {
           message: 'hello there!',
           level: 'warning',
-          correctionActions: {
+          correctiveActions: {
             manualSteps: ['mockPlugin step a', 'mockPlugin step b'],
           },
         },
@@ -76,7 +76,7 @@ describe('DeprecationsFactory', () => {
         {
           message: 'anotherMockPlugin message',
           level: 'critical',
-          correctionActions: {
+          correctiveActions: {
             manualSteps: ['anotherMockPlugin step 1', 'anotherMockPlugin step 2'],
           },
         },
@@ -123,7 +123,7 @@ describe('DeprecationsFactory', () => {
           pluginId,
           message: `Failed to get deprecations info for plugin "${pluginId}".`,
           level: 'warning',
-          correctionActions: {
+          correctiveActions: {
             manualSteps: ['Check Kibana server logs for error message.'],
           },
         },
@@ -139,7 +139,7 @@ describe('DeprecationsFactory', () => {
         {
           message: 'mockPlugin message',
           level: 'critical',
-          correctionActions: {
+          correctiveActions: {
             manualSteps: ['mockPlugin step 1', 'mockPlugin step 2'],
           },
         },
@@ -163,7 +163,7 @@ describe('DeprecationsFactory', () => {
           pluginId: 'anotherMockPlugin',
           message: `Failed to get deprecations info for plugin "anotherMockPlugin".`,
           level: 'warning',
-          correctionActions: {
+          correctiveActions: {
             manualSteps: ['Check Kibana server logs for error message.'],
           },
         },
@@ -184,7 +184,7 @@ describe('DeprecationsFactory', () => {
         {
           message: 'mockPlugin message',
           level: 'critical',
-          correctionActions: {
+          correctiveActions: {
             manualSteps: ['mockPlugin step 1', 'mockPlugin step 2'],
           },
         },
@@ -192,7 +192,7 @@ describe('DeprecationsFactory', () => {
           {
             message: 'hello there!',
             level: 'warning',
-            correctionActions: {
+            correctiveActions: {
               manualSteps: ['mockPlugin step a', 'mockPlugin step b'],
             },
           },
@@ -219,7 +219,7 @@ describe('DeprecationsFactory', () => {
         {
           message: 'mockPlugin message',
           level: 'critical',
-          correctionActions: {
+          correctiveActions: {
             manualSteps: ['mockPlugin step 1', 'mockPlugin step 2'],
           },
         },

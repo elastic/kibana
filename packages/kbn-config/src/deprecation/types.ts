@@ -7,17 +7,22 @@
  */
 
 /**
- * Logger interface used when invoking a {@link ConfigDeprecation}
+ * Config deprecation hook used when invoking a {@link ConfigDeprecation}
  *
  * @public
  */
-export type ConfigDeprecationHook = (context: DeprecatedConfigContext) => void;
+export type ConfigDeprecationHook = (details: DeprecatedConfigDetails) => void;
 
-export interface DeprecatedConfigContext {
+/**
+ * Deprecated Config Details
+ *
+ * @public
+ */
+export interface DeprecatedConfigDetails {
   message: string;
   silent?: boolean;
   documentationUrl?: string;
-  correctionActions?: {
+  correctiveActions?: {
     api?: {
       path: string;
       method: 'POST' | 'PUT';
@@ -41,7 +46,7 @@ export interface DeprecatedConfigContext {
 export type ConfigDeprecation = (
   config: Record<string, any>,
   fromPath: string,
-  onDeprecationHook: ConfigDeprecationHook
+  deprecationHook: ConfigDeprecationHook
 ) => Record<string, any>;
 
 /**
@@ -92,7 +97,11 @@ export interface ConfigDeprecationFactory {
    * ]
    * ```
    */
-  rename(oldKey: string, newKey: string): ConfigDeprecation;
+  rename(
+    oldKey: string,
+    newKey: string,
+    details?: Partial<DeprecatedConfigDetails>
+  ): ConfigDeprecation;
   /**
    * Rename a configuration property from the root configuration.
    * Will log a deprecation warning if the oldKey was found and deprecation applied.
@@ -108,7 +117,11 @@ export interface ConfigDeprecationFactory {
    * ]
    * ```
    */
-  renameFromRoot(oldKey: string, newKey: string, silent?: boolean): ConfigDeprecation;
+  renameFromRoot(
+    oldKey: string,
+    newKey: string,
+    details?: Partial<DeprecatedConfigDetails>
+  ): ConfigDeprecation;
   /**
    * Remove a configuration property from inside a plugin's configuration path.
    * Will log a deprecation warning if the unused key was found and deprecation applied.
@@ -121,7 +134,7 @@ export interface ConfigDeprecationFactory {
    * ]
    * ```
    */
-  unused(unusedKey: string): ConfigDeprecation;
+  unused(unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation;
   /**
    * Remove a configuration property from the root configuration.
    * Will log a deprecation warning if the unused key was found and deprecation applied.
@@ -137,7 +150,7 @@ export interface ConfigDeprecationFactory {
    * ]
    * ```
    */
-  unusedFromRoot(unusedKey: string): ConfigDeprecation;
+  unusedFromRoot(unusedKey: string, details?: Partial<DeprecatedConfigDetails>): ConfigDeprecation;
 }
 
 /** @internal */

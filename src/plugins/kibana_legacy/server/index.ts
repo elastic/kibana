@@ -18,11 +18,11 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     // TODO: Remove deprecation once defaultAppId is deleted
-    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', true),
+    renameFromRoot('kibana.defaultAppId', 'kibana_legacy.defaultAppId', { silent: true }),
     (
       completeConfig: Record<string, any>,
       rootPath: string,
-      configDeprecationHook: ConfigDeprecationHook
+      deprecationHook: ConfigDeprecationHook
     ) => {
       if (
         get(completeConfig, 'kibana.defaultAppId') === undefined &&
@@ -30,10 +30,15 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       ) {
         return completeConfig;
       }
-      configDeprecationHook({
-        type: 'unused',
-        oldConfigFullPath: 'kibana.defaultAppId',
-        logMsg: `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`,
+      deprecationHook({
+        message: `kibana.defaultAppId is deprecated and will be removed in 8.0. Please use the \`defaultRoute\` advanced setting instead`,
+        correctiveActions: {
+          manualSteps: [
+            'Go to Stack Management > Advanced Settings',
+            'Update the "defaultRoute" setting under the General section',
+            'Remove "kibana.defaultAppId" from the kibana.yml config file',
+          ],
+        },
       });
       return completeConfig;
     },

@@ -57,7 +57,7 @@ import { StatusServiceSetup } from './status';
 import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
-import { DeprecationsServiceSetup, DeprecationsServiceStart } from './deprecations';
+import { DeprecationsServiceSetup } from './deprecations';
 // Because of #79265 we need to explicity import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -380,7 +380,7 @@ export type {
 export type { I18nServiceSetup } from './i18n';
 export type {
   DeprecationsDetails,
-  DeprecationsContext,
+  RegisterDeprecationsConfig,
   DeprecationsServiceSetup,
 } from './deprecations';
 
@@ -522,8 +522,6 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
-  /** @internal {@link CoreUsageDataStart} */
-  deprecations: DeprecationsServiceStart;
 }
 
 export type {

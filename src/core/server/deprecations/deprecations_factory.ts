@@ -11,7 +11,7 @@ import type { Logger } from '../logging';
 import type {
   PluginDeprecationDetails,
   DeprecationsDetails,
-  DeprecationDependencies,
+  GetDeprecationsContext,
 } from './types';
 
 export interface DeprecationsFactoryDeps {
@@ -41,14 +41,14 @@ export class DeprecationsFactory {
 
   public getDeprecations = async (
     pluginId: string,
-    dependencies: DeprecationDependencies
+    dependencies: GetDeprecationsContext
   ): Promise<PluginDeprecationDetails[]> => {
     const infoBody = await this.getDeprecationsBody(pluginId, dependencies);
     return this.createDeprecationInfo(pluginId, infoBody).flat();
   };
 
   public getAllDeprecations = async (
-    dependencies: DeprecationDependencies
+    dependencies: GetDeprecationsContext
   ): Promise<PluginDeprecationDetails[]> => {
     const pluginIds = [...this.registries.keys()];
 
@@ -77,7 +77,7 @@ export class DeprecationsFactory {
 
   private getDeprecationsBody = async (
     pluginId: string,
-    dependencies: DeprecationDependencies
+    dependencies: GetDeprecationsContext
   ): Promise<DeprecationsDetails[]> => {
     const deprecationsRegistry = this.registries.get(pluginId);
     if (!deprecationsRegistry) {
@@ -95,7 +95,7 @@ export class DeprecationsFactory {
             {
               message: `Failed to get deprecations info for plugin "${pluginId}".`,
               level: 'warning',
-              correctionActions: {
+              correctiveActions: {
                 manualSteps: ['Check Kibana server logs for error message.'],
               },
             },

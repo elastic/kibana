@@ -18,19 +18,22 @@ import { Logger } from '../logging';
 import { registerRoutes } from './routes';
 
 /**
- * Deprecations Service is a mechanism to allow plugins to communiicate deprecated features.
+ * The deprecations service provides a way for the Kibana platform to communicate deprecated
+ * features and configs with its users. These deprecations are only communicated
+ * if the deployment is using these features. Allowing for a user tailored experience
+ * for upgrading the stack version.
  *
  * @example
  * ```ts
- * import { DeprecationsContext, CoreSetup } from 'src/core/server';
+ * import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from 'src/core/server';
  *
- * const getDeprecations: DeprecationsContext['getDeprecations'] = async ({ esClient, savedObjectsClient }) => {
+ * const getDeprecations = async ({ esClient, savedObjectsClient }: GetDeprecationsContext): DeprecationsDetails[] => {
  *   return [
  *      {
  *        message: string;
  *        level: 'warning' | 'critical';
  *        documentationUrl?: string;
- *        correctionActions: {
+ *        correctiveActions: {
  *          api?: {
  *            path: string;
  *            method: 'POST' | 'PUT';
@@ -67,6 +70,7 @@ export interface DeprecationsSetupDeps {
   coreUsageData: CoreUsageDataSetup;
 }
 
+/** @internal */
 export class DeprecationsService implements CoreService<InternalDeprecationsServiceSetup> {
   private readonly logger: Logger;
 
@@ -103,11 +107,11 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
       const deprecationsRegistry = deprecationsFactory.createRegistry(pluginId);
       deprecationsRegistry.registerDeprecations({
         getDeprecations: () => {
-          return deprecationsContexts.map(({ message, correctionActions, documentationUrl }) => {
+          return deprecationsContexts.map(({ message, correctiveActions, documentationUrl }) => {
             return {
               level: 'critical',
               message,
-              correctionActions: correctionActions ?? {},
+              correctiveActions: correctiveActions ?? {},
               documentationUrl,
             };
           });

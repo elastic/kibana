@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { DeprecationsDetails, DeprecationsContext, DeprecationDependencies } from './types';
+import { DeprecationsDetails, RegisterDeprecationsConfig, GetDeprecationsContext } from './types';
 
 export class DeprecationsRegistry {
-  private readonly deprecationContexts: DeprecationsContext[] = [];
+  private readonly deprecationContexts: RegisterDeprecationsConfig[] = [];
 
-  public registerDeprecations = (deprecationContext: DeprecationsContext) => {
+  public registerDeprecations = (deprecationContext: RegisterDeprecationsConfig) => {
     if (typeof deprecationContext.getDeprecations !== 'function') {
       throw new Error(`getDeprecations must be a function in registerDeprecations(context)`);
     }
@@ -20,7 +20,7 @@ export class DeprecationsRegistry {
   };
 
   public getDeprecations = async (
-    dependencies: DeprecationDependencies
+    dependencies: GetDeprecationsContext
   ): Promise<Array<PromiseSettledResult<DeprecationsDetails[]>>> => {
     return await Promise.allSettled(
       this.deprecationContexts.map(

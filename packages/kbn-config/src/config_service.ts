@@ -21,7 +21,7 @@ import {
   ConfigDeprecationWithContext,
   ConfigDeprecationProvider,
   configDeprecationFactory,
-  DeprecatedConfigContext,
+  DeprecatedConfigDetails,
 } from './deprecation';
 import { LegacyObjectToConfigAdapter } from './legacy';
 
@@ -44,7 +44,7 @@ export class ConfigService {
   private readonly handledPaths: Set<ConfigPath> = new Set();
   private readonly schemas = new Map<string, Type<unknown>>();
   private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
-  private readonly handledDeprecatedConfigs = new Map<string, DeprecatedConfigContext[]>();
+  private readonly handledDeprecatedConfigs = new Map<string, DeprecatedConfigDetails[]>();
 
   constructor(
     private readonly rawConfigProvider: RawConfigurationProvider,
@@ -195,7 +195,7 @@ export class ConfigService {
     const rawConfig = await this.rawConfigProvider.getConfig$().pipe(take(1)).toPromise();
     const deprecations = await this.deprecations.pipe(take(1)).toPromise();
     const deprecationMessages: string[] = [];
-    const onHandleDeprecationHook = (pluginId: string) => (context: DeprecatedConfigContext) => {
+    const onHandleDeprecationHook = (pluginId: string) => (context: DeprecatedConfigDetails) => {
       deprecationMessages.push(context.message);
       const handledDeprecatedConfig = this.handledDeprecatedConfigs.get(pluginId) || [];
       handledDeprecatedConfig.push(context);

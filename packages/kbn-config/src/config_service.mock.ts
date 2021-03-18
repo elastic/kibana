@@ -34,7 +34,7 @@ const createConfigServiceMock = ({
   mocked.getUsedPaths.mockResolvedValue([]);
   mocked.getUnusedPaths.mockResolvedValue([]);
   mocked.isEnabledAtPath.mockResolvedValue(true);
-  mocked.getHandledDeprecatedConfigs.mockReturnValue(new Map());
+  mocked.getHandledDeprecatedConfigs.mockReturnValue([]);
   return mocked;
 };
 

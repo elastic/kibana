@@ -11,7 +11,7 @@ import { ConfigDeprecationWithContext, ConfigDeprecationHook } from './types';
 
 const noopConfigDeprecationHook: () => ConfigDeprecationHook = () => () => undefined;
 /**
- * Applies deprecations on given configuration and passes handled deprecation configDeprecationHook
+ * Applies deprecations on given configuration and passes handled deprecation deprecationHook
  * This hook is used for logging any deprecation warning using provided logger.
  * This hook is used for exposing deprecated configs that must be handled by the user before upgrading to next major.
  *
@@ -20,11 +20,11 @@ const noopConfigDeprecationHook: () => ConfigDeprecationHook = () => () => undef
 export const applyDeprecations = (
   config: Record<string, any>,
   deprecations: ConfigDeprecationWithContext[],
-  configDeprecationHook: (pluginId: string) => ConfigDeprecationHook = noopConfigDeprecationHook
+  deprecationHook: (pluginId: string) => ConfigDeprecationHook = noopConfigDeprecationHook
 ) => {
   let processed = cloneDeep(config);
   deprecations.forEach(({ deprecation, path }) => {
-    processed = deprecation(processed, path, configDeprecationHook(path));
+    processed = deprecation(processed, path, deprecationHook(path));
   });
   return processed;
 };
