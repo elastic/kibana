@@ -5,95 +5,93 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
-import { cloneDeep } from 'lodash';
-import { htmlIdGenerator, EuiRadio } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
+import { EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import {
+  Immutable,
   ImmutableArray,
   ProtectionModes,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-// need to remove this eventually?
-import { useLicense } from '../../../../../../common/hooks/use_license';
-import { AppAction } from '../../../../../../common/store/actions';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { policyConfig } from '../../../store/policy_details/selectors';
 import { PolicyProtection } from '../../../types';
+import { ConfigFormHeading } from '../../components/config_form';
+import { ProtectionRadio } from './protection_radio';
 
-export const ProtectionRadio = React.memo(
+export const RadioFlexGroup = styled(EuiFlexGroup)`
+  .no-right-margin-radio {
+    margin-right: 0;
+  }
+  .no-horizontal-margin-radio {
+    margin: ${(props) => props.theme.eui.ruleMargins.marginSmall} 0;
+  }
+`;
+
+// TODO: rename this
+export const RadioButtons = React.memo(
   ({
     protection,
-    protectionMode,
     oses,
-    label,
   }: {
     protection: PolicyProtection;
-    protectionMode: ProtectionModes;
     oses: ImmutableArray<Partial<keyof UIPolicyConfig>>;
-    label: string;
   }) => {
-    const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
-    const dispatch = useDispatch<(action: AppAction) => void>();
-    const radioButtonId = useMemo(() => htmlIdGenerator()(), []);
-    // currently just taking windows.malware, but both windows.malware and mac.malware should be the same value
-    const selected = policyDetailsConfig && policyDetailsConfig.windows[protection].mode;
-    const isPlatinumPlus = useLicense().isPlatinumPlus();
-
-    const handleRadioChange = useCallback(() => {
-      if (policyDetailsConfig) {
-        const newPayload = cloneDeep(policyDetailsConfig);
-        for (const os of oses) {
-          if (os === 'windows') {
-            newPayload[os][protection].mode = protectionMode;
-          } else if (os === 'mac') {
-            newPayload[os][
-              protection as keyof Pick<UIPolicyConfig['mac'], 'malware'>
-            ].mode = protectionMode;
-          }
-          if (isPlatinumPlus) {
-            if (os === 'windows') {
-              if (protectionMode === ProtectionModes.prevent) {
-                newPayload[os].popup[protection].enabled = true;
-              } else {
-                newPayload[os].popup[protection].enabled = false;
-              }
-            } else if (os === 'mac') {
-              if (protectionMode === ProtectionModes.prevent) {
-                newPayload[os].popup[
-                  protection as keyof Pick<UIPolicyConfig['mac'], 'malware'>
-                ].enabled = true;
-              } else {
-                newPayload[os].popup[
-                  protection as keyof Pick<UIPolicyConfig['mac'], 'malware'>
-                ].enabled = false;
-              }
-            }
-          }
-        }
-        dispatch({
-          type: 'userChangedPolicyConfig',
-          payload: { policyConfig: newPayload },
-        });
-      }
-    }, [dispatch, protectionMode, policyDetailsConfig, isPlatinumPlus, oses, protection]);
-
-    /**
-     *  Passing an arbitrary id because EuiRadio
-     *  requires an id if label is passed
-     */
+    const radios: Immutable<
+      Array<{
+        id: ProtectionModes;
+        label: string;
+      }>
+    > = useMemo(() => {
+      return [
+        {
+          id: ProtectionModes.detect,
+          label: i18n.translate('xpack.securitySolution.endpoint.policy.details.detect', {
+            defaultMessage: 'Detect',
+          }),
+        },
+        {
+          id: ProtectionModes.prevent,
+          label: i18n.translate('xpack.securitySolution.endpoint.policy.details.prevent', {
+            defaultMessage: 'Prevent',
+          }),
+        },
+      ];
+    }, []);
 
     return (
-      <EuiRadio
-        className="policyDetailsProtectionRadio"
-        label={label}
-        id={radioButtonId}
-        checked={selected === protectionMode}
-        onChange={handleRadioChange}
-        disabled={selected === ProtectionModes.off}
-      />
+      <>
+        <ConfigFormHeading>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policyDetailsConfig.protectionLevel"
+            defaultMessage="Protection Level"
+          />
+        </ConfigFormHeading>
+        <EuiSpacer size="xs" />
+        <RadioFlexGroup>
+          <EuiFlexItem className="no-right-margin-radio" grow={2}>
+            <ProtectionRadio
+              protection={protection}
+              protectionMode={radios[0].id}
+              oses={oses}
+              key={{ protection } + radios[0].id}
+              label={radios[0].label}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem className="no-horizontal-margin-radio" grow={5}>
+            <ProtectionRadio
+              protection={protection}
+              protectionMode={radios[1].id}
+              oses={oses}
+              key={{ protection } + radios[1].id}
+              label={radios[1].label}
+            />
+          </EuiFlexItem>
+        </RadioFlexGroup>
+      </>
     );
   }
 );
 
-ProtectionRadio.displayName = 'ProtectionRadio';
+RadioButtons.displayName = 'RadioButtons';

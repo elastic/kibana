@@ -40,7 +40,7 @@ import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { AppAction } from '../../../../../../common/store/actions';
 import { SupportedVersionNotice } from './supported_version';
-import { RadioFlexGroup } from './malware';
+import { RadioFlexGroup } from './radio_buttons';
 
 const OSes: Immutable<RansomwareProtectionOSes[]> = [OS.windows];
 const protection = 'ransomware';
