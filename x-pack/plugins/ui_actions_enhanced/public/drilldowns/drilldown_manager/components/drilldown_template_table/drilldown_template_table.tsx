@@ -13,6 +13,9 @@ import {
   EuiSpacer,
   EuiButton,
   EuiTextColor,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
 } from '@elastic/eui';
 import {
   txtNameColumnTitle,
@@ -24,6 +27,7 @@ import {
 export interface DrilldownTemplateTableItem {
   id: string;
   name: string;
+  icon?: string;
   description?: string;
 }
 
@@ -48,7 +52,14 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
     {
       name: 'Source...',
       render: (item: DrilldownTemplateTableItem) => (
-        <EuiTextColor color={'subdued'}>{item.description}</EuiTextColor>
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={item.icon || 'empty'} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
+            <EuiTextColor color={'subdued'}>{item.description}</EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     },
     {

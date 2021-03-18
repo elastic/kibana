@@ -328,6 +328,16 @@ export class DrilldownManagerState {
     this.setRoute(['manage']);
   };
 
+  private async cloneTemplate(template: DrilldownTemplate) {
+    const { dynamicActionManager } = this.deps;
+    const action: SerializedAction = {
+      factoryId: template.factoryId,
+      name: template.name,
+      config: (template.config || {}) as SerializableState,
+    };
+    await dynamicActionManager.createEvent(action, template.triggers);
+  }
+
   public readonly onCreateFromTemplate = async (templateId: string) => {
     const { templates } = this.deps;
     if (!templates) return;
@@ -359,16 +369,6 @@ export class DrilldownManagerState {
       drilldownState.setConfig(event.action.config);
     }
   };
-
-  private async cloneTemplate(template: DrilldownTemplate) {
-    const { dynamicActionManager } = this.deps;
-    const action: SerializedAction = {
-      factoryId: template.factoryId,
-      name: template.name,
-      config: (template.config || {}) as SerializableState,
-    };
-    await dynamicActionManager.createEvent(action, template.triggers);
-  }
 
   /**
    * Returns the state object of an existing drilldown for editing purposes.

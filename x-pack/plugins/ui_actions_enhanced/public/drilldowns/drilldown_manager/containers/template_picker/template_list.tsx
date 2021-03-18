@@ -26,6 +26,7 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
     return items.map((item) => ({
       id: item.id,
       name: item.name,
+      icon: item.icon,
       description: item.description,
     }));
   }, [items]);

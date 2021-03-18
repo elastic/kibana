@@ -88,6 +88,11 @@ export interface DrilldownTemplate {
   id: string;
 
   /**
+   * EUI icon display next to the description.
+   */
+  icon?: string;
+
+  /**
    * A user facing text that provides information about the source of this template.
    */
   description: string;

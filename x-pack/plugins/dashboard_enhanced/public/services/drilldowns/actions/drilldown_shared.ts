@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { APPLY_FILTER_TRIGGER } from '../../../../../../../src/plugins/data/public';
 import {
   SELECT_RANGE_TRIGGER,
@@ -36,6 +37,14 @@ export function ensureNestedTriggers(triggers: string[]): string[] {
   return triggers;
 }
 
+const txtPanel = (panelTitle: string) =>
+  i18n.translate('xpack.dashboardEnhanced.drilldowns.panelDrilldownTemplateDescription', {
+    defaultMessage: 'Panel: {title}',
+    values: {
+      title: panelTitle,
+    },
+  });
+
 const isEmbeddableContainer = (x: unknown): x is EmbeddableContainer =>
   x instanceof EmbeddableContainer;
 
@@ -63,7 +72,8 @@ export const createDrilldownTemplatesFromSiblings = (
       const template: DrilldownTemplate = {
         id: event.eventId,
         name: event.action.name,
-        description: child.getTitle() || child.id,
+        icon: 'dashboardApp',
+        description: txtPanel(child.getTitle() || child.id),
         config: event.action.config,
         factoryId: event.action.factoryId,
         triggers: event.triggers,
