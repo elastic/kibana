@@ -1,0 +1,8 @@
+{
+  "id": "savedObjectsHiddenType",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["saved_objects_hidden_type"],
+  "server": true,
+  "ui": false
+}

@@ -7,9 +7,6 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,12 +19,12 @@ import {
   EuiLink,
   EuiPanel,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { CredentialItem } from '../../../../components/shared/credential_item';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
-
-import { CustomSource } from '../../../../types';
 import {
   SOURCES_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
@@ -36,7 +33,7 @@ import {
   getContentSourcePath,
   getSourcesPath,
 } from '../../../../routes';
-
+import { CustomSource } from '../../../../types';
 import { ACCESS_TOKEN_LABEL, ID_LABEL, LEARN_CUSTOM_FEATURES_BUTTON } from '../../constants';
 
 import {
@@ -63,7 +60,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
   isOrganization,
   header,
 }) => (
-  <div className="custom-api-step-2">
+  <>
     {header}
     <EuiFlexGroup direction="row">
       <EuiFlexItem grow={2}>
@@ -105,7 +102,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
               <EuiTitle size="xs">
                 <h4>{SAVE_CUSTOM_API_KEYS_TITLE}</h4>
               </EuiTitle>
-              <EuiText grow={false} size="s" color="secondary">
+              <EuiText grow={false} size="s" color="subdued">
                 <p>{SAVE_CUSTOM_API_KEYS_BODY}</p>
               </EuiText>
               <EuiSpacer />
@@ -129,7 +126,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <h4>{SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE}</h4>
               </EuiTitle>
               <EuiSpacer size="xs" />
-              <EuiText color="secondary" size="s">
+              <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.documentation.text"
@@ -151,7 +148,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <h4>{SAVE_CUSTOM_STYLING_RESULTS_TITLE}</h4>
               </EuiTitle>
               <EuiSpacer size="xs" />
-              <EuiText color="secondary" size="s">
+              <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.displaySettings.text"
@@ -182,7 +179,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <h4>{SAVE_CUSTOM_DOC_PERMISSIONS_TITLE}</h4>
               </EuiTitle>
               <EuiSpacer size="xs" />
-              <EuiText color="secondary" size="s">
+              <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
                     id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.permissions.text"
@@ -208,5 +205,5 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </div>
+  </>
 );

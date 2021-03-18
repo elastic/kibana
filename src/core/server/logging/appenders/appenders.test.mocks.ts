@@ -12,7 +12,7 @@ jest.mock('../layouts/layouts', () => {
   const { schema } = require('@kbn/config-schema');
   return {
     Layouts: {
-      configSchema: schema.object({ kind: schema.literal('mock') }),
+      configSchema: schema.object({ type: schema.literal('mock') }),
       create: mockCreateLayout,
     },
   };

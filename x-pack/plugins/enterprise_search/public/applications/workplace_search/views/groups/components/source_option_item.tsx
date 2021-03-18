@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { TruncatedContent } from '../../../../shared/truncate';
-
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { ContentSource } from '../../../types';
 
@@ -23,7 +22,7 @@ interface SourceOptionItemProps {
 export const SourceOptionItem: React.FC<SourceOptionItemProps> = ({ source }) => (
   <EuiFlexGroup gutterSize="xs" justifyContent="flexStart" alignItems="center">
     <EuiFlexItem grow={false}>
-      <SourceIcon wrapped {...source} />
+      <SourceIcon {...source} size="l" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <TruncatedContent tooltipType="title" content={source.name} length={MAX_LENGTH} />

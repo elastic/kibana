@@ -13,7 +13,7 @@ import { noop } from 'lodash/fp';
 import { TestProviders } from '../../../common/mock';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
-import { CommentRequest, CommentType } from '../../../../../case/common/api';
+import { CommentRequest, CommentType } from '../../../../../cases/common';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
 import { AddComment, AddCommentRefObject } from '.';
@@ -79,7 +79,12 @@ describe('AddComment ', () => {
 
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(postComment).toBeCalledWith(addCommentProps.caseId, sampleData, onCommentPosted);
+      expect(postComment).toBeCalledWith({
+        caseId: addCommentProps.caseId,
+        data: sampleData,
+        subCaseId: undefined,
+        updateCase: onCommentPosted,
+      });
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
     });
   });

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { LogicMounter } from '../__mocks__';
 
-import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { AppLogic } from './app_logic';
 
 describe('AppLogic', () => {

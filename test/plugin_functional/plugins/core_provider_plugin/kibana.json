@@ -1,8 +1,8 @@
 {
-  "id": "core_provider_plugin",
+  "id": "coreProviderPlugin",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
-  "optionalPlugins": ["core_plugin_a", "core_plugin_b", "licensing", "globalSearchTest"],
+  "optionalPlugins": ["corePluginA", "corePluginB", "licensing", "globalSearchTest"],
   "server": false,
   "ui": true
 }

@@ -29,7 +29,6 @@ import type {
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
-  DataRequestHandlerContext,
 } from './types';
 
 import { AggsService } from './aggs';
@@ -52,6 +51,9 @@ import {
   kibana,
   kibanaContext,
   kibanaContextFunction,
+  kibanaTimerangeFunction,
+  kqlFunction,
+  luceneFunction,
   SearchSourceDependencies,
   searchSourceRequiredUiSettings,
   SearchSourceService,
@@ -66,6 +68,7 @@ import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
+import { DataRequestHandlerContext } from '../types';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -142,6 +145,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(kibana);
+    expressions.registerFunction(luceneFunction);
+    expressions.registerFunction(kqlFunction);
+    expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerFunction(kibanaContextFunction);
     expressions.registerType(kibanaContext);
 
@@ -275,7 +281,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         switchMap((searchRequest) => strategy.search(searchRequest, options, deps)),
         tap((response) => {
           if (!options.sessionId || !response.id || options.isRestore) return;
-          deps.searchSessionsClient.trackId(request, response.id, options);
+          // intentionally swallow tracking error, as it shouldn't fail the search
+          deps.searchSessionsClient.trackId(request, response.id, options).catch((trackErr) => {
+            this.logger.error(trackErr);
+          });
         })
       );
     } catch (e) {
@@ -283,7 +292,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
   };
 
-  private cancel = (deps: SearchStrategyDependencies, id: string, options: ISearchOptions = {}) => {
+  private cancel = async (
+    deps: SearchStrategyDependencies,
+    id: string,
+    options: ISearchOptions = {}
+  ) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.cancel) {
       throw new KbnServerError(
@@ -294,7 +307,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return strategy.cancel(id, options, deps);
   };
 
-  private extend = (
+  private extend = async (
     deps: SearchStrategyDependencies,
     id: string,
     keepAlive: string,
@@ -309,25 +322,26 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private cancelSessionSearches = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
-
-    for (const [searchId, strategyName] of searchIdMapping.entries()) {
-      const searchOptions = {
-        sessionId,
-        strategy: strategyName,
-        isStored: true,
-      };
-      this.cancel(deps, searchId, searchOptions);
-    }
+    await Promise.allSettled(
+      Array.from(searchIdMapping).map(([searchId, strategyName]) => {
+        const searchOptions = {
+          sessionId,
+          strategy: strategyName,
+          isStored: true,
+        };
+        return this.cancel(deps, searchId, searchOptions);
+      })
+    );
   };
 
   private cancelSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
     const response = await deps.searchSessionsClient.cancel(sessionId);
-    this.cancelSessionSearches(deps, sessionId);
+    await this.cancelSessionSearches(deps, sessionId);
     return response;
   };
 
   private deleteSession = async (deps: SearchStrategyDependencies, sessionId: string) => {
-    this.cancelSessionSearches(deps, sessionId);
+    await this.cancelSessionSearches(deps, sessionId);
     return deps.searchSessionsClient.delete(sessionId);
   };
 
@@ -339,13 +353,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const searchIdMapping = await deps.searchSessionsClient.getSearchIdMapping(sessionId);
     const keepAlive = `${moment(expires).diff(moment())}ms`;
 
-    for (const [searchId, strategyName] of searchIdMapping.entries()) {
-      const searchOptions = {
-        sessionId,
-        strategy: strategyName,
-        isStored: true,
-      };
-      await this.extend(deps, searchId, keepAlive, searchOptions);
+    const result = await Promise.allSettled(
+      Array.from(searchIdMapping).map(([searchId, strategyName]) => {
+        const searchOptions = {
+          sessionId,
+          strategy: strategyName,
+          isStored: true,
+        };
+        return this.extend(deps, searchId, keepAlive, searchOptions);
+      })
+    );
+
+    if (result.some((extRes) => extRes.status === 'rejected')) {
+      throw new Error('Failed to extend the expiration of some searches');
     }
 
     return deps.searchSessionsClient.extend(sessionId, expires);

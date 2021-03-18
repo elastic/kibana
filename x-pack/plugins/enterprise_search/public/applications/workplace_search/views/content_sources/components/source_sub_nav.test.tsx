@@ -8,12 +8,13 @@
 import { setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { CUSTOM_SERVICE_TYPE } from '../../../constants';
-import { SourceSubNav } from './source_sub_nav';
-
 import { SideNavLink } from '../../../../shared/layout';
+import { CUSTOM_SERVICE_TYPE } from '../../../constants';
+
+import { SourceSubNav } from './source_sub_nav';
 
 describe('SourceSubNav', () => {
   it('renders empty when no group id present', () => {

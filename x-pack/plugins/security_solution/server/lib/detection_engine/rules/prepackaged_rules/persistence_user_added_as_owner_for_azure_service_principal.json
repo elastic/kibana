@@ -9,7 +9,7 @@
     "logs-azure*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "User Added as Owner for Azure Service Principal",
   "note": "The Azure Filebeat module must be enabled to use this rule.",
   "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Add owner to service principal\" and event.outcome:(Success or success)",
@@ -44,6 +44,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

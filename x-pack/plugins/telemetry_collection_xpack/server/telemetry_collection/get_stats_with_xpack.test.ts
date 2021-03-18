@@ -61,22 +61,22 @@ function mockEsClient() {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   // mock for license should return a basic license
   esClient.license.get.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     { body: { license: { type: 'basic' } } }
   );
   // mock for xpack usage should return an empty object
   esClient.xpack.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     { body: {} }
   );
   // mock for nodes usage should resolve for this test
   esClient.nodes.usage.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     { body: { cluster_name: 'test cluster', nodes: nodesUsage } }
   );
   // mock for info should resolve for this test
   esClient.info.mockResolvedValue(
-    // @ts-ignore we only care about the response body
+    // @ts-expect-error we only care about the response body
     {
       body: {
         cluster_uuid: 'test',
@@ -139,9 +139,9 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
     const esClient = mockEsClient();
     const usageCollection = mockUsageCollection({
       ...kibana,
-      monitoringTelemetry: [
-        { collectionSource: 'monitoring', timestamp: new Date().toISOString() },
-      ],
+      monitoringTelemetry: {
+        stats: [{ collectionSource: 'monitoring', timestamp: new Date().toISOString() }],
+      },
     });
     const context = getContext();
 

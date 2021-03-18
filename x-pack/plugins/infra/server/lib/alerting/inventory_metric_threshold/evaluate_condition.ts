@@ -7,6 +7,7 @@
 
 import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
+import { ElasticsearchClient } from 'kibana/server';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import {
   isTooManyBucketsPreviewException,
@@ -17,7 +18,6 @@ import {
   CallWithRequestParams,
 } from '../../adapters/framework/adapter_types';
 import { Comparator, InventoryMetricConditions } from './types';
-import { AlertServices } from '../../../../../alerts/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraTimerangeInput, SnapshotRequest } from '../../../../common/http_api/snapshot_api';
 import { InfraSource } from '../../sources';
@@ -26,6 +26,7 @@ import { getNodes } from '../../../routes/snapshot/lib/get_nodes';
 
 type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean[];
+  shouldWarn: boolean[];
   currentValue: number;
   isNoData: boolean[];
   isError: boolean;
@@ -35,12 +36,12 @@ export const evaluateCondition = async (
   condition: InventoryMetricConditions,
   nodeType: InventoryItemType,
   source: InfraSource,
-  callCluster: AlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   filterQuery?: string,
   lookbackSize?: number
 ): Promise<Record<string, ConditionResult>> => {
-  const { comparator, metric, customMetric } = condition;
-  let { threshold } = condition;
+  const { comparator, warningComparator, metric, customMetric } = condition;
+  let { threshold, warningThreshold } = condition;
 
   const timerange = {
     to: Date.now(),
@@ -52,7 +53,7 @@ export const evaluateCondition = async (
   }
 
   const currentValues = await getData(
-    callCluster,
+    esClient,
     nodeType,
     metric,
     timerange,
@@ -62,19 +63,22 @@ export const evaluateCondition = async (
   );
 
   threshold = threshold.map((n) => convertMetricValue(metric, n));
+  warningThreshold = warningThreshold?.map((n) => convertMetricValue(metric, n));
 
-  const comparisonFunction = comparatorMap[comparator];
+  const valueEvaluator = (value?: DataValue, t?: number[], c?: Comparator) => {
+    if (value === undefined || value === null || !t || !c) return [false];
+    const comparisonFunction = comparatorMap[c];
+    return Array.isArray(value)
+      ? value.map((v) => comparisonFunction(Number(v), t))
+      : [comparisonFunction(value as number, t)];
+  };
 
   const result = mapValues(currentValues, (value) => {
     if (isTooManyBucketsPreviewException(value)) throw value;
     return {
       ...condition,
-      shouldFire:
-        value !== undefined &&
-        value !== null &&
-        (Array.isArray(value)
-          ? value.map((v) => comparisonFunction(Number(v), threshold))
-          : [comparisonFunction(value as number, threshold)]),
+      shouldFire: valueEvaluator(value, threshold, comparator),
+      shouldWarn: valueEvaluator(value, warningThreshold, warningComparator),
       isNoData: Array.isArray(value) ? value.map((v) => v === null) : [value === null],
       isError: value === undefined,
       currentValue: getCurrentValue(value),
@@ -90,8 +94,9 @@ const getCurrentValue: (value: any) => number = (value) => {
   return NaN;
 };
 
+type DataValue = number | null | Array<number | string | null | undefined>;
 const getData = async (
-  callCluster: AlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
   timerange: InfraTimerangeInput,
@@ -99,9 +104,10 @@ const getData = async (
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput
 ) => {
-  const client = <Hit = {}, Aggregation = undefined>(
+  const client = async <Hit = {}, Aggregation = undefined>(
     options: CallWithRequestParams
-  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> => callCluster('search', options);
+  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
+    (await esClient.search(options)).body as InfraDatabaseSearchResponse<Hit, Aggregation>;
 
   const metrics = [
     metric === 'custom' ? (customMetric as SnapshotCustomMetricInput) : { type: metric },

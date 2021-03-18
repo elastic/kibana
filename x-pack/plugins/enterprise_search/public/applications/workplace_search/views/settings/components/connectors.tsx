@@ -19,12 +19,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { Loading } from '../../../../shared/loading';
-import { SourceIcon } from '../../../components/shared/source_icon';
+import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { LicenseCallout } from '../../../components/shared/license_callout';
+import { SourceIcon } from '../../../components/shared/source_icon';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-
 import {
   CONFIGURE_BUTTON,
   CONNECTORS_HEADER_TITLE,
@@ -36,9 +35,7 @@ import {
 } from '../../../constants';
 import { getSourcesPath } from '../../../routes';
 import { SourceDataItem } from '../../../types';
-
 import { staticSourceData } from '../../content_sources/source_data';
-
 import { SettingsLogic } from '../settings_logic';
 
 export const Connectors: React.FC = () => {
@@ -97,18 +94,15 @@ export const Connectors: React.FC = () => {
               <EuiFlexItem grow={1}>
                 <EuiFlexGroup justifyContent="flexStart" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <SourceIcon
-                      serviceType={serviceType}
-                      name={name}
-                      className="source-row__icon"
-                    />
+                    <SourceIcon serviceType={serviceType} name={name} />
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <span className="source-row__name">
-                      {name}
-                      &nbsp;&nbsp;
-                      {accountContextOnly && <EuiBadge color="hollow">{PRIVATE_SOURCE}</EuiBadge>}
-                    </span>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        {accountContextOnly && <EuiBadge color="hollow">{PRIVATE_SOURCE}</EuiBadge>}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

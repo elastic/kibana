@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiLoadingContent } from '@elastic/eui';
 
 import { LoadingState } from './';

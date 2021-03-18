@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent, useRef, useState, useCallback } from 'react';
-import { EuiConfirmModal, EuiOverlayMask, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
 
@@ -78,64 +78,62 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
     <>
       {children(() => setIsModalVisible(true))}
       {isModalVisible ? (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            data-test-subj="loadJsonConfirmationModal"
-            title={i18nTexts.modalTitle}
-            onCancel={() => {
+        <EuiConfirmModal
+          data-test-subj="loadJsonConfirmationModal"
+          title={i18nTexts.modalTitle}
+          onCancel={() => {
+            setIsModalVisible(false);
+          }}
+          onConfirm={async () => {
+            try {
+              const json = jsonContent.current.data.format();
+              const { processors, on_failure: onFailure } = json;
+              // This function will throw if it cannot parse the pipeline object
+              deserialize({ processors, onFailure });
+              onDone(json as any);
               setIsModalVisible(false);
-            }}
-            onConfirm={async () => {
-              try {
-                const json = jsonContent.current.data.format();
-                const { processors, on_failure: onFailure } = json;
-                // This function will throw if it cannot parse the pipeline object
-                deserialize({ processors, onFailure });
-                onDone(json as any);
-                setIsModalVisible(false);
-              } catch (e) {
-                setError(e);
-              }
-            }}
-            cancelButtonText={i18nTexts.buttons.cancel}
-            confirmButtonDisabled={!isValidJson}
-            confirmButtonText={i18nTexts.buttons.confirm}
-            maxWidth={600}
-          >
-            <div className="application">
-              <EuiText color="subdued">
-                <FormattedMessage
-                  id="xpack.ingestPipelines.pipelineEditor.loadJsonModal.jsonEditorHelpText"
-                  defaultMessage="Provide a pipeline object. This will override the existing pipeline processors and on-failure processors."
-                />
-              </EuiText>
-
-              <EuiSpacer size="m" />
-
-              {error && (
-                <>
-                  <EuiCallOut
-                    data-test-subj="errorCallOut"
-                    title={i18nTexts.error.title}
-                    color="danger"
-                    iconType="alert"
-                  >
-                    {i18nTexts.error.body}
-                  </EuiCallOut>
-                  <EuiSpacer size="m" />
-                </>
-              )}
-
-              <JsonEditor
-                label={i18nTexts.editor.label}
-                onUpdate={onJsonUpdate}
-                euiCodeEditorProps={{
-                  height: '300px',
-                }}
+            } catch (e) {
+              setError(e);
+            }
+          }}
+          cancelButtonText={i18nTexts.buttons.cancel}
+          confirmButtonDisabled={!isValidJson}
+          confirmButtonText={i18nTexts.buttons.confirm}
+          maxWidth={600}
+        >
+          <div className="application">
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.ingestPipelines.pipelineEditor.loadJsonModal.jsonEditorHelpText"
+                defaultMessage="Provide a pipeline object. This will override the existing pipeline processors and on-failure processors."
               />
-            </div>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+            </EuiText>
+
+            <EuiSpacer size="m" />
+
+            {error && (
+              <>
+                <EuiCallOut
+                  data-test-subj="errorCallOut"
+                  title={i18nTexts.error.title}
+                  color="danger"
+                  iconType="alert"
+                >
+                  {i18nTexts.error.body}
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            <JsonEditor
+              label={i18nTexts.editor.label}
+              onUpdate={onJsonUpdate}
+              euiCodeEditorProps={{
+                height: '300px',
+              }}
+            />
+          </div>
+        </EuiConfirmModal>
       ) : undefined}
     </>
   );

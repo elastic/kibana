@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { CasePostRequest } from '../../../../../case/common/api';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { CasePostRequest, CaseType, ConnectorTypes } from '../../../../../cases/common';
+import { choices } from '../connectors/mock';
 
 export const sampleTags = ['coke', 'pepsi'];
 export const sampleData: CasePostRequest = {
   description: 'what a great description',
   tags: sampleTags,
   title: 'what a cool title',
+  type: CaseType.individual,
   connector: {
     fields: null,
     id: 'none',
@@ -92,4 +93,9 @@ export const useGetFieldsByIssueTypeResponse = {
       defaultValue: { name: 'Medium', id: '3' },
     },
   },
+};
+
+export const useGetChoicesResponse = {
+  isLoading: false,
+  choices,
 };

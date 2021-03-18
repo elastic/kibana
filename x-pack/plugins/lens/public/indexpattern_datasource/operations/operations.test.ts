@@ -56,7 +56,22 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['terms']));
+      ).toEqual(['terms', 'cardinality', 'last_value']);
+    });
+
+    it('should return only bucketed operations on strings when passed proper filterOperations function', () => {
+      expect(
+        getOperationTypesForField(
+          {
+            type: 'string',
+            name: 'a',
+            displayName: 'aLabel',
+            aggregatable: true,
+            searchable: true,
+          },
+          (op) => op.isBucketed
+        )
+      ).toEqual(['terms']);
     });
 
     it('should return operations on numbers', () => {
@@ -68,7 +83,33 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(expect.arrayContaining(['avg', 'sum', 'min', 'max']));
+      ).toEqual([
+        'range',
+        'terms',
+        'median',
+        'avg',
+        'sum',
+        'min',
+        'max',
+        'cardinality',
+        'percentile',
+        'last_value',
+      ]);
+    });
+
+    it('should return only metric operations on numbers when passed proper filterOperations function', () => {
+      expect(
+        getOperationTypesForField(
+          {
+            type: 'number',
+            name: 'a',
+            displayName: 'aLabel',
+            aggregatable: true,
+            searchable: true,
+          },
+          (op) => !op.isBucketed
+        )
+      ).toEqual(['median', 'avg', 'sum', 'min', 'max', 'cardinality', 'percentile', 'last_value']);
     });
 
     it('should return operations on dates', () => {
@@ -156,14 +197,14 @@ describe('getOperationTypesForField', () => {
   });
 
   describe('getAvailableOperationsByMetaData', () => {
-    it('should put the average operation first', () => {
+    it('should put the median operation first', () => {
       const numberOperation = getAvailableOperationsByMetadata(expectedIndexPatterns[1]).find(
         ({ operationMetaData }) =>
           !operationMetaData.isBucketed && operationMetaData.dataType === 'number'
       )!;
       expect(numberOperation.operations[0]).toEqual(
         expect.objectContaining({
-          operationType: 'avg',
+          operationType: 'median',
         })
       );
     });
@@ -240,6 +281,11 @@ describe('getOperationTypesForField', () => {
             "operations": Array [
               Object {
                 "field": "bytes",
+                "operationType": "median",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
                 "operationType": "avg",
                 "type": "field",
               },
@@ -287,11 +333,6 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "source",
                 "operationType": "cardinality",
-                "type": "field",
-              },
-              Object {
-                "field": "bytes",
-                "operationType": "median",
                 "type": "field",
               },
               Object {

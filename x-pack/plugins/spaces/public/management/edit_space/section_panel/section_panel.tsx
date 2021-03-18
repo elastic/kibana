@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  IconType,
-} from '@elastic/eui';
-import React, { Component, Fragment, ReactNode } from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { Component, Fragment } from 'react';
 
 interface Props {
   iconType?: IconType;

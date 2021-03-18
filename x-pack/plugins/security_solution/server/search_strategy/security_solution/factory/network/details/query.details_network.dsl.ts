@@ -106,6 +106,7 @@ export const buildNetworkDetailsQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggs: {
@@ -119,7 +120,6 @@ export const buildNetworkDetailsQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

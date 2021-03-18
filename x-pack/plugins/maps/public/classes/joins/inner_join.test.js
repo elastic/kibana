@@ -9,7 +9,7 @@ import { InnerJoin } from './inner_join';
 import { SOURCE_TYPES } from '../../../common/constants';
 
 jest.mock('../../kibana_services', () => {});
-jest.mock('../layers/vector_layer/vector_layer', () => {});
+jest.mock('../layers/vector_layer', () => {});
 
 const rightSource = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,

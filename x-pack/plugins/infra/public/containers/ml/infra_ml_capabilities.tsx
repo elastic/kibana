@@ -52,11 +52,11 @@ export const useInfraMLCapabilities = () => {
 
   const hasInfraMLSetupCapabilities = mlCapabilities.capabilities.canCreateJob;
   const hasInfraMLReadCapabilities = mlCapabilities.capabilities.canGetJobs;
-  const hasInfraMLCapabilites =
+  const hasInfraMLCapabilities =
     mlCapabilities.isPlatinumOrTrialLicense && mlCapabilities.mlFeatureEnabledInSpace;
 
   return {
-    hasInfraMLCapabilites,
+    hasInfraMLCapabilities,
     hasInfraMLReadCapabilities,
     hasInfraMLSetupCapabilities,
     isLoading,

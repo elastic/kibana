@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { IRouter, RouteValidationResultFactory } from 'src/core/server';
+import type { IRouter, RouteValidationResultFactory } from 'src/core/server';
 import Ajv from 'ajv';
+
 import {
   PLUGIN_ID,
   AGENT_API_ROUTES,
@@ -34,6 +35,10 @@ import {
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
 } from '../../types';
+import * as AgentService from '../../services/agents';
+import { appContextService } from '../../services';
+import type { FleetConfigType } from '../..';
+
 import {
   getAgentsHandler,
   getAgentHandler,
@@ -47,11 +52,8 @@ import {
   postBulkAgentsReassignHandler,
 } from './handlers';
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
-import * as AgentService from '../../services/agents';
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
-import { appContextService } from '../../services';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
-import { FleetConfigType } from '../..';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 
 const ajv = new Ajv({
@@ -123,7 +125,7 @@ export const registerAPIRoutes = (router: IRouter, config: FleetConfigType) => {
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     postNewAgentActionHandlerBuilder({
-      getAgent: AgentService.getAgent,
+      getAgent: AgentService.getAgentById,
       createAgentAction: AgentService.createAgentAction,
     })
   );

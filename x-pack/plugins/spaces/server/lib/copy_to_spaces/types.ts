@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Payload } from '@hapi/boom';
-import {
-  SavedObjectsImportSuccess,
+import type { Payload } from '@hapi/boom';
+
+import type {
+  SavedObjectsImportError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
-  SavedObjectsImportError,
+  SavedObjectsImportSuccess,
 } from 'src/core/server';
 
 export interface CopyOptions {

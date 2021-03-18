@@ -177,6 +177,11 @@ export const ExplorationPageWrapper: FC<Props> = ({
         <ExpandableSectionAnalytics jobId={jobConfig.id} />
       )}
 
+      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
+      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
+        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
+      )}
+
       {isLoadingJobConfig === true &&
         jobConfig !== undefined &&
         totalFeatureImportance === undefined && <LoadingPanel />}
@@ -191,10 +196,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
           </>
         )}
 
-      {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
-      {isLoadingJobConfig === false && jobConfig !== undefined && isInitialized === true && (
-        <EvaluatePanel jobConfig={jobConfig} jobStatus={jobStatus} searchQuery={searchQuery} />
-      )}
+      <EuiSpacer size="m" />
 
       {isLoadingJobConfig === true && jobConfig === undefined && <LoadingPanel />}
       {isLoadingJobConfig === false &&

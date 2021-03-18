@@ -81,6 +81,7 @@ important data later on.
 | config
   | Configuration files including `kibana.yml`
   | $KIBANA_HOME\config
+  | <<settings,KBN_PATH_CONF>>
  d|
 
 | data

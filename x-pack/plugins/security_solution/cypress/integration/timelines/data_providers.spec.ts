@@ -11,6 +11,7 @@ import {
   TIMELINE_DROPPED_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS_ACTION_MENU,
   IS_DRAGGING_DATA_PROVIDERS,
+  TIMELINE_FLYOUT_HEADER,
 } from '../../screens/timeline';
 import { HOSTS_NAMES_DRAGGABLE } from '../../screens/hosts/all_hosts';
 
@@ -24,7 +25,7 @@ import {
 
 import { loginAndWaitForPage } from '../../tasks/login';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { closeTimeline, createNewTimeline } from '../../tasks/timeline';
+import { addDataProvider, closeTimeline, createNewTimeline } from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
 import { cleanKibana } from '../../tasks/common';
@@ -58,15 +59,22 @@ describe('timeline data providers', () => {
       });
   });
 
-  it('displays the data provider action menu when Enter is pressed', () => {
-    dragAndDropFirstHostToTimeline();
+  it('displays the data provider action menu when Enter is pressed', (done) => {
     openTimelineUsingToggle();
-    cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
+    addDataProvider({ field: 'host.name', operator: 'exists' }).then(() => {
+      cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
 
-    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().focus();
-    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().parent().type('{enter}');
+      cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
+        .pipe(($el) => $el.trigger('focus'))
+        .should('exist');
+      cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
+        .first()
+        .parent()
+        .type('{enter}');
 
-    cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
+      cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
+      done();
+    });
   });
 
   it('sets correct classes when the user starts dragging a host, but is not hovering over the data providers', () => {

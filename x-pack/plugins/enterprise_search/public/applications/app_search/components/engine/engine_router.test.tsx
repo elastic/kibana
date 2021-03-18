@@ -6,18 +6,21 @@
  */
 
 import '../../../__mocks__/react_router_history.mock';
-import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockFlashMessageHelpers, setMockValues, setMockActions } from '../../../__mocks__';
+import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { mockEngineValues } from '../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { Switch, Redirect, useParams } from 'react-router-dom';
 
+import { shallow } from 'enzyme';
+
 import { Loading } from '../../../shared/loading';
-import { EngineOverview } from '../engine_overview';
 import { AnalyticsRouter } from '../analytics';
+import { CurationsRouter } from '../curations';
+import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
+import { ResultSettings } from '../result_settings';
 
 import { EngineRouter } from './engine_router';
 
@@ -96,10 +99,24 @@ describe('EngineRouter', () => {
     expect(wrapper.find(AnalyticsRouter)).toHaveLength(1);
   });
 
-  it('renders an relevance tuning view', () => {
+  it('renders a curations view', () => {
+    setMockValues({ ...values, myRole: { canManageEngineCurations: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(CurationsRouter)).toHaveLength(1);
+  });
+
+  it('renders a relevance tuning view', () => {
     setMockValues({ ...values, myRole: { canManageEngineRelevanceTuning: true } });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(RelevanceTuning)).toHaveLength(1);
+  });
+
+  it('renders a result settings view', () => {
+    setMockValues({ ...values, myRole: { canManageEngineResultSettings: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(ResultSettings)).toHaveLength(1);
   });
 });

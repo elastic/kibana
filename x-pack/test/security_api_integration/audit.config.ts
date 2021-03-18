@@ -29,9 +29,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${auditLogPlugin}`,
         '--xpack.security.audit.enabled=true',
-        '--xpack.security.audit.appender.kind=file',
-        `--xpack.security.audit.appender.path=${auditLogPath}`,
-        '--xpack.security.audit.appender.layout.kind=json',
+        '--xpack.security.audit.appender.type=file',
+        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+        '--xpack.security.audit.appender.layout.type=json',
       ],
     },
   };

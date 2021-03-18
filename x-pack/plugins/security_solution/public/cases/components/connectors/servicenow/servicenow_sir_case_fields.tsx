@@ -6,24 +6,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import {
-  EuiFormRow,
-  EuiSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelectOption,
-  EuiCheckbox,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 
-import {
-  ConnectorTypes,
-  ServiceNowSIRFieldsType,
-} from '../../../../../../case/common/api/connectors';
+import { ConnectorTypes, ServiceNowSIRFieldsType } from '../../../../../../cases/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';
 import { Choice, Fields } from './types';
+import { choicesToEuiOptions } from './helpers';
 
 import * as i18n from './translations';
 
@@ -33,9 +24,6 @@ const defaultFields: Fields = {
   subcategory: [],
   priority: [],
 };
-
-const choicesToEuiOptions = (choices: Choice[]): EuiSelectOption[] =>
-  choices.map((choice) => ({ value: choice.value, text: choice.label }));
 
 const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   ConnectorFieldsProps<ServiceNowSIRFieldsType>
@@ -179,7 +167,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
   }, [category, destIp, malwareHash, malwareUrl, onChange, priority, sourceIp, subcategory]);
 
   return isEdit ? (
-    <div data-test-subj={'connector-fields-sn'}>
+    <div data-test-subj={'connector-fields-sn-sir'}>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow fullWidth label={i18n.ALERT_FIELDS_LABEL}>
@@ -211,7 +199,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                   <EuiCheckbox
                     id="malwareUrlCheckbox"
                     data-test-subj="malwareUrlCheckbox"
-                    label={i18n.MALWARE_HASH}
+                    label={i18n.MALWARE_URL}
                     checked={malwareUrl ?? false}
                     compressed
                     onChange={(e) => onChangeCb('malwareUrl', e.target.checked)}
@@ -221,7 +209,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
                   <EuiCheckbox
                     id="malwareHashCheckbox"
                     data-test-subj="malwareHashCheckbox"
-                    label={i18n.MALWARE_URL}
+                    label={i18n.MALWARE_HASH}
                     checked={malwareHash ?? false}
                     compressed
                     onChange={(e) => onChangeCb('malwareHash', e.target.checked)}
@@ -259,7 +247,7 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
               isLoading={isLoadingChoices}
               disabled={isLoadingChoices}
               hasNoInitialSelection
-              onChange={(e) => onChangeCb('category', e.target.value)}
+              onChange={(e) => onChange({ ...fields, category: e.target.value, subcategory: null })}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -269,7 +257,8 @@ const ServiceNowSIRFieldsComponent: React.FunctionComponent<
               fullWidth
               data-test-subj="subcategorySelect"
               options={subcategoryOptions}
-              value={subcategory ?? undefined}
+              // Needs an empty string instead of undefined to select the blank option when changing categories
+              value={subcategory ?? ''}
               isLoading={isLoadingChoices}
               disabled={isLoadingChoices}
               hasNoInitialSelection

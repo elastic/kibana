@@ -10,6 +10,7 @@ import uuid from 'uuid';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
 import { createStateContainer, StateContainer } from '../../../../kibana_utils/public';
+import { SearchSessionSavedObject } from './sessions_client';
 
 /**
  * Possible state that current session can be in
@@ -69,9 +70,19 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
   sessionId?: string;
 
   /**
+   * App that created this session
+   */
+  appName?: string;
+
+  /**
    * Has the session already been stored (i.e. "sent to background")?
    */
   isStored: boolean;
+
+  /**
+   * Saved object of a current search session
+   */
+  searchSessionSavedObject?: SearchSessionSavedObject;
 
   /**
    * Is this session a restored session (have these requests already been made, and we're just
@@ -105,6 +116,7 @@ const createSessionDefaultState: <
   SearchDescriptor = unknown
 >() => SessionStateInternal<SearchDescriptor> = () => ({
   sessionId: undefined,
+  appName: undefined,
   isStored: false,
   isRestore: false,
   isCanceled: false,
@@ -116,20 +128,24 @@ export interface SessionPureTransitions<
   SearchDescriptor = unknown,
   S = SessionStateInternal<SearchDescriptor>
 > {
-  start: (state: S) => () => S;
+  start: (state: S) => ({ appName }: { appName: string }) => S;
   restore: (state: S) => (sessionId: string) => S;
   clear: (state: S) => () => S;
-  store: (state: S) => () => S;
+  store: (state: S) => (searchSessionSavedObject: SearchSessionSavedObject) => S;
   trackSearch: (state: S) => (search: SearchDescriptor) => S;
   unTrackSearch: (state: S) => (search: SearchDescriptor) => S;
   cancel: (state: S) => () => S;
+  setSearchSessionSavedObject: (
+    state: S
+  ) => (searchSessionSavedObject: SearchSessionSavedObject) => S;
 }
 
 export const sessionPureTransitions: SessionPureTransitions = {
-  start: (state) => () => ({
+  start: (state) => ({ appName }) => ({
     ...createSessionDefaultState(),
     sessionId: uuid.v4(),
     startTime: new Date(),
+    appName,
   }),
   restore: (state) => (sessionId: string) => ({
     ...createSessionDefaultState(),
@@ -138,13 +154,14 @@ export const sessionPureTransitions: SessionPureTransitions = {
     isStored: true,
   }),
   clear: (state) => () => createSessionDefaultState(),
-  store: (state) => () => {
+  store: (state) => (searchSessionSavedObject: SearchSessionSavedObject) => {
     if (!state.sessionId) throw new Error("Can't store session. Missing sessionId");
     if (state.isStored || state.isRestore)
       throw new Error('Can\'t store because current session is already stored"');
     return {
       ...state,
       isStored: true,
+      searchSessionSavedObject,
     };
   },
   trackSearch: (state) => (search) => {
@@ -169,6 +186,21 @@ export const sessionPureTransitions: SessionPureTransitions = {
       pendingSearches: [],
       isCanceled: true,
       isStored: false,
+      searchSessionSavedObject: undefined,
+    };
+  },
+  setSearchSessionSavedObject: (state) => (searchSessionSavedObject: SearchSessionSavedObject) => {
+    if (!state.sessionId)
+      throw new Error(
+        "Can't add search session saved object session into the state. Missing sessionId"
+      );
+    if (state.sessionId !== searchSessionSavedObject.attributes.sessionId)
+      throw new Error(
+        "Can't add search session saved object session into the state. SessionIds don't match."
+      );
+    return {
+      ...state,
+      searchSessionSavedObject,
     };
   },
 };
@@ -215,6 +247,8 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
   stateContainer: SessionStateContainer<SearchDescriptor>;
   sessionState$: Observable<SearchSessionState>;
   sessionStartTime$: Observable<Date | undefined>;
+  searchSessionSavedObject$: Observable<SearchSessionSavedObject | undefined>;
+  searchSessionName$: Observable<string | undefined>;
 } => {
   const stateContainer = createStateContainer(
     createSessionDefaultState(),
@@ -235,9 +269,21 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
     shareReplay(1)
   );
 
+  const searchSessionSavedObject$ = stateContainer.state$.pipe(
+    map(() => stateContainer.get().searchSessionSavedObject),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
+  const searchSessionName$ = searchSessionSavedObject$.pipe(
+    map((savedObject) => savedObject?.attributes?.name)
+  );
+
   return {
     stateContainer,
     sessionState$,
     sessionStartTime$,
+    searchSessionSavedObject$,
+    searchSessionName$,
   };
 };

@@ -1,5 +1,5 @@
 {
-  "id": "index_patterns_test_plugin",
+  "id": "indexPatternsTestPlugin",
   "version": "0.0.1",
   "kibanaVersion": "kibana",
   "configPath": ["index_patterns_test_plugin"],

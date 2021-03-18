@@ -153,6 +153,22 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       await testSubjects.clickWhenNotDisabled('mlDataVisualizerCreateAdvancedJobCard');
     },
 
+    async assertCreateDataFrameAnalyticsCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCreateDataFrameAnalyticsCard');
+    },
+
+    async assertCreateDataFrameAnalyticsCardNotExists() {
+      await testSubjects.missingOrFail('mlDataVisualizerCreateDataFrameAnalyticsCard');
+    },
+
+    async assertViewInDiscoverCard(shouldExist: boolean) {
+      if (shouldExist) {
+        await this.assertViewInDiscoverCardExists();
+      } else {
+        await this.assertViewInDiscoverCardNotExists();
+      }
+    },
+
     async assertViewInDiscoverCardExists() {
       await testSubjects.existOrFail('mlDataVisualizerViewInDiscoverCard');
     },

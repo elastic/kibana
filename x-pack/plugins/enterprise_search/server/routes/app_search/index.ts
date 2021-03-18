@@ -7,12 +7,14 @@
 
 import { RouteDependencies } from '../../plugin';
 
-import { registerEnginesRoutes } from './engines';
-import { registerCredentialsRoutes } from './credentials';
-import { registerSettingsRoutes } from './settings';
 import { registerAnalyticsRoutes } from './analytics';
+import { registerCredentialsRoutes } from './credentials';
+import { registerCurationsRoutes } from './curations';
 import { registerDocumentsRoutes, registerDocumentRoutes } from './documents';
+import { registerEnginesRoutes } from './engines';
+import { registerRoleMappingsRoutes } from './role_mappings';
 import { registerSearchSettingsRoutes } from './search_settings';
+import { registerSettingsRoutes } from './settings';
 
 export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerEnginesRoutes(dependencies);
@@ -21,5 +23,7 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerAnalyticsRoutes(dependencies);
   registerDocumentsRoutes(dependencies);
   registerDocumentRoutes(dependencies);
+  registerCurationsRoutes(dependencies);
   registerSearchSettingsRoutes(dependencies);
+  registerRoleMappingsRoutes(dependencies);
 };

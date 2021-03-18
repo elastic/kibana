@@ -29,7 +29,7 @@ import { createSessionRestorationDataProvider } from '../lib/session_restoration
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardTitle } from '../../dashboard_strings';
 import { DashboardAppServices } from '../types';
-import { ViewMode } from '../../services/embeddable';
+import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
 
 // TS is picky with type guards, we can't just inline `() => false`
 function defaultTaggingGuard(_obj: SavedObject): _obj is TagDecoratedSavedObject {
@@ -44,7 +44,8 @@ interface DashboardStateManagerReturn {
 
 export const useDashboardStateManager = (
   savedDashboard: DashboardSavedObject | null,
-  history: History
+  history: History,
+  getIncomingEmbeddable: () => EmbeddablePackageState | undefined
 ): DashboardStateManagerReturn => {
   const {
     data: dataPlugin,
@@ -87,6 +88,8 @@ export const useDashboardStateManager = (
     });
 
     const stateManager = new DashboardStateManager({
+      hasPendingEmbeddable: () => Boolean(getIncomingEmbeddable()),
+      toasts: core.notifications.toasts,
       hasTaggingCapabilities,
       dashboardPanelStorage,
       hideWriteControls,
@@ -160,7 +163,6 @@ export const useDashboardStateManager = (
     const dashboardTitle = getDashboardTitle(
       stateManager.getTitle(),
       stateManager.getViewMode(),
-      stateManager.getIsDirty(timefilter),
       stateManager.isNew()
     );
 
@@ -182,10 +184,6 @@ export const useDashboardStateManager = (
       }
     );
 
-    if (stateManager.getIsEditMode()) {
-      stateManager.restorePanels();
-    }
-
     setDashboardStateManager(stateManager);
     setViewMode(stateManager.getViewMode());
 
@@ -201,6 +199,7 @@ export const useDashboardStateManager = (
     hasTaggingCapabilities,
     initializerContext.config,
     dashboardPanelStorage,
+    getIncomingEmbeddable,
     hideWriteControls,
     history,
     kibanaVersion,
@@ -213,6 +212,7 @@ export const useDashboardStateManager = (
     uiSettings,
     usageCollection,
     allowByValueEmbeddables,
+    core.notifications.toasts,
     dashboardCapabilities.storeSearchSession,
   ]);
 

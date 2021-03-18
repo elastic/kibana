@@ -46,7 +46,7 @@ image::https://user-images.githubusercontent.com/9773803/74162514-3250a880-4c21-
 https://github.com/elastic/kibana/blob/master/docs/development/plugins/expressions/server/kibana-plugin-plugins-expressions-server.expressionsserversetup.md[Server Setup contract]
 https://github.com/elastic/kibana/blob/master/docs/development/plugins/expressions/server/kibana-plugin-plugins-expressions-server.expressionsserverstart.md[Server Start contract]
 
-===== Browser API
+==== Browser API
 https://github.com/elastic/kibana/blob/master/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.expressionsservicesetup.md[Browser Setup contract]
 https://github.com/elastic/kibana/blob/master/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.expressionsstart.md[Browser Start contract]
 

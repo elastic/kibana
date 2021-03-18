@@ -256,13 +256,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -410,13 +405,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },
@@ -458,6 +448,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Clear the value
         await advancedPolicyField.click();
         await advancedPolicyField.clearValueWithKeyboard();
+
+        // Make sure the toast button closes so the save button on the sticky footer is visible
+        await (await testSubjects.find('toastCloseButton')).click();
+        await testSubjects.waitForHidden('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
@@ -557,13 +551,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
-                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
-                    enabled: true,
-                    message: 'Elastic Security {action} {filename}',
-                  },
-                  ransomware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
                   },

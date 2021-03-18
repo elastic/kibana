@@ -18,6 +18,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
+import { TimelineId } from '../../../../common/types/timeline';
 import { createStore, State } from '../../../common/store';
 import * as timelineActions from '../../store/timeline/actions';
 
@@ -43,7 +44,7 @@ describe('Flyout', () => {
   const { storage } = createSecuritySolutionStorageMock();
   const props = {
     onAppLeave: jest.fn(),
-    timelineId: 'test',
+    timelineId: TimelineId.test,
   };
 
   beforeEach(() => {

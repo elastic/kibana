@@ -17,7 +17,7 @@ import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
 
-const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
+const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
 
 const actionsClient = actionsClientMock.create();
@@ -310,8 +310,8 @@ test('should not throws an error if actionType is preconfigured', async () => {
   });
 });
 
-test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
-  const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
+test('throws an error when passing isESOCanEncrypt with value of false', async () => {
+  const customActionExecutor = new ActionExecutor({ isESOCanEncrypt: false });
   customActionExecutor.initialize({
     logger: loggingSystemMock.create().get(),
     spaces: spacesMock,
@@ -325,7 +325,7 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
   await expect(
     customActionExecutor.execute(executeParams)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+    `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
   );
 });
 

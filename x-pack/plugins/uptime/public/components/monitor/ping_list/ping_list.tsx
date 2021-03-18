@@ -7,8 +7,10 @@
 
 import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, MouseEvent } from 'react';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
+import moment from 'moment';
 import { useDispatch } from 'react-redux';
 import { Ping } from '../../../../common/runtime_types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
@@ -27,6 +29,7 @@ import { FailedStep } from './columns/failed_step';
 import { usePingsList } from './use_pings';
 import { PingListHeader } from './ping_list_header';
 import { clearPings } from '../../../state/actions';
+import { getShortTimeStamp } from '../../overview/monitor_list/columns/monitor_status_column';
 
 export const SpanWithMargin = styled.span`
   margin-right: 16px;
@@ -34,11 +37,42 @@ export const SpanWithMargin = styled.span`
 
 const DEFAULT_PAGE_SIZE = 10;
 
+// one second = 1 million micros
+const ONE_SECOND_AS_MICROS = 1000000;
+
+// the limit for converting to seconds is >= 1 sec
+const MILLIS_LIMIT = ONE_SECOND_AS_MICROS * 1;
+
+export const formatDuration = (durationMicros: number) => {
+  if (durationMicros < MILLIS_LIMIT) {
+    return i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
+      values: { millis: microsToMillis(durationMicros) },
+      defaultMessage: '{millis} ms',
+    });
+  }
+  const seconds = (durationMicros / ONE_SECOND_AS_MICROS).toFixed(0);
+
+  // we format seconds with correct pulralization here and not for `ms` because it is much more likely users
+  // will encounter times of exactly '1' second.
+  if (seconds === '1') {
+    return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting.singular', {
+      values: { seconds },
+      defaultMessage: '{seconds} second',
+    });
+  }
+  return i18n.translate('xpack.uptime.pingist.durationSecondsColumnFormatting', {
+    values: { seconds },
+    defaultMessage: '{seconds} seconds',
+  });
+};
+
 export const PingList = () => {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [pageIndex, setPageIndex] = useState(0);
 
   const dispatch = useDispatch();
+
+  const history = useHistory();
 
   const pruneJourneysCallback = useCallback(
     (checkGroups: string[]) => dispatch(pruneJourneyState(checkGroups)),
@@ -111,7 +145,7 @@ export const PingList = () => {
             field: 'timestamp',
             name: TIMESTAMP_LABEL,
             render: (timestamp: string, item: Ping) => (
-              <PingTimestamp timestamp={timestamp} ping={item} />
+              <PingTimestamp label={getShortTimeStamp(moment(timestamp))} ping={item} />
             ),
           },
         ]
@@ -135,11 +169,7 @@ export const PingList = () => {
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      render: (duration: number) =>
-        i18n.translate('xpack.uptime.pingList.durationMsColumnFormatting', {
-          values: { millis: microsToMillis(duration) },
-          defaultMessage: '{millis} ms',
-        }),
+      render: (duration: number) => formatDuration(duration),
     },
     {
       field: 'error.type',
@@ -172,19 +202,42 @@ export const PingList = () => {
           },
         ]
       : []),
-    {
-      align: 'right',
-      width: '24px',
-      isExpander: true,
-      render: (item: Ping) => (
-        <ExpandRowColumn
-          item={item}
-          expandedRows={expandedRows}
-          setExpandedRows={setExpandedRows}
-        />
-      ),
-    },
+    ...(monitorType !== MONITOR_TYPES.BROWSER
+      ? [
+          {
+            align: 'right',
+            width: '24px',
+            isExpander: true,
+            render: (item: Ping) => (
+              <ExpandRowColumn
+                item={item}
+                expandedRows={expandedRows}
+                setExpandedRows={setExpandedRows}
+              />
+            ),
+          },
+        ]
+      : []),
   ];
+
+  const getRowProps = (item: Ping) => {
+    if (monitorType !== MONITOR_TYPES.BROWSER) {
+      return {};
+    }
+    const { monitor } = item;
+    return {
+      height: '85px',
+      'data-test-subj': `row-${monitor.check_group}`,
+      onClick: (evt: MouseEvent) => {
+        const targetElem = evt.target as HTMLElement;
+
+        // we dont want to capture image click event
+        if (targetElem.tagName !== 'IMG' && targetElem.tagName !== 'path') {
+          history.push(`/journey/${monitor.check_group}/steps`);
+        }
+      },
+    };
+  };
 
   const pagination: Pagination = {
     initialPageSize: DEFAULT_PAGE_SIZE,
@@ -222,6 +275,7 @@ export const PingList = () => {
           setPageIndex(criteria.page!.index);
         }}
         tableLayout={'auto'}
+        rowProps={getRowProps}
       />
     </EuiPanel>
   );

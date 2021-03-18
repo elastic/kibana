@@ -8,6 +8,7 @@
 import '../../__mocks__/kibana_logic.mock';
 
 import { FlashMessagesLogic } from './flash_messages_logic';
+
 import { flashAPIErrors } from './handle_api_errors';
 
 describe('flashAPIErrors', () => {

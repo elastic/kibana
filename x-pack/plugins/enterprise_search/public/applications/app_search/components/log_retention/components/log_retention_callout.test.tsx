@@ -6,14 +6,16 @@
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
-import { mountWithIntl } from '../../../../__mocks__';
+import { setMockValues, setMockActions, mountWithIntl } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { LogRetentionOptions } from '../';
+
 import { LogRetentionCallout } from './';
 
 describe('LogRetentionCallout', () => {

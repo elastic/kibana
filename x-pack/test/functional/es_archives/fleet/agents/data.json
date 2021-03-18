@@ -1,21 +1,15 @@
 {
   "type": "doc",
   "value": {
-    "id": "fleet-agents:agent1",
-    "index": ".kibana",
+    "id": "agent1",
+    "index": ".fleet-agents",
     "source": {
-      "type": "fleet-agents",
-      "fleet-agents": {
-        "access_api_key_id": "api-key-1",
-        "active": true,
-        "policy_id": "policy1",
-        "type": "PERMANENT",
-        "local_metadata": {},
-        "user_provided_metadata": {}
-      },
-      "migrationVersion": {
-        "fleet-agents": "7.10.0"
-      }
+      "access_api_key_id": "api-key-1",
+      "active": true,
+      "policy_id": "policy1",
+      "type": "PERMANENT",
+      "local_metadata": {},
+      "user_provided_metadata": {}
     }
   }
 }
@@ -23,21 +17,15 @@
 {
   "type": "doc",
   "value": {
-    "id": "fleet-agents:agent2",
-    "index": ".kibana",
+    "id": "agent2",
+    "index": ".fleet-agents",
     "source": {
-      "type": "fleet-agents",
-      "fleet-agents": {
-        "access_api_key_id": "api-key-2",
-        "active": true,
-        "policy_id": "policy1",
-        "type": "PERMANENT",
-        "local_metadata": {},
-        "user_provided_metadata": {}
-      },
-      "migrationVersion": {
-        "fleet-agents": "7.10.0"
-      }
+      "access_api_key_id": "api-key-2",
+      "active": true,
+      "policy_id": "policy1",
+      "type": "PERMANENT",
+      "local_metadata": {},
+      "user_provided_metadata": {}
     }
   }
 }
@@ -45,21 +33,15 @@
 {
   "type": "doc",
   "value": {
-    "id": "fleet-agents:agent3",
-    "index": ".kibana",
+    "id": "agent3",
+    "index": ".fleet-agents",
     "source": {
-      "type": "fleet-agents",
-      "fleet-agents": {
-        "access_api_key_id": "api-key-3",
-        "active": true,
-        "policy_id": "policy1",
-        "type": "PERMANENT",
-        "local_metadata": {},
-        "user_provided_metadata": {}
-      },
-      "migrationVersion": {
-        "fleet-agents": "7.10.0"
-      }
+      "access_api_key_id": "api-key-3",
+      "active": true,
+      "policy_id": "policy1",
+      "type": "PERMANENT",
+      "local_metadata": {},
+      "user_provided_metadata": {}
     }
   }
 }
@@ -67,21 +49,15 @@
 {
   "type": "doc",
   "value": {
-    "id": "fleet-agents:agent4",
-    "index": ".kibana",
+    "id": "agent4",
+    "index": ".fleet-agents",
     "source": {
-      "type": "fleet-agents",
-      "fleet-agents": {
-        "access_api_key_id": "api-key-4",
-        "active": true,
-        "policy_id": "policy1",
-        "type": "PERMANENT",
-        "local_metadata": {},
-        "user_provided_metadata": {}
-      },
-      "migrationVersion": {
-        "fleet-agents": "7.10.0"
-      }
+      "access_api_key_id": "api-key-4",
+      "active": true,
+      "policy_id": "policy1",
+      "type": "PERMANENT",
+      "local_metadata": {},
+      "user_provided_metadata": {}
     }
   }
 }
@@ -89,79 +65,14 @@
 {
   "type": "doc",
   "value": {
-    "id": "fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0",
-    "index": ".kibana",
+    "id": "ed22ca17-e178-4cfe-8b02-54ea29fbd6d0",
+    "index": ".fleet-enrollment-api-keys",
     "source": {
-      "fleet-enrollment-api-keys" :  {
-        "created_at" : "2019-10-10T16:31:12.518Z",
-        "name": "FleetEnrollmentKey:1",
-        "api_key_id" : "key",
-        "policy_id" : "policy1",
-        "active" : true
-      },
-      "type" : "fleet-enrollment-api-keys",
-      "references": [],
-      "migrationVersion": {
-        "fleet-enrollment-api-keys": "7.10.0"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "fleet-agent-events:event1",
-    "index": ".kibana",
-    "source": {
-      "type": "fleet-agent-events",
-      "fleet-agent-events": {
-        "agent_id": "agent1",
-        "type": "STATE",
-        "subtype": "STARTED",
-        "message": "State changed from STOPPED to STARTED",
-        "payload": "{\"previous_state\": \"STOPPED\"}",
-        "timestamp": "2019-09-20T17:30:22.950Z"
-      },
-      "migrationVersion": {
-        "fleet-agent-events": "7.10.0"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "fleet-agent-events:event2",
-    "index": ".kibana",
-    "source": {
-      "type": "fleet-agent-events",
-      "fleet-agent-events": {
-        "agent_id": "agent1",
-        "type": "STATE",
-        "subtype": "STOPPED",
-        "message": "State changed from RUNNING to STOPPED",
-        "payload": "{\"previous_state\": \"RUNNING\"}",
-        "timestamp": "2019-09-20T17:30:25.950Z"
-      }
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "id": "fleet-agent-actions:37ed51ff-e80f-4f2a-a62d-f4fa975e7d85",
-    "index": ".kibana",
-    "source": {
-      "type": "fleet-agent-actions",
-      "fleet-agent-actions": {
-        "agent_id": "agent1",
-        "created_at": "2019-09-04T15:04:07+0000",
-        "type": "RESUME",
-        "sent_at": "2019-09-04T15:03:07+0000"
-      }
+      "created_at" : "2019-10-10T16:31:12.518Z",
+      "name": "FleetEnrollmentKey:1",
+      "api_key_id" : "key",
+      "policy_id" : "policy1",
+      "active" : true
     }
   }
 }

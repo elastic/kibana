@@ -9,13 +9,14 @@ import '../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiPanel } from '@elastic/eui';
 
+import { IndexingStatus } from './indexing_status';
 import { IndexingStatusContent } from './indexing_status_content';
 import { IndexingStatusErrors } from './indexing_status_errors';
-import { IndexingStatus } from './indexing_status';
 
 describe('IndexingStatus', () => {
   const getItemDetailPath = jest.fn();

@@ -7,9 +7,6 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -20,15 +17,16 @@ import {
   EuiText,
   EuiTextAlign,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
+import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import {
   getSourcesPath,
   ADD_SOURCE_PATH,
   SECURITY_PATH,
   PRIVATE_SOURCES_DOCS_URL,
 } from '../../../../routes';
-
-import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 import {
   CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK,
@@ -50,7 +48,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
   header,
   privateSourcesEnabled,
 }) => (
-  <div className="step-3">
+  <>
     {header}
     <EuiSpacer size="xxl" />
     <EuiFlexGroup
@@ -141,7 +139,6 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
           to={getSourcesPath(ADD_SOURCE_PATH, true)}
           fill={accountContextOnly}
           color={accountContextOnly ? 'primary' : undefined}
-          className="eui-textNoWrap"
         >
           {CONFIG_COMPLETED_CONFIGURE_NEW_BUTTON}
         </EuiButtonTo>
@@ -150,7 +147,6 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             color="primary"
-            className="eui-textNoWrap"
             fill
             onClick={advanceStep}
             data-test-subj="ConfigCompletedConnectButton"
@@ -166,5 +162,5 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  </div>
+  </>
 );

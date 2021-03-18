@@ -1,0 +1,22 @@
+.header__topBanner {
+  position: fixed;
+  top: 0;
+  height: $kbnHeaderBannerHeight;
+  width: 100%;
+  z-index: $euiZHeader;
+}
+
+.header__topBannerContainer {
+  height: 100%;
+  width: 100%;
+}
+
+// overriding `top` positioning of the chrome headers when the top banner is present.
+.kbnBody--hasHeaderBanner .header__bars {
+  .header__firstBar {
+    top: $kbnHeaderBannerHeight;
+  }
+  .header__secondBar {
+    top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
+  }
+}

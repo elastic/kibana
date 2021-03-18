@@ -177,15 +177,6 @@ const errorResponseFactory = {
   conflict: (options: ErrorHttpResponseOptions = {}) =>
     new KibanaResponse(409, options.body || 'Conflict', options),
 
-  // Server error
-  /**
-   * The server encountered an unexpected condition that prevented it from fulfilling the request.
-   * Status code: `500`.
-   * @param options - {@link HttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client
-   */
-  internalError: (options: ErrorHttpResponseOptions = {}) =>
-    new KibanaResponse(500, options.body || 'Internal Error', options),
-
   /**
    * Creates an error response with defined status code and payload.
    * @param options - {@link CustomHttpResponseOptions} configures HTTP response headers, error message and other error details to pass to the client

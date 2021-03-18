@@ -84,7 +84,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Overview', 'Discover']);
+        expect(navLinks.map((link) => link.text)).to.eql([
+          'Overview',
+          'Discover',
+          'Stack Management', // because `global_discover_all_role` enables search sessions
+        ]);
       });
 
       it('shows save button', async () => {

@@ -3,4 +3,4 @@
 # For more info, see https://help.github.com/articles/about-codeowners/
 
 # App
-/x-pack/plugins/code/ @elastic/kibana-tre
+/src/dev/code_coverage/ingest_coverage/integration_tests/fixtures/test_plugin @elastic/kibana-tre

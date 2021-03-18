@@ -130,7 +130,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
 
 exports[`SpacesGridPage renders the list of spaces 1`] = `
 Array [
-  <SpaceAvatar
+  <SpaceAvatarInternal
     announceSpaceName={true}
     size="s"
     space={
@@ -172,8 +172,8 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </SpaceAvatar>,
-  <SpaceAvatar
+  </SpaceAvatarInternal>,
+  <SpaceAvatarInternal
     announceSpaceName={true}
     size="s"
     space={
@@ -214,8 +214,8 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </SpaceAvatar>,
-  <SpaceAvatar
+  </SpaceAvatarInternal>,
+  <SpaceAvatarInternal
     announceSpaceName={true}
     size="s"
     space={
@@ -259,6 +259,6 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </SpaceAvatar>,
+  </SpaceAvatarInternal>,
 ]
 `;

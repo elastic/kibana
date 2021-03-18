@@ -11,9 +11,9 @@ import React from 'react';
 
 import { EuiPanel } from '@elastic/eui';
 
-import { SourceFeatures } from './source_features';
-
 import { staticSourceData } from '../../source_data';
+
+import { SourceFeatures } from './source_features';
 
 describe('SourceFeatures', () => {
   const { features, objTypes } = staticSourceData[0];

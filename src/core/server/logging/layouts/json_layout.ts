@@ -14,12 +14,12 @@ import { LogRecord, Layout } from '@kbn/logging';
 const { literal, object } = schema;
 
 const jsonLayoutSchema = object({
-  kind: literal('json'),
+  type: literal('json'),
 });
 
 /** @internal */
 export interface JsonLayoutConfigType {
-  kind: 'json';
+  type: 'json';
 }
 
 /**

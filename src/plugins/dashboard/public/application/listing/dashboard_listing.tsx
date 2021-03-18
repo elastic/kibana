@@ -8,7 +8,7 @@
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink, EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import React, { Fragment, useCallback, useEffect, useMemo } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../types';
 import { getDashboardBreadcrumb, dashboardListingTable } from '../../dashboard_strings';
@@ -47,6 +47,10 @@ export const DashboardListing = ({
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
+
+  const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
+    dashboardPanelStorage.getDashboardIdsWithUnsavedChanges()
+  );
 
   // Set breadcrumbs useEffect
   useEffect(() => {
@@ -135,8 +139,12 @@ export const DashboardListing = ({
   );
 
   const deleteItems = useCallback(
-    (dashboards: Array<{ id: string }>) => savedDashboards.delete(dashboards.map((d) => d.id)),
-    [savedDashboards]
+    (dashboards: Array<{ id: string }>) => {
+      dashboards.map((d) => dashboardPanelStorage.clearPanels(d.id));
+      setUnsavedDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges());
+      return savedDashboards.delete(dashboards.map((d) => d.id));
+    },
+    [savedDashboards, dashboardPanelStorage]
   );
 
   const editItem = useCallback(
@@ -179,7 +187,13 @@ export const DashboardListing = ({
         tableColumns,
       }}
     >
-      <DashboardUnsavedListing redirectTo={redirectTo} />
+      <DashboardUnsavedListing
+        redirectTo={redirectTo}
+        unsavedDashboardIds={unsavedDashboardIds}
+        refreshUnsavedDashboards={() =>
+          setUnsavedDashboardIds(dashboardPanelStorage.getDashboardIdsWithUnsavedChanges())
+        }
+      />
     </TableListView>
   );
 };

@@ -13,6 +13,7 @@ import {
   threat_query,
   threat_mapping,
   threat_index,
+  threat_indicator_path,
   concurrent_searches,
   items_per_search,
 } from '../types/threat_mapping';
@@ -213,6 +214,7 @@ const threatMatchRuleParams = {
     filters,
     saved_id,
     threat_filters,
+    threat_indicator_path,
     threat_language: t.keyof({ kuery: null, lucene: null }),
     concurrent_searches,
     items_per_search,

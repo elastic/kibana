@@ -7,16 +7,19 @@
 
 import React from 'react';
 
-import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useValues } from 'kea';
+
+import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DocumentCreationButton } from './document_creation_button';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
-import { DOCUMENTS_TITLE } from './constants';
-import { EngineLogic } from '../engine';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+
 import { AppLogic } from '../../app_logic';
+import { EngineLogic } from '../engine';
+
+import { DOCUMENTS_TITLE } from './constants';
+import { DocumentCreationButton } from './document_creation_button';
 import { SearchExperience } from './search_experience';
 
 interface Props {

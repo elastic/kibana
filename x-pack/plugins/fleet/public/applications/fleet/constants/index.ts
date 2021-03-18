@@ -15,6 +15,9 @@ export {
   AGENT_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  // Fleet Server index
+  AGENTS_INDEX,
+  ENROLLMENT_API_KEYS_INDEX,
 } from '../../../../common';
 
 export * from './page_paths';

@@ -24,6 +24,7 @@ export const TextField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props)
   return (
     <EuiFormRow
       label={field.label}
+      labelAppend={field.labelAppend}
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

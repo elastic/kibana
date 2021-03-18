@@ -6,16 +6,16 @@
  */
 
 import React, { useEffect } from 'react';
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
+import { FlashMessages } from '../../../shared/flash_messages';
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { LicensingLogic } from '../../../shared/licensing';
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-
-import { LicensingLogic } from '../../../../applications/shared/licensing';
-
+import { AppLogic } from '../../app_logic';
 import { NAV } from '../../constants';
 import {
   ADD_SOURCE_PATH,
@@ -26,17 +26,13 @@ import {
   getSourcesPath,
 } from '../../routes';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-
-import { AppLogic } from '../../app_logic';
-import { staticSourceData } from './source_data';
-import { SourcesLogic } from './sources_logic';
-
 import { AddSource, AddSourceList } from './components/add_source';
 import { SourceAdded } from './components/source_added';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
+import { staticSourceData } from './source_data';
 import { SourceRouter } from './source_router';
+import { SourcesLogic } from './sources_logic';
 
 import './sources.scss';
 

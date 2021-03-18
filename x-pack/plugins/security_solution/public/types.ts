@@ -22,6 +22,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
+import { CasesUiStart } from '../../cases/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { ResolverPluginSetup } from './resolver/types';
 import { Inspect } from '../common/search_strategy';
@@ -34,10 +35,11 @@ import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
 import { Management } from './management';
-import { LicensingPluginStart } from '../../licensing/public';
+import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
+  licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
@@ -46,6 +48,7 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
+  cases: CasesUiStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;

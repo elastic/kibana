@@ -19,12 +19,13 @@ import { DataPluginStartDependencies, DataPluginStart } from '../plugin';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
-import { IndexPatternsService as IndexPatternsCommonService } from '../../common/index_patterns';
+import { IndexPatternsCommonService } from '../';
 import { FieldFormatsStart } from '../field_formats';
 import { getIndexPatternLoad } from './expressions';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
+import { DataRequestHandlerContext } from '../types';
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
@@ -35,6 +36,7 @@ export interface IndexPatternsServiceStart {
 
 export interface IndexPatternsServiceSetupDeps {
   expressions: ExpressionsServerSetup;
+  logger: Logger;
 }
 
 export interface IndexPatternsServiceStartDeps {
@@ -45,10 +47,26 @@ export interface IndexPatternsServiceStartDeps {
 export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { expressions }: IndexPatternsServiceSetupDeps
+    { logger, expressions }: IndexPatternsServiceSetupDeps
   ) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'indexPatterns'>(
+      'indexPatterns',
+      async (context, request) => {
+        const [coreStart, , dataStart] = await core.getStartServices();
+        try {
+          return await dataStart.indexPatterns.indexPatternsServiceFactory(
+            coreStart.savedObjects.getScopedClient(request),
+            coreStart.elasticsearch.client.asScoped(request).asCurrentUser
+          );
+        } catch (e) {
+          logger.error(e);
+          return undefined;
+        }
+      }
+    );
 
     registerRoutes(core.http, core.getStartServices);
 

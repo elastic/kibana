@@ -47,7 +47,7 @@ import { getTimelineRoute } from '../lib/timeline/routes/get_timeline_route';
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  usingEphemeralEncryptionKey: boolean,
+  hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml']
 ) => {
@@ -102,5 +102,5 @@ export const initRoutes = (
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(router, usingEphemeralEncryptionKey);
+  readPrivilegesRoute(router, hasEncryptionKey);
 };

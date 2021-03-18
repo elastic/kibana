@@ -22,11 +22,14 @@ const formats = {
   UNIX_MILLIS: 'UNIX_MILLIS',
 };
 
-function formatDate(date: Date, dateFormat: string = formats.ISO8601, timezone?: string): string {
+function formatDate(
+  date: Date,
+  dateFormat: string = formats.ISO8601_TZ,
+  timezone?: string
+): string {
   const momentDate = moment(date);
-  if (timezone) {
-    momentDate.tz(timezone);
-  }
+  momentDate.tz(timezone ?? moment.tz.guess());
+
   switch (dateFormat) {
     case formats.ISO8601:
       return momentDate.toISOString();

@@ -18,7 +18,8 @@ export default function upgradeAssistantFunctionalTests({
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('Upgrade Checkup', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/86546
+  describe.skip('Upgrade Checkup', function () {
     this.tags('includeFirefox');
 
     before(async () => {

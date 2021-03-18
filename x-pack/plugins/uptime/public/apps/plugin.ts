@@ -87,6 +87,28 @@ export class UptimePlugin
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
+      meta: {
+        keywords: [
+          'Synthetics',
+          'pings',
+          'checks',
+          'availability',
+          'response duration',
+          'response time',
+          'outside in',
+          'reachability',
+          'reachable',
+          'digital',
+          'performance',
+          'web performance',
+          'web perf',
+        ],
+        searchDeepLinks: [
+          { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
+          { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
+          { id: 'Settings', title: 'Settings', path: '/settings' },
+        ],
+      },
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
 

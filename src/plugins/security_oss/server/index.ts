@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
 import { ConfigSchema } from './config';
 import { SecurityOssPlugin } from './plugin';
 

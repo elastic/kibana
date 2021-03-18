@@ -15,8 +15,9 @@ import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { DocumentDetailLogic } from './document_detail_logic';
 import { InternalSchemaTypes } from '../../../shared/types';
+
+import { DocumentDetailLogic } from './document_detail_logic';
 
 describe('DocumentDetailLogic', () => {
   const { mount } = new LogicMounter(DocumentDetailLogic);

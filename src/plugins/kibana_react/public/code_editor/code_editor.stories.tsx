@@ -165,7 +165,6 @@ storiesOf('CodeEditor', module)
               provideCompletionItems: provideSuggestions,
             }}
             options={{
-              wordBasedSuggestions: false,
               quickSuggestions: true,
             }}
           />

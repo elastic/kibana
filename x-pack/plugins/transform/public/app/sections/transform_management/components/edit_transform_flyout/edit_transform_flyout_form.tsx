@@ -99,6 +99,46 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
       <EuiSpacer size="l" />
 
       <EuiAccordion
+        data-test-subj="transformEditAccordionRetentionPolicy"
+        id="transformEditAccordionRetentionPolicy"
+        buttonContent={i18n.translate(
+          'xpack.transform.transformList.editFlyoutFormRetentionPolicyButtonContent',
+          {
+            defaultMessage: 'Retention policy',
+          }
+        )}
+        paddingSize="s"
+      >
+        <EditTransformFlyoutFormTextInput
+          dataTestSubj="transformEditFlyoutRetentionPolicyFieldInput"
+          errorMessages={formFields.retentionPolicyField.errorMessages}
+          label={i18n.translate(
+            'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
+            {
+              defaultMessage: 'Field',
+            }
+          )}
+          onChange={(value) => dispatch({ field: 'retentionPolicyField', value })}
+          value={formFields.retentionPolicyField.value}
+        />
+
+        <EditTransformFlyoutFormTextInput
+          dataTestSubj="transformEditFlyoutRetentionPolicyMaxAgeInput"
+          errorMessages={formFields.retentionPolicyMaxAge.errorMessages}
+          label={i18n.translate(
+            'xpack.transform.transformList.editFlyoutFormRetentionMaxAgeFieldLabel',
+            {
+              defaultMessage: 'Max age',
+            }
+          )}
+          onChange={(value) => dispatch({ field: 'retentionPolicyMaxAge', value })}
+          value={formFields.retentionPolicyMaxAge.value}
+        />
+      </EuiAccordion>
+
+      <EuiSpacer size="l" />
+
+      <EuiAccordion
         data-test-subj="transformEditAccordionAdvancedSettings"
         id="transformEditAccordionAdvancedSettings"
         buttonContent={i18n.translate(

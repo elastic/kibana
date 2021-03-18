@@ -8,8 +8,9 @@
 import React, { lazy, Suspense } from 'react';
 import { CoreVitalProps, HeaderMenuPortalProps } from './types';
 
+const CoreVitalsLazy = lazy(() => import('./core_web_vitals/index'));
+
 export function getCoreVitalsComponent(props: CoreVitalProps) {
-  const CoreVitalsLazy = lazy(() => import('./core_web_vitals/index'));
   return (
     <Suspense fallback={null}>
       <CoreVitalsLazy {...props} />
@@ -17,8 +18,9 @@ export function getCoreVitalsComponent(props: CoreVitalProps) {
   );
 }
 
+const HeaderMenuPortalLazy = lazy(() => import('./header_menu_portal'));
+
 export function HeaderMenuPortal(props: HeaderMenuPortalProps) {
-  const HeaderMenuPortalLazy = lazy(() => import('./header_menu_portal'));
   return (
     <Suspense fallback={null}>
       <HeaderMenuPortalLazy {...props} />

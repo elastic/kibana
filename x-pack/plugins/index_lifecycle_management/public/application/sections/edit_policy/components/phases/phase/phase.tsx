@@ -23,23 +23,24 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { PhasesExceptDelete } from '../../../../../../../common/types';
 import { ToggleField, useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
-
 import { FormInternal } from '../../../types';
-
 import { UseField } from '../../../form';
-
-import { PhaseErrorIndicator } from './phase_error_indicator';
-
 import { MinAgeField } from '../shared_fields';
 import { PhaseIcon } from '../../phase_icon';
 import { PhaseFooter } from '../../phase_footer';
+import { PhaseErrorIndicator } from './phase_error_indicator';
+
 import './phase.scss';
 
 interface Props {
   phase: PhasesExceptDelete;
+  /**
+   * Settings that should always be visible on the phase when it is enabled.
+   */
+  topLevelSettings?: React.ReactNode;
 }
 
-export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
+export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, phase }) => {
   const enabledPath = `_meta.${phase}.enabled`;
   const [formData] = useFormData<FormInternal>({
     watch: [enabledPath],
@@ -95,6 +96,7 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
       actions={minAge}
       timelineIcon={<PhaseIcon enabled={enabled} phase={phase} />}
       className={`ilmPhase ${enabled ? 'ilmPhase--enabled' : ''}`}
+      data-test-subj={`${phase}-phase`}
     >
       <EuiText color="subdued" size={'s'} style={{ maxWidth: '50%' }}>
         {i18nTexts.editPolicy.descriptions[phase]}
@@ -102,21 +104,37 @@ export const Phase: FunctionComponent<Props> = ({ children, phase }) => {
 
       {enabled && (
         <>
-          <EuiSpacer size="m" />
-          <EuiAccordion
-            id={`${phase}-settingsSwitch`}
-            buttonContent={
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
-                defaultMessage="Advanced settings"
-              />
-            }
-            buttonClassName="ilmSettingsButton"
-            extraAction={<PhaseFooter phase={phase} />}
-          >
-            <EuiSpacer />
-            {children}
-          </EuiAccordion>
+          {!!topLevelSettings ? (
+            <>
+              <EuiSpacer />
+              {topLevelSettings}
+            </>
+          ) : (
+            <EuiSpacer size="m" />
+          )}
+
+          {children ? (
+            <EuiAccordion
+              id={`${phase}-settingsSwitch`}
+              buttonContent={
+                <FormattedMessage
+                  id="xpack.indexLifecycleMgmt.editPolicy.phaseSettings.buttonLabel"
+                  defaultMessage="Advanced settings"
+                />
+              }
+              buttonClassName="ilmSettingsButton"
+              extraAction={<PhaseFooter phase={phase} />}
+            >
+              <EuiSpacer />
+              {children}
+            </EuiAccordion>
+          ) : (
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <PhaseFooter phase={phase} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </>
       )}
     </EuiComment>

@@ -8,7 +8,6 @@
 
 import { Observable, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
-// @ts-ignore
 import fetch from 'node-fetch';
 import {
   TelemetryCollectionManagerPluginStart,

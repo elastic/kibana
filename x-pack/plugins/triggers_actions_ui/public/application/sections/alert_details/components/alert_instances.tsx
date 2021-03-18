@@ -12,7 +12,7 @@ import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch, EuiToolTip } from '@ela
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerts/common';
+import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerting/common';
 import {
   Alert,
   AlertInstanceSummary,
@@ -43,8 +43,8 @@ export const alertInstancesTableColumns = (
   {
     field: 'instance',
     name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.instance',
-      { defaultMessage: 'Instance' }
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.alert',
+      { defaultMessage: 'Alert' }
     ),
     sortable: false,
     truncateText: true,

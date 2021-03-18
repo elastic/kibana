@@ -11,7 +11,7 @@ import {
   CasesConfigureResponse,
   CasesConfigureRequest,
   ConnectorTypes,
-} from '../../../../../case/common/api';
+} from '../../../../../cases/common/api';
 import { CaseConfigure, CaseConnectorMapping } from './types';
 
 export const mappings: CaseConnectorMapping[] = [
@@ -58,6 +58,15 @@ export const connectorsMock: ActionConnector[] = [
     name: 'Jira',
     config: {
       apiUrl: 'https://instance.atlassian.ne',
+    },
+    isPreconfigured: false,
+  },
+  {
+    id: 'servicenow-sir',
+    actionTypeId: '.servicenow-sir',
+    name: 'My Connector SIR',
+    config: {
+      apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
   },

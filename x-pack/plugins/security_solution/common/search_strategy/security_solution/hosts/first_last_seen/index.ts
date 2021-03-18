@@ -13,7 +13,9 @@ import { HostsFields } from '../common';
 export interface HostFirstLastSeenRequestOptions
   extends Partial<RequestOptionsPaginated<HostsFields>> {
   hostName: string;
+  order: 'asc' | 'desc';
 }
+
 export interface HostFirstLastSeenStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   firstSeen?: Maybe<string>;
