@@ -20,6 +20,7 @@ describe('config validation', () => {
           "*",
         ],
         "preconfigured": Object {},
+        "preconfiguredAlertHistoryEsIndex": true,
         "proxyRejectUnauthorizedCertificates": true,
         "rejectUnauthorized": true,
       }
@@ -59,6 +60,7 @@ describe('config validation', () => {
             "secrets": Object {},
           },
         },
+        "preconfiguredAlertHistoryEsIndex": true,
         "proxyRejectUnauthorizedCertificates": false,
         "rejectUnauthorized": false,
       }

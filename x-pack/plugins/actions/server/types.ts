@@ -110,7 +110,7 @@ export interface ActionType<
   renderParameterTemplates?(
     params: Params,
     variables: Record<string, unknown>,
-    actionId: string
+    actionId?: string
   ): Params;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }

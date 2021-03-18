@@ -18,6 +18,7 @@ import {
   ESIndexActionType,
   ESIndexActionTypeExecutorOptions,
 } from './es_index';
+import { AlertHistoryEsIndexConnectorId } from '../../common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
 
@@ -302,6 +303,106 @@ describe('execute()', () => {
               },
             ],
           ]
+    `);
+  });
+
+  test('renders parameter templates as expected', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+    };
+    const variables = {
+      who: 'world',
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      'action-type-id'
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "hello": "world",
+          },
+        ],
+      }
+    `);
+  });
+
+  test('renders parameter templates as expected for preconfigured alert history index', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+    };
+    const variables = {
+      rule: {
+        id: 'rule-id',
+        name: 'rule-name',
+        type: 'rule-type',
+      },
+      context: {
+        contextVar1: 'contextValue1',
+        contextVar2: 'contextValue2',
+      },
+      params: {
+        ruleParam: 1,
+        ruleParamString: 'another param',
+      },
+      tags: ['abc', 'xyz'],
+      alert: {
+        id: 'alert-id',
+        actionGroup: 'action-group-id',
+        actionGroupName: 'Action Group',
+      },
+      state: {
+        alertStateValue: true,
+        alertStateAnotherValue: 'yes',
+      },
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      AlertHistoryEsIndexConnectorId
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "alert": Object {
+              "actionGroup": "action-group-id",
+              "actionGroupName": "Action Group",
+              "context": Object {
+                "rule-type": Object {
+                  "contextVar1": "contextValue1",
+                  "contextVar2": "contextValue2",
+                },
+              },
+              "id": "alert-id",
+              "state": Object {
+                "rule-type": Object {
+                  "alertStateAnotherValue": "yes",
+                  "alertStateValue": true,
+                },
+              },
+            },
+            "event": Object {
+              "kind": "alert",
+            },
+            "rule": Object {
+              "id": "rule-id",
+              "name": "rule-name",
+              "params": Object {
+                "rule-type": Object {
+                  "ruleParam": 1,
+                  "ruleParamString": "another param",
+                },
+              },
+              "type": "rule-type",
+            },
+          },
+        ],
+      }
     `);
   });
 
