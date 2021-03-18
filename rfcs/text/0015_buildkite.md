@@ -296,7 +296,7 @@ Besides this, [Enterprise](https://buildkite.com/enterprise) customers get 24/7 
 
 #### Scheduled Builds
 
-[Build has scheduled build](https://buildkite.com/docs/pipelines/scheduled-builds) support with a cron-like syntax. Schedules are defined separately from the pipeline yaml, and can be managed via the UI, API, or terraform.
+[Buildkite has scheduled build](https://buildkite.com/docs/pipelines/scheduled-builds) support with a cron-like syntax. Schedules are defined separately from the pipeline yaml, and can be managed via the UI, API, or terraform.
 
 ### Desired
 
@@ -332,7 +332,15 @@ TODO
 
 ### Elastic Buildkite PR Bot
 
-TODO
+For TeamCity, we built a bot that was going to handle webhooks from GitHub and trigger builds for PRs based on configuration, user permissions, etc. Since we will not be moving to TeamCity, we've repurposed this bot for Buildkite, since Buildkite does not support all of our requirements around triggering builds for PRs out-of-the-box.
+
+TODO add link to repo when available
+
+Features supported by the bot:
+
+- Triggering builds on commit / when the PR is opened
+- Triggering builds on comment
+-
 
 ### GCP Infrastructure
 
