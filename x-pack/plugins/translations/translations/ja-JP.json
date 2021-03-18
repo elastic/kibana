@@ -11804,7 +11804,6 @@
     "xpack.lens.app.docLoadingError": "保存されたドキュメントの保存中にエラーが発生",
     "xpack.lens.app.downloadButtonAriaLabel": "データを CSV ファイルとしてダウンロード",
     "xpack.lens.app.downloadCSV": "CSV をダウンロード",
-    "xpack.lens.app.indexPatternLoadingError": "インデックスパターンの読み込み中にエラーが発生",
     "xpack.lens.app.save": "保存",
     "xpack.lens.app.saveAndReturn": "保存して戻る",
     "xpack.lens.app.saveAndReturnButtonAriaLabel": "現在のLensビジュアライゼーションを保存し、前回使用していたアプリに戻る",
