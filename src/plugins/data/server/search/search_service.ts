@@ -29,7 +29,6 @@ import type {
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
-  DataRequestHandlerContext,
 } from './types';
 
 import { AggsService } from './aggs';
@@ -52,6 +51,9 @@ import {
   kibana,
   kibanaContext,
   kibanaContextFunction,
+  kibanaTimerangeFunction,
+  kqlFunction,
+  luceneFunction,
   SearchSourceDependencies,
   searchSourceRequiredUiSettings,
   SearchSourceService,
@@ -66,6 +68,7 @@ import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
+import { DataRequestHandlerContext } from '../types';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -142,6 +145,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(kibana);
+    expressions.registerFunction(luceneFunction);
+    expressions.registerFunction(kqlFunction);
+    expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerFunction(kibanaContextFunction);
     expressions.registerType(kibanaContext);
 

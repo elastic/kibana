@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { MouseEvent, ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
@@ -123,6 +123,26 @@ describe('IndexPattern Field Item', () => {
     expect(wrapper.find('[data-test-subj="lnsFieldListPanelField"]').first().text()).toEqual(
       'bytesLabel'
     );
+  });
+
+  it('should render edit field button if callback is set', () => {
+    core.http.post.mockImplementation(() => {
+      return new Promise(() => {});
+    });
+    const editFieldSpy = jest.fn();
+    const wrapper = mountWithIntl(
+      <InnerFieldItem {...defaultProps} editField={editFieldSpy} hideDetails />
+    );
+    clickField(wrapper, 'bytes');
+    wrapper.update();
+    const popoverContent = wrapper.find(EuiPopover).prop('children');
+    act(() => {
+      mountWithIntl(popoverContent as ReactElement)
+        .find('[data-test-subj="lnsFieldListPanelEdit"]')
+        .first()
+        .prop('onClick')!({} as MouseEvent);
+    });
+    expect(editFieldSpy).toHaveBeenCalledWith('bytes');
   });
 
   it('should request field stats every time the button is clicked', async () => {
