@@ -14,8 +14,8 @@ import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, collectionCase } from '../../containers/mock';
 import * as i18n from './translations';
 
-import { CaseStatuses, CaseType } from '../../../common/api';
-import { getEmptyTagValue } from '../../common/components/empty_value';
+import { CaseStatuses, CaseType } from '../../../common';
+import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';

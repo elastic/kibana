@@ -10,7 +10,7 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
 
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
@@ -78,22 +78,6 @@ const CasesTableFiltersComponent = ({
     }
   }, [refetch, setFilterRefetch]);
 
-  useEffect(() => {
-    if (selectedReporters.length) {
-      const newReporters = selectedReporters.filter((r) => reporters.includes(r));
-      handleSelectedReporters(newReporters);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reporters]);
-
-  useEffect(() => {
-    if (selectedTags.length) {
-      const newTags = selectedTags.filter((t) => tags.includes(t));
-      handleSelectedTags(newTags);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tags]);
-
   const handleSelectedReporters = useCallback(
     (newReporters) => {
       if (!isEqual(newReporters, selectedReporters)) {
@@ -104,9 +88,15 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ reporters: reportersObj });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedReporters, respReporters]
+    [selectedReporters, respReporters, onFilterChanged]
   );
+
+  useEffect(() => {
+    if (selectedReporters.length) {
+      const newReporters = selectedReporters.filter((r) => reporters.includes(r));
+      handleSelectedReporters(newReporters);
+    }
+  }, [handleSelectedReporters, reporters, selectedReporters]);
 
   const handleSelectedTags = useCallback(
     (newTags) => {
@@ -115,9 +105,15 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ tags: newTags });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedTags]
+    [onFilterChanged, selectedTags]
   );
+
+  useEffect(() => {
+    if (selectedTags.length) {
+      const newTags = selectedTags.filter((t) => tags.includes(t));
+      handleSelectedTags(newTags);
+    }
+  }, [handleSelectedTags, selectedTags, tags]);
 
   const handleOnSearch = useCallback(
     (newSearch) => {
@@ -127,8 +123,7 @@ const CasesTableFiltersComponent = ({
         onFilterChanged({ search: trimSearch });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [search]
+    [onFilterChanged, search]
   );
 
   const onStatusChanged = useCallback(

@@ -22,7 +22,7 @@ import styled, { css } from 'styled-components';
 import classnames from 'classnames';
 
 import * as i18n from './translations';
-import { CaseStatuses, CaseType } from '../../../common/api';
+import { CaseStatuses, CaseType } from '../../../common';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase, SubCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
@@ -48,7 +48,7 @@ import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { CaseCallOut } from '../callout';
 import { ConfigureCaseButton } from '../configure_cases/button';
 import { ERROR_PUSH_SERVICE_CALLOUT_TITLE } from '../use_push_to_service/translations';
-import { CaseDetailsHrefSchema, LinkButton } from '../../common/components/links';
+import { CaseDetailsHrefSchema, LinkButton } from '../links';
 import { Stats } from '../status';
 import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { getExpandedRowMap } from './expanded_row';
@@ -114,30 +114,30 @@ BasicTable.displayName = 'BasicTable';
 export interface AllCasesProps {
   configureCasesHref: string;
   createCaseHref: string;
+  disabledCases?: CaseType[];
+  disabledStatuses?: CaseStatuses[];
   getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
+  isModal?: boolean;
   onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
   onConfigureCasesNavClick?: (ev: React.MouseEvent) => void;
   onCreateCaseNavClick?: (ev: React.MouseEvent) => void;
   onRowClick?: (theCase?: Case | SubCase) => void;
-  isModal?: boolean;
   userCanCrud: boolean;
-  disabledStatuses?: CaseStatuses[];
-  disabledCases?: CaseType[];
 }
 
 export const AllCases = React.memo<AllCasesProps>(
   ({
     configureCasesHref,
     createCaseHref,
+    disabledCases = [],
+    disabledStatuses,
     getCaseDetailsHref,
+    isModal = false,
     onCaseDetailsNavClick,
     onConfigureCasesNavClick,
     onCreateCaseNavClick,
     onRowClick,
-    isModal = false,
     userCanCrud,
-    disabledStatuses,
-    disabledCases = [],
   }) => {
     const { actionLicense } = useGetActionLicense();
     const {

@@ -3,7 +3,7 @@
 exports[`LinkIcon it renders 1`] = `
 <Link
   aria-label="Test link"
-  className="siemLinkIcon"
+  className="casesLinkIcon"
   href="#"
   iconSide="right"
 >
@@ -12,7 +12,7 @@ exports[`LinkIcon it renders 1`] = `
     type="alert"
   />
   <span
-    className="siemLinkIcon__label"
+    className="casesLinkIcon__label"
   >
     Test link
   </span>

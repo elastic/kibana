@@ -12,14 +12,14 @@ import styled, { css } from 'styled-components';
 import { LinkIcon, LinkIconProps } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
 import { Title } from './title';
-import { DraggableArguments, BadgeOptions, TitleProp } from './types';
+import { BadgeOptions, TitleProp } from './types';
 interface HeaderProps {
   border?: boolean;
   isLoading?: boolean;
 }
 
 const Header = styled.header.attrs({
-  className: 'siemHeaderPage',
+  className: 'casesHeaderPage',
 })<HeaderProps>`
   ${({ border, theme }) => css`
     margin-bottom: ${theme.eui.euiSizeL};
@@ -42,7 +42,7 @@ const FlexItem = styled(EuiFlexItem)`
 FlexItem.displayName = 'FlexItem';
 
 const LinkBack = styled.div.attrs({
-  className: 'siemHeaderPage__linkBack',
+  className: 'casesHeaderPage__linkBack',
 })`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
@@ -70,7 +70,6 @@ export interface HeaderPageProps extends HeaderProps {
   backComponent?: React.ReactNode;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
-  draggableArguments?: DraggableArguments;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
@@ -83,7 +82,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   badgeOptions,
   border,
   children,
-  draggableArguments,
   isLoading,
   subtitle,
   subtitle2,
@@ -110,13 +108,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
 
           {!backOptions && backComponent && <>{backComponent}</>}
 
-          {titleNode || (
-            <Title
-              draggableArguments={draggableArguments}
-              title={title}
-              badgeOptions={badgeOptions}
-            />
-          )}
+          {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
 
           {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
           {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}

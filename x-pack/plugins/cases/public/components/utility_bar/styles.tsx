@@ -24,7 +24,7 @@ export interface BarGroupProps {
 }
 
 export const Bar = styled.aside.attrs({
-  className: 'siemUtilityBar',
+  className: 'casesUtilityBar',
 })<BarProps>`
   ${({ border, theme }) => css`
     ${border &&
@@ -42,7 +42,7 @@ export const Bar = styled.aside.attrs({
 Bar.displayName = 'Bar';
 
 export const BarSection = styled.div.attrs({
-  className: 'siemUtilityBar__section',
+  className: 'casesUtilityBar__section',
 })<BarSectionProps>`
   ${({ grow, theme }) => css`
     & + & {
@@ -69,7 +69,7 @@ export const BarSection = styled.div.attrs({
 BarSection.displayName = 'BarSection';
 
 export const BarGroup = styled.div.attrs({
-  className: 'siemUtilityBar__group',
+  className: 'casesUtilityBar__group',
 })<BarGroupProps>`
   ${({ grow, theme }) => css`
     align-items: flex-start;
@@ -113,7 +113,7 @@ export const BarGroup = styled.div.attrs({
 BarGroup.displayName = 'BarGroup';
 
 export const BarText = styled.p.attrs({
-  className: 'siemUtilityBar__text',
+  className: 'casesUtilityBar__text',
 })`
   ${({ theme }) => css`
     color: ${theme.eui.euiTextSubduedColor};
@@ -125,7 +125,7 @@ export const BarText = styled.p.attrs({
 BarText.displayName = 'BarText';
 
 export const BarAction = styled.div.attrs({
-  className: 'siemUtilityBar__action',
+  className: 'casesUtilityBar__action',
 })`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};
@@ -135,7 +135,7 @@ export const BarAction = styled.div.attrs({
 BarAction.displayName = 'BarAction';
 
 export const BarSpacer = styled.div.attrs({
-  className: 'siemUtilityBar__spacer',
+  className: 'casesUtilityBar__spacer',
 })`
   ${() => css`
     flex: 1;

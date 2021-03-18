@@ -54,7 +54,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemHeaderPage__linkBack').first().exists()).toBe(true);
+    expect(wrapper.find('.casesHeaderPage__linkBack').first().exists()).toBe(true);
   });
 
   test('it DOES NOT render the back link when not provided', () => {
@@ -64,7 +64,7 @@ describe('HeaderPage', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemHeaderPage__linkBack').first().exists()).toBe(false);
+    expect(wrapper.find('.casesHeaderPage__linkBack').first().exists()).toBe(false);
   });
 
   test('it renders the first subtitle when provided', () => {
@@ -137,10 +137,10 @@ describe('HeaderPage', () => {
         <HeaderPage border title="Test title" />
       </TestProviders>
     );
-    const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
+    const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
-    expect(siemHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
+    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -149,9 +149,9 @@ describe('HeaderPage', () => {
         <HeaderPage title="Test title" />
       </TestProviders>
     );
-    const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
+    const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
-    expect(siemHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
+    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
   });
 });

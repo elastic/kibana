@@ -11,7 +11,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import '../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../common/mock';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
@@ -64,10 +64,12 @@ describe('usePushToService', () => {
     caseId,
     caseServices,
     caseStatus: CaseStatuses.open,
+    configureCasesHref: 'href',
     connectors: connectorsMock,
+    isValidConnector: true,
+    onConfigureCasesNavClick: jest.fn(),
     updateCase,
     userCanCrud: true,
-    isValidConnector: true,
   };
 
   beforeEach(() => {

@@ -19,11 +19,11 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses, CaseType } from '../../../common/api';
-import { getEmptyTagValue } from '../../common/components/empty_value';
+import { CaseStatuses, CaseType } from '../../../common';
+import { getEmptyTagValue } from '../empty_value';
 import { Case, SubCase } from '../../containers/types';
-import { FormattedRelativePreferenceDate } from '../../common/components/formatted_date';
-import { CaseDetailsHrefSchema, CaseDetailsLink } from '../../common/components/links';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
+import { CaseDetailsHrefSchema, CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { Status } from '../status';
 import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';

@@ -26,14 +26,14 @@ export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
 
 export interface CaseDetailsHrefSchema {
   detailName: string;
-  subCaseId?: string;
   search?: string;
+  subCaseId?: string;
 }
 
 const CaseDetailsLinkComponent: React.FC<{
-  getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
   children?: React.ReactNode;
   detailName: string;
+  getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
   onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
   subCaseId?: string;
   title?: string;

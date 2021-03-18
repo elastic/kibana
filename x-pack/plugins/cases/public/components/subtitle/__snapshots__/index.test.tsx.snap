@@ -2,7 +2,7 @@
 
 exports[`Subtitle it renders 1`] = `
 <Wrapper
-  className="siemSubtitle"
+  className="casesSubtitle"
 >
   <SubtitleItem>
     Test subtitle

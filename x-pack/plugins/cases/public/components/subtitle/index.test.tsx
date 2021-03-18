@@ -25,7 +25,7 @@ describe('Subtitle', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item--text').length).toEqual(1);
+    expect(wrapper.find('.casesSubtitle__item--text').length).toEqual(1);
   });
 
   test('it renders multiple subtitle string items', () => {
@@ -35,7 +35,7 @@ describe('Subtitle', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item--text').length).toEqual(2);
+    expect(wrapper.find('.casesSubtitle__item--text').length).toEqual(2);
   });
 
   test('it renders one subtitle React.ReactNode item', () => {
@@ -45,7 +45,7 @@ describe('Subtitle', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item--node').length).toEqual(1);
+    expect(wrapper.find('.casesSubtitle__item--node').length).toEqual(1);
   });
 
   test('it renders multiple subtitle React.ReactNode items', () => {
@@ -55,7 +55,7 @@ describe('Subtitle', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item--node').length).toEqual(2);
+    expect(wrapper.find('.casesSubtitle__item--node').length).toEqual(2);
   });
 
   test('it renders multiple subtitle items of mixed type', () => {
@@ -65,6 +65,6 @@ describe('Subtitle', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemSubtitle__item').length).toEqual(2);
+    expect(wrapper.find('.casesSubtitle__item').length).toEqual(2);
   });
 });

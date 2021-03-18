@@ -15,9 +15,9 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
-import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common/api';
+import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { LinkAnchor } from '../../common/components/links';
+import { LinkAnchor } from '../links';
 import { ErrorMessage } from '../callout/types';
 
 export interface UsePushToService {

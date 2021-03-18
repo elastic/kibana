@@ -10,7 +10,7 @@ import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import styled from 'styled-components';
 import { Case, SubCase } from '../../containers/types';
 import { CasesColumns } from './columns';
-import { AssociationType } from '../../../common/api';
+import { AssociationType } from '../../../common';
 
 type ExpandedRowMap = Record<string, Element> | {};
 

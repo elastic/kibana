@@ -7,7 +7,6 @@
 
 // The DEFAULT_MAX_SIGNALS value should match the one in `x-pack/plugins/security_solution/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
-// import { DEFAULT_MAX_SIGNALS } from '../../security_solution/common/constants';
 const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';

@@ -97,13 +97,11 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     return () => {
       didCancel = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [security]);
+  }, [dispatchToaster, security]);
 
   useEffect(() => {
     fetchUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchUser]);
   return user;
 };
 

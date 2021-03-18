@@ -8,7 +8,7 @@
 import { Dispatch } from 'react';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common';
 import { Case, SubCase } from '../../containers/types';
 import { UpdateCase } from '../../containers/use_get_cases';
 import { statuses } from '../status';

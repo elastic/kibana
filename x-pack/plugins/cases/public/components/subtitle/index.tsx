@@ -12,7 +12,7 @@ const Wrapper = styled.div`
   ${({ theme }) => css`
     margin-top: ${theme.eui.euiSizeS};
 
-    .siemSubtitle__item {
+    .casesSubtitle__item {
       color: ${theme.eui.euiTextSubduedColor};
       font-size: ${theme.eui.euiFontSizeXS};
       line-height: ${theme.eui.euiLineHeight};
@@ -39,13 +39,16 @@ const SubtitleItem = React.memo<SubtitleItemProps>(
   ({ children, dataTestSubj = 'header-panel-subtitle' }) => {
     if (typeof children === 'string') {
       return (
-        <p className="siemSubtitle__item siemSubtitle__item--text" data-test-subj={dataTestSubj}>
+        <p className="casesSubtitle__item casesSubtitle__item--text" data-test-subj={dataTestSubj}>
           {children}
         </p>
       );
     } else {
       return (
-        <div className="siemSubtitle__item siemSubtitle__item--node" data-test-subj={dataTestSubj}>
+        <div
+          className="casesSubtitle__item casesSubtitle__item--node"
+          data-test-subj={dataTestSubj}
+        >
           {children}
         </div>
       );
@@ -60,7 +63,7 @@ export interface SubtitleProps {
 
 export const Subtitle = React.memo<SubtitleProps>(({ items }) => {
   return (
-    <Wrapper className="siemSubtitle">
+    <Wrapper className="casesSubtitle">
       {Array.isArray(items) ? (
         items.map((item, i) => <SubtitleItem key={i}>{item}</SubtitleItem>)
       ) : (

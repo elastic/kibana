@@ -65,7 +65,7 @@ describe('LinkIcon', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemLinkIcon').at(1)).toHaveStyleRule('flex-direction', 'row-reverse');
+    expect(wrapper.find('.casesLinkIcon').at(1)).toHaveStyleRule('flex-direction', 'row-reverse');
   });
 
   test('it positions the icon to the left when iconSide is left (or not provided)', () => {
@@ -77,7 +77,7 @@ describe('LinkIcon', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemLinkIcon').at(1)).not.toHaveStyleRule(
+    expect(wrapper.find('.casesLinkIcon').at(1)).not.toHaveStyleRule(
       'flex-direction',
       'row-reverse'
     );
@@ -90,6 +90,6 @@ describe('LinkIcon', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('.siemLinkIcon__label').first().exists()).toBe(true);
+    expect(wrapper.find('.casesLinkIcon__label').first().exists()).toBe(true);
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useReducer, useRef, useEffect } from 'react';
-import { CaseStatuses } from '../../common/api';
+import { CaseStatuses } from '../../common';
 import { displaySuccessToast, errorToToaster, useStateToaster } from '../components/toasters';
 import * as i18n from './translations';
 import { patchCasesStatus } from './api';

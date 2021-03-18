@@ -7,12 +7,12 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { LinkButton } from '../../common/components/links';
+import { LinkButton } from '../links';
 
 export interface ConfigureCaseButtonProps {
   configureCasesHref: string;
-  label: string;
   isDisabled: boolean;
+  label: string;
   msgTooltip: JSX.Element;
   onConfigureCasesNavClick?: (ev: React.MouseEvent) => void;
   showToolTip: boolean;

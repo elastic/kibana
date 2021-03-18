@@ -18,7 +18,7 @@ import {
   getEmptyValue,
   getOrEmptyTag,
 } from '.';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
 
 describe('EmptyValue', () => {
   const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
