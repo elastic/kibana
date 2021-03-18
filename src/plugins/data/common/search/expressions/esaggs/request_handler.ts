@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { DatatableColumn, DatatableRow } from 'src/plugins/expressions';
 import { Adapters } from 'src/plugins/inspector/common';
 
 import {
@@ -76,18 +77,18 @@ export const handleRequest = async ({
 
   const partialResponses = await Promise.all(
     Object.values(timeShifts).map(async (timeShift) => {
-      let currentAggs = aggs;
+      const currentAggs = aggs;
       if (timeShift) {
-        currentAggs = originalAggs.clone();
-        currentAggs.aggs = currentAggs.aggs.filter(
-          (agg) =>
-            agg.schema !== 'metric' ||
-            (agg.getTimeShift() &&
-              agg.getTimeShift()!.asMilliseconds() === timeShift.asMilliseconds())
-        );
+        // currentAggs = originalAggs.clone();
+        // currentAggs.aggs = currentAggs.aggs.filter(
+        //   (agg) =>
+        //     agg.schema !== 'metric' ||
+        //     (agg.getTimeShift() &&
+        //       agg.getTimeShift()!.asMilliseconds() === timeShift.asMilliseconds())
+        // );
       } else {
-        currentAggs = Object.values(timeShifts).length === 1 ? originalAggs : originalAggs.clone();
-        currentAggs.aggs = currentAggs.aggs.filter((agg) => !agg.getTimeShift());
+        // currentAggs = Object.values(timeShifts).length === 1 ? originalAggs : originalAggs.clone();
+        // currentAggs.aggs = currentAggs.aggs.filter((agg) => !agg.getTimeShift());
       }
       // Create a new search source that inherits the original search source
       // but has the appropriate timeRange applied via a filter.
@@ -235,17 +236,89 @@ export const handleRequest = async ({
   );
 
   // todo - do an outer join on all partial responses
-  // if (partialResponses.length === 1) {
-  //   return partialResponses[0];
-  // } else {
-  //   const joinAggs = aggs
-  //     .bySchemaName('bucket')
-  //     .filter((agg) => !timeFields || !timeFields.includes(agg.fieldName()));
-  //   const fullResponse = partialResponses[0];
-  //   partialResponses.shift();
-  //   partialResponses.forEach(partialResponse => {
-
-  //   });
-  // }
-  return partialResponses[0];
+  if (partialResponses.length === 1) {
+    return partialResponses[0];
+  } else {
+    const fullResponse = partialResponses[0];
+    const fullResponseTimeShift = Object.values(timeShifts)[0];
+    fullResponse.rows.forEach((row) => {
+      fullResponse.columns.forEach((column) => {
+        const columnAgg = aggs.aggs.find((a) => a.id === column.meta.sourceParams.id)!;
+        if (
+          columnAgg.getTimeShift()?.asMilliseconds() !== fullResponseTimeShift?.asMilliseconds()
+        ) {
+          delete row[column.id];
+        }
+      });
+    });
+    const joinAggs = aggs
+      .bySchemaName('bucket')
+      .filter((agg) => !timeFields || !timeFields.includes(agg.fieldName()));
+    const joinColumns = fullResponse.columns.filter(
+      (c) =>
+        c.meta.sourceParams.schema !== 'metric' &&
+        (!timeFields || !timeFields.includes(c.meta.sourceParams?.params?.field))
+    );
+    const timeJoinAggs = aggs
+      .bySchemaName('bucket')
+      .filter((agg) => timeFields && timeFields.includes(agg.fieldName()));
+    const timeJoinColumns = fullResponse.columns.filter(
+      (c) =>
+        c.meta.sourceParams.schema !== 'metric' &&
+        timeFields &&
+        timeFields.includes(c.meta.sourceParams?.params?.field)
+    );
+    partialResponses.shift();
+    partialResponses.forEach((partialResponse, index) => {
+      const timeShift = Object.values(timeShifts)[index + 1];
+      const missingCols: DatatableColumn[] = [];
+      partialResponse.columns.forEach((column) => {
+        const columnAgg = aggs.aggs.find((a) => a.id === column.meta.sourceParams.id)!;
+        if (columnAgg.getTimeShift()?.asMilliseconds() === timeShift?.asMilliseconds()) {
+          missingCols.push(column);
+        }
+      });
+      partialResponse.rows.forEach((row) => {
+        const targetRow = getColumnIdentifier(joinColumns, row, timeJoinColumns, timeShift);
+        const targetRowIndex = fullResponse.rows.findIndex((r) => {
+          return (
+            getColumnIdentifier(joinColumns, r, timeJoinColumns, moment.duration(0, 'ms')) ===
+            targetRow
+          );
+        });
+        if (targetRowIndex !== -1) {
+          missingCols.forEach((c) => {
+            fullResponse.rows[targetRowIndex][c.id] = row[c.id];
+          });
+        } else {
+          // add it to the bottom - this might be confusing in some cases
+          // can we insert it at the right place?
+          const updatedRow: DatatableRow = {};
+          joinColumns.forEach((c) => {
+            updatedRow[c.id] = row[c.id];
+          });
+          timeJoinColumns.forEach((c) => {
+            updatedRow[c.id] = moment(row[c.id]).add(timeShift).valueOf();
+          });
+          missingCols.forEach((c) => {
+            updatedRow[c.id] = row[c.id];
+          });
+          fullResponse.rows.push(updatedRow);
+        }
+      });
+    });
+    return fullResponse;
+  }
 };
+function getColumnIdentifier(
+  joinColumns: DatatableColumn[],
+  row: DatatableRow,
+  timeJoinColumns: DatatableColumn[],
+  timeShift: moment.Duration | undefined
+) {
+  const joinStr = joinColumns.map((c) => String(row[c.id]));
+  const timeJoinStr = timeJoinColumns.map((c) =>
+    String(moment(row[c.id]).add(timeShift).valueOf())
+  );
+  return joinStr.join(',') + timeJoinStr.join(',');
+}
