@@ -41,8 +41,11 @@ interface Props {
   setExpandedDoc: (doc: ElasticSearchHit) => void;
 }
 
-function getDocFingerprintId(doc: ElasticSearchHit) {
-  return [doc._index, doc._id].join('|');
+type ElasticSearchHitWithRouting = ElasticSearchHit & { _routing?: string };
+
+function getDocFingerprintId(doc: ElasticSearchHitWithRouting) {
+  const routing = doc._routing || '';
+  return [doc._index, doc._id, routing].join('||');
 }
 
 function getIndexByDocId(hits: ElasticSearchHit[], id: string) {
@@ -65,18 +68,18 @@ export function DiscoverGridFlyout({
   services,
   setExpandedDoc,
 }: Props) {
-  const pageCount = useMemo(() => hits && hits.length, [hits]);
-  const activePage = useMemo(() => {
+  const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
+  const activePage = useMemo<number>(() => {
     const id = getDocFingerprintId(hit);
-    if (!hits) {
+    if (!hits || pageCount <= 1) {
       return -1;
     }
 
     return getIndexByDocId(hits, id);
-  }, [hits, hit]);
+  }, [hits, hit, pageCount]);
 
   const setPage = useCallback(
-    (pageIdx) => {
+    (pageIdx: number) => {
       if (hits && hits[pageIdx]) {
         setExpandedDoc(hits[pageIdx]);
       }
@@ -159,6 +162,7 @@ export function DiscoverGridFlyout({
                   activePage={activePage}
                   onPageClick={setPage}
                   compressed
+                  data-test-subj="dscDocNavigation"
                 />
               </EuiFlexItem>
             )}
