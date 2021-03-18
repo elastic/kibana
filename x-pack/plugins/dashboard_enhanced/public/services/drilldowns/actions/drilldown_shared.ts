@@ -59,6 +59,7 @@ export const createDrilldownTemplatesFromSiblings = (
 
     for (const event of events) {
       const template: DrilldownTemplate = {
+        id: event.eventId,
         name: event.action.name,
         description: child.getTitle() || child.id,
         config: event.action.config,

@@ -82,10 +82,35 @@ export interface PublicDrilldownManagerProps {
  * cloned from one dashboard panel to another.
  */
 export interface DrilldownTemplate {
-  factoryId: string;
-  name: string;
+  /**
+   * Any string that uniquely identifies this item in a list of `DrilldownTemplate[]`.
+   */
+  id: string;
+
+  /**
+   * A user facing text that provides information about the source of this template.
+   */
   description: string;
+
+  /**
+   * Drilldown type, dynamic action factory ID.
+   */
+  factoryId: string;
+
+  /**
+   * Suggested new name of the cloned drilldown. If a drilldown with such suggested
+   * name already exists at current place, a suffix like " (copy 1)" will be added.
+   */
+  name: string;
+
+  /**
+   * Pre-selected triggers.
+   */
   triggers: string[];
+
+  /**
+   * Preliminary configuration of the new drilldown, to be used in the dynamicaction factory.
+   */
   config: unknown;
 }
 

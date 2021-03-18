@@ -22,8 +22,8 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items, onSelect }) =
   const tableItems: DrilldownTemplateTableItem[] = React.useMemo<
     DrilldownTemplateTableItem[]
   >(() => {
-    return items.map((item, index) => ({
-      id: String(index),
+    return items.map((item) => ({
+      id: item.id,
       name: item.name,
       description: item.description,
     }));
