@@ -9330,7 +9330,10 @@
     "vis_type_timeseries": {
       "properties": {
         "timeseries_use_last_value_mode_total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "Number of TSVB visualizations using \"last value\" as a time range"
+          }
         }
       }
     },
