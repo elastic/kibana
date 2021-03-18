@@ -15,6 +15,7 @@ import type {
   LoggerFactory,
 } from 'src/core/server';
 
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
@@ -26,11 +27,14 @@ import { APIKeys } from './api_keys';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
+import { API_ROUTES_SUPPORTING_REDIRECTS, canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
+import { renderUnauthorizedPage } from './unauthorized_page';
 
 interface AuthenticationServiceSetupParams {
-  http: Pick<HttpServiceSetup, 'registerAuth'>;
+  http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
   license: SecurityLicense;
+  buildNumber: number;
 }
 
 interface AuthenticationServiceStartParams {
@@ -65,7 +69,7 @@ export class AuthenticationService {
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ http, license }: AuthenticationServiceSetupParams) {
+  setup({ http, license, buildNumber }: AuthenticationServiceSetupParams) {
     this.license = license;
 
     http.registerAuth(async (request, response, t) => {
@@ -139,7 +143,29 @@ export class AuthenticationService {
       return t.notHandled();
     });
 
-    this.logger.debug('Successfully registered core authentication handler.');
+    http.registerOnPreResponse((request, preResponse, toolkit) => {
+      if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
+        return toolkit.next();
+      }
+
+      const basePath = http.basePath.get(request);
+
+      // We only want to preserve paths for non-API requests.
+      const logoutUrl = http.basePath.prepend(
+        API_ROUTES_SUPPORTING_REDIRECTS.includes(request.route.path)
+          ? '/api/security/logout'
+          : `/api/security/logout?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+              `${basePath}${request.url.pathname}${request.url.search}`
+            )}`
+      );
+
+      return toolkit.render({
+        body: renderUnauthorizedPage({ logoutUrl, basePath, buildNumber }),
+        headers: { 'Content-Security-Policy': http.csp.header },
+      });
+    });
+
+    this.logger.debug('Successfully registered core `onPreResponse` handler.');
   }
 
   start({

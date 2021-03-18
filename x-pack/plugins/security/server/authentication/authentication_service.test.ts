@@ -6,6 +6,7 @@
  */
 
 jest.mock('./authenticator');
+jest.mock('./unauthorized_page');
 
 import Boom from '@hapi/boom';
 
@@ -18,6 +19,7 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
+  OnPreResponseHandler,
 } from 'src/core/server';
 import {
   coreMock,
@@ -48,13 +50,19 @@ describe('AuthenticationService', () => {
   let mockSetupAuthenticationParams: {
     http: jest.Mocked<HttpServiceSetup>;
     license: jest.Mocked<SecurityLicense>;
+    buildNumber: number;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
 
+    const httpMock = coreMock.createSetup().http;
+    (httpMock.basePath.prepend as jest.Mock).mockImplementation(
+      (path) => `${httpMock.basePath.serverBasePath}${path}`
+    );
     mockSetupAuthenticationParams = {
-      http: coreMock.createSetup().http,
+      http: httpMock,
       license: licenseMock.create(),
+      buildNumber: 100500,
     };
 
     service = new AuthenticationService(logger);
@@ -68,6 +76,15 @@ describe('AuthenticationService', () => {
 
       expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
       expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
+    });
+
+    it('properly registers onPreResponse handler', () => {
+      service.setup(mockSetupAuthenticationParams);
+
+      expect(mockSetupAuthenticationParams.http.registerOnPreResponse).toHaveBeenCalledTimes(1);
+      expect(mockSetupAuthenticationParams.http.registerOnPreResponse).toHaveBeenCalledWith(
         expect.any(Function)
       );
     });
@@ -315,6 +332,112 @@ describe('AuthenticationService', () => {
         expect(getCurrentUser(mockRequest)).toBeNull();
         expect(mockAuthGet).toHaveBeenCalledTimes(1);
         expect(mockAuthGet).toHaveBeenCalledWith(mockRequest);
+      });
+    });
+  });
+
+  describe('onPreResponse handler', () => {
+    let onPreResponseHandler: OnPreResponseHandler;
+    beforeEach(() => {
+      service.setup(mockSetupAuthenticationParams);
+
+      onPreResponseHandler =
+        mockSetupAuthenticationParams.http.registerOnPreResponse.mock.calls[0][0];
+    });
+
+    it('ignores responses with non-401 status code', () => {
+      const mockReturnedValue = { type: 'next' as any };
+      const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+      mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+      for (const statusCode of [200, 400, 403, 404]) {
+        expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest(),
+            { statusCode },
+            mockOnPreResponseToolkit
+          )
+        ).toBe(mockReturnedValue);
+      }
+    });
+
+    it('ignores responses to requests that cannot handle redirects', () => {
+      const mockReturnedValue = { type: 'next' as any };
+      const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+      mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+      for (const request of [
+        httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'something' } }),
+        httpServerMock.createKibanaRequest({ path: '/api/security/some' }),
+        httpServerMock.createKibanaRequest({ path: '/internal/security/some' }),
+        httpServerMock.createKibanaRequest({ routeTags: ['api'] }),
+      ]) {
+        expect(onPreResponseHandler(request, { statusCode: 401 }, mockOnPreResponseToolkit)).toBe(
+          mockReturnedValue
+        );
+      }
+    });
+
+    it('renders proper UI for 401 responses', () => {
+      const mockRenderUnauthorizedPage = jest
+        .requireMock('./unauthorized_page')
+        .renderUnauthorizedPage.mockReturnValue('rendered-view');
+
+      const mockReturnedValue = { type: 'render' as any };
+      const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+      mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+      expect(
+        onPreResponseHandler(
+          httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        )
+      ).toBe(mockReturnedValue);
+
+      expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+        body: 'rendered-view',
+        headers: {
+          'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+        },
+      });
+      expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+        basePath: '/mock-server-basepath',
+        buildNumber: 100500,
+        logoutUrl: `/mock-server-basepath/api/security/logout?next=%2Fmock-server-basepath%2Fapp%2Fsome%3Fparam%3Done%2520two`,
+      });
+    });
+
+    it('does not preserve path for the redirectable API requests', () => {
+      const mockRenderUnauthorizedPage = jest
+        .requireMock('./unauthorized_page')
+        .renderUnauthorizedPage.mockReturnValue('rendered-view');
+
+      const mockReturnedValue = { type: 'render' as any };
+      const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+      mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+      expect(
+        onPreResponseHandler(
+          httpServerMock.createKibanaRequest({
+            path: '/api/security/saml/callback',
+            query: { param: 'one two' },
+          }),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        )
+      ).toBe(mockReturnedValue);
+
+      expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+        body: 'rendered-view',
+        headers: {
+          'Content-Security-Policy': `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`,
+        },
+      });
+      expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+        basePath: '/mock-server-basepath',
+        buildNumber: 100500,
+        logoutUrl: `/mock-server-basepath/api/security/logout`,
       });
     });
   });

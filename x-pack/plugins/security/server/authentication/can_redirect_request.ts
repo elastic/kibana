@@ -11,6 +11,14 @@ const ROUTE_TAG_API = 'api';
 const KIBANA_XSRF_HEADER = 'kbn-xsrf';
 const KIBANA_VERSION_HEADER = 'kbn-version';
 
+export const API_ROUTES_SUPPORTING_REDIRECTS = [
+  '/api/security/logout',
+  '/api/security/saml/callback',
+  '/api/security/oidc/callback',
+  '/api/security/oidc/initiate_login',
+  '/api/security/v1/oidc',
+];
+
 /**
  * Checks whether we can reply to the request with redirect response. We can do that
  * only for non-AJAX and non-API requests.
@@ -24,7 +32,7 @@ export function canRedirectRequest(request: KibanaRequest) {
 
   const isApiRoute =
     route.options.tags.includes(ROUTE_TAG_API) ||
-    (route.path.startsWith('/api/') && route.path !== '/api/security/logout') ||
+    (route.path.startsWith('/api/') && !API_ROUTES_SUPPORTING_REDIRECTS.includes(route.path)) ||
     route.path.startsWith('/internal/');
   const isAjaxRequest = hasVersionHeader || hasXsrfHeader;
 
