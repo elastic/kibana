@@ -137,3 +137,30 @@ export const LIST_VIEW_TOGGLE_LABEL = i18n.translate(
 export const NO_RESULTS_MESSAGE = i18n.translate('xpack.securitySolution.trustedapps.noResults', {
   defaultMessage: 'No items found',
 });
+
+export const CREATE_TRUSTED_APP_ERROR: { [K in string]: string } = {
+  [`duplicatedEntry.${ConditionEntryField.HASH}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.hash',
+    { defaultMessage: 'Field Hash is only accepted once' }
+  ),
+  [`duplicatedEntry.${ConditionEntryField.PATH}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.path',
+    { defaultMessage: 'Field Path is only accepted once' }
+  ),
+  [`duplicatedEntry.${ConditionEntryField.SIGNER}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.duplicated.signature',
+    { defaultMessage: 'Field Signature is only accepted once' }
+  ),
+  [`invalidField.${ConditionEntryField.HASH}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.hash',
+    { defaultMessage: 'Invalid field hash' }
+  ),
+  [`invalidField.${ConditionEntryField.PATH}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.path',
+    { defaultMessage: 'Invalid field path' }
+  ),
+  [`invalidField.${ConditionEntryField.SIGNER}`]: i18n.translate(
+    'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.error.invalid.signature',
+    { defaultMessage: 'Invalid field Signature' }
+  ),
+};
