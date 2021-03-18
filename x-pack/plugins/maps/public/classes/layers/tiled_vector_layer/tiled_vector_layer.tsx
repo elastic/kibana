@@ -105,10 +105,6 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   _syncSourceBindingWithMb(mbMap: MbMap) {
-    const mbSource = mbMap.getSource(this._getMbSourceId());
-    if (mbSource) {
-      return;
-    }
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest) {
       // this is possible if the layer was invisible at startup.
@@ -119,6 +115,17 @@ export class TiledVectorLayer extends VectorLayer {
 
     const sourceMeta: MVTSingleLayerVectorSourceConfig | null = sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
     if (!sourceMeta) {
+      return;
+    }
+
+    const mbSource = mbMap.getSource(this._getMbSourceId());
+    if (mbSource) {
+      const mbTileSource = mbSource as MbVectorSource;
+      // Check if tiles need to be updates
+      if (mbTileSource.tiles?.[0] !== sourceMeta.urlTemplate) {
+        // @ts-expect-error
+        mbTileSource.setTiles([sourceMeta.urlTemplate]);
+      }
       return;
     }
 
@@ -165,7 +172,6 @@ export class TiledVectorLayer extends VectorLayer {
       // Expected source is not compatible, so remove.
       return true;
     }
-    const mbTileSource = mbSource as MbVectorSource;
 
     const dataRequest = this.getSourceDataRequest();
     if (!dataRequest) {
@@ -177,12 +183,12 @@ export class TiledVectorLayer extends VectorLayer {
       return false;
     }
 
-    const isSourceDifferent =
-      mbTileSource.tiles?.[0] !== tiledSourceMeta.urlTemplate ||
+    const mbTileSource = mbSource as MbVectorSource;
+    const areZoomsDifferent =
       mbTileSource.minzoom !== tiledSourceMeta.minSourceZoom ||
       mbTileSource.maxzoom !== tiledSourceMeta.maxSourceZoom;
 
-    if (isSourceDifferent) {
+    if (areZoomsDifferent) {
       return true;
     }
 
