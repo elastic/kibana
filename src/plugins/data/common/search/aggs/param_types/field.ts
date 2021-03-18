@@ -47,13 +47,27 @@ export class FieldParamType extends BaseParamType {
           );
         }
 
+        if (field.type === 'missing') {
+          throw new SavedObjectNotFound(
+            'index-pattern-field',
+            field.name,
+            undefined,
+            i18n.translate(
+              'data.search.aggs.paramTypes.field.notFoundSavedFieldParameterErrorMessage',
+              {
+                defaultMessage:
+                  'The field "{fieldParameter}" associated with this object no longer exists in the index pattern. Please use another field.',
+                values: {
+                  fieldParameter: field.name,
+                },
+              }
+            )
+          );
+        }
+
         const validField = this.getAvailableFields(aggConfig).find(
           (f: any) => f.name === field.name
         );
-
-        if (field.type === 'unknown' && !validField) {
-          throw new SavedObjectNotFound('index-pattern-field', field.name);
-        }
 
         if (!validField) {
           throw new Error(
@@ -95,7 +109,7 @@ export class FieldParamType extends BaseParamType {
 
       if (!field) {
         return new IndexPatternField({
-          type: 'unknown',
+          type: 'missing',
           name: fieldName,
           searchable: false,
           aggregatable: false,

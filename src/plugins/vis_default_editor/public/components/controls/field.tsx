@@ -69,6 +69,29 @@ function FieldParamEditor({
     );
   }
 
+  if (value?.type === 'missing') {
+    errors.push(
+      i18n.translate('visDefaultEditor.controls.field.fieldIsNotExists', {
+        defaultMessage:
+          'The field "{fieldParameter}" associated with this object no longer exists in the index pattern. Please use another field.',
+        values: {
+          fieldParameter: value.name,
+        },
+      })
+    );
+  } else if (!indexedFields.find((field) => field.key === value?.name)) {
+    errors.push(
+      i18n.translate('visDefaultEditor.controls.field.invalidFieldForAggregation', {
+        defaultMessage:
+          'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with this aggregation. Please select a new field.',
+        values: {
+          fieldParameter: value?.name,
+          indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+        },
+      })
+    );
+  }
+
   const isValid = !!value && !errors.length && !isDirty;
   // we show an error message right away if there is no compatible fields
   const showErrorMessage = (showValidation || !indexedFields.length) && !isValid;
