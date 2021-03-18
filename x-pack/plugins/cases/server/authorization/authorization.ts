@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { GetSpaceFn, ReadOperations, WriteOperations } from './types';
+import { getClassFilter } from './authorization_query';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -135,5 +136,74 @@ export class Authorization {
     }
 
     // else security is disabled so let the operation proceed
+  }
+
+  public async getFindAuthorizationFilter(savedObjectType: string) {
+    const { securityAuth } = this;
+    if (securityAuth && this.shouldCheckAuthorization()) {
+      const { authorizedClassNames } = await this.getAuthorizedClassNames([ReadOperations.Find]);
+
+      if (!authorizedClassNames.length) {
+        // TODO: Better error message, log error
+        throw Boom.forbidden('Not authorized for this class');
+      }
+
+      return {
+        filter: getClassFilter(savedObjectType, authorizedClassNames),
+        ensureSavedObjectIsAuthorized: (className: string) => {
+          if (!authorizedClassNames.includes(className)) {
+            // TODO: log error
+            throw Boom.forbidden('Not authorized for this class');
+          }
+        },
+      };
+    }
+  }
+
+  private async getAuthorizedClassNames(
+    operations: Array<ReadOperations | WriteOperations>
+  ): Promise<{
+    username?: string;
+    hasAllRequested: boolean;
+    authorizedClassNames: string[];
+  }> {
+    const { securityAuth, featureCaseClasses } = this;
+    if (securityAuth && this.shouldCheckAuthorization()) {
+      const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
+      const requiredPrivileges = new Map<string, [string]>();
+
+      for (const className of featureCaseClasses) {
+        for (const operation of operations) {
+          requiredPrivileges.set(securityAuth.actions.cases.get(className, operation), [className]);
+        }
+      }
+
+      const { hasAllRequested, username, privileges } = await checkPrivileges({
+        kibana: [...requiredPrivileges.keys()],
+      });
+
+      return {
+        hasAllRequested,
+        username,
+        authorizedClassNames: hasAllRequested
+          ? Array.from(featureCaseClasses)
+          : privileges.kibana.reduce<string[]>(
+              (authorizedClassNames, { authorized, privilege }) => {
+                if (authorized && requiredPrivileges.has(privilege)) {
+                  const [className] = requiredPrivileges.get(privilege)!;
+                  authorizedClassNames.push(className);
+                }
+
+                return authorizedClassNames;
+              },
+              []
+            ),
+      };
+    } else {
+      return {
+        hasAllRequested: true,
+        authorizedClassNames: Array.from(featureCaseClasses),
+      };
+    }
   }
 }
