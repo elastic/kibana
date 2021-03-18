@@ -78,6 +78,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
               iconType="arrowDown"
               iconSide="right"
               onClick={onButtonClick}
+              data-test-subj="mlSwimLanePageSizeControl"
             >
               <FormattedMessage
                 id="xpack.ml.explorer.swimLaneRowsPerPage"
@@ -90,7 +91,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
           closePopover={closePopover}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel items={items} />
+          <EuiContextMenuPanel items={items} data-test-subj="mlSwimLanePageSizePanel" />
         </EuiPopover>
       </EuiFlexItem>
 
@@ -102,6 +103,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
           pageCount={pageCount}
           activePage={componentFromPage}
           onPageClick={goToPage}
+          data-test-subj="mlSwimLanePagination"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

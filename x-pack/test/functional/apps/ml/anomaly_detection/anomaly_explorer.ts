@@ -51,6 +51,8 @@ const testDataList = [
   },
 ];
 
+const cellSize = 15;
+
 const overallSwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneOverall';
 const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
 
@@ -176,31 +178,31 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('clicks on the Overall swim lane cell');
           const sampleCell = (await ml.swimLane.getCells(overallSwimLaneTestSubj))[0];
           await ml.swimLane.selectSingleCell(overallSwimLaneTestSubj, {
-            x: sampleCell.x,
-            y: sampleCell.y,
+            x: sampleCell.x + cellSize,
+            y: sampleCell.y + cellSize,
           });
-          // TODO extend cell data with X and Y values
+          // TODO extend cell data with X and Y values, and cell width
           await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
-            x: [1455105600000, 1455120000000],
+            x: [1454846400000, 1454860800000],
             y: ['Overall'],
           });
           await ml.anomalyExplorer.assertClearSelectionButtonVisible(true);
 
           await ml.testExecution.logTestStep('updates the View By swim lane');
-          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', ['AMX', 'TRS', 'VRD']);
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', ['EGF', 'DAL']);
 
           await ml.testExecution.logTestStep('renders anomaly explorer charts');
-          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(6);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(4);
 
           await ml.testExecution.logTestStep('updates top influencers list');
-          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 3);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 2);
 
           await ml.testExecution.logTestStep('updates anomalies table');
-          await ml.anomaliesTable.assertTableRowsCount(11);
+          await ml.anomaliesTable.assertTableRowsCount(4);
 
           await ml.testExecution.logTestStep('updates the URL state');
           await ml.navigation.assertCurrentURL(
-            "/app/ml/explorer?_g=(ml%3A(jobIds%3A!(fq_multi_1_ae))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2016-02-07T00%3A00%3A00.000Z'%2Cto%3A'2016-02-11T23%3A59%3A54.000Z'))&_a=(explorer%3A(mlExplorerFilter%3A()%2CmlExplorerSwimlane%3A(selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1455105600%2C1455120000)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t%2CviewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10))%2Cquery%3A(query_string%3A(analyze_wildcard%3A!t%2Cquery%3A'*')))"
+            "/app/ml/explorer?_g=(ml%3A(jobIds%3A!(fq_multi_1_ae))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2016-02-07T00%3A00%3A00.000Z'%2Cto%3A'2016-02-11T23%3A59%3A54.000Z'))&_a=(explorer%3A(mlExplorerFilter%3A()%2CmlExplorerSwimlane%3A(selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1454846400%2C1454860800)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t%2CviewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10))%2Cquery%3A(query_string%3A(analyze_wildcard%3A!t%2Cquery%3A'*')))"
           );
 
           await ml.testExecution.logTestStep('clears the selection');
@@ -212,6 +214,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableRowsCount(25);
         });
 
+        it('allows to change the swim lane pagination', async () => {});
+
         it('support cell selection by click on View By swim lane', async () => {
           await ml.testExecution.logTestStep('clicks on the View By swim lane cell');
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
@@ -219,18 +223,18 @@ export default function ({ getService }: FtrProviderContext) {
           const sampleCell = (await ml.swimLane.getCells('mlAnomalyExplorerSwimlaneViewBy'))[0];
 
           await ml.swimLane.selectSingleCell(viewBySwimLaneTestSubj, {
-            x: sampleCell.x,
-            y: sampleCell.y,
+            x: sampleCell.x + cellSize,
+            y: sampleCell.y + cellSize,
           });
 
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
-            x: [1455105600000, 1455120000000],
+            x: [1454817600000, 1454832000000],
             y: ['AAL'],
           });
 
           await ml.testExecution.logTestStep('highlights the Overall swim lane');
           await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
-            x: [1455105600000, 1455120000000],
+            x: [1454817600000, 1454832000000],
             y: ['Overall'],
           });
 

@@ -20,7 +20,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
   /**
    * Y axis labels width + padding
    */
-  const xOffset = 170 + 8;
+  const xOffset = 185;
 
   return {
     async getDebugState(testSubj: string): Promise<HeatmapDebugState> {
@@ -72,15 +72,30 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    /**
+     * Selects a single cell
+     * @param testSubj
+     * @param x - number of pixels from the Y-axis
+     * @param y - number of pixels from the top of the canvas element
+     */
     async selectSingleCell(testSubj: string, { x, y }: { x: number; y: number }) {
       const renderCount = await elasticChart.getVisualizationRenderingCount();
       const el = await elasticChart.getCanvas(testSubj);
 
-      const resultX = xOffset + Math.round(x);
+      const { width, height } = await el.getSize();
+
+      const canvasCenter = { x: Math.round(width / 2), y: Math.round(height / 2) };
+
+      /**
+       * Origin of the element uses the center point, hence we need ot adjust
+       * the click coordinated accordingly.
+       */
+      const resultX = xOffset + Math.round(x) - canvasCenter.x;
+      const resultY = Math.round(y) - canvasCenter.y;
 
       await browser
         .getActions()
-        .move({ x: resultX, y: Math.round(y), origin: el._webElement })
+        .move({ x: resultX, y: resultY, origin: el._webElement })
         .click()
         .perform();
 
