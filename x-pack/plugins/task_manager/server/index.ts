@@ -31,17 +31,18 @@ export {
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {
   schema: configSchema,
   deprecations: () => [
-    (settings, fromPath, log) => {
+    (settings, fromPath, deprecationHook) => {
       const taskManager = get(settings, fromPath);
       if (taskManager?.index) {
-        log(
-          `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
-        );
+        deprecationHook({
+          documentationUrl: 'https://ela.st/kbn-remove-legacy-multitenancy',
+          message: `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
+        });
       }
       if (taskManager?.max_workers > MAX_WORKERS_LIMIT) {
-        log(
-          `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated. Values greater than ${MAX_WORKERS_LIMIT} will not be supported starting in 8.0.`
-        );
+        deprecationHook({
+          message: `setting "${fromPath}.max_workers" (${taskManager?.max_workers}) greater than ${MAX_WORKERS_LIMIT} is deprecated. Values greater than ${MAX_WORKERS_LIMIT} will not be supported starting in 8.0.`,
+        });
       }
       return settings;
     },
