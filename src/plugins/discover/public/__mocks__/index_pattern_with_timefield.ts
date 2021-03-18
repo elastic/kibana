@@ -23,6 +23,7 @@ const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    sortable: true,
   },
   {
     name: 'message',
@@ -58,14 +59,14 @@ fields.getByName = (name: string) => {
 
 const indexPattern = ({
   id: 'index-pattern-with-timefield-id',
-  title: 'index-pattern-without-timefield',
+  title: 'index-pattern-with-timefield',
   metaFields: ['_index', '_score'],
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
   fields,
   getComputedFields: () => ({}),
   getSourceFiltering: () => ({}),
-  getFieldByName: () => ({}),
+  getFieldByName: (name: string) => fields.getByName(name),
   timeFieldName: 'timestamp',
 } as unknown) as IndexPattern;
 

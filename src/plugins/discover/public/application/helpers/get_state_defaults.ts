@@ -18,7 +18,7 @@ import { DataPublicPluginStart, IndexPattern } from '../../../../data/public';
 import { AppState } from '../angular/discover_state';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
-  if (savedSearch.columns.length > 0) {
+  if (savedSearch.columns && savedSearch.columns.length > 0) {
     return [...savedSearch.columns];
   }
   return [...config.get(DEFAULT_COLUMNS_SETTING)];

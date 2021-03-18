@@ -34,7 +34,7 @@ import {
   tabifyAggResponse,
 } from '../../kibana_services';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { getStateDefaults } from '../helpers/get_state_default';
+import { getStateDefaults } from '../helpers/get_state_defaults';
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
