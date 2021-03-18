@@ -34,10 +34,10 @@ describe('Indices tab', () => {
       ],
     };
 
-    httpRequestsMockHelpers.setLoadStatusResponse(upgradeStatusMockResponse);
-    httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
-
     beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadStatusResponse(upgradeStatusMockResponse);
+      httpRequestsMockHelpers.setLoadDeprecationLoggingResponse({ isEnabled: true });
+
       await act(async () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
       });
@@ -47,7 +47,11 @@ describe('Indices tab', () => {
       component.update();
 
       // Navigate to the indices tab
-      actions.clickTab('indices');
+      await act(async () => {
+        actions.clickTab('indices');
+      });
+
+      component.update();
     });
 
     test('renders deprecations', () => {
@@ -73,6 +77,8 @@ describe('Indices tab', () => {
           find(`${accordionTestSubj}.removeIndexSettingsButton`).simulate('click');
         });
 
+        // We need to read the document "body" as the modal is added there and not inside
+        // the component DOM tree.
         const modal = document.body.querySelector(
           '[data-test-subj="indexSettingsDeleteConfirmModal"]'
         );
@@ -123,7 +129,11 @@ describe('Indices tab', () => {
       component.update();
 
       // Navigate to the indices tab
-      actions.clickTab('indices');
+      await act(async () => {
+        actions.clickTab('indices');
+      });
+
+      component.update();
     });
 
     test('renders prompt', () => {

@@ -25,7 +25,7 @@ import { TelemetryState, UpgradeAssistantTabProps } from './types';
 import { useAppContext } from '../app_context';
 
 export const UpgradeAssistantTabs: React.FunctionComponent = () => {
-  const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
   const { api } = useAppContext();
@@ -99,11 +99,10 @@ export const UpgradeAssistantTabs: React.FunctionComponent = () => {
         await api.sendTelemetryData({
           [tabName]: true,
         });
+        setTelemetryState(TelemetryState.Complete);
       }
 
       sendTelemetryData();
-
-      setTelemetryState(TelemetryState.Complete);
     }
   }, [api, selectedTabIndex, tabName, isLoading]);
 

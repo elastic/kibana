@@ -16,8 +16,8 @@ import { ResponseError } from '../../../lib/api';
 export const DeprecationLoggingToggle: React.FunctionComponent = () => {
   const { api } = useAppContext();
 
-  const [isEnabled, setIsEnabled] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ResponseError | undefined>(undefined);
 
   useEffect(() => {
