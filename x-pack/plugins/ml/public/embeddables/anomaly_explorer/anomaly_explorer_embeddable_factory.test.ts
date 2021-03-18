@@ -15,7 +15,7 @@ jest.mock('./anomaly_explorer_embeddable', () => ({
   AnomalyExplorerEmbeddable: jest.fn(),
 }));
 
-describe('AnomalySwimlaneEmbeddableFactory', () => {
+describe('AnomalyExplorerEmbeddableFactory', () => {
   test('should provide required services on create', async () => {
     // arrange
     const pluginStartDeps = { data: dataPluginMock.createStartContract() };

@@ -84,7 +84,6 @@ describe('AnomalyExplorerChartsService', () => {
   );
   const combinedJobRecords = {
     [jobId]: mockJobConfigClone,
-    'mock-job-id-distribution': mockJobConfigClone,
   };
   const anomalyExplorerService = new AnomalyExplorerChartsService(
     mlStartMock.data.query.timefilter.timefilter,

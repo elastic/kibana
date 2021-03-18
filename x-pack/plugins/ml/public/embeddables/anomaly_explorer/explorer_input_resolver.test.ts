@@ -193,7 +193,7 @@ describe('useExplorerInputResolver', () => {
 
     await act(async () => {
       embeddableInput.next({
-        id: 'test-swimlane-embeddable',
+        id: 'test-explorer-charts-embeddable',
         jobIds: ['invalid-job-id'],
         filters: [],
         query: { language: 'kuery', query: '' },
