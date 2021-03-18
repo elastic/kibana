@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export type OnActionComplete = () => void;
-
-export enum ACTION {
-  INSPECT = 'inspect',
-  EXTEND = 'extend',
-  DELETE = 'delete',
-  RENAME = 'rename',
-}
+export * from './search_session_name';
