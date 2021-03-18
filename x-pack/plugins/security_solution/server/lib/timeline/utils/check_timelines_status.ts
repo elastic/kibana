@@ -69,7 +69,7 @@ export const checkTimelinesStatus = async (
     timeline: TimelineSavedObject[];
   };
   const dir = resolve(
-    join(__dirname, filePath ?? '../../../detection_engine/rules/prepackaged_timelines')
+    join(__dirname, filePath ?? '../../detection_engine/rules/prepackaged_timelines')
   );
   const file = fileName ?? 'index.ndjson';
   const dataPath = path.join(dir, file);
