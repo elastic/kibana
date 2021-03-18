@@ -540,7 +540,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('enrolled in a managed policy should respond 400 to bulk upgrade and not update the agent SOs', async () => {
+      it('enrolled in a managed policy bulk upgrade should respond with 400 and not update the agent SOs', async () => {
         // update enrolled policy to managed
         await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
           name: 'Test policy',
@@ -591,6 +591,58 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
+      });
+
+      it('enrolled in a managed policy bulk upgrade with force flag should respond with 200 and update the agent SOs', async () => {
+        // update enrolled policy to managed
+        await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
+          name: 'Test policy',
+          namespace: 'default',
+          is_managed: true,
+        });
+
+        const kibanaVersion = await kibanaServer.version.get();
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: {
+                elastic: {
+                  agent: { upgradeable: true, version: semver.inc(kibanaVersion, 'patch') },
+                },
+              },
+            },
+          },
+        });
+        // attempt to upgrade agent in managed policy
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: kibanaVersion,
+            agents: ['agent1', 'agent2'],
+            force: true,
+          });
+        expect(body).to.eql({});
+
+        const [agent1data, agent2data] = await Promise.all([
+          supertest.get(`/api/fleet/agents/agent1`),
+          supertest.get(`/api/fleet/agents/agent2`),
+        ]);
+        expect(typeof agent1data.body.item.upgrade_started_at).to.be('string');
+        expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
       });
     });
   });
