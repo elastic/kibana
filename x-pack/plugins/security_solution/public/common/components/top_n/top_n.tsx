@@ -127,6 +127,7 @@ const TopNComponent: React.FC<Props> = ({
           />
         ) : (
           <SignalsByCategory
+            combinedQueries={combinedQueries}
             filters={filters}
             from={from}
             headerChildren={headerChildren}
