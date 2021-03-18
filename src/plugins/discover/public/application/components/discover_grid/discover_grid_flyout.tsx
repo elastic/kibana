@@ -120,6 +120,7 @@ export function DiscoverGridFlyout({
               <EuiButtonEmpty
                 size="xs"
                 iconType="document"
+                flush="left"
                 href={services.addBasePath(
                   `#/doc/${indexPattern.id}/${hit._index}?id=${encodeURIComponent(
                     hit._id as string
@@ -133,10 +134,11 @@ export function DiscoverGridFlyout({
               </EuiButtonEmpty>
             </EuiFlexItem>
             {indexPattern.isTimeBased() && indexPattern.id && (
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
                   iconType="documents"
+                  flush="left"
                   href={getContextUrl(
                     hit._id,
                     indexPattern.id,
@@ -153,7 +155,7 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             )}
             {activePage !== -1 && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <EuiPagination
                   aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
                     defaultMessage: 'Document navigation',
@@ -161,6 +163,7 @@ export function DiscoverGridFlyout({
                   pageCount={pageCount}
                   activePage={activePage}
                   onPageClick={setPage}
+                  className="dscTable__flyoutDocumentNavigation"
                   compressed
                   data-test-subj="dscDocNavigation"
                 />
