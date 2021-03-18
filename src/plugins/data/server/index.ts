@@ -236,9 +236,9 @@ export {
   SearchUsage,
   SearchSessionService,
   ISearchSessionService,
-  SearchRequestHandlerContext,
-  DataRequestHandlerContext,
 } from './search';
+
+export { DataRequestHandlerContext } from './types';
 
 // Search namespace
 export const search = {

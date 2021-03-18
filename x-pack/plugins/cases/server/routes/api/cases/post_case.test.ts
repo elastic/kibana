@@ -15,9 +15,9 @@ import {
   mockCases,
 } from '../__fixtures__';
 import { initPostCaseApi } from './post_case';
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_URL } from '../../../../common';
 import { mockCaseConfigure } from '../__fixtures__/mock_saved_objects';
-import { ConnectorTypes, CaseStatuses } from '../../../../common/api';
+import { ConnectorTypes, CaseStatuses } from '../../../../common';
 
 describe('POST cases', () => {
   let routeHandler: RequestHandler<any, any, any>;
