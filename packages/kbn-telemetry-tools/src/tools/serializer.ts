@@ -202,7 +202,7 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
     return getDescriptor(node.typeName, program);
   }
 
-  if (ts.isImportSpecifier(node)) {
+  if (ts.isImportSpecifier(node) || ts.isExportSpecifier(node)) {
     const source = node.getSourceFile();
     const importedModuleName = getModuleSpecifier(node);
 
