@@ -27,7 +27,7 @@ type QueryResponse = CursorResponse & {
   }>;
 };
 
-export const ESSqlSearchStrategyProvider = (
+export const essqlSearchStrategyProvider = (
   data: PluginStart
 ): ISearchStrategy<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse> => {
   return {
@@ -98,12 +98,6 @@ export const ESSqlSearchStrategyProvider = (
       };
 
       return from(searchUntilEnd());
-    },
-
-    cancel: async (id, options, deps) => {
-      // if (es.cancel) {
-      //   await es.cancel(id, options, deps);
-      // }
     },
   };
 };

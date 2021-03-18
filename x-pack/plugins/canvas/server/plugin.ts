@@ -22,7 +22,7 @@ import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadType, workpadTemplateType } from './saved_objects';
 import { initializeTemplates } from './templates';
-import { ESSqlSearchStrategyProvider } from './lib/es_sql_strategy';
+import { essqlSearchStrategyProvider } from './lib/essql_strategy';
 
 interface PluginsSetup {
   expressions: ExpressionsServerSetup;
@@ -99,7 +99,7 @@ export class CanvasPlugin implements Plugin {
     setupInterpreter(plugins.expressions);
 
     coreSetup.getStartServices().then(([_, depsStart]) => {
-      const strategy = ESSqlSearchStrategyProvider(depsStart.data);
+      const strategy = essqlSearchStrategyProvider(depsStart.data);
       plugins.data.search.registerSearchStrategy('essql', strategy);
     });
   }
