@@ -46,10 +46,14 @@
       - [GitHub Integration](#github-integration-1)
   - [What we will build and manage](#what-we-will-build-and-manage)
     - [Elastic Buildkite Agent Manager](#elastic-buildkite-agent-manager)
-    - [Elastic Buildkite PR Bot](#elastic-buildkite-pr-bot)
       - [Overview](#overview-1)
+      - [Design](#design)
       - [Configuration](#configuration)
       - [Build / Deploy](#build--deploy)
+    - [Elastic Buildkite PR Bot](#elastic-buildkite-pr-bot)
+      - [Overview](#overview-2)
+      - [Configuration](#configuration-1)
+      - [Build / Deploy](#build--deploy-1)
     - [GCP Infrastructure](#gcp-infrastructure)
     - [Monitoring / Alerting](#monitoring--alerting)
     - [Agent Image management](#agent-image-management)
@@ -331,7 +335,40 @@ However, for Pull Requests, because we have a lot of requirements around when bu
 
 ### Elastic Buildkite Agent Manager
 
-TODO
+#### Overview
+
+Currently, with Buildkite, the agent lifecycle is managed entirely by customers. Customers can run "static" workers that are online all of the time, or dynamically scale their agents up and down as needed.
+
+For AWS, Buildkite maintains an auto-scaling solution called [Elastic CI Stack for AWS](https://github.com/buildkite/elastic-ci-stack-for-aws).
+
+Since, we primarily need support for GCP, we built our own agent manager. It's not 100% complete, but has been working very well during our testing/evaluation of Buildkite, and can handle 1000s of agents.
+
+[Elastic Buildkite Agent Manager](https://github.com/brianseeders/buildkite-agent-manager)
+
+Features:
+
+- Handles many different agent configurations with one instance
+- Configures long-running agents, one-time use agents, and agents that will terminate after being idle for a configured amount of time
+- Configures both minimum and maximum agent limits - i.e. can ensure a certain number of agents are always online, even if no jobs currently require them
+- Supports overproivisioning agents by a percentage or a fixed number
+- Supports many GCE settings: zone, image/image family, machine type, disk type and size, tags, metadata, custom startup scripts
+- Agent configuration is stored in a separate repo and read at runtime
+- Agents are gracefully replaced (e.g. after they finish their current job) if they are running using an out-of-date agent configuration that can affect the underlying GCE instance
+- Detect and remove orphaned GCP instances
+- Handles 1000s of agents (tested with 2200 before we hit GCP quotas)
+- Does instance creation/deletion in large, parallel batches so that demand spikes are handled quickly
+
+Also planned:
+
+- Balance creating agents across numerous GCP zones for higher availability
+- Automatically gracefully replace agents if disk usage gets too high
+- Scaling idle timeouts: e.g. the first agent for a configuration might have an idle timeout of 1 hour, but the 200th might be 5 minutes
+
+#### Design
+
+#### Configuration
+
+#### Build / Deploy
 
 ### Elastic Buildkite PR Bot
 
