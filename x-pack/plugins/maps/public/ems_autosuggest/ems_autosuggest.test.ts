@@ -16,13 +16,49 @@ jest.mock('../util', () => {
 });
 
 describe('suggestEMSTermJoinConfig', () => {
-  test('should reject', async () => {
-    const termJoinConfig = await suggestEMSTermJoinConfig({
-      sampleValues: [],
-      sampleValuesColumnName: 'state',
-      emsLayerIds: [],
+  test('no info provided', async () => {
+    const termJoinConfig = await suggestEMSTermJoinConfig({});
+    expect(termJoinConfig).toBe(null);
+  });
+
+  describe('validate common column names', () => {
+    [
+      {
+        name: 'ecs region',
+        columnName: 'destination.geo.region_iso_code',
+        config: {
+          layerId: 'administrative_regions_lvl2',
+          field: 'region_iso_code',
+        },
+      },
+      {
+        name: 'ecs country',
+        columnName: 'country_iso_code',
+        config: {
+          layerId: 'world_countries',
+          field: 'iso2',
+        },
+      },
+      {
+        name: 'country',
+        columnName: 'Country_name',
+        config: {
+          layerId: 'world_countries',
+          field: 'name',
+        },
+      },
+      {
+        name: 'unknown name',
+        columnName: 'cntry',
+        config: null,
+      },
+    ].forEach((stub) => {
+      test(stub.name, async () => {
+        const termJoinConfig = await suggestEMSTermJoinConfig({
+          sampleValuesColumnName: stub.columnName,
+        });
+        expect(termJoinConfig).toEqual(stub.config);
+      });
     });
-    expect(termJoinConfig!.layerId).toBe('foo');
-    expect(termJoinConfig!.field).toBe('bar');
   });
 });
