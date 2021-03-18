@@ -17,7 +17,7 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import { omit, pick } from 'lodash';
+import { omit } from 'lodash';
 import * as rt from 'io-ts';
 import moment from 'moment';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -70,6 +70,10 @@ export const SourceConfigurationFieldColumnRuntimeType = rt.type({
   }),
 });
 
+export type InfraSourceConfigurationFieldColumn = rt.TypeOf<
+  typeof SourceConfigurationFieldColumnRuntimeType
+>;
+
 export const SourceConfigurationColumnRuntimeType = rt.union([
   SourceConfigurationTimestampColumnRuntimeType,
   SourceConfigurationMessageColumnRuntimeType,
@@ -82,7 +86,7 @@ export type InfraSourceConfigurationColumn = rt.TypeOf<typeof SourceConfiguratio
  * Fields
  */
 
-const SourceConfigurationFieldsRT = rt.partial({
+const SourceConfigurationFieldsRT = rt.type({
   container: rt.string,
   host: rt.string,
   pod: rt.string,
@@ -139,8 +143,11 @@ export const pickSavedSourceConfiguration = (
  * hardcoded defaults.
  */
 
-const StaticSourceConfigurationFieldsRuntimeType = SourceConfigurationFieldsRT;
-export const StaticSourceConfigurationRuntimeType = SourceConfigurationRT;
+const StaticSourceConfigurationFieldsRuntimeType = rt.partial(SourceConfigurationFieldsRT.props);
+export const StaticSourceConfigurationRuntimeType = rt.partial({
+  ...SourceConfigurationRT.props,
+  fields: StaticSourceConfigurationFieldsRuntimeType,
+});
 
 export interface InfraStaticSourceConfiguration
   extends rt.TypeOf<typeof StaticSourceConfigurationRuntimeType> {}
