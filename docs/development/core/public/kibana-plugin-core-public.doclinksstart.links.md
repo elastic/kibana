@@ -100,6 +100,8 @@ readonly links: {
         };
         readonly indexPatterns: {
             readonly introduction: string;
+            readonly fieldFormattersNumber: string;
+            readonly fieldFormattersString: string;
         };
         readonly addData: string;
         readonly kibana: string;
