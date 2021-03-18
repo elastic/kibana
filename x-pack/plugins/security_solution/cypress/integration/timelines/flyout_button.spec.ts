@@ -76,7 +76,7 @@ describe('timeline flyout button', () => {
     closeTimelineUsingCloseButton();
   });
 
-  it('sets the data providers background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers area', () => {
+  it.skip('sets the data providers background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers area', () => {
     dragFirstHostToTimeline();
 
     cy.get(TIMELINE_DATA_PROVIDERS)
