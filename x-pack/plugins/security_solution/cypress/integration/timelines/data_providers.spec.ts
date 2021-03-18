@@ -74,7 +74,7 @@ describe('timeline data providers', () => {
     });
   });
 
-  it('sets the background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers', () => {
+  it.skip('sets the background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers', () => {
     dragFirstHostToTimeline();
 
     if (Cypress.browser.name === 'firefox') {

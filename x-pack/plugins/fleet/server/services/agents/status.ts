@@ -14,13 +14,13 @@ import { AgentStatusKueryHelper } from '../../../common/services';
 import { esKuery } from '../../../../../../src/plugins/data/server';
 import type { KueryNode } from '../../../../../../src/plugins/data/server';
 
-import { getAgent, listAgents, removeSOAttributes } from './crud';
+import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
 
 export async function getAgentStatusById(
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentStatus> {
-  const agent = await getAgent(esClient, agentId);
+  const agent = await getAgentById(esClient, agentId);
   return AgentStatusKueryHelper.getAgentStatus(agent);
 }
 
@@ -64,7 +64,7 @@ export async function getAgentStatusForAgentPolicy(
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
     (kuery) =>
-      listAgents(esClient, {
+      getAgentsByKuery(esClient, {
         showInactive: false,
         perPage: 0,
         page: 1,
