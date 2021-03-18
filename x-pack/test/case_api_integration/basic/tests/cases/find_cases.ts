@@ -272,9 +272,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const createCasesWithTitleAsNumber = async (total: number) => {
         const responsePromises: supertestAsPromised.Test[] = [];
         for (let i = 0; i < total; i++) {
-          // this doesn't guarantee that the cases will be created in order, or example case b, could be created before case
-          // a, since we're doing a promise all here
-          // a promise all is just much faster than doing it one by one
+          // this doesn't guarantee that the cases will be created in order that the for-loop executes,
+          // for example case with title '2', could be created before the case with title '1' since we're doing a promise all here
+          // A promise all is just much faster than doing it one by one which would have guaranteed that the cases are
+          // created in the order that the for-loop executes
           responsePromises.push(
             supertest
               .post(CASES_URL)
