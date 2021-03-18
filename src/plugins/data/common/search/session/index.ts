@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './aggs';
-export * from './es_search';
-export * from './expressions';
-export * from './search_source';
-export * from './tabify';
+export * from './status';
 export * from './types';
-export * from './utils';
-export * from './session';
+
+export const SEARCH_SESSIONS_TABLE_ID = 'searchSessionsMgmtUiTable';
