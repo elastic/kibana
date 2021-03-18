@@ -8,7 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { HttpSetup } from 'src/core/public';
-import { API_BASE_PATH } from '../../../../../../../common/constants';
+import { API_BASE_PATH } from '../../../../../../common/constants';
 import {
   IndexGroup,
   ReindexOperation,
