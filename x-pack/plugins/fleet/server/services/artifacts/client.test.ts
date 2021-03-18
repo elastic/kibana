@@ -25,7 +25,7 @@ describe('When using the Fleet Artifacts Client', () => {
     const singleHit = generateArtifactEsGetSingleHitMock();
 
     if (withInvalidArtifact) {
-      singleHit._source.packageName = 'not endpoint';
+      singleHit._source.package_name = 'not endpoint';
     }
 
     esClientMock.get.mockImplementation(() => {
