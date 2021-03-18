@@ -19,6 +19,16 @@ export enum CaseType {
   individual = 'individual',
 }
 
+export enum CollectionState {
+  empty = 'empty',
+  hasSubCases = 'hasSubCases',
+}
+
+const CollectionStateRt = rt.union([
+  rt.literal(CollectionState.empty),
+  rt.literal(CollectionState.hasSubCases),
+]);
+
 /**
  * Exposing the field used to define the case type so that it can be used for filtering in saved object find queries.
  */
@@ -62,6 +72,7 @@ const CaseFullExternalServiceRt = rt.union([
 export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
   rt.type({
+    collectionState: CollectionStateRt,
     closed_at: rt.union([rt.string, rt.null]),
     closed_by: rt.union([UserRT, rt.null]),
     created_at: rt.string,

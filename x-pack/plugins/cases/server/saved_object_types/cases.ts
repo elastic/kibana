@@ -109,6 +109,10 @@ export const caseSavedObjectType: SavedObjectsType = {
           },
         },
       },
+      // If this case is a collection, this will indicate whether it has sub cases or not
+      collectionState: {
+        type: 'keyword',
+      },
       title: {
         type: 'keyword',
       },

@@ -14,6 +14,7 @@ import {
   CaseType,
   AssociationType,
   ESConnectorFields,
+  CollectionState,
 } from '../../common';
 
 interface UnsanitizedCaseConnector {
@@ -57,6 +58,10 @@ interface SanitizedCaseSettings {
 
 interface SanitizedCaseType {
   type: string;
+}
+
+interface SanitizedCaseCollectionState {
+  collectionState: string;
 }
 
 export const caseMigrations = {
@@ -109,6 +114,18 @@ export const caseMigrations = {
               ? [...fields, { key: 'category', value: null }, { key: 'subcategory', value: null }]
               : fields,
         },
+      },
+      references: doc.references || [],
+    };
+  },
+  '7.13.0': (
+    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+  ): SavedObjectSanitizedDoc<SanitizedCaseCollectionState> => {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        collectionState: CollectionState.empty,
       },
       references: doc.references || [],
     };
