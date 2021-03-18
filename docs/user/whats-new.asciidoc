@@ -149,7 +149,7 @@ To give the new functions a try, take a look at the new <<create-a-dashboard-of-
 ==== New drag and drop interactions
 
 To significantly speed up the visualization creation process, we added a
-fully accessible drag and drop system in *Lens*. For more information, refer to *Lens*.
+fully accessible drag and drop system in *Lens*. For more information, refer to <<lens,*Lens*>>.
 
 [float]
 ==== Table improvements
