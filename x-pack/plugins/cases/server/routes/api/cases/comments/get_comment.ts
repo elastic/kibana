@@ -7,10 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CommentResponseRt } from '../../../../../common/api';
+import { CommentResponseRt } from '../../../../../common';
 import { RouteDeps } from '../../types';
 import { flattenCommentSavedObject, wrapError } from '../../utils';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common';
 
 export function initGetCommentApi({ caseService, router, logger }: RouteDeps) {
   router.get(

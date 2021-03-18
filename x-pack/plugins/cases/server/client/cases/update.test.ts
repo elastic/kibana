@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypes, CasesPatchRequest, CaseStatuses } from '../../../common/api';
+import { ConnectorTypes, CasesPatchRequest, CaseStatuses } from '../../../common';
 import { isCaseError } from '../../common/error';
 import {
   createMockSavedObjectsRepository,

@@ -19,6 +19,8 @@ import {
 import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
+import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
+import { defaultMonacoEditorWidth } from './constants';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
@@ -26,7 +28,7 @@ export const getRenderCellValueFn = (
   rowsFlattened: Array<Record<string, unknown>>,
   useNewFieldsApi: boolean
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
-  const row = rows ? (rows[rowIndex] as Record<string, unknown>) : undefined;
+  const row = rows ? rows[rowIndex] : undefined;
   const rowFlattened = rowsFlattened
     ? (rowsFlattened[rowIndex] as Record<string, unknown>)
     : undefined;
@@ -106,10 +108,18 @@ export const getRenderCellValueFn = (
     );
   }
 
+  if (typeof rowFlattened[columnId] === 'object' && isDetails) {
+    return (
+      <JsonCodeEditor
+        json={rowFlattened[columnId] as Record<string, any>}
+        width={defaultMonacoEditorWidth}
+      />
+    );
+  }
+
   if (field && field.type === '_source') {
     if (isDetails) {
-      // nicely formatted JSON for the expanded view
-      return <span>{JSON.stringify(row, null, 2)}</span>;
+      return <JsonCodeEditor json={row} width={defaultMonacoEditorWidth} />;
     }
     const formatted = indexPattern.formatHit(row);
 
