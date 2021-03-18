@@ -14,7 +14,7 @@ const { parseEsInterval } = search.aggs;
 import { GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
 import { AUTO_INTERVAL } from '../../../../common/constants';
 import { isVisTableData, PanelData, TimeseriesVisData } from '../../../../common/types';
-import { TimeseriesVisParams } from '../../../metrics_fn';
+import { TimeseriesVisParams } from '../../../types';
 
 export const unitLookup = {
   s: i18n.translate('visTypeTimeseries.getInterval.secondsLabel', { defaultMessage: 'seconds' }),
