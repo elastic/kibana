@@ -73,6 +73,8 @@ export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
   indicatorMapping: string;
   indicatorIndexField: string;
+  type?: string;
+  atomic?: string;
 }
 
 export interface MachineLearningRule {
@@ -312,6 +314,8 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   indicatorIndexPattern: ['filebeat-*'],
   indicatorMapping: 'myhash.mysha256',
   indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  type: 'file',
+  atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline,
   maxSignals: 100,
 };

@@ -50,6 +50,7 @@ import {
   SCHEDULE_DETAILS,
   SEVERITY_DETAILS,
   TAGS_DETAILS,
+  TIMELINE_FIELD,
   TIMELINE_TEMPLATE_DETAILS,
 } from '../../screens/rule_details';
 
@@ -98,7 +99,7 @@ import {
 import { waitForKibana } from '../../tasks/edit_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { goBackToAllRulesTable } from '../../tasks/rule_details';
+import { addsFieldsToTimeline, goBackToAllRulesTable } from '../../tasks/rule_details';
 
 import { DETECTIONS_URL, RULE_CREATION } from '../../urls/navigation';
 
@@ -468,6 +469,44 @@ describe('indicator match', () => {
           .first()
           .should('have.text', newThreatIndicatorRule.severity.toLowerCase());
         cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newThreatIndicatorRule.riskScore);
+      });
+    });
+
+    describe('Enrichment', () => {
+      beforeEach(() => {
+        cleanKibana();
+        esArchiverLoad('threat_indicator');
+        esArchiverLoad('threat_data');
+        loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+        goToManageAlertsDetectionRules();
+        createCustomIndicatorRule(newThreatIndicatorRule);
+        reload();
+      });
+
+      afterEach(() => {
+        esArchiverUnload('threat_indicator');
+        esArchiverUnload('threat_data');
+      });
+
+      it('Displays matches on the timeline', () => {
+        const fieldSearch = 'threat.indicator.matched';
+        const fields = [
+          'threat.indicator.matched.atomic',
+          'threat.indicator.matched.type',
+          'threat.indicator.matched.field',
+        ];
+        const expectedFieldsText = [
+          newThreatIndicatorRule.atomic,
+          newThreatIndicatorRule.type,
+          newThreatIndicatorRule.indicatorMapping,
+        ];
+
+        goToRuleDetails();
+        addsFieldsToTimeline(fieldSearch, fields);
+
+        fields.forEach((field, index) => {
+          cy.get(TIMELINE_FIELD(field)).should('have.text', expectedFieldsText[index]);
+        });
       });
     });
 
