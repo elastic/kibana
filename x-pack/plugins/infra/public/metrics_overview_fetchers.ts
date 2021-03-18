@@ -40,7 +40,7 @@ export const createMetricsFetchData = (
     const overviewRequest: TopNodesRequest = {
       sourceId: 'default',
       bucketSize,
-      size: 10,
+      size: 5,
       timerange: {
         from: start,
         to: end,
