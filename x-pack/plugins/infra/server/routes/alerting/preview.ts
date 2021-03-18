@@ -26,7 +26,6 @@ import { InfraBackendLibs } from '../../lib/infra_types';
 import { assertHasInfraMlPlugins } from '../../utils/request_context';
 
 export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) => {
-  const { callWithRequest } = framework;
   framework.registerRoute(
     {
       method: 'post',
@@ -46,9 +45,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
         alertNotifyWhen,
       } = request.body;
 
-      const callCluster = (endpoint: string, opts: Record<string, any>) => {
-        return callWithRequest(requestContext, endpoint, opts);
-      };
+      const esClient = requestContext.core.elasticsearch.client.asCurrentUser;
 
       const source = await sources.getSourceConfiguration(
         requestContext.core.savedObjects.client,
@@ -64,7 +61,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               filterQuery,
             } = request.body as MetricThresholdAlertPreviewRequestParams;
             const previewResult = await previewMetricThresholdAlert({
-              callCluster,
+              esClient,
               params: { criteria, filterQuery, groupBy },
               lookback,
               config: source.configuration,
@@ -86,7 +83,7 @@ export const initAlertPreviewRoute = ({ framework, sources }: InfraBackendLibs) 
               filterQuery,
             } = request.body as InventoryAlertPreviewRequestParams;
             const previewResult = await previewInventoryMetricThresholdAlert({
-              callCluster,
+              esClient,
               params: { criteria, filterQuery, nodeType },
               lookback,
               source,

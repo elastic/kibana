@@ -15,7 +15,8 @@
     "uiActions",
     "embeddable",
     "share",
-    "presentationUtil"
+    "presentationUtil",
+    "indexPatternFieldEditor"
   ],
   "optionalPlugins": [
     "usageCollection",

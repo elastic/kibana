@@ -15,6 +15,7 @@ import {
   CategoryFieldExample,
 } from '../../../../../common/types/categories';
 import { RuntimeMappings } from '../../../../../common/types/fields';
+import { IndicesOptions } from '../../../../../common/types/anomaly_detection_jobs';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
@@ -34,7 +35,8 @@ export function categorizationExamplesProvider({
     start: number,
     end: number,
     analyzer: CategorizationAnalyzer,
-    runtimeMappings: RuntimeMappings | undefined
+    runtimeMappings: RuntimeMappings | undefined,
+    indicesOptions: IndicesOptions | undefined
   ): Promise<{ examples: CategoryFieldExample[]; error?: any }> {
     if (timeField !== undefined) {
       const range = {
@@ -69,6 +71,7 @@ export function categorizationExamplesProvider({
         sort: ['_doc'],
         ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
       },
+      ...(indicesOptions ?? {}),
     });
 
     // hit.fields can be undefined if value is originally null
@@ -169,7 +172,8 @@ export function categorizationExamplesProvider({
     start: number,
     end: number,
     analyzer: CategorizationAnalyzer,
-    runtimeMappings: RuntimeMappings | undefined
+    runtimeMappings: RuntimeMappings | undefined,
+    indicesOptions: IndicesOptions | undefined
   ) {
     const resp = await categorizationExamples(
       indexPatternTitle,
@@ -180,7 +184,8 @@ export function categorizationExamplesProvider({
       start,
       end,
       analyzer,
-      runtimeMappings
+      runtimeMappings,
+      indicesOptions
     );
 
     const { examples } = resp;

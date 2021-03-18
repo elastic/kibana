@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { LicensingLogic } from '../../../shared/licensing';
 import { Loading } from '../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
@@ -40,6 +41,7 @@ import {
   PRIVATE_PLATINUM_LICENSE_CALLOUT,
   CONFIRM_CHANGES_TEXT,
   PRIVATE_SOURCES_UPDATE_CONFIRMATION_TEXT,
+  NAV,
 } from '../../constants';
 
 import { PrivateSourcesTable } from './components/private_sources_table';
@@ -71,10 +73,6 @@ export const Security: React.FC = () => {
   }, []);
 
   if (dataLoading) return <Loading />;
-
-  const panelClass = classNames('euiPanel--noShadow', {
-    'euiPanel--disabled': !hasPlatinumLicense,
-  });
 
   const savePrivateSources = () => {
     saveSourceRestrictions();
@@ -114,7 +112,13 @@ export const Security: React.FC = () => {
   );
 
   const allSourcesToggle = (
-    <EuiPanel paddingSize="none" className={panelClass}>
+    <EuiPanel
+      paddingSize="none"
+      hasShadow={false}
+      className={classNames({
+        'euiPanel--disabled': !hasPlatinumLicense,
+      })}
+    >
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiSwitch
@@ -176,6 +180,7 @@ export const Security: React.FC = () => {
 
   return (
     <>
+      <SetPageChrome trail={[NAV.SECURITY]} />
       <FlashMessages />
       <UnsavedChangesPrompt
         hasUnsavedChanges={unsavedChanges}

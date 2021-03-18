@@ -15,6 +15,7 @@ import { Route, Redirect, Switch } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { staticSourceData } from '../content_sources/source_data';
 
 import { Connectors } from './components/connectors';
@@ -37,6 +38,7 @@ describe('SettingsRouter', () => {
     const wrapper = shallow(<SettingsRouter />);
 
     expect(wrapper.find(FlashMessages)).toHaveLength(1);
+    expect(wrapper.find(SetPageChrome)).toHaveLength(3);
     expect(wrapper.find(Switch)).toHaveLength(1);
     expect(wrapper.find(Route)).toHaveLength(NUM_ROUTES);
     expect(wrapper.find(Redirect)).toHaveLength(1);
