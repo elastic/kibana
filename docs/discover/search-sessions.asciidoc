@@ -18,30 +18,26 @@ and when your session is complete, view and manage it in *Stack Management*.
 [role="screenshot"]
 image::images/search-session.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session ]
 
-Search sessions are built on top of async search. For more information,
-refer to {ref}/async-search-intro.html[long-running searches].
+Search sessions are <<search-session-settings-kb,enabled by default>>. Saving
+a session is only available when
+<<set-time-filter,auto refresh>> is off.
+
 
 [float]
 ==== Requirements
 
-Search sessions are enabled by default in your `kibana.yml` file.  For additional
-settings, refer to <<search-session-settings-kb>>.
 
 * To save a session, you must have permissions for *Discover* and *Dashboard*,
 and the <<kibana-feature-privileges, search sessions subfeature>>.
 
 * To view and restore a saved session, you must have access to *Stack Management*.
 
-* Before saving a session, you must disable auto refresh from the time filter.
-+
-[role="screenshot"]
-image::images/disable-time-filter.png[Time filter showing how to turn off auto refresh]
-
 [float]
 ==== Example: Save and manage a search session
 
 You’re trying to understand a trend you see on a dashboard in {kib}. You
-need to look at several years of data, currently in cold storage,
+need to look at several years of data, currently in
+{ref}/data-tiers.html#cold-tier[cold storage],
 but you don’t have time to wait. You want {kib} to
 continue working in the background, so tomorrow morning you can get your coffee,
 open your browser, and pick up where you left off.
@@ -53,23 +49,21 @@ displays the current state of the search. A clock indicates the session is in pr
 A checkmark indicates that the search session is complete.
 
 . To instruct {kib} to continue the search in the background, click the clock icon,
-and then click *Save session*.
+and then click *Save session*. Once you save search session, you can start a new search,
+navigate to a different application, or close the browser.
 +
 [role="screenshot"]
 image::images/search-session-awhile.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session ]
-+
-. When the search is complete, click the check icon, and then click *Manage sessions*.
-+
-[role="screenshot"]
-image::images/search-session-complete.png[Popup with link to go directly to Search Sessions in Stack Management]
-+
-. In the *Search Sessions* view in *Stack Management*, use the edit menu to:
-** *Inspect* the queries and filters that makeup the session.
-** *Extend* the expiration of a completed session.
-** *Delete* a session.
+
+. To view your saved searches, open the main menu, and then click
+*Stack Management > Search Sessions*.  You can also open this view from the Search sessions popup once you save the session.
 +
 [role="screenshot"]
 image::images/search-sessions-menu.png[Search Sessions management view with actions for inspecting, extending, and deleting a session. ]
-
-. To change the search timeout, go to *Stack Management > Advanced Setting*
- and search for “search timeout”.
++
+. In *Search Sessions*, use the edit menu to:
+** *Inspect* the queries and filters that makeup the session.
+** *Extend* the expiration of a completed session.
+** *Restore* a session. Relative dates become
+absolute dates, panning is disabled for maps, and changing a filter, query, or drilldown starts a new search.
+** *Delete* a session.

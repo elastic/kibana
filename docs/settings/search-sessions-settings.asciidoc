@@ -17,15 +17,8 @@ enabled by default.
 | `search:Sessions:trackingInterval`
   | The frequency for updating the state of a search session. The default is 10s.
 
-| `search:Sessions:pageSize`
-  | The number of search sessions to show per page in *Stack Management*. The default is 10000.
-
 | `search:Sessions:defaultExpiration`
   | How long search session results are stored before they are deleted.
   Extending a search session resets the expiration by the same value. The default is 7d.
-
-| `search:sessions:maxUpdateRetries`
-  | The number of attempts before a search session request is abandoned. The default is 3.
-
 
 |===
