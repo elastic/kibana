@@ -1,8 +1,57 @@
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/server';
+import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
+import {
+  TelemetryPluginSetup,
+  TelemetryPluginStart,
+} from '../../../../src/plugins/telemetry/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { LicensingPluginStart } from '../../licensing/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import { PLUGIN_ID, RacPageName } from '../common';
+import { LIFECYCLE_RULE_ALERT_TYPE_ID } from '../public/types';
+import { lifecycleRuleAlertType } from './rules/lifecycle_rule_alert_type';
+import { PluginSetupContract as FeaturesSetup } from '../../features/server';
+
+import {
+  PluginSetupContract as AlertingSetup,
+  PluginStartContract as AlertPluginStartContract,
+} from '../../alerting/server';
 
 import { RacPluginSetup, RacPluginStart } from './types';
 import { defineRoutes } from './routes';
-import { createEsContext, EsContext } from './es/context';
+import { createEsContext, EsContext } from './es';
+
+export interface SetupPlugins {
+  alerting: AlertingSetup;
+  data: DataPluginSetup;
+  features: FeaturesSetup;
+  taskManager?: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
+  telemetry?: TelemetryPluginSetup;
+}
+
+export interface StartPlugins {
+  alerting: AlertPluginStartContract;
+  data: DataPluginStart;
+  licensing: LicensingPluginStart;
+  taskManager?: TaskManagerStartContract;
+  telemetry?: TelemetryPluginStart;
+}
+
+const racSubPlugins = [
+  PLUGIN_ID,
+  `${PLUGIN_ID}:${RacPageName.rules}`,
+  `${PLUGIN_ID}:${RacPageName.alerts}`,
+  `${PLUGIN_ID}:${RacPageName.cases}`,
+];
 
 export class RacPlugin implements Plugin<RacPluginSetup, RacPluginStart> {
   private readonly logger: Logger;
@@ -14,7 +63,7 @@ export class RacPlugin implements Plugin<RacPluginSetup, RacPluginStart> {
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: SetupPlugins) {
     this.logger.debug('rac: Setup');
     const router = core.http.createRouter();
 
@@ -30,6 +79,57 @@ export class RacPlugin implements Plugin<RacPluginSetup, RacPluginStart> {
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       kibanaVersion: this.kibanaVersion,
     });
+
+    plugins.features.registerKibanaFeature({
+      id: PLUGIN_ID,
+      name: i18n.translate('xpack.rac.featureRegistry.racTitle', {
+        defaultMessage: 'Rule, Alerts, Cases',
+      }),
+      order: 1100,
+      category: DEFAULT_APP_CATEGORIES.rac,
+      app: [...racSubPlugins, 'kibana'],
+      catalogue: ['rac'],
+      management: {
+        insightsAndAlerting: ['triggersActions'],
+      },
+      alerting: [LIFECYCLE_RULE_ALERT_TYPE_ID],
+      privileges: {
+        all: {
+          app: [...racSubPlugins, 'kibana'],
+          catalogue: ['rac'],
+          api: ['rac', 'lists-all', 'lists-read'],
+          savedObject: {
+            all: ['alert', 'exception-list', 'exception-list-agnostic'],
+            read: ['config'],
+          },
+          alerting: {
+            all: [LIFECYCLE_RULE_ALERT_TYPE_ID],
+          },
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: ['show', 'crud'],
+        },
+        read: {
+          app: [...racSubPlugins, 'kibana'],
+          catalogue: ['rac'],
+          api: ['rac', 'lists-read'],
+          savedObject: {
+            all: [],
+            read: ['config', 'exception-list', 'exception-list-agnostic'],
+          },
+          alerting: {
+            read: [LIFECYCLE_RULE_ALERT_TYPE_ID],
+          },
+          management: {
+            insightsAndAlerting: ['triggersActions'],
+          },
+          ui: ['show'],
+        },
+      },
+    });
+
+    plugins.alerting.registerType(lifecycleRuleAlertType);
 
     return {};
   }

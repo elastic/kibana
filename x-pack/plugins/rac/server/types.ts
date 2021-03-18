@@ -6,9 +6,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, KibanaRequest, RequestHandlerContext } from '../../../../src/core/server';
 
-export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
+export { IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
 import { IEvent } from '../generated/schemas';
 import { FindOptionsType } from './event_log_client';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';

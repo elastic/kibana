@@ -11,11 +11,12 @@
     "security"
   ],
   "requiredPlugins": [
-    "taskManager",
     "actions",
     "alerting",
     "data",
-    "navigation"
+    "features",
+    "navigation",
+    "taskManager"
   ],
   "server": true,
   "ui": true
