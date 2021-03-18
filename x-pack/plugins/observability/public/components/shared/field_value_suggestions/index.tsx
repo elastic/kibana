@@ -17,7 +17,7 @@ export interface FieldValueSuggestionsProps {
   label: string;
   indexPattern: IIndexPattern;
   sourceField: string;
-  onChange: (val: string) => void;
+  onChange: (val?: string) => void;
 }
 
 export function FieldValueSuggestions({
@@ -28,10 +28,9 @@ export function FieldValueSuggestions({
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
+  const [debouncedValue, setDebouncedValue] = useState('');
 
   const { values, loading } = useValuesList({ indexPattern, query, sourceField });
-
-  const [debouncedValue, setDebouncedValue] = useState('');
 
   useDebounce(
     () => {

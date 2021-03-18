@@ -20,13 +20,16 @@ export interface FieldValueSelectionProps {
   value?: string;
   label: string;
   loading: boolean;
-  onChange: (val: string) => void;
+  onChange: (val?: string) => void;
   values?: string[];
   setQuery: Dispatch<SetStateAction<string>>;
 }
 
 const formatOptions = (values?: string[], value?: string): EuiSelectableOption[] => {
-  return (values ?? []).map((val) => ({ label: val, ...(value ? { checked: 'on' } : {}) }));
+  return (values ?? []).map((val) => ({
+    label: val,
+    ...(value === val ? { checked: 'on' } : {}),
+  }));
 };
 
 export function FieldValueSelection({
@@ -104,10 +107,13 @@ export function FieldValueSelection({
                 <EuiButton
                   size="s"
                   fullWidth
-                  disabled={options.length === 0 || !options.find((opt) => opt?.checked === 'on')}
+                  disabled={
+                    !value &&
+                    (options.length === 0 || !options.find((opt) => opt?.checked === 'on'))
+                  }
                   onClick={() => {
-                    const selected = options.find((opt) => opt?.checked === 'on')!;
-                    onSelectionChange(selected.label);
+                    const selected = options.find((opt) => opt?.checked === 'on');
+                    onSelectionChange(selected?.label);
                     setIsPopoverOpen(false);
                   }}
                 >
