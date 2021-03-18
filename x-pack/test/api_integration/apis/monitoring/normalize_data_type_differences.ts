@@ -7,8 +7,8 @@
 import numeral from '@elastic/numeral';
 
 export function normalizeDataTypeDifferences(metrics: any, fixture: any) {
-  return Object.keys(metrics).reduce((accum, metricName) => {
-    accum[metricName] = metrics[metricName].map((item, index) => {
+  return Object.keys(metrics).reduce((accum: any, metricName) => {
+    accum[metricName] = metrics[metricName].map((item: { data: number[][] }, index: number) => {
       return {
         ...item,
         data: item.data.map(([_x, y], index2) => {
