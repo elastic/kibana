@@ -31,7 +31,7 @@ and the <<kibana-feature-privileges, search sessions subfeature>>.
 [float]
 ==== Example: Save and manage a search session
 
-You’re trying to understand a trend you see on a dashboard in {kib}. You
+You’re trying to understand a trend you see on a dashboard. You
 need to look at several years of data, currently in
 {ref}/data-tiers.html#cold-tier[cold storage],
 but you don’t have time to wait. You want {kib} to
@@ -41,10 +41,10 @@ open your browser and pick up where you left off.
 . Load your dashboard.
 +
 Your search session begins automatically. The icon after the dashboard title
-displays the current state of the search. A clock indicates the session is in progress.
+displays the current state of the search session. A clock indicates the search session is in progress.
 A checkmark indicates that the search session is complete.
 
-. To instruct {kib} to continue the search in the background, click the clock icon,
+. To instruct {kib} to continue a search in the background, click the clock icon,
 and then click *Save session*. Once you save a search session, you can start a new search,
 navigate to a different application, or close the browser.
 +
@@ -52,7 +52,7 @@ navigate to a different application, or close the browser.
 image::images/search-session-awhile.png[Search Session indicator displaying the current state of the search, which you can click to stop or save a running Search Session ]
 
 . To view your saved searches, open the main menu, and then click
-*Stack Management > Search Sessions*.  You can also open this view from the search sessions popup once you save the session.
+*Stack Management > Search Sessions*.  You can also open this view from the search sessions popup for a saved or completed session.
 +
 [role="screenshot"]
 image::images/search-sessions-menu.png[Search Sessions management view with actions for inspecting, extending, and deleting a session. ]
@@ -63,9 +63,10 @@ You're returned to the place from where you started the search session. The data
 behaves differently:
 +
 * Relative dates are converted to absolute dates.
+* Panning is disabled in maps.
 * Changing a filter, query, or drilldown starts a new search session, which can be slow.
 
-. Open the edit menu in *Search Sessions* to:
+. Use the edit menu in *Search Sessions* to:
 * *Inspect* the queries and filters that makeup the session.
 * *Extend* the expiration of a completed session.
 * *Delete* a session.
