@@ -1,6 +1,6 @@
 [role="xpack"]
 [[banners-settings-kb]]
-=== Banners settings in {kib}
+=== Banner settings in {kib}
 ++++
 <titleabbrev>Banners settings</titleabbrev>
 ++++
@@ -10,7 +10,7 @@ Banners are disabled by default. You need to manually configure them in order to
 You can configure the `xpack.banners` settings in your `kibana.yml` file.
 
 [[general-banners-settings-kb]]
-==== General banners settings
+==== General banner settings
 
 [cols="2*<"]
 |===
