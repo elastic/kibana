@@ -85,7 +85,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
       <EuiSpacer />
       {!!onClone && !!selected.length && (
         <EuiButton fill onClick={() => onClone(selected)}>
-          {txtCloneButtonLabel}
+          {txtCloneButtonLabel(selected.length)}
         </EuiButton>
       )}
     </>
