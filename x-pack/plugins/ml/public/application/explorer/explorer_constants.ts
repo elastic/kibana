@@ -52,6 +52,8 @@ export const CHART_TYPE = {
   GEO_MAP: 'geo_map',
 } as const;
 
+export type ChartType = typeof CHART_TYPE[keyof typeof CHART_TYPE];
+
 export const MAX_CATEGORY_EXAMPLES = 10;
 
 /**

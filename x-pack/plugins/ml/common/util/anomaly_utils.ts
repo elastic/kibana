@@ -32,11 +32,13 @@ export const ENTITY_FIELD_OPERATIONS = {
   REMOVE: '-',
 } as const;
 
+export type EntityFieldOperations = typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
+
 export interface EntityField {
   fieldName: string;
   fieldValue: string | number | undefined;
   fieldType?: ENTITY_FIELD_TYPE;
-  operation?: typeof ENTITY_FIELD_OPERATIONS[keyof typeof ENTITY_FIELD_OPERATIONS];
+  operation?: EntityFieldOperations;
 }
 
 // List of function descriptions for which actual values from record level results should be displayed.

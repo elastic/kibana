@@ -25,15 +25,18 @@ import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
 import { getChartType, chartLimits } from '../util/chart_utils';
 import { CriteriaField, MlResultsService } from './results_service';
 import { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
-import { CHART_TYPE } from '../explorer/explorer_constants';
+import { CHART_TYPE, ChartType } from '../explorer/explorer_constants';
 import type { ChartRecord } from '../explorer/explorer_utils';
 import { RecordsForCriteria, ScheduledEventsByBucket } from './results_service/result_service_rx';
 import { isPopulatedObject } from '../../../common/util/object_utils';
 import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
-import { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
+import {
+  ExplorerChartsData,
+  getDefaultChartsData,
+} from '../explorer/explorer_charts/explorer_charts_container_service';
 import { TimeRangeBounds } from '../util/time_buckets';
-import { isDefined } from '../util/validation_utils';
+import { isDefined } from '../../../common/types/guards';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -126,17 +129,6 @@ export class AnomalyExplorerChartsService {
     return this._customTimeRange !== undefined
       ? this.timeFilter.calculateBounds(this._customTimeRange)
       : this.timeFilter.getBounds();
-  }
-
-  public getDefaultChartsData(): ExplorerChartsData {
-    return {
-      chartsPerRow: 1,
-      errorMessages: undefined,
-      seriesToPlot: [] as SeriesConfigWithMetadata[],
-      // default values, will update on every re-render
-      tooManyBuckets: false,
-      timeFieldName: 'timestamp',
-    };
   }
 
   public calculateChartRange(
@@ -381,14 +373,15 @@ export class AnomalyExplorerChartsService {
     return fullSeriesConfig;
   }
   public async getCombinedJobs(jobIds: string[]): Promise<CombinedJob[]> {
-    const jobs = await Promise.all(
+    const combinedResults = await Promise.all(
       // Getting only necessary job config and datafeed config without the stats
       jobIds.map((jobId) => this.mlApiServices.jobs.jobForCloning(jobId))
     );
-    const results = jobs
+    const combinedJobs = combinedResults
       .filter(isDefined)
-      .map(({ job, datafeed }) => ({ ...job!, datafeed_config: datafeed! }));
-    return results;
+      .filter((r) => r.job !== undefined && r.datafeed !== undefined)
+      .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed } as CombinedJob));
+    return combinedJobs;
   }
 
   public async getAnomalyData(
@@ -402,7 +395,7 @@ export class AnomalyExplorerChartsService {
     severity = 0,
     maxSeries = DEFAULT_MAX_SERIES_TO_PLOT
   ): Promise<ExplorerChartsData | void> {
-    const data = this.getDefaultChartsData();
+    const data = getDefaultChartsData();
 
     const containerWith = chartsContainerWidth + SWIM_LANE_LABEL_WIDTH;
     if (anomalyRecords === undefined) return;
@@ -804,7 +797,7 @@ export class AnomalyExplorerChartsService {
     function getChartDataForPointSearch(
       chartData: ChartPoint[],
       record: AnomalyRecordDoc,
-      chartType: typeof CHART_TYPE[keyof typeof CHART_TYPE]
+      chartType: ChartType
     ) {
       if (
         chartType === CHART_TYPE.EVENT_DISTRIBUTION ||

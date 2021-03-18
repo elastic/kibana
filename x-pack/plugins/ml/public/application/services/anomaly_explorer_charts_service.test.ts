@@ -17,6 +17,7 @@ import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_ch
 import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';
+import { getDefaultChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 
 // Some notes on the tests and mocks:
 //

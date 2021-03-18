@@ -79,10 +79,7 @@ export class AnomalyExplorerEmbeddableFactory
     ];
   }
 
-  public async create(
-    initialInput: AnomalyExplorerEmbeddableInput,
-    parent?: IContainer
-  ): Promise<any> {
+  public async create(initialInput: AnomalyExplorerEmbeddableInput, parent?: IContainer) {
     const services = await this.getServices();
     const { AnomalyExplorerEmbeddable } = await import('./anomaly_explorer_embeddable');
     return new AnomalyExplorerEmbeddable(initialInput, services, parent);

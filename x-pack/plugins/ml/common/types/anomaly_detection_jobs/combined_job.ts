@@ -9,6 +9,7 @@ import { Datafeed } from './datafeed';
 import { DatafeedStats } from './datafeed_stats';
 import { Job } from './job';
 import { JobStats } from './job_stats';
+import { isPopulatedObject } from '../../util/object_utils';
 
 export type JobWithStats = Job & JobStats;
 export type DatafeedWithStats = Datafeed & DatafeedStats;
@@ -25,6 +26,23 @@ export interface CombinedJobWithStats extends JobWithStats {
   datafeed_config: DatafeedWithStats;
 }
 
-export function isCombinedJobWithStats(arg: any): arg is CombinedJobWithStats {
-  return typeof arg.job_id === 'string';
+// export const isCombinedJob = (item: any | undefined): item is CombinedJob => {
+//   return !!item;
+// };
+
+export function isCombinedJob(arg: null | undefined | unknown): arg is CombinedJob {
+  return (
+    isPopulatedObject(arg) &&
+    typeof arg.job_id === 'string' &&
+    isPopulatedObject(arg.datafeed_config)
+  );
+}
+
+export function isCombinedJobWithStats(arg: unknown): arg is CombinedJobWithStats {
+  return (
+    isPopulatedObject(arg) &&
+    typeof arg.job_id === 'string' &&
+    isPopulatedObject(arg.datafeed_config) &&
+    arg.hasOwnProperty('timing_stats')
+  );
 }
