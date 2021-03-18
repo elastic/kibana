@@ -11955,7 +11955,6 @@
     "xpack.lens.app.docLoadingError": "加载已保存文档时出错",
     "xpack.lens.app.downloadButtonAriaLabel": "将数据下载为 CSV 文件",
     "xpack.lens.app.downloadCSV": "下载为 CSV",
-    "xpack.lens.app.indexPatternLoadingError": "加载索引模式时出错",
     "xpack.lens.app.save": "保存",
     "xpack.lens.app.saveAndReturn": "保存并返回",
     "xpack.lens.app.saveAndReturnButtonAriaLabel": "保存当前 Lens 可视化并返回到上一应用",
