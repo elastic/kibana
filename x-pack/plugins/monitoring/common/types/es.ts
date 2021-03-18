@@ -481,6 +481,9 @@ export interface ElasticsearchMetricbeatSource {
     stats?: {
       concurrent_connections?: number;
       process?: {
+        uptime?: {
+          ms?: number;
+        };
         memory?: {
           heap?: {
             size_limit?: {
