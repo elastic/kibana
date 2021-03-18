@@ -34,7 +34,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     options: InfraMetricsRequestOptions,
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
-    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
+    const indexPattern = `${options.sourceConfiguration.metricAlias}`;
     const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
     const nodeField = fields.id;
 
