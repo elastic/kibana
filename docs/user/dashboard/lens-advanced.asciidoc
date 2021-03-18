@@ -121,11 +121,11 @@ image::images/lens_advanced_2_1_1.png[Chart type menu with Area selected]
 .. Click *All records*.
 
 .. In the *KQL* field, enter `day_of_week : "Saturday" or day_of_week : "Sunday"`. This <<kuery-query,{kib} KQL filter>> will match documents where `day_of_week` matches exactly `Saturday` or `Sunday`. 
-
++
 Hint: A simpler way to achieve the same effect is typing a filter in KQL bar above the chart. However, there are powerful advantages of using Filters aggregation over KQL bar:
  - you can add only one filter to KQL bar, but you can add as many filters as needed with Filters aggregations,
  - KQL bar will filter all data used in visualization, whereas Filters aggregation will only filter the current layer so you can have a chart with both filtered and unfiltered data if needed.
-
++
 .. Press Return.
 +
 [role="screenshot"]
