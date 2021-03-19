@@ -102,11 +102,8 @@ describe('CachedIndexPatternFetcher', () => {
 
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "indexPattern": Object {
-            "id": "default",
-            "title": "index",
-          },
-          "indexPatternString": "index",
+          "indexPattern": undefined,
+          "indexPatternString": "",
         }
       `);
     });

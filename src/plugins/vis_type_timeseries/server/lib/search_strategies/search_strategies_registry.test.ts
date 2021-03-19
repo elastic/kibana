@@ -45,12 +45,11 @@ describe('SearchStrategyRegister', () => {
 
   test('should return a DefaultSearchStrategy instance', async () => {
     const req = {} as VisTypeTimeseriesRequest;
-    const indexPattern = '*';
 
     const { searchStrategy, capabilities } = (await registry.getViableStrategy(
       requestContext,
       req,
-      indexPattern
+      { indexPatternString: '*', indexPattern: undefined }
     ))!;
 
     expect(searchStrategy instanceof DefaultSearchStrategy).toBe(true);
@@ -67,14 +66,13 @@ describe('SearchStrategyRegister', () => {
 
   test('should return a MockSearchStrategy instance', async () => {
     const req = {} as VisTypeTimeseriesRequest;
-    const indexPattern = '*';
     const anotherSearchStrategy = new MockSearchStrategy();
     registry.addStrategy(anotherSearchStrategy);
 
     const { searchStrategy, capabilities } = (await registry.getViableStrategy(
       requestContext,
       req,
-      indexPattern
+      { indexPatternString: '*', indexPattern: undefined }
     ))!;
 
     expect(searchStrategy instanceof MockSearchStrategy).toBe(true);
