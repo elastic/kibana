@@ -42,6 +42,7 @@ export const getArtifact = async (
       id,
     });
 
+    // @ts-expect-error @elastic/elasticsearch _source is opitonal
     return esSearchHitToArtifact(esData.body);
   } catch (e) {
     if (isElasticsearchItemNotFoundError(e)) {
@@ -107,6 +108,7 @@ export const listArtifacts = async (
     });
 
     return {
+      // @ts-expect-error @elastic/elasticsearch _source is opitonal
       items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
       page,
       perPage,
