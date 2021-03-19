@@ -16,11 +16,9 @@ import { serializeKey } from './rollups';
 import {
   ApplicationUsageDaily,
   ApplicationUsageTotal,
-  ApplicationUsageTransactional,
   registerMappings,
   SAVED_OBJECTS_DAILY_TYPE,
   SAVED_OBJECTS_TOTAL_TYPE,
-  SAVED_OBJECTS_TRANSACTIONAL_TYPE,
 } from './saved_objects_types';
 import { applicationUsageSchema } from './schema';
 import { rollDailyData, rollTotals } from './rollups';
@@ -105,7 +103,6 @@ export function registerApplicationUsageCollector(
         const [
           { saved_objects: rawApplicationUsageTotals },
           { saved_objects: rawApplicationUsageDaily },
-          { saved_objects: rawApplicationUsageTransactional },
         ] = await Promise.all([
           savedObjectsClient.find<ApplicationUsageTotal>({
             type: SAVED_OBJECTS_TOTAL_TYPE,
@@ -114,10 +111,6 @@ export function registerApplicationUsageCollector(
           savedObjectsClient.find<ApplicationUsageDaily>({
             type: SAVED_OBJECTS_DAILY_TYPE,
             perPage: 10000, // We can have up to 44 apps * 91 days = 4004 docs. This limit is OK
-          }),
-          savedObjectsClient.find<ApplicationUsageTransactional>({
-            type: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
-            perPage: 10000, // If we have more than those, we won't report the rest (they'll be rolled up to the daily soon enough to become a problem)
           }),
         ]);
 
@@ -156,10 +149,7 @@ export function registerApplicationUsageCollector(
         const nowMinus30 = moment().subtract(30, 'days');
         const nowMinus90 = moment().subtract(90, 'days');
 
-        const applicationUsage = [
-          ...rawApplicationUsageDaily,
-          ...rawApplicationUsageTransactional,
-        ].reduce(
+        const applicationUsage = rawApplicationUsageDaily.reduce(
           (
             acc,
             {
