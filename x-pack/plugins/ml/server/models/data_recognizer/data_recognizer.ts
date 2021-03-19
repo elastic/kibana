@@ -865,10 +865,10 @@ export class DataRecognizer {
       try {
         const duration: { start: string; end?: string } = { start: '0' };
         if (start !== undefined) {
-          duration.start = (start as unknown) as string;
+          duration.start = String(start);
         }
         if (end !== undefined) {
-          duration.end = (end as unknown) as string;
+          duration.end = String(end);
         }
 
         const {

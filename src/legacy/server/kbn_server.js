@@ -15,7 +15,6 @@ import { Config } from './config';
 import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
-import { optimizeMixin } from '../../optimize';
 
 /**
  * @typedef {import('./kbn_server').KibanaConfig} KibanaConfig
@@ -63,10 +62,7 @@ export default class KbnServer {
 
         coreMixin,
 
-        loggingMixin,
-
-        // setup routes that serve the @kbn/optimizer output
-        optimizeMixin
+        loggingMixin
       )
     );
 

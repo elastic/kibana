@@ -2492,7 +2492,7 @@ export interface SavedObjectsFindOptions {
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
-    searchAfter?: unknown[];
+    searchAfter?: estypes.Id[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;
@@ -2528,7 +2528,7 @@ export interface SavedObjectsFindResponse<T = unknown> {
 // @public (undocumented)
 export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
     score: number;
-    sort?: unknown[];
+    sort?: string[];
 }
 
 // @public

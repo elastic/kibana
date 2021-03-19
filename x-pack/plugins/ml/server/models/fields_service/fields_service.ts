@@ -13,7 +13,7 @@ import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { AggCardinality } from '../../../common/types/fields';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
-import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Service for carrying out queries to obtain data
@@ -183,6 +183,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+      ...(datafeedConfig?.indices_options ?? {}),
     });
 
     if (!aggregations) {
@@ -211,7 +213,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   async function getTimeFieldRange(
     index: string[] | string,
     timeFieldName: string,
-    query: any
+    query: any,
+    indicesOptions?: IndicesOptions
   ): Promise<{
     success: boolean;
     start: { epoch: number; string: string };
@@ -239,6 +242,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
           },
         },
       },
+      ...(indicesOptions ?? {}),
     });
 
     if (aggregations && aggregations.earliest && aggregations.latest) {
@@ -399,6 +403,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+      ...(datafeedConfig?.indices_options ?? {}),
     });
 
     if (!aggregations) {

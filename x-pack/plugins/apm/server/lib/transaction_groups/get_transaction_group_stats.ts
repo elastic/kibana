@@ -73,9 +73,11 @@ export function getCounts({ request, setup }: MetricParams) {
           sort: {
             '@timestamp': 'desc' as const,
           },
-          metrics: {
-            field: TRANSACTION_TYPE,
-          } as const,
+          metrics: [
+            {
+              field: TRANSACTION_TYPE,
+            } as const,
+          ],
         },
       },
     });

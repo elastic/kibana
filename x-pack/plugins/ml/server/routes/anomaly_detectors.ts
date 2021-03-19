@@ -516,8 +516,8 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
           body: {
             top_n: request.body.topN,
             bucket_span: request.body.bucketSpan,
-            start: request.body.start,
-            end: request.body.end,
+            start: request.body.start !== undefined ? String(request.body.start) : undefined,
+            end: request.body.end !== undefined ? String(request.body.end) : undefined,
           },
         });
         return response.ok({

@@ -256,7 +256,9 @@ export class ResultsLoader {
       if (this._jobCreator.splitField !== null) {
         const fieldValues = await this._chartLoader.loadFieldExampleValues(
           this._jobCreator.splitField,
-          this._jobCreator.runtimeMappings
+          this._jobCreator.runtimeMappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+          this._jobCreator.datafeedConfig.indices_options
         );
         if (fieldValues.length > 0) {
           this._detectorSplitFieldFilters = {

@@ -635,6 +635,7 @@ export interface DocLinksStart {
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
+        readonly ingest: Record<string, string>;
     };
 }
 
@@ -1224,7 +1225,7 @@ export interface SavedObjectsFindOptions {
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
-    searchAfter?: unknown[];
+    searchAfter?: estypes.Id[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;

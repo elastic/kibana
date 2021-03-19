@@ -178,16 +178,14 @@ export class AdvancedJobCreator extends JobCreator {
   // load the start and end times for the selected index
   // and apply them to the job creator
   public async autoSetTimeRange() {
-    try {
-      const { start, end } = await ml.getTimeFieldRange({
-        index: this._indexPatternTitle,
-        timeFieldName: this.timeFieldName,
-        query: this.query,
-      });
-      this.setTimeRange(start.epoch, end.epoch);
-    } catch (error) {
-      throw Error(error);
-    }
+    const { start, end } = await ml.getTimeFieldRange({
+      index: this._indexPatternTitle,
+      timeFieldName: this.timeFieldName,
+      query: this.query,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+      indicesOptions: this.datafeedConfig.indices_options,
+    });
+    this.setTimeRange(start.epoch, end.epoch);
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {

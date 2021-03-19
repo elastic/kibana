@@ -67,10 +67,9 @@ export function anomalySeriesFetcher({
                         { field: 'timestamp' },
                         { field: 'bucket_span' },
                       ] as const),
-                      sort: ({
+                      sort: {
                         record_score: 'desc' as const,
-                        // FIXME: TopMetricsAggregation.sort is incorrect
-                      } as unknown) as Sort,
+                      },
                     },
                   },
                   lower: { min: { field: 'model_lower' } },

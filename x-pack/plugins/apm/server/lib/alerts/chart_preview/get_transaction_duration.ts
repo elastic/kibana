@@ -85,7 +85,7 @@ export function getTransactionDurationChartPreview({
       const x = bucket.key;
       const y =
         aggregationType === 'avg'
-          ? (bucket.agg as MetricsAggregationResponsePart).value
+          ? (bucket.agg as { value: number | null }).value
           : (bucket.agg as { values: Record<string, number | null> }).values[
               percentilesKey
             ];

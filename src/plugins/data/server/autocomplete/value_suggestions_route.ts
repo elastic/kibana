@@ -12,12 +12,13 @@ import { IRouter, SharedGlobalConfig } from 'kibana/server';
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { IFieldType, Filter } from '../index';
-import { findIndexPatternById, getFieldByName } from '../index_patterns';
+import { estypes } from '@elastic/elasticsearch';
+import { IFieldType, ES_SEARCH_STRATEGY, IEsSearchRequest } from '../index';
 import { getRequestAbortedSignal } from '../lib';
+import { DataRequestHandlerContext } from '../types';
 
 export function registerValueSuggestionsRoute(
-  router: IRouter,
+  router: IRouter<DataRequestHandlerContext>,
   config$: Observable<SharedGlobalConfig>
 ) {
   router.post(
@@ -44,24 +45,40 @@ export function registerValueSuggestionsRoute(
       const config = await config$.pipe(first()).toPromise();
       const { field: fieldName, query, filters } = request.body;
       const { index } = request.params;
-      const { client } = context.core.elasticsearch.legacy;
       const signal = getRequestAbortedSignal(request.events.aborted$);
+
+      if (!context.indexPatterns) {
+        return response.badRequest();
+      }
 
       const autocompleteSearchOptions = {
         timeout: `${config.kibana.autocompleteTimeout.asMilliseconds()}ms`,
         terminate_after: config.kibana.autocompleteTerminateAfter.asMilliseconds(),
       };
 
-      const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
-
-      const field = indexPattern && getFieldByName(fieldName, indexPattern);
+      const indexPatterns = await context.indexPatterns.find(index, 1);
+      if (!indexPatterns || indexPatterns.length === 0) {
+        return response.notFound();
+      }
+      const field = indexPatterns[0].getFieldByName(fieldName);
       const body = await getBody(autocompleteSearchOptions, field || fieldName, query, filters);
 
-      const result = await client.callAsCurrentUser('search', { index, body }, { signal });
+      const searchRequest: IEsSearchRequest = {
+        params: {
+          index,
+          body,
+        },
+      };
+      const { rawResponse } = await context.search
+        .search(searchRequest, {
+          strategy: ES_SEARCH_STRATEGY,
+          abortSignal: signal,
+        })
+        .toPromise();
 
       const buckets: any[] =
-        get(result, 'aggregations.suggestions.buckets') ||
-        get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
+        get(rawResponse, 'aggregations.suggestions.buckets') ||
+        get(rawResponse, 'aggregations.nestedSuggestions.suggestions.buckets');
 
       return response.ok({ body: map(buckets || [], 'key') });
     }
@@ -73,7 +90,7 @@ async function getBody(
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  filters: Filter[] = []
+  filters: estypes.QueryContainer[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 
@@ -82,7 +99,7 @@ async function getBody(
     q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
-  const executionHint = 'map';
+  const executionHint = 'map' as const;
 
   // We don't care about the accuracy of the counts, just the content of the terms, so this reduces
   // the amount of information that needs to be transmitted to the coordinating node
