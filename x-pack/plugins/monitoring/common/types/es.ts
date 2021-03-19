@@ -205,14 +205,46 @@ export interface ElasticsearchLegacySource {
   };
   logstash_stats?: {
     timestamp?: string;
-    logstash?: {};
-    events?: {};
-    reloads?: {};
+    logstash?: {
+      timestamp?: string;
+      pipeline: {
+        batch_size: number;
+        workers: number;
+      };
+      http_address: string;
+      name: string;
+      host: string;
+      uuid: string;
+      version: string;
+      status: string;
+    };
     queue?: {
       type?: string;
     };
     jvm?: {
       uptime_in_millis?: number;
+      mem?: {
+        heap_used_percent?: number;
+      };
+    };
+    process?: {
+      cpu?: {
+        percent?: number;
+      };
+    };
+    os?: {
+      cpu?: {
+        load_average?: {
+          '1m'?: number;
+        };
+      };
+    };
+    events?: {
+      out?: number;
+    };
+    reloads?: {
+      failures?: number;
+      successes?: number;
     };
   };
   beats_stats?: {
@@ -513,6 +545,53 @@ export interface ElasticsearchMetricbeatSource {
         };
         max?: {
           ms?: number;
+        };
+      };
+    };
+  };
+  logstash?: {
+    node?: {
+      stats?: {
+        timestamp?: string;
+        logstash?: {
+          pipeline: {
+            batch_size: number;
+            workers: number;
+          };
+          http_address: string;
+          name: string;
+          host: string;
+          uuid: string;
+          version: string;
+          status: string;
+        };
+        queue?: {
+          type?: string;
+        };
+        jvm?: {
+          uptime_in_millis?: number;
+          mem?: {
+            heap_used_percent?: number;
+          };
+        };
+        process?: {
+          cpu?: {
+            percent?: number;
+          };
+        };
+        os?: {
+          cpu?: {
+            load_average?: {
+              '1m'?: number;
+            };
+          };
+        };
+        events?: {
+          out?: number;
+        };
+        reloads?: {
+          failures?: number;
+          successes?: number;
         };
       };
     };

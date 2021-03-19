@@ -54,6 +54,17 @@ function defaultCalculation(bucket, key) {
 
 function createMetricAggs(metric) {
   if (metric.derivative) {
+    const mbDerivative = metric.mbField
+      ? {
+          metric_mb_deriv: {
+            derivative: {
+              buckets_path: 'metric_mb',
+              gap_policy: 'skip',
+              unit: NORMALIZED_DERIVATIVE_UNIT,
+            },
+          },
+        }
+      : {};
     return {
       metric_deriv: {
         derivative: {
@@ -62,6 +73,7 @@ function createMetricAggs(metric) {
           unit: NORMALIZED_DERIVATIVE_UNIT,
         },
       },
+      ...mbDerivative,
       ...metric.aggs,
     };
   }
@@ -97,6 +109,13 @@ async function fetchSeries(
       },
       ...createMetricAggs(metric),
     };
+    if (metric.mbField) {
+      dateHistogramSubAggs.metric_mb = {
+        [metric.metricAgg]: {
+          field: metric.mbField,
+        },
+      };
+    }
   }
 
   let aggs = {
@@ -230,6 +249,7 @@ function countBuckets(data, count = 0) {
 
 function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, response) {
   const { derivative, calculation: customCalculation } = metric;
+  // metric.mbField && console.log(JSON.stringify(response))
 
   function getAggregatedData(buckets) {
     const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
@@ -256,7 +276,11 @@ function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, 
 
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
       // map buckets to values for charts
-      const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
+      let metricName = 'metric';
+      if (metric.mbField) {
+        metricName = derivative ? 'metric_mb_deriv' : 'metric_mb';
+      }
+      const key = derivative ? `${metricName}.normalized_value` : `${metricName}.value`;
       const calculation = customCalculation !== undefined ? customCalculation : defaultCalculation;
 
       data = buckets

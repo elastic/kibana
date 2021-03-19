@@ -57,7 +57,6 @@ export default function ({ getService, getPageObjects }) {
           expect(rows.length).to.be(3);
 
           const nodesAll = await nodesList.getNodesAll();
-          console.log(JSON.stringify(nodesAll, null, 2));
           const tableData = [
             {
               name: 'whatever-01',
