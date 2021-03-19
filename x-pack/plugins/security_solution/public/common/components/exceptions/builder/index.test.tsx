@@ -72,6 +72,7 @@ describe('ExceptionBuilderComponent', () => {
           isAndDisabled={false}
           isNestedDisabled={false}
           onChange={jest.fn()}
+          osTypes={['windows']}
         />
       </ThemeProvider>
     );
@@ -115,6 +116,7 @@ describe('ExceptionBuilderComponent', () => {
           isAndDisabled={false}
           isNestedDisabled={false}
           onChange={jest.fn()}
+          osTypes={['windows']}
         />
       </ThemeProvider>
     );
@@ -150,6 +152,7 @@ describe('ExceptionBuilderComponent', () => {
           isAndDisabled={false}
           isNestedDisabled={false}
           onChange={jest.fn()}
+          osTypes={['windows']}
         />
       </ThemeProvider>
     );
@@ -183,6 +186,7 @@ describe('ExceptionBuilderComponent', () => {
           isAndDisabled={false}
           isNestedDisabled={false}
           onChange={jest.fn()}
+          osTypes={['windows']}
         />
       </ThemeProvider>
     );
@@ -237,6 +241,7 @@ describe('ExceptionBuilderComponent', () => {
           isAndDisabled={false}
           isNestedDisabled={false}
           onChange={jest.fn()}
+          osTypes={['windows']}
         />
       </ThemeProvider>
     );
@@ -302,6 +307,7 @@ describe('ExceptionBuilderComponent', () => {
           isAndDisabled={false}
           isNestedDisabled={false}
           onChange={jest.fn()}
+          osTypes={['windows']}
         />
       </ThemeProvider>
     );
@@ -347,6 +353,7 @@ describe('ExceptionBuilderComponent', () => {
           isAndDisabled={false}
           isNestedDisabled={false}
           onChange={jest.fn()}
+          osTypes={['windows']}
         />
       </ThemeProvider>
     );
@@ -380,6 +387,7 @@ describe('ExceptionBuilderComponent', () => {
           isAndDisabled={false}
           isNestedDisabled={false}
           onChange={jest.fn()}
+          osTypes={['windows']}
         />
       </ThemeProvider>
     );
@@ -416,6 +424,7 @@ describe('ExceptionBuilderComponent', () => {
             isAndDisabled={false}
             isNestedDisabled={false}
             onChange={jest.fn()}
+            osTypes={['windows']}
           />
         </ThemeProvider>
       );

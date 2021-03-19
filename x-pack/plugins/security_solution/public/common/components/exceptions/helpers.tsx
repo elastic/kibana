@@ -489,7 +489,7 @@ export const getPrepopulatedEndpointException = ({
   const { file, host } = alertEcsData;
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
-  const filePathDefault = host?.os.family === 'linux' ? 'file.path.text' : 'file.path.caseless';
+  const filePathDefault = host?.os?.family === 'linux' ? 'file.path.text' : 'file.path.caseless';
 
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
