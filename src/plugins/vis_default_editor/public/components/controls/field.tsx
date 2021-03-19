@@ -69,7 +69,7 @@ function FieldParamEditor({
     );
   }
 
-  if (value?.type === 'missing') {
+  if (value && value.type === 'missing') {
     errors.push(
       i18n.translate('visDefaultEditor.controls.field.fieldIsNotExists', {
         defaultMessage:
@@ -79,7 +79,10 @@ function FieldParamEditor({
         },
       })
     );
-  } else if (!getFieldTypes(agg).find((type: string) => type === value?.type)) {
+  } else if (
+    value &&
+    !getFieldTypes(agg).find((type: string) => type === value.type || type === '*')
+  ) {
     errors.push(
       i18n.translate('visDefaultEditor.controls.field.invalidFieldForAggregation', {
         defaultMessage:
@@ -145,14 +148,14 @@ function FieldParamEditor({
 }
 
 function getFieldTypesString(agg: IAggConfig) {
-  return formatListAsProse(parseCommaSeparatedList(getFieldTypes(agg)), { inclusive: false });
+  return formatListAsProse(getFieldTypes(agg), { inclusive: false });
 }
 
 function getFieldTypes(agg: IAggConfig) {
   const param =
     get(agg, 'type.params', []).find((p: AggParam) => p.name === 'field') ||
     ({} as IFieldParamType);
-  return param.filterFieldTypes;
+  return parseCommaSeparatedList(param.filterFieldTypes || []);
 }
 
 export { FieldParamEditor };
