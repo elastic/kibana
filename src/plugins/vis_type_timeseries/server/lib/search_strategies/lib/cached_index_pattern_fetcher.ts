@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsService } from '../../../../../data/server';
-import { IndexPatternObject, FetchedIndexPattern } from '../../../../common/types';
 import {
   getIndexPatternObjectKey,
   fetchIndexPattern,
 } from '../../../../common/index_patterns_utils';
+
+import type { IndexPatternsService } from '../../../../../data/server';
+import type { IndexPatternObject, FetchedIndexPattern } from '../../../../common/types';
 
 export const getCachedIndexPatternFetcher = (indexPatternsService: IndexPatternsService) => {
   const cache = new Map();

@@ -32,12 +32,12 @@ export async function getTableData(
   panel: PanelSchema,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const fetchedIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
+  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
 
   const strategy = await services.searchStrategyRegistry.getViableStrategy(
     requestContext,
     req,
-    fetchedIndex
+    panelIndex
   );
 
   if (!strategy) {
@@ -58,8 +58,8 @@ export async function getTableData(
   });
 
   const calculatePivotLabel = async () => {
-    if (panel.pivot_id && fetchedIndex.indexPattern?.title) {
-      const fields = await extractFields(fetchedIndex.indexPattern.title);
+    if (panel.pivot_id && panelIndex.indexPattern?.title) {
+      const fields = await extractFields(panelIndex.indexPattern.title);
 
       return extractFieldLabel(fields, panel.pivot_id);
     }
@@ -77,7 +77,7 @@ export async function getTableData(
       req,
       panel,
       services.esQueryConfig,
-      fetchedIndex.indexPattern,
+      panelIndex.indexPattern,
       capabilities,
       services.uiSettings
     );
@@ -85,7 +85,7 @@ export async function getTableData(
     const [resp] = await searchStrategy.search(requestContext, req, [
       {
         body,
-        index: fetchedIndex.indexPatternString,
+        index: panelIndex.indexPatternString,
       },
     ]);
 

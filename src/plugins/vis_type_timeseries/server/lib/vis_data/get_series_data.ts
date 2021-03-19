@@ -29,12 +29,12 @@ export async function getSeriesData(
   panel: PanelSchema,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const fetchedIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
+  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
 
   const strategy = await services.searchStrategyRegistry.getViableStrategy(
     requestContext,
     req,
-    fetchedIndex
+    panelIndex
   );
 
   if (!strategy) {
@@ -53,7 +53,7 @@ export async function getSeriesData(
 
   try {
     const bodiesPromises = getActiveSeries(panel).map((series) =>
-      getSeriesRequestParams(req, panel, series, capabilities, services)
+      getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services)
     );
 
     const searches = await Promise.all(bodiesPromises);

@@ -7,12 +7,13 @@
  */
 
 import { RollupSearchStrategy } from './rollup_search_strategy';
-import {
+
+import type { IndexPatternsService } from '../../../../../data/common';
+import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
+import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { IndexPatternsService } from '../../../../../data/common';
-import { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 
 jest.mock('./abstract_search_strategy', () => {
   class AbstractSearchStrategyMock {

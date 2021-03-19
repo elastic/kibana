@@ -81,7 +81,7 @@ export abstract class AbstractSearchStrategy {
       fetchedIndexPattern.indexPattern
         ? fetchedIndexPattern.indexPattern.getNonScriptedFields()
         : await indexPatternsService.getFieldsForWildcard({
-            pattern: fetchedIndexPattern.indexPatternString,
+            pattern: fetchedIndexPattern.indexPatternString ?? '',
             metaFields: [],
             ...options,
           })

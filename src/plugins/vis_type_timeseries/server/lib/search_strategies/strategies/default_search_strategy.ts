@@ -8,8 +8,8 @@
 
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../capabilities/default_search_capabilities';
-import { IndexPatternsService } from '../../../../../data/server';
 
+import type { IndexPatternsService } from '../../../../../data/server';
 import type { FetchedIndexPattern } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
