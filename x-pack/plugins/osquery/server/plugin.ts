@@ -78,7 +78,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Started');
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
 
-    console.log('casss', Object.keys(plugins.cases));
+    // console.log('casss', Object.keys(plugins.cases));
 
     this.osqueryAppContextService.start({
       ...plugins.fleet,

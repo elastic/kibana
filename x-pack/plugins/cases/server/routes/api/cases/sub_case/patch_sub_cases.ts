@@ -35,8 +35,8 @@ import {
   SubCasesResponseRt,
   User,
   CommentAttributes,
-} from '../../../../../common';
-import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common';
+} from '../../../../../common/api';
+import { SUB_CASES_PATCH_DEL_URL } from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import {
   escapeHatch,

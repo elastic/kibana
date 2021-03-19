@@ -14,11 +14,9 @@
   ],
   "requiredPlugins": [
     "actions",
-    "esUiShared",
-    "kibanaReact",
-    "triggersActionsUi"
+    "securitySolution"
   ],
   "server": true,
-  "ui": true,
+  "ui": false,
   "version": "8.0.0"
 }

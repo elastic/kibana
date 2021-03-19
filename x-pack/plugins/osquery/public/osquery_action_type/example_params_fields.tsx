@@ -21,7 +21,7 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
   errors,
 }) => {
   const { query } = actionParams;
-  console.error('actionParams', actionParams, index, errors);
+  // console.error('actionParams', actionParams, index, errors);
 
   useEffect(() => {
     editAction(

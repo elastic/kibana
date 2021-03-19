@@ -7,7 +7,7 @@
 
 import { isEmpty, map } from 'lodash';
 import { produce } from 'immer';
-import { EuiFlexGroup, EuiFlexItem, EuiFilePicker, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFilePicker, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { PackagePolicyCreateExtensionComponentProps } from '../../../fleet/public';

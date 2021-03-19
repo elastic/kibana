@@ -6,10 +6,10 @@
  */
 
 import { EuiBasicTable, EuiButtonIcon, EuiCodeBlock, formatDate } from '@elastic/eui';
-import React, { createContext, useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 
 import { useAllActions } from './use_all_actions';
-import { ActionEdges, Direction } from '../../common/search_strategy';
+import { Direction } from '../../common/search_strategy';
 import { useRouterNavigate } from '../common/lib/kibana';
 
 interface ActionTableResultsButtonProps {
@@ -28,7 +28,7 @@ const ActionsTableComponent = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
-  const { isLoading: actionsLoading, data: actionsData } = useAllActions({
+  const { isLoading, data: actionsData } = useAllActions({
     activePage: pageIndex,
     limit: pageSize,
     direction: Direction.desc,
