@@ -102,14 +102,14 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should allow to reassign multiple agents by id -- some invalid', async () => {
-        await supertest
+        const { body } = await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             agents: ['agent2', 'INVALID_ID', 'agent3', 'MISSING_ID', 'etc'],
             policy_id: 'policy2',
-          })
-          .expect(200);
+          });
+
         const [agent2data, agent3data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent2`),
           supertest.get(`/api/fleet/agents/agent3`),

@@ -12,9 +12,17 @@ import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { AgentReassignmentError } from '../../errors';
 
-import { getAgents, getAgentPolicyForAgent, updateAgent, bulkUpdateAgents } from './crud';
+import type { ESAgentDocumentResult } from './crud';
+import {
+  getAgentDocuments,
+  getAgentPolicyForAgent,
+  isAgentDocument,
+  updateAgent,
+  bulkUpdateAgents,
+} from './crud';
 import type { GetAgentsOptions } from './index';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
+import { searchHitToAgent } from './helpers';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -67,7 +75,7 @@ export async function reassignAgentIsAllowed(
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options: { agents: Agent[] } | GetAgentsOptions,
+  options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean },
   newAgentPolicyId: string
 ): Promise<{ items: Array<{ id: string; success: boolean; error?: Error }> }> {
   const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
@@ -75,29 +83,48 @@ export async function reassignAgents(
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  const allResults = 'agents' in options ? options.agents : await getAgents(esClient, options);
+  let givenAgentsResults: Array<Agent | ESAgentDocumentResult> = [];
+  if ('agents' in options) {
+    givenAgentsResults = options.agents;
+  } else if ('agentIds' in options) {
+    givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
+  }
+
   // which are allowed to unenroll
-  const settled = await Promise.allSettled(
-    allResults.map((agent) =>
-      reassignAgentIsAllowed(soClient, esClient, agent.id, newAgentPolicyId).then((_) => agent)
-    )
+  const agentResults = await Promise.allSettled(
+    givenAgentsResults.map(async (result) => {
+      const agent: Agent = isAgentDocument(result) ? searchHitToAgent(result) : result;
+
+      if (!agent.id) {
+        if ('_id' in result) {
+          throw new AgentReassignmentError(`Cannot find agent ${result._id}`);
+        }
+        throw new AgentReassignmentError(`Cannot find agent`);
+      }
+      if (agent.policy_id === newAgentPolicyId) {
+        throw new AgentReassignmentError(`${agent.id} is already assigned to ${newAgentPolicyId}`);
+      }
+
+      const isAllowed = await reassignAgentIsAllowed(
+        soClient,
+        esClient,
+        agent.id,
+        newAgentPolicyId
+      );
+      if (isAllowed) {
+        return agent;
+      }
+      throw new AgentReassignmentError(`${agent.id} may not be reassigned to ${newAgentPolicyId}`);
+    })
   );
 
   // Filter to agents that do not already use the new agent policy ID
-  const agentsToUpdate = allResults.filter((agent, index) => {
-    if (settled[index].status === 'fulfilled') {
-      if (agent.policy_id === newAgentPolicyId) {
-        settled[index] = {
-          status: 'rejected',
-          reason: new AgentReassignmentError(
-            `${agent.id} is already assigned to ${newAgentPolicyId}`
-          ),
-        };
-      } else {
-        return true;
-      }
+  const agentsToUpdate = agentResults.reduce<Agent[]>((updateable, result) => {
+    if (result.status === 'fulfilled' && result.value) {
+      updateable.push(result.value);
     }
-  });
+    return updateable;
+  }, []);
 
   const res = await bulkUpdateAgents(
     esClient,

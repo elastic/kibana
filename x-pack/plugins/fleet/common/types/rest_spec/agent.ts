@@ -164,12 +164,13 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
-export interface PostBulkAgentReassignResponse {
-  [key: string]: {
+export type PostBulkAgentReassignResponse = Record<
+  Agent['id'],
+  {
     success: boolean;
     error?: Error;
-  };
-}
+  }
+>;
 
 export interface GetOneAgentEventsRequest {
   params: {
