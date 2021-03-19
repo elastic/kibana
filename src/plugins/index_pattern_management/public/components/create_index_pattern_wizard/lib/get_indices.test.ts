@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getIndices, responseToItemArray, dedupeMatchedItems } from './get_indices';
+import {
+  getIndices,
+  getIndicesViaSearch,
+  responseToItemArray,
+  dedupeMatchedItems,
+} from './get_indices';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { ResolveIndexResponseItemIndexAttrs, MatchedItem } from '../types';
 import { Observable } from 'rxjs';
@@ -34,6 +39,8 @@ export const successfulResolveResponse = {
 };
 
 const successfulSearchResponse = {
+  isPartial: false,
+  isRunning: false,
   rawResponse: {
     aggregations: {
       indices: {
@@ -41,6 +48,22 @@ const successfulSearchResponse = {
       },
     },
   },
+};
+
+const partialSearchResponse = {
+  isPartial: true,
+  isRunning: true,
+  rawResponse: {
+    hits: {
+      total: 2,
+      hits: [],
+    },
+  },
+};
+
+const errorSearchResponse = {
+  isPartial: true,
+  isRunning: false,
 };
 
 const getIndexTags = () => [];
@@ -93,6 +116,22 @@ describe('getIndices', () => {
     ).toBe(0);
   });
 
+  it('should work with partial responses', async () => {
+    const searchClientPartialResponse = () =>
+      new Observable((observer) => {
+        observer.next(partialSearchResponse);
+        observer.next(successfulSearchResponse);
+        observer.complete();
+      }) as any;
+    const result = await getIndices({
+      http,
+      getIndexTags,
+      pattern: '*:kibana',
+      searchClient: searchClientPartialResponse,
+    });
+    expect(result.length).toBe(4);
+  });
+
   it('response object to item array', () => {
     const result = {
       indices: [
@@ -129,11 +168,26 @@ describe('getIndices', () => {
   });
 
   describe('errors', () => {
-    it('should handle errors gracefully', async () => {
+    it('should handle thrown errors gracefully', async () => {
       http.get.mockImplementationOnce(() => {
         throw new Error('Test error');
       });
       const result = await getIndices({ http, getIndexTags, pattern: 'kibana', searchClient });
+      expect(result.length).toBe(0);
+    });
+
+    it('getIndicesViaSearch should handle error responses gracefully', async () => {
+      const searchClientErrorResponse = () =>
+        new Observable((observer) => {
+          observer.next(errorSearchResponse);
+          observer.complete();
+        }) as any;
+      const result = await getIndicesViaSearch({
+        getIndexTags,
+        pattern: '*:kibana',
+        searchClient: searchClientErrorResponse,
+        showAllIndices: false,
+      });
       expect(result.length).toBe(0);
     });
   });

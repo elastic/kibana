@@ -11,7 +11,7 @@ exports[`PercentFormatEditor should render normally 1`] = `
     helpText={
       <span>
         <EuiLink
-          href="https://adamwdraper.github.io/Numeral-js/"
+          href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/numeral.html"
           target="_blank"
         >
           <FormattedMessage
