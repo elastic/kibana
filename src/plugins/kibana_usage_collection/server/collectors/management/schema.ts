@@ -196,10 +196,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:aggs:terms:size': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'context:tieBreakerFields': {
     type: 'array',
     items: {
