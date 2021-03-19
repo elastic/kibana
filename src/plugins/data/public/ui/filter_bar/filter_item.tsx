@@ -36,7 +36,7 @@ export interface FilterItemProps {
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
-  hiddenPanelOptions?: Array<PanelOptions>;
+  hiddenPanelOptions?: PanelOptions[];
 }
 
 interface LabelOptions {
@@ -374,4 +374,5 @@ export function FilterItem(props: FilterItemProps) {
   );
 }
 
+// eslint-disable-next-line import/no-default-export
 export default FilterItem;

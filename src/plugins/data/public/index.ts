@@ -40,6 +40,7 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
+import { FilterItem } from './ui/filter_bar';
 
 import {
   generateFilters,
