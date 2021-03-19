@@ -2,7 +2,7 @@
 [[glossary]]
 = Glossary
 
-<<a_glos>> | <<b_glos>> | <<c_glos>> | <<d_glos>> | <<e_glos>> | <<f_glos>> | <<g_glos>> | H | I | J | <<k_glos>> | <<l_glos>> | <<m_glos>> | N | O | <<p_glos>> | <<q_glos>> | R | <<s_glos>> | <<t_glos>> | <<u_glos>> | V | <<w_glos>> | X | Y | Z
+<<a_glos>> | <<b_glos>> | <<c_glos>> | <<d_glos>> | <<e_glos>> | <<f_glos>> | <<g_glos>> | H | I | J | <<k_glos>> | <<l_glos>> | <<m_glos>> | N | O | <<p_glos>> | <<q_glos>> | <<r_glos>> | <<s_glos>> | <<t_glos>> | <<u_glos>> | V | <<w_glos>> | X | Y | Z
 
 [float]
 [[a_glos]]
@@ -13,10 +13,9 @@
 +
 --
 // tag::action-def[]
-The alert-specific response that occurs when an alert fires.
-An alert can have multiple actions.
-See
-{kibana-ref}/action-types.html[Action and connector types].
+The rule-specific response that occurs when an alerting <<glossary-rule,rule>>
+fires. A rule can have multiple actions. See
+{kibana-ref}/action-types.html[Connectors and actions].
 // end::action-def[]
 --
 
@@ -27,20 +26,6 @@ by setting the date format, default index, and other attributes.
 Part of {kib} Stack Management.
 See {kibana-ref}/advanced-options.html[Advanced Settings].
 // end::advanced-settings-def[]
-
-[[glossary-alert]] alert ::
-// tag::alert-def[]
-A set of <<glossary-condition,conditions>>, schedules, and <<glossary-action,actions>>
-that enable notifications.
-See <<glossary-alerts-and-actions,Alerts and Actions>>.
-// end::alert-def[]
-
-[[glossary-alerts-and-actions]] Alerts and Actions ::
-// tag::alerts-and-actions-def[]
-A comprehensive view of all your alerts. Enables you to access and
-manage alerts for all {kib} apps from one place.
-See {kibana-ref}/alerting-getting-started.html[Alerts and Actions].
-// end::alerts-and-actions-def[]
 
 [[glossary-annotation]] annotation ::
 // tag::annotation-def[]
@@ -104,15 +89,23 @@ Specifies how many documents must contain a pair of terms before it is considere
 a useful connection in a graph.
 // end::certainty-def[]
 
+[[glossary-clusters]] clusters ::
+// tag::clusters-def[]
+A layer type and display option in the *Maps* application.
+Clusters display a cluster symbol across a grid on the map, one symbol per grid cluster.
+The cluster location is the weighted centroid for all documents in the grid cell.
+// end::clusters-def[]
+
 [[glossary-condition]] condition ::
 // tag::condition-def[]
-Specifies the circumstances that must be met to trigger an alert.
+Specifies the circumstances that must be met to trigger an alerting
+<<glossary-rule,rule>>.
 // end::condition-def[]
 
 [[glossary-connector]] connector ::
 // tag::connector-def[]
 A configuration that enables integration with an external system (the destination for an action).
-See {kibana-ref}/action-types.html[Action and connector types].
+See {kibana-ref}/action-types.html[Connectors and actions].
 // end::connector-def[]
 
 [[glossary-console]] Console ::
@@ -202,12 +195,47 @@ a set of entities. Each entity is represented by a node. Connections between
 nodes are represented by <<glossary-edge,edges>>.  See {kibana-ref}/xpack-graph.html[Graph].
 // end::graph-def[]
 
+[[glossary-geojson]] GeoJSON ::
+// tag::geojson-def[]
+A format for representing geospatial data. GeoJSON is also a file-type,
+commonly used in the *Maps* application to upload a file of geospatial data.
+See {kibana-ref}/indexing-geojson-data-tutorial.html[GeoJSON data].
+// end::geojson-def[]
+
+[[glossary-geo-point]] geo-point ::
+// tag::geo-point-def[]
+A field type in {es}. A geo-point field accepts latitude-longitude pairs
+for storing point locations. The latitude-longitude format can be from a string,
+geohash, array, well-known text, or object.
+See {ref}/geo-point.html[geo-point].
+// end::geo-point-def[]
+
+[[glossary-geo-shape]] geo-shape ::
+// tag::geo-shape-def[]
+A field type in {es}. A geo-shape field accepts arbitrary geographic primitives,
+like polygons, lines, or rectangles (and more). You can populate a geo-shape
+field from GeoJSON or well-known text.
+See {ref}/geo-shape.html[geo-shape].
+// end::geo-shape-def[]
+
 [[glossary-grok-debugger]] Grok Debugger ::
 // tag::grok-debugger-def[]
 A tool for building and debugging grok patterns. Grok is good for parsing
 syslog, Apache, and other webserver logs. See
 {kibana-ref}/xpack-grokdebugger.html[Debugging grok expressions].
 // end::grok-debugger-def[]
+
+[float]
+[[h_glos]]
+== H
+
+[[glossary-heat-map]] heat map ::
+// tag::heat-map-def[]
+A layer type in the *Maps* application. Heat maps cluster locations to show higher
+(or lower) densities. Heat maps describe a visualization with color-coded cells
+or regions to analyze patterns across multiple dimensions.
+See {kibana-ref}/heatmap-layer.html[Heat map layer].
+// end::heat-map-def[]
 
 
 [float]
@@ -216,7 +244,7 @@ syslog, Apache, and other webserver logs. See
 
 [[glossary-kibana-privileges]] {kib} privileges ::
 // tag::kibana-privileges-def[]
-Enable administrators to grant users read-only, read-write, or no access to 
+Enable administrators to grant users read-only, read-write, or no access to
 individual features within <<glossary-space,spaces>> in {kib}. See
 {kibana-ref}/kibana-privileges.html[{kib} privileges].
 // end::kibana-privileges-def[]
@@ -294,6 +322,24 @@ See {kibana-ref}/xpack-profiler.html[Query Profiler].
 // end::query-profiler-def[]
 
 [float]
+[[r_glos]]
+== R
+
+[[glossary-rule]] rule ::
+// tag::rule-def[]
+A set of <<glossary-condition,conditions>>, schedules, and <<glossary-action,actions>>
+that enable notifications.
+See <<glossary-rules-and-connectors,Rules and Connectors>>.
+// end::rule-def[]
+
+[[glossary-rules-and-connectors]] Rules and Connectors ::
+// tag::rules-and-connectors-def[]
+A comprehensive view of all your alerting rules. Enables you to access and
+manage rules for all {kib} apps from one place.
+See {kibana-ref}/alerting-getting-started.html[Rules and Connectors].
+// end::rules-and-connectors-def[]
+
+[float]
 [[s_glos]]
 == S
 
@@ -314,6 +360,13 @@ saved for later retrieval and reuse.
 A field that computes data on the fly from the data in {es} indices.
 Scripted field data is shown in Discover and used in visualizations.
 // end::scripted-field-def[]
+
+[[glossary-search-session]] search session ::
+// tag::search-session-def[]
+A group of one or more queries that are executed asynchronously.
+The results of the session are stored for a period of time,
+so you can recall the query. Search sessions are user specific.
+// end::search-session-def[]
 
 [[glossary-shareable]] shareable ::
 // tag::shareable-def[]
@@ -340,6 +393,13 @@ The general purpose alert types {kib} provides out of the box.  Index threshold 
 [[t_glos]]
 == T
 
+[[glossary-tag]] tag ::
+// tag::tag-def[]
+A keyword or label that you assign to {kib} saved objects, such as dashboards and visualizations,
+so you can classify them in a way that is meaningful to you. Tags makes it easier for you to manage your content.
+See {kibana-ref}/managing-tags.html[Tags].
+// end::tag-def[]
+
 [[glossary-term-join]] term join ::
 // tag::term-join-def[]
 A shared key that combines vector features with the results of an
@@ -363,6 +423,12 @@ See {kibana-ref}/dashboard.html[Timelion].
 // tag::time-series-data-def[]
 Timestamped data such as logs, metrics, and events that is indexed on an ongoing basis.
 // end::time-series-data-def[]
+
+[[glossary-tracks]] tracks ::
+// tag::tracks-def[]
+A layer type in the *Maps* application. This layer converts a series of point
+locations into a line, often representing a path or route.
+// end::tracks-def[]
 
 
 [[glossary-TSVB-data]] TSVB ::
@@ -423,3 +489,10 @@ A workspace where you build presentations of your live data in <<glossary-canvas
 See
 {kibana-ref}/canvas.html[Create a workpad].
 // end::workpad-def[]
+
+[[glossary-wms]] Web Map Service (WMS) ::
+// tag::wms-def[]
+A layer type in the *Maps* application. 
+Add a WMS source to provide authoritative geographic context to your map.
+See the https://www.ogc.org/standards/wms[OpenGIS Web Map Service].
+// end::wms-def[]

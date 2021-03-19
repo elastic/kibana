@@ -18,15 +18,16 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-} from '../../../../alerts/server';
+} from '../../../../alerting/server';
 import { UMServerLibs } from '../lib';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
-import { alertsMock, AlertServicesMock } from '../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../alerting/server/mocks';
 import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { makePing } from '../../../common/runtime_types/ping';
 import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import type { UptimeRouter } from '../../types';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
@@ -50,7 +51,7 @@ const bootstrapDependencies = (customRequests?: any) => {
  * This function aims to provide an easy way to give mock props that will
  * reduce boilerplate for tests.
  * @param params the params received at alert creation time
- * @param services the core services provided by kibana/alerts platforms
+ * @param services the core services provided by kibana/alerting platforms
  * @param state the state the alert maintains
  */
 const mockOptions = (
@@ -63,7 +64,8 @@ const mockOptions = (
   services = alertsMock.createAlertServices(),
   state = {}
 ): any => {
-  services.scopedClusterClient = jest.fn() as any;
+  services.scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+  services.scopedClusterClient.asCurrentUser = (jest.fn() as unknown) as any;
 
   services.savedObjectsClient.get.mockResolvedValue({
     id: '',
@@ -354,7 +356,7 @@ describe('status check alert', () => {
                                   "should": Array [
                                     Object {
                                       "match": Object {
-                                        "url.port": 12349,
+                                        "url.port": "12349",
                                       },
                                     },
                                   ],
@@ -365,27 +367,20 @@ describe('status check alert', () => {
                                   "minimum_should_match": 1,
                                   "should": Array [
                                     Object {
-                                      "bool": Object {
-                                        "minimum_should_match": 1,
-                                        "should": Array [
-                                          Object {
-                                            "match": Object {
-                                              "url.port": 5601,
-                                            },
-                                          },
-                                        ],
+                                      "match": Object {
+                                        "url.port": "5601",
                                       },
                                     },
+                                  ],
+                                },
+                              },
+                              Object {
+                                "bool": Object {
+                                  "minimum_should_match": 1,
+                                  "should": Array [
                                     Object {
-                                      "bool": Object {
-                                        "minimum_should_match": 1,
-                                        "should": Array [
-                                          Object {
-                                            "match": Object {
-                                              "url.port": 443,
-                                            },
-                                          },
-                                        ],
+                                      "match": Object {
+                                        "url.port": "443",
                                       },
                                     },
                                   ],
@@ -396,14 +391,39 @@ describe('status check alert', () => {
                         },
                         Object {
                           "bool": Object {
-                            "filter": Array [
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "observer.geo.name": "harrisburg",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match": Object {
+                                  "monitor.type": "http",
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
                               Object {
                                 "bool": Object {
                                   "minimum_should_match": 1,
                                   "should": Array [
                                     Object {
                                       "match": Object {
-                                        "observer.geo.name": "harrisburg",
+                                        "tags": "unsecured",
                                       },
                                     },
                                   ],
@@ -411,67 +431,23 @@ describe('status check alert', () => {
                               },
                               Object {
                                 "bool": Object {
-                                  "filter": Array [
+                                  "minimum_should_match": 1,
+                                  "should": Array [
                                     Object {
-                                      "bool": Object {
-                                        "minimum_should_match": 1,
-                                        "should": Array [
-                                          Object {
-                                            "match": Object {
-                                              "monitor.type": "http",
-                                            },
-                                          },
-                                        ],
+                                      "match": Object {
+                                        "tags": "containers",
                                       },
                                     },
+                                  ],
+                                },
+                              },
+                              Object {
+                                "bool": Object {
+                                  "minimum_should_match": 1,
+                                  "should": Array [
                                     Object {
-                                      "bool": Object {
-                                        "minimum_should_match": 1,
-                                        "should": Array [
-                                          Object {
-                                            "bool": Object {
-                                              "minimum_should_match": 1,
-                                              "should": Array [
-                                                Object {
-                                                  "match": Object {
-                                                    "tags": "unsecured",
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                          Object {
-                                            "bool": Object {
-                                              "minimum_should_match": 1,
-                                              "should": Array [
-                                                Object {
-                                                  "bool": Object {
-                                                    "minimum_should_match": 1,
-                                                    "should": Array [
-                                                      Object {
-                                                        "match": Object {
-                                                          "tags": "containers",
-                                                        },
-                                                      },
-                                                    ],
-                                                  },
-                                                },
-                                                Object {
-                                                  "bool": Object {
-                                                    "minimum_should_match": 1,
-                                                    "should": Array [
-                                                      Object {
-                                                        "match_phrase": Object {
-                                                          "tags": "org:google",
-                                                        },
-                                                      },
-                                                    ],
-                                                  },
-                                                },
-                                              ],
-                                            },
-                                          },
-                                        ],
+                                      "match_phrase": Object {
+                                        "tags": "org:google",
                                       },
                                     },
                                   ],
@@ -761,7 +737,7 @@ describe('status check alert', () => {
       expect(mockAvailability.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":12349}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":5601}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":443}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"observer.geo.name\\":\\"harrisburg\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"unsecured\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"containers\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"tags\\":\\"org:google\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}]}}]}}",
+            "filters": "{\\"bool\\":{\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":\\"12349\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":\\"5601\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"url.port\\":\\"443\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"observer.geo.name\\":\\"harrisburg\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"monitor.type\\":\\"http\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"unsecured\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"tags\\":\\"containers\\"}}],\\"minimum_should_match\\":1}},{\\"bool\\":{\\"should\\":[{\\"match_phrase\\":{\\"tags\\":\\"org:google\\"}}],\\"minimum_should_match\\":1}}],\\"minimum_should_match\\":1}}]}}",
             "range": 35,
             "rangeUnit": "d",
             "threshold": "99.34",
@@ -1071,46 +1047,32 @@ describe('status check alert', () => {
                         "minimum_should_match": 1,
                         "should": Array [
                           Object {
-                            "bool": Object {
-                              "minimum_should_match": 1,
-                              "should": Array [
-                                Object {
-                                  "match": Object {
-                                    "observer.geo.name": "apj",
-                                  },
-                                },
-                              ],
+                            "match": Object {
+                              "observer.geo.name": "apj",
                             },
                           },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
                           Object {
-                            "bool": Object {
-                              "minimum_should_match": 1,
-                              "should": Array [
-                                Object {
-                                  "bool": Object {
-                                    "minimum_should_match": 1,
-                                    "should": Array [
-                                      Object {
-                                        "match": Object {
-                                          "observer.geo.name": "sydney",
-                                        },
-                                      },
-                                    ],
-                                  },
-                                },
-                                Object {
-                                  "bool": Object {
-                                    "minimum_should_match": 1,
-                                    "should": Array [
-                                      Object {
-                                        "match": Object {
-                                          "observer.geo.name": "us-west",
-                                        },
-                                      },
-                                    ],
-                                  },
-                                },
-                              ],
+                            "match": Object {
+                              "observer.geo.name": "sydney",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "match": Object {
+                              "observer.geo.name": "us-west",
                             },
                           },
                         ],

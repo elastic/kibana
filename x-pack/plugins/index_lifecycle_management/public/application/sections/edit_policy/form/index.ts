@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-export { deserializer } from './deserializer';
+export { createDeserializer } from './deserializer';
 
 export { createSerializer } from './serializer';
 
-export { schema } from './schema';
+export { getSchema } from './schema';
 
 export * from './validations';
 
 export { Form, EnhancedUseField as UseField } from './components';
 
-export {
-  ConfigurationIssuesProvider,
-  useConfigurationIssues,
-} from './configuration_issues_context';
+export { ConfigurationProvider, useConfiguration } from './configuration_context';
 
 export { FormErrorsProvider, useFormErrorsContext } from './form_errors_context';
 
@@ -27,3 +24,5 @@ export {
   usePhaseTimings,
   PhaseTimingConfiguration,
 } from './phase_timings_context';
+
+export { useGlobalFields, globalFields } from './global_fields_context';

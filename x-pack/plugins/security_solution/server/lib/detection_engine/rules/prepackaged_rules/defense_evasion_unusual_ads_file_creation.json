@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Unusual File Creation - Alternate Data Stream",
   "query": "file where event.type == \"creation\" and\n  file.path : \"C:\\\\*:*\" and\n  not file.path : \"C:\\\\*:zone.identifier*\" and\n  file.extension :\n    (\n      \"pdf\",\n      \"dll\",\n      \"png\",\n      \"exe\",\n      \"dat\",\n      \"com\",\n      \"bat\",\n      \"cmd\",\n      \"sys\",\n      \"vbs\",\n      \"ps1\",\n      \"hta\",\n      \"txt\",\n      \"vbe\",\n      \"js\",\n      \"wsh\",\n      \"docx\",\n      \"doc\",\n      \"xlsx\",\n      \"xls\",\n      \"pptx\",\n      \"ppt\",\n      \"rtf\",\n      \"gif\",\n      \"jpg\",\n      \"png\",\n      \"bmp\",\n      \"img\",\n      \"iso\"\n    )\n",
   "risk_score": 47,

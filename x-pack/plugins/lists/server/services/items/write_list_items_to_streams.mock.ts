@@ -7,8 +7,10 @@
 
 import { Stream } from 'stream';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
 import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
-import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
 import {
   ExportListItemsToStreamOptions,
   GetResponseOptions,
@@ -18,7 +20,7 @@ import {
 import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
 export const getExportListItemsToStreamOptionsMock = (): ExportListItemsToStreamOptions => ({
-  callCluster: getCallClusterMock(getSearchListItemMock()),
+  esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   stream: new Stream.PassThrough(),
@@ -26,7 +28,7 @@ export const getExportListItemsToStreamOptionsMock = (): ExportListItemsToStream
 });
 
 export const getWriteNextResponseOptions = (): WriteNextResponseOptions => ({
-  callCluster: getCallClusterMock(getSearchListItemMock()),
+  esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   searchAfter: [],
@@ -35,7 +37,7 @@ export const getWriteNextResponseOptions = (): WriteNextResponseOptions => ({
 });
 
 export const getResponseOptionsMock = (): GetResponseOptions => ({
-  callCluster: getCallClusterMock(),
+  esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   searchAfter: [],

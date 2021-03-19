@@ -23,13 +23,15 @@ export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults
 export const DEFAULT_APP_TIME_RANGE = 'securitySolution:timeDefaults';
 export const DEFAULT_APP_REFRESH_INTERVAL = 'securitySolution:refreshIntervalDefaults';
 export const DEFAULT_SIGNALS_INDEX = '.siem-signals';
+// The DEFAULT_MAX_SIGNALS value exists also in `x-pack/plugins/cases/common/constants.ts`
+// If either changes, engineer should ensure both values are updated
 export const DEFAULT_MAX_SIGNALS = 100;
 export const DEFAULT_SEARCH_AFTER_PAGE_SIZE = 100;
 export const DEFAULT_ANOMALY_SCORE = 'securitySolution:defaultAnomalyScore';
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
 export const DEFAULT_SCALE_DATE_FORMAT = 'dateFormat:scaled';
-export const DEFAULT_FROM = 'now-24h';
-export const DEFAULT_TO = 'now';
+export const DEFAULT_FROM = 'now/d';
+export const DEFAULT_TO = 'now/d';
 export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
@@ -180,6 +182,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.servicenow',
   '.jira',
   '.resilient',
+  '.teams',
 ];
 
 if (ENABLE_CASE_CONNECTOR) {
@@ -205,3 +208,10 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+/*
+  Feature Flag for Cases RAC UI
+  DO NOT MERGE to master as true, dev only
+*/
+
+export const USE_RAC_CASES_UI = false;

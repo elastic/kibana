@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import type { RequestHandler } from '../../../../../../src/core/server';
 import { appContextService, packagePolicyService } from '../../services';
-import {
+import type {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
   CreatePackagePolicyRequestSchema,
@@ -79,7 +79,6 @@ export const createPackagePolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   try {
     const newData = await packagePolicyService.runExternalCallbacks(
@@ -90,15 +89,9 @@ export const createPackagePolicyHandler: RequestHandler<
     );
 
     // Create package policy
-    const packagePolicy = await packagePolicyService.create(
-      soClient,
-      esClient,
-      callCluster,
-      newData,
-      {
-        user,
-      }
-    );
+    const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
+      user,
+    });
     const body: CreatePackagePolicyResponse = { item: packagePolicy };
     return response.ok({
       body,
