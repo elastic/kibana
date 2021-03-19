@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { DebugState } from '@elastic/charts';
 import { DebugStateAxis } from '@elastic/charts/dist/state/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 type HeatmapDebugState = Required<Pick<DebugState, 'heatmap' | 'axes' | 'legend'>>;
 
@@ -21,6 +22,51 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
    * Y axis labels width + padding
    */
   const xOffset = 185;
+
+  /**
+   * Get coordinates relative to the left top corner of the canvas
+   * and transpose them from the center point.
+   */
+  async function getCoordinatesFromCenter(
+    el: WebElementWrapper,
+    coordinates: { x: number; y: number }
+  ) {
+    const { width, height } = await el.getSize();
+
+    const elCenter = {
+      x: Math.round(width / 2),
+      y: Math.round(height / 2),
+    };
+
+    /**
+     * Origin of the element uses the center point, hence we need ot adjust
+     * the click coordinated accordingly.
+     */
+    const resultX = xOffset + Math.round(coordinates.x) - elCenter.x;
+    const resultY = Math.round(coordinates.y) - elCenter.y;
+
+    return {
+      x: resultX,
+      y: resultY,
+    };
+  }
+
+  const getRenderTracker = async (testSubj: string) => {
+    const renderCount = await elasticChart.getVisualizationRenderingCount(testSubj);
+
+    return {
+      async verify() {
+        if (testSubj === 'mlAnomalyExplorerSwimlaneViewBy') {
+          // We have a glitchy behaviour when clicking on the View By swim lane.
+          // The entire charts is re-rendered, hence it requires a different check
+          await testSubjects.existOrFail(testSubj);
+          await elasticChart.waitForRenderComplete(testSubj);
+        } else {
+          await elasticChart.waitForRenderingCount(renderCount + 1, testSubj);
+        }
+      },
+    };
+  };
 
   return {
     async getDebugState(testSubj: string): Promise<HeatmapDebugState> {
@@ -79,19 +125,10 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
      * @param y - number of pixels from the top of the canvas element
      */
     async selectSingleCell(testSubj: string, { x, y }: { x: number; y: number }) {
-      const renderCount = await elasticChart.getVisualizationRenderingCount();
+      const renderTracker = await getRenderTracker(testSubj);
       const el = await elasticChart.getCanvas(testSubj);
 
-      const { width, height } = await el.getSize();
-
-      const canvasCenter = { x: Math.round(width / 2), y: Math.round(height / 2) };
-
-      /**
-       * Origin of the element uses the center point, hence we need ot adjust
-       * the click coordinated accordingly.
-       */
-      const resultX = xOffset + Math.round(x) - canvasCenter.x;
-      const resultY = Math.round(y) - canvasCenter.y;
+      const { x: resultX, y: resultY } = await getCoordinatesFromCenter(el, { x, y });
 
       await browser
         .getActions()
@@ -99,18 +136,40 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
         .click()
         .perform();
 
-      if (testSubj === 'mlAnomalyExplorerSwimlaneViewBy') {
-        // We have a glitchy behaviour when clicking on the View By swim lane.
-        // The entire charts is re-rendered, hence it requires a different check
-        // await testSubjects.waitForHidden(testSubj);
-        // await testSubjects.waitForHidden('mlSwimLaneLoadingIndicator');
-        await testSubjects.existOrFail(testSubj);
-        await elasticChart.waitForRenderComplete(testSubj);
-      } else {
-        await elasticChart.waitForRenderingCount(renderCount + 1, testSubj);
-      }
+      await renderTracker.verify();
     },
 
-    async assertSwimlaneSelection() {},
+    async selectCells(
+      testSubj: string,
+      coordinates: { x1: number; x2: number; y1: number; y2: number }
+    ) {
+      const renderTracker = await getRenderTracker(testSubj);
+
+      const el = await elasticChart.getCanvas(testSubj);
+
+      const { x: resultX1, y: resultY1 } = await getCoordinatesFromCenter(el, {
+        x: coordinates.x1,
+        y: coordinates.y1,
+      });
+      const { x: resultX2, y: resultY2 } = await getCoordinatesFromCenter(el, {
+        x: coordinates.x2,
+        y: coordinates.y2,
+      });
+
+      await browser.dragAndDrop(
+        {
+          location: el,
+          offset: { x: resultX1, y: resultY1 },
+        },
+        {
+          location: el,
+          offset: { x: resultX2, y: resultY2 },
+        }
+      );
+
+      await renderTracker.verify();
+    },
+
+    async setPageSize(rowsCount: 5 | 10 | 20 | 50 | 100) {},
   };
 }

@@ -219,8 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('support cell selection by click on View By swim lane', async () => {
           await ml.testExecution.logTestStep('clicks on the View By swim lane cell');
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
-          await ml.testExecution.logTestStep('check after existance ');
-          const sampleCell = (await ml.swimLane.getCells('mlAnomalyExplorerSwimlaneViewBy'))[0];
+          const sampleCell = (await ml.swimLane.getCells(viewBySwimLaneTestSubj))[0];
 
           await ml.swimLane.selectSingleCell(viewBySwimLaneTestSubj, {
             x: sampleCell.x + cellSize,
@@ -242,7 +241,29 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomalyExplorer.clearSwimLaneSelection();
         });
 
-        it('supports cell selection by brush action', async () => {});
+        it('supports cell selection by brush action', async () => {
+          await ml.anomalyExplorer.assertSwimlaneViewByExists();
+          const cells = await ml.swimLane.getCells(viewBySwimLaneTestSubj);
+
+          const sampleCell1 = cells[0];
+          // Get cell from another row
+          const sampleCell2 = cells.find((c) => c.y !== sampleCell1.y);
+
+          await ml.swimLane.selectCells(viewBySwimLaneTestSubj, {
+            x1: sampleCell1.x + cellSize,
+            y1: sampleCell1.y + cellSize,
+            x2: sampleCell2!.x + cellSize,
+            y2: sampleCell2!.y + cellSize,
+          });
+
+          await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
+            x: [1454817600000, 1454846400000],
+            y: ['AAL', 'VRD'],
+          });
+
+          await ml.testExecution.logTestStep('clears the selection');
+          await ml.anomalyExplorer.clearSwimLaneSelection();
+        });
 
         it('restores cell selection from the URL state', async () => {});
 
