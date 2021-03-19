@@ -100,7 +100,8 @@ export interface SavedObjectsRepositoryOptions {
 /**
  * @public
  */
-export interface SavedObjectsIncrementCounterOptions<T = unknown> extends SavedObjectsBaseOptions {
+export interface SavedObjectsIncrementCounterOptions<Attributes = unknown>
+  extends SavedObjectsBaseOptions {
   /**
    * (default=false) If true, sets all the counter fields to 0 if they don't
    * already exist. Existing fields will be left as-is and won't be incremented.
@@ -116,7 +117,7 @@ export interface SavedObjectsIncrementCounterOptions<T = unknown> extends SavedO
   /**
    * Attributes to use when upserting the document if it doesn't exist.
    */
-  upsertAttributes?: T;
+  upsertAttributes?: Attributes;
 }
 
 /**
