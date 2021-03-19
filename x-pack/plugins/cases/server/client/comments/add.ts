@@ -25,7 +25,7 @@ import {
   User,
   CommentRequestAlertType,
   AlertCommentRequestRt,
-} from '../../../common';
+} from '../../../common/api';
 import {
   buildCaseUserActionItem,
   buildCommentUserActionItem,
@@ -36,7 +36,7 @@ import { CommentableCase, createAlertUpdateRequest } from '../../common';
 import { CasesClientHandler } from '..';
 import { createCaseError } from '../../common/error';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
-import { MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common';
+import { MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
 
 async function getSubCase({
   caseService,
