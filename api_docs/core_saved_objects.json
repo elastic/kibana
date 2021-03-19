@@ -4581,7 +4581,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/export/errors.ts",
-                  "lineNumber": 34
+                  "lineNumber": 36
                 }
               }
             ],
@@ -4589,7 +4589,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/export/errors.ts",
-              "lineNumber": 34
+              "lineNumber": 36
             }
           },
           {
@@ -4628,7 +4628,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/export/errors.ts",
-                  "lineNumber": 43
+                  "lineNumber": 45
                 }
               },
               {
@@ -4641,7 +4641,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/export/errors.ts",
-                  "lineNumber": 43
+                  "lineNumber": 45
                 }
               }
             ],
@@ -4649,7 +4649,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/export/errors.ts",
-              "lineNumber": 43
+              "lineNumber": 45
             }
           },
           {
@@ -4681,7 +4681,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/saved_objects/export/errors.ts",
-                  "lineNumber": 58
+                  "lineNumber": 60
                 }
               }
             ],
@@ -4689,7 +4689,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/saved_objects/export/errors.ts",
-              "lineNumber": 58
+              "lineNumber": 60
             }
           }
         ],
