@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { Logger } from 'src/core/server';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
@@ -216,7 +217,7 @@ export function getAlertType(
     const { body: searchResult } = await esClient.search(query);
 
     if (searchResult.hits.hits.length > 0) {
-      const numMatches = searchResult.hits.total.value;
+      const numMatches = (searchResult.hits.total as estypes.TotalHits).value;
       logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatches} matches`);
 
       // apply the alert condition
