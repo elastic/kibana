@@ -156,6 +156,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       }
 
       if (columnId === '@timestamp') {
+        // @ts-expect-error fields is optional
         return value.fields['@timestamp'];
       }
 
