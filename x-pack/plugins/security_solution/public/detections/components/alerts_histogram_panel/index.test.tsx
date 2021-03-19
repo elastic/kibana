@@ -150,11 +150,11 @@ describe('AlertsHistogramPanel', () => {
       expect(parseCombinedQueries(undefined)).toEqual({});
     });
 
-    it('return empty array when variables is empty string', async () => {
+    it('return empty object when variables is empty string', async () => {
       expect(parseCombinedQueries('')).toEqual({});
     });
 
-    it('return empty array when variables is NOT a valid stringify json object', async () => {
+    it('return empty object when variables is NOT a valid stringify json object', async () => {
       expect(parseCombinedQueries('hello world')).toEqual({});
     });
 

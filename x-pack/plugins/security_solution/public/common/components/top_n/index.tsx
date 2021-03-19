@@ -25,7 +25,7 @@ import { combineQueries } from '../../../timelines/components/timeline/helpers';
 
 import { getOptions } from './helpers';
 import { TopN } from './top_n';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
@@ -47,11 +47,16 @@ const makeMapStateToProps = () => {
 
     return {
       activeTimelineEventType: activeTimeline.eventType,
-      activeTimelineFilters,
+      activeTimelineFilters:
+        activeTimeline.activeTab === TimelineTabs.query ? activeTimelineFilters : EMPTY_FILTERS,
       activeTimelineFrom: activeTimelineInput.timerange.from,
-      activeTimelineKqlQueryExpression: getKqlQueryTimeline(state, TimelineId.active),
+      activeTimelineKqlQueryExpression:
+        activeTimeline.activeTab === TimelineTabs.query
+          ? getKqlQueryTimeline(state, TimelineId.active)
+          : null,
       activeTimelineTo: activeTimelineInput.timerange.to,
-      dataProviders: activeTimeline.dataProviders,
+      dataProviders:
+        activeTimeline.activeTab === TimelineTabs.query ? activeTimeline.dataProviders : [],
       globalQuery: getGlobalQuerySelector(state),
       globalFilters: getGlobalFiltersQuerySelector(state),
       kqlMode: activeTimeline.kqlMode,
