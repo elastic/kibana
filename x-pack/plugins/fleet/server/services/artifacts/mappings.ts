@@ -7,7 +7,7 @@
 
 import type { ESSearchHit } from '../../../../../../typings/elasticsearch';
 
-import { Artifact, ArtifactElasticsearchProperties } from './types';
+import type { Artifact, ArtifactElasticsearchProperties } from './types';
 import { ARTIFACT_DOWNLOAD_RELATIVE_PATH } from './constants';
 
 export const esSearchHitToArtifact = <

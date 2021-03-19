@@ -64,21 +64,6 @@ export async function migrateKibanaIndex({
   client: Client;
   kbnClient: KbnClient;
 }) {
-  // we allow dynamic mappings on the index, as some interceptors are accessing documents before
-  // the migration is actually performed. The migrator will put the value back to `strict` after migration.
-  await client.indices.putMapping(
-    {
-      index: '.kibana',
-      body: {
-        dynamic: true,
-      },
-    },
-    {
-      ignore: [404],
-      headers: ES_CLIENT_HEADERS,
-    }
-  );
-
   await kbnClient.savedObjects.migrate();
 }
 

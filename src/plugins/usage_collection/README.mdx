@@ -166,7 +166,10 @@ In many cases, plugins need to report the custom usage of a feature. In this cas
         type: 'MY_USAGE_TYPE',
         schema: {
           my_objects: {
-            total: 'long',
+            total: {
+              type: 'long',
+              _meta: { description: 'The total number of objects in the cluster created in the last 24h' },
+            },
           },
         },
         isReady: () => isCollectorFetchReady, // Method to return `true`/`false` or Promise(`true`/`false`) to confirm if the collector is ready for the `fetch` method to be called.
@@ -211,7 +214,7 @@ schema: {
   my_greeting: {
     type: 'keyword',
     _meta: {
-      description: 'The greeting keyword',
+      description: 'The greeting shown to the user. It reports only when overwritten by the user.',
     }
   }
 }
@@ -254,21 +257,27 @@ export const myCollector = makeUsageCollector<Usage>({
   schema: {
     my_greeting: {
       type: 'keyword',
+      _meta: { description: 'The greeting shown to the user. It reports only when overwritten by the user.' }
     },
     some_obj: {
       total: {
         type: 'long',
+        _meta: { description: 'The total count of some_obj since the creation of the cluster' }
       },
     },
     some_array: {
       type: 'array',
-      items: { type: 'keyword' }
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Category assigned to ...' }
+      }
     },
     some_array_of_obj: {
       type: 'array',
       items: {
         total: {
           type: 'long',
+          _meta: { description: 'The daily total number of items.' }
         },
       },
     },
