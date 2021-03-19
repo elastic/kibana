@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
@@ -22,16 +22,20 @@ export const FieldTextSelect = ({
   allowSwitchMode,
   'data-test-subj': dataTestSubj,
 }: SelectIndexComponentProps) => {
-  const textualValue = fetchedIndex?.indexPatternString ?? '';
-  const [inputValue, setInputValue] = useState(textualValue);
+  const [inputValue, setInputValue] = useState<string>();
+  const { indexPatternString } = fetchedIndex;
 
   const onFieldTextChange: EuiFieldTextProps['onChange'] = useCallback((e) => {
     setInputValue(e.target.value);
   }, []);
 
+  useEffect(() => {
+    setInputValue(indexPatternString ?? '');
+  }, [indexPatternString]);
+
   useDebounce(
     () => {
-      if (inputValue !== textualValue) {
+      if (inputValue !== indexPatternString) {
         onIndexChange(inputValue);
       }
     },
@@ -43,7 +47,7 @@ export const FieldTextSelect = ({
     <EuiFieldText
       disabled={disabled}
       onChange={onFieldTextChange}
-      value={inputValue}
+      value={inputValue ?? ''}
       placeholder={placeholder}
       data-test-subj={dataTestSubj}
       {...(allowSwitchMode && {

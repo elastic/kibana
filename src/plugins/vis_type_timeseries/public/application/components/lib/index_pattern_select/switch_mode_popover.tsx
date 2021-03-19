@@ -7,6 +7,9 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiButtonIcon,
   EuiPopover,
@@ -15,9 +18,8 @@ import {
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { PopoverProps } from './types';
+
+import type { PopoverProps } from './types';
 
 export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

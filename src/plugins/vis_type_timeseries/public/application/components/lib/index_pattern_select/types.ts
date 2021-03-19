@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Assign } from '@kbn/utility-types';
+import type { Assign } from '@kbn/utility-types';
 import type { FetchedIndexPattern, IndexPatternObject } from '../../../../../common/types';
 
 /** @internal **/
 export interface SelectIndexComponentProps {
-  fetchedIndex: FetchedIndexPattern | undefined;
+  fetchedIndex: FetchedIndexPattern;
   onIndexChange: (value: IndexPatternObject) => void;
-  onModeChange: (useKibanaIndexes: boolean) => void;
+  onModeChange: (useKibanaIndexes: boolean, index?: FetchedIndexPattern) => void;
   'data-test-subj': string;
   placeholder?: string;
   disabled?: boolean;

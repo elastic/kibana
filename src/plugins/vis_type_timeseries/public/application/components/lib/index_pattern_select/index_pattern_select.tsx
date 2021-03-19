@@ -7,18 +7,20 @@
  */
 
 import React, { useState, useContext, useCallback, useEffect } from 'react';
-
-import { EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FieldTextSelect } from './field_text_select';
-import { ComboBoxSelect } from './combo_box_select';
-import { MigrationPopover } from './migrate_popover';
-import { PanelModelContext } from '../../../contexts/panel_model_context';
+import { EuiFormRow, htmlIdGenerator } from '@elastic/eui';
+
 import { getDataStart } from '../../../../services';
+import { PanelModelContext } from '../../../contexts/panel_model_context';
+
 import {
   isStringTypeIndexPattern,
   fetchIndexPattern,
 } from '../../../../../common/index_patterns_utils';
+
+import { FieldTextSelect } from './field_text_select';
+import { ComboBoxSelect } from './combo_box_select';
+import { MigrationPopover } from './migrate_popover';
 
 import type { IndexPatternObject, FetchedIndexPattern } from '../../../../../common/types';
 
@@ -59,34 +61,9 @@ export const IndexPatternSelect = ({
 }: IndexPatternSelectProps) => {
   const htmlId = htmlIdGenerator();
   const panelModel = useContext(PanelModelContext);
-  const [fetchedIndex, setFetchedIndex] = useState<FetchedIndexPattern>();
-
+  const [fetchedIndex, setFetchedIndex] = useState<FetchedIndexPattern | null>();
   const useKibanaIndices = Boolean(panelModel?.[USE_KIBANA_INDEXES_KEY]);
   const Component = useKibanaIndices ? ComboBoxSelect : FieldTextSelect;
-
-  useEffect(() => {
-    async function fetchIndex() {
-      const { indexPatterns } = getDataStart();
-
-      setFetchedIndex(value ? await fetchIndexPattern(value, indexPatterns) : undefined);
-    }
-
-    fetchIndex();
-  }, [value]);
-
-  const onModeChange = useCallback(
-    (useKibanaIndexes: boolean) => {
-      onChange({
-        [USE_KIBANA_INDEXES_KEY]: useKibanaIndexes,
-        [indexPatternName]: fetchedIndex?.indexPattern
-          ? {
-              id: fetchedIndex.indexPattern.id!,
-            }
-          : '',
-      });
-    },
-    [onChange, fetchedIndex, indexPatternName]
-  );
 
   const onIndexChange = useCallback(
     (index: IndexPatternObject) => {
@@ -97,6 +74,41 @@ export const IndexPatternSelect = ({
     [indexPatternName, onChange]
   );
 
+  const onModeChange = useCallback(
+    (useKibanaIndexes: boolean, index?: FetchedIndexPattern) => {
+      onChange({
+        [USE_KIBANA_INDEXES_KEY]: useKibanaIndexes,
+        [indexPatternName]: index?.indexPattern?.id
+          ? {
+              id: index.indexPattern.id,
+            }
+          : '',
+      });
+    },
+    [onChange, indexPatternName]
+  );
+
+  useEffect(() => {
+    async function fetchIndex() {
+      const { indexPatterns } = getDataStart();
+
+      setFetchedIndex(
+        value
+          ? await fetchIndexPattern(value, indexPatterns)
+          : {
+              indexPattern: undefined,
+              indexPatternString: undefined,
+            }
+      );
+    }
+
+    fetchIndex();
+  }, [value]);
+
+  if (!fetchedIndex) {
+    return null;
+  }
+
   return (
     <EuiFormRow
       id={htmlId('indexPattern')}
@@ -106,6 +118,7 @@ export const IndexPatternSelect = ({
       }
       labelAppend={
         value &&
+        allowIndexSwitchingMode &&
         isStringTypeIndexPattern(value) && (
           <MigrationPopover
             onModeChange={onModeChange}

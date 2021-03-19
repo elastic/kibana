@@ -7,6 +7,9 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import {
   EuiTextColor,
   EuiButton,
@@ -16,10 +19,9 @@ import {
   EuiSpacer,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
+
 import { getCoreStart } from '../../../../services';
-import { PopoverProps } from './types';
+import type { PopoverProps } from './types';
 
 const switchModeLabel = i18n.translate(
   'visTypeTimeseries.indexPatternSelect.migrationPopover.switchMode',
@@ -80,16 +82,18 @@ export const MigrationPopover = ({ fetchedIndex, onModeChange }: PopoverProps) =
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), []);
 
   const switchMode = useCallback(() => {
-    onModeChange(true);
-  }, [onModeChange]);
+    onModeChange(true, fetchedIndex);
+  }, [onModeChange, fetchedIndex]);
 
   const navigateToCreateIndexPatterns = useCallback(() => {
-    getCoreStart().application.navigateToApp('management', {
-      path: `/kibana/indexPatterns/create?name=${fetchedIndex?.indexPatternString ?? ''}`,
+    const coreStart = getCoreStart();
+
+    coreStart.application.navigateToApp('management', {
+      path: `/kibana/indexPatterns/create?name=${fetchedIndex.indexPatternString ?? ''}`,
     });
   }, [fetchedIndex]);
 
-  if (!fetchedIndex) {
+  if (!fetchedIndex.indexPatternString) {
     return null;
   }
 

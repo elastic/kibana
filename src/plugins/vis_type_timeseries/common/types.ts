@@ -30,7 +30,7 @@ export type IndexPatternObject = TypeOf<typeof indexPattern>;
 
 export interface FetchedIndexPattern {
   indexPattern: IndexPattern | undefined | null;
-  indexPatternString: string;
+  indexPatternString: string | undefined;
 }
 
 interface PanelData {

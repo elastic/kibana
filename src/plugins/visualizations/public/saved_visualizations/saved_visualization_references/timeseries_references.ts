@@ -12,10 +12,7 @@ import { SavedObjectReference } from '../../../../../core/types';
 const REF_NAME_POSTFIX = '_ref_name';
 
 /** @internal **/
-enum INDEX_TYPE {
-  KIBANA_INDEX_PATTERN = 'index-pattern',
-  STRING_INDEX_PATTERN = 'string-index-pattern',
-}
+const INDEX_PATTERN_REF_TYPE = 'index_pattern';
 
 /** @internal **/
 type Action = (object: Record<string, any>, key: string) => void;
@@ -47,14 +44,14 @@ export const extractTimeSeriesReferences = (
   let i = 0;
 
   doForExtractedIndices((object, key) => {
-    if (object[key]) {
+    if (object[key] && object[key].id) {
       const name = `ref_${++i}_index_pattern`;
 
       object[key + REF_NAME_POSTFIX] = name;
       references.push({
         name,
-        type: object[key].id ? INDEX_TYPE.KIBANA_INDEX_PATTERN : INDEX_TYPE.STRING_INDEX_PATTERN,
-        id: object[key].id || object[key],
+        type: INDEX_PATTERN_REF_TYPE,
+        id: object[key].id,
       });
       delete object[key];
     }
@@ -72,8 +69,7 @@ export const injectTimeSeriesReferences = (
       const refValue = references.find((ref) => ref.name === object[refKey]);
 
       if (refValue) {
-        object[key] =
-          refValue.type === INDEX_TYPE.KIBANA_INDEX_PATTERN ? { id: refValue.id } : refValue.id;
+        object[key] = { id: refValue.id };
       }
 
       delete object[refKey];

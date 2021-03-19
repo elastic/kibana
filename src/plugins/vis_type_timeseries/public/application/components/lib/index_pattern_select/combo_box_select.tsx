@@ -38,30 +38,31 @@ export const ComboBoxSelect = ({
   const [availableIndexes, setAvailableIndexes] = useState<IdsWithTitle>([]);
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>([]);
 
-  useEffect(() => {
-    let options: SelectedOptions = [];
-
-    if (fetchedIndex) {
-      if (!fetchedIndex.indexPattern) {
-        options = [{ label: fetchedIndex.indexPatternString ?? '' }];
-      } else {
-        options = [
-          {
-            id: fetchedIndex.indexPattern.id,
-            label: fetchedIndex.indexPattern.title,
-          },
-        ];
-      }
-    }
-    setSelectedOptions(options);
-  }, [fetchedIndex]);
-
   const onComboBoxChange: EuiComboBoxProps<IndexPatternObject>['onChange'] = useCallback(
     ([selected]) => {
       onIndexChange(selected ? { id: selected.id } : '');
     },
     [onIndexChange]
   );
+
+  useEffect(() => {
+    let options: SelectedOptions = [];
+    const { indexPattern, indexPatternString } = fetchedIndex;
+
+    if (indexPattern || indexPatternString) {
+      if (!indexPattern) {
+        options = [{ label: indexPatternString ?? '' }];
+      } else {
+        options = [
+          {
+            id: indexPattern.id,
+            label: indexPattern.title,
+          },
+        ];
+      }
+    }
+    setSelectedOptions(options);
+  }, [fetchedIndex]);
 
   useEffect(() => {
     async function fetchIndexes() {
