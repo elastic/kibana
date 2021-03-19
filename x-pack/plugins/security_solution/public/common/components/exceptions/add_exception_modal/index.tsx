@@ -55,6 +55,7 @@ import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
+import { OsTypeArray } from '../../../../shared_imports';
 
 export interface AddExceptionModalProps {
   ruleName: string;
@@ -341,6 +342,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return false;
   }, [maybeRule]);
 
+  const osTypesFromAlert = useMemo((): OsTypeArray => {
+    return retrieveAlertOsTypes(alertData);
+  }, [alertData]);
+
   return (
     <Modal onClose={onCancel} data-test-subj="add-exception-modal">
       <ModalHeader>
@@ -396,6 +401,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               <ExceptionBuilderComponent
                 exceptionListItems={initialExceptionItems}
                 listType={exceptionListType}
+                osTypes={osTypesFromAlert}
                 listId={ruleExceptionList.list_id}
                 listNamespaceType={ruleExceptionList.namespace_type}
                 ruleName={ruleName}

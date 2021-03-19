@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { OsTypeArray } from '../../../../shared_imports';
 import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
 import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } from '../types';
 import { ExceptionListType } from '../../../../../public/lists_plugin_deps';
@@ -37,6 +38,7 @@ interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionId: string;
   exceptionItemIndex: number;
+  osTypes: OsTypeArray;
   indexPattern: IIndexPattern;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
@@ -52,6 +54,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
   ({
     exceptionItem,
     exceptionId,
+    osTypes,
     exceptionItemIndex,
     indexPattern,
     isOnlyItem,
@@ -122,6 +125,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           entry={item}
                           indexPattern={indexPattern}
                           listType={listType}
+                          osTypes={osTypes}
                           showLabel={
                             exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                           }

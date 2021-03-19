@@ -33,6 +33,7 @@ import {
   getDefaultEmptyEntry,
   getDefaultNestedEmptyEntry,
 } from './helpers';
+import { OsTypeArray } from '../../../../shared_imports';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -69,6 +70,7 @@ interface ExceptionBuilderProps {
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   listType: ExceptionListType;
   listId: string;
+  osTypes: OsTypeArray;
   listNamespaceType: NamespaceType;
   ruleName: string;
   indexPatterns: IIndexPattern;
@@ -85,6 +87,7 @@ export const ExceptionBuilderComponent = ({
   listId,
   listNamespaceType,
   ruleName,
+  osTypes,
   indexPatterns,
   isOrDisabled,
   isAndDisabled,
@@ -378,6 +381,7 @@ export const ExceptionBuilderComponent = ({
                 exceptionItem={exceptionListItem}
                 exceptionId={getExceptionListItemId(exceptionListItem, index)}
                 indexPattern={indexPatterns}
+                osTypes={osTypes}
                 listType={listType}
                 exceptionItemIndex={index}
                 andLogicIncluded={andLogicIncluded}

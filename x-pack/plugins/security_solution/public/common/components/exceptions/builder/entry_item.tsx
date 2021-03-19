@@ -22,6 +22,7 @@ import { FormattedBuilderEntry, BuilderEntry } from '../types';
 import { AutocompleteFieldListsComponent } from '../../autocomplete/field_value_lists';
 import { ListSchema, OperatorTypeEnum, ExceptionListType } from '../../../../lists_plugin_deps';
 import { getEmptyValue } from '../../empty_value';
+import { OsTypeArray } from '../../../../shared_imports';
 import * as i18n from './translations';
 import {
   getFilteredIndexPatterns,
@@ -42,6 +43,7 @@ interface EntryItemProps {
   entry: FormattedBuilderEntry;
   indexPattern: IIndexPattern;
   showLabel: boolean;
+  osTypes: OsTypeArray;
   listType: ExceptionListType;
   onChange: (arg: BuilderEntry, i: number) => void;
   setErrorsExist: (arg: boolean) => void;
@@ -52,6 +54,7 @@ interface EntryItemProps {
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   entry,
   indexPattern,
+  osTypes,
   listType,
   showLabel,
   onChange,
@@ -112,7 +115,12 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const renderFieldInput = useCallback(
     (isFirst: boolean): JSX.Element => {
-      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry, listType);
+      const filteredIndexPatterns = getFilteredIndexPatterns(
+        indexPattern,
+        entry,
+        listType,
+        osTypes
+      );
       const comboBox = (
         <FieldComponent
           placeholder={
@@ -145,7 +153,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       }
     },
-    [handleFieldChange, indexPattern, entry, listType]
+    [handleFieldChange, indexPattern, entry, listType, osTypes]
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {

@@ -486,9 +486,11 @@ export const getPrepopulatedEndpointException = ({
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
-  const { file } = alertEcsData;
+  const { file, host } = alertEcsData;
   const filePath = file?.path ?? '';
   const sha256Hash = file?.hash?.sha256 ?? '';
+  const filePathDefault = host?.os.family === 'linux' ? 'file.path.text' : 'file.path.caseless';
+
   return {
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
     entries: addIdToEntries([
@@ -511,7 +513,7 @@ export const getPrepopulatedEndpointException = ({
         ],
       },
       {
-        field: 'file.path.caseless',
+        field: filePathDefault,
         operator: 'included',
         type: 'match',
         value: filePath ?? '',

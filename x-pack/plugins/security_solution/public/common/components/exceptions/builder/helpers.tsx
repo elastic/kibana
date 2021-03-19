@@ -37,6 +37,8 @@ import {
 } from '../types';
 import { getEntryValue, getExceptionOperatorSelect } from '../helpers';
 import exceptionableFields from '../exceptionable_fields.json';
+import exceptionableLinuxFields from '../exceptionable_linux_fields.json';
+import { OsTypeArray } from '../../../../shared_imports';
 
 /**
  * Returns filtered index patterns based on the field - if a user selects to
@@ -50,12 +52,17 @@ import exceptionableFields from '../exceptionable_fields.json';
 export const getFilteredIndexPatterns = (
   patterns: IIndexPattern,
   item: FormattedBuilderEntry,
-  type: ExceptionListType
+  type: ExceptionListType,
+  osTypes: OsTypeArray
 ): IIndexPattern => {
   const indexPatterns = {
     ...patterns,
     fields: patterns.fields.filter(({ name }) =>
-      type === 'endpoint' ? exceptionableFields.includes(name) : true
+      type === 'endpoint' && osTypes.includes('linux')
+        ? exceptionableLinuxFields.includes(name)
+        : type === 'endpoint'
+        ? exceptionableFields.includes(name)
+        : true
     ),
   };
 
