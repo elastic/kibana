@@ -320,6 +320,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 ruleName={ruleName}
                 isOrDisabled
                 isAndDisabled={false}
+                osTypes={exceptionItem.os_types}
                 isNestedDisabled={false}
                 data-test-subj="edit-exception-modal-builder"
                 id-aria="edit-exception-modal-builder"

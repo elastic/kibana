@@ -197,7 +197,9 @@ describe('Exception builder helpers', () => {
       test('it returns nested fields that match parent value when "item.nested" is "child"', () => {
         const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection', [
+          'windows',
+        ]);
         const expected: IIndexPattern = {
           fields: [{ ...getField('nestedField.child'), name: 'child' }],
           id: '1234',
@@ -209,7 +211,9 @@ describe('Exception builder helpers', () => {
       test('it returns only parent nested field when "item.nested" is "parent" and nested parent field is not undefined', () => {
         const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection', [
+          'windows',
+        ]);
         const expected: IIndexPattern = {
           fields: [{ ...getField('nestedField.child'), name: 'nestedField', esTypes: ['nested'] }],
           id: '1234',
@@ -224,7 +228,9 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field: undefined,
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection', [
+          'windows',
+        ]);
         const expected: IIndexPattern = {
           fields: [
             { ...getField('nestedField.child') },
@@ -239,7 +245,9 @@ describe('Exception builder helpers', () => {
       test('it returns all fields unfiletered if "item.nested" is not "child" or "parent"', () => {
         const payloadIndexPattern: IIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection', [
+          'windows',
+        ]);
         const expected: IIndexPattern = {
           fields: [...fields],
           id: '1234',
@@ -277,7 +285,9 @@ describe('Exception builder helpers', () => {
           entryIndex: 0,
           correspondingKeywordField: undefined,
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint', [
+          'windows',
+        ]);
         const expected: IIndexPattern = {
           fields: [{ ...getEndpointField('file.Ext.code_signature.status'), name: 'status' }],
           id: '1234',
@@ -295,7 +305,9 @@ describe('Exception builder helpers', () => {
             esTypes: ['nested'],
           },
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint', [
+          'windows',
+        ]);
         const expected: IIndexPattern = {
           fields: [
             {
@@ -325,7 +337,9 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field: undefined,
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint', [
+          'windows',
+        ]);
         const expected: IIndexPattern = {
           fields: [getEndpointField('file.Ext.code_signature.status')],
           id: '1234',
@@ -336,7 +350,9 @@ describe('Exception builder helpers', () => {
 
       test('it returns all fields that matched those in "exceptionable_fields.json" with no further filtering if "item.nested" is not "child" or "parent"', () => {
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint', [
+          'windows',
+        ]);
         const expected: IIndexPattern = {
           fields: [
             {
