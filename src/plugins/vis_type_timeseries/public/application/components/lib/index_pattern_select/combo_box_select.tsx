@@ -14,7 +14,7 @@ import { getDataStart } from '../../../../services';
 import { SwitchModePopover } from './switch_mode_popover';
 
 import type { SelectIndexComponentProps } from './types';
-import type { IndexPatternObject } from '../../../../../common/types';
+import type { IndexPatternValue } from '../../../../../common/types';
 import type { IndexPatternsService } from '../../../../../../data/public';
 
 /** @internal **/
@@ -38,7 +38,7 @@ export const ComboBoxSelect = ({
   const [availableIndexes, setAvailableIndexes] = useState<IdsWithTitle>([]);
   const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>([]);
 
-  const onComboBoxChange: EuiComboBoxProps<IndexPatternObject>['onChange'] = useCallback(
+  const onComboBoxChange: EuiComboBoxProps<IndexPatternValue>['onChange'] = useCallback(
     ([selected]) => {
       onIndexChange(selected ? { id: selected.id } : '');
     },

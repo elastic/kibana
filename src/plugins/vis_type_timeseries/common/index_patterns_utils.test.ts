@@ -7,7 +7,7 @@
  */
 
 import {
-  extractIndexPatternObjects,
+  extractIndexPatternValues,
   isStringTypeIndexPattern,
   fetchIndexPattern,
 } from './index_patterns_utils';
@@ -44,7 +44,7 @@ describe('extractIndexPatterns', () => {
   });
 
   test('should return index patterns', () => {
-    expect(extractIndexPatternObjects(panel, '')).toEqual([
+    expect(extractIndexPatternValues(panel, '')).toEqual([
       '*',
       'example-1-*',
       'example-2-*',

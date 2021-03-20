@@ -9,13 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
-import { SanitizedFieldType, IndexPatternObject } from '../../../common/types';
-import { getIndexPatternObjectKey } from '../../../common/index_patterns_utils';
+import { SanitizedFieldType, IndexPatternValue } from '../../../common/types';
+import { getIndexPatternKey } from '../../../common/index_patterns_utils';
 
 export type VisFields = Record<string, SanitizedFieldType[]>;
 
 export async function fetchFields(
-  indexes: IndexPatternObject[] = [],
+  indexes: IndexPatternValue[] = [],
   signal?: AbortSignal
 ): Promise<VisFields> {
   const patterns = Array.isArray(indexes) ? indexes : [indexes];
@@ -42,7 +42,7 @@ export async function fetchFields(
     const fields: VisFields = patterns.reduce(
       (cumulatedFields, currentPattern, index) => ({
         ...cumulatedFields,
-        [getIndexPatternObjectKey(currentPattern)]: indexFields[index],
+        [getIndexPatternKey(currentPattern)]: indexFields[index],
       }),
       {}
     );

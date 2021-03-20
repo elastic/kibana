@@ -15,21 +15,18 @@ import { EventEmitter } from 'events';
 import { IUiSettingsClient } from 'kibana/public';
 import { TimeRange } from 'src/plugins/data/public';
 import {
-  PersistedState,
   Vis,
+  PersistedState,
   VisualizeEmbeddableContract,
 } from 'src/plugins/visualizations/public';
-import {
-  IndexPatternObject,
-  TimeseriesVisData,
-} from 'src/plugins/vis_type_timeseries/common/types';
+import { IndexPatternValue, TimeseriesVisData } from 'src/plugins/vis_type_timeseries/common/types';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 
 // @ts-expect-error
 import { VisEditorVisualization } from './vis_editor_visualization';
 import { PanelConfig } from './panel_config';
-import { extractIndexPatternObjects } from '../../../common/index_patterns_utils';
+import { extractIndexPatternValues } from '../../../common/index_patterns_utils';
 import { VisPicker } from './vis_picker';
 import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
@@ -50,7 +47,7 @@ export interface TimeseriesEditorProps {
 interface TimeseriesEditorState {
   autoApply: boolean;
   dirty: boolean;
-  extractedIndexPatterns: IndexPatternObject[];
+  extractedIndexPatterns: IndexPatternValue[];
   model: TimeseriesVisParams;
   visFields?: VisFields;
 }
@@ -86,7 +83,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       isDirty: false,
     });
 
-    const extractedIndexPatterns = extractIndexPatternObjects(
+    const extractedIndexPatterns = extractIndexPatternValues(
       this.state.model,
       this.state.model.default_index_pattern
     );
@@ -100,7 +97,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
     }
   }, VIS_STATE_DEBOUNCE_DELAY);
 
-  abortableFetchFields = (extractedIndexPatterns: IndexPatternObject[]) => {
+  abortableFetchFields = (extractedIndexPatterns: IndexPatternValue[]) => {
     this.abortControllerFetchFields?.abort();
     this.abortControllerFetchFields = new AbortController();
 
@@ -205,7 +202,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
 
     dataStart.indexPatterns.getDefault().then(async (index) => {
       const defaultIndexTitle = index?.title ?? '';
-      const indexPatterns = extractIndexPatternObjects(this.props.vis.params, defaultIndexTitle);
+      const indexPatterns = extractIndexPatternValues(this.props.vis.params, defaultIndexTitle);
       const visFields = await fetchFields(indexPatterns);
 
       this.setState((state) => ({

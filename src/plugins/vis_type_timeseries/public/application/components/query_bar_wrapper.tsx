@@ -9,14 +9,14 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 import { CoreStartContext } from '../contexts/query_input_bar_context';
-import { IndexPatternObject } from '../../../common/types';
+import { IndexPatternValue } from '../../../common/types';
 
 import { QueryStringInput, QueryStringInputProps } from '../../../../../plugins/data/public';
 import { getDataStart } from '../../services';
 import { fetchIndexPattern, isStringTypeIndexPattern } from '../../../common/index_patterns_utils';
 
 type QueryBarWrapperProps = Pick<QueryStringInputProps, 'query' | 'onChange'> & {
-  indexPatterns: IndexPatternObject[];
+  indexPatterns: IndexPatternValue[];
 };
 
 export function QueryBarWrapper({ query, onChange, indexPatterns }: QueryBarWrapperProps) {

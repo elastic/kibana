@@ -7,21 +7,21 @@
  */
 
 import { uniq } from 'lodash';
-import { PanelSchema, IndexPatternObject, FetchedIndexPattern } from '../common/types';
+import { PanelSchema, IndexPatternValue, FetchedIndexPattern } from '../common/types';
 import { IndexPatternsService } from '../../data/common';
 
 export const isStringTypeIndexPattern = (
-  indexPatternObject: IndexPatternObject
-): indexPatternObject is string => typeof indexPatternObject === 'string';
+  indexPatternValue: IndexPatternValue
+): indexPatternValue is string => typeof indexPatternValue === 'string';
 
-export const getIndexPatternObjectKey = (indexPatternObject: IndexPatternObject) =>
-  isStringTypeIndexPattern(indexPatternObject) ? indexPatternObject : indexPatternObject?.id ?? '';
+export const getIndexPatternKey = (indexPatternValue: IndexPatternValue) =>
+  isStringTypeIndexPattern(indexPatternValue) ? indexPatternValue : indexPatternValue?.id ?? '';
 
-export const extractIndexPatternObjects = (
+export const extractIndexPatternValues = (
   panel: PanelSchema,
   defaultIndex?: PanelSchema['default_index_pattern']
 ) => {
-  const patterns: IndexPatternObject[] = [];
+  const patterns: IndexPatternValue[] = [];
 
   if (panel.index_pattern) {
     patterns.push(panel.index_pattern);
@@ -47,29 +47,29 @@ export const extractIndexPatternObjects = (
     patterns.push(defaultIndex);
   }
 
-  return uniq<IndexPatternObject>(patterns).sort();
+  return uniq<IndexPatternValue>(patterns).sort();
 };
 
 export const fetchIndexPattern = async (
-  indexPatternObject: IndexPatternObject,
+  indexPatternValue: IndexPatternValue,
   indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>
 ): Promise<FetchedIndexPattern> => {
   let indexPattern: FetchedIndexPattern['indexPattern'];
   let indexPatternString: string = '';
 
-  if (!indexPatternObject) {
+  if (!indexPatternValue) {
     indexPattern = await indexPatternsService.getDefault();
   } else {
-    if (isStringTypeIndexPattern(indexPatternObject)) {
-      indexPattern = (await indexPatternsService.find(indexPatternObject)).find(
-        (index) => index.title === indexPatternObject
+    if (isStringTypeIndexPattern(indexPatternValue)) {
+      indexPattern = (await indexPatternsService.find(indexPatternValue)).find(
+        (index) => index.title === indexPatternValue
       );
 
       if (!indexPattern) {
-        indexPatternString = indexPatternObject;
+        indexPatternString = indexPatternValue;
       }
-    } else if (indexPatternObject.id) {
-      indexPattern = await indexPatternsService.get(indexPatternObject.id);
+    } else if (indexPatternValue.id) {
+      indexPattern = await indexPatternsService.get(indexPatternValue.id);
     }
   }
 

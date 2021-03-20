@@ -26,7 +26,7 @@ export type MetricsItemsSchema = TypeOf<typeof metricsItems>;
 export type PanelSchema = TypeOf<typeof panel>;
 export type VisPayload = TypeOf<typeof visPayloadSchema>;
 export type FieldObject = TypeOf<typeof fieldObject>;
-export type IndexPatternObject = TypeOf<typeof indexPattern>;
+export type IndexPatternValue = TypeOf<typeof indexPattern>;
 
 export interface FetchedIndexPattern {
   indexPattern: IndexPattern | undefined | null;

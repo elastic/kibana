@@ -6,27 +6,24 @@
  * Side Public License, v 1.
  */
 
-import {
-  getIndexPatternObjectKey,
-  fetchIndexPattern,
-} from '../../../../common/index_patterns_utils';
+import { getIndexPatternKey, fetchIndexPattern } from '../../../../common/index_patterns_utils';
 
 import type { IndexPatternsService } from '../../../../../data/server';
-import type { IndexPatternObject, FetchedIndexPattern } from '../../../../common/types';
+import type { IndexPatternValue, FetchedIndexPattern } from '../../../../common/types';
 
 export const getCachedIndexPatternFetcher = (indexPatternsService: IndexPatternsService) => {
   const cache = new Map();
 
-  return async (indexPatternObject: IndexPatternObject): Promise<FetchedIndexPattern> => {
-    const key = getIndexPatternObjectKey(indexPatternObject);
+  return async (indexPatternValue: IndexPatternValue): Promise<FetchedIndexPattern> => {
+    const key = getIndexPatternKey(indexPatternValue);
 
     if (cache.has(key)) {
       return cache.get(key);
     }
 
-    const fetchedIndex = fetchIndexPattern(indexPatternObject, indexPatternsService);
+    const fetchedIndex = fetchIndexPattern(indexPatternValue, indexPatternsService);
 
-    cache.set(indexPatternObject, fetchedIndex);
+    cache.set(indexPatternValue, fetchedIndex);
 
     return fetchedIndex;
   };

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import type { Assign } from '@kbn/utility-types';
-import type { FetchedIndexPattern, IndexPatternObject } from '../../../../../common/types';
+import type { FetchedIndexPattern, IndexPatternValue } from '../../../../../common/types';
 
 /** @internal **/
 export interface SelectIndexComponentProps {
   fetchedIndex: FetchedIndexPattern;
-  onIndexChange: (value: IndexPatternObject) => void;
+  onIndexChange: (value: IndexPatternValue) => void;
   onModeChange: (useKibanaIndexes: boolean, index?: FetchedIndexPattern) => void;
   'data-test-subj': string;
   placeholder?: string;

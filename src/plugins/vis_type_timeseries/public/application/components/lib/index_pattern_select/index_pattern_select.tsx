@@ -22,12 +22,12 @@ import { FieldTextSelect } from './field_text_select';
 import { ComboBoxSelect } from './combo_box_select';
 import { MigrationPopover } from './migrate_popover';
 
-import type { IndexPatternObject, FetchedIndexPattern } from '../../../../../common/types';
+import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
 
 const USE_KIBANA_INDEXES_KEY = 'use_kibana_indexes';
 
 interface IndexPatternSelectProps {
-  value: IndexPatternObject;
+  value: IndexPatternValue;
   indexPatternName: string;
   onChange: Function;
   disabled?: boolean;
@@ -66,7 +66,7 @@ export const IndexPatternSelect = ({
   const Component = useKibanaIndices ? ComboBoxSelect : FieldTextSelect;
 
   const onIndexChange = useCallback(
-    (index: IndexPatternObject) => {
+    (index: IndexPatternValue) => {
       onChange({
         [indexPatternName]: index,
       });
