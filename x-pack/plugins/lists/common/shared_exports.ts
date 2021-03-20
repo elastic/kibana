@@ -44,6 +44,7 @@ export {
   namespaceType,
   ExceptionListType,
   Type,
+  osType,
   osTypeArray,
   OsTypeArray,
 } from './schemas';
