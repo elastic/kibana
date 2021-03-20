@@ -96,14 +96,18 @@ export async function getLogstashPipelineIds(
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return get(
-    response,
-    'aggregations.nest_mb.id.buckets',
-    get(response, 'aggregations.nest.id.buckets', [])
-  ).map((bucket) => ({
-    id: bucket.key,
-    nodeIds: get(bucket, 'unnest_mb.nodes.buckets', get(bucket, 'unnest.nodes.buckets', [])).map(
-      (item) => item.key
-    ),
-  }));
+  let buckets = get(response, 'aggregations.nest_mb.id.buckets', []);
+  if (!buckets || buckets.length === 0) {
+    buckets = get(response, 'aggregations.nest.id.buckets', []);
+  }
+  return buckets.map((bucket) => {
+    let nodeBuckets = get(bucket, 'unnest_mb.nodes.buckets', []);
+    if (!nodeBuckets || nodeBuckets.length === 0) {
+      nodeBuckets = get(bucket, 'unnest.nodes.buckets', []);
+    }
+    return {
+      id: bucket.key,
+      nodeIds: nodeBuckets.map((item) => item.key),
+    };
+  });
 }
