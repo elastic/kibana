@@ -106,7 +106,7 @@ deleted.
 
 Impacts include:
 
-* Kibana Alerting and Action alerts that have been configured to use the affected connectors will no
+* Kibana *Alerts and Actions* that have been configured to use the affected connectors will no
 longer create these actions.
 * Security detection rules that have been configured to use the affected connectors as part of their
 rule actions will no longer create these actions.
