@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import moment from 'moment';
 // @ts-ignore
 import { checkParam } from '../error_missing_required';
@@ -44,7 +43,7 @@ interface Logstash {
   os?: {
     cpu?: {
       load_average?: {
-        '1m': number;
+        '1m'?: number;
       };
     };
   };
