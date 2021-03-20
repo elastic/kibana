@@ -276,11 +276,8 @@ function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, 
 
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
       // map buckets to values for charts
-      let metricName = 'metric';
-      if (metric.mbField) {
-        metricName = derivative ? 'metric_mb_deriv' : 'metric_mb';
-      }
-      const key = derivative ? `${metricName}.normalized_value` : `${metricName}.value`;
+      const metricName = metric.mbField ? `metric_mb` : `metric`;
+      const key = derivative ? `${metricName}_deriv.normalized_value` : `${metricName}.value`;
       const calculation = customCalculation !== undefined ? customCalculation : defaultCalculation;
 
       data = buckets
