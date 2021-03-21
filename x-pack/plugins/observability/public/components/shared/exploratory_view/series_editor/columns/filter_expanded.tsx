@@ -11,7 +11,6 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   EuiLoadingSpinner,
-  EuiFilterButton,
   EuiFilterGroup,
 } from '@elastic/eui';
 import { ObservabilityClientPluginsStart } from '../../../../../plugin';
@@ -20,15 +19,17 @@ import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/p
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
 import { UrlFilter } from '../../types';
+import { FilterValueButton } from './filter_value_btn';
 
 interface Props {
   seriesId: string;
   label: string;
   field: string;
   goBack: () => void;
+  nestedField?: string;
 }
 
-export function FilterExpanded({ seriesId, field, label, goBack }: Props) {
+export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: Props) {
   const { indexPattern } = useIndexPatternContext();
 
   const [value, setValue] = useState('');
@@ -37,7 +38,7 @@ export function FilterExpanded({ seriesId, field, label, goBack }: Props) {
     services: { data },
   } = useKibana<ObservabilityClientPluginsStart>();
 
-  const { series, setSeries } = useUrlStorage(seriesId);
+  const { series } = useUrlStorage(seriesId);
 
   const { data: values, status } = useFetcher<Promise<string[]>>(() => {
     return data.autocomplete.getValueSuggestions({
@@ -51,49 +52,6 @@ export function FilterExpanded({ seriesId, field, label, goBack }: Props) {
   const filters = series?.filters ?? [];
 
   let currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
-
-  const onChange = (id: string, not?: boolean) => {
-    if (!currFilter) {
-      currFilter = { field };
-      if (not) {
-        currFilter.notValues = [id];
-      } else {
-        currFilter.values = [id];
-      }
-      if (filters.length === 0) {
-        setSeries(seriesId, { ...series, filters: [currFilter] });
-      } else {
-        setSeries(seriesId, {
-          ...series,
-          filters: [currFilter, ...filters.filter((ft) => ft.field != field)],
-        });
-      }
-      return;
-    }
-
-    if (currFilter) {
-      const currNotValues = currFilter.notValues ?? [];
-      const currValues = currFilter.values ?? [];
-
-      const notValues = currNotValues.filter((val) => val !== id);
-      const values = currValues.filter((val) => val !== id);
-
-      if (not && !currNotValues.includes(id)) {
-        notValues.push(id);
-      } else if (!currValues.includes(id)) {
-        values.push(id);
-      }
-
-      currFilter.notValues = notValues.length > 0 ? notValues : undefined;
-      currFilter.values = values.length > 0 ? values : undefined;
-
-      if (notValues.length > 0 || values.length > 0) {
-        setSeries(seriesId, { ...series, filters: [currFilter] });
-      } else {
-        setSeries(seriesId, { ...series, filters: undefined });
-      }
-    }
-  };
 
   return (
     <>
@@ -118,20 +76,22 @@ export function FilterExpanded({ seriesId, field, label, goBack }: Props) {
         .map((opt) => (
           <Fragment key={opt}>
             <EuiFilterGroup fullWidth={true} color="primary">
-              <EuiFilterButton
-                hasActiveFilters={(currFilter?.notValues ?? []).includes(opt)}
-                onClick={() => onChange(opt, true)}
-                color="danger"
-              >
-                Not {opt}
-              </EuiFilterButton>
-              <EuiFilterButton
-                hasActiveFilters={(currFilter?.values ?? []).includes(opt)}
-                onClick={() => onChange(opt)}
-                color="primary"
-              >
-                {opt}
-              </EuiFilterButton>
+              <FilterValueButton
+                field={field}
+                value={opt}
+                allValues={currFilter?.notValues}
+                negate={true}
+                nestedField={nestedField}
+                seriesId={seriesId}
+              />
+              <FilterValueButton
+                field={field}
+                value={opt}
+                allValues={currFilter?.values}
+                nestedField={nestedField}
+                seriesId={seriesId}
+                negate={false}
+              />
             </EuiFilterGroup>
             <EuiSpacer size="s" />
           </Fragment>

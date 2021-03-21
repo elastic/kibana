@@ -57,12 +57,18 @@ export const SeriesEditor = () => {
             field: 'id',
             render: (val: string, item: DataSeries) => <ActionsCol series={item} />,
           },
-          {
-            name: 'Time',
-            width: '20%',
-            field: 'id',
-            render: (val: string, item: DataSeries) => <DatePickerCol seriesId={item.id} />,
-          },
+        ]
+      : []),
+    {
+      name: <div>Time</div>,
+      width: '20%',
+      field: 'id',
+      align: 'right' as const,
+      render: (val: string, item: DataSeries) => <DatePickerCol seriesId={item.id} />,
+    },
+
+    ...(firstSeriesId !== NEW_SERIES_KEY
+      ? [
           {
             name: 'Actions',
             align: 'center' as const,

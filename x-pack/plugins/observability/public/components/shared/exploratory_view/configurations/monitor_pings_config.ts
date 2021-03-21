@@ -17,7 +17,6 @@ export function getMonitorPingsConfig({ seriesId }: Props): DataSeries {
     id: seriesId,
     reportType: 'uptime-pings',
     defaultSeriesType: 'bar_stacked',
-    indexPattern: 'df32db00-819e-11eb-87f5-d7da22b1dde3',
     seriesTypes: ['bar_stacked', 'bar'],
     xAxisColumn: {
       sourceField: '@timestamp',
@@ -28,12 +27,15 @@ export function getMonitorPingsConfig({ seriesId }: Props): DataSeries {
     },
     metricType: false,
     defaultFilters: ['observer.geo.name'],
-    breakdowns: ['monitor.status', 'observer.geo.name'],
+    breakdowns: ['monitor.status', 'observer.geo.name', 'monitor.type'],
     filters: [],
     palette: { type: 'palette', name: 'status' },
     reportDefinitions: [
       {
         field: 'monitor.id',
+      },
+      {
+        field: 'url.full',
       },
     ],
     labels: { ...FieldLabels },

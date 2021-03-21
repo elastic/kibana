@@ -68,7 +68,7 @@ export type AllSeries = Record<string, SeriesUrl>;
 
 export const NEW_SERIES_KEY = 'newSeriesKey';
 
-export const useUrlStorage = (seriesId?: string) => {
+export function useUrlStorage(seriesId?: string) {
   const allSeriesKey = 'sr';
   const storage = useContext((UrlStorageContext as unknown) as Context<IKbnUrlStateStorage>);
   let series: SeriesUrl = {} as SeriesUrl;
@@ -110,4 +110,4 @@ export const useUrlStorage = (seriesId?: string) => {
     allSeriesIds,
     firstSeries: allSeries?.[firstSeriesId],
   };
-};
+}

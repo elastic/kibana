@@ -1,0 +1,98 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import { EuiFilterButton, hexToRgb } from '@elastic/eui';
+import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
+import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { FieldValueSelection } from '../../../field_value_selection';
+import { useSeriesFilters } from '../../hooks/use_series_filters';
+import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+
+interface Props {
+  value: string;
+  field: string;
+  allValues?: string[];
+  negate?: boolean;
+  nestedField?: string;
+  seriesId: string;
+}
+
+export const FilterValueButton = ({
+  value,
+  field,
+  allValues,
+  negate,
+  seriesId,
+  nestedField,
+}: Props) => {
+  const { series } = useUrlStorage(seriesId);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const [selected, setSelected] = useState('any');
+
+  const { indexPattern } = useIndexPatternContext();
+
+  const { setFilter, removeFilter } = useSeriesFilters({ seriesId });
+
+  const hasActiveFilters = (allValues ?? []).includes(value);
+
+  const button = (
+    <FilterButton
+      hasActiveFilters={hasActiveFilters}
+      color={negate ? 'danger' : 'primary'}
+      onClick={() => {
+        if (hasActiveFilters) {
+          removeFilter({ field, value, negate });
+        } else {
+          setFilter({ field, value, negate });
+        }
+        if (!hasActiveFilters) {
+          setIsOpen((prevState) => !prevState);
+        } else {
+          setIsOpen(false);
+        }
+      }}
+      className=""
+    >
+      {negate ? `Not ${value}` : value}
+    </FilterButton>
+  );
+
+  const onNestedChange = (val: string) => {
+    console.log(val);
+  };
+
+  return nestedField ? (
+    <FieldValueSelection
+      button={button}
+      label={'Choose version'}
+      indexPattern={indexPattern}
+      sourceField={nestedField}
+      onChange={onNestedChange}
+      filters={[]}
+      forceOpen={isOpen}
+      anchorPosition="rightCenter"
+      time={series.time}
+    />
+  ) : (
+    button
+  );
+};
+
+const FilterButton = euiStyled(EuiFilterButton)`
+  background-color: rgba(${(props) => {
+    const color = props.hasActiveFilters
+      ? props.color === 'danger'
+        ? hexToRgb(props.theme.eui.euiColorDanger)
+        : hexToRgb(props.theme.eui.euiColorPrimary)
+      : 'initial';
+    return `${color[0]}, ${color[1]}, ${color[2]}, 0.1`;
+  }});
+`;

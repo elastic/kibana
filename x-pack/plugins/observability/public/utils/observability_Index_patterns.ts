@@ -34,7 +34,7 @@ export class ObservabilityIndexPatterns {
 
   async createIndexPattern(app: DataType) {
     if (!this.data) {
-      throw 'data is not defined';
+      throw new Error('data is not defined');
     }
 
     const pattern = appToPatternMap[app];

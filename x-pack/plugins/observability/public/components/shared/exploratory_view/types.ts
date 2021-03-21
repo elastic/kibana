@@ -43,7 +43,7 @@ export interface DataSeries {
     | Partial<AvgIndexPatternColumn>;
   breakdowns: string[];
   defaultSeriesType: string;
-  defaultFilters: string[];
+  defaultFilters: Array<string | { field: string; nested: string }>;
   seriesTypes: string[];
   filters?: ESFilter[];
   reportDefinitions: {

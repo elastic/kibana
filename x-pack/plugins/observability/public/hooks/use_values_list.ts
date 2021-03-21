@@ -16,22 +16,44 @@ interface Props {
   query?: string;
   indexPattern: IIndexPattern;
   filters: ESFilter[];
+  time?: { from: string; to: string };
 }
 
-export const useValuesList = ({ sourceField, indexPattern, query, filters }: Props) => {
+export const useValuesList = ({
+  sourceField,
+  indexPattern,
+  query,
+  filters = [],
+  time,
+}: Props): { values: string[]; loading: boolean } => {
   const {
     services: { data },
   } = useKibana<ObservabilityClientPluginsStart>();
 
   const { data: values, status } = useFetcher(() => {
+    if (!sourceField || !indexPattern) {
+      return [];
+    }
     return data.autocomplete.getValueSuggestions({
       indexPattern,
       query: query || '',
-      // useTimeRange: false,
+      useTimeRange: !time,
       field: indexPattern.fields.find(({ name }) => name === sourceField)!,
-      boolFilter: filters,
+      boolFilter: time
+        ? [
+            ...filters,
+            {
+              range: {
+                '@timestamp': {
+                  gte: time.from,
+                  lte: time.to,
+                },
+              },
+            },
+          ]
+        : filters,
     });
   }, [sourceField, query]);
 
-  return { values, loading: status === 'loading' || status === 'pending' };
+  return { values: values as string[], loading: status === 'loading' || status === 'pending' };
 };

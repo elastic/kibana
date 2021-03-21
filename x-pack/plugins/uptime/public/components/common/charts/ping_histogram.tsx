@@ -16,6 +16,7 @@ import {
   XYChartElementEvent,
   ElementClickListener,
 } from '@elastic/charts';
+import rison from 'rison-node';
 import { EuiTitle, EuiSpacer, EuiFlexItem, EuiFlexGroup, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
@@ -30,7 +31,6 @@ import { useGetUrlParams, useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 import { getDateRangeFromChartElement } from './utils';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
-import rison from 'rison-node';
 
 export interface PingHistogramComponentProps {
   /**

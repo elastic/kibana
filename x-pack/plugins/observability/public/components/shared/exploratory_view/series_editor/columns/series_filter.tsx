@@ -30,6 +30,7 @@ interface Props {
 export interface Field {
   label: string;
   field: string;
+  nested: string;
 }
 
 export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: Props) {
@@ -37,7 +38,12 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
 
   const [selectedField, setSelectedField] = useState<Field | null>(null);
 
-  const options = defaultFilters.map((field) => ({ label: FieldLabels[field], field }));
+  const options = defaultFilters.map((field) => {
+    if (typeof field == 'string') {
+      return { label: FieldLabels[field], field };
+    }
+    return { label: FieldLabels[field.field], field: field.field, nested: field.nested };
+  });
   const disabled = seriesId === NEW_SERIES_KEY && !isNew;
 
   const button = (
@@ -80,6 +86,7 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       seriesId={seriesId}
       field={selectedField.field}
       label={selectedField.label}
+      nestedField={selectedField.nested}
       goBack={() => {
         setSelectedField(null);
       }}

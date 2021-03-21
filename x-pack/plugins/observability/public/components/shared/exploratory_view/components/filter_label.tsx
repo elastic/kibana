@@ -10,7 +10,6 @@ import { esFilters, Filter } from '../../../../../../../../src/plugins/data/publ
 import { useIndexPatternContext } from '../../../../hooks/use_default_index_pattern';
 import { injectI18n } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { FieldLabels } from '../configurations/constants';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 
 interface Props {
@@ -53,7 +52,7 @@ export const FilterLabel = ({ label, seriesId, field, value, negate, removeFilte
       }}
       onUpdate={(filterN: Filter) => {
         if (filterN.meta.negate !== negate) {
-          invertFilter(field, value, negate);
+          invertFilter({ field, value, negate });
         }
       }}
       uiSettings={uiSettings!}

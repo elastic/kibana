@@ -9,6 +9,7 @@ import { AppDataType, ReportViewTypeId } from '../types';
 
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': 'Browser family',
+  'user_agent.version': 'Browser version',
   'user_agent.os.name': 'Operating system',
   'client.geo.country_name': 'Location',
   'user_agent.device.name': 'Device',

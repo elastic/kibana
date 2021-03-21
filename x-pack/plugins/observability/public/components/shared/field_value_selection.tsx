@@ -16,6 +16,7 @@ import {
 import { useValuesList } from '../../hooks/use_values_list';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 
 interface Option {
   id: string;
@@ -28,8 +29,12 @@ interface Props {
   label: string;
   indexPattern: IIndexPattern;
   sourceField: string;
-  onChange: (val: string) => void;
+  onChange: (val?: string) => void;
   filters: ESFilter[];
+  anchorPosition?: PopoverAnchorPosition;
+  time?: { from: string; to: string };
+  forceOpen?: boolean;
+  button?: JSX.Element;
 }
 
 export const FieldValueSelection = ({
@@ -38,10 +43,14 @@ export const FieldValueSelection = ({
   value,
   label,
   filters,
+  button,
+  time,
+  forceOpen,
+  anchorPosition,
   onChange: onSelectionChange,
 }: Props) => {
   const [query, setQuery] = useState('');
-  const { values, loading } = useValuesList({ indexPattern, query, sourceField, filters });
+  const { values, loading } = useValuesList({ indexPattern, query, sourceField, filters, time });
 
   const [options, setOptions] = useState<Option[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -68,7 +77,7 @@ export const FieldValueSelection = ({
     setQuery((evt.target as HTMLInputElement).value);
   };
 
-  const button = (
+  const anchorButton = (
     <EuiButton
       size="s"
       iconType="arrowDown"
@@ -85,9 +94,10 @@ export const FieldValueSelection = ({
     <EuiPopover
       id="popover"
       panelPaddingSize="none"
-      button={button}
-      isOpen={isPopoverOpen}
+      button={button || anchorButton}
+      isOpen={isPopoverOpen || forceOpen}
       closePopover={closePopover}
+      anchorPosition={anchorPosition}
     >
       <EuiSelectable
         searchable
@@ -111,8 +121,8 @@ export const FieldValueSelection = ({
                 fullWidth
                 disabled={options.length === 0 || !options.find((opt) => opt?.checked === 'on')}
                 onClick={() => {
-                  const selected = options.find((opt) => opt?.checked === 'on')!;
-                  onSelectionChange(selected.label);
+                  const selected = options.find((opt) => opt?.checked === 'on');
+                  onSelectionChange(selected?.label);
                   setIsPopoverOpen(false);
                 }}
               >

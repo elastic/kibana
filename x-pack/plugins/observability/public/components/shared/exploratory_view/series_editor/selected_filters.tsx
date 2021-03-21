@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FilterLabel } from '../components/filter_label';
 import { DataSeries, UrlFilter } from '../types';
 import { useIndexPatternContext } from '../../../../hooks/use_default_index_pattern';
+import { useSeriesFilters } from '../hooks/use_series_filters';
 
 interface Props {
   seriesId: string;
@@ -18,9 +19,10 @@ interface Props {
   isNew?: boolean;
 }
 export const SelectedFilters = ({ seriesId, isNew, series: { labels } }: Props) => {
-  const { series, setSeries } = useUrlStorage(seriesId);
+  const { series } = useUrlStorage(seriesId);
 
   const { reportDefinitions = {} } = series;
+
   const getFiltersFromDefs = () => {
     return Object.entries(reportDefinitions).map(([field, value]) => ({
       field,
@@ -35,22 +37,7 @@ export const SelectedFilters = ({ seriesId, isNew, series: { labels } }: Props) 
     return (series.filters ?? []).concat(getFiltersFromDefs());
   }, [series.filters, reportDefinitions]);
 
-  const removeFilter = (field: string, value: string, notVal: boolean) => {
-    const filtersN = filters.map((filter) => {
-      if (filter.field === field) {
-        if (notVal) {
-          const notValuesN = filter.notValues?.filter((val) => val !== value);
-          return { ...filter, notValues: notValuesN };
-        } else {
-          const valuesN = filter.values?.filter((val) => val !== value);
-          return { ...filter, values: valuesN };
-        }
-      }
-
-      return filter;
-    });
-    setSeries(seriesId, { ...series, filters: filtersN });
-  };
+  const { removeFilter } = useSeriesFilters({ seriesId });
 
   const { indexPattern } = useIndexPatternContext();
 
@@ -66,7 +53,7 @@ export const SelectedFilters = ({ seriesId, isNew, series: { labels } }: Props) 
                   field={field}
                   label={labels[field]}
                   value={val}
-                  removeFilter={() => removeFilter(field, val, false)}
+                  removeFilter={() => removeFilter({ field, value: val, negate: false })}
                   negate={false}
                 />
               </EuiFlexItem>
@@ -79,7 +66,7 @@ export const SelectedFilters = ({ seriesId, isNew, series: { labels } }: Props) 
                   label={labels[field]}
                   value={val}
                   negate={true}
-                  removeFilter={() => removeFilter(field, val, true)}
+                  removeFilter={() => removeFilter({ field, value: val, negate: true })}
                 />
               </EuiFlexItem>
             ))}
