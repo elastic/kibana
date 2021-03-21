@@ -24,6 +24,7 @@ import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import { History } from 'history';
 import { Href } from 'history';
+import { HttpSetup as HttpSetup_2 } from 'src/core/public';
 import { I18nStart as I18nStart_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';

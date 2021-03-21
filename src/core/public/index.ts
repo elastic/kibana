@@ -65,6 +65,7 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
+import { DeprecationsServiceSetup, DeprecationsServiceStart } from './deprecations';
 
 export type { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
 export type { CoreContext, CoreSystem } from './core_system';
@@ -184,6 +185,13 @@ export type {
   ErrorToastOptions,
 } from './notifications';
 
+export type {
+  DeprecationsServiceSetup,
+  DeprecationsServiceStart,
+  GetAllDeprecationsConfig,
+  GetDeprecationsConfig,
+} from './deprecations';
+
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
@@ -213,6 +221,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   notifications: NotificationsSetup;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
+  /** {@link DeprecationsServiceSetup} */
+  deprecations: DeprecationsServiceSetup;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
@@ -268,6 +278,8 @@ export interface CoreStart {
   uiSettings: IUiSettingsClient;
   /** {@link FatalErrorsStart} */
   fatalErrors: FatalErrorsStart;
+  /** {@link DeprecationsServiceStart} */
+  deprecations: DeprecationsServiceStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values

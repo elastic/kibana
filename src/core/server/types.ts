@@ -37,6 +37,7 @@ export type {
   SavedObjectsClientContract,
   SavedObjectsNamespaceType,
 } from './saved_objects/types';
+export type { PluginDeprecationDetails } from './deprecations/types';
 export * from './ui_settings/types';
 export * from './legacy/types';
 export type { EnvironmentMode, PackageInfo } from '@kbn/config';

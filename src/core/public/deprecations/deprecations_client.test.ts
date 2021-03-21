@@ -1,0 +1,116 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { httpServiceMock } from '../http/http_service.mock';
+import { DeprecationsClient } from './deprecations_client';
+
+describe('DeprecationsClient', () => {
+  const http = httpServiceMock.createSetupContract();
+  const mockDeprecationsInfo = [
+    { pluginId: 'testPluginId-1' },
+    { pluginId: 'testPluginId-1' },
+    { pluginId: 'testPluginId-2' },
+  ];
+
+  beforeEach(() => {
+    http.fetch.mockReset();
+    http.fetch.mockResolvedValue({ deprecationsInfo: mockDeprecationsInfo });
+  });
+
+  describe('getAllDeprecations', () => {
+    it('returns a list of deprecations', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const deprecations = await deprecationsClient.getAllDeprecations();
+      expect(http.fetch).toBeCalledTimes(1);
+      expect(http.fetch).toBeCalledWith('/api/deprecations/', {
+        asSystemRequest: true,
+      });
+
+      expect(deprecations).toEqual(mockDeprecationsInfo);
+    });
+
+    it('caches the results', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const results = [
+        await deprecationsClient.getAllDeprecations(),
+        await deprecationsClient.getAllDeprecations(),
+      ];
+
+      expect(http.fetch).toBeCalledTimes(1);
+
+      expect(results).toEqual([mockDeprecationsInfo, mockDeprecationsInfo]);
+    });
+
+    it('calls the fetch api on skipCache: true', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      http.fetch.mockResolvedValueOnce({ deprecationsInfo: ['test2'] });
+      http.fetch.mockResolvedValueOnce({ deprecationsInfo: ['test3'] });
+      const results = [
+        await deprecationsClient.getAllDeprecations({ skipCache: true }),
+        await deprecationsClient.getAllDeprecations({ skipCache: true }),
+      ];
+
+      expect(http.fetch).toBeCalledTimes(2);
+
+      expect(results).toEqual([['test2'], ['test3']]);
+    });
+  });
+
+  describe('getDeprecations', () => {
+    it('returns deprecations for a single pluginId', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const deprecations = await deprecationsClient.getDeprecations('testPluginId-1');
+
+      expect(deprecations.length).toBe(2);
+      expect(deprecations).toEqual([
+        { pluginId: 'testPluginId-1' },
+        { pluginId: 'testPluginId-1' },
+      ]);
+    });
+
+    it('returns [] if the pluginId does not have any deprecations', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const deprecations = await deprecationsClient.getDeprecations('testPluginId-4');
+
+      expect(deprecations).toEqual([]);
+    });
+
+    it('caches the results', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const results = [
+        ...(await deprecationsClient.getDeprecations('testPluginId-1')),
+        ...(await deprecationsClient.getDeprecations('testPluginId-2')),
+      ];
+
+      expect(http.fetch).toBeCalledTimes(1);
+      expect(results).toEqual(mockDeprecationsInfo);
+    });
+
+    it('calls the fetch api on skipCache: true', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      http.fetch.mockResolvedValueOnce({
+        deprecationsInfo: [{ pluginId: 'testPluginId-1' }, { pluginId: 'testPluginId-1' }],
+      });
+      http.fetch.mockResolvedValueOnce({
+        deprecationsInfo: [{ pluginId: 'testPluginId-2' }, { pluginId: 'testPluginId-2' }],
+      });
+      const results = [
+        ...(await deprecationsClient.getDeprecations('testPluginId-1', { skipCache: true })),
+        ...(await deprecationsClient.getDeprecations('testPluginId-2', { skipCache: true })),
+      ];
+
+      expect(http.fetch).toBeCalledTimes(2);
+      expect(results).toEqual([
+        { pluginId: 'testPluginId-1' },
+        { pluginId: 'testPluginId-1' },
+        { pluginId: 'testPluginId-2' },
+        { pluginId: 'testPluginId-2' },
+      ]);
+    });
+  });
+});
