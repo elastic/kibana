@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type { SearchResponse, MGetResponse, GetResponse } from 'elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
-import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
+import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
@@ -285,7 +285,7 @@ export async function bulkUpdateAgents(
     agentId: string;
     data: Partial<AgentSOAttributes>;
   }>
-) {
+): Promise<{ items: BulkActionResult[] }> {
   if (updateData.length === 0) {
     return { items: [] };
   }

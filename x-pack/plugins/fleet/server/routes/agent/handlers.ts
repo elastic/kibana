@@ -320,15 +320,20 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       request.body.policy_id
     );
 
-    const body: PostBulkAgentReassignResponse = results.items.reduce((acc, so) => {
-      return {
-        ...acc,
-        [so.id]: {
-          success: !so.error,
-          error: so.error || undefined,
-        },
+    const body = results.items.reduce<PostBulkAgentReassignResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error
+          ? {
+              name: so.error.name,
+              message: so.error.message,
+              // so.error.stack is also available
+            }
+          : undefined,
       };
+      return acc;
     }, {});
+
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

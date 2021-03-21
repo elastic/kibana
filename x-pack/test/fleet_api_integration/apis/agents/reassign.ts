@@ -102,13 +102,31 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should allow to reassign multiple agents by id -- some invalid', async () => {
+        const inputAgentIds = ['agent2', 'INVALID_ID', 'agent3', 'MISSING_ID', 'etc'];
         const { body } = await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            agents: ['agent2', 'INVALID_ID', 'agent3', 'MISSING_ID', 'etc'],
+            agents: inputAgentIds,
             policy_id: 'policy2',
           });
+
+        expect(Object.keys(body)).to.eql(inputAgentIds);
+        expect(inputAgentIds.map((id) => ({ success: body[id].success }))).to.eql([
+          { success: true },
+          { success: false },
+          { success: true },
+          { success: false },
+          { success: false },
+        ]);
+
+        expect(inputAgentIds.map((id) => Boolean(body[id].error))).to.eql([
+          false,
+          true,
+          false,
+          true,
+          true,
+        ]);
 
         const [agent2data, agent3data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent2`),
