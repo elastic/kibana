@@ -101,32 +101,40 @@ export default function (providerContext: FtrProviderContext) {
         expect(agent3data.body.item.policy_id).to.eql('policy2');
       });
 
-      it('should allow to reassign multiple agents by id -- some invalid', async () => {
-        const inputAgentIds = ['agent2', 'INVALID_ID', 'agent3', 'MISSING_ID', 'etc'];
+      it('should allow to reassign multiple agents by id -- mix valid & invalid', async () => {
         const { body } = await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            agents: inputAgentIds,
+            agents: ['agent2', 'INVALID_ID', 'agent3', 'MISSING_ID', 'etc'],
             policy_id: 'policy2',
           });
 
-        expect(Object.keys(body)).to.eql(inputAgentIds);
-        expect(inputAgentIds.map((id) => ({ success: body[id].success }))).to.eql([
-          { success: true },
-          { success: false },
-          { success: true },
-          { success: false },
-          { success: false },
-        ]);
-
-        expect(inputAgentIds.map((id) => Boolean(body[id].error))).to.eql([
-          false,
-          true,
-          false,
-          true,
-          true,
-        ]);
+        expect(body).to.eql({
+          agent2: { success: true },
+          INVALID_ID: {
+            success: false,
+            error: {
+              name: 'AgentReassignmentError',
+              message: 'Cannot find agent INVALID_ID',
+            },
+          },
+          agent3: { success: true },
+          MISSING_ID: {
+            success: false,
+            error: {
+              name: 'AgentReassignmentError',
+              message: 'Cannot find agent MISSING_ID',
+            },
+          },
+          etc: {
+            success: false,
+            error: {
+              name: 'AgentReassignmentError',
+              message: 'Cannot find agent etc',
+            },
+          },
+        });
 
         const [agent2data, agent3data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent2`),
@@ -134,6 +142,54 @@ export default function (providerContext: FtrProviderContext) {
         ]);
         expect(agent2data.body.item.policy_id).to.eql('policy2');
         expect(agent3data.body.item.policy_id).to.eql('policy2');
+      });
+
+      it('should allow to reassign multiple agents by id -- mixed invalid, managed, etc', async () => {
+        // agent1 is enrolled in policy1. set policy1 to managed
+        await supertest
+          .put(`/api/fleet/agent_policies/policy1`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ name: 'Test policy', namespace: 'default', is_managed: true })
+          .expect(200);
+
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_reassign`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: ['agent2', 'INVALID_ID', 'agent3'],
+            policy_id: 'policy2',
+          });
+
+        expect(body).to.eql({
+          agent2: {
+            success: false,
+            error: {
+              name: 'AgentReassignmentError',
+              message: 'Cannot reassign an agent from managed agent policy policy1',
+            },
+          },
+          INVALID_ID: {
+            success: false,
+            error: {
+              name: 'AgentReassignmentError',
+              message: 'Cannot find agent INVALID_ID',
+            },
+          },
+          agent3: {
+            success: false,
+            error: {
+              name: 'AgentReassignmentError',
+              message: 'Cannot reassign an agent from managed agent policy policy1',
+            },
+          },
+        });
+
+        const [agent2data, agent3data] = await Promise.all([
+          supertest.get(`/api/fleet/agents/agent2`),
+          supertest.get(`/api/fleet/agents/agent3`),
+        ]);
+        expect(agent2data.body.item.policy_id).to.eql('policy1');
+        expect(agent3data.body.item.policy_id).to.eql('policy1');
       });
 
       it('should allow to reassign multiple agents by kuery', async () => {
