@@ -7,10 +7,10 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { AnomalyExplorerEmbeddableInput, AnomalyExplorerServices } from '../types';
+import { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '../types';
 import { CoreStart } from 'kibana/public';
 import { MlStartDependencies } from '../../plugin';
-import { useExplorerInputResolver } from './explorer_input_resolver';
+import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import {
   anomalyDetectorServiceMock,
   anomalyExplorerChartsServiceMock,
@@ -18,7 +18,7 @@ import {
   mlResultsServiceMock,
   mlStartMock,
 } from './__mocks__/services';
-import { EmbeddableExplorerContainerProps } from './embeddable_explorer_container';
+import { EmbeddableAnomalyChartsContainerProps } from './embeddable_anomaly_charts_container';
 import moment from 'moment';
 
 jest.mock('../common/process_filters', () => ({
@@ -68,10 +68,10 @@ jest.mock('../../application/explorer/explorer_utils', () => ({
   ),
 }));
 
-describe('useExplorerInputResolver', () => {
-  let embeddableInput: BehaviorSubject<Partial<AnomalyExplorerEmbeddableInput>>;
+describe('useAnomalyChartsInputResolver', () => {
+  let embeddableInput: BehaviorSubject<Partial<AnomalyChartsEmbeddableInput>>;
   let refresh: Subject<any>;
-  let services: [CoreStart, MlStartDependencies, AnomalyExplorerServices];
+  let services: [CoreStart, MlStartDependencies, AnomalyChartsServices];
   let onInputChange: jest.Mock;
 
   const start = moment().subtract(1, 'years');
@@ -91,7 +91,7 @@ describe('useExplorerInputResolver', () => {
         from: 'now-3y',
         to: 'now',
       },
-    } as Partial<AnomalyExplorerEmbeddableInput>);
+    } as Partial<AnomalyChartsEmbeddableInput>);
 
     refresh = new Subject();
 
@@ -124,7 +124,7 @@ describe('useExplorerInputResolver', () => {
         anomalyExplorerService: anomalyExplorerChartsServiceMock,
         mlResultsService: mlResultsServiceMock,
       },
-    ] as unknown) as EmbeddableExplorerContainerProps['services'];
+    ] as unknown) as EmbeddableAnomalyChartsContainerProps['services'];
 
     onInputChange = jest.fn();
   });
@@ -135,8 +135,8 @@ describe('useExplorerInputResolver', () => {
 
   test('should fetch jobs only when input job ids have been changed', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useExplorerInputResolver(
-        embeddableInput as Observable<AnomalyExplorerEmbeddableInput>,
+      useAnomalyChartsInputResolver(
+        embeddableInput as Observable<AnomalyChartsEmbeddableInput>,
         onInputChange,
         refresh,
         services,
@@ -181,8 +181,8 @@ describe('useExplorerInputResolver', () => {
 
   test('should not complete the observable on error', async () => {
     const { result } = renderHook(() =>
-      useExplorerInputResolver(
-        embeddableInput as Observable<AnomalyExplorerEmbeddableInput>,
+      useAnomalyChartsInputResolver(
+        embeddableInput as Observable<AnomalyChartsEmbeddableInput>,
         onInputChange,
         refresh,
         services,
@@ -197,7 +197,7 @@ describe('useExplorerInputResolver', () => {
         jobIds: ['invalid-job-id'],
         filters: [],
         query: { language: 'kuery', query: '' },
-      } as Partial<AnomalyExplorerEmbeddableInput>);
+      } as Partial<AnomalyChartsEmbeddableInput>);
     });
     expect(result.current.error).toBeDefined();
   });

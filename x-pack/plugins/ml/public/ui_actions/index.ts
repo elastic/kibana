@@ -20,7 +20,7 @@ import {
 } from './triggers';
 import { createApplyTimeRangeSelectionAction } from './apply_time_range_action';
 import { createClearSelectionAction } from './clear_selection_action';
-import { createEditExplorerPanelAction } from './edit_explorer_panel_action';
+import { createEditAnomalyChartsPanelAction } from './edit_anomaly_charts_panel_action';
 import { createApplyEntityFieldFiltersAction } from './apply_entity_filters_action';
 export { APPLY_TIME_RANGE_SELECTION_ACTION } from './apply_time_range_action';
 export { EDIT_SWIMLANE_PANEL_ACTION } from './edit_swimlane_panel_action';
@@ -41,7 +41,7 @@ export function registerMlUiActions(
   const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(core.getStartServices);
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
-  const editExplorerPanelAction = createEditExplorerPanelAction(core.getStartServices);
+  const editExplorerPanelAction = createEditAnomalyChartsPanelAction(core.getStartServices);
 
   // Register actions
   uiActions.registerAction(editSwimlanePanelAction);

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EmbeddableExplorerContainer should render explorer charts with a valid embeddable input 1`] = `
+exports[`EmbeddableAnomalyChartsContainer should render explorer charts with a valid embeddable input 1`] = `
 Object {
   "chartsData": Object {
     "chartsPerRow": 2,

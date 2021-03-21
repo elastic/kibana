@@ -18,13 +18,13 @@ import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  AnomalyExplorerEmbeddableInput,
-  AnomalyExplorerEmbeddableServices,
+  AnomalyChartsEmbeddableInput,
+  AnomalyChartsEmbeddableServices,
 } from '..';
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 
-export class AnomalyExplorerEmbeddableFactory
-  implements EmbeddableFactoryDefinition<AnomalyExplorerEmbeddableInput> {
+export class AnomalyChartsEmbeddableFactory
+  implements EmbeddableFactoryDefinition<AnomalyChartsEmbeddableInput> {
   public readonly type = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   constructor(
@@ -37,22 +37,24 @@ export class AnomalyExplorerEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
-      defaultMessage: 'ML Anomaly Explorer',
+      defaultMessage: 'ML Anomaly charts',
     });
   }
 
-  public async getExplicitInput(): Promise<Partial<AnomalyExplorerEmbeddableInput>> {
+  public async getExplicitInput(): Promise<Partial<AnomalyChartsEmbeddableInput>> {
     const [coreStart] = await this.getServices();
 
     try {
-      const { resolveAnomalyExplorerUserInput } = await import('./anomaly_explorer_setup_flyout');
-      return await resolveAnomalyExplorerUserInput(coreStart);
+      const { resolveEmbeddableAnomalyChartsUserInput } = await import(
+        './anomaly_charts_setup_flyout'
+      );
+      return await resolveEmbeddableAnomalyChartsUserInput(coreStart);
     } catch (e) {
       return Promise.reject();
     }
   }
 
-  private async getServices(): Promise<AnomalyExplorerEmbeddableServices> {
+  private async getServices(): Promise<AnomalyChartsEmbeddableServices> {
     const [coreStart, pluginsStart] = await this.getStartServices();
 
     const { AnomalyDetectorService } = await import(
@@ -79,9 +81,9 @@ export class AnomalyExplorerEmbeddableFactory
     ];
   }
 
-  public async create(initialInput: AnomalyExplorerEmbeddableInput, parent?: IContainer) {
+  public async create(initialInput: AnomalyChartsEmbeddableInput, parent?: IContainer) {
     const services = await this.getServices();
-    const { AnomalyExplorerEmbeddable } = await import('./anomaly_explorer_embeddable');
-    return new AnomalyExplorerEmbeddable(initialInput, services, parent);
+    const { AnomalyChartsEmbeddable } = await import('./anomaly_charts_embeddable');
+    return new AnomalyChartsEmbeddable(initialInput, services, parent);
   }
 }

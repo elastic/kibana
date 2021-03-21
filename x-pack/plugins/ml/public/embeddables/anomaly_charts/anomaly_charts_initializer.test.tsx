@@ -8,14 +8,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { AnomalyExplorerInitializer } from './anomaly_explorer_initializer';
+import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
-import { getDefaultExplorerChartsPanelTitle } from './anomaly_explorer_embeddable';
+import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
 const defaultOptions = { wrapper: I18nProvider };
 
-describe('AnomalyExplorerInitializer', () => {
-  test('should render anomaly explorer charts initializer', async () => {
+describe('AnomalyChartsInitializer', () => {
+  test('should render anomaly charts initializer', async () => {
     const onCreate = jest.fn();
     const onCancel = jest.fn();
 
@@ -25,7 +25,7 @@ describe('AnomalyExplorerInitializer', () => {
       maxSeriesToPlot: 12,
     };
     const { getByTestId } = render(
-      <AnomalyExplorerInitializer
+      <AnomalyChartsInitializer
         defaultTitle={defaultTitle}
         initialInput={input}
         onCreate={(params) => onCreate(params)}

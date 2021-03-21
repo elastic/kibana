@@ -21,7 +21,7 @@ import { SwimlaneContainer } from '../../application/explorer/swimlane_container
 import { MlDependencies } from '../../application/app';
 import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
 import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
-import { coreStartMock, mlStartMock } from '../anomaly_explorer/__mocks__/services';
+import { coreStartMock, mlStartMock } from '../anomaly_charts/__mocks__/services';
 
 jest.mock('./swimlane_input_resolver', () => ({
   useSwimlaneInputResolver: jest.fn(() => {

@@ -6,7 +6,7 @@
  */
 
 import { AnomalyExplorerChartsService } from './anomaly_explorer_charts_service';
-import { mlStartMock, mlApiServices } from '../../embeddables/anomaly_explorer/__mocks__/services';
+import { mlStartMock, mlApiServices } from '../../embeddables/anomaly_charts/__mocks__/services';
 import mockAnomalyChartRecords from '../explorer/explorer_charts/__mocks__/mock_anomaly_chart_records.json';
 import mockJobConfig from '../explorer/explorer_charts/__mocks__/mock_job_config.json';
 import mockSeriesPromisesResponse from '../explorer/explorer_charts/__mocks__/mock_series_promises_response.json';
@@ -151,7 +151,7 @@ describe('AnomalyExplorerChartsService', () => {
       12
     )) as ExplorerChartsData;
     expect(anomalyData).toStrictEqual({
-      ...anomalyExplorerService.getDefaultChartsData(),
+      ...getDefaultChartsData(),
       chartsPerRow: 2,
     });
   });

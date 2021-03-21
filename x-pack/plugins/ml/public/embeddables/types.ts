@@ -90,7 +90,7 @@ export function isSwimLaneEmbeddable(arg: unknown): arg is SwimLaneDrilldownCont
 /**
  * Anomaly Explorer
  */
-export interface AnomalyExplorerEmbeddableCustomInput {
+export interface AnomalyChartsEmbeddableCustomInput {
   jobIds: JobId[];
   maxSeriesToPlot: number;
 
@@ -102,35 +102,33 @@ export interface AnomalyExplorerEmbeddableCustomInput {
   severityThreshold?: number;
 }
 
-export type AnomalyExplorerEmbeddableInput = EmbeddableInput & AnomalyExplorerEmbeddableCustomInput;
+export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbeddableCustomInput;
 
-export interface AnomalyExplorerServices {
+export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyExplorerService: AnomalyExplorerChartsService;
   mlResultsService: MlResultsService;
 }
 
-export type AnomalyExplorerEmbeddableServices = [
-  CoreStart,
-  MlDependencies,
-  AnomalyExplorerServices
-];
-export interface AnomalyExplorerCustomOutput {
+export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, AnomalyChartsServices];
+export interface AnomalyChartsCustomOutput {
   entityFields?: EntityField[];
   severity?: number;
   indexPatterns?: IndexPattern[];
 }
-export type AnomalyExplorerEmbeddableOutput = EmbeddableOutput & AnomalyExplorerCustomOutput;
-export interface EditExplorerPanelContext {
-  embeddable: IEmbeddable<AnomalyExplorerEmbeddableInput, AnomalyExplorerEmbeddableOutput>;
+export type AnomalyChartsEmbeddableOutput = EmbeddableOutput & AnomalyChartsCustomOutput;
+export interface EditAnomalyChartsPanelContext {
+  embeddable: IEmbeddable<AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableOutput>;
 }
-export interface ExplorerFieldSelectionContext extends EditExplorerPanelContext {
+export interface AnomalyChartsFieldSelectionContext extends EditAnomalyChartsPanelContext {
   /**
-   * Optional data provided by swim lane selection
+   * Optional fields selected using anomaly charts
    */
   data?: EntityField[];
 }
-export function isAnomalyExplorerEmbeddable(arg: unknown): arg is ExplorerFieldSelectionContext {
+export function isAnomalyExplorerEmbeddable(
+  arg: unknown
+): arg is AnomalyChartsFieldSelectionContext {
   return (
     isPopulatedObject(arg) &&
     arg.hasOwnProperty('embeddable') &&

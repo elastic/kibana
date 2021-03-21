@@ -20,18 +20,18 @@ import {
   EuiModal,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AnomalyExplorerEmbeddableInput } from '..';
+import { AnomalyChartsEmbeddableInput } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 
 const MAX_SERIES_ALLOWED = 48;
-export interface AnomalyExplorerInitializerProps {
+export interface AnomalyChartsInitializerProps {
   defaultTitle: string;
-  initialInput?: Partial<Pick<AnomalyExplorerEmbeddableInput, 'jobIds' | 'maxSeriesToPlot'>>;
+  initialInput?: Partial<Pick<AnomalyChartsEmbeddableInput, 'jobIds' | 'maxSeriesToPlot'>>;
   onCreate: (props: { panelTitle: string; maxSeriesToPlot?: number }) => void;
   onCancel: () => void;
 }
 
-export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = ({
+export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
   defaultTitle,
   initialInput,
   onCreate,
@@ -50,7 +50,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <FormattedMessage
-            id="xpack.ml.anomalyExplorerChartsEmbeddable.setupModal.title"
+            id="xpack.ml.anomalyChartsEmbeddable.setupModal.title"
             defaultMessage="Anomaly explorer charts configuration"
           />
         </EuiModalHeaderTitle>
@@ -61,7 +61,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.anomalyExplorerChartsEmbeddable.panelTitleLabel"
+                id="xpack.ml.anomalyChartsEmbeddable.panelTitleLabel"
                 defaultMessage="Panel title"
               />
             }
@@ -80,7 +80,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.ml.anomalyExplorerChartsEmbeddable.maxSeriesToPlotLabel"
+                id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotLabel"
                 defaultMessage="Max series to plot"
               />
             }
@@ -100,7 +100,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} data-test-subj={'cancelButton'}>
           <FormattedMessage
-            id="xpack.ml.anomalyExplorerChartsEmbeddable.setupModal.cancelButtonLabel"
+            id="xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -115,7 +115,7 @@ export const AnomalyExplorerInitializer: FC<AnomalyExplorerInitializerProps> = (
           fill
         >
           <FormattedMessage
-            id="xpack.ml.anomalyExplorerChartsEmbeddable.setupModal.confirmButtonLabel"
+            id="xpack.ml.anomalyChartsEmbeddable.setupModal.confirmButtonLabel"
             defaultMessage="Confirm"
           />
         </EuiButton>

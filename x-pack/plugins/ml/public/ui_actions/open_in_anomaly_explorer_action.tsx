@@ -12,7 +12,7 @@ import { ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  ExplorerFieldSelectionContext,
+  AnomalyChartsFieldSelectionContext,
   isAnomalyExplorerEmbeddable,
   isSwimLaneEmbeddable,
   SwimLaneDrilldownContext,
@@ -23,7 +23,7 @@ import { ExplorerAppState } from '../../common/types/ml_url_generator';
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
 export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<SwimLaneDrilldownContext | ExplorerFieldSelectionContext>({
+  return createAction<SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext>({
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
     getIconType(context): string {
@@ -119,7 +119,9 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         await application.navigateToUrl(anomalyExplorerUrl!);
       }
     },
-    async isCompatible({ embeddable }: SwimLaneDrilldownContext | ExplorerFieldSelectionContext) {
+    async isCompatible({
+      embeddable,
+    }: SwimLaneDrilldownContext | AnomalyChartsFieldSelectionContext) {
       return (
         embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE ||
         embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE

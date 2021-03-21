@@ -9,20 +9,25 @@ import { i18n } from '@kbn/i18n';
 import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 import { MlCoreSetup } from '../plugin';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE, EditExplorerPanelContext } from '../embeddables';
+import {
+  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  EditAnomalyChartsPanelContext,
+} from '../embeddables';
 
-export const EDIT_EXPLORER_PANEL_ACTION = 'editExplorerPanelAction';
+export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
-export function createEditExplorerPanelAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<EditExplorerPanelContext>({
-    id: 'edit-anomaly-explorer',
-    type: EDIT_EXPLORER_PANEL_ACTION,
+export function createEditAnomalyChartsPanelAction(
+  getStartServices: MlCoreSetup['getStartServices']
+) {
+  return createAction<EditAnomalyChartsPanelContext>({
+    id: 'edit-anomaly-charts',
+    type: EDIT_ANOMALY_CHARTS_PANEL_ACTION,
     getIconType(context): string {
       return 'pencil';
     },
     getDisplayName: () =>
-      i18n.translate('xpack.ml.actions.editExplorerTitle', {
-        defaultMessage: 'Edit explorer',
+      i18n.translate('xpack.ml.actions.editAnomalyChartsTitle', {
+        defaultMessage: 'Edit anomaly charts',
       }),
     async execute({ embeddable }) {
       if (!embeddable) {
@@ -32,11 +37,14 @@ export function createEditExplorerPanelAction(getStartServices: MlCoreSetup['get
       const [coreStart] = await getStartServices();
 
       try {
-        const { resolveAnomalyExplorerUserInput } = await import(
-          '../embeddables/anomaly_explorer/anomaly_explorer_setup_flyout'
+        const { resolveEmbeddableAnomalyChartsUserInput } = await import(
+          '../embeddables/anomaly_charts/anomaly_charts_setup_flyout'
         );
 
-        const result = await resolveAnomalyExplorerUserInput(coreStart, embeddable.getInput());
+        const result = await resolveEmbeddableAnomalyChartsUserInput(
+          coreStart,
+          embeddable.getInput()
+        );
         embeddable.updateInput(result);
       } catch (e) {
         return Promise.reject();

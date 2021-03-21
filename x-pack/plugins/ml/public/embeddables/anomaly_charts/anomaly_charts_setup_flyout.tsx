@@ -15,20 +15,20 @@ import {
   KibanaContextProvider,
   toMountPoint,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { AnomalyExplorerInitializer } from './anomaly_explorer_initializer';
+import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { JobSelectorFlyoutContent } from '../../application/components/job_selector/job_selector_flyout';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
-import { getDefaultExplorerChartsPanelTitle } from './anomaly_explorer_embeddable';
+import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
 import { getMlGlobalServices } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
 import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
-import { AnomalyExplorerEmbeddableInput } from '..';
+import { AnomalyChartsEmbeddableInput } from '..';
 
-export async function resolveAnomalyExplorerUserInput(
+export async function resolveEmbeddableAnomalyChartsUserInput(
   coreStart: CoreStart,
-  input?: AnomalyExplorerEmbeddableInput
-): Promise<Partial<AnomalyExplorerEmbeddableInput>> {
+  input?: AnomalyChartsEmbeddableInput
+): Promise<Partial<AnomalyChartsEmbeddableInput>> {
   const {
     http,
     uiSettings,
@@ -74,7 +74,7 @@ export async function resolveAnomalyExplorerUserInput(
 
               const modalSession = overlays.openModal(
                 toMountPoint(
-                  <AnomalyExplorerInitializer
+                  <AnomalyChartsInitializer
                     defaultTitle={title}
                     initialInput={input}
                     onCreate={({ panelTitle, maxSeriesToPlot }) => {

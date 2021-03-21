@@ -10,12 +10,12 @@ import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elasti
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { throttle } from 'lodash';
-import { useExplorerInputResolver } from './explorer_input_resolver';
-import type { IAnomalyExplorerEmbeddable } from './anomaly_explorer_embeddable';
+import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
+import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type {
-  AnomalyExplorerEmbeddableInput,
-  AnomalyExplorerEmbeddableOutput,
-  AnomalyExplorerEmbeddableServices,
+  AnomalyChartsEmbeddableInput,
+  AnomalyChartsEmbeddableOutput,
+  AnomalyChartsEmbeddableServices,
 } from '..';
 import type { EntityField } from '../../../common/util/anomaly_utils';
 
@@ -29,17 +29,17 @@ import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/trigge
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
-export interface EmbeddableExplorerContainerProps {
+export interface EmbeddableAnomalyChartsContainerProps {
   id: string;
-  embeddableContext: InstanceType<IAnomalyExplorerEmbeddable>;
-  embeddableInput: Observable<AnomalyExplorerEmbeddableInput>;
-  services: AnomalyExplorerEmbeddableServices;
+  embeddableContext: InstanceType<IAnomalyChartsEmbeddable>;
+  embeddableInput: Observable<AnomalyChartsEmbeddableInput>;
+  services: AnomalyChartsEmbeddableServices;
   refresh: Observable<any>;
-  onInputChange: (input: Partial<AnomalyExplorerEmbeddableInput>) => void;
-  onOutputChange: (output: Partial<AnomalyExplorerEmbeddableOutput>) => void;
+  onInputChange: (input: Partial<AnomalyChartsEmbeddableInput>) => void;
+  onOutputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void;
 }
 
-export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> = ({
+export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
   id,
   embeddableContext,
   embeddableInput,
@@ -88,7 +88,7 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
     });
   }, [severity, selectedEntities]);
 
-  const { chartsData, isLoading: isExplorerLoading, error } = useExplorerInputResolver(
+  const { chartsData, isLoading: isExplorerLoading, error } = useAnomalyChartsInputResolver(
     embeddableInput,
     onInputChange,
     refresh,
@@ -108,7 +108,7 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.ml.anomalyExplorerChartsEmbeddable.errorMessage"
+            id="xpack.ml.anomalyChartsEmbeddable.errorMessage"
             defaultMessage="Unable to load the ML anomaly explorer data"
           />
         }
@@ -182,4 +182,4 @@ export const EmbeddableExplorerContainer: FC<EmbeddableExplorerContainerProps> =
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default EmbeddableExplorerContainer;
+export default EmbeddableAnomalyChartsContainer;

@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { AnomalyExplorerEmbeddableFactory } from './anomaly_explorer_embeddable_factory';
+import React from 'react';
+
+export const EmbeddableAnomalyChartsContainer = React.lazy(
+  () => import('./embeddable_anomaly_charts_container')
+);

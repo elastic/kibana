@@ -11,7 +11,7 @@ import { MlCoreSetup } from '../plugin';
 import { Filter, FilterStateStore } from '../../../../../src/plugins/data/common';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  ExplorerFieldSelectionContext,
+  AnomalyChartsFieldSelectionContext,
 } from '../embeddables';
 import { CONTROLLED_BY_EXPLORER_FILTER } from './constants';
 import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
@@ -21,10 +21,10 @@ export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction'
 export function createApplyEntityFieldFiltersAction(
   getStartServices: MlCoreSetup['getStartServices']
 ) {
-  return createAction<ExplorerFieldSelectionContext>({
+  return createAction<AnomalyChartsFieldSelectionContext>({
     id: 'apply-entity-field-filters',
     type: APPLY_ENTITY_FIELD_FILTERS_ACTION,
-    getIconType(context: ExplorerFieldSelectionContext): string {
+    getIconType(context: AnomalyChartsFieldSelectionContext): string {
       return 'filter';
     },
     getDisplayName() {

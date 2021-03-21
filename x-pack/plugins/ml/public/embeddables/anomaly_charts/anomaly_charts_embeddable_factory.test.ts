@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { AnomalyExplorerEmbeddableFactory } from './anomaly_explorer_embeddable_factory';
+import { AnomalyChartsEmbeddableFactory } from './anomaly_charts_embeddable_factory';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { AnomalyExplorerEmbeddable } from './anomaly_explorer_embeddable';
-import { AnomalyExplorerEmbeddableInput } from '..';
+import { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
+import { AnomalyChartsEmbeddableInput } from '..';
 
-jest.mock('./anomaly_explorer_embeddable', () => ({
-  AnomalyExplorerEmbeddable: jest.fn(),
+jest.mock('./anomaly_charts_embeddable', () => ({
+  AnomalyChartsEmbeddable: jest.fn(),
 }));
 
-describe('AnomalyExplorerEmbeddableFactory', () => {
+describe('AnomalyChartsEmbeddableFactory', () => {
   test('should provide required services on create', async () => {
     // arrange
     const pluginStartDeps = { data: dataPluginMock.createStartContract() };
@@ -27,15 +27,15 @@ describe('AnomalyExplorerEmbeddableFactory', () => {
     const [coreStart, pluginsStart] = await getStartServices();
 
     // act
-    const factory = new AnomalyExplorerEmbeddableFactory(getStartServices);
+    const factory = new AnomalyChartsEmbeddableFactory(getStartServices);
 
     await factory.create({
       jobIds: ['test-job'],
       maxSeriesToPlot: 4,
-    } as AnomalyExplorerEmbeddableInput);
+    } as AnomalyChartsEmbeddableInput);
 
     // assert
-    const mockCalls = ((AnomalyExplorerEmbeddable as unknown) as jest.Mock<AnomalyExplorerEmbeddable>)
+    const mockCalls = ((AnomalyChartsEmbeddable as unknown) as jest.Mock<AnomalyChartsEmbeddable>)
       .mock.calls[0];
     const input = mockCalls[0];
     const createServices = mockCalls[1];

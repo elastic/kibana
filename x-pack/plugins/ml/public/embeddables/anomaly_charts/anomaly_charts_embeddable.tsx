@@ -12,36 +12,36 @@ import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { Embeddable, IContainer } from '../../../../../../src/plugins/embeddable/public';
-import { EmbeddableExplorerContainer } from './embeddable_explorer_container_lazy';
+import { EmbeddableAnomalyChartsContainer } from './embeddable_anomaly_charts_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-  AnomalyExplorerEmbeddableInput,
-  AnomalyExplorerEmbeddableOutput,
-  AnomalyExplorerServices,
+  AnomalyChartsEmbeddableInput,
+  AnomalyChartsEmbeddableOutput,
+  AnomalyChartsServices,
 } from '..';
 import type { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
 export const getDefaultExplorerChartsPanelTitle = (jobIds: JobId[]) =>
-  i18n.translate('xpack.ml.anomalyExplorerChartsEmbeddable.title', {
-    defaultMessage: 'ML anomaly explorer charts for {jobIds}',
+  i18n.translate('xpack.ml.anomalyChartsEmbeddable.title', {
+    defaultMessage: 'ML anomaly charts for {jobIds}',
     values: { jobIds: jobIds.join(', ') },
   });
 
-export type IAnomalyExplorerEmbeddable = typeof AnomalyExplorerEmbeddable;
+export type IAnomalyChartsEmbeddable = typeof AnomalyChartsEmbeddable;
 
-export class AnomalyExplorerEmbeddable extends Embeddable<
-  AnomalyExplorerEmbeddableInput,
-  AnomalyExplorerEmbeddableOutput
+export class AnomalyChartsEmbeddable extends Embeddable<
+  AnomalyChartsEmbeddableInput,
+  AnomalyChartsEmbeddableOutput
 > {
   private node?: HTMLElement;
   private reload$ = new Subject();
   public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   constructor(
-    initialInput: AnomalyExplorerEmbeddableInput,
-    public services: [CoreStart, MlDependencies, AnomalyExplorerServices],
+    initialInput: AnomalyChartsEmbeddableInput,
+    public services: [CoreStart, MlDependencies, AnomalyChartsServices],
     parent?: IContainer
   ) {
     super(
@@ -54,7 +54,7 @@ export class AnomalyExplorerEmbeddable extends Embeddable<
     this.initializeOutput(initialInput);
   }
 
-  private async initializeOutput(initialInput: AnomalyExplorerEmbeddableInput) {
+  private async initializeOutput(initialInput: AnomalyChartsEmbeddableInput) {
     const { anomalyExplorerService } = this.services[2];
     const { jobIds } = initialInput;
 
@@ -107,7 +107,7 @@ export class AnomalyExplorerEmbeddable extends Embeddable<
       <I18nContext>
         <KibanaContextProvider services={{ ...this.services[0] }}>
           <Suspense fallback={null}>
-            <EmbeddableExplorerContainer
+            <EmbeddableAnomalyChartsContainer
               id={this.input.id}
               embeddableContext={this}
               embeddableInput={this.getInput$()}

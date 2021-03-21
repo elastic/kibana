@@ -34,9 +34,9 @@ import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explore
 import { parseInterval } from '../../../common/util/parse_interval';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import {
-  AnomalyExplorerEmbeddableInput,
-  AnomalyExplorerEmbeddableOutput,
-  AnomalyExplorerServices,
+  AnomalyChartsEmbeddableInput,
+  AnomalyChartsEmbeddableOutput,
+  AnomalyChartsServices,
 } from '..';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
@@ -46,7 +46,7 @@ import { InfluencersFilterQuery } from '../../../common/types/es_client';
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
 function getJobsObservable(
-  embeddableInput: Observable<AnomalyExplorerEmbeddableInput>,
+  embeddableInput: Observable<AnomalyChartsEmbeddableInput>,
   anomalyDetectorService: AnomalyDetectorService,
   setErrorHandler: (e: Error) => void
 ) {
@@ -61,11 +61,11 @@ function getJobsObservable(
   );
 }
 
-export function useExplorerInputResolver(
-  embeddableInput: Observable<AnomalyExplorerEmbeddableInput>,
-  onInputChange: (output: Partial<AnomalyExplorerEmbeddableOutput>) => void,
+export function useAnomalyChartsInputResolver(
+  embeddableInput: Observable<AnomalyChartsEmbeddableInput>,
+  onInputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void,
   refresh: Observable<any>,
-  services: [CoreStart, MlStartDependencies, AnomalyExplorerServices],
+  services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
   chartWidth: number,
   severity: number
 ): { chartsData: ExplorerChartsData; isLoading: boolean; error: Error | null | undefined } {

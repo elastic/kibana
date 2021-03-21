@@ -8,17 +8,17 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import {
-  EmbeddableExplorerContainer,
-  EmbeddableExplorerContainerProps,
-} from './embeddable_explorer_container';
+  EmbeddableAnomalyChartsContainer,
+  EmbeddableAnomalyChartsContainerProps,
+} from './embeddable_anomaly_charts_container';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n/react';
-import { AnomalyExplorerEmbeddable } from './anomaly_explorer_embeddable';
+import { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import { CoreStart } from 'kibana/public';
-import { useExplorerInputResolver } from './explorer_input_resolver';
+import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import { MlDependencies } from '../../application/app';
 import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
-import { AnomalyExplorerEmbeddableInput, AnomalyExplorerServices } from '..';
+import { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '..';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts_container';
 import {
   anomalyDetectorServiceMock,
@@ -28,8 +28,8 @@ import {
   mlStartMock,
 } from './__mocks__/services';
 
-jest.mock('./explorer_input_resolver', () => ({
-  useExplorerInputResolver: jest.fn(() => {
+jest.mock('./use_anomaly_charts_input_resolver', () => ({
+  useAnomalyChartsInputResolver: jest.fn(() => {
     return [];
   }),
 }));
@@ -42,11 +42,11 @@ jest.mock('../../application/explorer/explorer_charts_container', () => ({
 
 const defaultOptions = { wrapper: I18nProvider };
 
-describe('EmbeddableExplorerContainer', () => {
-  let embeddableInput: BehaviorSubject<Partial<AnomalyExplorerEmbeddableInput>>;
+describe('EmbeddableAnomalyChartsContainer', () => {
+  let embeddableInput: BehaviorSubject<Partial<AnomalyChartsEmbeddableInput>>;
   let refresh: BehaviorSubject<any>;
-  let services: jest.Mocked<[CoreStart, MlDependencies, AnomalyExplorerServices]>;
-  let embeddableContext: jest.Mocked<AnomalyExplorerEmbeddable>;
+  let services: jest.Mocked<[CoreStart, MlDependencies, AnomalyChartsServices]>;
+  let embeddableContext: jest.Mocked<AnomalyChartsEmbeddable>;
   let trigger: jest.Mocked<TriggerContract>;
 
   const onInputChange = jest.fn();
@@ -77,7 +77,7 @@ describe('EmbeddableExplorerContainer', () => {
     enhancements: {},
     severity: 50,
     severityThreshold: 75,
-  } as AnomalyExplorerEmbeddableInput;
+  } as AnomalyChartsEmbeddableInput;
 
   beforeEach(() => {
     // we only want to mock some of the functions needed
@@ -90,7 +90,7 @@ describe('EmbeddableExplorerContainer', () => {
 
     embeddableInput = new BehaviorSubject({
       id: 'test-explorer-charts-embeddable',
-    } as Partial<AnomalyExplorerEmbeddableInput>);
+    } as Partial<AnomalyChartsEmbeddableInput>);
 
     trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
 
@@ -104,7 +104,7 @@ describe('EmbeddableExplorerContainer', () => {
         anomalyExplorerChartsService: anomalyExplorerChartsServiceMock,
         mlResultsService: mlResultsServiceMock,
       },
-    ] as unknown) as EmbeddableExplorerContainerProps['services'];
+    ] as unknown) as EmbeddableAnomalyChartsContainerProps['services'];
   });
 
   test('should render explorer charts with a valid embeddable input', async () => {
@@ -116,19 +116,17 @@ describe('EmbeddableExplorerContainer', () => {
       errorMessages: undefined,
     };
 
-    (useExplorerInputResolver as jest.Mock).mockReturnValueOnce({
+    (useAnomalyChartsInputResolver as jest.Mock).mockReturnValueOnce({
       chartsData,
       isLoading: false,
       error: undefined,
     });
 
     render(
-      <EmbeddableExplorerContainer
+      <EmbeddableAnomalyChartsContainer
         id={'test-explorer-charts-embeddable'}
         embeddableContext={embeddableContext}
-        embeddableInput={
-          embeddableInput.asObservable() as Observable<AnomalyExplorerEmbeddableInput>
-        }
+        embeddableInput={embeddableInput.asObservable() as Observable<AnomalyChartsEmbeddableInput>}
         services={services}
         refresh={refresh}
         onInputChange={onInputChange}
@@ -145,19 +143,17 @@ describe('EmbeddableExplorerContainer', () => {
   });
 
   test('should render an error in case it could not fetch the ML charts data', async () => {
-    (useExplorerInputResolver as jest.Mock).mockReturnValueOnce({
+    (useAnomalyChartsInputResolver as jest.Mock).mockReturnValueOnce({
       chartsData: undefined,
       isLoading: false,
       error: 'No anomalies',
     });
 
     const { findByText } = render(
-      <EmbeddableExplorerContainer
+      <EmbeddableAnomalyChartsContainer
         embeddableContext={embeddableContext}
         id={'test-explorer-charts-embeddable'}
-        embeddableInput={
-          embeddableInput.asObservable() as Observable<AnomalyExplorerEmbeddableInput>
-        }
+        embeddableInput={embeddableInput.asObservable() as Observable<AnomalyChartsEmbeddableInput>}
         services={services}
         refresh={refresh}
         onInputChange={onInputChange}

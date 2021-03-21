@@ -26,10 +26,6 @@ export interface CombinedJobWithStats extends JobWithStats {
   datafeed_config: DatafeedWithStats;
 }
 
-// export const isCombinedJob = (item: any | undefined): item is CombinedJob => {
-//   return !!item;
-// };
-
 export function isCombinedJob(arg: null | undefined | unknown): arg is CombinedJob {
   return (
     isPopulatedObject(arg) &&
@@ -42,7 +38,6 @@ export function isCombinedJobWithStats(arg: unknown): arg is CombinedJobWithStat
   return (
     isPopulatedObject(arg) &&
     typeof arg.job_id === 'string' &&
-    isPopulatedObject(arg.datafeed_config) &&
-    arg.hasOwnProperty('timing_stats')
+    isPopulatedObject(arg.datafeed_config)
   );
 }
