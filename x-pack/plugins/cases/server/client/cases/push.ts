@@ -29,7 +29,7 @@ import {
   User,
   ESCasesConfigureAttributes,
   CaseType,
-} from '../../../common';
+} from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
