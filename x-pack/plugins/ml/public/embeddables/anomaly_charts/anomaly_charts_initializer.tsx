@@ -49,10 +49,12 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
     <EuiModal initialFocus="[name=panelTitle]" onClose={onCancel}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupModal.title"
-            defaultMessage="Anomaly explorer charts configuration"
-          />
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.anomalyChartsEmbeddable.setupModal.title"
+              defaultMessage="Anomaly explorer charts configuration"
+            />
+          </h2>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
@@ -81,7 +83,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotLabel"
-                defaultMessage="Max series to plot"
+                defaultMessage="Maximum number of series to plot"
               />
             }
           >
@@ -116,7 +118,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
         >
           <FormattedMessage
             id="xpack.ml.anomalyChartsEmbeddable.setupModal.confirmButtonLabel"
-            defaultMessage="Confirm"
+            defaultMessage="Confirm configurations"
           />
         </EuiButton>
       </EuiModalFooter>

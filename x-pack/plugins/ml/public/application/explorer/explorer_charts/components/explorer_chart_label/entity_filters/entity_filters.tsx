@@ -51,7 +51,8 @@ export const EntityFilter: FC<EntityFilterProps> = ({
           }
           iconType="plusInCircle"
           aria-label={i18n.translate('xpack.ml.influencersCell.addFilterAriaLabel', {
-            defaultMessage: 'Add filter',
+            defaultMessage: 'Add filter for {influencerFieldName} {influencerFieldValue}',
+            values: { influencerFieldName, influencerFieldValue },
           })}
         />
       </EuiToolTip>
@@ -76,7 +77,8 @@ export const EntityFilter: FC<EntityFilterProps> = ({
           }
           iconType="minusInCircle"
           aria-label={i18n.translate('xpack.ml.influencersCell.removeFilterAriaLabel', {
-            defaultMessage: 'Remove filter',
+            defaultMessage: 'Remove filter for {influencerFieldName} {influencerFieldValue}',
+            values: { influencerFieldName, influencerFieldValue },
           })}
         />
       </EuiToolTip>

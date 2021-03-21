@@ -13,7 +13,7 @@ import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   AnomalyChartsFieldSelectionContext,
 } from '../embeddables';
-import { CONTROLLED_BY_EXPLORER_FILTER } from './constants';
+import { CONTROLLED_BY_ANOMALY_CHARTS_FILTER } from './constants';
 import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
 
 export const APPLY_ENTITY_FIELD_FILTERS_ACTION = 'applyEntityFieldFiltersAction';
@@ -54,7 +54,7 @@ export function createApplyEntityFieldFiltersAction(
                     labelValue: `${fieldName}:${fieldValue}`,
                   },
                 }),
-                controlledBy: CONTROLLED_BY_EXPLORER_FILTER,
+                controlledBy: CONTROLLED_BY_ANOMALY_CHARTS_FILTER,
                 negate: false,
                 disabled: false,
                 type: 'phrase',

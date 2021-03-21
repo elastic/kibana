@@ -10,6 +10,7 @@ import { CoreStart } from 'kibana/public';
 import moment from 'moment';
 import { takeUntil } from 'rxjs/operators';
 import { from } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import {
   KibanaContextProvider,
@@ -97,7 +98,12 @@ export async function resolveAnomalySwimlaneUserInput(
       {
         'data-test-subj': 'mlFlyoutJobSelector',
         ownFocus: true,
-        closeButtonAriaLabel: 'jobSelectorFlyout',
+        closeButtonAriaLabel: i18n.translate(
+          'xpack.ml.swimlaneEmbeddable.setupFlyout.closeJobSelectionDialogAriaLabel',
+          {
+            defaultMessage: 'Close job selection dialog',
+          }
+        ),
       }
     );
 
