@@ -195,14 +195,16 @@ export class ConfigService {
     const rawConfig = await this.rawConfigProvider.getConfig$().pipe(take(1)).toPromise();
     const deprecations = await this.deprecations.pipe(take(1)).toPromise();
     const deprecationMessages: string[] = [];
-    const onHandleDeprecationHook = (pluginId: string) => (context: DeprecatedConfigDetails) => {
-      deprecationMessages.push(context.message);
+    const deprecationHookFactory = (pluginId: string) => (context: DeprecatedConfigDetails) => {
+      if (!context.silent) {
+        deprecationMessages.push(context.message);
+      }
       const handledDeprecatedConfig = this.handledDeprecatedConfigs.get(pluginId) || [];
       handledDeprecatedConfig.push(context);
       this.handledDeprecatedConfigs.set(pluginId, handledDeprecatedConfig);
     };
 
-    applyDeprecations(rawConfig, deprecations, onHandleDeprecationHook);
+    applyDeprecations(rawConfig, deprecations, deprecationHookFactory);
     deprecationMessages.forEach((msg) => {
       this.deprecationLog.warn(msg);
     });

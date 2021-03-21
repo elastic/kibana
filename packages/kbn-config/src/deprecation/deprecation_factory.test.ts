@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ConfigDeprecationHook } from './types';
+import { DeprecatedConfigDetails } from './types';
 import { configDeprecationFactory } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
   const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
 
-  let deprecationMessages: string[];
-  const deprecationHook: ConfigDeprecationHook = ({ message }) => deprecationMessages.push(message);
+  const deprecationHook = jest.fn<void, [DeprecatedConfigDetails]>();
 
   beforeEach(() => {
-    deprecationMessages = [];
+    deprecationHook.mockClear();
   });
 
   describe('rename', () => {
@@ -40,11 +39,14 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages).toMatchInlineSnapshot(`
-        Array [
-          "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\"",
-        ]
-      `);
+      expect(deprecationHook).toBeCalledWith({
+        correctiveActions: {
+          manualSteps: [
+            'Replace "myplugin.deprecated" in the kibana.yml file with "myplugin.renamed"',
+          ],
+        },
+        message: '"myplugin.deprecated" is deprecated and has been replaced by "myplugin.renamed"',
+      });
     });
     it('does not alter config and does not log if old property is not present', () => {
       const rawConfig = {
@@ -66,7 +68,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages.length).toEqual(0);
+      expect(deprecationHook).toHaveBeenCalledTimes(0);
     });
     it('handles nested keys', () => {
       const rawConfig = {
@@ -97,11 +99,15 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages).toMatchInlineSnapshot(`
-        Array [
-          "\\"myplugin.oldsection.deprecated\\" is deprecated and has been replaced by \\"myplugin.newsection.renamed\\"",
-        ]
-      `);
+      expect(deprecationHook).toBeCalledWith({
+        correctiveActions: {
+          manualSteps: [
+            'Replace "myplugin.oldsection.deprecated" in the kibana.yml file with "myplugin.newsection.renamed"',
+          ],
+        },
+        message:
+          '"myplugin.oldsection.deprecated" is deprecated and has been replaced by "myplugin.newsection.renamed"',
+      });
     });
     it('remove the old property but does not overrides the new one if they both exist, and logs a specific message', () => {
       const rawConfig = {
@@ -116,11 +122,16 @@ describe('DeprecationFactory', () => {
           renamed: 'renamed',
         },
       });
-      expect(deprecationMessages).toMatchInlineSnapshot(`
-        Array [
-          "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\". However both key are present, ignoring \\"myplugin.deprecated\\"",
-        ]
-      `);
+      expect(deprecationHook).toBeCalledWith({
+        correctiveActions: {
+          manualSteps: [
+            'Make sure "myplugin.renamed" contains the correct value in the kibana.yml file."',
+            'Remove "myplugin.deprecated" from the kibana.yml file."',
+          ],
+        },
+        message:
+          '"myplugin.deprecated" is deprecated and has been replaced by "myplugin.renamed". However both key are present, ignoring "myplugin.deprecated"',
+      });
     });
   });
 
@@ -149,11 +160,14 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages).toMatchInlineSnapshot(`
-        Array [
-          "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\"",
-        ]
-      `);
+      expect(deprecationHook).toBeCalledWith({
+        correctiveActions: {
+          manualSteps: [
+            'Replace "myplugin.deprecated" in the kibana.yml file with "myplugin.renamed"',
+          ],
+        },
+        message: '"myplugin.deprecated" is deprecated and has been replaced by "myplugin.renamed"',
+      });
     });
 
     it('can move a property to a different namespace', () => {
@@ -180,11 +194,15 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages).toMatchInlineSnapshot(`
-        Array [
-          "\\"oldplugin.deprecated\\" is deprecated and has been replaced by \\"newplugin.renamed\\"",
-        ]
-      `);
+      expect(deprecationHook).toBeCalledWith({
+        correctiveActions: {
+          manualSteps: [
+            'Replace "oldplugin.deprecated" in the kibana.yml file with "newplugin.renamed"',
+          ],
+        },
+        message:
+          '"oldplugin.deprecated" is deprecated and has been replaced by "newplugin.renamed"',
+      });
     });
 
     it('does not alter config and does not log if old property is not present', () => {
@@ -211,7 +229,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages.length).toEqual(0);
+      expect(deprecationHook).toBeCalledTimes(0);
     });
 
     it('remove the old property but does not overrides the new one if they both exist, and logs a specific message', () => {
@@ -231,11 +249,17 @@ describe('DeprecationFactory', () => {
           renamed: 'renamed',
         },
       });
-      expect(deprecationMessages).toMatchInlineSnapshot(`
-        Array [
-          "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\". However both key are present, ignoring \\"myplugin.deprecated\\"",
-        ]
-      `);
+
+      expect(deprecationHook).toBeCalledWith({
+        correctiveActions: {
+          manualSteps: [
+            'Make sure "myplugin.renamed" contains the correct value in the kibana.yml file."',
+            'Remove "myplugin.deprecated" from the kibana.yml file."',
+          ],
+        },
+        message:
+          '"myplugin.deprecated" is deprecated and has been replaced by "myplugin.renamed". However both key are present, ignoring "myplugin.deprecated"',
+      });
     });
   });
 
@@ -259,11 +283,12 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages).toMatchInlineSnapshot(`
-        Array [
-          "myplugin.deprecated is deprecated and is no longer used",
-        ]
-      `);
+      expect(deprecationHook).toBeCalledWith({
+        correctiveActions: {
+          manualSteps: ['Remove "myplugin.deprecated" from the kibana.yml file."'],
+        },
+        message: 'myplugin.deprecated is deprecated and is no longer used',
+      });
     });
 
     it('handles deeply nested keys', () => {
@@ -288,11 +313,13 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages).toMatchInlineSnapshot(`
-        Array [
-          "myplugin.section.deprecated is deprecated and is no longer used",
-        ]
-      `);
+
+      expect(deprecationHook).toBeCalledWith({
+        correctiveActions: {
+          manualSteps: ['Remove "myplugin.section.deprecated" from the kibana.yml file."'],
+        },
+        message: 'myplugin.section.deprecated is deprecated and is no longer used',
+      });
     });
 
     it('does not alter config and does not log if unused property is not present', () => {
@@ -313,7 +340,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages.length).toEqual(0);
+      expect(deprecationHook).toBeCalledTimes(0);
     });
   });
 
@@ -341,11 +368,13 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages).toMatchInlineSnapshot(`
-        Array [
-          "myplugin.deprecated is deprecated and is no longer used",
-        ]
-      `);
+
+      expect(deprecationHook).toBeCalledWith({
+        correctiveActions: {
+          manualSteps: ['Remove "myplugin.deprecated" from the kibana.yml file."'],
+        },
+        message: 'myplugin.deprecated is deprecated and is no longer used',
+      });
     });
 
     it('does not alter config and does not log if unused property is not present', () => {
@@ -370,7 +399,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationMessages.length).toEqual(0);
+      expect(deprecationHook).toBeCalledTimes(0);
     });
   });
 });

@@ -9,7 +9,7 @@
 import { cloneDeep } from 'lodash';
 import { ConfigDeprecationWithContext, ConfigDeprecationHook } from './types';
 
-const noopConfigDeprecationHook: () => ConfigDeprecationHook = () => () => undefined;
+const noopDeprecationHookFactory: () => ConfigDeprecationHook = () => () => undefined;
 /**
  * Applies deprecations on given configuration and passes handled deprecation deprecationHook
  * This hook is used for logging any deprecation warning using provided logger.
@@ -20,11 +20,11 @@ const noopConfigDeprecationHook: () => ConfigDeprecationHook = () => () => undef
 export const applyDeprecations = (
   config: Record<string, any>,
   deprecations: ConfigDeprecationWithContext[],
-  deprecationHook: (pluginId: string) => ConfigDeprecationHook = noopConfigDeprecationHook
+  deprecationHookFactory: (pluginId: string) => ConfigDeprecationHook = noopDeprecationHookFactory
 ) => {
   let processed = cloneDeep(config);
   deprecations.forEach(({ deprecation, path }) => {
-    processed = deprecation(processed, path, deprecationHook(path));
+    processed = deprecation(processed, path, deprecationHookFactory(path));
   });
   return processed;
 };
