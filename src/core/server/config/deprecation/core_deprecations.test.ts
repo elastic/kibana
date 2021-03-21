@@ -305,7 +305,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });
@@ -315,7 +315,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+          "\\"logging.dest\\" has been deprecated and will be removed in 8.0. To set the destination moving forward, you can use the \\"console\\" appender in your logging configuration or define a custom one. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });
@@ -361,7 +361,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.json\\" has been deprecated and will be removed in 8.0. To specify log message format moving forward, you can configure the \\"appender.layout\\" property for every custom appender in your logging configuration. There is currently no default layout for custom appenders and each one must be declared explicitly. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx.",
+          "\\"logging.json\\" has been deprecated and will be removed in 8.0. To specify log message format moving forward, you can configure the \\"appender.layout\\" property for every custom appender in your logging configuration. There is currently no default layout for custom appenders and each one must be declared explicitly. For more details, see https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx",
         ]
       `);
     });
@@ -446,7 +446,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.filter\\" has been deprecated and will be removed in 8.0. ",
+          "\\"logging.filter\\" has been deprecated and will be removed in 8.0.",
         ]
       `);
     });
@@ -457,7 +457,7 @@ describe('core deprecations', () => {
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "\\"logging.filter\\" has been deprecated and will be removed in 8.0. ",
+          "\\"logging.filter\\" has been deprecated and will be removed in 8.0.",
         ]
       `);
     });
