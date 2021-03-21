@@ -10,7 +10,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DeprecationsService } from './deprecations_service';
 import type { DeprecationsServiceSetup, DeprecationsServiceStart } from './deprecations_service';
 
-const createServiceMock = (): DeprecationsServiceSetup | DeprecationsServiceStart => ({
+const createServiceMock = (): jest.Mocked<DeprecationsServiceSetup | DeprecationsServiceStart> => ({
   getAllDeprecations: jest.fn().mockResolvedValue([]),
   getDeprecations: jest.fn().mockResolvedValue([]),
 });
@@ -29,6 +29,6 @@ const createMock = () => {
 
 export const deprecationsServiceMock = {
   create: createMock,
-  createSetupContract: createServiceMock as () => DeprecationsServiceSetup,
-  createStartContract: createServiceMock as () => DeprecationsServiceStart,
+  createSetupContract: createServiceMock as () => jest.Mocked<DeprecationsServiceSetup>,
+  createStartContract: createServiceMock as () => jest.Mocked<DeprecationsServiceStart>,
 };
