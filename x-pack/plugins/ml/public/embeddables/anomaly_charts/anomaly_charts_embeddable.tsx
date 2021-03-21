@@ -22,7 +22,7 @@ import {
   AnomalyChartsServices,
 } from '..';
 import type { IndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
-
+import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 export const getDefaultExplorerChartsPanelTitle = (jobIds: JobId[]) =>
   i18n.translate('xpack.ml.anomalyChartsEmbeddable.title', {
     defaultMessage: 'ML anomaly charts for {jobIds}',
@@ -106,7 +106,7 @@ export class AnomalyChartsEmbeddable extends Embeddable<
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={{ ...this.services[0] }}>
-          <Suspense fallback={null}>
+          <Suspense fallback={<EmbeddableLoading />}>
             <EmbeddableAnomalyChartsContainer
               id={this.input.id}
               embeddableContext={this}
