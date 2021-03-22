@@ -16,6 +16,7 @@ import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/pu
 export type DashboardSaveProps = OnSaveProps & {
   returnToOrigin: boolean;
   dashboardId?: string | null;
+  addToLibrary?: boolean;
   newTags?: string[];
 };
 
