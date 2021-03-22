@@ -326,7 +326,7 @@ describe('Policy Details', () => {
         const userNotificationCustomMessageTextArea = policyView.find(
           'EuiTextArea[data-test-subj="malwareUserNotificationCustomMessage"]'
         );
-        const tooltip = policyView.find('EuiIconTip');
+        const tooltip = policyView.find('EuiIconTip[data-test-subj="malwareTooltip"]');
         expect(userNotificationCheckbox).toHaveLength(0);
         expect(userNotificationCustomMessageTextArea).toHaveLength(0);
         expect(tooltip).toHaveLength(0);
@@ -335,6 +335,11 @@ describe('Policy Details', () => {
       it('ransomware card is hidden', () => {
         const ransomware = policyView.find('EuiPanel[data-test-subj="ransomwareProtectionsForm"]');
         expect(ransomware).toHaveLength(0);
+      });
+
+      it('shows the locked card in place of 1 paid feature', () => {
+        const lockedCard = policyView.find('EuiCard[data-test-subj="lockedPolicyCard"]');
+        expect(lockedCard).toHaveLength(1);
       });
     });
   });

@@ -33,7 +33,10 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'Http SSL Integration Tests',
     },
-    esTestCluster: httpConfig.get('esTestCluster'),
+    esTestCluster: {
+      ...httpConfig.get('esTestCluster'),
+      serverArgs: ['xpack.security.enabled=false'],
+    },
     kbnTestServer: {
       ...httpConfig.get('kbnTestServer'),
       serverArgs: [

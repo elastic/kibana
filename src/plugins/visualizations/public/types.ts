@@ -20,7 +20,6 @@ import { PersistedState } from './persisted_state';
 import { VisParams } from '../common';
 
 export { Vis, SerializedVis, VisParams };
-
 export interface SavedVisState {
   title: string;
   type: string;

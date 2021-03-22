@@ -46,7 +46,7 @@ export class VisTypeVislibPlugin
     Plugin<void, void, VisTypeVislibPluginSetupDependencies, VisTypeVislibPluginStartDependencies> {
   constructor(public initializerContext: PluginInitializerContext) {}
 
-  public async setup(
+  public setup(
     core: VisTypeVislibCoreSetup,
     { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {

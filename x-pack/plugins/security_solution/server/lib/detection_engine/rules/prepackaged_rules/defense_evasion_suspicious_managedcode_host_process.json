@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Managed Code Hosting Process",
   "query": "event.category:file and not event.type:deletion and file.name:(wscript.exe.log or mshta.exe.log or wscript.exe.log or wmic.exe.log or svchost.exe.log or dllhost.exe.log or cmstp.exe.log or regsvr32.exe.log)",
   "references": [
@@ -42,6 +43,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

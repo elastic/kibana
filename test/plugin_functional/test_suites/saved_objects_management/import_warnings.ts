@@ -10,10 +10,15 @@ import path from 'path';
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
-export default function ({ getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getPageObjects, getService }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
+  const esArchiver = getService('esArchiver');
 
   describe('import warnings', () => {
+    before(async () => {
+      await esArchiver.emptyKibanaIndex();
+    });
+
     beforeEach(async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();

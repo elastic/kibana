@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const log = getService('log');
   const inspector = getService('inspector');
@@ -145,6 +146,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.clickIndexPatternLogstash();
         await PageObjects.settings.filterField(termsField);
         await PageObjects.settings.openControlsByName(termsField);
+        await (
+          await (await testSubjects.find('formatRow')).findAllByCssSelector(
+            '[data-test-subj="toggle"]'
+          )
+        )[0].click();
         await PageObjects.settings.setFieldFormat('bytes');
         await PageObjects.settings.controlChangeSave();
         await PageObjects.common.navigateToApp('visualize');

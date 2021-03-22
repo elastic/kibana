@@ -8,9 +8,11 @@
 import React from 'react';
 import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
-import { PackageInfo, PackageListItem } from '../../../types';
+
+import type { PackageInfo, PackageListItem } from '../../../types';
 import { useLink } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
+
 import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
 
 type PackageCardProps = PackageListItem | PackageInfo;
@@ -43,7 +45,7 @@ export function PackageCard({
       title={title || ''}
       description={description}
       icon={<PackageIcon icons={icons} packageName={name} version={version} size="xl" />}
-      href={getHref('integration_details', { pkgkey: `${name}-${urlVersion}` })}
+      href={getHref('integration_details_overview', { pkgkey: `${name}-${urlVersion}` })}
       betaBadgeLabel={release && release !== 'ga' ? RELEASE_BADGE_LABEL[release] : undefined}
       betaBadgeTooltipContent={
         release && release !== 'ga' ? RELEASE_BADGE_DESCRIPTION[release] : undefined

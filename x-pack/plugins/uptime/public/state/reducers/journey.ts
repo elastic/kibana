@@ -24,7 +24,7 @@ export interface JourneyState {
   error?: Error;
 }
 
-interface JourneyKVP {
+export interface JourneyKVP {
   [checkGroup: string]: JourneyState;
 }
 

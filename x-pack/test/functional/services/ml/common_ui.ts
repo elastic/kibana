@@ -15,9 +15,17 @@ interface SetValueOptions {
   typeCharByChar?: boolean;
 }
 
+// key: color hex code, e.g. #FF3344
+// value: the expected percentage of the color to be present in the canvas element
+export type CanvasElementColorStats = Array<{
+  key: string;
+  value: number;
+}>;
+
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;
 
 export function MachineLearningCommonUIProvider({ getService }: FtrProviderContext) {
+  const canvasElement = getService('canvasElement');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -162,6 +170,85 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
 
       // escape popover
       await browser.pressKeys(browser.keys.ESCAPE);
+    },
+
+    async setSliderValue(testDataSubj: string, value: number) {
+      const slider = await testSubjects.find(testDataSubj);
+
+      await retry.tryForTime(60 * 1000, async () => {
+        const currentValue = await slider.getAttribute('value');
+        const currentDiff = +currentValue - +value;
+
+        if (currentDiff === 0) {
+          return true;
+        } else {
+          if (currentDiff > 0) {
+            if (Math.abs(currentDiff) >= 10) {
+              slider.type(browser.keys.PAGE_DOWN);
+            } else {
+              slider.type(browser.keys.ARROW_LEFT);
+            }
+          } else {
+            if (Math.abs(currentDiff) >= 10) {
+              slider.type(browser.keys.PAGE_UP);
+            } else {
+              slider.type(browser.keys.ARROW_RIGHT);
+            }
+          }
+          await retry.tryForTime(1000, async () => {
+            const newValue = await slider.getAttribute('value');
+            if (newValue === currentValue) {
+              throw new Error(`slider value should have changed, but is still ${currentValue}`);
+            }
+          });
+          await this.assertSliderValue(testDataSubj, value);
+        }
+      });
+    },
+
+    async assertSliderValue(testDataSubj: string, expectedValue: number) {
+      const actualValue = await testSubjects.getAttribute(testDataSubj, 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `${testDataSubj} slider value should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async disableAntiAliasing() {
+      await canvasElement.disableAntiAliasing();
+    },
+
+    async resetAntiAliasing() {
+      await canvasElement.resetAntiAliasing();
+    },
+
+    async assertColorsInCanvasElement(
+      dataTestSubj: string,
+      expectedColorStats: CanvasElementColorStats,
+      exclude?: string[],
+      percentageThreshold = 0,
+      channelTolerance = 10,
+      valueTolerance = 10
+    ) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail(dataTestSubj);
+
+        const actualColorStatsWithTolerance = await canvasElement.getColorStatsWithColorTolerance(
+          `[data-test-subj="${dataTestSubj}"] canvas`,
+          expectedColorStats,
+          exclude,
+          percentageThreshold,
+          channelTolerance,
+          valueTolerance
+        );
+
+        expect(actualColorStatsWithTolerance.every((d) => d.withinTolerance)).to.eql(
+          true,
+          `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
+            expectedColorStats
+          )}' (got '${JSON.stringify(actualColorStatsWithTolerance)}')`
+        );
+      });
     },
   };
 }

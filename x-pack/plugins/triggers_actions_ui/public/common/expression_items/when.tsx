@@ -13,7 +13,7 @@ import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
 import { ClosablePopoverTitle } from './components';
 
-interface WhenExpressionProps {
+export interface WhenExpressionProps {
   aggType: string;
   customAggTypesOptions?: { [key: string]: AggregationType };
   onChangeSelectedAggType: (selectedAggType: string) => void;
@@ -79,6 +79,7 @@ export const WhenExpression = ({
         </ClosablePopoverTitle>
         <EuiSelect
           data-test-subj="whenExpressionSelect"
+          id="aggTypeField"
           value={aggType}
           fullWidth
           onChange={(e) => {
@@ -96,3 +97,6 @@ export const WhenExpression = ({
     </EuiPopover>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { WhenExpression as default };

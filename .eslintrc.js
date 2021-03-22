@@ -572,7 +572,6 @@ module.exports = {
     {
       files: [
         'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
-        'src/legacy/ui/ui_render/bootstrap/kbn_bundles_loader_source.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -790,6 +789,23 @@ module.exports = {
     },
 
     /**
+     * Fleet overrides
+     */
+    {
+      files: ['x-pack/plugins/fleet/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'error',
+        'import/order': [
+          'warn',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent'],
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+      },
+    },
+
+    /**
      * Security Solution overrides
      */
     {
@@ -813,48 +829,12 @@ module.exports = {
       // typescript only for front and back end
       files: ['x-pack/plugins/security_solution/**/*.{ts,tsx}'],
       rules: {
-        // This will be turned on after bug fixes are complete
-        // '@typescript-eslint/explicit-member-accessibility': 'warn',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-useless-constructor': 'error',
-        // This will be turned on after bug fixes are complete
-        // '@typescript-eslint/no-object-literal-type-assertion': 'warn',
         '@typescript-eslint/unified-signatures': 'error',
-
-        // eventually we want this to be a warn and then an error since this is a recommended linter rule
-        // for now, keeping it commented out to avoid too much IDE noise until the other linter issues
-        // are fixed in the next release or two
-        // '@typescript-eslint/explicit-function-return-type': 'warn',
-
-        // these rules cannot be turned on and tested at the moment until this issue is resolved:
-        // https://github.com/prettier/prettier-eslint/issues/201
-        // '@typescript-eslint/await-thenable': 'error',
-        // '@typescript-eslint/no-non-null-assertion': 'error'
-        // '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-        // '@typescript-eslint/no-unused-vars': 'error',
-        // '@typescript-eslint/prefer-includes': 'error',
-        // '@typescript-eslint/prefer-string-starts-ends-with': 'error',
-        // '@typescript-eslint/promise-function-async': 'error',
-        // '@typescript-eslint/prefer-regexp-exec': 'error',
-        // '@typescript-eslint/promise-function-async': 'error',
-        // '@typescript-eslint/require-array-sort-compare': 'error',
-        // '@typescript-eslint/restrict-plus-operands': 'error',
-        // '@typescript-eslint/unbound-method': 'error',
       },
     },
-    // {
-    //   // will introduced after the other warns are fixed
-    //   // typescript and javascript for front end react performance
-    //   files: ['x-pack/plugins/security_solution/public/**/!(*.test).{js,mjs,ts,tsx}'],
-    //   plugins: ['react-perf'],
-    //   rules: {
-    //     // 'react-perf/jsx-no-new-object-as-prop': 'error',
-    //     // 'react-perf/jsx-no-new-array-as-prop': 'error',
-    //     // 'react-perf/jsx-no-new-function-as-prop': 'error',
-    //     // 'react/jsx-no-bind': 'error',
-    //   },
-    // },
     {
       // typescript and javascript for front and back end
       files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
@@ -867,21 +847,6 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        // This will be turned on after bug fixes are mostly completed
-        // 'consistent-return': 'warn',
-        // This will be turned on after bug fixes are mostly completed
-        // 'func-style': ['warn', 'expression'],
-        // These will be turned on after bug fixes are mostly completed and we can
-        // run a fix-lint
-        /*
-        'import/order': [
-          'warn',
-          {
-            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-            'newlines-between': 'always',
-          },
-        ],
-        */
         'node/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
@@ -921,12 +886,8 @@ module.exports = {
         'no-useless-catch': 'error',
         'no-useless-concat': 'error',
         'no-useless-computed-key': 'error',
-        // This will be turned on after bug fixes are mostly complete
-        // 'no-useless-escape': 'warn',
         'no-useless-rename': 'error',
         'no-useless-return': 'error',
-        // This will be turned on after bug fixers are mostly complete
-        // 'no-void': 'warn',
         'one-var-declaration-per-line': 'error',
         'prefer-object-spread': 'error',
         'prefer-promise-reject-errors': 'error',
@@ -942,9 +903,6 @@ module.exports = {
         'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
         'react/no-did-mount-set-state': 'error',
-        // Re-enable once we have better options per this issue:
-        // https://github.com/airbnb/javascript/issues/1875
-        // 'react/no-did-update-set-state': 'error',
         'react/no-direct-mutation-state': 'error',
         'react/no-find-dom-node': 'error',
         'react/no-redundant-should-component-update': 'error',
@@ -956,8 +914,6 @@ module.exports = {
         'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
-        // will introduced after the other warns are fixed
-        // 'react/sort-comp': 'error',
         'react/void-dom-elements-no-children': 'error',
         'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
@@ -991,7 +947,62 @@ module.exports = {
       },
     },
     {
-      // typescript and javascript for front and back end
+      // typescript for /public and /common
+      files: ['x-pack/plugins/lists/public/*.{ts,tsx}', 'x-pack/plugins/lists/common/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-for-in-array': 'error',
+      },
+    },
+    {
+      // typescript for /public and /common
+      files: ['x-pack/plugins/lists/public/*.{ts,tsx}', 'x-pack/plugins/lists/common/*.{ts,tsx}'],
+      plugins: ['react'],
+      env: {
+        jest: true,
+      },
+      rules: {
+        'react/boolean-prop-naming': 'error',
+        'react/button-has-type': 'error',
+        'react/display-name': 'error',
+        'react/forbid-dom-props': 'error',
+        'react/no-access-state-in-setstate': 'error',
+        'react/no-children-prop': 'error',
+        'react/no-danger-with-children': 'error',
+        'react/no-deprecated': 'error',
+        'react/no-did-mount-set-state': 'error',
+        'react/no-did-update-set-state': 'error',
+        'react/no-direct-mutation-state': 'error',
+        'react/no-find-dom-node': 'error',
+        'react/no-redundant-should-component-update': 'error',
+        'react/no-render-return-value': 'error',
+        'react/no-typos': 'error',
+        'react/no-string-refs': 'error',
+        'react/no-this-in-sfc': 'error',
+        'react/no-unescaped-entities': 'error',
+        'react/no-unsafe': 'error',
+        'react/no-unused-prop-types': 'error',
+        'react/no-unused-state': 'error',
+        'react/sort-comp': 'error',
+        'react/void-dom-elements-no-children': 'error',
+        'react/jsx-no-comment-textnodes': 'error',
+        'react/jsx-no-literals': 'error',
+        'react/jsx-no-target-blank': 'error',
+        'react/jsx-fragments': 'error',
+        'react/jsx-sort-default-props': 'error',
+      },
+    },
+    {
+      files: ['x-pack/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
+      plugins: ['react-perf'],
+      rules: {
+        'react-perf/jsx-no-new-object-as-prop': 'error',
+        'react-perf/jsx-no-new-array-as-prop': 'error',
+        'react-perf/jsx-no-new-function-as-prop': 'error',
+        'react/jsx-no-bind': 'error',
+      },
+    },
+    {
+      // typescript and javascript for front and back
       files: ['x-pack/plugins/lists/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node'],
       env: {
@@ -1087,7 +1098,9 @@ module.exports = {
      */
     {
       // typescript for front and back end
-      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
+      files: [
+        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1112,12 +1125,55 @@ module.exports = {
 
     /**
      * Enterprise Search overrides
+     * NOTE: We also have a single rule at the bottom of the file that
+     * overrides Prettier's default of not linting unnecessary backticks
      */
     {
+      // All files
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        'import/order': [
+          'error',
+          {
+            groups: ['unknown', ['builtin', 'external'], 'internal', 'parent', 'sibling', 'index'],
+            pathGroups: [
+              {
+                pattern:
+                  '{../../../../../../,../../../../../,../../../../,../../../,../../,../}{common/,*}__mocks__{*,/**}',
+                group: 'unknown',
+              },
+              {
+                pattern: '{**,.}/*.mock',
+                group: 'unknown',
+              },
+              {
+                pattern: 'react*',
+                group: 'external',
+                position: 'before',
+              },
+              {
+                pattern: '{@elastic/**,@kbn/**,src/**}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'always-and-inside-groups',
+          },
+        ],
+        'import/newline-after-import': 'error',
+        'react-hooks/exhaustive-deps': 'off',
+        'react/jsx-boolean-value': ['error', 'never'],
+      },
+    },
+    {
+      // Source files only - allow `any` in test/mock files
       files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
       excludedFiles: ['x-pack/plugins/enterprise_search/**/*.{test,mock}.{ts,tsx}'],
       rules: {
-        'react-hooks/exhaustive-deps': 'off',
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
@@ -1227,14 +1283,19 @@ module.exports = {
      * Osquery overrides
      */
     {
-      extends: ['eslint:recommended', 'plugin:react/recommended'],
-      plugins: ['react'],
+      extends: [
+        'eslint:recommended',
+        'plugin:react/recommended',
+        'plugin:@typescript-eslint/recommended',
+      ],
+      plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'arrow-body-style': ['error', 'as-needed'],
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
     {
@@ -1260,10 +1321,69 @@ module.exports = {
         ...require('eslint-config-prettier/@typescript-eslint').rules,
       },
     },
+    /**
+     * Enterprise Search Prettier override
+     * Lints unnecessary backticks - @see https://github.com/prettier/eslint-config-prettier/blob/main/README.md#forbid-unnecessary-backticks
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/**/*.{ts,tsx}'],
+      rules: {
+        quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
+      },
+    },
+
+    /**
+     * Platform Security Team overrides
+     */
+    {
+      files: [
+        'src/plugins/security_oss/**/*.{js,mjs,ts,tsx}',
+        'src/plugins/spaces_oss/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/encrypted_saved_objects/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/spaces/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 1,
+        'import/order': [
+          // This rule sorts import declarations
+          'error',
+          {
+            groups: [
+              'unknown',
+              ['builtin', 'external'],
+              'internal',
+              ['parent', 'sibling', 'index'],
+            ],
+            pathGroups: [
+              {
+                pattern: '{@kbn/**,src/**,kibana{,/**}}',
+                group: 'internal',
+              },
+            ],
+            pathGroupsExcludedImportTypes: [],
+            alphabetize: {
+              order: 'asc',
+              caseInsensitive: true,
+            },
+            'newlines-between': 'always',
+          },
+        ],
+        'import/no-duplicates': ['error'],
+        'sort-imports': [
+          // This rule sorts imports of multiple members (destructured imports)
+          'error',
+          {
+            ignoreCase: true,
+            ignoreDeclarationSort: true,
+          },
+        ],
+      },
+    },
 
     {
       files: [
-        // platform-team owned code
+        // core-team owned code
         'src/core/**',
         'x-pack/plugins/features/**',
         'x-pack/plugins/licensing/**',
@@ -1272,6 +1392,14 @@ module.exports = {
         'packages/kbn-config-schema',
         'src/plugins/status_page/**',
         'src/plugins/saved_objects_management/**',
+        'packages/kbn-analytics/**',
+        'packages/kbn-telemetry-tools/**',
+        'src/plugins/kibana_usage_collection/**',
+        'src/plugins/usage_collection/**',
+        'src/plugins/telemetry/**',
+        'src/plugins/telemetry_collection_manager/**',
+        'src/plugins/telemetry_management_section/**',
+        'x-pack/plugins/telemetry_collection_xpack/**',
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
@@ -1287,7 +1415,7 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: ['lodash/*', '!lodash/fp'],
+            patterns: ['lodash/*', '!lodash/fp', 'rxjs/internal-compatibility'],
           },
         ],
       },

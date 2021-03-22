@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export * from './status';
-export * from './types';
+// TODO https://github.com/elastic/kibana/issues/92802
+export {
+  SEARCH_SESSION_TYPE,
+  SearchSessionSavedObjectAttributes,
+  SearchSessionFindOptions,
+  SearchSessionRequestInfo,
+  SearchSessionStatus,
+  SEARCH_SESSIONS_TABLE_ID,
+} from '../../../../../../src/plugins/data/common/';

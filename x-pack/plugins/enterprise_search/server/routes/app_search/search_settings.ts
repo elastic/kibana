@@ -38,7 +38,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings/details`,
+      path: '/as/engines/:engineName/search_settings/details',
     })
   );
 
@@ -52,7 +52,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings/reset`,
+      path: '/as/engines/:engineName/search_settings/reset',
     })
   );
 
@@ -67,7 +67,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings`,
+      path: '/as/engines/:engineName/search_settings',
     })
   );
 
@@ -79,7 +79,7 @@ export function registerSearchSettingsRoutes({
           engineName: schema.string(),
         }),
         body: schema.object({
-          boosts,
+          boosts: schema.maybe(boosts),
           search_fields: searchFields,
         }),
         query: schema.object({
@@ -88,7 +88,7 @@ export function registerSearchSettingsRoutes({
       },
     },
     enterpriseSearchRequestHandler.createRequest({
-      path: `/as/engines/:engineName/search_settings_search`,
+      path: '/as/engines/:engineName/search_settings_search',
     })
   );
 }

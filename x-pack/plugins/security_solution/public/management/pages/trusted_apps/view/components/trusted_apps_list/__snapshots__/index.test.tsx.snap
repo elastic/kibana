@@ -486,12 +486,7 @@ exports[`TrustedAppsList renders correctly when failed loading data for the seco
 
 exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
 .c0 {
-  background-color: #f5f7fa;
-  padding: 16px;
-}
-
-.c3 {
-  padding: 16px;
+  background-color: #ece;
 }
 
 .c1.c1.c1 {
@@ -864,7 +859,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                       </dl>
                     </div>
                     <div
-                      class="euiFlexItem euiFlexItem--flexGrow5 c3"
+                      class="euiFlexItem euiFlexItem--flexGrow5 "
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"

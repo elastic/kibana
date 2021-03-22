@@ -47,7 +47,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     this.log = ctx.logger.get();
   }
 
-  async setup({ http, getStartServices }: CoreSetup, { licensing, features }: Dependencies) {
+  setup({ http, getStartServices }: CoreSetup, { licensing, features }: Dependencies) {
     const router = http.createRouter<WatcherRequestHandlerContext>();
     const routeDependencies: RouteDependencies = {
       router,

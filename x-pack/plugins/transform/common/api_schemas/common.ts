@@ -53,3 +53,27 @@ export interface ResponseStatus {
 export interface CommonResponseStatusSchema {
   [key: string]: ResponseStatus;
 }
+
+export const runtimeMappingsSchema = schema.maybe(
+  schema.recordOf(
+    schema.string(),
+    schema.object({
+      type: schema.oneOf([
+        schema.literal('keyword'),
+        schema.literal('long'),
+        schema.literal('double'),
+        schema.literal('date'),
+        schema.literal('ip'),
+        schema.literal('boolean'),
+      ]),
+      script: schema.maybe(
+        schema.oneOf([
+          schema.string(),
+          schema.object({
+            source: schema.string(),
+          }),
+        ])
+      ),
+    })
+  )
+);

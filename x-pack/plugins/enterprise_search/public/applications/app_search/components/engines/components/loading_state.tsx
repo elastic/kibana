@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
+
 import { EuiPageContent, EuiSpacer, EuiLoadingContent } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
+
 import { EnginesOverviewHeader } from './header';
 
 export const LoadingState: React.FC = () => {

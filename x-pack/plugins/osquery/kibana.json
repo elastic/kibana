@@ -14,14 +14,15 @@
   "requiredBundles": [
     "esUiShared",
     "kibanaUtils",
-    "kibanaReact",
-    "kibanaUtils"
+    "kibanaReact"
   ],
   "requiredPlugins": [
+    "actions",
     "data",
     "dataEnhanced",
     "fleet",
-    "navigation"
+    "navigation",
+    "triggersActionsUi"
   ],
   "server": true,
   "ui": true,

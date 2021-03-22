@@ -6,13 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
-import { Agent } from '../../types';
+import type { KibanaRequest } from 'src/core/server';
+import type { ElasticsearchClient } from 'src/core/server';
+
+import type { Agent } from '../../types';
 import * as APIKeyService from '../api_keys';
+
 import { getAgentByAccessAPIKeyId } from './crud';
 
 export async function authenticateAgentWithAccessToken(
-  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   request: KibanaRequest
 ): Promise<Agent> {
   if (!request.auth.isAuthenticated) {
@@ -25,7 +28,7 @@ export async function authenticateAgentWithAccessToken(
     throw Boom.unauthorized(err.message);
   }
 
-  const agent = await getAgentByAccessAPIKeyId(soClient, res.apiKeyId);
+  const agent = await getAgentByAccessAPIKeyId(esClient, res.apiKeyId);
 
   return agent;
 }

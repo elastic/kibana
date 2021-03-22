@@ -9,10 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, memo } from 'react';
 import { EuiIconTip } from '@elastic/eui';
 
+import { Phases } from '../../../../../../../common/types';
 import { useFormErrorsContext } from '../../../form';
 
 interface Props {
-  phase: 'hot' | 'warm' | 'cold';
+  phase: string & keyof Phases;
 }
 
 const i18nTexts = {

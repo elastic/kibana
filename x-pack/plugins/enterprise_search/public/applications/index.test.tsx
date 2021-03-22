@@ -6,17 +6,19 @@
  */
 
 import React from 'react';
+
 import { getContext } from 'kea';
 
-import { coreMock } from 'src/core/public/mocks';
-import { licensingMock } from '../../../licensing/public/mocks';
+import { coreMock } from '../../../../../src/core/public/mocks';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { licensingMock } from '../../../licensing/public/mocks';
+
+import { AppSearch } from './app_search';
+import { EnterpriseSearch } from './enterprise_search';
+import { KibanaLogic } from './shared/kibana';
+import { WorkplaceSearch } from './workplace_search';
 
 import { renderApp, renderHeaderActions } from './';
-import { EnterpriseSearch } from './enterprise_search';
-import { AppSearch } from './app_search';
-import { WorkplaceSearch } from './workplace_search';
-import { KibanaLogic } from './shared/kibana';
 
 describe('renderApp', () => {
   const kibanaDeps = {

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { getFormatFromPreviousColumn, getInvalidFieldMessage, getSafeName } from './helpers';
 import {
   FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -31,6 +31,8 @@ const typeToFn: Record<string, string> = {
   sum: 'aggSum',
   median: 'aggMedian',
 };
+
+const supportedTypes = ['number', 'histogram'];
 
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
@@ -61,7 +63,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
-        fieldType === 'number' &&
+        supportedTypes.includes(fieldType) &&
         aggregatable &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
@@ -77,7 +79,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 
       return Boolean(
         newField &&
-          newField.type === 'number' &&
+          supportedTypes.includes(newField.type) &&
           newField.aggregatable &&
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
@@ -97,10 +99,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-        params:
-          previousColumn && previousColumn.dataType === 'number'
-            ? previousColumn.params
-            : undefined,
+        params: getFormatFromPreviousColumn(previousColumn),
       } as T),
     onFieldChange: (oldColumn, field) => {
       return {
@@ -181,6 +180,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
 
 export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
   type: 'median',
+  priority: 3,
   displayName: i18n.translate('xpack.lens.indexPattern.median', {
     defaultMessage: 'Median',
   }),

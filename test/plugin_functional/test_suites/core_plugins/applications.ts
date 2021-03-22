@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const find = getService('find');
   const retry = getService('retry');
   const deployment = getService('deployment');
+  const esArchiver = getService('esArchiver');
 
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
@@ -50,6 +51,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
   describe('ui applications', function describeIndexTests() {
     before(async () => {
+      await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('foo');
     });
 

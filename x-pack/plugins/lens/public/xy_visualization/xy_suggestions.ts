@@ -26,6 +26,7 @@ const columnSortOrder = {
   ip: 3,
   boolean: 4,
   number: 5,
+  histogram: 6,
 };
 
 /**

@@ -19,18 +19,23 @@ interface BasicOptionsParams {
   legendPosition: string;
 }
 
+type LegendPositions = Array<{
+  value: string;
+  text: string;
+}>;
+
 function BasicOptions<VisParams extends BasicOptionsParams>({
   stateParams,
   setValue,
-  vis,
-}: VisEditorOptionsProps<VisParams>) {
+  legendPositions,
+}: VisEditorOptionsProps<VisParams> & { legendPositions: LegendPositions }) {
   return (
     <>
       <SelectOption
         label={i18n.translate('visDefaultEditor.options.vislibBasicOptions.legendPositionLabel', {
           defaultMessage: 'Legend position',
         })}
-        options={vis.type.editorConfig.collections.legendPositions}
+        options={legendPositions}
         paramName="legendPosition"
         value={stateParams.legendPosition}
         setValue={setValue}

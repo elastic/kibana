@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb top n is filtered', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+        await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
       });
 
       it('saved search is filtered', async () => {
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb top n is filtered', async () => {
-        await dashboardExpect.tsvbTopNValuesExist(['0', '0']);
+        await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
       });
 
       it('saved search is filtered', async () => {

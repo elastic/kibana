@@ -12,7 +12,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import 'react-vis/dist/style.css';
-import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
+import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
@@ -34,8 +35,9 @@ import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
 import { setReadonlyBadge } from '../updateBadge';
+import { AnomalyDetectionJobsContextProvider } from '../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 
-const MainContainer = styled.div`
+const MainContainer = euiStyled.div`
   height: 100%;
 `;
 
@@ -83,7 +85,9 @@ export function ApmAppRoot({
             <Router history={history}>
               <UrlParamsProvider>
                 <LicenseProvider>
-                  <App />
+                  <AnomalyDetectionJobsContextProvider>
+                    <App />
+                  </AnomalyDetectionJobsContextProvider>
                 </LicenseProvider>
               </UrlParamsProvider>
             </Router>

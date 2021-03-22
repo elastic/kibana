@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 
 import { ProxyConfigCollection } from './lib';
@@ -28,7 +27,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     this.log = this.ctx.logger.get();
   }
 
-  async setup({ http, capabilities, getStartServices, elasticsearch }: CoreSetup) {
+  setup({ http, capabilities, getStartServices, elasticsearch }: CoreSetup) {
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
@@ -36,8 +35,8 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       },
     }));
 
-    const config = await this.ctx.config.create().pipe(first()).toPromise();
-    const globalConfig = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
+    const config = this.ctx.config.get();
+    const globalConfig = this.ctx.config.legacy.get();
     const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
 
     this.esLegacyConfigService.setup(elasticsearch.legacy.config$);

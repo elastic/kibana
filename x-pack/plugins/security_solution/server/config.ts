@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
@@ -17,6 +16,10 @@ export const configSchema = schema.object({
   maxTimelineImportExportSize: schema.number({ defaultValue: 10000 }),
   maxTimelineImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
+
+  /** Fleet server integration */
+  fleetServerEnabled: schema.boolean({ defaultValue: false }),
+
   /**
    * Host Endpoint Configuration
    */
@@ -38,9 +41,7 @@ export const configSchema = schema.object({
   validateArtifactDownloads: schema.boolean({ defaultValue: true }),
 });
 
-export const createConfig$ = (context: PluginInitializerContext) =>
-  context.config.create<TypeOf<typeof configSchema>>();
+export const createConfig = (context: PluginInitializerContext) =>
+  context.config.get<TypeOf<typeof configSchema>>();
 
-export type ConfigType = ReturnType<typeof createConfig$> extends Observable<infer T>
-  ? T
-  : ReturnType<typeof createConfig$>;
+export type ConfigType = TypeOf<typeof configSchema>;

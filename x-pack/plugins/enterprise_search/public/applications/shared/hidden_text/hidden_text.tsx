@@ -6,6 +6,7 @@
  */
 
 import React, { useState, ReactElement } from 'react';
+
 import { i18n } from '@kbn/i18n';
 
 interface ChildrenProps {
@@ -27,7 +28,7 @@ export const HiddenText: React.FC<Props> = ({ text, children }) => {
   });
   const hiddenText = isHidden ? (
     <span aria-label={hiddenLabel}>
-      <span aria-hidden={true}>{text.replace(/./g, '•')}</span>
+      <span aria-hidden>{text.replace(/./g, '•')}</span>
     </span>
   ) : (
     text

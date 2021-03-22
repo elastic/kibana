@@ -17,7 +17,7 @@ export interface Props {
    * A collection of choices to display in the dropdown
    * @default []
    */
-  choices?: string[];
+  choices?: Array<[string, string]>;
   /**
    * Optional value for the component. If the value is not present in the
    * choices collection, it will be discarded.
@@ -38,7 +38,7 @@ export const DropdownFilter: FunctionComponent<Props> = ({
   let options = [
     { value: '%%CANVAS_MATCH_ALL%%', text: `-- ${strings.getMatchAllOptionLabel()} --` },
   ];
-  options = options.concat(choices.map((choice) => ({ value: choice, text: choice })));
+  options = options.concat(choices.map((choice) => ({ value: choice[0], text: choice[1] })));
 
   const changeHandler = (e: FocusEvent<HTMLSelectElement> | ChangeEvent<HTMLSelectElement>) => {
     if (e && e.target) {

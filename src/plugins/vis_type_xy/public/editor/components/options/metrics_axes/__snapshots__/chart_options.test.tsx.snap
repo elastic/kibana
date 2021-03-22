@@ -31,6 +31,22 @@ exports[`ChartOptions component should init with the default set of props 1`] = 
       <SelectOption
         id="seriesType0"
         label="Chart type"
+        options={
+          Array [
+            Object {
+              "text": "Line",
+              "value": "line",
+            },
+            Object {
+              "text": "Area",
+              "value": "area",
+            },
+            Object {
+              "text": "Bar",
+              "value": "histogram",
+            },
+          ]
+        }
         paramName="type"
         setValue={[Function]}
         value="histogram"
@@ -40,6 +56,18 @@ exports[`ChartOptions component should init with the default set of props 1`] = 
       <SelectOption
         id="seriesMode0"
         label="Mode"
+        options={
+          Array [
+            Object {
+              "text": "Normal",
+              "value": "normal",
+            },
+            Object {
+              "text": "Stacked",
+              "value": "stacked",
+            },
+          ]
+        }
         paramName="mode"
         setValue={[Function]}
         value="stacked"

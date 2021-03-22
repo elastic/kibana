@@ -21,9 +21,7 @@ export default function () {
     servers,
 
     esTestCluster: {
-      license: 'oss',
-      from: 'snapshot',
-      serverArgs: [],
+      serverArgs: ['xpack.security.enabled=false'],
     },
 
     kbnTestServer: {
@@ -61,8 +59,6 @@ export default function () {
         ...(!!process.env.CODE_COVERAGE
           ? [`--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'coverage')}`]
           : []),
-        // Disable v2 migrations in tests for now
-        '--migrations.enableV2=false',
       ],
     },
     services,

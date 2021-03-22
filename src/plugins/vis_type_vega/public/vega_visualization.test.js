@@ -26,11 +26,6 @@ jest.mock('./default_spec', () => ({
   getDefaultSpec: () => jest.requireActual('./test_utils/default.spec.json'),
 }));
 
-jest.mock('./lib/vega', () => ({
-  vega: jest.requireActual('vega'),
-  vegaLite: jest.requireActual('vega-lite'),
-}));
-
 // FLAKY: https://github.com/elastic/kibana/issues/71713
 describe('VegaVisualizations', () => {
   let domNode;

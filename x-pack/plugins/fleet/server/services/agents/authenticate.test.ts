@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import type { KibanaRequest } from 'kibana/server';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { authenticateAgentWithAccessToken } from './authenticate';
 
 describe('test agent autenticate services', () => {
   it('should succeed with a valid API key and an active agent', async () => {
-    const mockSavedObjectsClient = savedObjectsClientMock.create();
-    mockSavedObjectsClient.find.mockReturnValue(
-      Promise.resolve({
-        page: 1,
-        per_page: 100,
-        total: 1,
-        saved_objects: [
-          {
-            id: 'agent1',
-            type: 'agent',
-            references: [],
-            score: 0,
-            attributes: {
-              active: true,
-              access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
+    const mockEsClient = elasticsearchServiceMock.createInternalClient();
+
+    mockEsClient.search.mockResolvedValue({
+      body: {
+        hits: {
+          hits: [
+            {
+              // @ts-expect-error
+              _id: 'agent1',
+              _source: {
+                // @ts-expect-error
+                active: true,
+                // @ts-expect-error
+                access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
+              },
             },
-          },
-        ],
-      })
-    );
-    await authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+          ],
+        },
+      },
+    });
+    await authenticateAgentWithAccessToken(mockEsClient, {
       auth: { isAuthenticated: true },
       headers: {
         authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
@@ -41,28 +41,28 @@ describe('test agent autenticate services', () => {
   });
 
   it('should throw if the request is not authenticated', async () => {
-    const mockSavedObjectsClient = savedObjectsClientMock.create();
-    mockSavedObjectsClient.find.mockReturnValue(
-      Promise.resolve({
-        page: 1,
-        per_page: 100,
-        total: 1,
-        saved_objects: [
-          {
-            id: 'agent1',
-            type: 'agent',
-            references: [],
-            score: 0,
-            attributes: {
-              active: true,
-              access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
+    const mockEsClient = elasticsearchServiceMock.createInternalClient();
+
+    mockEsClient.search.mockResolvedValue({
+      body: {
+        hits: {
+          hits: [
+            {
+              // @ts-expect-error
+              _id: 'agent1',
+              _source: {
+                // @ts-expect-error
+                active: true,
+                // @ts-expect-error
+                access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
+              },
             },
-          },
-        ],
-      })
-    );
+          ],
+        },
+      },
+    });
     expect(
-      authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+      authenticateAgentWithAccessToken(mockEsClient, {
         auth: { isAuthenticated: false },
         headers: {
           authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
@@ -72,28 +72,29 @@ describe('test agent autenticate services', () => {
   });
 
   it('should throw if the ApiKey headers is malformed', async () => {
-    const mockSavedObjectsClient = savedObjectsClientMock.create();
-    mockSavedObjectsClient.find.mockReturnValue(
-      Promise.resolve({
-        page: 1,
-        per_page: 100,
-        total: 1,
-        saved_objects: [
-          {
-            id: 'agent1',
-            type: 'agent',
-            references: [],
-            score: 0,
-            attributes: {
-              active: false,
-              access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
-            },
-          },
-        ],
-      })
-    );
+    const mockEsClient = elasticsearchServiceMock.createInternalClient();
+
+    const hits = [
+      {
+        _id: 'agent1',
+        _source: {
+          active: true,
+
+          access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
+        },
+      },
+    ];
+
+    mockEsClient.search.mockResolvedValue({
+      body: {
+        hits: {
+          // @ts-expect-error
+          hits,
+        },
+      },
+    });
     expect(
-      authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+      authenticateAgentWithAccessToken(mockEsClient, {
         auth: { isAuthenticated: true },
         headers: {
           authorization: 'aaaa',
@@ -103,28 +104,27 @@ describe('test agent autenticate services', () => {
   });
 
   it('should throw if the agent is not active', async () => {
-    const mockSavedObjectsClient = savedObjectsClientMock.create();
-    mockSavedObjectsClient.find.mockReturnValue(
-      Promise.resolve({
-        page: 1,
-        per_page: 100,
-        total: 1,
-        saved_objects: [
-          {
-            id: 'agent1',
-            type: 'agent',
-            references: [],
-            score: 0,
-            attributes: {
-              active: false,
-              access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
-            },
-          },
-        ],
-      })
-    );
+    const mockEsClient = elasticsearchServiceMock.createInternalClient();
+
+    const hits = [
+      {
+        _id: 'agent1',
+        _source: {
+          active: false,
+          access_api_key_id: 'pedTuHIBTEDt93wW0Fhr',
+        },
+      },
+    ];
+    mockEsClient.search.mockResolvedValue({
+      body: {
+        hits: {
+          // @ts-expect-error
+          hits,
+        },
+      },
+    });
     expect(
-      authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+      authenticateAgentWithAccessToken(mockEsClient, {
         auth: { isAuthenticated: true },
         headers: {
           authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',
@@ -134,17 +134,18 @@ describe('test agent autenticate services', () => {
   });
 
   it('should throw if there is no agent matching the API key', async () => {
-    const mockSavedObjectsClient = savedObjectsClientMock.create();
-    mockSavedObjectsClient.find.mockReturnValue(
-      Promise.resolve({
-        page: 1,
-        per_page: 100,
-        total: 1,
-        saved_objects: [],
-      })
-    );
+    const mockEsClient = elasticsearchServiceMock.createInternalClient();
+
+    mockEsClient.search.mockResolvedValue({
+      body: {
+        hits: {
+          // @ts-expect-error
+          hits: [],
+        },
+      },
+    });
     expect(
-      authenticateAgentWithAccessToken(mockSavedObjectsClient, {
+      authenticateAgentWithAccessToken(mockEsClient, {
         auth: { isAuthenticated: true },
         headers: {
           authorization: 'ApiKey cGVkVHVISUJURUR0OTN3VzBGaHI6TnU1U0JtbHJSeC12Rm9qQWpoSHlUZw==',

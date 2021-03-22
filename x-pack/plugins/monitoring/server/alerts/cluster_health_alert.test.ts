@@ -7,8 +7,10 @@
 
 import { ClusterHealthAlert } from './cluster_health_alert';
 import { ALERT_CLUSTER_HEALTH } from '../../common/constants';
-import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
+import { AlertClusterHealthType, AlertSeverity } from '../../common/enums';
+import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 const RealDate = Date;
 
@@ -26,8 +28,8 @@ jest.mock('../static_globals', () => ({
   },
 }));
 
-jest.mock('../lib/alerts/fetch_legacy_alerts', () => ({
-  fetchLegacyAlerts: jest.fn(),
+jest.mock('../lib/alerts/fetch_cluster_health', () => ({
+  fetchClusterHealth: jest.fn(),
 }));
 jest.mock('../lib/alerts/fetch_clusters', () => ({
   fetchClusters: jest.fn(),
@@ -63,23 +65,23 @@ describe('ClusterHealthAlert', () => {
     function FakeDate() {}
     FakeDate.prototype.valueOf = () => 1;
 
+    const ccs = undefined;
     const clusterUuid = 'abc123';
     const clusterName = 'testCluster';
-    const legacyAlert = {
-      prefix: 'Elasticsearch cluster status is yellow.',
-      message: 'Allocate missing replica shards.',
-      metadata: {
-        severity: 2000,
-        cluster_uuid: clusterUuid,
+    const healths = [
+      {
+        health: AlertClusterHealthType.Yellow,
+        clusterUuid,
+        ccs,
       },
-    };
+    ];
 
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        callCluster: jest.fn(),
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,
@@ -94,8 +96,8 @@ describe('ClusterHealthAlert', () => {
     beforeEach(() => {
       // @ts-ignore
       Date = FakeDate;
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [legacyAlert];
+      (fetchClusterHealth as jest.Mock).mockImplementation(() => {
+        return healths;
       });
       (fetchClusters as jest.Mock).mockImplementation(() => {
         return [{ clusterUuid, clusterName }];
@@ -120,8 +122,15 @@ describe('ClusterHealthAlert', () => {
         alertStates: [
           {
             cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
-            ccs: undefined,
-            nodeName: 'Elasticsearch cluster alert',
+            ccs,
+            itemLabel: undefined,
+            nodeId: undefined,
+            nodeName: undefined,
+            meta: {
+              ccs,
+              clusterUuid,
+              health: AlertClusterHealthType.Yellow,
+            },
             ui: {
               isFiring: true,
               message: {
@@ -140,7 +149,7 @@ describe('ClusterHealthAlert', () => {
                   },
                 ],
               },
-              severity: 'danger',
+              severity: AlertSeverity.Warning,
               triggeredMS: 1,
               lastCheckedMS: 0,
             },
@@ -160,9 +169,15 @@ describe('ClusterHealthAlert', () => {
       });
     });
 
-    it('should not fire actions if there is no legacy alert', async () => {
-      (fetchLegacyAlerts as jest.Mock).mockImplementation(() => {
-        return [];
+    it('should not fire actions if the cluster health is green', async () => {
+      (fetchClusterHealth as jest.Mock).mockImplementation(() => {
+        return [
+          {
+            health: AlertClusterHealthType.Green,
+            clusterUuid,
+            ccs,
+          },
+        ];
       });
       const alert = new ClusterHealthAlert();
       const type = alert.getAlertType();

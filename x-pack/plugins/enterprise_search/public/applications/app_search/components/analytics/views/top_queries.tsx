@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
 
-import { TOP_QUERIES } from '../constants';
+import { AnalyticsLogic } from '../';
 import { AnalyticsLayout } from '../analytics_layout';
 import { AnalyticsSearch, AnalyticsTable } from '../components';
-import { AnalyticsLogic } from '../';
+import { TOP_QUERIES } from '../constants';
 
 export const TopQueries: React.FC = () => {
   const { topQueries } = useValues(AnalyticsLogic);

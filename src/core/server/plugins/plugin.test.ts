@@ -100,7 +100,7 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.optionalPlugins).toEqual(['some-optional-dep']);
 });
 
-test('`setup` fails if `plugin` initializer is not exported', async () => {
+test('`setup` fails if `plugin` initializer is not exported', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -115,14 +115,14 @@ test('`setup` fails if `plugin` initializer is not exported', async () => {
     ),
   });
 
-  await expect(
+  expect(() =>
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Plugin "some-plugin-id" does not export "plugin" definition (plugin-without-initializer-path).]`
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Plugin \\"some-plugin-id\\" does not export \\"plugin\\" definition (plugin-without-initializer-path)."`
   );
 });
 
-test('`setup` fails if plugin initializer is not a function', async () => {
+test('`setup` fails if plugin initializer is not a function', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -137,14 +137,14 @@ test('`setup` fails if plugin initializer is not a function', async () => {
     ),
   });
 
-  await expect(
+  expect(() =>
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Definition of plugin "some-plugin-id" should be a function (plugin-with-wrong-initializer-path).]`
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Definition of plugin \\"some-plugin-id\\" should be a function (plugin-with-wrong-initializer-path)."`
   );
 });
 
-test('`setup` fails if initializer does not return object', async () => {
+test('`setup` fails if initializer does not return object', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -161,14 +161,14 @@ test('`setup` fails if initializer does not return object', async () => {
 
   mockPluginInitializer.mockReturnValue(null);
 
-  await expect(
+  expect(() =>
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Initializer for plugin "some-plugin-id" is expected to return plugin instance, but returned "null".]`
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Initializer for plugin \\"some-plugin-id\\" is expected to return plugin instance, but returned \\"null\\"."`
   );
 });
 
-test('`setup` fails if object returned from initializer does not define `setup` function', async () => {
+test('`setup` fails if object returned from initializer does not define `setup` function', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -186,10 +186,10 @@ test('`setup` fails if object returned from initializer does not define `setup` 
   const mockPluginInstance = { run: jest.fn() };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
 
-  await expect(
+  expect(() =>
     plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
-  ).rejects.toMatchInlineSnapshot(
-    `[Error: Instance of plugin "some-plugin-id" does not define "setup" function.]`
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Instance of plugin \\"some-plugin-id\\" does not define \\"setup\\" function."`
   );
 });
 
@@ -223,7 +223,7 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
   expect(mockPluginInstance.setup).toHaveBeenCalledWith(setupContext, setupDependencies);
 });
 
-test('`start` fails if setup is not called first', async () => {
+test('`start` fails if setup is not called first', () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -238,7 +238,7 @@ test('`start` fails if setup is not called first', async () => {
     ),
   });
 
-  await expect(plugin.start({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
+  expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
     `"Plugin \\"some-plugin-id\\" can't be started since it isn't set up."`
   );
 });

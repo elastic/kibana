@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
+
 import {
   EuiFlyoutFooter,
   EuiFlexGroup,
@@ -35,7 +37,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={onApiTokenChange}
-            fill={true}
+            fill
             color="secondary"
             iconType="check"
             data-test-subj="APIKeyActionButton"

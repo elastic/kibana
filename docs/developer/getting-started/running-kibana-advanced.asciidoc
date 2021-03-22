@@ -24,24 +24,6 @@ By default, you can log in with username `elastic` and password
 you’d like to configure a different password.
 
 [discrete]
-=== Running {kib} in Open-Source mode
-
-If you’re looking to only work with the open-source software, supply the
-license type to `yarn es`:
-
-[source,bash]
-----
-yarn es snapshot --license oss
-----
-
-And start {kib} with only open-source code:
-
-[source,bash]
-----
-yarn start --oss
-----
-
-[discrete]
 === Unsupported URL Type
 
 If you’re installing dependencies and seeing an error that looks

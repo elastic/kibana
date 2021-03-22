@@ -10,15 +10,23 @@ import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { ReindexWarning } from '../../../../../../../../common/types';
+import { mockKibanaSemverVersion } from '../../../../../../../../common/constants';
+
 import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 
 jest.mock('../../../../../../app_context', () => {
+  const { docLinksServiceMock } = jest.requireActual(
+    '../../../../../../../../../../../src/core/public/doc_links/doc_links_service.mock'
+  );
+
   return {
     useAppContext: () => {
       return {
-        docLinks: {
-          DOC_LINK_VERSION: 'current',
-          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+        docLinks: docLinksServiceMock.createStartContract(),
+        kibanaVersionInfo: {
+          currentMajor: mockKibanaSemverVersion.major,
+          prevMajor: mockKibanaSemverVersion.major - 1,
+          nextMajor: mockKibanaSemverVersion.major + 1,
         },
       };
     },
@@ -28,7 +36,7 @@ jest.mock('../../../../../../app_context', () => {
 describe('WarningsFlyoutStep', () => {
   const defaultProps = {
     advanceNextStep: jest.fn(),
-    warnings: [ReindexWarning.allField, ReindexWarning.booleanFields],
+    warnings: [] as ReindexWarning[],
     closeFlyout: jest.fn(),
     renderGlobalCallouts: jest.fn(),
   };
@@ -37,23 +45,42 @@ describe('WarningsFlyoutStep', () => {
     expect(shallow(<WarningsFlyoutStep {...defaultProps} />)).toMatchSnapshot();
   });
 
-  it('does not allow proceeding until all are checked', () => {
-    const wrapper = mount(
-      <I18nProvider>
-        <WarningsFlyoutStep {...defaultProps} />
-      </I18nProvider>
-    );
-    const button = wrapper.find('EuiButton');
+  if (mockKibanaSemverVersion.major === 7) {
+    it('does not allow proceeding until all are checked', () => {
+      const defaultPropsWithWarnings = {
+        ...defaultProps,
+        warnings: [
+          {
+            warningType: 'customTypeName',
+            meta: {
+              typeName: 'my_mapping_type',
+            },
+          },
+          {
+            warningType: 'indexSetting',
+            meta: {
+              deprecatedSettings: ['index.force_memory_term_dictionary'],
+            },
+          },
+        ] as ReindexWarning[],
+      };
+      const wrapper = mount(
+        <I18nProvider>
+          <WarningsFlyoutStep {...defaultPropsWithWarnings} />
+        </I18nProvider>
+      );
+      const button = wrapper.find('EuiButton');
 
-    button.simulate('click');
-    expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
+      button.simulate('click');
+      expect(defaultPropsWithWarnings.advanceNextStep).not.toHaveBeenCalled();
 
-    wrapper.find(`input#${idForWarning(ReindexWarning.allField)}`).simulate('change');
-    button.simulate('click');
-    expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
+      // first warning (customTypeName)
+      wrapper.find(`input#${idForWarning(0)}`).simulate('change');
+      // second warning (indexSetting)
+      wrapper.find(`input#${idForWarning(1)}`).simulate('change');
+      button.simulate('click');
 
-    wrapper.find(`input#${idForWarning(ReindexWarning.booleanFields)}`).simulate('change');
-    button.simulate('click');
-    expect(defaultProps.advanceNextStep).toHaveBeenCalled();
-  });
+      expect(defaultPropsWithWarnings.advanceNextStep).toHaveBeenCalled();
+    });
+  }
 });

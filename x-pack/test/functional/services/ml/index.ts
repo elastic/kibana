@@ -18,7 +18,6 @@ import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytic
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
 import { MachineLearningDataFrameAnalyticsEditProvider } from './data_frame_analytics_edit';
 import { MachineLearningDataFrameAnalyticsResultsProvider } from './data_frame_analytics_results';
-import { MachineLearningDataFrameAnalyticsScatterplotProvider } from './data_frame_analytics_scatterplot';
 import { MachineLearningDataFrameAnalyticsMapProvider } from './data_frame_analytics_map';
 import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
@@ -45,6 +44,7 @@ import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewe
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
+import { MachineLearningAlertingProvider } from './alerting';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -62,12 +62,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     api
   );
   const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
-  const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(context);
+  const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(
+    context,
+    commonUI
+  );
   const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
-  const dataFrameAnalyticsScatterplot = MachineLearningDataFrameAnalyticsScatterplotProvider(
-    context
-  );
 
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const dataVisualizerTable = MachineLearningDataVisualizerTableProvider(context, commonUI);
@@ -95,10 +95,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
+  const alerting = MachineLearningAlertingProvider(context, commonUI);
 
   return {
     anomaliesTable,
     anomalyExplorer,
+    alerting,
     api,
     commonAPI,
     commonConfig,
@@ -110,7 +112,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataFrameAnalyticsResults,
     dataFrameAnalyticsMap,
     dataFrameAnalyticsTable,
-    dataFrameAnalyticsScatterplot,
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,

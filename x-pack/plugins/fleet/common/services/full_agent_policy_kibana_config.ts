@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FullAgentPolicyKibanaConfig } from '../types';
+import type { FullAgentPolicyKibanaConfig } from '../types';
 
 export function getFullAgentPolicyKibanaConfig(kibanaUrls: string[]): FullAgentPolicyKibanaConfig {
   // paths and protocol are validated to be the same for all urls, so use the first to get them

@@ -131,7 +131,8 @@ export const queryPreviewReducer = () => (state: State, action: Action): State =
       const thresholdField =
         action.threshold != null &&
         action.threshold.field != null &&
-        action.threshold.field.trim() !== '';
+        action.threshold.field.length > 0 &&
+        action.threshold.field.every((field) => field.trim() !== '');
       const showNonEqlHist =
         action.ruleType === 'query' ||
         action.ruleType === 'saved_query' ||

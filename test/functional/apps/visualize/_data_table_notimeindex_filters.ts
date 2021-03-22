@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const filterBar = getService('filterBar');
   const renderable = getService('renderable');
+  const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
     'common',
@@ -66,13 +67,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization(vizName1);
 
-      // hover and click on cell to filter
-      await PageObjects.visChart.filterOnTableCell(1, 2);
+      await retry.try(async () => {
+        // hover and click on cell to filter
+        await PageObjects.visChart.filterOnTableCell(1, 2);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender();
-      const filterCount = await filterBar.getFilterCount();
-      expect(filterCount).to.be(1);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await renderable.waitForRender();
+        const filterCount = await filterBar.getFilterCount();
+        expect(filterCount).to.be(1);
+      });
 
       await filterBar.removeAllFilters();
     });

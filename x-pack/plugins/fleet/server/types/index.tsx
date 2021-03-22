@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { LegacyScopedClusterClient } from 'src/core/server';
-
 export {
   // Object types
   Agent,
@@ -81,9 +79,10 @@ export {
   dataTypes,
   // Fleet Server types
   FleetServerEnrollmentAPIKey,
+  FleetServerAgent,
+  FleetServerAgentAction,
+  FleetServerPolicy,
 } from '../../common';
-
-export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
 
 export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',

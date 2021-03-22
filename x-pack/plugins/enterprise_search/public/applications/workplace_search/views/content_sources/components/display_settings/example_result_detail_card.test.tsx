@@ -8,11 +8,11 @@
 import '../../../../../__mocks__/shallow_useeffect.mock';
 
 import { setMockValues } from '../../../../../__mocks__';
-import { shallow } from 'enzyme';
+import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
-import { exampleResult } from '../../../../__mocks__/content_sources.mock';
+import { shallow } from 'enzyme';
 
 import { ExampleResultDetailCard } from './example_result_detail_card';
 

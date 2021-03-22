@@ -6,9 +6,10 @@
  */
 
 import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
-import { UsageStatsService } from '.';
-import { UsageStatsClient } from './usage_stats_client';
+
 import { SPACES_USAGE_STATS_TYPE } from './constants';
+import { UsageStatsClient } from './usage_stats_client';
+import { UsageStatsService } from './usage_stats_service';
 
 describe('UsageStatsService', () => {
   const mockLogger = loggingSystemMock.createLogger();

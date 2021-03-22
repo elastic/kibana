@@ -10,11 +10,13 @@ import { join } from 'path';
 import typeDetect from 'type-detect';
 import { Subject } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
 
 import { Logger } from '../logging';
 import {
   Plugin,
+  AsyncPlugin,
   PluginInitializerContext,
   PluginManifest,
   PluginInitializer,
@@ -49,7 +51,9 @@ export class PluginWrapper<
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
 
-  private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private instance?:
+    | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
@@ -83,9 +87,11 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: CoreSetup<TPluginsStart>, plugins: TPluginsSetup) {
+  public setup(
+    setupContext: CoreSetup<TPluginsStart>,
+    plugins: TPluginsSetup
+  ): TSetup | Promise<TSetup> {
     this.instance = this.createPluginInstance();
-
     return this.instance.setup(setupContext, plugins);
   }
 
@@ -96,14 +102,21 @@ export class PluginWrapper<
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `start` function.
    */
-  public async start(startContext: CoreStart, plugins: TPluginsStart) {
+  public start(startContext: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart> {
     if (this.instance === undefined) {
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    const startContract = await this.instance.start(startContext, plugins);
-    this.startDependencies$.next([startContext, plugins, startContract]);
-    return startContract;
+    const startContract = this.instance.start(startContext, plugins);
+    if (isPromise(startContract)) {
+      return startContract.then((resolvedContract) => {
+        this.startDependencies$.next([startContext, plugins, resolvedContract]);
+        return resolvedContract;
+      });
+    } else {
+      this.startDependencies$.next([startContext, plugins, startContract]);
+      return startContract;
+    }
   }
 
   /**

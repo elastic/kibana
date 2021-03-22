@@ -51,14 +51,35 @@ export const isFileEvent = ({
   eventCategory: string | null | undefined;
   eventDataset: string | null | undefined;
 }) =>
-  (eventCategory != null && eventCategory.toLowerCase() === 'file') ||
-  (eventDataset != null && eventDataset.toLowerCase() === 'file');
+  eventCategory?.toLowerCase() === 'file' ||
+  eventDataset?.toLowerCase() === 'file' ||
+  eventDataset?.toLowerCase() === 'endpoint.events.file';
 
 export const isProcessStoppedOrTerminationEvent = (
   eventAction: string | null | undefined
 ): boolean => ['process_stopped', 'termination_event'].includes(`${eventAction}`.toLowerCase());
 
 export const showVia = (eventAction: string | null | undefined): boolean =>
-  ['file_create_event', 'created', 'file_delete_event', 'deleted'].includes(
-    `${eventAction}`.toLowerCase()
-  );
+  [
+    'created',
+    'creation',
+    'deleted',
+    'deletion',
+    'file_create_event',
+    'file_delete_event',
+    'files-encrypted',
+    'load',
+    'modification',
+    'overwrite',
+    'rename',
+  ].includes(`${eventAction}`.toLowerCase());
+
+export const excludeFileNameAndPath = ({
+  eventAction,
+  eventCategory,
+  eventType,
+}: {
+  eventAction: string | null | undefined;
+  eventCategory: string | null | undefined;
+  eventType: string | null | undefined;
+}) => false;

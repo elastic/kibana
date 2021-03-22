@@ -29,9 +29,9 @@ const tooltipMaxWidth = parseInt(theme.euiSizeXL || 0, 10) * 10;
  * @param formatter {Function} Tooltip formatter
  * @param events {Constructor} Allows tooltip to return event response data
  */
-export function Tooltip(id, el, formatter, events) {
+export function Tooltip(id, el, formatter, events, uiSettings) {
   if (!(this instanceof Tooltip)) {
-    return new Tooltip(id, el, formatter, events);
+    return new Tooltip(id, el, formatter, events, uiSettings);
   }
 
   this.id = id; // unique id for this tooltip type
@@ -39,6 +39,7 @@ export function Tooltip(id, el, formatter, events) {
   this.order = 100; // higher ordered contents are rendered below the others
   this.formatter = formatter;
   this.events = events;
+  this.uiSettings = uiSettings;
   this.containerClass = 'visWrapper';
   this.tooltipClass = 'visTooltip';
   this.tooltipSizerClass = 'visTooltip__sizingClone';
@@ -223,7 +224,7 @@ Tooltip.prototype.render = function () {
         }
 
         const events = self.events ? self.events.eventResponse(d, i) : d;
-        return render(self.formatter(events));
+        return render(self.formatter(events, self.uiSettings));
       });
 
       self.binder.fakeD3Bind(this, 'mouseleave', function () {

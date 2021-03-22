@@ -35,11 +35,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             url.format({
               pathname: `/api/apm/services/opbeans-java/service_overview_instances`,
               query: {
+                latencyAggregationType: 'avg',
                 start,
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                uiFilters: '{}',
               },
             })
           );
@@ -63,11 +63,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             url.format({
               pathname: `/api/apm/services/opbeans-java/service_overview_instances`,
               query: {
+                latencyAggregationType: 'avg',
                 start,
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                uiFilters: '{}',
               },
             })
           );
@@ -146,11 +146,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             url.format({
               pathname: `/api/apm/services/opbeans-ruby/service_overview_instances`,
               query: {
+                latencyAggregationType: 'avg',
                 start,
                 end,
                 numBuckets: 20,
                 transactionType: 'request',
-                uiFilters: '{}',
               },
             })
           );

@@ -15,7 +15,7 @@ import { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
   chrome.setHelpExtension({
     appName: i18n.translate('visualize.helpMenu.appName', {
-      defaultMessage: 'Visualize',
+      defaultMessage: 'Visualize Library',
     }),
     links: [
       {

@@ -7,14 +7,12 @@
  */
 
 import type { Map, CustomLayerInterface } from 'mapbox-gl';
+import type { View } from 'vega';
 import type { LayerParameters } from './types';
 
-// @ts-ignore
-import { vega } from '../../lib/vega';
-
 export interface VegaLayerContext {
-  vegaView: vega.View;
-  updateVegaView: (map: Map, view: vega.View) => void;
+  vegaView: View;
+  updateVegaView: (map: Map, view: View) => void;
 }
 
 export function initVegaLayer({

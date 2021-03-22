@@ -12,7 +12,7 @@ import { Connectors, Props } from './connectors';
 import { TestProviders } from '../../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors } from './__mock__';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
 
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
@@ -72,7 +72,7 @@ describe('Connectors', () => {
     const newWrapper = mount(
       <Connectors
         {...props}
-        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.servicenow }}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
         wrappingComponent: TestProviders,
@@ -99,7 +99,7 @@ describe('Connectors', () => {
     const newWrapper = mount(
       <Connectors
         {...props}
-        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.servicenow }}
+        selectedConnector={{ id: 'servicenow-1', type: ConnectorTypes.serviceNowITSM }}
       />,
       {
         wrappingComponent: TestProviders,

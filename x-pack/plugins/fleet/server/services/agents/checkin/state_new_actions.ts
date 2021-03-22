@@ -7,8 +7,8 @@
 
 import semverParse from 'semver/functions/parse';
 import semverLt from 'semver/functions/lt';
-
-import { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { timer, from, TimeoutError, of, EMPTY } from 'rxjs';
 import { omit } from 'lodash';
 import {
   shareReplay,
@@ -22,17 +22,12 @@ import {
   timeout,
   take,
 } from 'rxjs/operators';
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import {
-  Agent,
-  AgentAction,
-  AgentPolicyAction,
-  AgentPolicyActionV7_9,
-  AgentSOAttributes,
-} from '../../../types';
+import type { KibanaRequest } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
+import type { Agent, AgentAction, AgentPolicyAction, AgentPolicyActionV7_9 } from '../../../types';
 import * as APIKeysService from '../../api_keys';
 import {
-  AGENT_SAVED_OBJECT_TYPE,
   AGENT_UPDATE_ACTIONS_INTERVAL_MS,
   AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
@@ -44,8 +39,9 @@ import {
   getAgentPolicyActionByIds,
 } from '../actions';
 import { appContextService } from '../../app_context';
+import { getAgentById, updateAgent } from '../crud';
+
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
-import { getAgent } from '../crud';
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -106,31 +102,35 @@ function createAgentPolicyActionSharedObservable(agentPolicyId: string) {
   );
 }
 
+async function getAgentDefaultOutputAPIKey(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agent: Agent
+) {
+  return agent.default_api_key;
+}
+
 async function getOrCreateAgentDefaultOutputAPIKey(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agent: Agent
 ): Promise<string> {
-  const {
-    attributes: { default_api_key: defaultApiKey },
-  } = await appContextService
-    .getEncryptedSavedObjects()
-    .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id);
-
-  if (defaultApiKey) {
-    return defaultApiKey;
+  const defaultAPIKey = await getAgentDefaultOutputAPIKey(soClient, esClient, agent);
+  if (defaultAPIKey) {
+    return defaultAPIKey;
   }
 
   const outputAPIKey = await APIKeysService.generateOutputApiKey(soClient, 'default', agent.id);
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
+  await updateAgent(esClient, agent.id, {
     default_api_key: outputAPIKey.key,
     default_api_key_id: outputAPIKey.id,
   });
-
   return outputAPIKey.key;
 }
 
 export async function createAgentActionFromPolicyAction(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agent: Agent,
   policyAction: AgentPolicyAction
 ) {
@@ -168,7 +168,7 @@ export async function createAgentActionFromPolicyAction(
   );
 
   // Mutate the policy to set the api token for this agent
-  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, agent);
+  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, esClient, agent);
   if (newAgentAction.data.policy) {
     newAgentAction.data.policy.outputs.default.api_key = apiKey;
   }
@@ -249,7 +249,9 @@ export function agentCheckinStateNewActionsFactory() {
           (!agent.policy_revision || action.policy_revision > agent.policy_revision)
       ),
       rateLimiter(),
-      concatMap((policyAction) => createAgentActionFromPolicyAction(soClient, agent, policyAction)),
+      concatMap((policyAction) =>
+        createAgentActionFromPolicyAction(soClient, esClient, agent, policyAction)
+      ),
       merge(newActions$),
       concatMap((data: AgentAction[] | undefined) => {
         if (data === undefined) {
@@ -264,7 +266,7 @@ export function agentCheckinStateNewActionsFactory() {
           (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
         );
         if (hasConfigReassign) {
-          return from(getAgent(soClient, esClient, agent.id)).pipe(
+          return from(getAgentById(esClient, agent.id)).pipe(
             concatMap((refreshedAgent) => {
               if (!refreshedAgent.policy_id) {
                 throw new Error('Agent does not have a policy assigned');
@@ -274,7 +276,7 @@ export function agentCheckinStateNewActionsFactory() {
             }),
             rateLimiter(),
             concatMap((policyAction) =>
-              createAgentActionFromPolicyAction(soClient, agent, policyAction)
+              createAgentActionFromPolicyAction(soClient, esClient, agent, policyAction)
             )
           );
         }

@@ -6,7 +6,7 @@
  */
 
 import { AlertInstanceState } from '../../../common/types/alerts';
-import { AlertsClient } from '../../../../alerts/server';
+import { AlertsClient } from '../../../../alerting/server';
 import { AlertsFactory } from '../../alerts';
 import {
   CommonAlertStatus,
@@ -20,7 +20,7 @@ export async function fetchStatus(
   alertsClient: AlertsClient,
   licenseService: MonitoringLicenseService,
   alertTypes: string[] | undefined,
-  clusterUuid: string,
+  clusterUuids: string[],
   filters: CommonAlertFilter[] = []
 ): Promise<{ [type: string]: CommonAlertStatus }> {
   const types: Array<{ type: string; result: CommonAlertStatus }> = [];
@@ -28,7 +28,7 @@ export async function fetchStatus(
   await Promise.all(
     (alertTypes || ALERTS).map(async (type) => {
       const alert = await AlertsFactory.getByType(type, alertsClient);
-      if (!alert || !alert.isEnabled(licenseService) || !alert.rawAlert) {
+      if (!alert || !alert.rawAlert) {
         return;
       }
 
@@ -57,7 +57,7 @@ export async function fetchStatus(
         }
         for (const state of alertInstanceState.alertStates) {
           const meta = instance.meta;
-          if (clusterUuid && state.cluster.clusterUuid !== clusterUuid) {
+          if (clusterUuids && !clusterUuids.includes(state.cluster.clusterUuid)) {
             return accum;
           }
 

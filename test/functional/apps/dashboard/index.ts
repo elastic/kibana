@@ -57,6 +57,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dashboard_back_button'));
       loadTestFile(require.resolve('./dashboard_error_handling'));
       loadTestFile(require.resolve('./legacy_urls'));
+      loadTestFile(require.resolve('./saved_search_embeddable'));
 
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
@@ -81,6 +82,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.
       // If we don't use the timestamp in the URL, the colors in the charts will be different.
       loadTestFile(require.resolve('./dashboard_snapshots'));
+      loadTestFile(require.resolve('./embeddable_library'));
     });
 
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
@@ -93,8 +95,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       loadTestFile(require.resolve('./dashboard_time_picker'));
       loadTestFile(require.resolve('./bwc_shared_urls'));
+      loadTestFile(require.resolve('./bwc_import'));
       loadTestFile(require.resolve('./panel_replacing'));
       loadTestFile(require.resolve('./panel_cloning'));
+      loadTestFile(require.resolve('./copy_panel_to'));
       loadTestFile(require.resolve('./panel_context_menu'));
       loadTestFile(require.resolve('./dashboard_state'));
     });

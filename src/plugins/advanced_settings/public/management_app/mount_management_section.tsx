@@ -67,6 +67,8 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
+  chrome.docTitle.change(title);
+
   ReactDOM.render(
     <I18nProvider>
       <Router history={params.history}>
@@ -90,6 +92,7 @@ export async function mountManagementSection(
     params.element
   );
   return () => {
+    chrome.docTitle.reset();
     ReactDOM.unmountComponentAtNode(params.element);
   };
 }

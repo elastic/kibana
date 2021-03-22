@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler, SavedObjectsClientContract } from 'kibana/public';
+import { HttpHandler } from 'kibana/public';
 import _ from 'lodash';
 import {
   loadInitialState,
@@ -183,23 +183,28 @@ const sampleIndexPatterns = {
   '2': indexPattern2,
 };
 
-function mockClient() {
-  return ({
-    find: jest.fn(async () => ({
-      savedObjects: [
-        { id: '1', attributes: { title: sampleIndexPatterns[1].title } },
-        { id: '2', attributes: { title: sampleIndexPatterns[2].title } },
-      ],
-    })),
-  } as unknown) as Pick<SavedObjectsClientContract, 'find'>;
-}
-
 function mockIndexPatternsService() {
   return ({
     get: jest.fn(async (id: '1' | '2') => {
-      return { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      const result = { ...sampleIndexPatternsFromService[id], metaFields: [] };
+      if (!result.fields) {
+        result.fields = [];
+      }
+      return result;
     }),
-  } as unknown) as Pick<IndexPatternsContract, 'get'>;
+    getIdsWithTitle: jest.fn(async () => {
+      return [
+        {
+          id: sampleIndexPatterns[1].id,
+          title: sampleIndexPatterns[1].title,
+        },
+        {
+          id: sampleIndexPatterns[2].id,
+          title: sampleIndexPatterns[2].title,
+        },
+      ];
+    }),
+  } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>;
 }
 
 describe('loader', () => {
@@ -212,7 +217,8 @@ describe('loader', () => {
           get: jest.fn(() =>
             Promise.reject('mockIndexPatternService.get should not have been called')
           ),
-        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+          getIdsWithTitle: jest.fn(),
+        } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache).toEqual(sampleIndexPatterns);
@@ -281,7 +287,11 @@ describe('loader', () => {
               },
             ],
           })),
-        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+        } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -333,7 +343,11 @@ describe('loader', () => {
               },
             ],
           })),
-        } as unknown) as Pick<IndexPatternsContract, 'get'>,
+          getIdsWithTitle: jest.fn(async () => ({
+            id: 'foo',
+            title: 'Foo index',
+          })),
+        } as unknown) as Pick<IndexPatternsContract, 'get' | 'getIdsWithTitle'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -344,7 +358,6 @@ describe('loader', () => {
     it('should load a default state', async () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -368,10 +381,9 @@ describe('loader', () => {
 
     it('should load a default state without loading the indexPatterns when embedded', async () => {
       const storage = createMockStorage();
-      const savedObjectsClient = mockClient();
+      const indexPatternsService = mockIndexPatternsService();
       const state = await loadInitialState({
-        savedObjectsClient,
-        indexPatternsService: mockIndexPatternsService(),
+        indexPatternsService,
         storage,
         options: { isFullEditor: false },
       });
@@ -384,14 +396,12 @@ describe('loader', () => {
       });
 
       expect(storage.set).not.toHaveBeenCalled();
-
-      expect(savedObjectsClient.find).not.toHaveBeenCalled();
+      expect(indexPatternsService.getIdsWithTitle).not.toHaveBeenCalled();
     });
 
     it('should load a default state when lastUsedIndexPatternId is not found in indexPatternRefs', async () => {
       const storage = createMockStorage({ indexPatternId: 'c' });
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -415,7 +425,6 @@ describe('loader', () => {
 
     it('should load lastUsedIndexPatternId if in localStorage', async () => {
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage: createMockStorage({ indexPatternId: '2' }),
         options: { isFullEditor: true },
@@ -438,7 +447,6 @@ describe('loader', () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
         defaultIndexPatternId: '2',
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -463,7 +471,6 @@ describe('loader', () => {
     it('should use the indexPatternId of the visualize trigger field, if provided', async () => {
       const storage = createMockStorage();
       const state = await loadInitialState({
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         initialContext: {
@@ -524,7 +531,6 @@ describe('loader', () => {
           { name: 'indexpattern-datasource-layer-layerb', id: '2', type: 'index-pattern' },
           { name: 'another-reference', id: 'c', type: 'index-pattern' },
         ],
-        savedObjectsClient: mockClient(),
         indexPatternsService: mockIndexPatternsService(),
         storage,
         options: { isFullEditor: true },
@@ -681,6 +687,7 @@ describe('loader', () => {
           get: jest.fn(async () => {
             throw err;
           }),
+          getIdsWithTitle: jest.fn(),
         },
         onError,
         storage,
@@ -688,7 +695,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 
@@ -808,6 +815,7 @@ describe('loader', () => {
           get: jest.fn(async () => {
             throw err;
           }),
+          getIdsWithTitle: jest.fn(),
         },
         onError,
         storage,
@@ -815,7 +823,7 @@ describe('loader', () => {
 
       expect(setState).not.toHaveBeenCalled();
       expect(storage.set).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith(err);
+      expect(onError).toHaveBeenCalledWith(Error('Missing indexpatterns'));
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISessionExpired } from './session_expired';
+import type { ISessionExpired } from './session_expired';
 
 export function createSessionExpiredMock() {
   return {

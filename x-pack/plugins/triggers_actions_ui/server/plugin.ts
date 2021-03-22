@@ -6,7 +6,7 @@
  */
 
 import { Logger, Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
-import { PluginSetupContract as AlertsPluginSetup } from '../../alerts/server';
+import { PluginSetupContract as AlertsPluginSetup } from '../../alerting/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { getService, register as registerDataService } from './data';
 import { createHealthRoute } from './routes/health';
@@ -18,7 +18,7 @@ export interface PluginStartContract {
 
 interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
-  alerts?: AlertsPluginSetup;
+  alerting?: AlertsPluginSetup;
 }
 
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
@@ -30,7 +30,7 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
     this.data = getService();
   }
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup): Promise<void> {
+  public setup(core: CoreSetup, plugins: PluginsSetup): void {
     const router = core.http.createRouter();
     registerDataService({
       logger: this.logger,
@@ -39,10 +39,10 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       baseRoute: BASE_ROUTE,
     });
 
-    createHealthRoute(this.logger, router, BASE_ROUTE, plugins.alerts !== undefined);
+    createHealthRoute(this.logger, router, BASE_ROUTE, plugins.alerting !== undefined);
   }
 
-  public async start(): Promise<PluginStartContract> {
+  public start(): PluginStartContract {
     return {
       data: this.data,
     };

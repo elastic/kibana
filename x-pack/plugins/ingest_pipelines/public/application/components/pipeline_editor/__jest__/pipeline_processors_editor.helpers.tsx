@@ -154,6 +154,17 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         find(`${processorSelector}.moreMenu.duplicateButton`).simulate('click');
       });
     },
+    openProcessorEditor: (processorSelector: string) => {
+      act(() => {
+        find(`${processorSelector}.manageItemButton`).simulate('click');
+      });
+      component.update();
+    },
+    submitProcessorForm: async () => {
+      await act(async () => {
+        find('editProcessorForm.submitButton').simulate('click');
+      });
+    },
   };
 };
 

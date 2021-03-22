@@ -33,7 +33,7 @@ import {
   useConnectorsResponse,
   useActionTypesResponse,
 } from './__mock__';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');
@@ -186,14 +186,14 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'unchanged',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowITSM,
           fields: null,
         },
         currentConfiguration: {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: ConnectorTypes.servicenow,
+            type: ConnectorTypes.serviceNowITSM,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -271,7 +271,7 @@ describe('ConfigureCases', () => {
           connector: {
             id: 'servicenow-1',
             name: 'unchanged',
-            type: ConnectorTypes.servicenow,
+            type: ConnectorTypes.serviceNowITSM,
             fields: null,
           },
           closureType: 'close-by-user',
@@ -331,7 +331,7 @@ describe('ConfigureCases', () => {
         connector: {
           id: 'servicenow-1',
           name: 'SN',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowITSM,
           fields: null,
         },
         persistLoading: true,
@@ -450,7 +450,7 @@ describe('ConfigureCases', () => {
           connector: {
             id: 'servicenow-1',
             name: 'My connector',
-            type: ConnectorTypes.servicenow,
+            type: ConnectorTypes.serviceNowITSM,
             fields: null,
           },
         }))
@@ -493,7 +493,7 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: ConnectorTypes.servicenow,
+        type: ConnectorTypes.serviceNowITSM,
         fields: null,
       },
       currentConfiguration: {
@@ -522,7 +522,7 @@ describe('closure options', () => {
       connector: {
         id: 'servicenow-1',
         name: 'My connector',
-        type: ConnectorTypes.servicenow,
+        type: ConnectorTypes.serviceNowITSM,
         fields: null,
       },
       closureType: 'close-by-pushing',
@@ -546,7 +546,7 @@ describe('user interactions', () => {
         connector: {
           id: 'resilient-2',
           name: 'unchanged',
-          type: ConnectorTypes.servicenow,
+          type: ConnectorTypes.serviceNowITSM,
           fields: null,
         },
         closureType: 'close-by-user',

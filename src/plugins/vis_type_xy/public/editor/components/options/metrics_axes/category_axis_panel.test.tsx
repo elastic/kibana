@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import { CategoryAxisPanel, CategoryAxisPanelProps } from './category_axis_panel';
 import { CategoryAxis } from '../../../../types';
 import { LabelOptions } from './label_options';
-import { categoryAxis, vis } from './mocks';
+import { categoryAxis } from './mocks';
 import { Position } from '@elastic/charts';
 
 describe('CategoryAxisPanel component', () => {
@@ -27,7 +27,6 @@ describe('CategoryAxisPanel component', () => {
 
     defaultProps = {
       axis,
-      vis,
       onPositionChanged,
       setCategoryAxis,
     };

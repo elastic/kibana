@@ -26,11 +26,9 @@ import {
   CaseConfigureResponseRt,
   CaseUserActionsResponse,
   CaseUserActionsResponseRt,
-  ServiceConnectorCaseResponseRt,
-  ServiceConnectorCaseResponse,
   CommentType,
   CasePatchRequest,
-} from '../../../../case/common/api';
+} from '../../../../cases/common/api';
 import { AppToast, ToasterError } from '../../common/components/toasters';
 import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';
@@ -104,12 +102,6 @@ export const decodeCaseConfigureResponse = (respCase?: CasesConfigureResponse) =
 export const decodeCaseUserActionsResponse = (respUserActions?: CaseUserActionsResponse) =>
   pipe(
     CaseUserActionsResponseRt.decode(respUserActions),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
-export const decodeServiceConnectorCaseResponse = (respPushCase?: ServiceConnectorCaseResponse) =>
-  pipe(
-    ServiceConnectorCaseResponseRt.decode(respPushCase),
     fold(throwErrors(createToasterPlainError), identity)
   );
 

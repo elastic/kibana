@@ -35,7 +35,7 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const dispatch = useDispatch();
 
   const [getUrlValues] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
+  const { dateRangeStart, dateRangeEnd, pagination, statusFilter, query } = getUrlValues();
 
   const { lastRefresh } = useContext(UptimeRefreshContext);
 
@@ -50,6 +50,7 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
         pageSize,
         pagination,
         statusFilter,
+        query,
       })
     );
   }, [
@@ -61,6 +62,7 @@ export const MonitorList: React.FC<MonitorListProps> = (props) => {
     pageSize,
     pagination,
     statusFilter,
+    query,
   ]);
 
   return (

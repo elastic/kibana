@@ -8,7 +8,9 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CheckBoxField, NumericField } from '../../../../../../shared_imports';
+import uuid from 'uuid';
+import { EuiCheckbox, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { NumericField } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
@@ -43,7 +45,7 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
         <>
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText"
-            defaultMessage="Reduce the number of segments in your shard by merging smaller files and clearing deleted ones."
+            defaultMessage="Reduce the number of segments in each index shard and clean up deleted documents."
           />{' '}
           <LearnMoreLink docPath="ilm-forcemerge.html" />
         </>
@@ -67,16 +69,29 @@ export const ForcemergeField: React.FunctionComponent<Props> = ({ phase }) => {
           },
         }}
       />
-      <UseField
-        path={`_meta.${phase}.bestCompression`}
-        component={CheckBoxField}
-        componentProps={{
-          hasEmptyLabelSpace: true,
-          euiFieldProps: {
-            'data-test-subj': `${phase}-bestCompression`,
-          },
-        }}
-      />
+      <EuiSpacer />
+      <UseField path={`_meta.${phase}.bestCompression`}>
+        {(field) => (
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiCheckbox
+                label={field.label}
+                checked={field.value as boolean}
+                onChange={field.onChange}
+                data-test-subj={`${phase}-bestCompression`}
+                id={uuid()}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18nTexts.editPolicy.bestCompressionFieldHelpText}
+                position="right"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </UseField>
     </DescribedFormRow>
   );
 };

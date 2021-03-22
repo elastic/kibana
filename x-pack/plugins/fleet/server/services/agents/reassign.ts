@@ -7,11 +7,13 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import type { AgentSOAttributes } from '../../types';
-import { AgentReassignmentError } from '../../errors';
+
+import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { getAgentPolicyForAgent, getAgents, listAllAgents } from './crud';
+import { AgentReassignmentError } from '../../errors';
+
+import { getAgents, getAgentPolicyForAgent, updateAgent, bulkUpdateAgents } from './crud';
+import type { GetAgentsOptions } from './index';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
@@ -27,12 +29,12 @@ export async function reassignAgent(
 
   await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
 
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
+  await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
   });
 
-  await createAgentAction(soClient, {
+  await createAgentAction(soClient, esClient, {
     agent_id: agentId,
     created_at: new Date().toISOString(),
     type: 'INTERNAL_POLICY_REASSIGN',
@@ -65,54 +67,53 @@ export async function reassignAgentIsAllowed(
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options:
-    | {
-        agentIds: string[];
-      }
-    | {
-        kuery: string;
-      },
+  options: { agents: Agent[] } | GetAgentsOptions,
   newAgentPolicyId: string
-) {
+): Promise<{ items: Array<{ id: string; success: boolean; error?: Error }> }> {
   const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!agentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  // Filter to agents that do not already use the new agent policy ID
-  const agents =
-    'agentIds' in options
-      ? await getAgents(soClient, options.agentIds)
-      : (
-          await listAllAgents(soClient, esClient, {
-            kuery: options.kuery,
-            showInactive: false,
-          })
-        ).agents;
-  // And which are allowed to unenroll
+  const allResults = 'agents' in options ? options.agents : await getAgents(esClient, options);
+  // which are allowed to unenroll
   const settled = await Promise.allSettled(
-    agents.map((agent) =>
+    allResults.map((agent) =>
       reassignAgentIsAllowed(soClient, esClient, agent.id, newAgentPolicyId).then((_) => agent)
     )
   );
-  const agentsToUpdate = agents.filter(
-    (agent, index) => settled[index].status === 'fulfilled' && agent.policy_id !== newAgentPolicyId
-  );
 
-  // Update the necessary agents
-  const res = await soClient.bulkUpdate<AgentSOAttributes>(
+  // Filter to agents that do not already use the new agent policy ID
+  const agentsToUpdate = allResults.filter((agent, index) => {
+    if (settled[index].status === 'fulfilled') {
+      if (agent.policy_id === newAgentPolicyId) {
+        settled[index] = {
+          status: 'rejected',
+          reason: new AgentReassignmentError(
+            `${agent.id} is already assigned to ${newAgentPolicyId}`
+          ),
+        };
+      } else {
+        return true;
+      }
+    }
+  });
+
+  const res = await bulkUpdateAgents(
+    esClient,
     agentsToUpdate.map((agent) => ({
-      type: AGENT_SAVED_OBJECT_TYPE,
-      id: agent.id,
-      attributes: {
+      agentId: agent.id,
+      data: {
         policy_id: newAgentPolicyId,
         policy_revision: null,
       },
     }))
   );
+
   const now = new Date().toISOString();
   await bulkCreateAgentActions(
     soClient,
+    esClient,
     agentsToUpdate.map((agent) => ({
       agent_id: agent.id,
       created_at: now,

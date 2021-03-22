@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { History, Location } from 'history';
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Timeline } from '../../../../../shared/charts/Timeline';
 import { HeightRetainer } from '../../../../../shared/HeightRetainer';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
@@ -21,9 +21,10 @@ import { WaterfallFlyout } from './WaterfallFlyout';
 import {
   IWaterfall,
   IWaterfallItem,
+  IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 
-const Container = styled.div`
+const Container = euiStyled.div`
   transition: 0.1s padding ease;
   position: relative;
   overflow: hidden;
@@ -55,7 +56,7 @@ const toggleFlyout = ({
   });
 };
 
-const WaterfallItemsContainer = styled.div`
+const WaterfallItemsContainer = euiStyled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
@@ -76,13 +77,13 @@ export function Waterfall({
   const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
   const waterfallHeight = itemContainerHeight * waterfall.items.length;
 
-  const { serviceColors, duration } = waterfall;
+  const { duration } = waterfall;
 
   const agentMarks = getAgentMarks(waterfall.entryWaterfallTransaction?.doc);
-  const errorMarks = getErrorMarks(waterfall.errorItems, serviceColors);
+  const errorMarks = getErrorMarks(waterfall.errorItems);
 
   function renderItems(
-    childrenByParentId: Record<string | number, IWaterfallItem[]>
+    childrenByParentId: Record<string | number, IWaterfallSpanOrTransaction[]>
   ) {
     const { entryWaterfallTransaction } = waterfall;
     if (!entryWaterfallTransaction) {
@@ -95,7 +96,6 @@ export function Waterfall({
         isOpen={isAccordionOpen}
         item={entryWaterfallTransaction}
         level={0}
-        serviceColors={serviceColors}
         waterfallItemId={waterfallItemId}
         location={location}
         errorsPerTransaction={waterfall.errorsPerTransaction}

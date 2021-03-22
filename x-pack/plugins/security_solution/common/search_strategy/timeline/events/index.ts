@@ -8,6 +8,7 @@
 export * from './all';
 export * from './details';
 export * from './last_event_time';
+export * from './eql';
 
 export enum TimelineEventsQueries {
   all = 'eventsAll',

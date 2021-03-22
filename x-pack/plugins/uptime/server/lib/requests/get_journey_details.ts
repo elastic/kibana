@@ -8,7 +8,7 @@
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 
-interface GetJourneyDetails {
+export interface GetJourneyDetails {
   checkGroup: string;
 }
 
@@ -27,13 +27,12 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
           },
           {
             term: {
-              'synthetics.type': 'journey/end',
+              'synthetics.type': 'journey/start',
             },
           },
         ],
       },
     },
-    _source: ['@timestamp', 'monitor.id'],
     size: 1,
   };
 
@@ -53,7 +52,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
             },
             {
               term: {
-                'synthetics.type': 'journey/end',
+                'synthetics.type': 'journey/start',
               },
             },
           ],
@@ -109,6 +108,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
       nextJourneyResult?.hits?.hits.length > 0 ? nextJourneyResult?.hits?.hits[0] : null;
     return {
       timestamp: thisJourneySource['@timestamp'],
+      journey: thisJourneySource,
       previous: previousJourney
         ? {
             checkGroup: previousJourney._source.monitor.check_group,

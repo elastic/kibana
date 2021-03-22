@@ -196,9 +196,6 @@ export function getMlClient(
       await jobIdsCheck('data-frame-analytics', p);
       return mlClient.explainDataFrameAnalytics(...p);
     },
-    async findFileStructure(...p: Parameters<MlClient['findFileStructure']>) {
-      return mlClient.findFileStructure(...p);
-    },
     async flushJob(...p: Parameters<MlClient['flushJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.flushJob(...p);

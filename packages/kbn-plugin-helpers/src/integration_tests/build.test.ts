@@ -74,13 +74,14 @@ it('builds a generated plugin into a viable archive', async () => {
 
   await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
 
-  const files = await globby(['**/*'], { cwd: TMP_DIR });
+  const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
   files.sort((a, b) => a.localeCompare(b));
 
   expect(files).toMatchInlineSnapshot(`
     Array [
       "kibana/fooTestPlugin/common/index.js",
       "kibana/fooTestPlugin/kibana.json",
+      "kibana/fooTestPlugin/node_modules/.yarn-integrity",
       "kibana/fooTestPlugin/package.json",
       "kibana/fooTestPlugin/server/index.js",
       "kibana/fooTestPlugin/server/plugin.js",

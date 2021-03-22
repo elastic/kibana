@@ -8,13 +8,16 @@
 import { setMockValues, mockKibanaValues } from '../../../../__mocks__';
 
 import React, { ReactElement } from 'react';
+
 import { shallow, ShallowWrapper } from 'enzyme';
 import moment, { Moment } from 'moment';
+
 import { EuiPageHeader, EuiSelect, EuiDatePickerRange, EuiButton } from '@elastic/eui';
 
 import { LogRetentionTooltip } from '../../log_retention';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from '../constants';
+
 import { AnalyticsHeader } from './';
 
 describe('AnalyticsHeader', () => {

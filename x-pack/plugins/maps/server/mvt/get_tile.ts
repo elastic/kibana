@@ -25,8 +25,12 @@ import {
 
 import { convertRegularRespToGeoJson, hitsToGeoJson } from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
-import { ESBounds, tile2lat, tile2long, tileToESBbox } from '../../common/geo_tile_utils';
+import { ESBounds, tileToESBbox } from '../../common/geo_tile_utils';
 import { getCentroidFeatures } from '../../common/get_centroid_features';
+
+function isAbortError(error: Error) {
+  return error.message === 'Request aborted' || error.message === 'Aborted';
+}
 
 export async function getGridTile({
   logger,
@@ -40,6 +44,7 @@ export async function getGridTile({
   requestType = RENDER_AS.POINT,
   geoFieldType = ES_GEO_FIELD_TYPE.GEO_POINT,
   searchSessionId,
+  abortSignal,
 }: {
   x: number;
   y: number;
@@ -52,36 +57,16 @@ export async function getGridTile({
   requestType: RENDER_AS;
   geoFieldType: ES_GEO_FIELD_TYPE;
   searchSessionId?: string;
+  abortSignal: AbortSignal;
 }): Promise<Buffer | null> {
-  const esBbox: ESBounds = tileToESBbox(x, y, z);
   try {
-    let bboxFilter;
-    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
-      bboxFilter = {
-        geo_bounding_box: {
-          [geometryFieldName]: esBbox,
-        },
-      };
-    } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
-      const geojsonPolygon = tileToGeoJsonPolygon(x, y, z);
-      bboxFilter = {
-        geo_shape: {
-          [geometryFieldName]: {
-            shape: geojsonPolygon,
-            relation: 'INTERSECTS',
-          },
-        },
-      };
-    } else {
-      throw new Error(`${geoFieldType} is not valid geo field-type`);
-    }
-    requestBody.query.bool.filter.push(bboxFilter);
-
+    const tileBounds: ESBounds = tileToESBbox(x, y, z);
+    requestBody.query.bool.filter.push(getTileSpatialFilter(geometryFieldName, tileBounds));
     requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.precision = Math.min(
       z + SUPER_FINE_ZOOM_DELTA,
       MAX_ZOOM
     );
-    requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = esBbox;
+    requestBody.aggs[GEOTILE_GRID_AGG_NAME].geotile_grid.bounds = tileBounds;
 
     const response = await context
       .search!.search(
@@ -93,6 +78,7 @@ export async function getGridTile({
         },
         {
           sessionId: searchSessionId,
+          abortSignal,
         }
       )
       .toPromise();
@@ -104,7 +90,9 @@ export async function getGridTile({
 
     return createMvtTile(featureCollection, z, x, y);
   } catch (e) {
-    logger.warn(`Cannot generate grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    if (!isAbortError(e)) {
+      logger.warn(`Cannot generate grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    }
     return null;
   }
 }
@@ -120,6 +108,7 @@ export async function getTile({
   requestBody = {},
   geoFieldType,
   searchSessionId,
+  abortSignal,
 }: {
   x: number;
   y: number;
@@ -131,20 +120,17 @@ export async function getTile({
   requestBody: any;
   geoFieldType: ES_GEO_FIELD_TYPE;
   searchSessionId?: string;
+  abortSignal: AbortSignal;
 }): Promise<Buffer | null> {
   let features: Feature[];
   try {
-    requestBody.query.bool.filter.push({
-      geo_shape: {
-        [geometryFieldName]: {
-          shape: tileToGeoJsonPolygon(x, y, z),
-          relation: 'INTERSECTS',
-        },
-      },
-    });
+    requestBody.query.bool.filter.push(
+      getTileSpatialFilter(geometryFieldName, tileToESBbox(x, y, z))
+    );
 
     const searchOptions = {
       sessionId: searchSessionId,
+      abortSignal,
     };
 
     const countResponse = await context
@@ -193,7 +179,8 @@ export async function getTile({
             [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
           },
           geometry: esBboxToGeoJsonPolygon(
-            bboxResponse.rawResponse.aggregations.data_bounds.bounds
+            bboxResponse.rawResponse.aggregations.data_bounds.bounds,
+            tileToESBbox(x, y, z)
           ),
         },
       ];
@@ -239,37 +226,38 @@ export async function getTile({
 
     return createMvtTile(featureCollection, z, x, y);
   } catch (e) {
-    logger.warn(`Cannot generate tile for ${z}/${x}/${y}: ${e.message}`);
+    if (!isAbortError(e)) {
+      logger.warn(`Cannot generate tile for ${z}/${x}/${y}: ${e.message}`);
+    }
     return null;
   }
 }
 
-function tileToGeoJsonPolygon(x: number, y: number, z: number): Polygon {
-  const wLon = tile2long(x, z);
-  const sLat = tile2lat(y + 1, z);
-  const eLon = tile2long(x + 1, z);
-  const nLat = tile2lat(y, z);
-
+function getTileSpatialFilter(geometryFieldName: string, tileBounds: ESBounds): unknown {
   return {
-    type: 'Polygon',
-    coordinates: [
-      [
-        [wLon, sLat],
-        [wLon, nLat],
-        [eLon, nLat],
-        [eLon, sLat],
-        [wLon, sLat],
-      ],
-    ],
+    geo_shape: {
+      [geometryFieldName]: {
+        shape: {
+          type: 'envelope',
+          // upper left and lower right points of the shape to represent a bounding rectangle in the format [[minLon, maxLat], [maxLon, minLat]]
+          coordinates: [
+            [tileBounds.top_left.lon, tileBounds.top_left.lat],
+            [tileBounds.bottom_right.lon, tileBounds.bottom_right.lat],
+          ],
+        },
+        relation: 'INTERSECTS',
+      },
+    },
   };
 }
 
-function esBboxToGeoJsonPolygon(esBounds: ESBounds): Polygon {
-  let minLon = esBounds.top_left.lon;
-  const maxLon = esBounds.bottom_right.lon;
+function esBboxToGeoJsonPolygon(esBounds: ESBounds, tileBounds: ESBounds): Polygon {
+  // Intersecting geo_shapes may push bounding box outside of tile so need to clamp to tile bounds.
+  let minLon = Math.max(esBounds.top_left.lon, tileBounds.top_left.lon);
+  const maxLon = Math.min(esBounds.bottom_right.lon, tileBounds.bottom_right.lon);
   minLon = minLon > maxLon ? minLon - 360 : minLon; // fixes an ES bbox to straddle dateline
-  const minLat = esBounds.bottom_right.lat;
-  const maxLat = esBounds.top_left.lat;
+  const minLat = Math.max(esBounds.bottom_right.lat, tileBounds.bottom_right.lat);
+  const maxLat = Math.min(esBounds.top_left.lat, tileBounds.top_left.lat);
 
   return {
     type: 'Polygon',

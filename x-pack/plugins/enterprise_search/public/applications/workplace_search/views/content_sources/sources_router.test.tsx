@@ -10,9 +10,9 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__';
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { Route, Switch, Redirect } from 'react-router-dom';
+
+import { shallow } from 'enzyme';
 
 import { ADD_SOURCE_PATH, PERSONAL_SOURCES_PATH, SOURCES_PATH, getSourcesPath } from '../../routes';
 

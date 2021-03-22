@@ -7,13 +7,14 @@
 
 import React, { useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { useValues } from 'kea';
+
 import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 // @ts-expect-error types are not available for this package yet;
 import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
 // @ts-expect-error types are not available for this package yet
 import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
+import { i18n } from '@kbn/i18n';
 
 import './search_experience.scss';
 
@@ -21,14 +22,14 @@ import { externalUrl } from '../../../../shared/enterprise_search_url';
 import { useLocalStorage } from '../../../../shared/use_local_storage';
 import { EngineLogic } from '../../engine';
 
-import { Fields, SortOption } from './types';
-import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
-import { SearchExperienceContent } from './search_experience_content';
 import { buildSearchUIConfig } from './build_search_ui_config';
-import { CustomizationCallout } from './customization_callout';
-import { CustomizationModal } from './customization_modal';
 import { buildSortOptions } from './build_sort_options';
 import { ASCENDING, DESCENDING } from './constants';
+import { CustomizationCallout } from './customization_callout';
+import { CustomizationModal } from './customization_modal';
+import { SearchExperienceContent } from './search_experience_content';
+import { Fields, SortOption } from './types';
+import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
 
 const RECENTLY_UPLOADED = i18n.translate(
   'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.recentlyUploaded',
@@ -80,7 +81,7 @@ export const SearchExperience: React.FC = () => {
     <div className="documentsSearchExperience">
       <SearchProvider config={searchProviderConfig}>
         <SearchBox
-          searchAsYouType={true}
+          searchAsYouType
           inputProps={{
             placeholder: i18n.translate(
               'xpack.enterpriseSearch.appSearch.documents.search.placeholder',

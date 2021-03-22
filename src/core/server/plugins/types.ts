@@ -169,6 +169,12 @@ export interface PluginManifest {
    * @deprecated
    */
   readonly extraPublicDirs?: string[];
+
+  /**
+   * Only used for the automatically generated API documentation. Specifying service
+   * folders will cause your plugin API reference to be broken up into sub sections.
+   */
+  readonly serviceFolders?: readonly string[];
 }
 
 /**
@@ -238,6 +244,23 @@ export interface InternalPluginInfo {
  * @public
  */
 export interface Plugin<
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends object = object,
+  TPluginsStart extends object = object
+> {
+  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup;
+  start(core: CoreStart, plugins: TPluginsStart): TStart;
+  stop?(): void;
+}
+
+/**
+ * A plugin with asynchronous lifecycle methods.
+ *
+ * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
+ * @public
+ */
+export interface AsyncPlugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
@@ -383,4 +406,8 @@ export type PluginInitializer<
   TStart,
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
-> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+> = (
+  core: PluginInitializerContext
+) =>
+  | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;

@@ -54,7 +54,7 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
           });
         }
 
-        return res.internalError({ body: error });
+        throw error;
       }
     })
   );
@@ -94,7 +94,7 @@ export function registerGetAllRoute({ router, license, lib: { isEsError } }: Rou
           });
         }
 
-        return res.internalError({ body: error });
+        throw error;
       }
     })
   );

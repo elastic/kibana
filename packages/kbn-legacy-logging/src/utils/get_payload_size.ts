@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { ReadStream } from 'fs';
+import { isPlainObject } from 'lodash';
+import { ReadStream } from 'fs';
+import { Zlib } from 'zlib';
 import type { ResponseObject } from '@hapi/hapi';
 
 const isBuffer = (obj: unknown): obj is Buffer => Buffer.isBuffer(obj);
-const isObject = (obj: unknown): obj is Record<string, unknown> =>
-  typeof obj === 'object' && obj !== null;
 const isFsReadStream = (obj: unknown): obj is ReadStream =>
-  typeof obj === 'object' && obj !== null && 'bytesRead' in obj;
+  typeof obj === 'object' && obj !== null && 'bytesRead' in obj && obj instanceof ReadStream;
+const isZlibStream = (obj: unknown): obj is Zlib => {
+  return typeof obj === 'object' && obj !== null && 'bytesWritten' in obj;
+};
 const isString = (obj: unknown): obj is string => typeof obj === 'string';
 
 /**
@@ -52,11 +55,15 @@ export function getResponsePayloadBytes(
     return payload.bytesRead;
   }
 
+  if (isZlibStream(payload)) {
+    return payload.bytesWritten;
+  }
+
   if (isString(payload)) {
     return Buffer.byteLength(payload);
   }
 
-  if (isObject(payload)) {
+  if (isPlainObject(payload) || Array.isArray(payload)) {
     return Buffer.byteLength(JSON.stringify(payload));
   }
 

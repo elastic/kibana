@@ -5,29 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsBulkUpdateObject } from 'src/core/server';
 import { appContextService } from '../../app_context';
-import { AgentSOAttributes } from '../../../types';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { bulkUpdateAgents } from '../crud';
 
-function getInternalUserSOClient() {
-  const fakeRequest = ({
-    headers: {},
-    getBasePath: () => '',
-    path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as unknown) as KibanaRequest;
-
-  return appContextService.getInternalUserSOClient(fakeRequest);
-}
 export function agentCheckinStateConnectedAgentsFactory() {
   const connectedAgentsIds = new Set<string>();
   let agentToUpdate = new Set<string>();
@@ -57,20 +37,16 @@ export function agentCheckinStateConnectedAgentsFactory() {
     if (agentToUpdate.size === 0) {
       return;
     }
-    const internalSOClient = getInternalUserSOClient();
+    const esClient = appContextService.getInternalUserESClient();
     const now = new Date().toISOString();
-    const updates: Array<SavedObjectsBulkUpdateObject<AgentSOAttributes>> = [
-      ...agentToUpdate.values(),
-    ].map((agentId) => ({
-      type: AGENT_SAVED_OBJECT_TYPE,
-      id: agentId,
-      attributes: {
+    const updates = [...agentToUpdate.values()].map((agentId) => ({
+      agentId,
+      data: {
         last_checkin: now,
       },
     }));
-
     agentToUpdate = new Set<string>([...connectedAgentsIds.values()]);
-    await internalSOClient.bulkUpdate<AgentSOAttributes>(updates, { refresh: false });
+    await bulkUpdateAgents(esClient, updates);
   }
 
   return {

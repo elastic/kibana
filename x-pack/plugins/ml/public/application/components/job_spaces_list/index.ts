@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { JobSpacesList, ALL_SPACES_ID } from './job_spaces_list';
+export { JobSpacesList } from './job_spaces_list';

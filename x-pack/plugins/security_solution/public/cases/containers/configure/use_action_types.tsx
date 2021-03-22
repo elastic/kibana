@@ -22,25 +22,25 @@ export const useActionTypes = (): UseActionTypesResponse => {
   const [, dispatchToaster] = useStateToaster();
   const [loading, setLoading] = useState(true);
   const [actionTypes, setActionTypes] = useState<ActionTypeConnector[]>([]);
-  const didCancel = useRef(false);
-  const abortCtrl = useRef(new AbortController());
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
   const queryFirstTime = useRef(true);
 
   const refetchActionTypes = useCallback(async () => {
     try {
       setLoading(true);
-      didCancel.current = false;
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
 
-      const res = await fetchActionTypes({ signal: abortCtrl.current.signal });
+      const res = await fetchActionTypes({ signal: abortCtrlRef.current.signal });
 
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         setLoading(false);
         setActionTypes(res);
       }
     } catch (error) {
-      if (!didCancel.current) {
+      if (!isCancelledRef.current) {
         setLoading(false);
         setActionTypes([]);
         errorToToaster({
@@ -59,8 +59,8 @@ export const useActionTypes = (): UseActionTypesResponse => {
     }
 
     return () => {
-      didCancel.current = true;
-      abortCtrl.current.abort();
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
       queryFirstTime.current = true;
     };
   }, [refetchActionTypes]);

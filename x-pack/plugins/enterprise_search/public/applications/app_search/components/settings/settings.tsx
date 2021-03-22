@@ -15,10 +15,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import { LogRetentionPanel, LogRetentionConfirmationModal } from './log_retention';
+
 import { SETTINGS_TITLE } from './';
 
 export const Settings: React.FC = () => {

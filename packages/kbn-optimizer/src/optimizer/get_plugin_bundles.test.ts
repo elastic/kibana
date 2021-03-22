@@ -48,7 +48,12 @@ it('returns a bundle for core and each plugin', () => {
         },
       ],
       '/repo',
-      '/output'
+      '/output',
+      {
+        pageLoadAssetSize: {
+          box: 123,
+        },
+      }
     ).map((b) => b.toSpec())
   ).toMatchInlineSnapshot(`
     Array [
@@ -58,6 +63,7 @@ it('returns a bundle for core and each plugin', () => {
         "id": "foo",
         "manifestPath": <repoRoot>/plugins/foo/kibana.json,
         "outputDir": <outputRoot>/plugins/foo/target/public,
+        "pageLoadAssetSizeLimit": undefined,
         "publicDirNames": Array [
           "public",
         ],
@@ -70,6 +76,7 @@ it('returns a bundle for core and each plugin', () => {
         "id": "baz",
         "manifestPath": <outsideOfRepo>/plugins/baz/kibana.json,
         "outputDir": <outsideOfRepo>/plugins/baz/target/public,
+        "pageLoadAssetSizeLimit": undefined,
         "publicDirNames": Array [
           "public",
         ],
@@ -84,6 +91,7 @@ it('returns a bundle for core and each plugin', () => {
         "id": "box",
         "manifestPath": <repoRoot>/x-pack/plugins/box/kibana.json,
         "outputDir": <outputRoot>/x-pack/plugins/box/target/public,
+        "pageLoadAssetSizeLimit": 123,
         "publicDirNames": Array [
           "public",
         ],

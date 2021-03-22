@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
-import { IWaterfallContext } from '../context/waterfall_chart';
+import { IWaterfallContext, useWaterfallContext } from '../context/waterfall_chart';
 import {
   WaterfallChartSidebarContainer,
   WaterfallChartSidebarContainerInnerPanel,
   WaterfallChartSidebarContainerFlexGroup,
   WaterfallChartSidebarFlexItem,
+  WaterfallChartSidebarWrapper,
 } from './styles';
 import { WaterfallChartProps } from './waterfall_chart';
 
@@ -23,9 +23,15 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
+  const { onSidebarClick } = useWaterfallContext();
+  const handleSidebarClick = useMemo(() => onSidebarClick, [onSidebarClick]);
+
   return (
-    <EuiFlexItem grow={SIDEBAR_GROW_SIZE}>
-      <WaterfallChartSidebarContainer height={items.length * FIXED_AXIS_HEIGHT}>
+    <WaterfallChartSidebarWrapper grow={SIDEBAR_GROW_SIZE}>
+      <WaterfallChartSidebarContainer
+        height={items.length * FIXED_AXIS_HEIGHT}
+        data-test-subj="wfSidebarContainer"
+      >
         <WaterfallChartSidebarContainerInnerPanel paddingSize="none">
           <WaterfallChartSidebarContainerFlexGroup
             direction="column"
@@ -35,13 +41,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ items, render }) => {
             {items.map((item, index) => {
               return (
                 <WaterfallChartSidebarFlexItem key={index}>
-                  {render(item, index)}
+                  {render(item, index, handleSidebarClick)}
                 </WaterfallChartSidebarFlexItem>
               );
             })}
           </WaterfallChartSidebarContainerFlexGroup>
         </WaterfallChartSidebarContainerInnerPanel>
       </WaterfallChartSidebarContainer>
-    </EuiFlexItem>
+    </WaterfallChartSidebarWrapper>
   );
 };

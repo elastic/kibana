@@ -64,9 +64,14 @@ export const buildRule = ({
     ruleNameMapping: ruleParams.ruleNameOverride,
   });
 
-  const meta = { ...ruleParams.meta, ...riskScoreMeta, ...severityMeta, ...ruleNameMeta };
+  const meta: RulesSchema['meta'] = {
+    ...ruleParams.meta,
+    ...riskScoreMeta,
+    ...severityMeta,
+    ...ruleNameMeta,
+  };
 
-  const rule = {
+  const rule: RulesSchema = {
     id,
     rule_id: ruleParams.ruleId ?? '(unknown rule_id)',
     actions,
@@ -103,6 +108,12 @@ export const buildRule = ({
     created_by: createdBy,
     updated_by: updatedBy,
     threat: ruleParams.threat ?? [],
+    threat_mapping: ruleParams.threatMapping,
+    threat_filters: ruleParams.threatFilters,
+    threat_indicator_path: ruleParams.threatIndicatorPath,
+    threat_query: ruleParams.threatQuery,
+    threat_index: ruleParams.threatIndex,
+    threat_language: ruleParams.threatLanguage,
     timestamp_override: ruleParams.timestampOverride,
     throttle,
     version: ruleParams.version,
@@ -170,6 +181,7 @@ export const buildRuleWithoutOverrides = (
     threat_query: ruleParams.threatQuery,
     threat_mapping: ruleParams.threatMapping,
     threat_language: ruleParams.threatLanguage,
+    threat_indicator_path: ruleParams.threatIndicatorPath,
   };
   return removeInternalTagsFromRule(rule);
 };

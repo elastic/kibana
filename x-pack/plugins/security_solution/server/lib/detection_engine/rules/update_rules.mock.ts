@@ -6,7 +6,7 @@
  */
 
 import { UpdateRulesOptions } from './types';
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import {
   getUpdateRulesSchemaMock,

@@ -14,12 +14,20 @@ import { observeLines } from '@kbn/dev-utils/stdio';
 import { spawn } from '../child_process';
 import { log } from '../log';
 
-export async function runBazel(bazelArgs: string[], runOpts: execa.Options = {}) {
+export async function runBazel(
+  bazelArgs: string[],
+  offline: boolean = false,
+  runOpts: execa.Options = {}
+) {
   // Force logs to pipe in order to control the output of them
   const bazelOpts: execa.Options = {
     ...runOpts,
     stdio: 'pipe',
   };
+
+  if (offline) {
+    bazelArgs.push('--config=offline');
+  }
 
   const bazelProc = spawn('bazel', bazelArgs, bazelOpts);
 

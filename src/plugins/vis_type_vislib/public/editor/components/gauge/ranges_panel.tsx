@@ -15,8 +15,9 @@ import {
   SetColorRangeValue,
   SwitchOption,
   ColorSchemaOptions,
+  PercentageModeOption,
 } from '../../../../../vis_default_editor/public';
-import { ColorSchemaParams, ColorSchemas } from '../../../../../charts/public';
+import { ColorSchemaParams, ColorSchemas, colorSchemas } from '../../../../../charts/public';
 import { GaugeOptionsInternalProps } from '../gauge';
 import { Gauge } from '../../../gauge';
 
@@ -27,7 +28,6 @@ function RangesPanel({
   setValue,
   stateParams,
   uiState,
-  vis,
 }: GaugeOptionsInternalProps) {
   const setColorSchemaOptions = useCallback(
     <T extends keyof ColorSchemaParams>(paramName: T, value: ColorSchemaParams[T]) => {
@@ -78,20 +78,17 @@ function RangesPanel({
         setValue={setGaugeValue}
       />
 
-      <SwitchOption
+      <PercentageModeOption
         data-test-subj="gaugePercentageMode"
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.percentageModeLabel', {
-          defaultMessage: 'Percentage mode',
-        })}
-        paramName="percentageMode"
-        value={stateParams.gauge.percentageMode}
+        percentageMode={stateParams.gauge.percentageMode}
+        formatPattern={stateParams.gauge.percentageFormatPattern}
         setValue={setGaugeValue}
       />
 
       <ColorSchemaOptions
         disabled={stateParams.gauge.colorsRange.length < 2}
         colorSchema={stateParams.gauge.colorSchema}
-        colorSchemas={vis.type.editorConfig.collections.colorSchemas}
+        colorSchemas={colorSchemas}
         invertColors={stateParams.gauge.invertColors}
         uiState={uiState}
         setValue={setColorSchemaOptions}

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../common/constants';
 
 import {
   getDeprecationLoggingStatus,
@@ -17,7 +18,7 @@ import { RouteDependencies } from '../types';
 export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) {
   router.get(
     {
-      path: '/api/upgrade_assistant/deprecation_logging',
+      path: `${API_BASE_PATH}/deprecation_logging`,
       validate: false,
     },
     versionCheckHandlerWrapper(
@@ -30,19 +31,15 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         request,
         response
       ) => {
-        try {
-          const result = await getDeprecationLoggingStatus(client);
-          return response.ok({ body: result });
-        } catch (e) {
-          return response.internalError({ body: e });
-        }
+        const result = await getDeprecationLoggingStatus(client);
+        return response.ok({ body: result });
       }
     )
   );
 
   router.put(
     {
-      path: '/api/upgrade_assistant/deprecation_logging',
+      path: `${API_BASE_PATH}/deprecation_logging`,
       validate: {
         body: schema.object({
           isEnabled: schema.boolean(),
@@ -59,14 +56,10 @@ export function registerDeprecationLoggingRoutes({ router }: RouteDependencies) 
         request,
         response
       ) => {
-        try {
-          const { isEnabled } = request.body as { isEnabled: boolean };
-          return response.ok({
-            body: await setDeprecationLogging(client, isEnabled),
-          });
-        } catch (e) {
-          return response.internalError({ body: e });
-        }
+        const { isEnabled } = request.body as { isEnabled: boolean };
+        return response.ok({
+          body: await setDeprecationLogging(client, isEnabled),
+        });
       }
     )
   );

@@ -28,7 +28,7 @@ export interface RuleEcs {
   tags?: string[];
   threat?: unknown;
   threshold?: {
-    field: string;
+    field: string | string[];
     value: number;
   };
   type?: string[];

@@ -25,14 +25,16 @@ jest.mock('../create/form_context', () => {
       onSuccess,
     }: {
       children: ReactNode;
-      onSuccess: ({ id }: { id: string }) => void;
+      onSuccess: ({ id }: { id: string }) => Promise<void>;
     }) => {
       return (
         <>
           <button
             type="button"
             data-test-subj="form-context-on-success"
-            onClick={() => onSuccess({ id: 'case-id' })}
+            onClick={async () => {
+              await onSuccess({ id: 'case-id' });
+            }}
           >
             {'Form submit'}
           </button>

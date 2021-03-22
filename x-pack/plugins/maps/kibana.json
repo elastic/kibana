@@ -11,13 +11,13 @@
     "features",
     "inspector",
     "data",
-    "mapsFileUpload",
+    "fileUpload",
     "uiActions",
     "navigation",
     "visualizations",
     "dashboard",
     "embeddable",
-    "mapsLegacy",
+    "mapsEms",
     "usageCollection",
     "savedObjects",
     "share",
@@ -25,7 +25,8 @@
   ],
   "optionalPlugins": [
     "home",
-    "savedObjectsTagging"
+    "savedObjectsTagging",
+    "charts"
   ],
   "ui": true,
   "server": true,

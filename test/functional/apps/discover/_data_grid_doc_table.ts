@@ -10,11 +10,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const find = getService('find');
   const dataGrid = getService('dataGrid');
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -22,8 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('discover data grid doc table', function describeIndexTests() {
-    const defaultRowsLimit = 25;
-
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
@@ -38,10 +38,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    it('should show the first 50 rows by default', async function () {
+    it('should show the first 12 rows by default', async function () {
       // with the default range the number of hits is ~14000
       const rows = await dataGrid.getDocTableRows();
-      expect(rows.length).to.be(defaultRowsLimit);
+      expect(rows.length).to.be(12);
     });
 
     it('should refresh the table content when changing time window', async function () {
@@ -56,6 +56,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.below(initialRows.length);
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+    });
+
+    // flaky https://github.com/elastic/kibana/issues/94889
+    it.skip('should show popover with expanded cell content by click on expand button', async () => {
+      log.debug('open popover with expanded cell content to get json from the editor');
+      const documentCell = await dataGrid.getCellElement(1, 3);
+      await documentCell.click();
+      const expandCellContentButton = await documentCell.findByClassName(
+        'euiDataGridRowCell__expandButtonIcon'
+      );
+      await expandCellContentButton.click();
+      const popoverJson = await monacoEditor.getCodeEditorValue();
+
+      log.debug('open expanded document flyout to get json');
+      await dataGrid.clickRowToggle();
+      await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
+      const flyoutJson = await monacoEditor.getCodeEditorValue();
+
+      expect(popoverJson).to.be(flyoutJson);
     });
 
     describe('expand a document row', function () {

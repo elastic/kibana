@@ -22,7 +22,7 @@ import {
   NewAlertParams,
 } from '../api/alerts';
 import { ActionConnector as RawActionConnector } from '../../../../triggers_actions_ui/public';
-import { Alert } from '../../../../alerts/common';
+import { Alert } from '../../../../alerting/common';
 import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';
 import { AlertsResult, MonitorIdParam } from '../actions/types';
@@ -53,7 +53,7 @@ export const deleteAnomalyAlertAction = createAsyncAction<{ alertId: string }, a
   'DELETE ANOMALY ALERT'
 );
 
-interface AlertState {
+export interface AlertState {
   connectors: AsyncInitState<ActionConnector[]>;
   newAlert: AsyncInitState<Alert<UptimeAlertTypeParams>>;
   alerts: AsyncInitState<AlertsResult>;

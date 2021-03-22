@@ -6,23 +6,25 @@
  */
 
 import { of } from 'rxjs';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { ConfigSchema } from './config';
-import { Plugin, PluginSetupDependencies, PluginStartDependencies } from './plugin';
 
-import { coreMock } from '../../../../src/core/server/mocks';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { coreMock } from 'src/core/server/mocks';
+
 import { featuresPluginMock } from '../../features/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
+import { taskManagerMock } from '../../task_manager/server/mocks';
+import { ConfigSchema } from './config';
+import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
+import { SecurityPlugin } from './plugin';
 
 describe('Security Plugin', () => {
-  let plugin: Plugin;
+  let plugin: SecurityPlugin;
   let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
   let mockCoreStart: ReturnType<typeof coreMock.createStart>;
   let mockSetupDependencies: PluginSetupDependencies;
   let mockStartDependencies: PluginStartDependencies;
   beforeEach(() => {
-    plugin = new Plugin(
+    plugin = new SecurityPlugin(
       coreMock.createPluginInitializerContext(
         ConfigSchema.validate({
           session: { idleTimeout: 1500 },

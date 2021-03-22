@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -81,49 +81,47 @@ export const ComponentTemplatesDeleteModal = ({
   };
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        buttonColor="danger"
-        data-test-subj="deleteComponentTemplatesConfirmation"
-        title={
+    <EuiConfirmModal
+      buttonColor="danger"
+      data-test-subj="deleteComponentTemplatesConfirmation"
+      title={
+        <FormattedMessage
+          id="xpack.idxMgmt.home.componentTemplates.deleteModal.modalTitleText"
+          defaultMessage="Delete {numComponentTemplatesToDelete, plural, one {component template} other {# component templates}}"
+          values={{ numComponentTemplatesToDelete }}
+        />
+      }
+      onCancel={handleOnCancel}
+      onConfirm={handleDeleteComponentTemplates}
+      cancelButtonText={
+        <FormattedMessage
+          id="xpack.idxMgmt.home.componentTemplates.deleteModal.cancelButtonLabel"
+          defaultMessage="Cancel"
+        />
+      }
+      confirmButtonText={
+        <FormattedMessage
+          id="xpack.idxMgmt.home.componentTemplates.confirmButtonLabel"
+          defaultMessage="Delete {numComponentTemplatesToDelete, plural, one {component template} other {component templates} }"
+          values={{ numComponentTemplatesToDelete }}
+        />
+      }
+    >
+      <>
+        <p>
           <FormattedMessage
-            id="xpack.idxMgmt.home.componentTemplates.deleteModal.modalTitleText"
-            defaultMessage="Delete {numComponentTemplatesToDelete, plural, one {component template} other {# component templates}}"
+            id="xpack.idxMgmt.home.componentTemplates.deleteModal.deleteDescription"
+            defaultMessage="You are about to delete {numComponentTemplatesToDelete, plural, one {this component template} other {these component templates} }:"
             values={{ numComponentTemplatesToDelete }}
           />
-        }
-        onCancel={handleOnCancel}
-        onConfirm={handleDeleteComponentTemplates}
-        cancelButtonText={
-          <FormattedMessage
-            id="xpack.idxMgmt.home.componentTemplates.deleteModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        }
-        confirmButtonText={
-          <FormattedMessage
-            id="xpack.idxMgmt.home.componentTemplates.confirmButtonLabel"
-            defaultMessage="Delete {numComponentTemplatesToDelete, plural, one {component template} other {component templates} }"
-            values={{ numComponentTemplatesToDelete }}
-          />
-        }
-      >
-        <>
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.home.componentTemplates.deleteModal.deleteDescription"
-              defaultMessage="You are about to delete {numComponentTemplatesToDelete, plural, one {this component template} other {these component templates} }:"
-              values={{ numComponentTemplatesToDelete }}
-            />
-          </p>
+        </p>
 
-          <ul>
-            {componentTemplatesToDelete.map((name) => (
-              <li key={name}>{name}</li>
-            ))}
-          </ul>
-        </>
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+        <ul>
+          {componentTemplatesToDelete.map((name) => (
+            <li key={name}>{name}</li>
+          ))}
+        </ul>
+      </>
+    </EuiConfirmModal>
   );
 };

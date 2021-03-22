@@ -22,7 +22,7 @@ export class PainlessLabServerPlugin implements Plugin {
     this.license = new License();
   }
 
-  async setup({ http }: CoreSetup, { licensing }: Dependencies) {
+  setup({ http }: CoreSetup, { licensing }: Dependencies) {
     const router = http.createRouter();
 
     this.license.setup(

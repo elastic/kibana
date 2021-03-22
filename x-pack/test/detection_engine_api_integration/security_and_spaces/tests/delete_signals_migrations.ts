@@ -32,12 +32,10 @@ interface FinalizeResponse extends CreateResponse {
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
-  const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/90229
-  describe.skip('deleting signals migrations', () => {
+  describe('deleting signals migrations', () => {
     let outdatedSignalsIndexName: string;
     let createdMigration: CreateResponse;
     let finalizedMigration: FinalizeResponse;
@@ -104,8 +102,21 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
+    it('returns a 404 trying to delete a migration that does not exist', async () => {
+      const { body } = await supertest
+        .delete(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ migration_ids: ['dne-migration'] })
+        .expect(404);
+
+      expect(body).to.eql({
+        message: 'Saved object [security-solution-signals-migration/dne-migration] not found',
+        status_code: 404,
+      });
+    });
+
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createUserAndRole(security, ROLES.t1_analyst);
+      await createUserAndRole(getService, ROLES.t1_analyst);
 
       const { body } = await supertestWithoutAuth
         .delete(DETECTION_ENGINE_SIGNALS_MIGRATION_URL)
@@ -117,11 +128,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const deletedMigration = body.migrations[0];
 
       expect(deletedMigration.id).to.eql(createdMigration.migration_id);
-      expect(deletedMigration.error).to.eql({
-        message:
-          'security_exception: action [indices:admin/settings/update] is unauthorized for user [t1_analyst] on indices [], this action is granted by the privileges [manage,all]',
-        status_code: 403,
-      });
+      expect(deletedMigration.error.message).to.match(/^security_exception/);
+      expect(deletedMigration.error.status_code).to.eql(403);
     });
   });
 };

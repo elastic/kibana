@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'src/core/server';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
+
+import type { RouteDefinitionParams } from '../';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { RouteDefinitionParams } from '..';
 
 interface NodeSettingsResponse {
   nodes: {

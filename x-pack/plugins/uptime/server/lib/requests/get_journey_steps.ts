@@ -8,12 +8,12 @@
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types';
 
-interface GetJourneyStepsParams {
+export interface GetJourneyStepsParams {
   checkGroup: string;
   syntheticEventTypes?: string | string[];
 }
 
-const defaultEventTypes = ['step/end', 'stderr', 'cmd/status', 'step/screenshot'];
+const defaultEventTypes = ['step/end', 'cmd/status', 'step/screenshot', 'journey/browserconsole'];
 
 export const formatSyntheticEvents = (eventTypes?: string | string[]) => {
   if (!eventTypes) {

@@ -48,11 +48,10 @@ import {
 } from '../../../../../src/plugins/data/public';
 import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { DraggedField } from './indexpattern';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
-import { IndexPattern, IndexPatternField } from './types';
+import { IndexPattern, IndexPatternField, DraggedField } from './types';
 import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
@@ -73,6 +72,7 @@ export interface FieldItemProps {
   itemIndex: number;
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  editField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
 
@@ -103,10 +103,24 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     dateRange,
     filters,
     hideDetails,
+    itemIndex,
+    groupIndex,
     dropOntoWorkspace,
+    editField,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
+
+  const closeAndEdit = useMemo(
+    () =>
+      editField
+        ? (name: string) => {
+            editField(name);
+            setOpen(false);
+          }
+        : undefined,
+    [editField, setOpen]
+  );
 
   const dropOntoWorkspaceAndClose = useCallback(
     (droppedField: DragDropIdentifier) => {
@@ -121,14 +135,15 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   });
 
   function fetchData() {
-    if (state.isLoading) {
+    // Range types don't have any useful stats we can show
+    if (state.isLoading || field.type === 'document' || field.type.includes('range')) {
       return;
     }
 
     setState((s) => ({ ...s, isLoading: true }));
 
     core.http
-      .post(`/api/lens/index_stats/${indexPattern.title}/field`, {
+      .post(`/api/lens/index_stats/${indexPattern.id}/field`, {
         body: JSON.stringify({
           dslQuery: esQuery.buildEsQuery(
             indexPattern as IIndexPattern,
@@ -138,8 +153,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
           ),
           fromDate: dateRange.fromDate,
           toDate: dateRange.toDate,
-          timeFieldName: indexPattern.timeFieldName,
-          field,
+          fieldName: field.name,
         }),
       })
       .then((results: FieldStatsResponse<string | number>) => {
@@ -167,9 +181,18 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   }
 
   const value = useMemo(
-    () => ({ field, indexPatternId: indexPattern.id, id: field.name } as DraggedField),
-    [field, indexPattern.id]
+    () => ({
+      field,
+      indexPatternId: indexPattern.id,
+      id: field.name,
+      humanData: {
+        label: field.displayName,
+        position: itemIndex + 1,
+      },
+    }),
+    [field, indexPattern.id, itemIndex]
   );
+  const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
   const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
   const lensInfoIcon = (
@@ -204,9 +227,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <DragDrop
-            noKeyboardSupportYet
             draggable
-            label={field.displayName}
+            order={order}
             value={value}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
           >
@@ -247,6 +269,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         <FieldItemPopoverContents
           {...state}
           {...props}
+          editField={closeAndEdit}
           dropOntoWorkspace={dropOntoWorkspaceAndClose}
         />
       </EuiPopover>
@@ -261,23 +284,28 @@ function FieldPanelHeader({
   field,
   hasSuggestionForField,
   dropOntoWorkspace,
+  editField,
 }: {
   field: IndexPatternField;
   indexPatternId: string;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  editField?: (name: string) => void;
 }) {
   const draggableField = {
     indexPatternId,
     id: field.name,
     field,
+    humanData: {
+      label: field.displayName,
+    },
   };
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h5 className="lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
+          <h5 className="eui-textBreakWord lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
         </EuiTitle>
       </EuiFlexItem>
 
@@ -286,6 +314,22 @@ function FieldPanelHeader({
         dropOntoWorkspace={dropOntoWorkspace}
         field={draggableField}
       />
+      {editField && (
+        <EuiToolTip
+          content={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+            defaultMessage: 'Edit index pattern field',
+          })}
+        >
+          <EuiButtonIcon
+            onClick={() => editField(field.name)}
+            iconType="pencil"
+            data-test-subj="lnsFieldListPanelEdit"
+            aria-label={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+              defaultMessage: 'Edit index pattern field',
+            })}
+          />
+        </EuiToolTip>
+      )}
     </EuiFlexGroup>
   );
 }
@@ -302,6 +346,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     chartsThemeService,
     data: { fieldFormats },
     dropOntoWorkspace,
+    editField,
     hasSuggestionForField,
     hideDetails,
   } = props;
@@ -333,6 +378,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
       field={field}
       dropOntoWorkspace={dropOntoWorkspace}
       hasSuggestionForField={hasSuggestionForField}
+      editField={editField}
     />
   );
 
@@ -365,6 +411,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   if (props.isLoading) {
     return <EuiLoadingSpinner />;
+  } else if (field.type.includes('range')) {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsLimited', {
+            defaultMessage: `Summary information is not available for range type fields.`,
+          })}
+        </EuiText>
+      </>
+    );
   } else if (
     (!props.histogram || props.histogram.buckets.length === 0) &&
     (!props.topValues || props.topValues.buckets.length === 0)
@@ -641,11 +699,7 @@ const DragToWorkspaceButton = ({
   dropOntoWorkspace,
   isEnabled,
 }: {
-  field: {
-    indexPatternId: string;
-    id: string;
-    field: IndexPatternField;
-  };
+  field: DraggedField;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   isEnabled: boolean;
 }) => {

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 
-import { IndexPattern } from '../../../../../../../../src/plugins/data/public';
+import { IndexPattern, KBN_FIELD_TYPES } from '../../../../../../../../src/plugins/data/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
 import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
@@ -48,7 +48,7 @@ export class DataLoader {
     this._indexPattern.fields.forEach((field) => {
       const fieldName = field.displayName !== undefined ? field.displayName : field.name;
       if (this.isDisplayField(fieldName) === true) {
-        if (field.aggregatable === true) {
+        if (field.aggregatable === true && field.type !== KBN_FIELD_TYPES.GEO_SHAPE) {
           aggregatableFields.push(fieldName);
         } else {
           nonAggregatableFields.push(fieldName);

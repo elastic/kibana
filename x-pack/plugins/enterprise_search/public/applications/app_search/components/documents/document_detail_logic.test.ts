@@ -15,8 +15,9 @@ import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { DocumentDetailLogic } from './document_detail_logic';
 import { InternalSchemaTypes } from '../../../shared/types';
+
+import { DocumentDetailLogic } from './document_detail_logic';
 
 describe('DocumentDetailLogic', () => {
   const { mount } = new LogicMounter(DocumentDetailLogic);
@@ -62,7 +63,7 @@ describe('DocumentDetailLogic', () => {
 
         DocumentDetailLogic.actions.getDocumentDetails('1');
 
-        expect(http.get).toHaveBeenCalledWith(`/api/app_search/engines/engine1/documents/1`);
+        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
         await nextTick();
         expect(DocumentDetailLogic.actions.setFields).toHaveBeenCalledWith(fields);
       });
@@ -96,7 +97,7 @@ describe('DocumentDetailLogic', () => {
         mount();
         DocumentDetailLogic.actions.deleteDocument('1');
 
-        expect(http.delete).toHaveBeenCalledWith(`/api/app_search/engines/engine1/documents/1`);
+        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/engine1/documents/1');
         await nextTick();
         expect(setQueuedSuccessMessage).toHaveBeenCalledWith(
           'Successfully marked document for deletion. It will be deleted momentarily.'

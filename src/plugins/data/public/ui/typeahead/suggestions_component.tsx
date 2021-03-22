@@ -17,11 +17,12 @@ import {
   SUGGESTIONS_LIST_REQUIRED_TOP_OFFSET,
   SUGGESTIONS_LIST_REQUIRED_WIDTH,
 } from './constants';
+import { SuggestionOnClick } from './types';
 
 // @internal
 export interface SuggestionsComponentProps {
   index: number | null;
-  onClick: (suggestion: QuerySuggestion) => void;
+  onClick: SuggestionOnClick;
   onMouseEnter: (index: number) => void;
   show: boolean;
   suggestions: QuerySuggestion[];
@@ -50,6 +51,7 @@ export default class SuggestionsComponent extends Component<SuggestionsComponent
         <SuggestionComponent
           innerRef={(node) => (this.childNodes[index] = node)}
           selected={index === this.props.index}
+          index={index}
           suggestion={suggestion}
           onClick={this.props.onClick}
           onMouseEnter={() => this.props.onMouseEnter(index)}

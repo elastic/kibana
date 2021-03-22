@@ -7,13 +7,13 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { isEmpty } from 'lodash';
 import Suggestion from './Suggestion';
 import { units, px, unit } from '../../../../style/variables';
 import { tint } from 'polished';
 
-const List = styled.ul`
+const List = euiStyled.ul`
   width: 100%;
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: ${px(units.quarter)};

@@ -11,7 +11,6 @@ import {
   ActionTypeModel,
   ConnectorValidationResult,
 } from '../../../../types';
-import { connectorConfiguration } from './config';
 import logo from './logo.svg';
 import { JiraActionConnector, JiraConfig, JiraSecrets, JiraActionParams } from './types';
 import * as i18n from './translations';
@@ -63,15 +62,16 @@ const validateConnector = (
 
 export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraActionParams> {
   return {
-    id: connectorConfiguration.id,
+    id: '.jira',
     iconClass: logo,
     selectMessage: i18n.JIRA_DESC,
-    actionTypeTitle: connectorConfiguration.name,
+    actionTypeTitle: i18n.JIRA_TITLE,
     validateConnector,
     actionConnectorFields: lazy(() => import('./jira_connectors')),
     validateParams: (actionParams: JiraActionParams): GenericValidationResult<unknown> => {
       const errors = {
         'subActionParams.incident.summary': new Array<string>(),
+        'subActionParams.incident.labels': new Array<string>(),
       };
       const validationResult = {
         errors,
@@ -82,6 +82,12 @@ export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraAc
         !actionParams.subActionParams.incident.summary?.length
       ) {
         errors['subActionParams.incident.summary'].push(i18n.SUMMARY_REQUIRED);
+      }
+
+      if (actionParams.subActionParams?.incident?.labels?.length) {
+        // Jira do not allows empty spaces on labels. If the label includes a whitespace show an error.
+        if (actionParams.subActionParams.incident.labels.some((label) => label.match(/\s/g)))
+          errors['subActionParams.incident.labels'].push(i18n.LABELS_WHITE_SPACES);
       }
       return validationResult;
     },

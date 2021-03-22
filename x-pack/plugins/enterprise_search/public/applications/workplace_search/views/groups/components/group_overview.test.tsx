@@ -9,20 +9,21 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import { groups } from '../../../__mocks__/groups.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
+import { EuiFieldText } from '@elastic/eui';
+
+import { Loading } from '../../../../shared/loading';
+import { ContentSection } from '../../../components/shared/content_section';
+import { SourcesTable } from '../../../components/shared/sources_table';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
 import {
   GroupOverview,
   EMPTY_SOURCES_DESCRIPTION,
   EMPTY_USERS_DESCRIPTION,
 } from './group_overview';
-
-import { ContentSection } from '../../../components/shared/content_section';
-import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { SourcesTable } from '../../../components/shared/sources_table';
-import { Loading } from '../../../../shared/loading';
-
-import { EuiFieldText } from '@elastic/eui';
 
 const deleteGroup = jest.fn();
 const showSharedSourcesModal = jest.fn();

@@ -6,13 +6,14 @@
   "false_positives": [
     "VNC connections may be made directly to Linux cloud server instances but such connections are usually made only by engineers. VNC is less common than SSH or RDP but may be required by some work flows such as remote access and support for specialized software products or servers. Such work-flows are usually known and not unexpected. Usage that is unfamiliar to server or network owners can be unexpected and suspicious."
   ],
+  "from": "now-9m",
   "index": [
     "filebeat-*",
     "packetbeat-*",
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "VNC (Virtual Network Computing) to the Internet",
   "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port >= 5800 and destination.port <= 5810 and source.ip:( 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 ) and not destination.ip:( 10.0.0.0/8 or 127.0.0.0/8 or 169.254.0.0/16 or 172.16.0.0/12 or 192.168.0.0/16 or 224.0.0.0/4 or \"::1\" or \"FE80::/10\" or \"FF00::/8\" )",
   "risk_score": 47,
@@ -42,6 +43,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

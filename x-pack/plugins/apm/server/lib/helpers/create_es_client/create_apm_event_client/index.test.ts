@@ -69,10 +69,10 @@ describe('createApmEventClient', () => {
         incomingRequest.on('abort', () => {
           setTimeout(() => {
             resolve(undefined);
-          }, 0);
+          }, 100);
         });
         incomingRequest.abort();
-      }, 50);
+      }, 100);
     });
 
     expect(abort).toHaveBeenCalled();

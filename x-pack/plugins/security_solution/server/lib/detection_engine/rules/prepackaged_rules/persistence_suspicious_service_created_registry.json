@@ -3,12 +3,14 @@
     "Elastic"
   ],
   "description": "Identifies the creation of a suspicious ImagePath value. This could be an indication of an adversary attempting to stealthily persist or escalate privileges through abnormal service creation.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious ImagePath Service Creation",
   "query": "registry where registry.path : \"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Services\\\\*\\\\ImagePath\" and\n /* add suspicious registry ImagePath values here */\n registry.data.strings : (\"%COMSPEC%*\", \"*\\\\.\\\\pipe\\\\*\")\n",
   "risk_score": 73,
@@ -45,6 +47,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 3
 }

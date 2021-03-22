@@ -62,6 +62,7 @@ import {
   threat_filters,
   threat_mapping,
   threat_language,
+  threat_indicator_path,
 } from '../types/threat_mapping';
 
 import {
@@ -152,6 +153,7 @@ export const importRulesSchema = t.intersection([
       threat_query, // defaults to "undefined" if not set during decode
       threat_index, // defaults to "undefined" if not set during decode
       threat_language, // defaults "undefined" if not set during decode
+      threat_indicator_path, // defaults to "undefined" if not set during decode
       concurrent_searches, // defaults to "undefined" if not set during decode
       items_per_search, // defaults to "undefined" if not set during decode
     })

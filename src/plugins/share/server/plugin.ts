@@ -16,7 +16,7 @@ import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/const
 export class SharePlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup) {
+  public setup(core: CoreSetup) {
     createRoutes(core, this.initializerContext.logger.get());
     core.savedObjects.registerType(url);
     core.uiSettings.register({

@@ -20,8 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { Vis } from '../../../../../../visualizations/public';
-
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { ValueAxisOptions } from './value_axis_options';
 import { SetParamByIndex } from '.';
@@ -33,7 +31,6 @@ export interface ValueAxesPanelProps {
   setParamByIndex: SetParamByIndex;
   seriesParams: SeriesParam[];
   valueAxes: ValueAxis[];
-  vis: Vis;
   setMultipleValidity: (paramName: string, isValid: boolean) => void;
 }
 
@@ -152,7 +149,6 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
               onValueAxisPositionChanged={props.onValueAxisPositionChanged}
               setParamByIndex={props.setParamByIndex}
               setMultipleValidity={props.setMultipleValidity}
-              vis={props.vis}
             />
           </>
         </EuiAccordion>

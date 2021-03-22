@@ -6,15 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
+import uuid from 'uuid/v4';
 import semverParse from 'semver/functions/parse';
 import semverDiff from 'semver/functions/diff';
 import semverLte from 'semver/functions/lte';
+import type { SavedObjectsClientContract } from 'src/core/server';
 
-import { SavedObjectsClientContract } from 'src/core/server';
-import { AgentType, Agent, AgentSOAttributes } from '../../types';
-import { savedObjectToAgent } from './saved_objects';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import type { AgentType, Agent, FleetServerAgent } from '../../types';
+import { AGENTS_INDEX } from '../../constants';
+import { IngestManagerError } from '../../errors';
 import * as APIKeyService from '../api_keys';
+import { agentPolicyService } from '../../services';
 import { appContextService } from '../app_context';
 
 export async function enroll(
@@ -26,32 +28,38 @@ export async function enroll(
   const agentVersion = metadata?.local?.elastic?.agent?.version;
   validateAgentVersion(agentVersion);
 
-  const agentData: AgentSOAttributes = {
+  const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId, false);
+  if (agentPolicy?.is_managed) {
+    throw new IngestManagerError(`Cannot enroll in managed policy ${agentPolicyId}`);
+  }
+
+  const esClient = appContextService.getInternalUserESClient();
+
+  const agentId = uuid();
+  const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agentId);
+  const fleetServerAgent: FleetServerAgent = {
     active: true,
     policy_id: agentPolicyId,
     type,
     enrolled_at: new Date().toISOString(),
     user_provided_metadata: metadata?.userProvided ?? {},
     local_metadata: metadata?.local ?? {},
-    current_error_events: undefined,
-    access_api_key_id: undefined,
-    last_checkin: undefined,
-    default_api_key: undefined,
-  };
-
-  const agent = savedObjectToAgent(
-    await soClient.create<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentData, {
-      refresh: false,
-    })
-  );
-
-  const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agent.id);
-
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
     access_api_key_id: accessAPIKey.id,
+  };
+  await esClient.create({
+    index: AGENTS_INDEX,
+    body: fleetServerAgent,
+    id: agentId,
+    refresh: 'wait_for',
   });
 
-  return { ...agent, access_api_key: accessAPIKey.key };
+  return {
+    id: agentId,
+    current_error_events: [],
+    packages: [],
+    ...fleetServerAgent,
+    access_api_key: accessAPIKey.key,
+  } as Agent;
 }
 
 export function validateAgentVersion(

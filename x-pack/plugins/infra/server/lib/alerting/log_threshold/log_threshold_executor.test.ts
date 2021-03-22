@@ -23,7 +23,7 @@ import {
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold/types';
-import { alertsMock } from '../../../../../alerts/server/mocks';
+import { alertsMock } from '../../../../../alerting/server/mocks';
 
 // Mocks //
 const numericField = {

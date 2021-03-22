@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
+
 import { EuiPage, EuiPageContent } from '@elastic/eui';
 
-import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { ErrorStatePrompt } from '../../../shared/error_state';
+import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 export const ErrorConnecting: React.FC = () => (
   <EuiPage restrictWidth>

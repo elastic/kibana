@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { CaseStatuses, caseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, caseStatuses } from '../../../../../cases/common/api';
 import { statuses } from './config';
 
 interface Props {
@@ -40,7 +40,7 @@ const StatusActionButtonComponent: React.FC<Props> = ({
   return (
     <EuiButton
       data-test-subj="case-view-status-action-button"
-      iconType={statuses[caseStatuses[nextStatusIndex]].button.icon}
+      iconType={statuses[caseStatuses[nextStatusIndex]].icon}
       isDisabled={disabled}
       isLoading={isLoading}
       onClick={onClick}

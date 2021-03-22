@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { DashboardSavedObject } from 'src/plugins/dashboard/public';
-
 import { PresentationUtilPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../create';
 import { PresentationDashboardsService } from '..';
@@ -17,11 +15,15 @@ export type DashboardsServiceFactory = KibanaPluginServiceFactory<
   PresentationUtilPluginStartDeps
 >;
 
+export interface PartialDashboardAttributes {
+  title: string;
+}
+
 export const dashboardsServiceFactory: DashboardsServiceFactory = ({ coreStart }) => {
   const findDashboards = async (query: string = '', fields: string[] = []) => {
     const { find } = coreStart.savedObjects.client;
 
-    const { savedObjects } = await find<DashboardSavedObject>({
+    const { savedObjects } = await find<PartialDashboardAttributes>({
       type: 'dashboard',
       search: `${query}*`,
       searchFields: fields,

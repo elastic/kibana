@@ -14,16 +14,14 @@ import {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteSignalsIndex } from '../../utils';
 import { ROLES } from '../../../../plugins/security_solution/common/test';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const security = getService('security');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/90229
-  describe.skip('create_index', () => {
+  describe('create_index', () => {
     afterEach(async () => {
       await deleteSignalsIndex(supertest);
     });
@@ -66,8 +64,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('t1_analyst', () => {
       const role = ROLES.t1_analyst;
+
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -86,11 +89,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t1_analyst], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as not being outdated', async () => {
@@ -111,8 +111,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('t2_analyst', () => {
       const role = ROLES.t2_analyst;
+
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -131,11 +136,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [t2_analyst], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as not being outdated', async () => {
@@ -156,8 +158,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('detections_admin', () => {
       const role = ROLES.detections_admin;
+
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -201,8 +208,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('soc_manager', () => {
       const role = ROLES.soc_manager;
+
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -221,11 +233,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [soc_manager], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as not being outdated', async () => {
@@ -246,8 +255,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('hunter', () => {
       const role = ROLES.hunter;
+
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -266,11 +280,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [hunter], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as not being outdated', async () => {
@@ -291,8 +302,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('platform_engineer', () => {
       const role = ROLES.platform_engineer;
+
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -336,8 +352,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('reader', () => {
       const role = ROLES.reader;
+
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -356,11 +377,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [reader], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as being outdated.', async () => {
@@ -381,8 +399,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('rule_author', () => {
       const role = ROLES.rule_author;
+
       beforeEach(async () => {
-        await createUserAndRole(security, role);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
       });
 
       it('should return a 404 when the signal index has never been created', async () => {
@@ -401,11 +424,8 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(role, 'changeme')
           .send()
           .expect(403);
-        expect(body).to.eql({
-          message:
-            'security_exception: action [cluster:admin/ilm/get] is unauthorized for user [rule_author], this action is granted by the privileges [read_ilm,manage_ilm,manage,all]',
-          status_code: 403,
-        });
+        expect(body.message).to.match(/^security_exception/);
+        expect(body.status_code).to.eql(403);
       });
 
       it('should be able to read the index name and status as being outdated.', async () => {

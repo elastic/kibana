@@ -18,6 +18,7 @@ import {
   createGoAgentInstructions,
   createJavaAgentInstructions,
   createDotNetAgentInstructions,
+  createPhpAgentInstructions,
 } from '../../../../../src/plugins/apm_oss/server';
 import { CloudSetup } from '../../../cloud/server';
 
@@ -104,6 +105,10 @@ function getApmAgentInstructionSet(cloudSetup?: CloudSetup) {
       {
         id: INSTRUCTION_VARIANT.DOTNET,
         instructions: createDotNetAgentInstructions(apmServerUrl, secretToken),
+      },
+      {
+        id: INSTRUCTION_VARIANT.PHP,
+        instructions: createPhpAgentInstructions(apmServerUrl, secretToken),
       },
     ],
   };

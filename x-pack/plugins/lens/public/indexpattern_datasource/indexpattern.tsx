@@ -12,6 +12,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 import {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -31,7 +32,7 @@ import { toExpression } from './to_expression';
 import {
   IndexPatternDimensionTrigger,
   IndexPatternDimensionEditor,
-  canHandleDrop,
+  getDropProps,
   onDrop,
 } from './dimension_panel';
 import { IndexPatternDataPanel } from './datapanel';
@@ -44,7 +45,7 @@ import {
 import { isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
 import { IndexPatternColumn, getErrorMessages, IncompleteColumn } from './operations';
-import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
+import { IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
@@ -52,14 +53,8 @@ import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../types';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { deleteColumn, isReferenced } from './operations';
-import { DragDropIdentifier } from '../drag_drop/providers';
 
 export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
-
-export type DraggedField = DragDropIdentifier & {
-  field: IndexPatternField;
-  indexPatternId: string;
-};
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
@@ -82,13 +77,14 @@ export function getIndexPatternDatasource({
   storage,
   data,
   charts,
+  indexPatternFieldEditor,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   charts: ChartsPluginSetup;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }) {
-  const savedObjectsClient = core.savedObjects.client;
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
@@ -98,6 +94,21 @@ export function getIndexPatternDatasource({
     });
 
   const indexPatternsService = data.indexPatterns;
+
+  const handleChangeIndexPattern = (
+    id: string,
+    state: IndexPatternPrivateState,
+    setState: StateSetter<IndexPatternPrivateState>
+  ) => {
+    changeIndexPattern({
+      id,
+      state,
+      setState,
+      onError: onIndexPatternLoadError,
+      storage,
+      indexPatternsService,
+    });
+  };
 
   // Not stateful. State is persisted to the frame
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
@@ -112,7 +123,6 @@ export function getIndexPatternDatasource({
       return loadInitialState({
         persistedState,
         references,
-        savedObjectsClient: await savedObjectsClient,
         defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
         storage,
         indexPatternsService,
@@ -164,7 +174,11 @@ export function getIndexPatternDatasource({
       return mergeLayer({
         state: prevState,
         layerId,
-        newLayer: deleteColumn({ layer: prevState.layers[layerId], columnId, indexPattern }),
+        newLayer: deleteColumn({
+          layer: prevState.layers[layerId],
+          columnId,
+          indexPattern,
+        }),
       });
     },
 
@@ -177,23 +191,12 @@ export function getIndexPatternDatasource({
       render(
         <I18nProvider>
           <IndexPatternDataPanel
-            changeIndexPattern={(
-              id: string,
-              state: IndexPatternPrivateState,
-              setState: StateSetter<IndexPatternPrivateState>
-            ) => {
-              changeIndexPattern({
-                id,
-                state,
-                setState,
-                onError: onIndexPatternLoadError,
-                storage,
-                indexPatternsService,
-              });
-            }}
+            changeIndexPattern={handleChangeIndexPattern}
             data={data}
             charts={charts}
+            indexPatternFieldEditor={indexPatternFieldEditor}
             {...props}
+            core={core}
           />
         </I18nProvider>,
         domElement
@@ -314,8 +317,7 @@ export function getIndexPatternDatasource({
         domElement
       );
     },
-
-    canHandleDrop,
+    getDropProps,
     onDrop,
 
     // Reset the temporary invalid state when closing the editor, but don't
@@ -413,6 +415,10 @@ export function getIndexPatternDatasource({
         });
       });
       return messages.length ? messages : undefined;
+    },
+    checkIntegrity: (state) => {
+      const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
+      return ids.filter((id) => !state.indexPatterns[id]);
     },
   };
 

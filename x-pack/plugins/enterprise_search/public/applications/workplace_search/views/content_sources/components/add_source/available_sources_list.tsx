@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
+import { useValues } from 'kea';
 
 import {
   EuiCard,
@@ -18,15 +18,13 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-
-import { useValues } from 'kea';
+import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
-
 import { SourceIcon } from '../../../../components/shared/source_icon';
-import { SourceDataItem } from '../../../../types';
 import { ADD_CUSTOM_PATH, getSourcesPath } from '../../../../routes';
+import { SourceDataItem } from '../../../../types';
 
 import {
   AVAILABLE_SOURCE_EMPTY_STATE,
@@ -50,13 +48,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
         title={name}
         description={<></>}
         isDisabled={disabled}
-        icon={
-          <SourceIcon
-            serviceType={serviceType}
-            name={name}
-            className="euiIcon--xxxLarge source-card-icon"
-          />
-        }
+        icon={<SourceIcon serviceType={serviceType} name={name} size="xxl" />}
       />
     );
 
@@ -81,7 +73,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   };
 
   const visibleSources = (
-    <EuiFlexGrid columns={3} gutterSize="m" className="source-grid" responsive={false}>
+    <EuiFlexGrid columns={3} gutterSize="m" responsive={false}>
       {sources.map((source, i) => (
         <EuiFlexItem key={i} data-test-subj="AvailableSourceCard">
           {getSourceCard(source)}

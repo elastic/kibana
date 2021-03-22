@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the execution of macOS built-in commands to mount a Server Message Block (SMB) network share. Adversaries may use valid accounts to interact with a remote network share using SMB.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Attempt to Mount SMB Share via Command Line",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  (\n    process.name : \"mount_smbfs\" or\n    (process.name : \"open\" and process.args : \"smb://*\") or\n    (process.name : \"mount\" and process.args : \"smbfs\") or\n    (process.name : \"osascript\" and process.command_line : \"osascript*mount volume*smb://*\")\n  )\n",
+  "references": [
+    "https://www.freebsd.org/cgi/man.cgi?mount_smbfs",
+    "https://ss64.com/osx/mount.html"
+  ],
+  "risk_score": 21,
+  "rule_id": "661545b4-1a90-4f45-85ce-2ebd7c6a15d0",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Lateral Movement"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/",
+          "subtechnique": [
+            {
+              "id": "T1021.002",
+              "name": "SMB/Windows Admin Shares",
+              "reference": "https://attack.mitre.org/techniques/T1021/002/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

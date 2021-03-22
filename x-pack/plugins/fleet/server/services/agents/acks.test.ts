@@ -6,16 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsBulkResponse } from 'kibana/server';
+import type { SavedObjectsBulkResponse } from 'kibana/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import {
+import type {
   Agent,
   AgentActionSOAttributes,
   BaseAgentActionSOAttributes,
   AgentEvent,
 } from '../../../common/types/models';
 import { AGENT_TYPE_PERMANENT, AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
+
 import { acknowledgeAgentActions } from './acks';
 
 describe('test agent acks services', () => {
@@ -106,19 +107,24 @@ describe('test agent acks services', () => {
         } as AgentEvent,
       ]
     );
-    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(1);
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).toMatchInlineSnapshot(`
-      Object {
-        "attributes": Object {
-          "packages": Array [
-            "system",
-          ],
-          "policy_revision": 4,
+    expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
+    expect(mockElasticsearchClient.update).toBeCalled();
+    expect(mockElasticsearchClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "body": Object {
+            "doc": Object {
+              "packages": Array [
+                "system",
+              ],
+              "policy_revision_idx": 4,
+            },
+          },
+          "id": "id",
+          "index": ".fleet-agents",
+          "refresh": "wait_for",
         },
-        "id": "id",
-        "type": "fleet-agents",
-      }
+      ]
     `);
   });
 
@@ -168,19 +174,24 @@ describe('test agent acks services', () => {
         } as AgentEvent,
       ]
     );
-    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(1);
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0][0]).toMatchInlineSnapshot(`
-      Object {
-        "attributes": Object {
-          "packages": Array [
-            "system",
-          ],
-          "policy_revision": 4,
+    expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
+    expect(mockElasticsearchClient.update).toBeCalled();
+    expect(mockElasticsearchClient.update.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "body": Object {
+            "doc": Object {
+              "packages": Array [
+                "system",
+              ],
+              "policy_revision_idx": 4,
+            },
+          },
+          "id": "id",
+          "index": ".fleet-agents",
+          "refresh": "wait_for",
         },
-        "id": "id",
-        "type": "fleet-agents",
-      }
+      ]
     `);
   });
 
@@ -230,8 +241,8 @@ describe('test agent acks services', () => {
         } as AgentEvent,
       ]
     );
-    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(0);
+    expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
+    expect(mockSavedObjectsClient.update).not.toBeCalled();
   });
 
   it('should not update config field on the agent if a policy change for an old revision is acknowledged', async () => {
@@ -277,8 +288,8 @@ describe('test agent acks services', () => {
         } as AgentEvent,
       ]
     );
-    expect(mockSavedObjectsClient.bulkUpdate).toBeCalled();
-    expect(mockSavedObjectsClient.bulkUpdate.mock.calls[0][0]).toHaveLength(0);
+    expect(mockSavedObjectsClient.bulkUpdate).not.toBeCalled();
+    expect(mockSavedObjectsClient.update).not.toBeCalled();
   });
 
   it('should fail for actions that cannot be found on agent actions list', async () => {

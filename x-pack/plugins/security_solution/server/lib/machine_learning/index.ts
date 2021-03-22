@@ -7,7 +7,7 @@
 
 import { RequestParams } from '@elastic/elasticsearch';
 
-import { buildExceptionFilter } from '../../../common/detection_engine/build_exceptions_filter';
+import { buildExceptionFilter } from '../../../common/shared_imports';
 import { ExceptionListItemSchema } from '../../../../lists/common';
 import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 import { SearchResponse } from '../types';
@@ -47,6 +47,7 @@ export const getAnomalies = async (
                   analyze_wildcard: false,
                 },
               },
+              { term: { is_interim: false } },
               {
                 bool: {
                   must: boolCriteria,

@@ -107,6 +107,13 @@ export const getTestCases = (
         savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype'),
       },
     } as FindTestCase,
+    multiNamespaceIsolatedType: {
+      title: buildTitle('find multi-namespace isolated type'),
+      query: `type=sharecapabletype&fields=title${namespacesQueryParam}`,
+      successResult: {
+        savedObjects: getExpectedSavedObjects((t) => t.type === 'sharecapabletype'),
+      },
+    } as FindTestCase,
     namespaceAgnosticType: {
       title: buildTitle('find namespace-agnostic type'),
       query: `type=globaltype&fields=title${namespacesQueryParam}`,

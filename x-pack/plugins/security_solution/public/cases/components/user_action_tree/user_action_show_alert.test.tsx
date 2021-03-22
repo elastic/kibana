@@ -8,20 +8,24 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { UserActionShowAlert } from './user_action_show_alert';
+import { RuleEcs } from '../../../../common/ecs/rule';
 
 const props = {
   id: 'action-id',
+  alertId: 'alert-id',
+  index: 'alert-index',
   alert: {
     _id: 'alert-id',
     _index: 'alert-index',
-    '@timestamp': '2021-01-07T13:58:31.487Z',
+    timestamp: '2021-01-07T13:58:31.487Z',
     rule: {
-      id: 'rule-id',
-      name: 'Awesome Rule',
-      from: '2021-01-07T13:58:31.487Z',
-      to: '2021-01-07T14:58:31.487Z',
-    },
+      id: ['rule-id'],
+      name: ['Awesome Rule'],
+      from: ['2021-01-07T13:58:31.487Z'],
+      to: ['2021-01-07T14:58:31.487Z'],
+    } as RuleEcs,
   },
+  onShowAlertDetails: jest.fn(),
 };
 
 describe('UserActionShowAlert ', () => {
