@@ -48,6 +48,7 @@
     - [Elastic Buildkite Agent Manager](#elastic-buildkite-agent-manager)
       - [Overview](#overview-1)
       - [Design](#design)
+        - [Protection against creating too many instances](#protection-against-creating-too-many-instances)
       - [Configuration](#configuration)
       - [Build / Deploy](#build--deploy)
     - [Elastic Buildkite PR Bot](#elastic-buildkite-pr-bot)
@@ -62,6 +63,23 @@
 - [Drawbacks](#drawbacks)
 - [Alternatives](#alternatives)
   - [Jenkins](#jenkins)
+    - [Required](#required-2)
+      - [Scalable](#scalable-2)
+      - [Stable](#stable-2)
+        - [Updates](#updates)
+      - [Surfaces information intuitively](#surfaces-information-intuitively-2)
+      - [Pipelines](#pipelines-2)
+      - [Advanced Pipeline logic](#advanced-pipeline-logic-2)
+      - [Cloud-friendly pricing model](#cloud-friendly-pricing-model-2)
+      - [Public access](#public-access-2)
+      - [Secrets handling](#secrets-handling-2)
+      - [Support or Documentation](#support-or-documentation-2)
+      - [Scheduled Builds](#scheduled-builds-2)
+    - [Desired](#desired-2)
+      - [Customization](#customization-2)
+      - [Core functionality is first-party](#core-functionality-is-first-party-2)
+      - [First-class support for test results](#first-class-support-for-test-results-2)
+      - [GitHub Integration](#github-integration-2)
   - [Other solutions](#other-solutions)
     - [CircleCI](#circleci)
     - [GitHub Actions](#github-actions)
@@ -77,6 +95,8 @@ Implement a CI system for Kibana teams that is highly scalable, is stable, surfa
 
 If the proposal involves a new or changed API, include a basic code example.
 Omit this section if it's not applicable. -->
+
+TODO add a table overview of required/desired vs CI systems?
 
 # Motivation
 
@@ -433,6 +453,10 @@ Also planned:
 
 The agent manager is primarily concerned with ensuring that, given an agent configuration, the number of online agents for that configuration is **greather than or equal to** the desired number. Buildkite then determines how to use the agents: which jobs they should execute and when they should go offline (due to being idle, done with jobs, etc). Even when stopping agents due to having an outdated configuration, Buildkite still determines the actual time that the agent should disconnect.
 
+The current version of the agent manager only handles GCP-based agents, but support for other platforms could be added as well, such as AWS or Kubernetes. There's likely more complexity in managing all of the various agent images than in maintaining support in the agent manager.
+
+It is also designed to itself be stateless, so that it is easy to deploy and reason about. State is effectively stored in GCP and Buildkite.
+
 ![High-Level Design](../images/0016_agent_manager.png)
 
 The high-level design for the agent manager is pretty straightforward. There are three primary stages during execution:
@@ -450,6 +474,25 @@ The high-level design for the agent manager is pretty straightforward. There are
 An error at any step, e.g. when checking current state of GCP instances, will cause the rest of the run to abort.
 
 Because the service gathers data about the total current state and creates a plan based on that state each run, it's reasonably resistant to errors and it's self-healing.
+
+##### Protection against creating too many instances
+
+Creating too many instances in GCP could be costly, so is worth mentioning here. Since the agent manager itself is stateless, and only looks at the current, external state when determining an execution plan, there is the possibility of creating too many instances.
+
+There are two primary mechanisms to protect against this:
+
+One is usage of GCP quotas. Maintaining reasonable GCP quotas will ensure that we don't create too many instances in a situation where something goes catastrophically wrong during operation. It's an extra failsafe.
+
+The other is built into the agent manager. The agent manager checks both the number of connected agents in Buildkite for a given configuration, as well as the number of instances currently running and being created in GCP. It uses whichever number is greater as the current number of instances.
+
+This is a simple failsafe, but means that a large number of unnecessary instances should only be able to be created in a pretty specific scenario (keep in mind that errors will abort the current agent manager run):
+
+- The GCP APIs (both read and create) are returning success codes
+- The GCP API for listing instances is returning partial/missing/erroroneous data, with a success code
+- GCP instances are successfully being created
+- Created GCP instances are unable to connect to Buildkite, or Buildkite Agents API is returning partial/missing/erroroneous data
+
+All of these things would need to be true at the same time for a large number of instances to be created. In the unlikely event that that were to happen, the GCP quotas would still be in-place.
 
 #### Configuration
 
@@ -598,7 +641,118 @@ There are tradeoffs to choosing any path. Attempt to identify them here.
 
 ## Jenkins
 
-TODO how Jenkins stacks up against the required/desired functionality, and the kinds of things we would need to build to get there.
+### Required
+
+#### Scalable
+
+Our current Jenkins instance only allows for 300-400 connected agents, before effectively going offline. We have strugged with this issue for several years, and completely redesigned our pipelines around this limitation. The resulting design, which involves running 20+ tasks in parallel on single, large machines, and managing all of the concurrency ourselves, is complicated and problematic.
+
+Other teams at Elastic, especially over the last few months, have been experiencing this same limitation with their Jenkins instaces as well. The team that manages Jenkins at Elastic is well aware of this issue, and is actively investigating. It is currently unknown whether or not it is a solvable problem (without sharding) or a limitation of Jenkins.
+
+#### Stable
+
+Firstly, Jenkins was not designed for high availability. If the primary/controller goes offline, CI is offline.
+
+The two biggest sources of stability issues for us are currently related to scaling (see above) and updates.
+
+##### Updates
+
+The typical update process for Jenkins looks like this:
+
+- Put Jenkins into shutdown mode, which stops any new builds from starting
+- Wait for all currently-running jobs to finish
+- Shutdown Jenkins
+- Do the update
+- Start Jenkins
+
+For us, shutdown mode also means that `gobld` stops creating new agents for our jobs. This means that many running jobs will never finish executing while shutdown mode is active.
+
+So, for us, the typical update process is:
+
+- Put Jenkins into shutdown mode, which stops any new builds from starting, and many from finishing
+- Hard kill all of our currently running jobs
+- Shutdown Jenkins
+- Do the update
+- Start Jenkins
+- A human manually restarts CI for all PRs that were running before the update
+
+This is pretty disruptive for us, as developers have to wait several hours longer before merging or seeing the status of their PRs, plus there is manual work that must be done to restart CI. If we stay with Jenkins, we'll need to fix this process, and likely build some automation for it.
+
+#### Surfaces information intuitively
+
+Our pipelines are very complex, mainly because of the issues mentioned above related to designing around scaling issues, and none of the UIs in Jenkins work well for us.
+
+The [Stage View](https://kibana-ci.elastic.co/job/elastic+kibana+pipeline-pull-request) only works for very simple pipelines. Even if we were able to re-design our pipelines to populate this page better, there are just too many stages to display in this manner.
+
+[Blue Ocean](https://kibana-ci.elastic.co/blue/organizations/jenkins/elastic%2Bkibana%2Bpipeline-pull-request/activity), which is intended to be the modern UI for Jenkins, doesn't work at all for our pipelines. We have nested parallel stages in our pipelines, which [are not supported](https://issues.jenkins.io/browse/JENKINS-54010).
+
+[Pipeline Steps](https://kibana-ci.elastic.co/job/elastic+kibana+pipeline-pull-request/) (Choose a build -> Pipeline Steps) shows information fairly accurately (sometimes logs/errors are not attached to any steps, and do not show), but is very difficult to read. There are entire pages of largely irrelevant information (Setting environment variables, starting a `try` block, etc), which is difficult to read through, especially developers who don't interact with Jenkins every day.
+
+![Pipeline Steps](../images/0016_jenkins_pipeline_steps.png)
+
+We push a lot of information to GitHub and Slack, and have even built custom UIs, to try to minimize how much people need to interact directly with Jenkins. In particular, when things go wrong, it is very difficult to investigate using the Jenkins UI.
+
+#### Pipelines
+
+Jenkins supports pipeline-as-code through [Pipelines](https://www.jenkins.io/doc/book/pipeline), which we currently use.
+
+Pros:
+
+- Overall pretty powerful, pipelines execute Groovy code at runtime, so pipelines can do a lot and can be pretty complex, if you're willing to write the code
+- Pipeline changes can be tested in PRs
+
+Cons:
+
+- The sandbox is pretty difficult to work with. There's a [hard-coded list](https://github.com/jenkinsci/script-security-plugin/tree/e99ba9cffb0502868b05d19ef5cd205ca7e0e5bd/src/main/resources/org/jenkinsci/plugins/scriptsecurity/sandbox/whitelists) of allowed methods for pipelines. Other methods must be approved separately, or put in a separate shared repository that runs trusted code.
+- Pipeline code is serialized by Jenkins, and the serializiation process leads to a lot of issues that are difficult to debug and reason about. See [JENKINS-44924](https://issues.jenkins.io/browse/JENKINS-44924) - `List.sort()` doesn't work and silently returns `-1` instead of a list
+- Reasonably complex pipelines are difficult to view in the UI ([see above](#surfaces-information-intuitively-2))
+- Using Pipelines to manage certain configurations (such as Build Parameters) requires running an outdated job once and letting it fail to update it
+- Jobs that reference a pipeline have to be managed separately. Only third-party tools exist for managing these jobs as code (JJB and Job DSL).
+- Very difficult to test code without running it live in Jenkins
+
+https://issues.jenkins.io/browse/JENKINS-44924
+
+#### Advanced Pipeline logic
+
+See above section. Jenkins supports very advanced pipeline logic using scripted pipelines and Groovy.
+
+#### Cloud-friendly pricing model
+
+Given that Jenkins is open-source, we pay only for infrastructure and people to manage it.
+
+#### Public access
+
+Jenkins has pretty fine-grained authorization settings, including anonymous user access for the public.
+
+#### Secrets handling
+
+TODO
+
+#### Support or Documentation
+
+TODO
+
+#### Scheduled Builds
+
+TODO
+
+### Desired
+
+#### Customization
+
+TODO
+
+#### Core functionality is first-party
+
+TODO
+
+#### First-class support for test results
+
+TODO
+
+#### GitHub Integration
+
+TODO
 
 ## Other solutions
 
