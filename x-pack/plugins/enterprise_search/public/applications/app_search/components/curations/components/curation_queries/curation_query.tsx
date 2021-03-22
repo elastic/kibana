@@ -10,6 +10,8 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DELETE } from '../../../../../shared/constants';
+
 interface Props {
   queryValue: string;
   onChange(newValue: string): void;
@@ -41,9 +43,7 @@ export const CurationQuery: React.FC<Props> = ({
         color="danger"
         onClick={onDelete}
         isDisabled={disableDelete}
-        aria-label={i18n.translate('xpack.enterpriseSearch.actions.delete', {
-          defaultMessage: 'Delete',
-        })}
+        aria-label={DELETE}
         data-test-subj="deleteCurationQueryButton"
       />
     </EuiFlexItem>

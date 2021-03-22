@@ -12,7 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EDIT } from '../../../../shared/constants';
+import { EDIT, DELETE } from '../../../../shared/constants';
 import { HiddenText } from '../../../../shared/hidden_text';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
@@ -93,9 +93,7 @@ export const CredentialsList: React.FC = () => {
           onClick: (token: ApiToken) => showCredentialsForm(token),
         },
         {
-          name: i18n.translate('xpack.enterpriseSearch.actions.delete', {
-            defaultMessage: 'Delete',
-          }),
+          name: DELETE,
           description: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.deleteKey', {
             defaultMessage: 'Delete API Key',
           }),

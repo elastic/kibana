@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EDIT } from '../../../../shared/constants';
+import { EDIT, DELETE } from '../../../../shared/constants';
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { Loading } from '../../../../shared/loading';
@@ -122,10 +122,7 @@ export const CurationsTable: React.FC = () => {
           'data-test-subj': 'CurationsTableEditButton',
         },
         {
-          name: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.deleteAction',
-            { defaultMessage: 'Delete' }
-          ),
+          name: DELETE,
           description: i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.table.deleteTooltip',
             { defaultMessage: 'Delete curation' }

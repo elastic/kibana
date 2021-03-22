@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DELETE } from '../../../shared/constants';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
@@ -86,9 +87,7 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
             onClick={() => deleteDocument(documentId)}
             data-test-subj="DeleteDocumentButton"
           >
-            {i18n.translate('xpack.enterpriseSearch.appSearch.documentDetail.deleteButton', {
-              defaultMessage: 'Delete',
-            })}
+            {DELETE}
           </EuiButton>,
         ]}
       />

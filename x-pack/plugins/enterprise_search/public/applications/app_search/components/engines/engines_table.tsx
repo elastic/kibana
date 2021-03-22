@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n/react';
 
+import { DELETE } from '../../../shared/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
@@ -165,12 +166,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         },
       },
       {
-        name: i18n.translate(
-          'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonLabel',
-          {
-            defaultMessage: 'Delete',
-          }
-        ),
+        name: DELETE,
         description: i18n.translate(
           'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonDescription',
           {
