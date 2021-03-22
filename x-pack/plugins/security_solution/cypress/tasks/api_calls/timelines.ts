@@ -112,67 +112,58 @@ export const createIndicatorMatchTimelineTemplate = (timeline: CompleteTimeline)
             id: 'threat.indicator.match.type',
           },
         ],
+        dataProviders: [
+          {
+            name: '{threat.indicator.matched.atomic}',
+            enabled: true,
+            excluded: false,
+            queryMatch: {
+              field: 'threat.indicator.matched.atomic',
+              value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+              operator: ':',
+            },
+            and: [
+              {
+                name: '{threat.indicator.matched.field}',
+                enabled: true,
+                excluded: false,
+                queryMatch: {
+                  field: 'threat.indicator.matched.field',
+                  value: '{threat.indicator.matched.field}',
+                  operator: ':',
+                },
+              },
+              {
+                name: '{threat.indicator.matched.type}',
+                enabled: true,
+                excluded: false,
+                queryMatch: {
+                  field: 'threat.indicator.matched.type',
+                  value: '{threat.indicator.matched.type}',
+                  operator: ':',
+                },
+              },
+            ],
+          },
+        ],
         kqlMode: 'filter',
         kqlQuery: {
           filterQuery: {
             kuery: {
-              expression: timeline.query,
+              expression: 'myhash.mysha256: *',
               kind: 'kuery',
             },
           },
         },
         dateRange: {
-          end: '1577881376000',
-          start: '1514809376000',
+          start: '2021-03-21T23:00:00.000Z',
+          end: '2027-03-21T23:00:00.000Z',
         },
         description: timeline.description,
         title: timeline.title,
         templateTimelineVersion: 1,
         timelineType: 'template',
       },
-      dataProviders: [
-        {
-          id: 'timeline-1-d18ef97c-5b2f-4e77-bbcb-33f35db477eb',
-          name: '{threat.indicator.matched.atomic}',
-          enabled: true,
-          excluded: false,
-          kqlQuery: '',
-          type: 'template',
-          queryMatch: {
-            field: 'threat.indicator.matched.atomic',
-            value: '{threat.indicator.matched.atomic}',
-            operator: ':',
-          },
-          and: [
-            {
-              id: 'timeline-1-7f8013f9-3ccf-490a-8788-c358e0f17907',
-              name: '{threat.indicator.matched.field}',
-              enabled: true,
-              excluded: false,
-              kqlQuery: '',
-              type: 'template',
-              queryMatch: {
-                field: 'threat.indicator.matched.field',
-                value: '{threat.indicator.matched.field}',
-                operator: ':',
-              },
-            },
-            {
-              id: 'timeline-1-1edcf9f9-5c57-445c-9bdd-dbed9079c71b',
-              name: '{threat.indicator.matched.type}',
-              enabled: true,
-              excluded: false,
-              kqlQuery: '',
-              type: 'template',
-              queryMatch: {
-                field: 'threat.indicator.matched.type',
-                value: '{threat.indicator.matched.type}',
-                operator: ':',
-              },
-            },
-          ],
-        },
-      ],
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });

@@ -58,6 +58,7 @@ import {
 import {
   expandFirstAlert,
   goToManageAlertsDetectionRules,
+  investigateFirstAlertInTimeline,
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
@@ -72,6 +73,7 @@ import {
   waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
+import { createIndicatorMatchTimelineTemplate } from '../../tasks/api_calls/timelines';
 import { cleanKibana, reload } from '../../tasks/common';
 import {
   createAndActivateRule,
@@ -472,6 +474,30 @@ describe('indicator match', () => {
           .first()
           .should('have.text', newThreatIndicatorRule.severity.toLowerCase());
         cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', newThreatIndicatorRule.riskScore);
+      });
+    });
+
+    describe('Investigate in timeline', () => {
+      const indicatorMatchRule = { ...newThreatIndicatorRule };
+
+      beforeEach(() => {
+        cleanKibana();
+        createIndicatorMatchTimelineTemplate(indicatorMatchRule.timeline).then((response) => {
+          indicatorMatchRule.timeline.id =
+            response.body.data.persistTimeline.timeline.savedObjectId;
+          cy.log('gloria');
+          cy.log(indicatorMatchRule.timeline.id!);
+          loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+          goToManageAlertsDetectionRules();
+          createCustomIndicatorRule(indicatorMatchRule);
+          reload();
+        });
+      });
+
+      it('Investigate an indicator match alert in timeline', () => {
+        cy.pause();
+
+        investigateFirstAlertInTimeline();
       });
     });
 

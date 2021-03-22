@@ -41,7 +41,8 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       name: rule.name,
       severity: rule.severity.toLocaleLowerCase(),
       type: 'threat_match',
-      timeline_id: rule.timelineTemplate,
+      timeline_id: rule.timeline.id,
+      timeline_title: rule.timeline.title,
       threat_mapping: [
         {
           entries: [

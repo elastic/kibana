@@ -24,15 +24,15 @@ import { DETECTIONS_URL } from '../../urls/navigation';
 describe('Alerts timeline', () => {
   beforeEach(() => {
     cleanKibana();
+  });
+
+  it('Investigate alert in default timeline', () => {
     loginAndWaitForPage(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     createCustomRuleActivated(newRule);
     refreshPage();
     waitForAlertsToPopulate();
-  });
-
-  it('Investigate alert in default timeline', () => {
     investigateFirstAlertInTimeline();
     cy.get(PROVIDER_BADGE)
       .first()
