@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
@@ -17,17 +18,19 @@ interface Props {
 }
 
 export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
-  const [policy, setPolicy] = useState<ResponseBodyIndexPolicy>(defaultValue);
+  const [policy, setPolicy] = useState<ResponseBodyIndexPolicy>(
+    defaultValue !== ResponseBodyIndexPolicy.NEVER ? defaultValue : ResponseBodyIndexPolicy.ON_ERROR
+  );
   const [checked, setChecked] = useState<boolean>(defaultValue !== ResponseBodyIndexPolicy.NEVER);
 
   useEffect(() => {
     if (checked) {
-      setPolicy(defaultValue);
-      onChange(defaultValue);
+      setPolicy(policy);
+      onChange(policy);
     } else {
       onChange(ResponseBodyIndexPolicy.NEVER);
     }
-  }, [checked, defaultValue, setPolicy, onChange]);
+  }, [checked, policy, setPolicy, onChange]);
 
   useEffect(() => {
     onChange(policy);
@@ -54,6 +57,7 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
       {checked && (
         <EuiFlexItem>
           <EuiSelect
+            data-test-subj="indexResponseBodyFieldSelect"
             options={responseBodyIndexPolicyOptions}
             value={policy}
             onChange={(event) => {
@@ -67,6 +71,22 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
 };
 
 const responseBodyIndexPolicyOptions = [
-  { value: ResponseBodyIndexPolicy.ALWAYS, text: 'Always' },
-  { value: ResponseBodyIndexPolicy.ON_ERROR, text: 'On error' },
+  {
+    value: ResponseBodyIndexPolicy.ALWAYS,
+    text: i18n.translate(
+      'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyIndex.always',
+      {
+        defaultMessage: 'Always',
+      }
+    ),
+  },
+  {
+    value: ResponseBodyIndexPolicy.ON_ERROR,
+    text: i18n.translate(
+      'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyIndex.onError',
+      {
+        defaultMessage: 'On error',
+      }
+    ),
+  },
 ];
