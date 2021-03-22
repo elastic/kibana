@@ -227,15 +227,21 @@ export class TelemetryCollectionManagerPlugin
       if (statsCollectionConfig) {
         try {
           const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
-          if (usageData.length) {
+          const optedInUsageData = usageData.filter(isClusterOptedIn);
+          if (optedInUsageData.length) {
             this.logger.debug(`Got Usage using ${collection.title} collection.`);
             if (config.unencrypted) {
-              return usageData;
+              return optedInUsageData;
             }
 
-            return encryptTelemetry(usageData.filter(isClusterOptedIn), {
+            return await encryptTelemetry(optedInUsageData, {
               useProdKey: this.isDistributable,
             });
+          } else if (usageData.length) {
+            this.logger.debug(
+              `Got Usage using ${collection.title} collection but none is opted-in.`
+            );
+            return [];
           }
         } catch (err) {
           this.logger.debug(
