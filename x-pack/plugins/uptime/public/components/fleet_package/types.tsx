@@ -81,7 +81,7 @@ export interface ISimpleFields {
   [ConfigKeys.MONITOR_TYPE]: DataStream;
   [ConfigKeys.PROXY_URL]: string;
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: boolean;
-  [ConfigKeys.SCHEDULE]: { number: string; unit: string };
+  [ConfigKeys.SCHEDULE]: { number: string; unit: ScheduleUnit };
   [ConfigKeys.SERVICE_NAME]: string;
   [ConfigKeys.TIMEOUT]: number;
   [ConfigKeys.URLS]: string;
