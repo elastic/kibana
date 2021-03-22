@@ -19,7 +19,7 @@ type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U> ? Array<DeepPartial<U>> : DeepPartial<T[P]>;
 };
 
-export const ECS_VERSION = '1.6.0';
+export const ECS_VERSION = '1.8.0';
 
 // types and config-schema describing the es structures
 export type IValidatedEvent = TypeOf<typeof EventSchema>;
