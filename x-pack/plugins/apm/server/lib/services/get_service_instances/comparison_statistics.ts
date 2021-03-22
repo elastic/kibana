@@ -15,7 +15,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServiceInstanceSystemMetricComparisonStatistics } from './get_service_instance_system_metric_statistics';
 import { getServiceInstanceTransactionComparisonStatistics } from './get_service_instance_transaction_statistics';
 
-export interface ServiceInstanceComparisonStatisticsParams {
+interface ServiceInstanceComparisonStatisticsParams {
   environment?: string;
   kuery?: string;
   latencyAggregationType: LatencyAggregationType;
@@ -29,7 +29,7 @@ export interface ServiceInstanceComparisonStatisticsParams {
   serviceNodeIds: string[];
 }
 
-export async function getServiceInstancesComparisonStatistics(
+async function getServiceInstancesComparisonStatistics(
   params: ServiceInstanceComparisonStatisticsParams
 ): Promise<
   Array<{

@@ -12,7 +12,7 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServiceInstanceSystemMetricPrimaryStatistics } from './get_service_instance_system_metric_statistics';
 import { getServiceInstanceTransactionPrimaryStatistics } from './get_service_instance_transaction_statistics';
 
-export interface ServiceInstancePrimaryStatisticsParams {
+interface ServiceInstancePrimaryStatisticsParams {
   environment?: string;
   kuery?: string;
   latencyAggregationType: LatencyAggregationType;
