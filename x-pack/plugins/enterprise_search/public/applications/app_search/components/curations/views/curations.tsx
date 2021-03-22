@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EDIT } from '../../../../shared/constants';
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { Loading } from '../../../../shared/loading';
@@ -105,10 +106,7 @@ export const CurationsTable: React.FC = () => {
       width: '120px',
       actions: [
         {
-          name: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.editAction',
-            { defaultMessage: 'Edit' }
-          ),
+          name: EDIT,
           description: i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.table.editTooltip',
             { defaultMessage: 'Edit curation' }

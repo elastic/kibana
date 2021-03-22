@@ -7523,7 +7523,6 @@
     "xpack.enterpriseSearch.appSearch.engine.analytics.recentQueriesDescription": "現在実行中のクエリを表示します。",
     "xpack.enterpriseSearch.appSearch.engine.analytics.recentQueriesTitle": "最近のクエリ",
     "xpack.enterpriseSearch.appSearch.engine.analytics.table.clicksColumn": "クリック",
-    "xpack.enterpriseSearch.appSearch.engine.analytics.table.editAction": "編集",
     "xpack.enterpriseSearch.appSearch.engine.analytics.table.editTooltip": "クエリの編集",
     "xpack.enterpriseSearch.appSearch.engine.analytics.table.empty.noClicksDescription": "このクエリからクリックされたドキュメントはありません。",
     "xpack.enterpriseSearch.appSearch.engine.analytics.table.empty.noClicksTitle": "クリックなし",

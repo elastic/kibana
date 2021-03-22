@@ -7588,7 +7588,6 @@
     "xpack.enterpriseSearch.appSearch.engine.analytics.recentQueriesDescription": "了解现时正发生的查询。",
     "xpack.enterpriseSearch.appSearch.engine.analytics.recentQueriesTitle": "最近查询",
     "xpack.enterpriseSearch.appSearch.engine.analytics.table.clicksColumn": "点击",
-    "xpack.enterpriseSearch.appSearch.engine.analytics.table.editAction": "编辑",
     "xpack.enterpriseSearch.appSearch.engine.analytics.table.editTooltip": "编辑查询",
     "xpack.enterpriseSearch.appSearch.engine.analytics.table.empty.noClicksDescription": "此查询未引起任何文档的点击。",
     "xpack.enterpriseSearch.appSearch.engine.analytics.table.empty.noClicksTitle": "无点击",
