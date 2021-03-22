@@ -7,8 +7,7 @@
  */
 
 import React, { Fragment, useContext, useEffect } from 'react';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
-import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 
 import {
   EuiDataGridCellValueElementProps,
@@ -41,8 +40,8 @@ export const getRenderCellValueFn = (
       setCellProps({
         style: {
           backgroundColor: ctx.isDarkMode
-            ? themeDark.euiColorHighlight
-            : themeLight.euiColorHighlight,
+            ? euiDarkVars.euiColorHighlight
+            : euiLightVars.euiColorHighlight,
         },
       });
     } else {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-const { euiColorDarkShade, euiColorWarning } = theme;
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+const { euiColorDarkShade, euiColorWarning } = euiThemeVars;
 
 export const errorColor = '#c23c2b';
 export const neutralColor = euiColorDarkShade;

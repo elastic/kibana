@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
@@ -23,7 +23,7 @@ const series = {
     title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesUsed', {
       defaultMessage: 'Avg. used',
     }),
-    color: theme.euiColorVis0,
+    color: euiThemeVars.euiColorVis0,
   },
   heapMemoryCommitted: {
     title: i18n.translate(
@@ -32,13 +32,13 @@ const series = {
         defaultMessage: 'Avg. committed',
       }
     ),
-    color: theme.euiColorVis1,
+    color: euiThemeVars.euiColorVis1,
   },
   heapMemoryMax: {
     title: i18n.translate('xpack.apm.agentMetrics.java.heapMemorySeriesMax', {
       defaultMessage: 'Avg. limit',
     }),
-    color: theme.euiColorVis2,
+    color: euiThemeVars.euiColorVis2,
   },
 };
 

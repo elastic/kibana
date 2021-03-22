@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
@@ -21,25 +21,25 @@ const series = {
     title: i18n.translate('xpack.apm.chart.cpuSeries.systemMaxLabel', {
       defaultMessage: 'System max',
     }),
-    color: theme.euiColorVis1,
+    color: euiThemeVars.euiColorVis1,
   },
   systemCPUAverage: {
     title: i18n.translate('xpack.apm.chart.cpuSeries.systemAverageLabel', {
       defaultMessage: 'System average',
     }),
-    color: theme.euiColorVis0,
+    color: euiThemeVars.euiColorVis0,
   },
   processCPUMax: {
     title: i18n.translate('xpack.apm.chart.cpuSeries.processMaxLabel', {
       defaultMessage: 'Process max',
     }),
-    color: theme.euiColorVis7,
+    color: euiThemeVars.euiColorVis7,
   },
   processCPUAverage: {
     title: i18n.translate('xpack.apm.chart.cpuSeries.processAverageLabel', {
       defaultMessage: 'Process average',
     }),
-    color: theme.euiColorVis5,
+    color: euiThemeVars.euiColorVis5,
   },
 };
 

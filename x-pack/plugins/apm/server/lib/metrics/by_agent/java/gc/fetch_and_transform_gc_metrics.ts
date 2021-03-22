@@ -6,7 +6,7 @@
  */
 
 import { sum, round } from 'lodash';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
@@ -147,7 +147,7 @@ export async function fetchAndTransformGcMetrics({
       title: label,
       key: label,
       type: chartBase.type,
-      color: getVizColorForIndex(i, theme),
+      color: getVizColorForIndex(i, euiThemeVars),
       overallValue,
       data,
     };

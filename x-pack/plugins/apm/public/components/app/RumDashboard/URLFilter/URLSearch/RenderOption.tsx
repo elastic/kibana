@@ -9,10 +9,10 @@ import React, { ReactNode } from 'react';
 import classNames from 'classnames';
 import { EuiHighlight, EuiSelectableOption } from '@elastic/eui';
 import styled from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 const StyledSpan = styled.span`
-  color: ${euiLightVars.euiColorSecondaryText};
+  color: ${euiThemeVars.euiColorSecondaryText};
   font-weight: 500;
   :not(:last-of-type)::after {
     content: '•';

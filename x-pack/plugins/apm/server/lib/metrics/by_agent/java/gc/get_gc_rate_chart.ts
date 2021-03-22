@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/elasticsearch_fieldnames';
@@ -18,7 +18,7 @@ const series = {
     title: i18n.translate('xpack.apm.agentMetrics.java.gcRate', {
       defaultMessage: 'GC rate',
     }),
-    color: theme.euiColorVis0,
+    color: euiThemeVars.euiColorVis0,
   },
 };
 

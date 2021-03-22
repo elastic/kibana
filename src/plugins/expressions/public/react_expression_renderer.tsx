@@ -12,7 +12,7 @@ import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { EuiLoadingChart, EuiProgress } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { IExpressionLoaderParams, ExpressionRenderError } from './types';
 import { ExpressionAstExpression, IInterpreterRenderHandlers } from '../common';
 import { ExpressionLoader } from './loader';
@@ -213,7 +213,7 @@ export const ReactExpressionRenderer = ({
   const expressionStyles: React.CSSProperties = {};
 
   if (padding) {
-    expressionStyles.padding = theme.paddingSizes[padding];
+    expressionStyles.padding = euiThemeVars.paddingSizes[padding];
   }
 
   return (

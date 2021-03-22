@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
@@ -21,13 +21,13 @@ const series = {
     title: i18n.translate('xpack.apm.agentMetrics.java.threadCount', {
       defaultMessage: 'Avg. count',
     }),
-    color: theme.euiColorVis0,
+    color: euiThemeVars.euiColorVis0,
   },
   threadCountMax: {
     title: i18n.translate('xpack.apm.agentMetrics.java.threadCountMax', {
       defaultMessage: 'Max count',
     }),
-    color: theme.euiColorVis1,
+    color: euiThemeVars.euiColorVis1,
   },
 };
 

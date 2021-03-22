@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
@@ -26,7 +26,7 @@ const series = {
         defaultMessage: 'Avg. used',
       }
     ),
-    color: theme.euiColorVis0,
+    color: euiThemeVars.euiColorVis0,
   },
   nonHeapMemoryCommitted: {
     title: i18n.translate(
@@ -35,7 +35,7 @@ const series = {
         defaultMessage: 'Avg. committed',
       }
     ),
-    color: theme.euiColorVis1,
+    color: euiThemeVars.euiColorVis1,
   },
 };
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
-function getVizColorsForTheme(theme = lightTheme) {
+function getVizColorsForTheme(theme = euiThemeVars) {
   return [
     theme.euiColorVis0,
     theme.euiColorVis1,
@@ -22,7 +22,7 @@ function getVizColorsForTheme(theme = lightTheme) {
   ];
 }
 
-export function getVizColorForIndex(index = 0, theme = lightTheme) {
+export function getVizColorForIndex(index = 0, theme = euiThemeVars) {
   const colors = getVizColorsForTheme(theme);
   return colors[index % colors.length];
 }

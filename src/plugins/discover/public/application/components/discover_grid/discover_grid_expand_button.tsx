@@ -8,10 +8,10 @@
 
 import React, { useContext, useEffect } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
-import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
+
 /**
  * Button to expand a given row
  */
@@ -22,7 +22,9 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
     if (expanded && current && expanded._id === current._id) {
       setCellProps({
         style: {
-          backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
+          backgroundColor: isDarkMode
+            ? euiDarkVars.euiColorHighlight
+            : euiLightVars.euiColorHighlight,
         },
       });
     } else {

@@ -8,14 +8,13 @@
 
 import { monaco } from '@kbn/monaco';
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 
 // NOTE: For talk around where this theme information will ultimately live,
 // please see this discuss issue: https://github.com/elastic/kibana/issues/43814
 
 export function createTheme(
-  euiTheme: typeof darkTheme | typeof lightTheme,
+  euiTheme: typeof euiDarkVars | typeof euiLightVars,
   selectionBackgroundColor: string
 ): monaco.editor.IStandaloneThemeData {
   return {
@@ -103,7 +102,7 @@ export function createTheme(
   };
 }
 
-const DARK_THEME = createTheme(darkTheme, '#343551');
-const LIGHT_THEME = createTheme(lightTheme, '#E3E4ED');
+const DARK_THEME = createTheme(euiDarkVars, '#343551');
+const LIGHT_THEME = createTheme(euiLightVars, '#E3E4ED');
 
 export { DARK_THEME, LIGHT_THEME };

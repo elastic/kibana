@@ -17,8 +17,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 
 interface EndzonesProps {
   isDarkMode: boolean;
@@ -45,10 +44,10 @@ export const Endzones: FC<EndzonesProps> = ({
   isFullBin = false,
 }) => {
   const rectAnnotationStyle: Partial<RectAnnotationStyle> = {
-    stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
+    stroke: isDarkMode ? euiDarkVars.euiColorLightShade : euiLightVars.euiColorDarkShade,
     strokeWidth: 0,
     opacity: isDarkMode ? 0.6 : 0.2,
-    fill: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
+    fill: isDarkMode ? euiDarkVars.euiColorLightShade : euiLightVars.euiColorDarkShade,
   };
 
   const rectAnnotations: RectAnnotationDatum[] = [];

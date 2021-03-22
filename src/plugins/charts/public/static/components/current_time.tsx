@@ -10,8 +10,7 @@ import moment, { Moment } from 'moment';
 import React, { FC } from 'react';
 
 import { LineAnnotation, AnnotationDomainTypes, LineAnnotationStyle } from '@elastic/charts';
-import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
-import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 
 interface CurrentTimeProps {
   isDarkMode: boolean;
@@ -25,7 +24,7 @@ export const CurrentTime: FC<CurrentTimeProps> = ({ isDarkMode, domainEnd }) => 
   const lineAnnotationStyle: Partial<LineAnnotationStyle> = {
     line: {
       strokeWidth: 2,
-      stroke: isDarkMode ? darkEuiTheme.euiColorDanger : lightEuiTheme.euiColorDanger,
+      stroke: isDarkMode ? euiDarkVars.euiColorDanger : euiLightVars.euiColorDanger,
       opacity: 0.7,
     },
   };

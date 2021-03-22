@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import { euiColorAccent } from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -126,7 +125,7 @@ export class CreateButton extends Component<Props, State> {
 
   private renderBetaBadge = () => {
     return (
-      <EuiBadge color={euiColorAccent}>
+      <EuiBadge color={euiThemeVars.euiColorAccent}>
         <FormattedMessage
           id="indexPatternManagement.indexPatternList.createButton.betaLabel"
           defaultMessage="Beta"
