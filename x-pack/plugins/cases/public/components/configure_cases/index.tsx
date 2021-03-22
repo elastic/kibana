@@ -50,11 +50,11 @@ const FormWrapper = styled.div`
   `}
 `;
 
-interface ConfigureCasesComponentProps {
+export interface ConfigureCasesProps {
   userCanCrud: boolean;
 }
 
-const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userCanCrud }) => {
+const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud }) => {
   const { triggersActionsUi } = useKibana().services;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
