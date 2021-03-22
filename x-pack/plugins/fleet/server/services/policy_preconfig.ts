@@ -33,8 +33,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   defaultOutput: Output
 ) {
   // Validate configured packages to ensure there are no version conflicts
-  const packageNamesByVersion = groupBy(packages, (pkg) => pkg.version);
-  const duplicatePackages = Object.entries(packageNamesByVersion).filter(
+  const packageNames = groupBy(packages, (pkg) => pkg.name);
+  const duplicatePackages = Object.entries(packageNames).filter(
     ([, versions]) => versions.length > 1
   );
   if (duplicatePackages.length) {
@@ -55,9 +55,24 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     );
   }
 
+  // Preinstall packages specified in Kibana config
+  const preconfiguredPackages = await Promise.all(
+    packages.map(({ name, version }) =>
+      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version)
+    )
+  );
+
   // Create policies specified in Kibana config
-  const policiesPromise = Promise.all(
+  const preconfiguredPolicies = await Promise.all(
     policies.map(async ({ package_policies: packagePolicies, id, ...newAgentPolicy }) => {
+      const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
+        soClient,
+        esClient,
+        { ...newAgentPolicy, preconfiguration_id: String(id) }
+      );
+
+      if (!created) return { created, policy };
+
       const installedPackagePolicies = await Promise.all(
         packagePolicies.map(async ({ package: pkg, name, ...newPackagePolicy }) => {
           const installedPackage = await isPackageInstalled({
@@ -82,26 +97,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         })
       );
 
-      const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
-        soClient,
-        esClient,
-        { ...newAgentPolicy, preconfiguration_id: String(id) }
-      );
       return { created, policy, installedPackagePolicies };
     })
   );
-
-  // Preinstall packages specified in Kibana config
-  const packagesPromise = Promise.all(
-    packages.map(({ name, version }) =>
-      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version)
-    )
-  );
-
-  const [preconfiguredPolicies, preconfiguredPackages] = await Promise.all([
-    policiesPromise,
-    packagesPromise,
-  ]);
 
   for (const preconfiguredPolicy of preconfiguredPolicies) {
     const { created, policy, installedPackagePolicies } = preconfiguredPolicy;
@@ -110,14 +108,17 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         soClient,
         esClient,
         policy,
-        installedPackagePolicies,
+        installedPackagePolicies!,
         defaultOutput
       );
     }
   }
 
   return {
-    policies: preconfiguredPolicies.map((p) => p.policy.id),
+    policies: preconfiguredPolicies.map((p) => ({
+      id: p.policy.id,
+      updated_at: p.policy.updated_at,
+    })),
     packages: preconfiguredPackages.map((pkg) => `${pkg.name}:${pkg.version}`),
   };
 }
