@@ -22,20 +22,24 @@ import {
 } from '../constants';
 
 import {
-  migratePackagePolicyToV7110,
-  migratePackagePolicyToV7120,
-  // @ts-expect-error
-} from './security_solution';
-import {
-  migrateAgentToV7100,
+  migrateAgentActionToV7100,
   migrateAgentEventToV7100,
   migrateAgentPolicyToV7100,
+  migrateAgentToV7100,
   migrateEnrollmentApiKeysToV7100,
   migratePackagePolicyToV7100,
   migrateSettingsToV7100,
-  migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
-import { migrateAgentToV7120, migrateAgentPolicyToV7120 } from './migrations/to_v7_12_0';
+
+import { migratePackagePolicyToV7110 } from './migrations/to_v7_11_0';
+
+import {
+  migrateAgentPolicyToV7120,
+  migrateAgentToV7120,
+  migratePackagePolicyToV7120,
+} from './migrations/to_v7_12_0';
+
+import { migrateSettingsToV7130 } from './migrations/to_v7_13_0';
 
 /*
  * Saved object types and mappings
@@ -55,8 +59,6 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
-        agent_auto_upgrade: { type: 'keyword' },
-        package_auto_upgrade: { type: 'keyword' },
         kibana_urls: { type: 'keyword' },
         kibana_ca_sha256: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
@@ -64,6 +66,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migrateSettingsToV7100,
+      '7.13.0': migrateSettingsToV7130,
     },
   },
   [AGENT_SAVED_OBJECT_TYPE]: {

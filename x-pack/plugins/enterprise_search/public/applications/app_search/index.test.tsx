@@ -156,7 +156,7 @@ describe('AppSearchNav', () => {
     const wrapper = shallow(<AppSearchNav />);
 
     expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as#/role-mappings'
+      'http://localhost:3002/as/role_mappings'
     );
   });
 });

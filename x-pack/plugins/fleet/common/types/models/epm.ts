@@ -9,7 +9,7 @@
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 
-import {
+import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
@@ -274,6 +274,7 @@ export interface RegistryElasticsearch {
   'index_template.mappings'?: object;
 }
 
+export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -286,7 +287,6 @@ export enum RegistryVarsEntryKeys {
   os = 'os',
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
 // EPR types this as `[]map[string]interface{}`
 // which means the official/possible type is Record<string, any>
 // but we effectively only see this shape

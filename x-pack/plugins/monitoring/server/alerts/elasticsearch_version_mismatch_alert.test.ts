@@ -9,6 +9,7 @@ import { ElasticsearchVersionMismatchAlert } from './elasticsearch_version_misma
 import { ALERT_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 const RealDate = Date;
 
@@ -84,7 +85,7 @@ describe('ElasticsearchVersionMismatchAlert', () => {
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        callCluster: jest.fn(),
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,
