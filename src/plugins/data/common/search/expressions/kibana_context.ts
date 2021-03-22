@@ -81,7 +81,14 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   async fn(input, args, { getSavedObject }) {
     const timeRange = args.timeRange || input?.timeRange;
     let queries = mergeQueries(input?.query, args?.q || []);
-    let filters = [...(input?.filters || []), ...(args?.filters || [])];
+    let filters = [
+      ...(input?.filters || []),
+      ...(args?.filters?.map((f) => {
+        // @ts-ignore
+        delete f.type;
+        return f;
+      }) || []),
+    ];
 
     if (args.savedSearchId) {
       if (typeof getSavedObject !== 'function') {
