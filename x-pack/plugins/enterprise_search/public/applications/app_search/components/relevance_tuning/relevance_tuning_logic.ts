@@ -311,7 +311,12 @@ export const RelevanceTuningLogic = kea<
 
       try {
         const response = await http.put(url, {
-          body: JSON.stringify(removeBoostStateProps(values.searchSettings)),
+          body: JSON.stringify({
+            ...removeBoostStateProps({
+              ...values.searchSettings,
+              boosts: removeEmptyValueBoosts(values.searchSettings.boosts),
+            }),
+          }),
         });
         setSuccessMessage(UPDATE_SUCCESS_MESSAGE);
         actions.onSearchSettingsSuccess(response);

@@ -484,6 +484,14 @@ describe('RelevanceTuningLogic', () => {
                 type: BoostType.Value,
                 factor: 5,
                 newBoost: true, // This should be deleted before sent to the server
+                value: ['test'],
+              },
+            ],
+            bar: [
+              // This should be filtered out since empty value boosts are invalid
+              {
+                type: BoostType.Value,
+                factor: 5,
                 value: [''],
               },
             ],
@@ -496,7 +504,7 @@ describe('RelevanceTuningLogic', () => {
               {
                 type: BoostType.Value,
                 factor: 5,
-                value: [''],
+                value: ['test'],
               },
             ],
           },
