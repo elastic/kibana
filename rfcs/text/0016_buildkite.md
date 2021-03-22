@@ -96,7 +96,25 @@ Implement a CI system for Kibana teams that is highly scalable, is stable, surfa
 If the proposal involves a new or changed API, include a basic code example.
 Omit this section if it's not applicable. -->
 
-TODO add a table overview of required/desired vs CI systems?
+|                                      | Jenkins | Buildkite | GitHub Actions | CircleCI |
+| ------------------------------------ | ------- | --------- | -------------- | -------- |
+| Scalable                             | No      | Yes       | No             | Yes      |
+| Stable                               | No      | Yes       | No             | Yes      |
+| Surfaces information intuitively     | No      | Yes       | No             | TODO     |
+| Pipelines                            | Yes     | Yes       | Yes            | Yes      |
+| Advanced Pipeline logic              | Yes     | Yes       | TODO           | TODO     |
+| Cloud-friendly pricing model         | Yes     | Yes       | TODO           | No       |
+| Public access                        | Yes     | Yes       | Yes            | TODO     |
+| Secrets handling                     | Yes     | No        | Yes            | TODO     |
+| Support or Documentation             | No      | Yes       | TODO           | TODO     |
+| Scheduled Builds                     | Yes     | Yes       | TODO           | TODO     |
+| Container support                    | TODO    | TODO      | TODO           | TODO     |
+|                                      |         |           |                |          |
+| Customization                        | TODO    | Yes       | No             | TODO     |
+| Core functionality is first-party    | TODO    | Mostly    | TODO           | TODO     |
+| First-class support for test results | Buggy   | No        | No             | TODO     |
+| GitHub Integration                   | Yes     | Simple    | Yes            | TODO     |
+| Local testing / reproduction?        |         | TODO      | TODO           | TODO     |
 
 # Motivation
 
