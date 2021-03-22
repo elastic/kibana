@@ -34,21 +34,20 @@ interface Props {
 }
 
 export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, validate }) => {
-  const [advancedHTTPFields, setAdvancedHTTPFields] = useState<IHTTPAdvancedFields>(defaultValues);
-
+  const [fields, setFields] = useState<IHTTPAdvancedFields>(defaultValues);
   const handleInputChange = useCallback(
     ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
-      setAdvancedHTTPFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
-    [setAdvancedHTTPFields]
+    [setFields]
   );
 
   useDebounce(
     () => {
-      onChange(advancedHTTPFields);
+      onChange(fields);
     },
     250,
-    [advancedHTTPFields]
+    [fields]
   );
 
   return (
@@ -102,7 +101,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         >
           <EuiSelect
             options={requestMethodOptions}
-            value={advancedHTTPFields[ConfigKeys.REQUEST_METHOD_CHECK]}
+            value={fields[ConfigKeys.REQUEST_METHOD_CHECK]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
@@ -119,7 +118,8 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
             defaultMessage="Request headers"
           />
         }
-        contentMode={advancedHTTPFields[ConfigKeys.REQUEST_BODY_CHECK].type}
+        contentMode={fields[ConfigKeys.REQUEST_BODY_CHECK].type}
+        defaultValue={defaultValues[ConfigKeys.REQUEST_HEADERS_CHECK]}
         onChange={useCallback(
           (value) =>
             handleInputChange({
@@ -129,9 +129,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           [handleInputChange]
         )}
         isInvalid={
-          !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(
-            advancedHTTPFields[ConfigKeys.REQUEST_HEADERS_CHECK]
-          )
+          !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(fields[ConfigKeys.REQUEST_HEADERS_CHECK])
         }
       />
       <EuiFormRow
@@ -145,9 +143,16 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
       >
         <RequestBodyField
           configKey={ConfigKeys.REQUEST_BODY_CHECK}
-          value={advancedHTTPFields[ConfigKeys.REQUEST_BODY_CHECK].value}
-          type={advancedHTTPFields[ConfigKeys.REQUEST_BODY_CHECK].type}
-          setFields={setAdvancedHTTPFields}
+          value={fields[ConfigKeys.REQUEST_BODY_CHECK].value}
+          type={fields[ConfigKeys.REQUEST_BODY_CHECK].type}
+          onChange={useCallback(
+            (value) =>
+              handleInputChange({
+                value,
+                configKey: ConfigKeys.REQUEST_BODY_CHECK,
+              }),
+            [handleInputChange]
+          )}
         />
       </EuiFormRow>
       <EuiSpacer size="xl" />
@@ -182,7 +187,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
       >
         <EuiSpacer size="s" />
         <ResponseBodyIndexField
-          defaultValue={advancedHTTPFields[ConfigKeys.RESPONSE_BODY_INDEX]}
+          defaultValue={defaultValues[ConfigKeys.RESPONSE_BODY_INDEX]}
           onChange={useCallback(
             (policy) =>
               handleInputChange({ value: policy, configKey: ConfigKeys.RESPONSE_BODY_INDEX }),
@@ -192,8 +197,13 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         <EuiFormRow>
           <EuiCheckbox
             id={'uptimeFleetIndexResponseHeaders'}
-            checked={advancedHTTPFields[ConfigKeys.RESPONSE_HEADERS_INDEX]}
-            label="Index response headers"
+            checked={fields[ConfigKeys.RESPONSE_HEADERS_INDEX]}
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.indexResponseHeaders"
+                defaultMessage="Index response headers"
+              />
+            }
             onChange={(event) =>
               handleInputChange({
                 value: event.target.checked,
@@ -242,7 +252,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           labelAppend={<OptionalLabel />}
         >
           <ComboBox
-            selectedOptions={advancedHTTPFields[ConfigKeys.RESPONSE_STATUS_CHECK]}
+            selectedOptions={fields[ConfigKeys.RESPONSE_STATUS_CHECK]}
             onChange={(value) =>
               handleInputChange({
                 value,
@@ -261,7 +271,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           labelAppend={<OptionalLabel />}
         >
           <ComboBox
-            selectedOptions={advancedHTTPFields[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]}
+            selectedOptions={fields[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]}
             onChange={useCallback(
               (value) =>
                 handleInputChange({
@@ -289,7 +299,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           helpText="Sample help text"
         >
           <ComboBox
-            selectedOptions={advancedHTTPFields[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]}
+            selectedOptions={fields[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]}
             onChange={useCallback(
               (value) =>
                 handleInputChange({
@@ -308,6 +318,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
             defaultMessage="Check response headers contain"
           />
         }
+        defaultValue={defaultValues[ConfigKeys.RESPONSE_HEADERS_CHECK]}
         onChange={useCallback(
           (value) =>
             handleInputChange({
@@ -317,9 +328,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           [handleInputChange]
         )}
         isInvalid={
-          !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(
-            advancedHTTPFields[ConfigKeys.RESPONSE_HEADERS_CHECK]
-          )
+          !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(fields[ConfigKeys.RESPONSE_HEADERS_CHECK])
         }
       />
     </EuiAccordion>
