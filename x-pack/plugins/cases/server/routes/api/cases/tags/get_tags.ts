@@ -7,7 +7,7 @@
 
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_TAGS_URL, SAVED_OBJECT_TYPES } from '../../../../../common';
+import { CASE_TAGS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 
 export function initGetTagsApi({ caseService, router }: RouteDeps) {
   router.get(

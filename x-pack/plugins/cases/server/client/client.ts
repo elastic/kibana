@@ -31,7 +31,7 @@ import {
   CaseUserActionServiceSetup,
   AlertServiceContract,
 } from '../services';
-import { CasesPatchRequest, CasePostRequest, User, CasesFindRequest } from '../../common';
+import { CasesPatchRequest, CasePostRequest, User, CasesFindRequest } from '../../common/api';
 import { get } from './cases/get';
 import { get as getUserActions } from './user_actions/get';
 import { get as getAlerts } from './alerts/get';

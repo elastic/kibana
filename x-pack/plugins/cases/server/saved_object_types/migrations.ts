@@ -15,7 +15,7 @@ import {
   AssociationType,
   ESConnectorFields,
 } from '../../common/api';
-import { SECURITY_SOLUTION_CONSUMER } from '../../common';
+import { SECURITY_SOLUTION_CONSUMER } from '../../common/constants';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;

@@ -8,10 +8,10 @@
 import { schema } from '@kbn/config-schema';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { AllCommentsResponseRt, CommentAttributes } from '../../../../../common';
+import { AllCommentsResponseRt, CommentAttributes } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenCommentSavedObjects, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common';
+import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 import { defaultSortField } from '../../../../common';
 
 export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps) {

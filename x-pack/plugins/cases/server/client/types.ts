@@ -18,9 +18,9 @@ import {
   GetFieldsResponse,
   CaseUserActionsResponse,
   User,
-  CasesFindResponse,
   CasesFindRequest,
-} from '../../common';
+  CasesFindResponse,
+} from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import { AlertInfo } from '../common';
 import {

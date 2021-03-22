@@ -7,12 +7,11 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 import {
+  SUB_CASE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-  CaseUserActionsResponseRt,
-  CaseUserActionsResponse,
-} from '../../../common';
+} from '../../../common/constants';
+import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../common/api';
 import { CaseUserActionServiceSetup } from '../../services';
 
 interface GetParams {

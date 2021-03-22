@@ -10,18 +10,15 @@ import deepEqual from 'fast-deep-equal';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import {
-  CASE_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
   CaseConnector,
-  CaseStatuses,
-  CaseType,
-  ConnectorTypeFields,
-  ConnectorTypes,
   ESCaseConnector,
   ESCasesConfigureAttributes,
-  ESConnectorFields,
+  ConnectorTypes,
+  CaseStatuses,
+  CaseType,
   SavedObjectFindOptions,
-} from '../../../../common';
+} from '../../../../common/api';
+import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { sortToSnake } from '../utils';
 import { combineFilters } from '../../../common';
 

@@ -10,7 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES, AssociationType } from '../../../../../common';
+import { AssociationType } from '../../../../../common/api';
+import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 
 export function initDeleteAllCommentsApi({
   caseService,

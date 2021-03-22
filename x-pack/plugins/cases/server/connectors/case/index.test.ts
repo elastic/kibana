@@ -18,7 +18,7 @@ import {
   AssociationType,
   CaseResponse,
   CasesResponse,
-} from '../../../common';
+} from '../../../common/api';
 import {
   connectorMappingsServiceMock,
   createCaseServiceMock,
@@ -177,6 +177,34 @@ describe('case connector', () => {
                     urgency: 'Medium',
                     category: 'software',
                     subcategory: 'os',
+                  },
+                },
+                settings: {
+                  syncAlerts: true,
+                },
+              },
+            },
+          },
+          {
+            test: 'servicenow-sir',
+            params: {
+              subAction: 'create',
+              subActionParams: {
+                title: 'Case from case connector!!',
+                tags: ['case', 'connector'],
+                description: 'Yo fields!!',
+                connector: {
+                  id: 'servicenow-sir',
+                  name: 'Servicenow SIR',
+                  type: '.servicenow-sir',
+                  fields: {
+                    destIp: true,
+                    sourceIp: true,
+                    malwareHash: true,
+                    malwareUrl: true,
+                    category: 'ddos',
+                    subcategory: '15',
+                    priority: '1',
                   },
                 },
                 settings: {
@@ -488,7 +516,7 @@ describe('case connector', () => {
           });
         });
 
-        it('succeeds when servicenow fields are valid', () => {
+        it('succeeds when servicenow ITMSM fields are valid', () => {
           const params: Record<string, unknown> = {
             subAction: 'update',
             subActionParams: {
@@ -504,6 +532,42 @@ describe('case connector', () => {
                   urgency: 'Medium',
                   category: 'software',
                   subcategory: 'os',
+                },
+              },
+            },
+          };
+
+          expect(validateParams(caseActionType, params)).toEqual({
+            ...params,
+            subActionParams: {
+              description: null,
+              tags: null,
+              title: null,
+              status: null,
+              settings: null,
+              ...(params.subActionParams as Record<string, unknown>),
+            },
+          });
+        });
+
+        it('succeeds when servicenow SIR fields are valid', () => {
+          const params: Record<string, unknown> = {
+            subAction: 'update',
+            subActionParams: {
+              id: 'case-id',
+              version: '123',
+              connector: {
+                id: 'servicenow-sir',
+                name: 'Servicenow SIR',
+                type: '.servicenow-sir',
+                fields: {
+                  destIp: true,
+                  sourceIp: true,
+                  malwareHash: true,
+                  malwareUrl: true,
+                  category: 'ddos',
+                  subcategory: '15',
+                  priority: '1',
                 },
               },
             },

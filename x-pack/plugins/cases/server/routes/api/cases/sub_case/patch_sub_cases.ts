@@ -34,10 +34,12 @@ import {
   SubCasesResponseRt,
   User,
   CommentAttributes,
+} from '../../../../../common/api';
+import {
   SUB_CASES_PATCH_DEL_URL,
   CASE_COMMENT_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
-} from '../../../../../common';
+} from '../../../../../common/constants';
 import { RouteDeps } from '../../types';
 import {
   escapeHatch,

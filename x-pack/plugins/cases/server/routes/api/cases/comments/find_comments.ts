@@ -19,10 +19,10 @@ import {
   CommentsResponseRt,
   SavedObjectFindOptionsRt,
   throwErrors,
-} from '../../../../../common';
+} from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common';
+import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 import { defaultPage, defaultPerPage } from '../..';
 
 const FindQueryParamsRt = rt.partial({

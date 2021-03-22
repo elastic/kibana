@@ -22,10 +22,8 @@ import {
   SAVED_OBJECT_TYPES,
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
-  CommentPatchRequestRt,
-  throwErrors,
-  User,
-} from '../../../../../common';
+} from '../../../../../common/constants';
+import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
 import { CaseServiceSetup } from '../../../../services';
 
 interface CombinedCaseParams {

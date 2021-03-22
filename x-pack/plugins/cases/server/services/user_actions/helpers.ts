@@ -17,7 +17,7 @@ import {
   User,
   UserActionFieldType,
   SubCaseAttributes,
-} from '../../../common';
+} from '../../../common/api';
 import {
   isTwoArraysDifference,
   transformESConnectorToCaseConnector,

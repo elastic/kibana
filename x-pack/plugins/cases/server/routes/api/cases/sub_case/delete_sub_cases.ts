@@ -14,7 +14,7 @@ import {
   SUB_CASES_PATCH_DEL_URL,
   SAVED_OBJECT_TYPES,
   CASE_SAVED_OBJECT,
-} from '../../../../../common';
+} from '../../../../../common/constants';
 
 export function initDeleteSubCasesApi({
   caseService,

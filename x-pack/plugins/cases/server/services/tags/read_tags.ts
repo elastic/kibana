@@ -7,7 +7,8 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'kibana/server';
 
-import { CaseAttributes, CASE_SAVED_OBJECT } from '../../../common';
+import { CaseAttributes } from '../../../common/api';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 
 export const convertToTags = (tagObjects: Array<SavedObject<CaseAttributes>>): string[] =>
   tagObjects.reduce<string[]>((accum, tagObj) => {

@@ -17,10 +17,10 @@ import {
   SubCasesFindRequestRt,
   SubCasesFindResponseRt,
   throwErrors,
-} from '../../../../../common';
+} from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformSubCases, wrapError } from '../../utils';
-import { SUB_CASES_URL, SAVED_OBJECT_TYPES } from '../../../../../common';
+import { SUB_CASES_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 import { constructQueryOptions } from '../helpers';
 import { defaultPage, defaultPerPage } from '../..';
 

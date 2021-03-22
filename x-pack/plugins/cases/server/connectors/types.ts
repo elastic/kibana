@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { CaseResponse, ConnectorTypes } from '../../common';
+import { CaseResponse, ConnectorTypes } from '../../common/api';
 import { CasesClientGetAlertsResponse } from '../client/alerts/types';
 import { CasesClientFactory } from '../client/factory';
 import { RegisterActionType } from '../types';

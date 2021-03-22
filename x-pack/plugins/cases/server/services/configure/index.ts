@@ -13,11 +13,8 @@ import {
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
-import {
-  ESCasesConfigureAttributes,
-  SavedObjectFindOptions,
-  CASE_CONFIGURE_SAVED_OBJECT,
-} from '../../../common';
+import { ESCasesConfigureAttributes, SavedObjectFindOptions } from '../../../common/api';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 
 interface ClientArgs {
   client: SavedObjectsClientContract;
