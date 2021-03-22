@@ -26,7 +26,7 @@ Whether you have multiple {kib} instances running for different environments,
 need to provide some additional context for accreditation purposes, or simply
 want to customize {kib}, you can now add your own header.
 For more details on how to
-configure a global header, view the configuration settings.
+configure a global header, view the {kibana-ref}/banners-settings-kb.html[configuration settings].
 Customizable headers are a https://www.elastic.co/subscriptions[subscription feature].
 
 [role="screenshot"]
@@ -46,7 +46,8 @@ Search sessions are groups of queries, from a dashboard for example,
 that run in the background for as long as needed.
 You can save a search session in *Dashboard* or *Discover*,
 close the browser window, and then come back once your searches are complete.
-A view of your managed search sessions is in *Stack Management*.
+A view of your managed search sessions is in *Stack Management*. For more
+information, refer to {kibana-ref}/search-sessions.html[the documentation].
 
 [role="screenshot"]
 image::user/images/highlights-search-session.png[Popup for saving a search session from a dashboard]
@@ -56,26 +57,19 @@ image::user/images/highlights-search-session.png[Popup for saving a search sessi
 === New flow for creating dashboards
 
 Creating dashboards is now quicker and easier with the new streamlined navigation
-between apps. We’re thinking dashboard-first, making it easier to create new
+between apps. Think dashboard-first, making it easy to create new
 visualizations and add them in place, without interrupting the dashboard building process.
 For more information about this new workflow, refer to {kibana-ref}/dashboard.html[Dashboard].
 
-[float]
-==== Visualize Library
+The 7.12 release also brings:
 
-Visualize is now **Visualize Library** to reflect its new function as the
+* *Visualize Library*. Visualize is now **Visualize Library** to reflect its new function as the
 home for all of your saved panels.
 
-[float]
-==== Copy to dashboard
-
-Have a panel that you want to instantly copy to a new or existing dashboard?
+* *Copy to dashboard*. Have a panel that you want to instantly copy to a new or existing dashboard?
 Now you can right from the panel menu.
 
-[float]
-==== Quick save
-
-We’ve added a *Save* option to the toolbar so that you can quickly
+* *Quick save*. A new *Save* option in the toolbar lets you can quickly
 save a dashboard without adding a title first. To pick up where you left off,
 simply navigate back to *Dashboard*.
 
@@ -102,13 +96,10 @@ image::user/images/highlights-es-query.png[Elasticsearch query alert]
 
 [float]
 [[maps-7-12]]
-=== Maps&mdash;alerts and labels
+=== Maps&mdash;location-based alerts and polygon labels
 
-[float]
-[[tracking-alert-7-12]]
-==== Location-based alerts now GA
-
-The {kibana-ref}/geo-alerting.html[tracking containment alert] allows you to monitor an entity’s
+The 7.12 release brings the {kibana-ref}/geo-alerting.html[tracking containment alert] to GA.
+This alert allows you to monitor an entity’s
 location as it relates to a boundary, triggering a notification while contained,
 or when entering or leaving a boundary. Also known
 as “geo-fencing”, this feature is common for tracking
@@ -116,11 +107,8 @@ the movement of devices, such as
 vehicles within a fleet. The tracking containment alert is a
 https://www.elastic.co/subscriptions[subscription feature].
 
-[float]
-==== Labels for polygons and lines
-
-Adding labels to polygons and lines gives anyone working with your map
-the right context for analysis.
+If you are using the *Maps* app, you are now able to add labels to the polygons and lines in your map.
+This feature can give anyone working with your map the right context for analysis.
 
 [role="screenshot"]
 image::user/images/highlights-maps.png[Map showing lines with labels]
@@ -130,39 +118,27 @@ image::user/images/highlights-maps.png[Map showing lines with labels]
 === URL drilldowns generally available
 
 URL drilldowns, which enable you to navigate from a dashboard to internal or external URLs,
-is now generally available. For more information,
+are now generally available. For more information,
 refer to {kibana-ref}/drilldowns.html#url-drilldowns[URL drilldowns].
 
 
 [float]
 [[lens-7-12]]
-=== Lens&mdash;functions, interactions, and improvements
-
-[float]
-==== New functions
+=== Lens&mdash;functions, interactions, and table improvements
 
 *Lens* now supports even more functions to meet your visualization needs,
 including percentiles, cumulative sum, moving average, counter rate, and differences.
 To give the new functions a try, take a look at the new <<create-a-dashboard-of-panels-with-ecommerce-data,Lens tutorial>>.
 
-[float]
-==== New drag and drop interactions
+To significantly speed up the visualization creation process, *Lens* now has a
+fully accessible drag and drop system. For more information, refer to <<lens,Lens>>.
 
-To significantly speed up the visualization creation process, we added a
-fully accessible drag and drop system in *Lens*. For more information, refer to <<lens,*Lens*>>.
-
-[float]
-==== Table improvements
-To customize the data table in *Lens*, we’ve implemented several customization options,
-including column resize, text alignment, and the ability to hide columns.
-
-[float]
-[[machine-learning-7-12]]
-=== Machine Learning&mdash;alerts, geo data, and more
+To customize the data table, *Lens* now has options for
+column resize, text alignment, and the ability to hide columns.
 
 [float]
 [[anomaly-alert-7-12]]
-==== {anomaly-detect-cap} alerts (beta)
+=== {anomaly-detect-cap} alerts (beta)
 
 This release provides more flexible, more intuitive, easier to set-up alerting for {anomaly-detect}.
 {anomaly-detect-cap} alerts are integrated with the {kib} alerting framework,
@@ -179,9 +155,9 @@ the current {ml} integration with *Watcher*.
 image::user/images/highlights-anomaly-detection.png[Anomaly detection alert]
 
 [float]
-==== {ml-cap} integration with Maps
+=== {ml-cap} integration with Maps
 
-This integration enables you to view geographic data inside the {ml-cap} app and
+This integration enables you to view geographic data inside the *Machine Learning* and
 anomaly data inside *Maps*. The redesigned *Data Visualizer* shows the distribution of
 values for geo_point field types.
 
@@ -195,7 +171,7 @@ of the input data, the *Anomaly Explorer* shows the actual and typical locations
 image::user/images/highlights-lat-long.png[Anomaly Explorer showing the actual and typical locations on maps]
 
 [float]
-==== AUC ROC visualization for classification jobs
+=== AUC ROC visualization for classification jobs
 
 Performance measurement is an essential part of {ml}, and for classification models,
 the {ml-docs}/ml-dfanalytics-evaluate.html#ml-dfanalytics-class-aucroc[AUC ROC] (Area Under the Curve of Receiver Operating Characteristics) is one of the most
