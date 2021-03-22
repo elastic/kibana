@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
 } from '../../../../fleet/public';
-import { Config, ConfigKeys, ICustomFields } from './types';
+import { Config, ConfigKeys, ICustomFields, contentTypesToMode, ContentType } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
+import { validate } from './validation';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -20,31 +21,71 @@ import { useUpdatePolicy } from './use_update_policy';
  */
 export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy: currentPolicy, newPolicy, onChange }) => {
-    const getDefaultConfig = (policy: NewPackagePolicy) => {
-      const vars = policy.inputs[0]?.streams[0]?.vars;
-      let configKeys: ConfigKeys[] = [];
-      if (vars) {
-        configKeys = Object.keys(vars) as ConfigKeys[];
-      }
-      const defaultConfig = configKeys.reduce((acc: Record<string, unknown>, key: ConfigKeys) => {
-        switch (key) {
-          case ConfigKeys.NAME:
-            acc[key] = currentPolicy.name;
-            break;
-          case ConfigKeys.TAGS:
-            acc[key] = JSON.parse(vars?.[key]?.value);
-            break;
-          default:
-            acc[key] = vars?.[key]?.value;
+    const defaultConfig = useMemo(() => {
+      const getDefaultConfig = (policy: NewPackagePolicy) => {
+        const vars = policy.inputs[0]?.streams[0]?.vars;
+        let configKeys: ConfigKeys[] = [];
+        if (vars) {
+          configKeys = Object.keys(vars) as ConfigKeys[];
         }
-        return acc;
-      }, {});
+        const formattedDefaultConfig = configKeys.reduce(
+          (acc: Record<string, unknown>, key: ConfigKeys) => {
+            const value = vars?.[key].value;
+            switch (key) {
+              case ConfigKeys.NAME:
+                acc[key] = currentPolicy.name;
+                break;
+              case ConfigKeys.SCHEDULE:
+                // split unit and number
+                const fullString = JSON.parse(value);
+                const fullSchedule = fullString.replace('@every ', '');
+                const unit = fullSchedule.slice(-1);
+                const number = fullSchedule.slice(0, fullSchedule.length - 1);
+                acc[key] = {
+                  unit,
+                  number,
+                };
+                break;
+              case ConfigKeys.WAIT:
+                acc[key] = value.slice(0, fullSchedule.length - 1); // remove unit
+                break;
+              case ConfigKeys.TAGS:
+              case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
+              case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
+              case ConfigKeys.RESPONSE_HEADERS_CHECK:
+              case ConfigKeys.RESPONSE_RECEIVE_CHECK:
+              case ConfigKeys.RESPONSE_STATUS_CHECK:
+              case ConfigKeys.REQUEST_HEADERS_CHECK:
+                acc[key] = JSON.parse(value);
+                break;
+              case ConfigKeys.REQUEST_BODY_CHECK:
+                const headers = JSON.parse(vars?.[ConfigKeys.REQUEST_HEADERS_CHECK].value);
+                const requestBodyValue = JSON.parse(value);
+                let type;
+                Object.keys(headers).map((headerKey) => {
+                  if (headerKey === 'Content-Type') {
+                    type = contentTypesToMode[headers[headerKey] as ContentType];
+                  }
+                });
+                acc[key] = {
+                  value: requestBodyValue,
+                  type,
+                };
+                break;
+              default:
+                acc[key] = value;
+            }
+            return acc;
+          },
+          {}
+        );
 
-      return (defaultConfig as unknown) as Config;
-    };
+        return (formattedDefaultConfig as unknown) as Config;
+      };
 
-    const defaultConfig = getDefaultConfig(currentPolicy);
-    const { setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange });
+      return getDefaultConfig(currentPolicy);
+    }, [currentPolicy]);
+    const { config, setConfig } = useUpdatePolicy({ defaultConfig, newPolicy, onChange, validate });
 
     const handleInputChange = useCallback(
       (fields: ICustomFields) => {
@@ -53,7 +94,13 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
       [setConfig]
     );
 
-    return <CustomFields defaultValues={defaultConfig} onChange={handleInputChange} />;
+    return (
+      <CustomFields
+        defaultValues={defaultConfig}
+        onChange={handleInputChange}
+        validate={validate[config[ConfigKeys.MONITOR_TYPE]]}
+      />
+    );
   }
 );
 SyntheticsPolicyEditExtension.displayName = 'SyntheticsPolicyEditExtension';
