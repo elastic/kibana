@@ -79,16 +79,19 @@ export default function ({ getService }: FtrProviderContext) {
             testData.jobConfig,
             testData.datafeedConfig
           );
-          await elasticChart.setNewChartUiDebugFlag(true);
         });
 
         after(async () => {
+          await elasticChart.setNewChartUiDebugFlag(false);
           await ml.api.cleanMlIndices();
         });
 
         it('opens a job from job list link', async () => {
           await ml.testExecution.logTestStep('navigate to job list');
           await ml.navigation.navigateToMl();
+          // Set debug state has to happen at this point
+          // because page refresh happens after navigation to the ML app.
+          await elasticChart.setNewChartUiDebugFlag(true);
           await ml.navigation.navigateToJobManagement();
 
           await ml.testExecution.logTestStep('open job in anomaly explorer');
