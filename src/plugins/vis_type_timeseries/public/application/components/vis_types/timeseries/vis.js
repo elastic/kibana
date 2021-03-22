@@ -168,7 +168,7 @@ class TimeseriesVisualization extends Component {
         name:
           seriesGroup.split_color_mode === 'kibana'
             ? 'kibana_palette'
-            : seriesGroup.split_color_mode || seriesGroup.palette.name,
+            : seriesGroup.split_color_mode || seriesGroup.palette?.name,
       };
       const yScaleType = hasSeparateAxis
         ? TimeseriesVisualization.getAxisScaleType(seriesGroup)
