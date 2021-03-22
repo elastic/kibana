@@ -6,6 +6,7 @@
 * <<enabling-ssl>>
 * <<load-balancing-es>>
 * <<load-balancing-kibana>>
+* <<accessing-load-balanced-kibana>>
 * <<high-availability>>
 * <<memory>>
 
@@ -143,6 +144,13 @@ Separate configuration files can be used from the command line by using the `-c`
 bin/kibana -c config/instance1.yml
 bin/kibana -c config/instance2.yml
 --------
+
+[float]
+[[accessing-load-balanced-kibana]]
+=== Accessing multiple load-balanced Kibana clusters
+To be able to access multiple load-balanced Kibana clusters from the same browser, the setting `xpack.security.cookieName` must be set in the configuration to avoid having conflicts between cookies from the different Kibana instances.
+
+In each cluster, Kibana instances should have the same `cookieName` value in order to achieve seamless high availability and keep the session active in case of failure from the currently used instance.
 
 [float]
 [[high-availability]]
