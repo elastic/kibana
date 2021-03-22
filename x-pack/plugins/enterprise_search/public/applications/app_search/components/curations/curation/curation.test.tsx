@@ -22,6 +22,8 @@ import { Loading } from '../../../../shared/loading';
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { CurationLogic } from './curation_logic';
 
+import { AddResultFlyout } from './results';
+
 import { Curation } from './';
 
 describe('Curation', () => {
@@ -31,6 +33,7 @@ describe('Curation', () => {
   const values = {
     dataLoading: false,
     queries: ['query A', 'query B'],
+    isFlyoutOpen: false,
   };
   const actions = {
     loadCuration: jest.fn(),
@@ -58,6 +61,13 @@ describe('Curation', () => {
     const wrapper = shallow(<Curation {...props} />);
 
     expect(wrapper.find(Loading)).toHaveLength(1);
+  });
+
+  it('renders the add result flyout when open', () => {
+    setMockValues({ ...values, isFlyoutOpen: true });
+    const wrapper = shallow(<Curation {...props} />);
+
+    expect(wrapper.find(AddResultFlyout)).toHaveLength(1);
   });
 
   it('initializes CurationLogic with a curationId prop from URL param', () => {

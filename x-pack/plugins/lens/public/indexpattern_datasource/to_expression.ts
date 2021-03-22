@@ -31,7 +31,7 @@ function getExpressionForLayer(
   uiSettings: IUiSettingsClient
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
-  if (columnOrder.length === 0) {
+  if (columnOrder.length === 0 || !indexPattern) {
     return null;
   }
 
