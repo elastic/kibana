@@ -42,6 +42,7 @@ export interface PagerDutyActionParams {
 
 export interface IndexActionParams {
   documents: Array<Record<string, any>>;
+  usePreconfiguredSchema: boolean;
 }
 
 export enum ServerLogLevelOptions {

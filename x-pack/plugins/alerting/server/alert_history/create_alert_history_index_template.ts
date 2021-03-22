@@ -8,74 +8,15 @@
 import { ElasticsearchClient, Logger } from 'src/core/server';
 import mappings from './mappings.json';
 
-import { getIndexName, AlertHistoryIlmPolicyName, AlertHistoryIlmPolicy } from './types';
-
-function getAlertHistoryIndexTemplate(indexName: string, ilmPolicyName: string) {
+function getAlertHistoryIndexTemplate() {
   return {
-    index_patterns: [`${indexName}-*`],
+    index_patterns: [`alert-history-*`],
     settings: {
       number_of_shards: 1,
       auto_expand_replicas: '0-1',
-      'index.lifecycle.name': ilmPolicyName,
-      'index.lifecycle.rollover_alias': indexName,
     },
     mappings,
   };
-}
-
-async function doesIlmPolicyExist({
-  client,
-  policyName,
-}: {
-  client: ElasticsearchClient;
-  policyName: string;
-}) {
-  try {
-    await client.transport.request({
-      method: 'GET',
-      path: `/_ilm/policy/${policyName}`,
-    });
-  } catch (err) {
-    if (err.statusCode === 404) {
-      return false;
-    } else {
-      throw new Error(`error checking existence of ilm policy: ${err.message}`);
-    }
-  }
-
-  return true;
-}
-
-async function createIlmPolicy({
-  client,
-  policyName,
-}: {
-  client: ElasticsearchClient;
-  policyName: string;
-}) {
-  try {
-    await client.transport.request({
-      method: 'PUT',
-      path: `/_ilm/policy/${policyName}`,
-      body: AlertHistoryIlmPolicy,
-    });
-  } catch (err) {
-    throw new Error(`error creating ilm policy: ${err.message}`);
-  }
-}
-
-async function createIlmPolicyIfNotExists({
-  client,
-  policyName,
-}: {
-  client: ElasticsearchClient;
-  policyName: string;
-}) {
-  const ilmPolicyExists = await doesIlmPolicyExist({ client, policyName });
-
-  if (!ilmPolicyExists) {
-    await createIlmPolicy({ client, policyName });
-  }
 }
 
 async function doesIndexTemplateExist({
@@ -138,27 +79,22 @@ async function createIndexTemplateIfNotExists({
   }
 }
 
-export async function createAlertHistoryEsIndex({
+export async function createAlertHistoryIndexTemplate({
   client,
-  kibanaVersion,
   logger,
 }: {
   client: ElasticsearchClient;
-  kibanaVersion: string;
   logger: Logger;
 }) {
   try {
-    const indexName = getIndexName(kibanaVersion);
-    const ilmPolicyName = AlertHistoryIlmPolicyName;
-    const indexTemplate = getAlertHistoryIndexTemplate(indexName, ilmPolicyName);
-
-    await createIlmPolicyIfNotExists({ client, policyName: ilmPolicyName });
     await createIndexTemplateIfNotExists({
       client,
-      templateName: `${indexName}-template`,
-      template: indexTemplate,
+      templateName: `alert-history-template`,
+      template: getAlertHistoryIndexTemplate(),
     });
   } catch (err) {
-    logger.error(`Could not initialize alert history index with mappings: ${err.message}.`);
+    logger.error(
+      `Could not initialize alert history index template with mappings: ${err.message}.`
+    );
   }
 }
