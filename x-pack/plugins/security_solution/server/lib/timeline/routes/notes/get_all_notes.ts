@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { filter } from 'lodash';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import { NOTE_URL } from '../../../../../common/constants';
+import { NOTES_URL } from '../../../../../common/constants';
 
 import { ConfigType } from '../../../..';
 import { SetupPlugins } from '../../../../plugin';
@@ -16,9 +17,8 @@ import { buildRouteValidationWithExcess } from '../../../../utils/build_validati
 import { buildSiemResponse, transformError } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { getAllNotesSchema } from '../../schemas/notes/get_all_notes_schema';
-import { getAllNotes } from '../../saved_object/notes';
-
+import { getAllNotesSchema, getNotesSchema } from '../../schemas/notes/get_all_notes_schema';
+import { getAllNotes, getNotesByEventId, getNotesByTimelineId } from '../../saved_object/notes';
 export const getAllNotesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
@@ -26,8 +26,11 @@ export const getAllNotesRoute = (
 ) => {
   router.get(
     {
-      path: NOTE_URL,
-      validate: { body: buildRouteValidationWithExcess(getAllNotesSchema) },
+      path: NOTES_URL,
+      validate: {
+        query: buildRouteValidationWithExcess(getNotesSchema),
+        body: buildRouteValidationWithExcess(getAllNotesSchema),
+      },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -35,11 +38,37 @@ export const getAllNotesRoute = (
     async (context, request, response) => {
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const eventId = request.query?.eventId ?? null;
+        const timelineId = request.query?.timelineId ?? null;
         const pageInfo = request.body?.pageInfo ?? null;
         const search = request.body?.search ?? null;
         const sort = request.body?.sort ?? null;
 
-        const res = await getAllNotes(frameworkRequest, pageInfo, search, sort);
+        const args = filter(
+          [
+            { name: 'eventId', value: eventId },
+            { name: 'timelineId', value: timelineId },
+          ],
+          (arg) => arg.value != null
+        );
+
+        let res = null;
+
+        if (args.length === 2) {
+          throw new Error(
+            `Can not retrieving notes with more than one indices: ${args
+              .map((arg) => `${arg.name} = ${arg.value}`)
+              .join('and ')}, please remove one of them.`
+          );
+        } else if (args.length === 0) {
+          res = await getAllNotes(frameworkRequest, pageInfo, search, sort);
+        } else {
+          if (eventId != null) {
+            res = await getNotesByEventId(frameworkRequest, eventId);
+          } else if (timelineId != null) {
+            res = await getNotesByTimelineId(frameworkRequest, timelineId);
+          }
+        }
 
         return response.ok({ body: res });
       } catch (err) {

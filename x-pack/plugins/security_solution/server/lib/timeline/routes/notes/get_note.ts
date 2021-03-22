@@ -27,7 +27,9 @@ export const getNoteRoute = (
   router.get(
     {
       path: NOTE_URL,
-      validate: { query: buildRouteValidationWithExcess(getNoteSchema) },
+      validate: {
+        query: buildRouteValidationWithExcess(getNoteSchema),
+      },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -35,7 +37,8 @@ export const getNoteRoute = (
     async (context, request, response) => {
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const { id } = request.query;
+        const id = request.query?.id ?? null;
+
         const res = await getNote(frameworkRequest, id);
 
         return response.ok({ body: res });

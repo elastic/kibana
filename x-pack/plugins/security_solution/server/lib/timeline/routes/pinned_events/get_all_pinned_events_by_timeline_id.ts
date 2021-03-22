@@ -7,7 +7,7 @@
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import { NOTE_URL } from '../../../../../common/constants';
+import { PINNED_EVENTS_URL } from '../../../../../common/constants';
 
 import { ConfigType } from '../../../..';
 import { SetupPlugins } from '../../../../plugin';
@@ -27,7 +27,7 @@ export const getAllPinnedEventsByTimelineIdRoute = (
 ) => {
   router.get(
     {
-      path: NOTE_URL,
+      path: PINNED_EVENTS_URL,
       validate: { query: buildRouteValidationWithExcess(getAllPinnedEventsByTimelineIdSchema) },
       options: {
         tags: ['access:securitySolution'],

@@ -7,7 +7,7 @@
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import { NOTE_URL } from '../../../../../common/constants';
+import { PINNED_EVENT_URL } from '../../../../../common/constants';
 
 import { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
@@ -26,7 +26,7 @@ export const persistNoteRoute = (
 ) => {
   router.patch(
     {
-      path: NOTE_URL,
+      path: PINNED_EVENT_URL,
       validate: {
         body: buildRouteValidationWithExcess(persistPinnedEventSchema),
       },

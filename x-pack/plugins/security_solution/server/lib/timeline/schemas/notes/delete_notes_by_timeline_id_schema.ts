@@ -6,6 +6,6 @@
  */
 import * as rt from 'io-ts';
 
-export const deletNotesByTimelineIdSchema = rt.type({
+export const deletNotesByTimelineIdSchema = rt.partial({
   timelineId: rt.string,
 });

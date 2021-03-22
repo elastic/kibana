@@ -6,6 +6,6 @@
  */
 import * as rt from 'io-ts';
 
-export const deletAllPinnedEventsOnTimelineSchema = rt.type({
+export const deletAllPinnedEventsOnTimelineSchema = rt.partial({
   timelineId: rt.string,
 });

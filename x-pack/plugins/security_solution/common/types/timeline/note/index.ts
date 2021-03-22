@@ -70,7 +70,22 @@ export enum SortFieldNote {
   updated = 'updated',
 }
 
-export interface SortNote {
-  sortField: SortFieldNote;
-  sortOrder: Direction;
-}
+export const pageInfoNoteRt = runtimeTypes.type({
+  pageIndex: runtimeTypes.number,
+  pageSize: runtimeTypes.number,
+});
+
+export type PageInfoNote = runtimeTypes.TypeOf<typeof pageInfoNoteRt>;
+
+export const sortNoteRt = runtimeTypes.type({
+  sortField: runtimeTypes.union([
+    runtimeTypes.literal(SortFieldNote.updatedBy),
+    runtimeTypes.literal(SortFieldNote.updated),
+  ]),
+  sortOrder: runtimeTypes.union([
+    runtimeTypes.literal(Direction.asc),
+    runtimeTypes.literal(Direction.desc),
+  ]),
+});
+
+export type SortNote = runtimeTypes.TypeOf<typeof sortNoteRt>;

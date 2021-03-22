@@ -10,10 +10,11 @@ import { ConfigType } from '../../../..';
 import { deletNotesSchema } from '../../schemas/notes/delete_notes_schema';
 import { SecuritySolutionPluginRouter } from '../../../../types';
 import { SetupPlugins } from '../../../../plugin';
-import { NOTE_URL } from '../../../../../common/constants';
+import { NOTES_URL } from '../../../../../common/constants';
 import { transformError, buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../utils/common';
-import { deleteTimeline } from '../../saved_object/timelines';
+import { deletNotesByTimelineIdSchema } from '../../schemas/notes/delete_notes_by_timeline_id_schema';
+import { deleteNote, deleteNoteByTimelineId } from '../../saved_object/notes';
 
 export const deletNotesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -22,8 +23,9 @@ export const deletNotesRoute = (
 ) => {
   router.delete(
     {
-      path: NOTE_URL,
+      path: NOTES_URL,
       validate: {
+        query: buildRouteValidationWithExcess(deletNotesByTimelineIdSchema),
         body: buildRouteValidationWithExcess(deletNotesSchema),
       },
       options: {
@@ -35,9 +37,25 @@ export const deletNotesRoute = (
 
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const { id } = request.body;
+        const timelineId = request.query?.timelineId ?? null;
+        const ids = request.body?.ids ?? null;
 
-        await deleteTimeline(frameworkRequest, id);
+        // Can only provide query or body at a time
+        if (
+          ((ids == null || ids.length === 0) && timelineId == null) ||
+          (ids != null && ids.length > 0 && timelineId != null)
+        ) {
+          throw new Error(`Provide query with timelineId or body with note ids`);
+        }
+
+        if (ids != null) {
+          await deleteNote(frameworkRequest, ids);
+        }
+
+        if (timelineId != null) {
+          await deleteNoteByTimelineId(frameworkRequest, timelineId);
+        }
+
         return response.ok();
       } catch (err) {
         const error = transformError(err);

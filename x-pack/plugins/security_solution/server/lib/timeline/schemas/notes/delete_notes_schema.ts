@@ -6,6 +6,6 @@
  */
 import * as rt from 'io-ts';
 
-export const deletNotesSchema = rt.type({
-  id: rt.array(rt.string),
+export const deletNotesSchema = rt.partial({
+  ids: rt.array(rt.string),
 });
