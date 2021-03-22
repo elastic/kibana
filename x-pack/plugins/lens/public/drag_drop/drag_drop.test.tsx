@@ -40,7 +40,7 @@ describe('DragDrop', () => {
   };
 
   const value = { id: '1', humanData: { label: 'hello' } };
-  describe('DragDrop', () => {});
+
   test('renders if nothing is being dragged', () => {
     const component = render(
       <DragDrop value={value} draggable order={[2, 0, 1, 0]}>
@@ -316,9 +316,82 @@ describe('DragDrop', () => {
     expect(setActiveDropTarget).toBeCalledWith(undefined);
   });
 
-  test('extra drop targets appear when dragging through main drop target', () => {
+  test('extra drop targets render when dragging through main drop target', () => {
     // drag on
     // elements appear
+    let activeDropTarget;
+    const onDrop = jest.fn();
+    const setActiveDropTarget = jest.fn((val) => {
+      activeDropTarget = value as DragContextState['activeDropTarget'];
+    });
+
+    const component = mount(
+      <ChildDragDropProvider
+        setA11yMessage={jest.fn()}
+        dragging={{ id: '1', humanData: { label: 'Label1' } }}
+        setDragging={jest.fn()}
+        setActiveDropTarget={setActiveDropTarget}
+        activeDropTarget={activeDropTarget}
+        keyboardMode={false}
+        setKeyboardMode={(keyboardMode) => true}
+        dropTargetsByOrder={undefined}
+        registerDropTarget={jest.fn()}
+      >
+        <DragDrop
+          value={{ id: '3', humanData: { label: 'ignored' } }}
+          draggable={true}
+          order={[2, 0, 1, 0]}
+        >
+          <button>Drag this</button>
+        </DragDrop>
+        <DragDrop
+          order={[2, 0, 1, 0]}
+          value={value}
+          onDrop={onDrop}
+          dropTypes={['move_compatible', 'duplicate_compatible', 'swap_compatible']}
+          getCustomDropTarget={(dropType) => <div className="extraDrop">{dropType}</div>}
+        >
+          <button>Drop here</button>
+        </DragDrop>
+      </ChildDragDropProvider>
+    );
+
+    // passed customDropTargets render in the DOM
+    expect(component.find('.extraDrop').hostNodes()).toHaveLength(2);
+
+    component
+      .find('[data-test-subj="lnsDragDrop"]')
+      .first()
+      .simulate('dragstart', { dataTransfer });
+
+    component
+      .find('[data-test-subj="lnsDragDrop"]')
+      .at(1)
+      .simulate('dragover')
+      .simulate('dragover');
+
+    component
+      .find('[data-test-subj="lnsDragDropContainer"]')
+      .first()
+      .simulate('dragenter')
+      .simulate('dragenter');
+
+    // customDropTargets are visible
+    expect(component.find('[data-test-subj="lnsDragDropContainer"]').prop('className')).toEqual(
+      'lnsDragDrop__container lnsDragDrop__container-active'
+    );
+    expect(
+      component.find('[data-test-subj="lnsDragDropExtraDrops"]').first().prop('className')
+    ).toEqual('lnsDragDrop__extraDrops lnsDragDrop__extraDrops-visible');
+
+    expect(setActiveDropTarget).toBeCalledWith({
+      ...value,
+      dropType: 'move_compatible',
+      onDrop,
+    });
+
+    component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragleave');
+    expect(setActiveDropTarget).toBeCalledWith(undefined);
   });
   test('extra drop targets disappear when dragging out of main drop target', () => {
     // drag out

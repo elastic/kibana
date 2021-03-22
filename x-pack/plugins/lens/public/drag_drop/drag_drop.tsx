@@ -491,13 +491,8 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
       nextActiveDropType = dropTypes[2];
     }
     const isMainTarget = dropTypes?.[0] === dropType;
-
     if (nextActiveDropType !== activeDropType) {
-      if (isMainTarget) {
-        setActiveDropType(nextActiveDropType);
-      } else {
-        setActiveDropType(dropType);
-      }
+      setActiveDropType(isMainTarget ? nextActiveDropType : dropType);
     }
   };
 
@@ -582,9 +577,10 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
 
   return (
     <div
+      data-test-subj="lnsDragDropContainer"
       className={
         isInZone || activeDropTarget?.id === value.id
-          ? 'lnsDragDrop__container  lnsDragDrop__container-active'
+          ? 'lnsDragDrop__container lnsDragDrop__container-active'
           : 'lnsDragDrop__container'
       }
       onDragEnter={dragEnter}
@@ -617,9 +613,10 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
             gutterSize="s"
             ref={extraDropsRef}
             direction="column"
+            data-test-subj="lnsDragDropExtraDrops"
             className={
               isInZone || activeDropTarget?.id === value.id
-                ? 'lnsDragDrop__extraDrops  lnsDragDrop__extraDrops-visible'
+                ? 'lnsDragDrop__extraDrops lnsDragDrop__extraDrops-visible'
                 : 'lnsDragDrop__extraDrops'
             }
           >
