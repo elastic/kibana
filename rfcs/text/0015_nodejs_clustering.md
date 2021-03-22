@@ -528,7 +528,7 @@ ensure clustered mode compatibility when adding new features.
 
 One alternative of the `cluster` module is using a worker pool via `worker_threads`. Both have distinct use cases
 though. Clustering is meant to have multiple workers with the same codebase, often sharing a network socket to balance
-network traffic. The worker pattern is a way to create specialized workers in charge of executing isolated, CPU intensive
+network traffic. Worker threads is a way to create specialized workers in charge of executing isolated, CPU intensive
 tasks on demand (e.g encrypting or descrypting a file). If we were to identify that under heavy load, the actual bottleneck
 is ES, maybe exposing a worker thread service and API from core (task_manager would be a perfect example of potential consumer) 
 would make more sense.
