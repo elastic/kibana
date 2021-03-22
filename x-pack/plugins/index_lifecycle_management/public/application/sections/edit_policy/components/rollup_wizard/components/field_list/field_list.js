@@ -55,7 +55,7 @@ export const FieldList = ({
   };
 
   const pagination = {
-    initialPageSize: 200,
+    initialPageSize: 20,
     pageSizeOptions: [20, 100, 200],
   };
 
