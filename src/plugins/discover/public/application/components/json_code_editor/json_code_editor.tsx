@@ -13,7 +13,6 @@ import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '../../../../../kibana_react/public';
-import { DocViewRenderProps } from '../../../application/doc_views/doc_views_types';
 
 const codeEditorAriaLabel = i18n.translate('discover.json.codeEditorAriaLabel', {
   defaultMessage: 'Read only JSON view of an elasticsearch document',
@@ -22,8 +21,14 @@ const copyToClipboardLabel = i18n.translate('discover.json.copyToClipboardLabel'
   defaultMessage: 'Copy to clipboard',
 });
 
-export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
-  const jsonValue = JSON.stringify(hit, null, 2);
+interface JsonCodeEditorProps {
+  json: Record<string, any>;
+  width?: string | number;
+  hasLineNumbers?: boolean;
+}
+
+export const JsonCodeEditor = ({ json, width, hasLineNumbers }: JsonCodeEditorProps) => {
+  const jsonValue = JSON.stringify(json, null, 2);
 
   // setting editor height based on lines height and count to stretch and fit its content
   const setEditorCalculatedHeight = useCallback((editor) => {
@@ -43,7 +48,7 @@ export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
 
   return (
     <EuiFlexGroup className="dscJsonCodeEditor" direction="column" gutterSize="s">
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem>
         <EuiSpacer size="s" />
         <div className="eui-textRight">
           <EuiCopy textToCopy={jsonValue}>
@@ -55,9 +60,10 @@ export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
           </EuiCopy>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem>
         <CodeEditor
           languageId={XJsonLang.ID}
+          width={width}
           value={jsonValue}
           onChange={() => {}}
           editorDidMount={setEditorCalculatedHeight}
@@ -65,6 +71,7 @@ export const JsonCodeEditor = ({ hit }: DocViewRenderProps) => {
           options={{
             automaticLayout: true,
             fontSize: 12,
+            lineNumbers: hasLineNumbers ? 'on' : 'off',
             minimap: {
               enabled: false,
             },
