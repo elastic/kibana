@@ -163,6 +163,13 @@ class TimeseriesVisualization extends Component {
         seriesGroup,
         this.props.getConfig
       );
+      const palette = {
+        ...seriesGroup.palette,
+        name:
+          seriesGroup.split_color_mode === 'kibana'
+            ? 'kibana_palette'
+            : seriesGroup.split_color_mode || seriesGroup.palette.name,
+      };
       const yScaleType = hasSeparateAxis
         ? TimeseriesVisualization.getAxisScaleType(seriesGroup)
         : mainAxisScaleType;
@@ -182,7 +189,7 @@ class TimeseriesVisualization extends Component {
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
-          seriesDataRow.palette = seriesGroup.palette;
+          seriesDataRow.palette = palette;
           seriesDataRow.baseColor = seriesGroup.color;
           seriesDataRow.isSplitByTerms = seriesGroup.split_mode === 'terms';
         });

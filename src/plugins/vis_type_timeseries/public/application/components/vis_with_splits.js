@@ -30,12 +30,19 @@ export function visWithSplits(WrappedComponent) {
 
     const getSeriesColor = useCallback(
       (seriesName, seriesId, baseColor) => {
+        const palette = {
+          ...model.series[0].palette,
+          name:
+            model.series[0].split_color_mode === 'kibana'
+              ? 'kibana_palette'
+              : model.series[0].split_color_mode || model.series[0].palette.name,
+        };
         const props = {
           seriesById: visData[model.id].series,
           seriesName,
           seriesId,
           baseColor,
-          seriesPalette: model.series[0].palette,
+          seriesPalette: palette,
           palettesRegistry,
           syncColors,
         };

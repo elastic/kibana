@@ -8,6 +8,7 @@
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { PALETTES, PanelData } from '../../../common/types';
 import { computeGradientFinalColor } from './compute_gradient_final_color';
+import { rainbowColors } from './rainbow_colors';
 
 interface PaletteParams {
   colors: string[];
@@ -46,6 +47,12 @@ export const getSplitByTermsColor = ({
       ? {
           ...seriesPalette.params,
           colors: [baseColor, computeGradientFinalColor(baseColor)],
+          gradient: true,
+        }
+      : seriesPalette.name === PALETTES.RAINBOW
+      ? {
+          ...seriesPalette.params,
+          colors: rainbowColors,
         }
       : seriesPalette.params;
 
