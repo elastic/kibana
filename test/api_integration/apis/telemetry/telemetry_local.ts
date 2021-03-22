@@ -9,7 +9,7 @@
 import expect from '@kbn/expect';
 import supertestAsPromised from 'supertest-as-promised';
 import { basicUiCounters } from './__fixtures__/ui_counters';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { SavedObject } from '../../../../src/core/server';
 import ossRootTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_plugins.json';
