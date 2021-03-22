@@ -8,16 +8,12 @@
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
 import Boom from '@hapi/boom';
 
+import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { AgentReassignmentError } from '../../errors';
 
-import {
-  getAgents,
-  getAgentPolicyForAgent,
-  listAllAgents,
-  updateAgent,
-  bulkUpdateAgents,
-} from './crud';
+import { getAgents, getAgentPolicyForAgent, updateAgent, bulkUpdateAgents } from './crud';
+import type { GetAgentsOptions } from './index';
 import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
@@ -33,7 +29,7 @@ export async function reassignAgent(
 
   await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
 
-  await updateAgent(soClient, esClient, agentId, {
+  await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
   });
@@ -71,42 +67,39 @@ export async function reassignAgentIsAllowed(
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options:
-    | {
-        agentIds: string[];
-      }
-    | {
-        kuery: string;
-      },
+  options: { agents: Agent[] } | GetAgentsOptions,
   newAgentPolicyId: string
-): Promise<{ items: Array<{ id: string; sucess: boolean; error?: Error }> }> {
+): Promise<{ items: Array<{ id: string; success: boolean; error?: Error }> }> {
   const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!agentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  // Filter to agents that do not already use the new agent policy ID
-  const agents =
-    'agentIds' in options
-      ? await getAgents(soClient, esClient, options.agentIds)
-      : (
-          await listAllAgents(soClient, esClient, {
-            kuery: options.kuery,
-            showInactive: false,
-          })
-        ).agents;
-  // And which are allowed to unenroll
+  const allResults = 'agents' in options ? options.agents : await getAgents(esClient, options);
+  // which are allowed to unenroll
   const settled = await Promise.allSettled(
-    agents.map((agent) =>
+    allResults.map((agent) =>
       reassignAgentIsAllowed(soClient, esClient, agent.id, newAgentPolicyId).then((_) => agent)
     )
   );
-  const agentsToUpdate = agents.filter(
-    (agent, index) => settled[index].status === 'fulfilled' && agent.policy_id !== newAgentPolicyId
-  );
+
+  // Filter to agents that do not already use the new agent policy ID
+  const agentsToUpdate = allResults.filter((agent, index) => {
+    if (settled[index].status === 'fulfilled') {
+      if (agent.policy_id === newAgentPolicyId) {
+        settled[index] = {
+          status: 'rejected',
+          reason: new AgentReassignmentError(
+            `${agent.id} is already assigned to ${newAgentPolicyId}`
+          ),
+        };
+      } else {
+        return true;
+      }
+    }
+  });
 
   const res = await bulkUpdateAgents(
-    soClient,
     esClient,
     agentsToUpdate.map((agent) => ({
       agentId: agent.id,

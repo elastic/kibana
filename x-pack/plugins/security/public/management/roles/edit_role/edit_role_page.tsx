@@ -49,11 +49,11 @@ import type {
   RoleIndexPrivilege,
 } from '../../../../common/model';
 import {
-  copyRole,
-  getExtendedRoleDeprecationNotice,
   isRoleDeprecated as checkIfRoleDeprecated,
   isRoleReadOnly as checkIfRoleReadOnly,
   isRoleReserved as checkIfRoleReserved,
+  copyRole,
+  getExtendedRoleDeprecationNotice,
   prepareRoleClone,
 } from '../../../../common/model';
 import type { UserAPIClient } from '../../users';

@@ -18,6 +18,7 @@
     "DeleteDataFrameAnalytics",
     "JobsExist",
     "GetDataFrameAnalyticsIdMap",
+    "ValidateDataFrameAnalytics",
 
     "DataVisualizer",
     "GetOverallStats",
@@ -83,6 +84,7 @@
     "GetLookBackProgress",
     "ValidateCategoryExamples",
     "TopCategories",
+    "DatafeedPreview",
     "UpdateGroups",
     "DeletingJobTasks",
     "DeleteJobs",

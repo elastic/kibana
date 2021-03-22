@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
+import type { CanvasElementColorStats, MlCommonUI } from './common_ui';
 import { MlApi } from './api';
 import {
   isRegressionAnalysis,
@@ -142,25 +142,26 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
-        for (const [index, expected] of expectedHistogramCharts.entries()) {
-          await testSubjects.existOrFail(`mlDataGridChart-${index}`);
+        for (const expected of expectedHistogramCharts.values()) {
+          const id = expected.id;
+          await testSubjects.existOrFail(`mlDataGridChart-${id}`);
 
           if (expected.chartAvailable) {
-            await testSubjects.existOrFail(`mlDataGridChart-${index}-histogram`);
+            await testSubjects.existOrFail(`mlDataGridChart-${id}-histogram`);
           } else {
-            await testSubjects.missingOrFail(`mlDataGridChart-${index}-histogram`);
+            await testSubjects.missingOrFail(`mlDataGridChart-${id}-histogram`);
           }
 
-          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${index}-legend`);
+          const actualLegend = await testSubjects.getVisibleText(`mlDataGridChart-${id}-legend`);
           expect(actualLegend).to.eql(
             expected.legend,
-            `Legend text for column '${index}' should be '${expected.legend}' (got '${actualLegend}')`
+            `Legend text for column '${id}' should be '${expected.legend}' (got '${actualLegend}')`
           );
 
-          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${index}-id`);
+          const actualId = await testSubjects.getVisibleText(`mlDataGridChart-${id}-id`);
           expect(actualId).to.eql(
             expected.id,
-            `Id text for column '${index}' should be '${expected.id}' (got '${actualId}')`
+            `Id text for column '${id}' should be '${expected.id}' (got '${actualId}')`
           );
         }
       });
@@ -255,6 +256,23 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDependentVariableSelection([dependentVariable]);
     },
 
+    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+      await testSubjects.existOrFail(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded',
+        {
+          timeout: 5000,
+        }
+      );
+      await testSubjects.scrollIntoView(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded'
+      );
+      await mlCommonUI.assertColorsInCanvasElement(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
+        expectedValue,
+        ['#000000']
+      );
+    },
+
     async assertTrainingPercentInputExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardTrainingPercentSlider');
     },
@@ -297,6 +315,10 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardCreateStep active');
     },
 
+    async assertValidationStepActive() {
+      await testSubjects.existOrFail('mlAnalyticsCreateJobWizardValidationStepWrapper active');
+    },
+
     async continueToAdditionalOptionsStep() {
       await retry.tryForTime(5000, async () => {
         await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
@@ -309,6 +331,24 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
         await this.assertDetailsStepActive();
       });
+    },
+
+    async continueToValidationStep() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.clickWhenNotDisabled('mlAnalyticsCreateJobWizardContinueButton');
+        await this.assertValidationStepActive();
+      });
+    },
+
+    async assertValidationCalloutsExists() {
+      await retry.tryForTime(4000, async () => {
+        await testSubjects.existOrFail('mlValidationCallout');
+      });
+    },
+
+    async assertAllValidationCalloutsPresent(expectedNumCallouts: number) {
+      const validationCallouts = await testSubjects.findAll('mlValidationCallout');
+      expect(validationCallouts.length).to.eql(expectedNumCallouts);
     },
 
     async continueToCreateStep() {

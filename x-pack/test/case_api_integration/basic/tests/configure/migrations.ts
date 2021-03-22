@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { CASE_CONFIGURE_URL } from '../../../../../plugins/case/common/constants';
+import { CASE_CONFIGURE_URL } from '../../../../../plugins/cases/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {

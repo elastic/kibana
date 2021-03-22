@@ -4,6 +4,45 @@
     "classes": [],
     "functions": [
       {
+        "id": "def-public.DashboardPicker",
+        "type": "Function",
+        "label": "DashboardPicker",
+        "signature": [
+          "(props: ",
+          "DashboardPickerProps",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "Object",
+            "label": "props",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "presentationUtil",
+                "scope": "public",
+                "docId": "kibPresentationUtilPluginApi",
+                "section": "def-public.DashboardPickerProps",
+                "text": "DashboardPickerProps"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
+              "lineNumber": 27
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
+          "lineNumber": 27
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.SavedObjectSaveModalDashboard",
         "type": "Function",
         "label": "SavedObjectSaveModalDashboard",
@@ -36,8 +75,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx#L37"
+              "lineNumber": 37
             }
           }
         ],
@@ -45,49 +83,7 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 37,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx#L37"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.DashboardPicker",
-        "type": "Function",
-        "label": "DashboardPicker",
-        "signature": [
-          "(props: ",
-          "DashboardPickerProps",
-          ") => JSX.Element"
-        ],
-        "description": [],
-        "children": [
-          {
-            "type": "Object",
-            "label": "props",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.DashboardPickerProps",
-                "text": "DashboardPickerProps"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/dashboard_picker.tsx#L27"
-            }
-          }
-        ],
-        "tags": [],
-        "returnComment": [],
-        "source": {
-          "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-          "lineNumber": 27,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/dashboard_picker.tsx#L27"
+          "lineNumber": 37
         },
         "initialIsOpen": false
       }
@@ -108,8 +104,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx#L30"
+              "lineNumber": 30
             },
             "signature": [
               "SaveModalDocumentInfo"
@@ -123,8 +118,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx#L31"
+              "lineNumber": 31
             }
           },
           {
@@ -135,8 +129,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx#L32"
+              "lineNumber": 32
             },
             "signature": [
               "() => void"
@@ -150,8 +143,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx#L33"
+              "lineNumber": 33
             },
             "signature": [
               "(props: ",
@@ -173,8 +165,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx#L34"
+              "lineNumber": 34
             },
             "signature": [
               "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | ((state: ",
@@ -191,8 +182,7 @@
         ],
         "source": {
           "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx#L29"
+          "lineNumber": 29
         },
         "initialIsOpen": false
       }
@@ -209,8 +199,7 @@
       "children": [],
       "source": {
         "path": "src/plugins/presentation_util/public/types.ts",
-        "lineNumber": 10,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/types.ts#L10"
+        "lineNumber": 10
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -230,8 +219,7 @@
           "description": [],
           "source": {
             "path": "src/plugins/presentation_util/public/types.ts",
-            "lineNumber": 13,
-            "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/types.ts#L13"
+            "lineNumber": 13
           },
           "signature": [
             "React.FC<{}>"
@@ -240,8 +228,7 @@
       ],
       "source": {
         "path": "src/plugins/presentation_util/public/types.ts",
-        "lineNumber": 12,
-        "link": "https://github.com/elastic/kibana/tree/mastersrc/plugins/presentation_util/public/types.ts#L12"
+        "lineNumber": 12
       },
       "lifecycle": "start",
       "initialIsOpen": true

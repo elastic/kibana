@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { kibanaPackageJson as pkg } from '@kbn/dev-utils';
 import url, { format as formatUrl } from 'url';
-import pkg from '../../../../package.json';
 import { adminTestUser } from '../kbn';
 
 export const esTestConfig = new (class EsTestConfig {

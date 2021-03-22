@@ -5,70 +5,83 @@
  * 2.0.
  */
 
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import React, { FunctionComponent, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiComboBoxOptionOption,
-  EuiTextColor,
-  EuiSpacer,
-  EuiCallOut,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 
-import {
-  ComboBoxField,
-  useKibana,
-  fieldValidators,
-  useFormData,
-} from '../../../../../../../shared_imports';
-
+import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
-import { useConfigurationIssues, UseField } from '../../../../form';
-
-import { i18nTexts } from '../../../../i18n_texts';
-
+import { useConfiguration, UseField, globalFields } from '../../../../form';
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../../';
-
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
+import { RepositoryComboBoxField } from './repository_combobox_field';
 
 import './_searchable_snapshot_field.scss';
 
-const { emptyField } = fieldValidators;
-
 export interface Props {
-  phase: 'hot' | 'cold';
+  phase: 'hot' | 'cold' | 'frozen';
+  canBeDisabled?: boolean;
 }
 
-/**
- * This repository is provisioned by Elastic Cloud and will always
- * exist as a "managed" repository.
- */
-const CLOUD_DEFAULT_REPO = 'found-snapshots';
+const geti18nTexts = (phase: Props['phase']) => ({
+  title: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
+    defaultMessage: 'Searchable snapshot',
+  }),
+  description:
+    phase === 'frozen' ? (
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.searchableSnapshotFieldDescription"
+        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. To reduce costs, only a cache of the snapshot is mounted in the frozen tier. {learnMoreLink}"
+        values={{
+          learnMoreLink: (
+            <LearnMoreLink docPath="searchable-snapshots.html#searchable-snapshots-shared-cache" />
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
+        defaultMessage="Take a snapshot of your data and mount it as a searchable snapshot. {learnMoreLink}"
+        values={{
+          learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
+        }}
+      />
+    ),
+});
 
-export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => {
+export const SearchableSnapshotField: FunctionComponent<Props> = ({
+  phase,
+  canBeDisabled = true,
+}) => {
   const {
     services: { cloud },
   } = useKibana();
   const { getUrlForApp, policy, license, isNewPolicy } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
-  const searchableSnapshotPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
 
-  const [formData] = useFormData({ watch: searchableSnapshotPath });
-  const searchableSnapshotRepo = get(formData, searchableSnapshotPath);
+  const [formData] = useFormData({
+    watch: globalFields.searchableSnapshotRepo.path,
+  });
 
+  const searchableSnapshotGlobalRepo = get(formData, globalFields.searchableSnapshotRepo.path);
   const isColdPhase = phase === 'cold';
+  const isFrozenPhase = phase === 'frozen';
+  const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;
   const isDisabledDueToLicense = !license.canUseSearchableSnapshot();
 
   const [isFieldToggleChecked, setIsFieldToggleChecked] = useState(() =>
     Boolean(
-      // New policy on cloud should have searchable snapshot on in cold phase
-      (isColdPhase && isNewPolicy && cloud?.isCloudEnabled) ||
+      // New policy on cloud should have searchable snapshot on in cold and frozen phase
+      (isColdOrFrozenPhase && isNewPolicy && cloud?.isCloudEnabled) ||
         policy.phases[phase]?.actions?.searchable_snapshot?.snapshot_repository
     )
   );
+
+  const i18nTexts = geti18nTexts(phase);
 
   useEffect(() => {
     if (isDisabledDueToLicense) {
@@ -141,7 +154,10 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
                 />
               </EuiCallOut>
             );
-          } else if (searchableSnapshotRepo && !repos.includes(searchableSnapshotRepo)) {
+          } else if (
+            searchableSnapshotGlobalRepo &&
+            !repos.includes(searchableSnapshotGlobalRepo)
+          ) {
             calloutContent = (
               <EuiCallOut
                 title={i18n.translate(
@@ -178,56 +194,17 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
 
         return (
           <div className="ilmSearchableSnapshotField">
-            <UseField<string>
-              config={{
-                label: i18nTexts.editPolicy.searchableSnapshotsFieldLabel,
-                defaultValue: cloud?.isCloudEnabled ? CLOUD_DEFAULT_REPO : undefined,
-                validations: [
-                  {
-                    validator: emptyField(
-                      i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired
-                    ),
-                  },
-                ],
+            <UseField
+              path={searchableSnapshotRepoPath}
+              defaultValue={!!searchableSnapshotGlobalRepo ? [searchableSnapshotGlobalRepo] : []}
+              component={RepositoryComboBoxField}
+              componentProps={{
+                globalRepository: searchableSnapshotGlobalRepo,
+                isLoading,
+                repos,
+                noSuggestions: !!(error || repos.length === 0),
               }}
-              path={searchableSnapshotPath}
-            >
-              {(field) => {
-                const singleSelectionArray: [selectedSnapshot?: string] = field.value
-                  ? [field.value]
-                  : [];
-
-                return (
-                  <ComboBoxField
-                    field={
-                      {
-                        ...field,
-                        value: singleSelectionArray,
-                      } as any
-                    }
-                    label={field.label}
-                    fullWidth={false}
-                    euiFieldProps={{
-                      'data-test-subj': 'searchableSnapshotCombobox',
-                      options: repos.map((repo) => ({ label: repo, value: repo })),
-                      singleSelection: { asPlainText: true },
-                      isLoading,
-                      noSuggestions: !!(error || repos.length === 0),
-                      onCreateOption: (newOption: string) => {
-                        field.setValue(newOption);
-                      },
-                      onChange: (options: EuiComboBoxOptionOption[]) => {
-                        if (options.length > 0) {
-                          field.setValue(options[0].label);
-                        } else {
-                          field.setValue('');
-                        }
-                      },
-                    }}
-                  />
-                );
-              }}
-            </UseField>
+            />
             {calloutContent && (
               <>
                 <EuiSpacer size="s" />
@@ -289,34 +266,24 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({ phase }) => 
   return (
     <DescribedFormRow
       data-test-subj={`searchableSnapshotField-${phase}`}
-      switchProps={{
-        checked: isFieldToggleChecked,
-        disabled: isDisabledDueToLicense,
-        onChange: setIsFieldToggleChecked,
-        'data-test-subj': 'searchableSnapshotToggle',
-        label: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
-          { defaultMessage: 'Create searchable snapshot' }
-        ),
-      }}
-      title={
-        <h3>
-          {i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldTitle', {
-            defaultMessage: 'Searchable snapshot',
-          })}
-        </h3>
+      switchProps={
+        canBeDisabled
+          ? {
+              checked: isFieldToggleChecked,
+              disabled: isDisabledDueToLicense,
+              onChange: setIsFieldToggleChecked,
+              'data-test-subj': 'searchableSnapshotToggle',
+              label: i18n.translate(
+                'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotsToggleLabel',
+                { defaultMessage: 'Create searchable snapshot' }
+              ),
+            }
+          : undefined
       }
+      title={<h3>{i18nTexts.title}</h3>}
       description={
         <>
-          <EuiTextColor color="subdued">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotFieldDescription"
-              defaultMessage="Take a snapshot of the managed index in the selected repository and mount it as a searchable snapshot. {learnMoreLink}"
-              values={{
-                learnMoreLink: <LearnMoreLink docPath="ilm-searchable-snapshot.html" />,
-              }}
-            />
-          </EuiTextColor>
+          <EuiTextColor color="subdued">{i18nTexts.description}</EuiTextColor>
         </>
       }
       fieldNotices={renderInfoCallout()}

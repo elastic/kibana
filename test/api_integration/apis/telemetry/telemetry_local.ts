@@ -256,10 +256,12 @@ export default function ({ getService }: FtrProviderContext) {
           await es.deleteByQuery({
             index: '.kibana',
             body: { query: { term: { type: 'application_usage_transactional' } } },
+            conflicts: 'proceed',
           });
         });
 
-        it("should only use the first 10k docs for the application_usage data (they'll be rolled up in a later process)", async () => {
+        // flaky https://github.com/elastic/kibana/issues/94513
+        it.skip("should only use the first 10k docs for the application_usage data (they'll be rolled up in a later process)", async () => {
           const { body } = await supertest
             .post('/api/telemetry/v2/clusters/_stats')
             .set('kbn-xsrf', 'xxx')

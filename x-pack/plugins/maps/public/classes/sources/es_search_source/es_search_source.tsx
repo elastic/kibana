@@ -19,6 +19,7 @@ import {
   getField,
   hitsToGeoJson,
   isTotalHitsGreaterThan,
+  PreIndexedShape,
 } from '../../../../common/elasticsearch_util';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
@@ -48,7 +49,7 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { ImmutableSourceProperty, PreIndexedShape, SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import {
   GeoJsonWithMeta,

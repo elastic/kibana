@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 import { IFieldType } from 'src/plugins/data/common';
 import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/common';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
 
@@ -92,6 +92,10 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           });
           return result;
         };
+
+        if (field.type.includes('range')) {
+          return res.ok({ body: {} });
+        }
 
         if (field.type === 'histogram') {
           return res.ok({
