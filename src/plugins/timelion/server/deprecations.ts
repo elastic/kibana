@@ -51,7 +51,7 @@ export const getDeprecations: RegisterDeprecationsConfig['getDeprecations'] = as
     deprecations.push({
       message: `You have ${count} Timelion worksheets. The Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard.`,
       documentationUrl:
-        'https://www.elastic.co/guide/en/kibana/master/dashboard.html#timelion-deprecation',
+        'https://www.elastic.co/guide/en/kibana/current/create-panels-with-timelion.html',
       level: 'warning',
       correctiveActions: {
         manualSteps: [
