@@ -11,7 +11,7 @@ import { stringify, parse } from 'query-string';
 import styled from 'styled-components';
 
 import { EuiCodeEditor, EuiPanel, EuiTabbedContent } from '@elastic/eui';
-import { ConfigKeys, Mode, IHTTPAdvancedFields } from './types';
+import { ConfigKeys, Mode } from './types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
 
@@ -56,14 +56,14 @@ const CodeEditor = ({
 
 interface Props {
   configKey: ConfigKeys;
-  setFields: React.Dispatch<React.SetStateAction<IHTTPAdvancedFields>>;
+  onChange: (requestBody: { type: Mode; value: string }) => void;
   type: Mode;
   value: string;
 }
 
 // TO DO: Look into whether or not code editor reports errors, in order to prevent form submission on an error
-export const RequestBodyField = ({ configKey, setFields, type, value }: Props) => {
-  const modeKeys = Object.keys(Mode) as Mode[];
+export const RequestBodyField = ({ onChange, type, value }: Props) => {
+  const modeKeys = Object.values(Mode) as Mode[];
   const defaultValues = modeKeys.reduce((acc: Record<string, string>, modeKey: Mode) => {
     if (type === modeKey) {
       acc[modeKey] = value;
@@ -75,26 +75,20 @@ export const RequestBodyField = ({ configKey, setFields, type, value }: Props) =
   const [values, setValues] = useState<Record<Mode, string>>(defaultValues);
 
   useEffect(() => {
-    setFields((prevFields) => ({
-      ...prevFields,
-      [configKey]: {
-        type,
-        value: values[type],
-      },
-    }));
-  }, [configKey, setFields, type, values]);
+    onChange({
+      type,
+      value: values[type],
+    });
+  }, [onChange, type, values]);
 
   const handleSetMode = useCallback(
     (currentMode: Mode) => {
-      setFields((prevFields) => ({
-        ...prevFields,
-        [configKey]: {
-          type: currentMode,
-          value: values[currentMode],
-        },
-      }));
+      onChange({
+        type: currentMode,
+        value: values[currentMode],
+      });
     },
-    [configKey, setFields, values]
+    [onChange, values]
   );
 
   const onChangeFormFields = useCallback(
@@ -175,7 +169,7 @@ export const RequestBodyField = ({ configKey, setFields, type, value }: Props) =
   return (
     <EuiTabbedContent
       tabs={tabs}
-      initialSelectedTab={tabs[0]}
+      initialSelectedTab={tabs.find((tab) => tab.id === type)}
       autoFocus="selected"
       onTabClick={(tab) => handleSetMode(tab.id as Mode)}
     />
