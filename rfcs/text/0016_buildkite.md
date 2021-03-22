@@ -55,7 +55,7 @@
       - [Overview](#overview-2)
       - [Configuration](#configuration-1)
       - [Build / Deploy](#build--deploy-1)
-    - [GCP Infrastructure](#gcp-infrastructure)
+    - [Infrastructure](#infrastructure)
     - [Monitoring / Alerting](#monitoring--alerting)
     - [Agent Image management](#agent-image-management)
     - [Buildkite org-level settings management](#buildkite-org-level-settings-management)
@@ -110,8 +110,8 @@ Omit this section if it's not applicable. -->
 | Scheduled Builds                     | Yes     | Yes       | TODO           | TODO     |
 | Container support                    | TODO    | TODO      | TODO           | TODO     |
 |                                      |         |           |                |          |
-| Customization                        | TODO    | Yes       | No             | TODO     |
-| Core functionality is first-party    | TODO    | Mostly    | TODO           | TODO     |
+| Customization                        | No      | Yes       | No             | TODO     |
+| Core functionality is first-party    | No      | Mostly    | TODO           | TODO     |
 | First-class support for test results | Buggy   | No        | No             | TODO     |
 | GitHub Integration                   | Yes     | Limited   | Yes            | TODO     |
 | Local testing / reproduction?        | TODO    | TODO      | TODO           | TODO     |
@@ -608,23 +608,52 @@ Currently, the bot is built and deployed using [Google Cloud Build](https://clou
 
 TODO link to cloud build yaml once available
 
-### GCP Infrastructure
+### Infrastructure
 
-TODO
+We will need to maintain our infrastructure related to Buildkite, primarily ephemeral agents. To start, it will mean supporting infrastructure in GCP, but could later mean AWS as well.
 
-Hosting for bots/services, GCS buckets, images, networking (cloud nat), IAM/permissions
+- Separate GCP project for CI resources
+- Hosting for bots/services we maintain, such as the Agent Manager (GKE Auto-Pilot) and GitHub PR bot (Cloud Run)
+- Google Storage Buckets for CI artifacts
+- Networking (security, we may also need Cloud NAT)
+- IAM and Security
+- Agent images
 
-Terraform
+We are already using Terraform to manage most resources related to Buildkite, and will continue to do so.
 
 ### Monitoring / Alerting
 
-TODO
+We will need to set up and maintain monitoring and alerting for our GCP infrastructure, as well as Buildkite metrics.
 
-GCP monitoring (instances, quotas, etc)
+Some examples:
 
-Buildkite monitoring (agent queues, job times)
+GCP
+
+- Number of instances by type
+- Age of instances
+- Resource Quotas
+
+Buildkite
+
+- Agent queues
+- Job wait times
+- Build status
 
 ### Agent Image management
+
+We will need to maintain images used to create GCP instances for our Buildkite agents. These images would need to be built on a regular basis (daily, or possibly more often).
+
+We could likely maintain a single linux-based image to cover all of our current CI needs. However, in the future, if we need to maintain many images across different operating systems and architectures, this is likely to become the most complex part of the CI system that we would need to maintain. Every operating system and architecture we need to support adds another group of required images, with unique dependencies and configuration automation.
+
+For our testing, we have a single GCP image, built using Packer, with the Buildkite agent installed and all of our dependencies.
+
+TODO
+
+automated process for updating images
+cleaning out old images
+rolling back images
+base vs cache
+cache image could run multiple times per day
 
 ### Buildkite org-level settings management
 
@@ -728,8 +757,6 @@ Cons:
 - Jobs that reference a pipeline have to be managed separately. Only third-party tools exist for managing these jobs as code (JJB and Job DSL).
 - Very difficult to test code without running it live in Jenkins
 
-https://issues.jenkins.io/browse/JENKINS-44924
-
 #### Advanced Pipeline logic
 
 See above section. Jenkins supports very advanced pipeline logic using scripted pipelines and Groovy.
@@ -740,11 +767,17 @@ Given that Jenkins is open-source, we pay only for infrastructure and people to 
 
 #### Public access
 
-Jenkins has pretty fine-grained authorization settings, including anonymous user access for the public.
+- Fine-grained authorization settings
+- Anonymous user access
+- Per-job authorization, so some jobs can be private
 
 #### Secrets handling
 
-TODO
+- Supports [Credentials](https://www.jenkins.io/doc/book/using/using-credentials/), which are stored encrypted on disk and have authorization settings
+  - Credentials are difficult to manage in an automated way
+- Pipeline support for accessing credentials
+- Credentials masked in log output
+- Support for masking custom values in log output
 
 #### Support or Documentation
 
@@ -752,7 +785,7 @@ TODO
 
 #### Scheduled Builds
 
-TODO
+Jenkins supports scheduled builds via a Cron-like syntax, and can spread scheduled jobs out. For example, if many jobs are scheduled to run every day at midnight, a syntax is available that will automatically spread the triggered jobs evenly out across the midnight hour.
 
 ### Desired
 
@@ -761,6 +794,12 @@ TODO
 TODO
 
 #### Core functionality is first-party
+
+Jenkins is very modular, and almost all Jenkins functionality is provided by plugins.
+
+It's difficult to understand which plugins are required to support which base features. For example, Pipelines support is provided by a group of many plugins, and many of them have outdated names ([Pipeline: Nodes and Processes](https://github.com/jenkinsci/workflow-durable-task-step-plugin) is actually a plugin called `workflow-durable-task-step-plugin`).
+
+Many plugins are maintained by CloudBees employees, but it can be very difficult to determine which ones are, without knowing the names of CloudBees employees. All Jenkins community/third-party plugins live under the `jenkinsci` organization in GitHub.
 
 TODO
 
