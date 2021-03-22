@@ -22,16 +22,13 @@ import type { FunctionComponent, ReactElement } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-
-import { useTheme } from './use_theme';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 export interface TokenFieldProps extends Omit<EuiFieldTextProps, 'append'> {
   value: string;
 }
 
 export const TokenField: FunctionComponent<TokenFieldProps> = (props) => {
-  const theme = useTheme();
-
   return (
     <EuiFormControlLayout
       {...props}
@@ -60,7 +57,7 @@ export const TokenField: FunctionComponent<TokenFieldProps> = (props) => {
         })}
         className="euiFieldText euiFieldText--inGroup"
         value={props.value}
-        style={{ fontFamily: theme.euiCodeFontFamily, fontSize: theme.euiFontSizeXS }}
+        style={{ fontFamily: euiThemeVars.euiCodeFontFamily, fontSize: euiThemeVars.euiFontSizeXS }}
         onFocus={(event) => event.currentTarget.select()}
         readOnly
       />
