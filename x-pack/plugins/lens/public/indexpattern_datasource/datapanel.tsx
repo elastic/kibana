@@ -57,6 +57,7 @@ import { LensFieldIcon } from './lens_field_icon';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { FieldGroups, FieldList } from './field_list';
+import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
 function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
@@ -509,6 +510,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               fieldName,
               onSave: async () => {
                 trackUiEvent(`save_field_${uiAction}`);
+
+                // clear available operations cache as index pattern will get re-mapped
+                memoizedGetAvailableOperationsByMetadata.cache.delete(currentIndexPattern);
+
                 const newlyMappedIndexPattern = await loadIndexPatterns({
                   indexPatternsService: data.indexPatterns,
                   cache: {},
