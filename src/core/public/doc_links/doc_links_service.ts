@@ -292,7 +292,6 @@ export class DocLinksService {
           pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
           pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
           processors: `${ELASTICSEARCH_DOCS}processors.html`,
-
         },
       },
     });
