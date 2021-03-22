@@ -18,6 +18,7 @@ import {
   PutTrustedAppsRequestParams,
   PutTrustedAppUpdateRequest,
 } from '../../../../common/endpoint/types';
+import { EndpointAppContext } from '../../types';
 
 import {
   createTrustedApp,
@@ -68,6 +69,8 @@ export const getTrustedAppsDeleteRouteHandler = (
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
   return async (context, req, res) => {
     try {
       await deleteTrustedApp(exceptionListClientFromContext(context), req.params);
@@ -108,6 +111,8 @@ export const getTrustedAppsListRouteHandler = (
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
   return async (context, req, res) => {
     try {
       return res.ok({
@@ -119,12 +124,16 @@ export const getTrustedAppsListRouteHandler = (
   };
 };
 
-export const getTrustedAppsCreateRouteHandler = (): RequestHandler<
+export const getTrustedAppsCreateRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<
   unknown,
   unknown,
   PostTrustedAppCreateRequest,
   SecuritySolutionRequestHandlerContext
 > => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
   return async (context, req, res) => {
     try {
       return res.ok({
@@ -144,6 +153,8 @@ export const getTrustedAppsUpdateRouteHandler = (
   PutTrustedAppUpdateRequest,
   SecuritySolutionRequestHandlerContext
 > => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
   return async (context, req, res) => {
     try {
       return res.ok({
