@@ -32,7 +32,7 @@ import {
   InternalArtifactCompleteSchema,
   internalArtifactCompleteSchema,
 } from '../../../schemas/artifacts';
-import { ArtifactClient } from '../artifact_client';
+import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 
 interface ArtifactsBuildResult {
@@ -76,7 +76,7 @@ const iterateAllListItems = async <T>(
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
-  artifactClient: ArtifactClient;
+  artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
   packagePolicyService: PackagePolicyServiceInterface;
   logger: Logger;
@@ -92,7 +92,7 @@ const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
   isEqual(new Set(getArtifactIds(manifest1)), new Set(getArtifactIds(manifest2)));
 
 export class ManifestManager {
-  protected artifactClient: ArtifactClient;
+  protected artifactClient: EndpointArtifactClientInterface;
   protected exceptionListClient: ExceptionListClient;
   protected packagePolicyService: PackagePolicyServiceInterface;
   protected savedObjectsClient: SavedObjectsClientContract;
@@ -290,10 +290,13 @@ export class ManifestManager {
       );
 
       for (const entry of manifestSo.attributes.artifacts) {
-        manifest.addEntry(
-          (await this.artifactClient.getArtifact(entry.artifactId)).attributes,
-          entry.policyId
-        );
+        const artifact = await this.artifactClient.getArtifact(entry.artifactId);
+
+        if (!artifact) {
+          throw new Error(`artifact id [${entry.artifactId}] not found!`);
+        }
+
+        manifest.addEntry(artifact.attributes, entry.policyId);
       }
 
       return manifest;
@@ -462,7 +465,7 @@ export class ManifestManager {
     });
   }
 
-  public getArtifactsClient(): ArtifactClient {
+  public getArtifactsClient(): EndpointArtifactClientInterface {
     return this.artifactClient;
   }
 }
