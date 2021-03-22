@@ -156,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('application usage limits', () => {
       function createSavedObject(viewId?: string) {
         return supertest
-          .post('/api/saved_objects/application_usage_transactional')
+          .post('/api/saved_objects/application_usage_daily')
           .send({
             attributes: {
               appId: 'test-app',
