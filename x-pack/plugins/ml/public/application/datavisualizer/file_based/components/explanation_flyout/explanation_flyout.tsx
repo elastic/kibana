@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiSubSteps,
 } from '@elastic/eui';
-import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+import { FindFileStructureResponse } from '../../../../../../../file_upload/common';
 
 interface Props {
   results: FindFileStructureResponse;
