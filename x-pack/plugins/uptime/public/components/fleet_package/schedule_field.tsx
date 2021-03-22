@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { ConfigKeys, ICustomFields, ScheduleUnit } from './types';
@@ -13,7 +14,7 @@ import { ConfigKeys, ICustomFields, ScheduleUnit } from './types';
 interface Props {
   number: string;
   onChange: (schedule: ICustomFields[ConfigKeys.SCHEDULE]) => void;
-  unit: string;
+  unit: ScheduleUnit;
 }
 
 export const ScheduleField = ({ number, onChange, unit }: Props) => {
@@ -21,6 +22,7 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiFieldNumber
+          data-test-subj="scheduleFieldInput"
           min={0}
           value={number}
           onChange={(event) => {
@@ -31,11 +33,12 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSelect
+          data-test-subj="scheduleFieldSelect"
           options={options}
           value={unit}
           onChange={(event) => {
             const updatedUnit = event.target.value;
-            onChange({ number, unit: updatedUnit });
+            onChange({ number, unit: updatedUnit as ScheduleUnit });
           }}
         />
       </EuiFlexItem>
@@ -45,11 +48,15 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
 
 const options = [
   {
-    text: 'Seconds',
+    text: i18n.translate('xpack.uptime.createPackagePolicy.stepConfigure.scheduleField.seconds', {
+      defaultMessage: 'Seconds',
+    }),
     value: ScheduleUnit.SECONDS,
   },
   {
-    text: 'Minutes',
+    text: i18n.translate('xpack.uptime.createPackagePolicy.stepConfigure.scheduleField.minutes', {
+      defaultMessage: 'Minutes',
+    }),
     value: ScheduleUnit.MINUTES,
   },
 ];
