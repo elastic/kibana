@@ -3,6 +3,7 @@
 exports[`DragDrop defined dropTypes is reflected in the className 1`] = `
 <div
   class="lnsDragDrop__container"
+  data-test-subj="lnsDragDropContainer"
 >
   <button
     class="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isDropTarget"
