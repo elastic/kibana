@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { ResponseBodyIndexPolicy } from './types';
@@ -21,12 +22,12 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
 
   useEffect(() => {
     if (checked) {
-      setPolicy(ResponseBodyIndexPolicy.ON_ERROR);
-      onChange(ResponseBodyIndexPolicy.ON_ERROR);
+      setPolicy(defaultValue);
+      onChange(defaultValue);
     } else {
       onChange(ResponseBodyIndexPolicy.NEVER);
     }
-  }, [checked, onChange]);
+  }, [checked, defaultValue, setPolicy, onChange]);
 
   useEffect(() => {
     onChange(policy);
@@ -36,17 +37,17 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiCheckbox
-          id={'uptimeFleetIndexResponseHeaders'}
+          id="uptimeFleetIndexResponseBody"
           checked={checked}
-          label="Index response body"
+          label={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.indexResponseBody"
+              defaultMessage="Index response body"
+            />
+          }
           onChange={(event) => {
             const checkedEvent = event.target.checked;
             setChecked(checkedEvent);
-            if (checked) {
-              setPolicy(ResponseBodyIndexPolicy.NEVER);
-            } else {
-              setPolicy(policy);
-            }
           }}
         />
       </EuiFlexItem>
