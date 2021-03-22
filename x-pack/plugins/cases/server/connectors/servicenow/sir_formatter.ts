@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash/fp';
-import { ConnectorServiceNowSIRTypeFields } from '../../../common';
+import { ConnectorServiceNowSIRTypeFields } from '../../../common/api';
 import { ExternalServiceFormatter } from '../types';
 interface ExternalServiceParams {
   dest_ip: string | null;
