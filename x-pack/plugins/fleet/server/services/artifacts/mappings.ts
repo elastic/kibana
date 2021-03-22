@@ -39,26 +39,24 @@ export const esSearchHitToArtifact = <
 };
 
 export const newArtifactToElasticsearchProperties = ({
-  /* eslint-disable @typescript-eslint/naming-convention */
-  encryptionAlgorithm: encryption_algorithm,
-  packageName: package_name,
-  encodedSize: encoded_size,
-  encodedSha256: encoded_sha256,
-  decodedSize: decoded_size,
-  decodedSha256: decoded_sha256,
-  compressionAlgorithm: compression_algorithm,
-  /* eslint-enable @typescript-eslint/naming-convention */
+  encryptionAlgorithm,
+  packageName,
+  encodedSize,
+  encodedSha256,
+  decodedSize,
+  decodedSha256,
+  compressionAlgorithm,
   ...attributesNotNeedingRename
 }: NewArtifact): ArtifactElasticsearchProperties => {
   return {
     ...attributesNotNeedingRename,
-    encryption_algorithm,
-    package_name,
-    encoded_size,
-    encoded_sha256,
-    decoded_size,
-    decoded_sha256,
-    compression_algorithm,
+    encryption_algorithm: encryptionAlgorithm,
+    package_name: packageName,
+    encoded_size: encodedSize,
+    encoded_sha256: encodedSha256,
+    decoded_size: decodedSize,
+    decoded_sha256: decodedSha256,
+    compression_algorithm: compressionAlgorithm,
     created: new Date().toISOString(),
   };
 };

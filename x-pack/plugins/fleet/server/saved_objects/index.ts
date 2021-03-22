@@ -38,9 +38,7 @@ import {
   migrateAgentToV7120,
   migratePackagePolicyToV7120,
 } from './migrations/to_v7_12_0';
-import { migratePackagePolicyToV7130 } from './migrations/to_v7_13_0';
-
-import { migrateSettingsToV7130 } from './migrations/to_v7_13_0';
+import { migratePackagePolicyToV7130, migrateSettingsToV7130 } from './migrations/to_v7_13_0';
 
 /*
  * Saved object types and mappings
