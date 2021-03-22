@@ -6,44 +6,10 @@
  */
 
 import { FtrProviderContext as CommonFtrProviderContext } from '../../../common/ftr_provider_context';
-import { Role, User, Space } from './types';
-
-const space1: Space = {
-  id: 'space1',
-  name: 'Space 1',
-  disabledFeatures: [],
-};
-
-const space2: Space = {
-  id: 'space2',
-  name: 'Space 2',
-  disabledFeatures: [],
-};
-
-const spaces: Space[] = [space1, space2];
-
-const superUser: User = {
-  username: 'superuser',
-  password: 'superuser',
-  roles: ['superuser'],
-};
-
-const noKibanaPrivileges: Role = {
-  name: 'no_kibana_privileges',
-  privileges: {
-    elasticsearch: {
-      indices: [
-        {
-          names: ['*'],
-          privileges: ['all'],
-        },
-      ],
-    },
-  },
-};
-
-const users = [superUser];
-const roles = [noKibanaPrivileges];
+import { Role, User } from './types';
+import { users } from './users';
+import { roles } from './roles';
+import { spaces } from './spaces';
 
 export const createSpaces = async (getService: CommonFtrProviderContext['getService']) => {
   const spacesService = getService('spaces');
