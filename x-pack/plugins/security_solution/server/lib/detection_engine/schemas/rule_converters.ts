@@ -6,7 +6,12 @@
  */
 
 import uuid from 'uuid';
-import { InternalRuleCreate, InternalRuleResponse, TypeSpecificRuleParams } from './rule_schemas';
+import {
+  BaseRuleParams,
+  InternalRuleCreate,
+  InternalRuleResponse,
+  TypeSpecificRuleParams,
+} from './rule_schemas';
 import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
@@ -20,6 +25,7 @@ import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
+import { SignalParamsSchema } from '../signals/signal_params_schema';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -247,15 +253,18 @@ export const internalRuleToAPIResponse = (
     description: rule.params.description,
     risk_score: rule.params.riskScore,
     severity: rule.params.severity,
-    building_block_type: rule.params.buildingBlockType,
-    note: rule.params.note,
-    license: rule.params.license,
+    building_block_type:
+      rule.params.buildingBlockType !== null ? rule.params.buildingBlockType : undefined,
+    note: rule.params.note !== null ? rule.params.note : undefined,
+    license: rule.params.license !== null ? rule.params.license : undefined,
     output_index: rule.params.outputIndex,
-    timeline_id: rule.params.timelineId,
-    timeline_title: rule.params.timelineTitle,
-    meta: rule.params.meta,
-    rule_name_override: rule.params.ruleNameOverride,
-    timestamp_override: rule.params.timestampOverride,
+    timeline_id: rule.params.timelineId !== null ? rule.params.timelineId : undefined,
+    timeline_title: rule.params.timelineTitle !== null ? rule.params.timelineTitle : undefined,
+    meta: rule.params.meta !== null ? rule.params.meta : undefined,
+    rule_name_override:
+      rule.params.ruleNameOverride !== null ? rule.params.ruleNameOverride : undefined,
+    timestamp_override:
+      rule.params.timestampOverride !== null ? rule.params.timestampOverride : undefined,
     author: rule.params.author ?? [],
     false_positives: rule.params.falsePositives,
     from: rule.params.from,
@@ -263,11 +272,24 @@ export const internalRuleToAPIResponse = (
     max_signals: rule.params.maxSignals,
     risk_score_mapping: rule.params.riskScoreMapping ?? [],
     severity_mapping: rule.params.severityMapping ?? [],
-    threat: rule.params.threat,
+    threat: rule.params.threat !== null ? rule.params.threat : [],
     to: rule.params.to,
     references: rule.params.references,
     version: rule.params.version,
     exceptions_list: rule.params.exceptionsList ?? [],
     ...typeSpecificCamelToSnake(rule.params),
+  };
+};
+
+export const signalRuleParamsToInternalRuleParams = (
+  params: SignalParamsSchema
+): BaseRuleParams => {
+  return {
+    ...params,
+    riskScoreMapping: params.riskScoreMapping as BaseRuleParams['riskScoreMapping'],
+    severity: params.severity as BaseRuleParams['severity'],
+    severityMapping: params.severityMapping as BaseRuleParams['severityMapping'],
+    threat: params.threat as BaseRuleParams['threat'],
+    exceptionsList: params.exceptionsList as BaseRuleParams['exceptionsList'],
   };
 };
