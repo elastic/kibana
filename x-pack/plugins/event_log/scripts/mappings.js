@@ -33,6 +33,18 @@ exports.EcsKibanaExtensionsMappings = {
         },
       },
     },
+    // fields specific to Detection Engine of Elastic Security app (x-pack/plugins/security_solution)
+    detection_engine: {
+      properties: {
+        rule_status: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        rule_status_severity: {
+          type: 'integer',
+        },
+      },
+    },
     // array of saved object references, for "linking" via search
     saved_objects: {
       type: 'nested',
@@ -63,29 +75,17 @@ exports.EcsKibanaExtensionsMappings = {
 // ECS and Kibana ECS extension properties to generate
 exports.EcsEventLogProperties = [
   '@timestamp',
-  'tags',
   'message',
-  'ecs.version',
-  'event.action',
-  'event.provider',
-  'event.start',
-  'event.duration',
-  'event.end',
-  'event.outcome', // optional, but one of failure, success, unknown
-  'event.reason',
-  'error.message',
+  'tags',
+  'ecs',
+  'error',
+  'event',
+  'log.level',
+  'log.logger',
+  'rule',
   'user.name',
-  'kibana.server_uuid',
-  'kibana.alerting.instance_id',
-  'kibana.alerting.action_group_id',
-  'kibana.alerting.action_subgroup',
-  'kibana.alerting.status',
-  'kibana.saved_objects.rel',
-  'kibana.saved_objects.namespace',
-  'kibana.saved_objects.id',
-  'kibana.saved_objects.name',
-  'kibana.saved_objects.type',
+  'kibana',
 ];
 
 // properties that can have multiple values (array vs single value)
-exports.EcsEventLogMultiValuedProperties = ['tags'];
+exports.EcsEventLogMultiValuedProperties = ['tags', 'event.category', 'event.type', 'rule.author'];

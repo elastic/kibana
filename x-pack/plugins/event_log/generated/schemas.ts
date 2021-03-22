@@ -28,27 +28,69 @@ export type IEvent = DeepPartial<DeepWriteable<IValidatedEvent>>;
 export const EventSchema = schema.maybe(
   schema.object({
     '@timestamp': ecsDate(),
-    tags: ecsStringMulti(),
     message: ecsString(),
+    tags: ecsStringMulti(),
     ecs: schema.maybe(
       schema.object({
         version: ecsString(),
       })
     ),
+    error: schema.maybe(
+      schema.object({
+        code: ecsString(),
+        id: ecsString(),
+        message: ecsString(),
+        stack_trace: ecsString(),
+        type: ecsString(),
+      })
+    ),
     event: schema.maybe(
       schema.object({
         action: ecsString(),
-        provider: ecsString(),
-        start: ecsDate(),
+        category: ecsStringMulti(),
+        code: ecsString(),
+        created: ecsDate(),
+        dataset: ecsString(),
         duration: ecsNumber(),
         end: ecsDate(),
+        hash: ecsString(),
+        id: ecsString(),
+        ingested: ecsDate(),
+        kind: ecsString(),
+        module: ecsString(),
+        original: ecsString(),
         outcome: ecsString(),
+        provider: ecsString(),
         reason: ecsString(),
+        reference: ecsString(),
+        risk_score: ecsNumber(),
+        risk_score_norm: ecsNumber(),
+        sequence: ecsNumber(),
+        severity: ecsNumber(),
+        start: ecsDate(),
+        timezone: ecsString(),
+        type: ecsStringMulti(),
+        url: ecsString(),
       })
     ),
-    error: schema.maybe(
+    log: schema.maybe(
       schema.object({
-        message: ecsString(),
+        level: ecsString(),
+        logger: ecsString(),
+      })
+    ),
+    rule: schema.maybe(
+      schema.object({
+        author: ecsStringMulti(),
+        category: ecsString(),
+        description: ecsString(),
+        id: ecsString(),
+        license: ecsString(),
+        name: ecsString(),
+        reference: ecsString(),
+        ruleset: ecsString(),
+        uuid: ecsString(),
+        version: ecsString(),
       })
     ),
     user: schema.maybe(
@@ -65,6 +107,12 @@ export const EventSchema = schema.maybe(
             action_group_id: ecsString(),
             action_subgroup: ecsString(),
             status: ecsString(),
+          })
+        ),
+        detection_engine: schema.maybe(
+          schema.object({
+            rule_status: ecsString(),
+            rule_status_severity: ecsNumber(),
           })
         ),
         saved_objects: schema.maybe(
