@@ -49,7 +49,7 @@ export class TopNPanelConfig extends Component<
 
   UNSAFE_componentWillMount() {
     const { model } = this.props;
-    if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {
+    if (!model.bar_color_rules || !model.bar_color_rules.length) {
       this.props.onChange({ bar_color_rules: [{ id: uuid.v1() }] });
     }
   }
@@ -70,18 +70,15 @@ export class TopNPanelConfig extends Component<
     };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
-    let view;
-    if (selectedTab === 'data') {
-      view = (
+    const view =
+      selectedTab === PANEL_CONFIG_TABS.DATA ? (
         <SeriesEditor
           colorPicker={false}
           fields={this.props.fields}
           model={this.props.model}
           onChange={this.props.onChange}
         />
-      );
-    } else {
-      view = (
+      ) : (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
             <EuiTitle size="s">
@@ -221,7 +218,7 @@ export class TopNPanelConfig extends Component<
           </EuiPanel>
         </div>
       );
-    }
+
     return (
       <>
         <EuiTabs size="s">

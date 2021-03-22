@@ -7,7 +7,6 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import _ from 'lodash';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -117,9 +116,9 @@ export class ColorRules extends Component<ColorRulesProps> {
       collectionActions.handleChange(this.props, { ...model, ...part });
     };
     const htmlId = htmlIdGenerator(model.id);
-    const selectedOperatorOption = operatorOptions.find((option) => {
-      return model.operator === option.value;
-    });
+    const selectedOperatorOption = operatorOptions.find(
+      (option) => model.operator === option.value
+    );
 
     const labelStyle = { marginBottom: 0 };
 
@@ -231,8 +230,6 @@ export class ColorRules extends Component<ColorRulesProps> {
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return <div />;
-    const rows = (model[name] as ColorRule[]).map(this.renderRow);
-    return <div>{rows}</div>;
+    return !model[name] ? <div /> : <div>{(model[name] as ColorRule[]).map(this.renderRow)}</div>;
   }
 }

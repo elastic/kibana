@@ -28,10 +28,7 @@ export function YesNo<ParamName extends keyof TimeseriesVisParams>({
 }: YesNoProps<ParamName>) {
   const handleChange = useCallback(
     (val: number) => {
-      return () => {
-        const parts = { [name]: val };
-        onChange(parts);
-      };
+      return () => onChange({ [name]: val });
     },
     [onChange, name]
   );

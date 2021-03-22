@@ -67,9 +67,8 @@ export class MetricPanelConfig extends Component<
     const defaults = { filter: { query: '', language: getDefaultQueryLanguage() } };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
-    let view;
-    if (selectedTab === PANEL_CONFIG_TABS.DATA) {
-      view = (
+    const view =
+      selectedTab === PANEL_CONFIG_TABS.DATA ? (
         <SeriesEditor
           colorPicker={false}
           fields={this.props.fields}
@@ -77,9 +76,7 @@ export class MetricPanelConfig extends Component<
           model={this.props.model}
           onChange={this.props.onChange}
         />
-      );
-    } else {
-      view = (
+      ) : (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
             <EuiTitle size="s">
@@ -162,7 +159,7 @@ export class MetricPanelConfig extends Component<
           </EuiPanel>
         </div>
       );
-    }
+
     return (
       <>
         <EuiTabs size="s">

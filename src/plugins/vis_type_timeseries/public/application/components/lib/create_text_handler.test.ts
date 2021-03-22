@@ -9,7 +9,7 @@
 import { createTextHandler } from './create_text_handler';
 
 describe('createTextHandler()', () => {
-  let handleChange: any;
+  let handleChange: jest.Mock;
   let changeHandler: ReturnType<typeof createTextHandler>;
   let event: React.ChangeEvent<HTMLInputElement>;
 
@@ -25,7 +25,6 @@ describe('createTextHandler()', () => {
   });
 
   test('calls handleChange() function with partial', () => {
-    expect((event.preventDefault as jest.Mock).mock.calls.length).toEqual(1);
     expect(handleChange.mock.calls.length).toEqual(1);
     expect(handleChange.mock.calls[0][0]).toEqual({
       axis_scale: 'foo',

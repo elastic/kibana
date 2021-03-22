@@ -9,23 +9,25 @@
 import { createNumberHandler } from './create_number_handler';
 
 describe('createNumberHandler()', () => {
-  let handleChange;
-  let changeHandler;
-  let event;
+  let handleChange: jest.Mock;
+  let changeHandler: ReturnType<typeof createNumberHandler>;
+  let event: React.ChangeEvent<HTMLInputElement>;
 
   beforeEach(() => {
     handleChange = jest.fn();
     changeHandler = createNumberHandler(handleChange);
-    event = { preventDefault: jest.fn(), target: { value: '1' } };
-    const fn = changeHandler('test');
+    event = ({
+      preventDefault: jest.fn(),
+      target: { value: '1' },
+    } as unknown) as React.ChangeEvent<HTMLInputElement>;
+    const fn = changeHandler('unit');
     fn(event);
   });
 
   test('calls handleChange() function with partial', () => {
-    expect(event.preventDefault.mock.calls.length).toEqual(1);
     expect(handleChange.mock.calls.length).toEqual(1);
     expect(handleChange.mock.calls[0][0]).toEqual({
-      test: 1,
+      unit: 1,
     });
   });
 });

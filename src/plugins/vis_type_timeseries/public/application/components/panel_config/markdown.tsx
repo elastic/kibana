@@ -110,13 +110,13 @@ export class MarkdownPanelConfig extends Component<
       return model.markdown_vertical_align === option.value;
     });
     let view;
-    if (selectedTab === 'markdown') {
+    if (selectedTab === PANEL_CONFIG_TABS.MARKDOWN) {
       view = (
         <VisDataContext.Consumer>
           {(visData) => <MarkdownEditor visData={visData} {...this.props} />}
         </VisDataContext.Consumer>
       );
-    } else if (selectedTab === 'data') {
+    } else if (selectedTab === PANEL_CONFIG_TABS.DATA) {
       view = (
         <SeriesEditor
           colorPicker={false}

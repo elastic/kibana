@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { MetricsItemsSchema } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 
-// TODO: replace with explicit callback in each component
-export const createTextHandler = (
+export const createNumberHandler = (
   handleChange: (partialModel: Partial<TimeseriesVisParams>) => void
 ) => {
-  return (name: keyof TimeseriesVisParams, defaultValue?: string) => (
+  return (name: keyof MetricsItemsSchema, defaultValue?: string) => (
     e: React.ChangeEvent<HTMLInputElement>
-  ) => handleChange({ [name]: e.target.value ?? defaultValue });
+  ) => handleChange?.({ [name]: Number(e.target.value ?? defaultValue) });
 };

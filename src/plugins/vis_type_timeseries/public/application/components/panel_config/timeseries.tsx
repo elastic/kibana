@@ -40,6 +40,69 @@ import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
 
+const positionOptions = [
+  {
+    label: i18n.translate('visTypeTimeseries.timeseries.positionOptions.rightLabel', {
+      defaultMessage: 'Right',
+    }),
+    value: 'right',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.timeseries.positionOptions.leftLabel', {
+      defaultMessage: 'Left',
+    }),
+    value: 'left',
+  },
+];
+const tooltipModeOptions = [
+  {
+    label: i18n.translate('visTypeTimeseries.timeseries.tooltipOptions.showAll', {
+      defaultMessage: 'Show all values',
+    }),
+    value: 'show_all',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.timeseries.tooltipOptions.showFocused', {
+      defaultMessage: 'Show focused values',
+    }),
+    value: 'show_focused',
+  },
+];
+const scaleOptions = [
+  {
+    label: i18n.translate('visTypeTimeseries.timeseries.scaleOptions.normalLabel', {
+      defaultMessage: 'Normal',
+    }),
+    value: 'normal',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.timeseries.scaleOptions.logLabel', {
+      defaultMessage: 'Log',
+    }),
+    value: 'log',
+  },
+];
+const legendPositionOptions = [
+  {
+    label: i18n.translate('visTypeTimeseries.timeseries.legendPositionOptions.rightLabel', {
+      defaultMessage: 'Right',
+    }),
+    value: 'right',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.timeseries.legendPositionOptions.leftLabel', {
+      defaultMessage: 'Left',
+    }),
+    value: 'left',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.timeseries.legendPositionOptions.bottomLabel', {
+      defaultMessage: 'Bottom',
+    }),
+    value: 'bottom',
+  },
+];
+
 export class TimeseriesPanelConfig extends Component<
   PanelConfigProps,
   { selectedTab: PANEL_CONFIG_TABS }
@@ -71,81 +134,18 @@ export class TimeseriesPanelConfig extends Component<
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
 
-    const positionOptions = [
-      {
-        label: i18n.translate('visTypeTimeseries.timeseries.positionOptions.rightLabel', {
-          defaultMessage: 'Right',
-        }),
-        value: 'right',
-      },
-      {
-        label: i18n.translate('visTypeTimeseries.timeseries.positionOptions.leftLabel', {
-          defaultMessage: 'Left',
-        }),
-        value: 'left',
-      },
-    ];
-    const tooltipModeOptions = [
-      {
-        label: i18n.translate('visTypeTimeseries.timeseries.tooltipOptions.showAll', {
-          defaultMessage: 'Show all values',
-        }),
-        value: 'show_all',
-      },
-      {
-        label: i18n.translate('visTypeTimeseries.timeseries.tooltipOptions.showFocused', {
-          defaultMessage: 'Show focused values',
-        }),
-        value: 'show_focused',
-      },
-    ];
-    const selectedPositionOption = positionOptions.find((option) => {
-      return model.axis_position === option.value;
-    });
-    const scaleOptions = [
-      {
-        label: i18n.translate('visTypeTimeseries.timeseries.scaleOptions.normalLabel', {
-          defaultMessage: 'Normal',
-        }),
-        value: 'normal',
-      },
-      {
-        label: i18n.translate('visTypeTimeseries.timeseries.scaleOptions.logLabel', {
-          defaultMessage: 'Log',
-        }),
-        value: 'log',
-      },
-    ];
-    const selectedAxisScaleOption = scaleOptions.find((option) => {
-      return model.axis_scale === option.value;
-    });
-    const legendPositionOptions = [
-      {
-        label: i18n.translate('visTypeTimeseries.timeseries.legendPositionOptions.rightLabel', {
-          defaultMessage: 'Right',
-        }),
-        value: 'right',
-      },
-      {
-        label: i18n.translate('visTypeTimeseries.timeseries.legendPositionOptions.leftLabel', {
-          defaultMessage: 'Left',
-        }),
-        value: 'left',
-      },
-      {
-        label: i18n.translate('visTypeTimeseries.timeseries.legendPositionOptions.bottomLabel', {
-          defaultMessage: 'Bottom',
-        }),
-        value: 'bottom',
-      },
-    ];
-    const selectedLegendPosOption = legendPositionOptions.find((option) => {
-      return model.legend_position === option.value;
-    });
-
-    const selectedTooltipMode = tooltipModeOptions.find((option) => {
-      return model.tooltip_mode === option.value;
-    });
+    const selectedPositionOption = positionOptions.find(
+      (option) => model.axis_position === option.value
+    );
+    const selectedAxisScaleOption = scaleOptions.find(
+      (option) => model.axis_scale === option.value
+    );
+    const selectedLegendPosOption = legendPositionOptions.find(
+      (option) => model.legend_position === option.value
+    );
+    const selectedTooltipMode = tooltipModeOptions.find(
+      (option) => model.tooltip_mode === option.value
+    );
 
     let view;
     if (selectedTab === PANEL_CONFIG_TABS.DATA) {

@@ -56,10 +56,7 @@ export class GaugePanelConfig extends Component<
   UNSAFE_componentWillMount() {
     const { model } = this.props;
     const parts: Writable<Partial<TimeseriesVisParams>> = {};
-    if (
-      !model.gauge_color_rules ||
-      (model.gauge_color_rules && model.gauge_color_rules.length === 0)
-    ) {
+    if (!model.gauge_color_rules || !model.gauge_color_rules.length) {
       parts.gauge_color_rules = [{ id: uuid.v1() }];
     }
     if (model.gauge_width == null) parts.gauge_width = 10;
@@ -102,12 +99,11 @@ export class GaugePanelConfig extends Component<
       },
     ];
     const htmlId = htmlIdGenerator();
-    const selectedGaugeStyleOption = styleOptions.find((option) => {
-      return model.gauge_style === option.value;
-    });
-    let view;
-    if (selectedTab === PANEL_CONFIG_TABS.DATA) {
-      view = (
+    const selectedGaugeStyleOption = styleOptions.find(
+      (option) => model.gauge_style === option.value
+    );
+    const view =
+      selectedTab === PANEL_CONFIG_TABS.DATA ? (
         <SeriesEditor
           colorPicker={true}
           fields={this.props.fields}
@@ -115,9 +111,7 @@ export class GaugePanelConfig extends Component<
           model={this.props.model}
           onChange={this.props.onChange}
         />
-      );
-    } else {
-      view = (
+      ) : (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
             <EuiTitle size="s">
@@ -320,7 +314,7 @@ export class GaugePanelConfig extends Component<
           </EuiPanel>
         </div>
       );
-    }
+
     return (
       <>
         <EuiTabs size="s">

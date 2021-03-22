@@ -54,7 +54,7 @@ export class TablePanelConfig extends Component<
 
   UNSAFE_componentWillMount() {
     const { model } = this.props;
-    if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {
+    if (!model.bar_color_rules || !model.bar_color_rules.length) {
       this.props.onChange({ bar_color_rules: [{ id: uuid.v1() }] });
     }
   }
@@ -90,9 +90,8 @@ export class TablePanelConfig extends Component<
     };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
-    let view;
-    if (selectedTab === 'data') {
-      view = (
+    const view =
+      selectedTab === PANEL_CONFIG_TABS.DATA ? (
         <div>
           <div className="tvbPanelConfig__container">
             <EuiPanel>
@@ -178,9 +177,7 @@ export class TablePanelConfig extends Component<
             onChange={this.props.onChange}
           />
         </div>
-      );
-    } else {
-      view = (
+      ) : (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
             <EuiTitle size="s">
@@ -270,7 +267,7 @@ export class TablePanelConfig extends Component<
           </EuiPanel>
         </div>
       );
-    }
+
     return (
       <>
         <EuiTabs size="s">
