@@ -20,7 +20,7 @@ import type {
 } from '../types';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
-  vars?: Array<NewPackagePolicyInput['vars'] & { key: string }>;
+  vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
 };
 
 const getStreamsForInputType = (
@@ -228,11 +228,11 @@ const deepMergeVars = (
   override: InputsOverride,
   original: NewPackagePolicyInput | NewPackagePolicyInputStream
 ) => {
-  for (const { key, ...val } of override.vars!) {
-    if (!original.vars || !Reflect.has(original.vars, key)) {
-      throw new Error(key);
+  for (const { name, ...val } of override.vars!) {
+    if (!original.vars || !Reflect.has(original.vars, name)) {
+      throw new Error(name);
     }
-    const originalVar = original.vars[key];
-    Reflect.set(original.vars, key, { ...originalVar, ...val });
+    const originalVar = original.vars[name];
+    Reflect.set(original.vars, name, { ...originalVar, ...val });
   }
 };
