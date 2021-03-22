@@ -86,7 +86,14 @@ export class StepTerms extends Component {
           columns={columns}
           fields={terms}
           onRemoveField={this.onRemoveField}
-          emptyMessage={<p>No terms fields added</p>}
+          emptyMessage={
+            <p>
+              <FormattedMessage
+                id="xpack.rollupJobs.create.stepTerms.noTermsAddedMessage"
+                defaultMessage="No terms fields added"
+              />
+            </p>
+          }
           addButton={
             <FieldChooser
               buttonLabel={
