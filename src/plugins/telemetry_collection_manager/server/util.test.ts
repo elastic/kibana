@@ -32,8 +32,8 @@ describe('isClusterOptedIn', () => {
     const result = isClusterOptedIn(mockClusterUsage);
     expect(result).toBe(false);
   });
-  it('returns false if cluster stats is malformed', () => {
-    expect(isClusterOptedIn(createMockClusterUsage({}))).toBe(false);
+  it('returns true if kibana.plugins.telemetry does not exist', () => {
+    expect(isClusterOptedIn(createMockClusterUsage({}))).toBe(true);
     expect(isClusterOptedIn({})).toBe(true);
     expect(isClusterOptedIn(undefined)).toBe(true);
   });
