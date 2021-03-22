@@ -24,6 +24,7 @@ import { getJourneyScreenshot } from './get_journey_screenshot';
 import { getJourneyDetails } from './get_journey_details';
 import { getNetworkEvents } from './get_network_events';
 import { getJourneyFailedSteps } from './get_journey_failed_steps';
+import { getStepLastSuccessfulStep } from './get_last_successful_step';
 
 export const requests = {
   getCerts,
@@ -42,6 +43,7 @@ export const requests = {
   getIndexStatus,
   getJourneySteps,
   getJourneyFailedSteps,
+  getStepLastSuccessfulStep,
   getJourneyScreenshot,
   getJourneyDetails,
   getNetworkEvents,
