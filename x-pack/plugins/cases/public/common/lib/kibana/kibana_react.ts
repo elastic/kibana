@@ -8,9 +8,11 @@
 import {
   KibanaContextProvider,
   useKibana,
+  useUiSetting,
+  useUiSetting$,
 } from '../../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../../types';
 
 const useTypedKibana = () => useKibana<StartServices>();
 
-export { KibanaContextProvider, useTypedKibana as useKibana };
+export { KibanaContextProvider, useTypedKibana as useKibana, useUiSetting, useUiSetting$ };

@@ -240,6 +240,10 @@ export const ALERT = i18n.translate('xpack.cases.common.alertLabel', {
   defaultMessage: 'Alert',
 });
 
+export const ALERTS = i18n.translate('xpack.cases.common.alertsLabel', {
+  defaultMessage: 'Alerts',
+});
+
 export const ALERT_ADDED_TO_CASE = i18n.translate('xpack.cases.common.alertAddedToCase', {
   defaultMessage: 'added to case',
 });

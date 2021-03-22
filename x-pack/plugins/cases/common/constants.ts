@@ -8,6 +8,9 @@
 // The DEFAULT_MAX_SIGNALS value should match the one in `x-pack/plugins/security_solution/common/constants.ts`
 // If either changes, engineer should ensure both values are updated
 const DEFAULT_MAX_SIGNALS = 100;
+export const DEFAULT_DATE_FORMAT = 'dateFormat';
+export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
+
 export const APP_ID = 'cases';
 
 /**
@@ -56,3 +59,6 @@ export const SUPPORTED_CONNECTORS = [
 
 export const MAX_ALERTS_PER_SUB_CASE = 5000;
 export const MAX_GENERATED_ALERTS_PER_SUB_CASE = MAX_ALERTS_PER_SUB_CASE / DEFAULT_MAX_SIGNALS;
+
+/** This Kibana Advanced Setting specifies the URLs of `IP Reputation Links`*/
+export const IP_REPUTATION_LINKS_SETTING = 'cases:ipReputationLinks';
