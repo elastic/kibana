@@ -56,12 +56,17 @@ export function initCaseApi(deps: RouteDeps) {
   initPostCaseApi(deps);
   initPushCaseApi(deps);
   initGetAllCaseUserActionsApi(deps);
-  initGetAllSubCaseUserActionsApi(deps);
-  // Sub cases
-  initGetSubCaseApi(deps);
-  initPatchSubCasesApi(deps);
-  initFindSubCasesApi(deps);
-  initDeleteSubCasesApi(deps);
+
+  // sub-cases-disabled: remove once sub cases feature is enabled
+  if (deps.subCasesEnabled) {
+    // Sub cases
+    initGetAllSubCaseUserActionsApi(deps);
+    initGetSubCaseApi(deps);
+    initPatchSubCasesApi(deps);
+    initFindSubCasesApi(deps);
+    initDeleteSubCasesApi(deps);
+  }
+
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);

@@ -44,6 +44,7 @@ interface CreateCaseArgs {
   userActionService: CaseUserActionServiceSetup;
   theCase: CasePostRequest;
   logger: Logger;
+  subCasesEnabled: boolean;
 }
 
 /**
@@ -57,12 +58,21 @@ export const create = async ({
   user,
   theCase,
   logger,
+  subCasesEnabled,
 }: CreateCaseArgs): Promise<CaseResponse> => {
   // default to an individual case if the type is not defined.
   const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
+
+  if (!subCasesEnabled && type === CaseType.collection) {
+    throw Boom.badRequest('Case type cannot be collection when the sub cases feature is disabled');
+  }
+
   const query = pipe(
     // decode with the defaulted type field
-    excess(CasesClientPostRequestRt).decode({ type, ...nonTypeCaseFields }),
+    excess(CasesClientPostRequestRt).decode({
+      type,
+      ...nonTypeCaseFields,
+    }),
     fold(throwErrors(Boom.badRequest), identity)
   );
 

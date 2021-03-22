@@ -14,7 +14,17 @@ import { flattenCommentSavedObjects, wrapError } from '../../utils';
 import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { defaultSortField } from '../../../../common';
 
-export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps) {
+export function initGetAllCommentsApi({ caseService, router, logger, subCasesEnabled }: RouteDeps) {
+  const querySchema = subCasesEnabled
+    ? {
+        query: schema.maybe(
+          schema.object({
+            includeSubCaseComments: schema.maybe(schema.boolean()),
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
+      }
+    : {};
   router.get(
     {
       path: CASE_COMMENTS_URL,
@@ -22,12 +32,7 @@ export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.maybe(
-          schema.object({
-            includeSubCaseComments: schema.maybe(schema.boolean()),
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
+        ...querySchema,
       },
     },
     async (context, request, response) => {

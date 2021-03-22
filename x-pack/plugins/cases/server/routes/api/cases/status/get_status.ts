@@ -12,7 +12,7 @@ import { CasesStatusResponseRt, caseStatuses } from '../../../../../common/api';
 import { CASE_STATUS_URL } from '../../../../../common/constants';
 import { constructQueryOptions } from '../helpers';
 
-export function initGetCasesStatusApi({ caseService, router, logger }: RouteDeps) {
+export function initGetCasesStatusApi({ caseService, router, logger, subCasesEnabled }: RouteDeps) {
   router.get(
     {
       path: CASE_STATUS_URL,
@@ -29,6 +29,7 @@ export function initGetCasesStatusApi({ caseService, router, logger }: RouteDeps
               client,
               caseOptions: statusQuery.case,
               subCaseOptions: statusQuery.subCase,
+              subCasesEnabled,
             });
           }),
         ]);

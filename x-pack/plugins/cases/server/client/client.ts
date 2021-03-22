@@ -51,6 +51,7 @@ export class CasesClientHandler implements CasesClient {
   private readonly _userActionService: CaseUserActionServiceSetup;
   private readonly _alertsService: AlertServiceContract;
   private readonly logger: Logger;
+  private readonly subCasesEnabled: boolean;
 
   constructor(clientArgs: CasesClientFactoryArguments) {
     this._scopedClusterClient = clientArgs.scopedClusterClient;
@@ -62,6 +63,7 @@ export class CasesClientHandler implements CasesClient {
     this._userActionService = clientArgs.userActionService;
     this._alertsService = clientArgs.alertsService;
     this.logger = clientArgs.logger;
+    this.subCasesEnabled = clientArgs.subCasesEnabled;
   }
 
   public async create(caseInfo: CasePostRequest) {
@@ -74,6 +76,7 @@ export class CasesClientHandler implements CasesClient {
         user: this.user,
         theCase: caseInfo,
         logger: this.logger,
+        subCasesEnabled: this.subCasesEnabled,
       });
     } catch (error) {
       throw createCaseError({
@@ -94,6 +97,7 @@ export class CasesClientHandler implements CasesClient {
         cases,
         casesClient: this,
         logger: this.logger,
+        subCasesEnabled: this.subCasesEnabled,
       });
     } catch (error) {
       const caseIDVersions = cases.cases.map((caseInfo) => ({
@@ -119,6 +123,7 @@ export class CasesClientHandler implements CasesClient {
         comment,
         user: this.user,
         logger: this.logger,
+        subCasesEnabled: this.subCasesEnabled,
       });
     } catch (error) {
       throw createCaseError({
@@ -185,6 +190,7 @@ export class CasesClientHandler implements CasesClient {
         caseService: this._caseService,
         savedObjectsClient: this._savedObjectsClient,
         logger: this.logger,
+        subCasesEnabled: this.subCasesEnabled,
       });
     } catch (error) {
       this.logger.error(`Failed to get case using client id: ${args.id}: ${error}`);
@@ -238,6 +244,7 @@ export class CasesClientHandler implements CasesClient {
         casesClient: this,
         caseConfigureService: this._caseConfigureService,
         logger: this.logger,
+        subCasesEnabled: this.subCasesEnabled,
       });
     } catch (error) {
       throw createCaseError({

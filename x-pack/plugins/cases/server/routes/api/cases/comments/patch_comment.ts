@@ -64,7 +64,23 @@ async function getCommentableCase({
   }
 }
 
-export function initPatchCommentApi({ caseService, router, userActionService, logger }: RouteDeps) {
+export function initPatchCommentApi({
+  caseService,
+  router,
+  userActionService,
+  logger,
+  subCasesEnabled,
+}: RouteDeps) {
+  const querySchema = subCasesEnabled
+    ? {
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
+      }
+    : {};
+
   router.patch(
     {
       path: CASE_COMMENTS_URL,
@@ -72,11 +88,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
+        ...querySchema,
         body: escapeHatch,
       },
     },

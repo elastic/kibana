@@ -22,7 +22,7 @@ import { RouteDeps } from '../types';
 import { CASES_URL } from '../../../../common/constants';
 import { constructQueryOptions } from './helpers';
 
-export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
+export function initFindCasesApi({ caseService, router, logger, subCasesEnabled }: RouteDeps) {
   router.get(
     {
       path: `${CASES_URL}/_find`,
@@ -50,6 +50,7 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
           client,
           caseOptions: { ...queryParams, ...caseQueries.case },
           subCaseOptions: caseQueries.subCase,
+          subCasesEnabled,
         });
 
         const [openCases, inProgressCases, closedCases] = await Promise.all([
@@ -59,6 +60,7 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
               client,
               caseOptions: statusQuery.case,
               subCaseOptions: statusQuery.subCase,
+              subCasesEnabled,
             });
           }),
         ]);

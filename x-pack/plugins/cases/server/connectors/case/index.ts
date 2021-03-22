@@ -86,6 +86,9 @@ async function executor(
     userActionService,
     alertsService,
     logger,
+    // sub-cases-enabled: force this to true because we should never be able to call execute if the feature is disabled in the first
+    // place. The plugin won't register case as a connector if subCasesEnabled is false.
+    subCasesEnabled: true,
   });
 
   if (!supportedSubActions.includes(subAction)) {

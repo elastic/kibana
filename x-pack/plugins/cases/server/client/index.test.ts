@@ -44,6 +44,7 @@ describe('createExternalCasesClient()', () => {
       savedObjectsClient,
       userActionService,
       logger,
+      subCasesEnabled: true,
     });
     expect(CasesClientHandler).toHaveBeenCalledTimes(1);
   });
