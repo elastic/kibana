@@ -8,7 +8,7 @@
 :issue: https://github.com/elastic/kibana/issues/
 :pull: https://github.com/elastic/kibana/pull/
 
-This section summarizes the changes in each release.
+Review important information about the {kib} 7.12.x releases.
 
 * <<release-notes-7.12.0>>
 
@@ -48,9 +48,29 @@ Use Geo containment alerts.
 [%collapsible]
 ====
 *Details* +
-When upgrading to 7.12.0, {kib} will use a new algorithm for performing saved object migrations. The new algorithm  enables {kib} to retry a failed migration without any user intervention. This can reduce downtime caused by temporary errors such as a bad network or temporarily overloaded {es} cluster because the upgrade migration will be able to proceed as soon as the underlying problem is resolved. For more information see <<upgrade-migrations, saved object upgrade migrations>>
+When you upgrade to 7.12.0, {kib} uses a new algorithm to migrate saved objects to reduce the downtime caused by temporary issues, such as network errors or temporarily overloaded {es} clusters. 
+With the new algorithm, {kib} now retries the failed migrations without user intervention, which allows the migration to continue after the issues are resolved. 
+For more information, refer to <<upgrade-migrations, saved object upgrade migrations>>.
+
 *Impact* +
-To rollback to an earlier version after upgrading to 7.12.0 requires different steps to previous versions of {kib}. Before upgrading, please carefully review the documentation for <<upgrade-migrations-rolling-back, rolling back to a previous version of {kib}>>
+Before you upgrade to 7.12.0, review the documentation for <<upgrade-migrations-rolling-back, rolling back to a previous version of {kib}>>.
+====
+
+[discrete]
+[[breaking-kibana-support-for-ccs]]
+.{kib} support for CCS
+[%collapsible]
+====
+*Details* +
+In 7.12.0, {kib} introduces a major incompatibility with cross-cluster search. When one or more remote {es} clusters use a version prior to 7.12.0, *Discover*, *Maps*, *Canvas*, and *Logs* are 
+unable to display the cluster data. For information about the cross-cluster search limitations in {kib}, refer to {kibana-issue}94965[#94965].
+
+*Impact* +
+Load documents directly from `_source`.
+
+. Open the main menu, then click *Stack Management > Advanced Settings*.
+
+. Go to `discover:searchFieldsFromSource`, then select *On*.
 ====
 
 // end::notable-breaking-changes[]
@@ -366,6 +386,7 @@ Lens & Visualizations::
 * Vega Maps Referencing from kibana.yml {kibana-pull}88316[#88316]
 * Close popover on repeated button click in *Lens* {kibana-pull}87834[#87834]
 * Make sure filter object is persistable in *Lens* {kibana-pull}87828[#87828]
+* Upgrading vis with pipeline agg from 6.8 doesn't render {kibana-pull}93427[#93427]
 Logs::
 * Check for privileges with user management links {kibana-pull}91134[#91134]
 * Use useMlHref hook for ML links {kibana-pull}90935[#90935]
