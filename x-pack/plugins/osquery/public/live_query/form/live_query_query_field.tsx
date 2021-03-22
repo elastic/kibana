@@ -15,13 +15,14 @@ import { FieldHook } from '../../shared_imports';
 import { OsqueryEditor } from '../../editor';
 
 interface LiveQueryQueryFieldProps {
+  disabled?: boolean;
   field: FieldHook<{
     id: string | null;
     query: string;
   }>;
 }
 
-const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ field }) => {
+const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ disabled, field }) => {
   // const { http } = useKibana().services;
   // const { data } = useQuery('savedQueryList', () =>
   //   http.get('/internal/osquery/saved_query', {
@@ -82,7 +83,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({ fiel
         onChange={handleSavedQueryChange}
       />
       <EuiSpacer /> */}
-      <OsqueryEditor defaultValue={value.query} onChange={handleEditorChange} />
+      <OsqueryEditor defaultValue={value.query} disabled={disabled} onChange={handleEditorChange} />
     </>
   );
 };

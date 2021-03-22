@@ -13,8 +13,7 @@
     "security"
   ],
   "requiredPlugins": [
-    "actions",
-    "securitySolution"
+    "actions"
   ],
   "server": true,
   "ui": false,

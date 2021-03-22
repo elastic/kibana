@@ -8,6 +8,7 @@
 import {
   EuiButtonEmpty,
   EuiText,
+  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCodeBlock,
@@ -47,6 +48,15 @@ const LiveQueryDetailsPageComponent = () => {
     direction: Direction.asc,
     sortField: '@timestamp',
   });
+
+  const agentsFailedCount = useMemo(
+    () =>
+      actionResultsData?.rawResponse?.aggregations?.responses?.buckets.find(
+        // @ts-expect-error update types
+        (bucket) => bucket.key === 'error'
+      )?.doc_count ?? 0,
+    [actionResultsData?.rawResponse?.aggregations?.responses?.buckets]
+  );
 
   const LeftColumn = useMemo(
     () => (
@@ -120,10 +130,9 @@ const LiveQueryDetailsPageComponent = () => {
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              {actionResultsData?.rawResponse?.aggregations?.responses?.buckets.find(
-                // @ts-expect-error update types
-                (bucket) => bucket.key === 'error'
-              )?.doc_count ?? '0'}
+              <EuiTextColor color={agentsFailedCount ? 'danger' : 'default'}>
+                {agentsFailedCount}
+              </EuiTextColor>
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
@@ -135,11 +144,7 @@ const LiveQueryDetailsPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [
-      actionId,
-      actionResultsData?.rawResponse?.aggregations?.responses?.buckets,
-      data?.actionDetails?.fields?.agents?.length,
-    ]
+    [actionId, agentsFailedCount, data?.actionDetails?.fields?.agents?.length]
   );
 
   return (

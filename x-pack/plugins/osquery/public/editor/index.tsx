@@ -22,10 +22,15 @@ const EDITOR_PROPS = {
 
 interface OsqueryEditorProps {
   defaultValue: string;
+  disabled?: boolean;
   onChange: (newValue: string) => void;
 }
 
-const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, onChange }) => {
+const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
+  defaultValue,
+  // disabled,
+  onChange,
+}) => {
   const handleChange = useCallback(
     (newValue) => {
       onChange(newValue);
@@ -37,6 +42,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, on
     <EuiCodeEditor
       value={defaultValue}
       mode="osquery"
+      // isReadOnly={disabled}
       theme="tomorrow"
       onChange={handleChange}
       name="osquery_editor"

@@ -5,51 +5,16 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useMutation } from 'react-query';
-import { useLocation } from 'react-router-dom';
 
-import { useKibana } from '../common/lib/kibana';
 import { LiveQueryForm } from './form';
-import { ResultTabs } from '../queries/edit/tabs';
 
 interface LiveQueryProps {
   onSuccess?: () => void;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({ onSuccess }) => {
-  const location = useLocation();
-  const { http } = useKibana().services;
-
-  const createActionMutation = useMutation(
-    (payload: Record<string, unknown>) =>
-      http.post('/internal/osquery/action', {
-        body: JSON.stringify(payload),
-      }),
-    {
-      onSuccess,
-    }
-  );
-
-  return (
-    <>
-      {
-        <LiveQueryForm
-          defaultValue={location.state?.query}
-          // @ts-expect-error update types
-          onSubmit={createActionMutation.mutate}
-        />
-      }
-
-      {createActionMutation.data && (
-        <>
-          <EuiSpacer />
-          <ResultTabs actionId={createActionMutation.data?.actions[0].action_id} />
-        </>
-      )}
-    </>
-  );
+  return <LiveQueryForm onSuccess={onSuccess} />;
 };
 
 export const LiveQuery = React.memo(LiveQueryComponent);

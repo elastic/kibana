@@ -5,18 +5,47 @@
  * 2.0.
  */
 
+import { find } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
+import { useQuery } from 'react-query';
+
+import { GetPackagesResponse, EPM_API_ROUTES } from '../../../fleet/common';
 
 import { Container, Nav, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';
-import { useRouterNavigate } from '../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 
 export const OsqueryAppComponent = () => {
+  const {
+    application: { getUrlForApp },
+    http,
+  } = useKibana().services;
   const location = useLocation();
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
+
+  const { data: integrationUrl } = useQuery(
+    'integrations',
+    () =>
+      http.get(EPM_API_ROUTES.LIST_PATTERN, {
+        query: {
+          experimental: true,
+        },
+      }),
+    {
+      select: ({ response }: GetPackagesResponse) => {
+        const osqueryIntegration = find(['name', 'osquery_elastic_managed'], response);
+
+        if (!osqueryIntegration) return null;
+
+        return getUrlForApp('fleet', {
+          path: `#/integrations/detail/${osqueryIntegration.name}-${osqueryIntegration.version}/`,
+        });
+      },
+    }
+  );
 
   return (
     <Container>
@@ -53,6 +82,16 @@ export const OsqueryAppComponent = () => {
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
+                {integrationUrl && (
+                  <EuiFlexItem>
+                    <EuiButtonEmpty iconType="gear" href={integrationUrl} target="_blank">
+                      <FormattedMessage
+                        id="xpack.osquery.appNavigation.manageIntegrationButton"
+                        defaultMessage="Manage integration"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

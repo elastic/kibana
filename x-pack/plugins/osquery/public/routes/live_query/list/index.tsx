@@ -46,7 +46,7 @@ const LiveQueriesPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton fill {...newQueryLinkProps}>
+      <EuiButton fill {...newQueryLinkProps} iconType="plusInCircle">
         <FormattedMessage
           id="xpack.osquery.liveQueryList.newLiveQueryButtonLabel"
           defaultMessage="New live query"

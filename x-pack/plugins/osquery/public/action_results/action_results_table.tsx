@@ -65,8 +65,8 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       defaultSortDirection: Direction.asc,
     },
     {
-      id: 'agent_status',
-      displayAsText: 'online',
+      id: 'error',
+      displayAsText: 'error',
       defaultSortDirection: Direction.asc,
     },
     {
@@ -113,16 +113,19 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
       const value = data[rowIndex % pagination.pageSize];
 
       if (columnId === 'status') {
-        // const linkProps = useRouterNavigate(
-        //   `/live_query/${actionId}/results/${value.fields.agent_id[0]}`
-        // );
+        const error = value.fields.error && value.fields.error[0];
 
-        return (
-          <>
-            <EuiIcon type="checkInCircleFilled" color="green" />
-            {/* <EuiLink {...linkProps}>{'View results'}</EuiLink> */}
-          </>
+        return error ? (
+          <EuiIcon type="crossInACircleFilled" color="danger" />
+        ) : (
+          <EuiIcon type="checkInCircleFilled" color="green" />
         );
+      }
+
+      if (columnId === 'error') {
+        const error = value.fields.error && value.fields.error[0];
+
+        return error ?? '-';
       }
 
       if (columnId === 'rows_count') {
@@ -136,15 +139,6 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
           sortField: '@timestamp',
         });
         return allResultsData?.totalCount ?? '-';
-      }
-
-      if (columnId === 'agent_status') {
-        const agentIdValue = value.fields.agent_id[0];
-        const agent = find(['_id', agentIdValue], agentsData?.agents);
-        const online = agent?.active;
-        const color = online ? 'success' : 'danger';
-        const label = online ? 'Online' : 'Offline';
-        return <EuiHealth color={color}>{label}</EuiHealth>;
       }
 
       if (columnId === 'agent') {
@@ -184,7 +178,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     [onChangeItemsPerPage, onChangePage, pagination]
   );
 
-  if (!actionResultsData?.results?.length && actionResultsData?.totalCount < 1) {
+  if (!actionResultsData?.results?.length && !actionResultsData?.totalCount) {
     return (
       <div>
         <EuiLoadingContent lines={8} />
@@ -193,14 +187,12 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
   }
 
   return (
-    // @ts-expect-error update types
     <DataContext.Provider value={actionResultsData?.results}>
       <EuiDataGrid
         aria-label="Osquery results"
         columns={columns}
         columnVisibility={columnVisibility}
-        // @ts-expect-error update types
-        rowCount={actionResultsData?.totalCount}
+        rowCount={actionResultsData?.totalCount ?? 0}
         renderCellValue={renderCellValue}
         sorting={tableSorting}
         pagination={tablePagination}

@@ -17,7 +17,6 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiOverlayMask,
   EuiSelectable,
   EuiSelectableOption,
   EuiButton,
@@ -245,56 +244,54 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   if (isModalVisible) {
     modal = (
-      <EuiOverlayMask>
-        <EuiModal onClose={closeModal} initialFocus="[name=popswitch]">
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>Select Agents</EuiModalHeaderTitle>
-          </EuiModalHeader>
+      <EuiModal onClose={closeModal} initialFocus="[name=popswitch]">
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>Select Agents</EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody>
-            {groupsLoading ? null : (
-              <EuiSelectable
-                aria-label="Searchable example"
-                searchable
-                searchProps={searchProps}
-                options={groupOptions}
-                onChange={onGroupChange}
-              >
-                {(list, search) => (
-                  <Fragment>
-                    {search}
-                    {list}
-                  </Fragment>
-                )}
-              </EuiSelectable>
-            )}
-            {allAgentsSelected || selectedGroups?.length ? null : (
-              <EuiBasicTable<Agent>
-                ref={tableRef}
-                // @ts-expect-error update types
-                // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-                items={data.agents ?? []}
-                itemId="_id"
-                columns={columns}
-                pagination={pagination}
-                sorting={sorting}
-                isSelectable={true}
-                selection={selection}
-                onChange={onTableChange}
-                rowHeader="firstName"
-              />
-            )}
-          </EuiModalBody>
+        <EuiModalBody>
+          {groupsLoading ? null : (
+            <EuiSelectable
+              aria-label="Searchable example"
+              searchable
+              searchProps={searchProps}
+              options={groupOptions}
+              onChange={onGroupChange}
+            >
+              {(list, search) => (
+                <Fragment>
+                  {search}
+                  {list}
+                </Fragment>
+              )}
+            </EuiSelectable>
+          )}
+          {allAgentsSelected || selectedGroups?.length ? null : (
+            <EuiBasicTable<Agent>
+              ref={tableRef}
+              // @ts-expect-error update types
+              // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
+              items={data.agents ?? []}
+              itemId="_id"
+              columns={columns}
+              pagination={pagination}
+              sorting={sorting}
+              isSelectable={true}
+              selection={selection}
+              onChange={onTableChange}
+              rowHeader="firstName"
+            />
+          )}
+        </EuiModalBody>
 
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={closeModal}>Cancel</EuiButtonEmpty>
 
-            <EuiButton onClick={closeModal} fill>
-              Save
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+          <EuiButton onClick={closeModal} fill>
+            Save
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
     );
   }
 
