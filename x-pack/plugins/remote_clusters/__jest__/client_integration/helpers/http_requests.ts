@@ -10,7 +10,7 @@ import { Cluster } from '../../../common/lib';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const mockResponse = (response: any[]) => [
+  const mockResponse = (response: Cluster[] | { itemsDeleted: string[]; errors: string[] }) => [
     200,
     { 'Content-Type': 'application/json' },
     JSON.stringify(response),
