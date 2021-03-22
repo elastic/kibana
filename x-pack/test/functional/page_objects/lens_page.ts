@@ -391,6 +391,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title: string,
       saveAsNew?: boolean,
       redirectToOrigin?: boolean,
+      saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
       dashboardId?: string
     ) {
@@ -402,6 +403,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
+        saveToLibrary,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
