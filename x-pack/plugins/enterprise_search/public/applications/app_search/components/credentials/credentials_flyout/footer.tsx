@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SAVE } from '../../../../shared/constants';
+import { CLOSE, SAVE } from '../../../../shared/constants';
 
 import { CredentialsLogic } from '../credentials_logic';
 
@@ -31,9 +31,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="cross" onClick={hideCredentialsForm}>
-            {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.closeText', {
-              defaultMessage: 'Close',
-            })}
+            {CLOSE}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
