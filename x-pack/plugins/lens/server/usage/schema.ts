@@ -43,6 +43,14 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   indexpattern_dimension_operation_count: { type: 'long' },
   indexpattern_dimension_operation_cardinality: { type: 'long' },
   indexpattern_dimension_operation_filters: { type: 'long' },
+  indexpattern_dimension_operation_range: { type: 'long' },
+  indexpattern_dimension_operation_median: { type: 'long' },
+  indexpattern_dimension_operation_percentile: { type: 'long' },
+  indexpattern_dimension_operation_last_value: { type: 'long' },
+  indexpattern_dimension_operation_cumulative_sum: { type: 'long' },
+  indexpattern_dimension_operation_counter_rate: { type: 'long' },
+  indexpattern_dimension_operation_derivative: { type: 'long' },
+  indexpattern_dimension_operation_moving_average: { type: 'long' },
 };
 
 const suggestionEventsSchema: MakeSchemaFrom<LensUsage['suggestion_events_30_days']> = {
