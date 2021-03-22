@@ -119,3 +119,8 @@ export const AGENTS_SETUP_API_ROUTES = {
 export const SETUP_API_ROUTE = `${API_ROOT}/setup`;
 
 export const INSTALL_SCRIPT_API_ROUTES = `${API_ROOT}/install/{osType}`;
+
+// Policy preconfig API routes
+export const POLICY_PRECONFIG_API_ROUTES = {
+  PUT_PRECONFIG: `${API_ROOT}/policy_preconfig`,
+};

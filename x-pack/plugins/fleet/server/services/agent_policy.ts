@@ -137,7 +137,7 @@ class AgentPolicyService {
   public async ensurePreconfiguredAgentPolicy(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    config: NewAgentPolicy
+    config: Omit<NewAgentPolicy, 'namespace'> & { namespace?: string }
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
@@ -155,7 +155,7 @@ class AgentPolicyService {
 
     const newAgentPolicy: NewAgentPolicy = {
       ...newAgentPolicyDefaults,
-      ...config,
+      ...(config as NewAgentPolicy),
     };
 
     return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);

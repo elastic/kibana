@@ -25,20 +25,6 @@ import { ensureInstalledPackage, isPackageInstalled } from './epm/packages/insta
 import { packagePolicyService } from './package_policy';
 import { agentPolicyService } from './agent_policy';
 
-async function ensureInstalledPreconfiguredPackage(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  pkgName: string,
-  version: string
-) {
-  return ensureInstalledPackage({
-    savedObjectsClient: soClient,
-    pkgName,
-    esClient,
-    version,
-  });
-}
-
 export async function ensurePreconfiguredPackagesAndPolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -112,7 +98,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     )
   );
 
-  const [preconfiguredPolicies] = await Promise.all([policiesPromise, packagesPromise]);
+  const [preconfiguredPolicies, preconfiguredPackages] = await Promise.all([
+    policiesPromise,
+    packagesPromise,
+  ]);
 
   for (const preconfiguredPolicy of preconfiguredPolicies) {
     const { created, policy, installedPackagePolicies } = preconfiguredPolicy;
@@ -127,7 +116,41 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     }
   }
 
-  return { initialized: true };
+  return {
+    policies: preconfiguredPolicies.map((p) => p.policy.id),
+    packages: preconfiguredPackages.map((pkg) => `${pkg.name}:${pkg.version}`),
+  };
+}
+
+export async function addPackageToAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  packageToInstall: Installation,
+  agentPolicy: AgentPolicy,
+  defaultOutput: Output,
+  packagePolicyName?: string,
+  packagePolicyDescription?: string,
+  inputsOverride?: InputsOverride[]
+) {
+  const packageInfo = await getPackageInfo({
+    savedObjectsClient: soClient,
+    pkgName: packageToInstall.name,
+    pkgVersion: packageToInstall.version,
+  });
+
+  const newPackagePolicy = packageToPackagePolicy(
+    packageInfo,
+    agentPolicy.id,
+    defaultOutput.id,
+    agentPolicy.namespace ?? 'default',
+    packagePolicyName,
+    packagePolicyDescription,
+    inputsOverride
+  );
+
+  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+    bumpRevision: false,
+  });
 }
 
 async function addPreconfiguredPolicyPackages(
@@ -159,33 +182,16 @@ async function addPreconfiguredPolicyPackages(
   );
 }
 
-export async function addPackageToAgentPolicy(
+async function ensureInstalledPreconfiguredPackage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  packageToInstall: Installation,
-  agentPolicy: AgentPolicy,
-  defaultOutput: Output,
-  packagePolicyName?: string,
-  packagePolicyDescription?: string,
-  inputsOverride?: InputsOverride[]
+  pkgName: string,
+  version: string
 ) {
-  const packageInfo = await getPackageInfo({
+  return ensureInstalledPackage({
     savedObjectsClient: soClient,
-    pkgName: packageToInstall.name,
-    pkgVersion: packageToInstall.version,
-  });
-
-  const newPackagePolicy = packageToPackagePolicy(
-    packageInfo,
-    agentPolicy.id,
-    defaultOutput.id,
-    agentPolicy.namespace,
-    packagePolicyName,
-    packagePolicyDescription,
-    inputsOverride
-  );
-
-  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
-    bumpRevision: false,
+    pkgName,
+    esClient,
+    version,
   });
 }

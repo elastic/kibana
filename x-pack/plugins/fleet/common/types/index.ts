@@ -10,8 +10,7 @@ export * from './rest_spec';
 
 import type { InputsOverride } from '../services';
 
-import type { NewAgentPolicy } from './models';
-import type { NewPackagePolicy, PackagePolicyPackage } from './models';
+import type { NewAgentPolicy, NewPackagePolicy, PackagePolicyPackage } from './models';
 
 export interface FleetConfigType {
   enabled: boolean;

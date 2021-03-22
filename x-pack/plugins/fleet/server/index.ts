@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
@@ -16,10 +15,9 @@ import {
   AGENT_POLLING_REQUEST_TIMEOUT_MS,
 } from '../common';
 
-import { FleetPlugin } from './plugin';
+import { PackagesPreconfigSchema, AgentPoliciesPreconfigSchema } from './types';
 
-const semverRegex = () =>
-  /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
+import { FleetPlugin } from './plugin';
 
 export { default as apm } from 'elastic-apm-node';
 export {
@@ -33,16 +31,6 @@ export {
 } from './services';
 export { FleetSetupContract, FleetSetupDeps, FleetStartContract, ExternalCallback } from './plugin';
 export { AgentNotFoundError } from './errors';
-
-const varsSchema = schema.maybe(
-  schema.arrayOf(
-    schema.object({
-      key: schema.string(),
-      type: schema.maybe(schema.string()),
-      value: schema.oneOf([schema.string(), schema.number()]),
-    })
-  )
-);
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -86,66 +74,8 @@ export const config: PluginConfigDescriptor = {
         defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
       }),
     }),
-    packages: schema.maybe(
-      schema.arrayOf(
-        schema.object({
-          name: schema.string(),
-          version: schema.string({
-            validate: (value) => {
-              if (!semverRegex().test(value)) {
-                return i18n.translate('xpack.fleet.config.invalidPackageVersionError', {
-                  defaultMessage: 'must be a valid semver',
-                });
-              }
-            },
-          }),
-        })
-      )
-    ),
-    agentPolicies: schema.maybe(
-      schema.arrayOf(
-        schema.object({
-          name: schema.string(),
-          id: schema.oneOf([schema.string(), schema.number()]),
-          namespace: schema.maybe(schema.string()),
-          description: schema.maybe(schema.string()),
-          monitoring_enabled: schema.maybe(
-            schema.arrayOf(schema.oneOf([schema.literal('logs'), schema.literal('metrics')]))
-          ),
-          package_policies: schema.arrayOf(
-            schema.object({
-              name: schema.string(),
-              package: schema.object({
-                name: schema.string(),
-              }),
-              description: schema.maybe(schema.string()),
-              namespace: schema.maybe(schema.string()),
-              inputs: schema.maybe(
-                schema.arrayOf(
-                  schema.object({
-                    type: schema.string(),
-                    enabled: schema.maybe(schema.boolean()),
-                    vars: varsSchema,
-                    streams: schema.maybe(
-                      schema.arrayOf(
-                        schema.object({
-                          data_stream: schema.object({
-                            type: schema.maybe(schema.string()),
-                            dataset: schema.string(),
-                          }),
-                          enabled: schema.maybe(schema.boolean()),
-                          vars: varsSchema,
-                        })
-                      )
-                    ),
-                  })
-                )
-              ),
-            })
-          ),
-        })
-      )
-    ),
+    packages: schema.maybe(PackagesPreconfigSchema),
+    agentPolicies: schema.maybe(AgentPoliciesPreconfigSchema),
   }),
 };
 
