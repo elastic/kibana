@@ -6,4 +6,4 @@
  */
 
 export const ANOMALY_SWIMLANE_EMBEDDABLE_TYPE = 'ml_anomaly_swimlane';
-export const ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE = 'ml_anomaly_explorer';
+export const ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE = 'ml_anomaly_charts';

@@ -67,7 +67,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
       {Array.isArray(chartsData.seriesToPlot) &&
         chartsData.seriesToPlot.length === 0 &&
         chartsData.errorMessages === undefined && (
-          <EuiText textAlign={'center'}>
+          <EuiText textAlign={'center'} data-test-subj={'mlNoMatchingAnomaliesMessage'}>
             <h4>
               <FormattedMessage
                 id="xpack.ml.explorer.noMatchingAnomaliesFoundTitle"

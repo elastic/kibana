@@ -46,7 +46,11 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
 
   const isFormValid = isPanelTitleValid && maxSeriesToPlot > 0;
   return (
-    <EuiModal initialFocus="[name=panelTitle]" onClose={onCancel}>
+    <EuiModal
+      initialFocus="[name=panelTitle]"
+      onClose={onCancel}
+      data-test-subj={'mlAnomalyChartsEmbeddableInitializer'}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h2>
@@ -70,7 +74,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
             isInvalid={!isPanelTitleValid}
           >
             <EuiFieldText
-              data-test-subj={'panelTitleInput'}
+              data-test-subj="panelTitleInput"
               id="panelTitle"
               name="panelTitle"
               value={panelTitle}
@@ -88,6 +92,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
             }
           >
             <EuiFieldNumber
+              data-test-subj="mlAnomalyChartsInitializerMaxSeries"
               id="selectMaxSeriesToPlot"
               name="selectMaxSeriesToPlot"
               value={maxSeriesToPlot}
@@ -100,7 +105,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj={'cancelButton'}>
+        <EuiButtonEmpty onClick={onCancel} data-test-subj="mlAnomalyChartsInitializerCancelButton">
           <FormattedMessage
             id="xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel"
             defaultMessage="Cancel"
@@ -108,7 +113,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
         </EuiButtonEmpty>
 
         <EuiButton
-          data-test-subj={'confirmButton'}
+          data-test-subj="mlAnomalyChartsInitializerConfirmButton"
           isDisabled={!isFormValid}
           onClick={onCreate.bind(null, {
             panelTitle,

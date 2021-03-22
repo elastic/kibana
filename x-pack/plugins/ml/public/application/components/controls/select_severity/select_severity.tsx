@@ -135,6 +135,7 @@ export const SelectSeverityUI: FC<{
 
   return (
     <EuiSuperSelect
+      data-test-subj={'mlAnomalySeverityThresholdControls'}
       className={classNames}
       hasDividers
       options={getSeverityOptions()}
