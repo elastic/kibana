@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { MouseEvent } from 'react';
+import React, { MouseEvent, useState } from 'react';
+import { Redirect } from 'react-router-dom';
 import { SavedObjectReference } from 'src/core/types';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
@@ -76,39 +77,42 @@ function navigateToNewMap() {
   });
 }
 
-async function findMaps(searchQuery: string) {
-  let searchTerm = searchQuery;
-  let tagReferences;
+function findMapsProvider(setNumMaps: (x: number) => void) {
+  return async (searchQuery: string) => {
+    let searchTerm = searchQuery;
+    let tagReferences;
 
-  if (savedObjectsTagging) {
-    const parsed = savedObjectsTagging.ui.parseSearchQuery(searchQuery, {
-      useName: true,
+    if (savedObjectsTagging) {
+      const parsed = savedObjectsTagging.ui.parseSearchQuery(searchQuery, {
+        useName: true,
+      });
+      searchTerm = parsed.searchTerm;
+      tagReferences = parsed.tagReferences;
+    }
+
+    const { savedObjects, total } = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
+      type: MAP_SAVED_OBJECT_TYPE,
+      search: searchTerm ? `${searchTerm}*` : undefined,
+      perPage: getSavedObjects().settings.getListingLimit(),
+      page: 1,
+      searchFields: ['title^3', 'description'],
+      defaultSearchOperator: 'AND',
+      fields: ['description', 'title'],
+      hasReference: tagReferences,
     });
-    searchTerm = parsed.searchTerm;
-    tagReferences = parsed.tagReferences;
-  }
+    setNumMaps(total);
 
-  const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
-    type: MAP_SAVED_OBJECT_TYPE,
-    search: searchTerm ? `${searchTerm}*` : undefined,
-    perPage: getSavedObjects().settings.getListingLimit(),
-    page: 1,
-    searchFields: ['title^3', 'description'],
-    defaultSearchOperator: 'AND',
-    fields: ['description', 'title'],
-    hasReference: tagReferences,
-  });
-
-  return {
-    total: resp.total,
-    hits: resp.savedObjects.map((savedObject) => {
-      return {
-        id: savedObject.id,
-        title: savedObject.attributes.title,
-        description: savedObject.attributes.description,
-        references: savedObject.references,
-      };
-    }),
+    return {
+      total,
+      hits: savedObjects.map((savedObject) => {
+        return {
+          id: savedObject.id,
+          title: savedObject.attributes.title,
+          description: savedObject.attributes.description,
+          references: savedObject.references,
+        };
+      }),
+    };
   };
 }
 
@@ -120,17 +124,19 @@ async function deleteMaps(items: object[]) {
 }
 
 export function MapsListView() {
+  const [numMaps, setNumMaps] = useState(1);
+
   const isReadOnly = !getMapsCapabilities().save;
 
   getCoreChrome().docTitle.change(getAppTitle());
   getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
 
-  return (
+  return numMaps ? (
     <TableListView
       headingId="mapsListingPage"
       rowHeader="title"
       createItem={isReadOnly ? undefined : navigateToNewMap}
-      findItems={findMaps}
+      findItems={findMapsProvider(setNumMaps)}
       deleteItems={isReadOnly ? undefined : deleteMaps}
       tableColumns={tableColumns}
       listingLimit={getSavedObjects().settings.getListingLimit()}
@@ -146,5 +152,7 @@ export function MapsListView() {
       toastNotifications={getToasts()}
       searchFilters={searchFilters}
     />
+  ) : (
+    <Redirect to="/map" />
   );
 }
