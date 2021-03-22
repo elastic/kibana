@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import './discover_embeddable.scss';
 import React, { useState } from 'react';
 import { EuiProgress } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -22,7 +22,11 @@ export function DiscoverGridEmbeddable(props: DiscoverGridProps) {
 
   return (
     <I18nProvider>
-      {props.isLoading && <EuiProgress size="xs" color="accent" />}
+      {props.isLoading ? (
+        <EuiProgress size="xs" color="accent" />
+      ) : (
+        <div className="dscEmbeddableProgressInactive" />
+      )}
       <DataGridMemoized
         {...props}
         setExpandedDoc={setExpandedDoc}
