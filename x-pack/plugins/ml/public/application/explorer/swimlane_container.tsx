@@ -363,7 +363,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
           direction={'column'}
           style={{ width: '100%', height: '100%', overflow: 'hidden' }}
           ref={resizeRef}
-          data-test-subj="mlSwimLaneContainer"
+          data-test-subj={dataTestSubj}
         >
           <EuiFlexItem
             style={{
@@ -372,10 +372,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             }}
             grow={false}
           >
-            <div
-              style={{ height: `${containerHeight}px`, position: 'relative' }}
-              data-test-subj={dataTestSubj}
-            >
+            <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
               {showSwimlane && !isLoading && (
                 <Chart className={'mlSwimLaneContainer'}>
                   <Settings

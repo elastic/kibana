@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
@@ -217,9 +218,25 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableRowsCount(25);
         });
 
-        it('allows to change the swim lane pagination', async () => {});
+        it('allows to change the swim lane pagination', async () => {
+          await ml.testExecution.logTestStep('checks default pagination');
+          await ml.swimLane.assertPageSize(viewBySwimLaneTestSubj, 10);
+          await ml.swimLane.assertActivePage(viewBySwimLaneTestSubj, 1);
 
-        it('support cell selection by click on View By swim lane', async () => {
+          await ml.testExecution.logTestStep('updates pagination');
+          await ml.swimLane.setPageSize(viewBySwimLaneTestSubj, 5);
+
+          const axisLabels = await ml.swimLane.getAxisLabels(viewBySwimLaneTestSubj, 'y');
+          expect(axisLabels.length).to.eql(5);
+
+          await ml.swimLane.selectPage(viewBySwimLaneTestSubj, 3);
+
+          await ml.testExecution.logTestStep('resets pagination');
+          await ml.swimLane.setPageSize(viewBySwimLaneTestSubj, 10);
+          await ml.swimLane.assertActivePage(viewBySwimLaneTestSubj, 1);
+        });
+
+        it.skip('support cell selection by click on View By swim lane', async () => {
           await ml.testExecution.logTestStep('clicks on the View By swim lane cell');
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
           const sampleCell = (await ml.swimLane.getCells(viewBySwimLaneTestSubj))[0];
