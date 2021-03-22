@@ -22,13 +22,22 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
   const tableItems: DrilldownTemplateTableItem[] = React.useMemo<
     DrilldownTemplateTableItem[]
   >(() => {
-    return items.map((item) => ({
-      id: item.id,
-      name: item.name,
-      icon: item.icon,
-      description: item.description,
-    }));
-  }, [items]);
+    return items.map((item) => {
+      const tableItem: DrilldownTemplateTableItem = {
+        id: item.id,
+        name: item.name,
+        icon: item.icon,
+        description: item.description,
+      };
+      const factory = drilldowns.deps.actionFactories.find(({ id }) => id === item.factoryId);
+      if (factory) {
+        const context = drilldowns.getActionFactoryContext();
+        tableItem.actionName = factory.getDisplayName(context);
+        tableItem.actionIcon = factory.getIconType(context);
+      }
+      return tableItem;
+    });
+  }, [drilldowns, items]);
 
   return (
     <DrilldownTemplateTable

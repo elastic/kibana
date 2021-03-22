@@ -17,16 +17,31 @@ export const txtSelectableMessage = i18n.translate(
 export const txtNameColumnTitle = i18n.translate(
   'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.nameColumnTitle',
   {
-    defaultMessage: 'Template',
+    defaultMessage: 'Name',
     description: 'Title of the first column in drilldown template cloning table.',
+  }
+);
+
+export const txtSourceColumnTitle = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.sourceColumnTitle',
+  {
+    defaultMessage: 'Panel',
+    description: 'Column title which describes from where the drilldown is cloned.',
+  }
+);
+
+export const txtActionColumnTitle = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.actionColumnTitle',
+  {
+    defaultMessage: 'Action',
   }
 );
 
 export const txtSingleItemCloneActionLabel = i18n.translate(
   'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.singleItemCloneAction',
   {
-    defaultMessage: 'Clone',
-    description: '"Clone" action button label in drilldown template cloning table.',
+    defaultMessage: 'Copy to this panel',
+    description: '"Clone" action button label in drilldown template cloning table last column.',
   }
 );
 

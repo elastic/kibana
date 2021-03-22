@@ -12,6 +12,7 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
   EuiButton,
+  EuiText,
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +23,8 @@ import {
   txtSelectableMessage,
   txtCloneButtonLabel,
   txtSingleItemCloneActionLabel,
+  txtSourceColumnTitle,
+  txtActionColumnTitle,
 } from './i18n';
 
 export interface DrilldownTemplateTableItem {
@@ -29,6 +32,8 @@ export interface DrilldownTemplateTableItem {
   name: string;
   icon?: string;
   description?: string;
+  actionName?: string;
+  actionIcon?: string;
 }
 
 export interface DrilldownTemplateTableProps {
@@ -47,18 +52,33 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
   const columns: Array<EuiBasicTableColumn<DrilldownTemplateTableItem>> = [
     {
       name: txtNameColumnTitle,
-      render: (item: DrilldownTemplateTableItem) => item.name,
+      render: (item: DrilldownTemplateTableItem) => (
+        <div style={{ display: 'block' }}>
+          <div style={{ display: 'block' }}>{item.name}</div>
+          <EuiText size={'xs'} color={'subdued'}>
+            {item.description}
+          </EuiText>
+        </div>
+      ),
     },
+    // {
+    //   name: txtSourceColumnTitle,
+    //   render: (item: DrilldownTemplateTableItem) => (
+    //     <EuiTextColor color={'subdued'}>{item.description}</EuiTextColor>
+    //   ),
+    // },
     {
-      name: 'Source...',
+      name: txtActionColumnTitle,
       render: (item: DrilldownTemplateTableItem) => (
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type={item.icon || 'empty'} />
+            <EuiIcon type={item.actionIcon || 'empty'} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
-            <EuiTextColor color={'subdued'}>{item.description}</EuiTextColor>
-          </EuiFlexItem>
+          {!!item.actionName && (
+            <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
+              <EuiTextColor color={'subdued'}>{item.actionName}</EuiTextColor>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ),
     },
@@ -85,6 +105,13 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
         columns={columns}
         isSelectable={!!onClone}
         responsive={false}
+        sorting={{
+          sort: {
+            direction: 'asc',
+            field: 'name',
+          },
+          enableAllColumns: true,
+        }}
         selection={{
           onSelectionChange: (selection) => {
             setSelected(selection.map((drilldown) => drilldown.id));
