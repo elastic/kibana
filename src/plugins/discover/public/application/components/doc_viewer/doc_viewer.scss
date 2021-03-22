@@ -52,7 +52,7 @@
   white-space: nowrap;
 }
 .kbnDocViewer__buttons {
-  width: 96px;
+  width: 108px;
 
   // Show all icons if one is focused,
   &:focus-within {
@@ -64,8 +64,8 @@
 
 .kbnDocViewer__field {
   width: $euiSize * 10;
-  @include euiBreakpoint('xs', 's') {
-    width: $euiSize * 6;
+  @include euiBreakpoint('xs', 's', 'm', 'l', 'xl') {
+    width: $euiSize * 5;
   }
 }
 
