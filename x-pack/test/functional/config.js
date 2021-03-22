@@ -91,7 +91,6 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
-        '--telemetry.optIn=true',
       ],
     },
     uiSettings: {

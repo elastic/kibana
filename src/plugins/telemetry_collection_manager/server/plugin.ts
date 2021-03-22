@@ -30,7 +30,6 @@ import {
   UsageStatsPayload,
   StatsCollectionContext,
 } from './types';
-import { isClusterOptedIn } from './util';
 import { encryptTelemetry } from './encryption';
 import { TelemetrySavedObjectsClient } from './telemetry_saved_objects_client';
 
@@ -227,21 +226,15 @@ export class TelemetryCollectionManagerPlugin
       if (statsCollectionConfig) {
         try {
           const usageData = await this.getUsageForCollection(collection, statsCollectionConfig);
-          const optedInUsageData = usageData.filter(isClusterOptedIn);
-          if (optedInUsageData.length) {
+          if (usageData.length) {
             this.logger.debug(`Got Usage using ${collection.title} collection.`);
             if (config.unencrypted) {
-              return optedInUsageData;
+              return usageData;
             }
 
-            return await encryptTelemetry(optedInUsageData, {
+            return await encryptTelemetry(usageData, {
               useProdKey: this.isDistributable,
             });
-          } else if (usageData.length) {
-            this.logger.debug(
-              `Got Usage using ${collection.title} collection but none is opted-in.`
-            );
-            return [];
           }
         } catch (err) {
           this.logger.debug(

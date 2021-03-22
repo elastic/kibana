@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(stats.stack_stats.kibana.os.platforms[0].count).to.be(1);
         expect(stats.stack_stats.kibana.os.platformReleases[0].platformRelease).to.be.a('string');
         expect(stats.stack_stats.kibana.os.platformReleases[0].count).to.be(1);
-        expect(stats.stack_stats.kibana.plugins.telemetry.opt_in_status).to.be(true);
+        expect(stats.stack_stats.kibana.plugins.telemetry.opt_in_status).to.be(false);
         expect(stats.stack_stats.kibana.plugins.telemetry.usage_fetcher).to.be.a('string');
         expect(stats.stack_stats.kibana.plugins.stack_management).to.be.an('object');
         expect(stats.stack_stats.kibana.plugins.ui_metric).to.be.an('object');
