@@ -46,6 +46,7 @@ export const QuickButtonGroup = ({ buttons }: Props) => {
 
   return (
     <EuiButtonGroup
+      buttonSize="s"
       className="quickButtonGroup"
       legend={strings.getLegend()}
       options={buttonGroupOptions}
