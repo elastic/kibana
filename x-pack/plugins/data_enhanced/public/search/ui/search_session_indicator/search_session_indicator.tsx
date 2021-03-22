@@ -167,7 +167,12 @@ const searchSessionIndicatorViewStateToProps: {
         defaultMessage: 'Save your session, continue your work, and return to completed results',
       }),
       whenText: (props: SearchSessionIndicatorProps) =>
-        `Started ${moment(new Date()).format(`L @ LTS`)}`,
+        i18n.translate('xpack.data.searchSessionIndicator.loadingResultsWhenText', {
+          defaultMessage: 'Started {when}',
+          values: {
+            when: props.startedTime ? moment(props.startedTime).format(`L @ LTS`) : '',
+          },
+        }),
       primaryAction: CancelButton,
       secondaryAction: ContinueInBackgroundButton,
     },
@@ -197,7 +202,12 @@ const searchSessionIndicatorViewStateToProps: {
         }
       ),
       whenText: (props: SearchSessionIndicatorProps) =>
-        `Completed ${moment(new Date()).format(`L @ LTS`)}`,
+        i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedWhenText', {
+          defaultMessage: 'Completed {when}',
+          values: {
+            when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
+          },
+        }),
       primaryAction: SaveButton,
       secondaryAction: ViewAllSearchSessionsButton,
     },
@@ -229,7 +239,12 @@ const searchSessionIndicatorViewStateToProps: {
         }
       ),
       whenText: (props: SearchSessionIndicatorProps) =>
-        `Started ${moment(new Date()).format(`L @ LTS`)}`,
+        i18n.translate('xpack.data.searchSessionIndicator.loadingInTheBackgroundWhenText', {
+          defaultMessage: 'Started {when}',
+          values: {
+            when: props.startedTime ? moment(props.startedTime).format(`L @ LTS`) : '',
+          },
+        }),
       primaryAction: CancelButton,
       secondaryAction: ViewAllSearchSessionsButton,
     },
@@ -265,7 +280,12 @@ const searchSessionIndicatorViewStateToProps: {
         }
       ),
       whenText: (props: SearchSessionIndicatorProps) =>
-        `Completed ${moment(new Date()).format(`L @ LTS`)}`,
+        i18n.translate('xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundWhenText', {
+          defaultMessage: 'Completed {when}',
+          values: {
+            when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
+          },
+        }),
       secondaryAction: ViewAllSearchSessionsButton,
     },
   },
@@ -292,7 +312,12 @@ const searchSessionIndicatorViewStateToProps: {
           'You are viewing cached data from a specific time range. Changing the time range or filters will re-run the session',
       }),
       whenText: (props: SearchSessionIndicatorProps) =>
-        `Completed ${moment(new Date()).format(`L @ LTS`)}`,
+        i18n.translate('xpack.data.searchSessionIndicator.restoredWhenText', {
+          defaultMessage: 'Completed {when}',
+          values: {
+            when: props.completedTime ? moment(props.completedTime).format(`L @ LTS`) : '',
+          },
+        }),
       secondaryAction: ViewAllSearchSessionsButton,
     },
   },
@@ -315,7 +340,12 @@ const searchSessionIndicatorViewStateToProps: {
         defaultMessage: 'You are viewing incomplete data',
       }),
       whenText: (props: SearchSessionIndicatorProps) =>
-        `Stopped ${moment(new Date()).format(`L @ LTS`)}`,
+        i18n.translate('xpack.data.searchSessionIndicator.canceledWhenText', {
+          defaultMessage: 'Stopped {when}',
+          values: {
+            when: props.canceledTime ? moment(props.canceledTime).format(`L @ LTS`) : '',
+          },
+        }),
       secondaryAction: ViewAllSearchSessionsButton,
     },
   },

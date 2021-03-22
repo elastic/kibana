@@ -289,12 +289,23 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .expect(200);
 
-        const { appId, name, touched, created, persisted, idMapping } = resp.body.attributes;
+        const {
+          appId,
+          name,
+          touched,
+          created,
+          persisted,
+          idMapping,
+          status,
+          completed,
+        } = resp.body.attributes;
         expect(persisted).to.be(false);
         expect(name).to.be(undefined);
         expect(appId).to.be(undefined);
         expect(touched).not.to.be(undefined);
         expect(created).not.to.be(undefined);
+        expect(status).to.be(SearchSessionStatus.COMPLETE);
+        expect(completed).not.to.be(undefined);
 
         const idMappings = Object.values(idMapping).map((value: any) => value.id);
         expect(idMappings).to.contain(id1);

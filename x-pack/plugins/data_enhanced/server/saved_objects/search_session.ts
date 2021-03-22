@@ -32,6 +32,9 @@ export const searchSessionMapping: SavedObjectsType = {
       touched: {
         type: 'date',
       },
+      completed: {
+        type: 'date',
+      },
       status: {
         type: 'keyword',
       },
