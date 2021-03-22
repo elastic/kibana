@@ -15,7 +15,7 @@ const typeToIconMap: { [type: string]: string | IconType } = {
   labels: 'visText',
   values: 'number',
   list: 'list',
-  curve: 'visLine',
+  visualOptions: 'brush',
 };
 
 export interface ToolbarPopoverProps {
