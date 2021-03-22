@@ -177,10 +177,12 @@ export class RollupWizard extends Component<Props, State> {
   componentDidUpdate(prev: Props) {
     if (prev.value !== this.props.value) {
       const stepsFields = deriveStepFields(this.props.value);
+      const stepsFieldErrors = this.getStepsFieldsErrors(stepsFields);
       this.setState({
         isNewRollup: !this.props.value,
         stepsFields,
-        stepsFieldErrors: this.getStepsFieldsErrors(stepsFields),
+        stepsFieldErrors,
+        checkpointStepId: this.calculateLastPossibleStepCheckPoint(stepsFieldErrors),
       });
     }
   }
