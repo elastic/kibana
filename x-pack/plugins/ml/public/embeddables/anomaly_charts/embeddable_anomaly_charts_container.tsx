@@ -19,7 +19,7 @@ import type {
 } from '..';
 import type { EntityField } from '../../../common/util/anomaly_utils';
 
-import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts_container';
+import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { ANOMALY_THRESHOLD } from '../../../common';

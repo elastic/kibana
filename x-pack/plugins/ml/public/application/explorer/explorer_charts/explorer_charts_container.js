@@ -34,10 +34,20 @@ import { withKibana } from '../../../../../../../src/plugins/kibana_react/public
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
+import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
 });
+
+const textTooManyBucketsForDashboard = i18n.translate(
+  'xpack.ml.explorer.charts.dashboardTooManyBucketsDescription',
+  {
+    defaultMessage:
+      'This selection contains too many buckets to be displayed. You should shorten the time range of the view.',
+  }
+);
+
 const textViewButton = i18n.translate(
   'xpack.ml.explorer.charts.openInSingleMetricViewerButtonLabel',
   {
@@ -69,6 +79,7 @@ function ExplorerChartContainer({
   timefilter,
   onSelectEntity,
   recentlyAccessed,
+  forDashboard,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
@@ -142,7 +153,7 @@ function ExplorerChartContainer({
             {tooManyBuckets && (
               <span className="ml-explorer-chart-icon">
                 <EuiIconTip
-                  content={textTooManyBuckets}
+                  content={forDashboard ? textTooManyBucketsForDashboard : textTooManyBuckets}
                   position="top"
                   size="s"
                   type="alert"
@@ -160,7 +171,6 @@ function ExplorerChartContainer({
                   iconType="visLine"
                   size="xs"
                   href={`${basePath}/app/ml${explorerSeriesLink}`}
-                  // @TODO: renable onClick, remove addToRecentlyAccessed dependency cache
                   onClick={addToRecentlyAccessed}
                 >
                   <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
@@ -171,6 +181,19 @@ function ExplorerChartContainer({
         </EuiFlexItem>
       </EuiFlexGroup>
       {(() => {
+        if (chartType === CHART_TYPE.GEO_MAP) {
+          return (
+            <MlTooltipComponent>
+              {(tooltipService) => (
+                <EmbeddedMapComponentWrapper
+                  seriesConfig={series}
+                  tooltipService={tooltipService}
+                />
+              )}
+            </MlTooltipComponent>
+          );
+        }
+
         if (
           chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
           chartType === CHART_TYPE.POPULATION_DISTRIBUTION
@@ -221,6 +244,7 @@ export const ExplorerChartsContainerUI = ({
   timeBuckets,
   timefilter,
   onSelectEntity,
+  forDashboard,
 }) => {
   const {
     services: {
@@ -279,6 +303,7 @@ export const ExplorerChartsContainerUI = ({
                 timefilter={timefilter}
                 onSelectEntity={onSelectEntity}
                 recentlyAccessed={recentlyAccessed}
+                forDashboard={forDashboard}
               />
             </EuiFlexItem>
           ))}

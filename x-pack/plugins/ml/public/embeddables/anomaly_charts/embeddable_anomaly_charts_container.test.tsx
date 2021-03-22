@@ -19,7 +19,7 @@ import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolv
 import { MlDependencies } from '../../application/app';
 import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
 import { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '..';
-import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts_container';
+import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import {
   anomalyDetectorServiceMock,
   anomalyExplorerChartsServiceMock,
@@ -34,7 +34,7 @@ jest.mock('./use_anomaly_charts_input_resolver', () => ({
   }),
 }));
 
-jest.mock('../../application/explorer/explorer_charts_container', () => ({
+jest.mock('../../application/explorer/explorer_charts/explorer_anomalies_container', () => ({
   ExplorerAnomaliesContainer: jest.fn(() => {
     return null;
   }),

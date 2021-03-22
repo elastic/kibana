@@ -10,16 +10,16 @@ import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 // @ts-ignore
-import { ExplorerChartsContainer } from './explorer_charts/embeddable_explorer_charts_container';
+import { ExplorerChartsContainer } from './explorer_charts_container';
 import {
   SelectSeverityUI,
   TableSeverity,
-} from '../components/controls/select_severity/select_severity';
-import type { UrlGeneratorContract } from '../../../../../../src/plugins/share/public';
-import type { TimeBuckets } from '../util/time_buckets';
-import type { TimefilterContract } from '../../../../../../src/plugins/data/public';
-import type { EntityField } from '../../../common/util/anomaly_utils';
-import type { ExplorerChartsData } from './explorer_charts/explorer_charts_container_service';
+} from '../../components/controls/select_severity/select_severity';
+import type { UrlGeneratorContract } from '../../../../../../../src/plugins/share/public';
+import type { TimeBuckets } from '../../util/time_buckets';
+import type { TimefilterContract } from '../../../../../../../src/plugins/data/public';
+import type { EntityField } from '../../../../common/util/anomaly_utils';
+import type { ExplorerChartsData } from './explorer_charts_container_service';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
@@ -86,6 +86,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
               timeBuckets,
               timefilter,
               onSelectEntity,
+              forDashboard: true,
             }}
           />
         )}
