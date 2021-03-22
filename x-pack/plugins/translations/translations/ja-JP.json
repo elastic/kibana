@@ -19308,7 +19308,6 @@
     "xpack.securitySolution.detectionEngine.ruleDescription.mlJobStoppedDescription": "停止",
     "xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAggregatedByDescription": "結果集約条件",
     "xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription": "すべての結果",
-    "xpack.securitySolution.detectionEngine.ruleDetails.activateRuleLabel": "有効化",
     "xpack.securitySolution.detectionEngine.ruleDetails.backToRulesDescription": "検出ルールに戻る",
     "xpack.securitySolution.detectionEngine.ruleDetails.errorCalloutTitle": "ルール失敗",
     "xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab": "例外",
