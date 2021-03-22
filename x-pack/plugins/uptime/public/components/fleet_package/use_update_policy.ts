@@ -63,11 +63,11 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
               configItem.value = config[key] ? `${config[key]}s` : null; // convert to cron
               break;
             case ConfigKeys.REQUEST_BODY_CHECK:
-              configItem.value = config[key].value; // only need value of REEQUEST_BODY_CHECK for outputted policy
+              configItem.value = JSON.stringify(config[key].value); // only need value of REQUEST_BODY_CHECK for outputted policy
               break;
             default:
               configItem.value =
-                !config[key] && typeof config[key] !== 'boolean' ? null : config[key];
+                config[key] === undefined || config[key] === null ? null : config[key];
           }
         }
       });
