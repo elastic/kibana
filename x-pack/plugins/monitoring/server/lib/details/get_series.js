@@ -46,7 +46,12 @@ function defaultCalculation(bucket, key) {
   const mbKey = `metric_mb_deriv.normalized_value`;
   const legacyValue = get(bucket, key, null);
   const mbValue = get(bucket, mbKey, null);
-  const value = isNaN(legacyValue) ? mbValue : legacyValue;
+  let value;
+  if (!isNaN(mbValue) && mbValue > 0) {
+    value = mbValue;
+  } else {
+    value = legacyValue;
+  }
   // negatives suggest derivatives that have been reset (usually due to restarts that reset the count)
   if (value < 0) {
     return null;
