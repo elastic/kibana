@@ -44,10 +44,8 @@ export default function ({ getService }: FtrProviderContext) {
           rocCurveColorState: [
             // tick/grid/axis
             { key: '#DDDDDD', value: 50 },
-            // lines
+            // line
             { key: '#98A2B3', value: 30 },
-            { key: '#6092C0', value: 10 },
-            { key: '#5F92C0', value: 6 },
           ],
           scatterplotMatrixColorStats: [
             // marker colors
