@@ -222,3 +222,5 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
 };
 
 export const ConfigureCases = React.memo(ConfigureCasesComponent);
+// eslint-disable-next-line import/no-default-export
+export default ConfigureCases;
