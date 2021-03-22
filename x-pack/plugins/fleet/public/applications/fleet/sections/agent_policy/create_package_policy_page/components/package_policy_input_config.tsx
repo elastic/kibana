@@ -17,12 +17,9 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../types';
-import {
-  isAdvancedVar,
-  PackagePolicyConfigValidationResults,
-  validationHasErrors,
-} from '../services';
+import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../types';
+import type { PackagePolicyConfigValidationResults } from '../services';
+import { isAdvancedVar, validationHasErrors } from '../services';
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
