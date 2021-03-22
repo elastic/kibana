@@ -9,7 +9,10 @@ import LRU from 'lru-cache';
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
-import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
+import {
+  createArtifactsClientMock,
+  createPackagePolicyServiceMock,
+} from '../../../../../../fleet/server/mocks';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas/response';
@@ -20,7 +23,7 @@ import {
   getMockArtifactsWithDiff,
   getEmptyMockArtifacts,
 } from '../../../lib/artifacts/mocks';
-import { ArtifactClient } from '../artifact_client';
+import { EndpointArtifactClient } from '../artifact_client';
 import { getManifestClientMock } from '../manifest_client.mock';
 import { ManifestManager, ManifestManagerContext } from './manifest_manager';
 
@@ -84,7 +87,7 @@ export const buildManifestManagerContextMock = (
 
   return {
     ...fullOpts,
-    artifactClient: new ArtifactClient(fullOpts.savedObjectsClient),
+    artifactClient: new EndpointArtifactClient(createArtifactsClientMock()),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
   };
 };

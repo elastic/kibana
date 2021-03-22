@@ -7,7 +7,7 @@
 
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { EndpointArtifactClient } from './artifact_client';
-import { createArtifactsClientMock } from '../../../../../fleet/server/services/artifacts/mocks';
+import { createArtifactsClientMock } from '../../../../../fleet/server/mocks';
 
 describe('artifact_client', () => {
   describe('ArtifactClient sanity checks', () => {

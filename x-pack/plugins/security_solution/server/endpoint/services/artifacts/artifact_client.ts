@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { inflate as _inflate } from 'zlib';
 import { promisify } from 'util';
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import { ArtifactConstants, getArtifactId } from '../../lib/artifacts';
-import {
-  InternalArtifactCompleteSchema,
-  InternalArtifactCreateSchema,
-} from '../../schemas/artifacts';
+import { SavedObject } from 'src/core/server';
+import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server';
 
 const inflateAsync = promisify(_inflate);
@@ -29,40 +23,8 @@ export interface EndpointArtifactClientInterface {
   deleteArtifact(id: string): Promise<void>;
 }
 
-export class ArtifactClient implements EndpointArtifactClientInterface {
-  private savedObjectsClient: SavedObjectsClientContract;
-
-  constructor(savedObjectsClient: SavedObjectsClientContract) {
-    this.savedObjectsClient = savedObjectsClient;
-  }
-
-  public async getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema>> {
-    return this.savedObjectsClient.get<InternalArtifactCompleteSchema>(
-      ArtifactConstants.SAVED_OBJECT_TYPE,
-      id
-    );
-  }
-
-  public async createArtifact(
-    artifact: InternalArtifactCompleteSchema
-  ): Promise<SavedObject<InternalArtifactCompleteSchema>> {
-    return this.savedObjectsClient.create<InternalArtifactCreateSchema>(
-      ArtifactConstants.SAVED_OBJECT_TYPE,
-      {
-        ...artifact,
-        created: Date.now(),
-      },
-      { id: getArtifactId(artifact) }
-    );
-  }
-
-  public async deleteArtifact(id: string) {
-    await this.savedObjectsClient.delete(ArtifactConstants.SAVED_OBJECT_TYPE, id);
-  }
-}
-
 /**
- * Endpoint specific artifact managment client which uses FleetArtifactsClient to persist artifacts
+ * Endpoint specific artifact management client which uses FleetArtifactsClient to persist artifacts
  * to the Fleet artifacts index (then used by Fleet Server)
  */
 export class EndpointArtifactClient implements EndpointArtifactClientInterface {
