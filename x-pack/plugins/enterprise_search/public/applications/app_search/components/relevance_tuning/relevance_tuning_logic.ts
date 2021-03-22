@@ -8,7 +8,11 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
-import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  setSuccessMessage,
+  flashAPIErrors,
+  clearFlashMessages,
+} from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts } from '../../../shared/types';
 
@@ -288,6 +292,7 @@ export const RelevanceTuningLogic = kea<
         });
 
         actions.setSearchResults(response.results);
+        clearFlashMessages();
       } catch (e) {
         flashAPIErrors(e);
       }

@@ -225,7 +225,7 @@ describe('RelevanceTuningLogic', () => {
 
   describe('listeners', () => {
     const { http } = mockHttpValues;
-    const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+    const { flashAPIErrors, setSuccessMessage, clearFlashMessages } = mockFlashMessageHelpers;
     let scrollToSpy: jest.SpyInstance;
     let confirmSpy: jest.SpyInstance;
 
@@ -317,7 +317,7 @@ describe('RelevanceTuningLogic', () => {
         jest.useRealTimers();
       });
 
-      it('should make an API call and set state based on the response', async () => {
+      it('should make an API call, set state based on the response, and clear flash messages', async () => {
         const searchSettingsWithNewBoostProp = {
           boosts: {
             foo: [
@@ -376,6 +376,7 @@ describe('RelevanceTuningLogic', () => {
           }
         );
         expect(RelevanceTuningLogic.actions.setSearchResults).toHaveBeenCalledWith(searchResults);
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
 
       it("won't send boosts or search_fields on the API call if there are none", async () => {
