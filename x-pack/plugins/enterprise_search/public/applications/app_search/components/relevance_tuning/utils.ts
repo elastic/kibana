@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, cloneDeep, omit } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 
 import { NUMBER } from '../../../shared/constants/field_types';
 import { SchemaTypes } from '../../../shared/types';
@@ -75,36 +75,27 @@ export const removeEmptyValueBoosts = (
 ): Record<string, Boost[]> => {
   // before:
   //   { foo: { values: ['a', '', '   '] } }
-  // after:
-  //   { foo: { values: ['a'] } }
-  const trimBoostValues = (fieldBoosts: Boost[]) => {
-    return fieldBoosts.map((boost: Boost) => {
-      if (boost.type !== BoostType.Value) return boost;
-      const valueBoost = boost as ValueBoost;
-      return {
-        ...boost,
-        value: valueBoost.value.filter((v) => v.trim() !== ''),
-      };
-    });
-  };
-
-  // before:
-  //   { foo: { values: ['a'] } }
-  //   { foo: { values: [] } }
+  //   { foo: { values: [''] } }
   // after:
   //   { foo: { values: ['a'] } }
   const filterEmptyValueBoosts = (fieldBoosts: Boost[]) => {
-    return fieldBoosts.filter(
-      (boost) => !(boost.type === BoostType.Value && boost.value && boost.value.length === 0)
-    );
+    return fieldBoosts.filter((boost: Boost) => {
+      if (boost.type !== BoostType.Value) return true;
+
+      const valueBoost = boost as ValueBoost;
+      const filteredValues = valueBoost.value.filter((value) => value.trim() !== '');
+
+      if (filteredValues.length) {
+        boost.value = filteredValues;
+        return true;
+      } else {
+        return false;
+      }
+    });
   };
 
   return Object.entries(boosts).reduce((acc, [fieldName, fieldBoosts]) => {
-    const updatedBoosts = filterEmptyValueBoosts(trimBoostValues(fieldBoosts));
-    if (isEmpty(updatedBoosts)) return acc;
-    return {
-      ...acc,
-      [fieldName]: updatedBoosts,
-    };
+    const updatedBoosts = filterEmptyValueBoosts(fieldBoosts);
+    return updatedBoosts.length ? { ...acc, [fieldName]: updatedBoosts } : acc;
   }, {});
 };
