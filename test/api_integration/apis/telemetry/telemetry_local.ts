@@ -253,7 +253,8 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        it("should only use the first 10k docs for the application_usage data (they'll be rolled up in a later process)", async () => {
+        // flaky https://github.com/elastic/kibana/issues/94513
+        it.skip("should only use the first 10k docs for the application_usage data (they'll be rolled up in a later process)", async () => {
           const stats = await retrieveTelemetry(supertest);
           expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
             'test-app': {
