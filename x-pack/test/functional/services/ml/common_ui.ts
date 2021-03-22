@@ -15,9 +15,17 @@ interface SetValueOptions {
   typeCharByChar?: boolean;
 }
 
+// key: color hex code, e.g. #FF3344
+// value: the expected percentage of the color to be present in the canvas element
+export type CanvasElementColorStats = Array<{
+  key: string;
+  value: number;
+}>;
+
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;
 
 export function MachineLearningCommonUIProvider({ getService }: FtrProviderContext) {
+  const canvasElement = getService('canvasElement');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -204,6 +212,43 @@ export function MachineLearningCommonUIProvider({ getService }: FtrProviderConte
         expectedValue,
         `${testDataSubj} slider value should be '${expectedValue}' (got '${actualValue}')`
       );
+    },
+
+    async disableAntiAliasing() {
+      await canvasElement.disableAntiAliasing();
+    },
+
+    async resetAntiAliasing() {
+      await canvasElement.resetAntiAliasing();
+    },
+
+    async assertColorsInCanvasElement(
+      dataTestSubj: string,
+      expectedColorStats: CanvasElementColorStats,
+      exclude?: string[],
+      percentageThreshold = 0,
+      channelTolerance = 10,
+      valueTolerance = 10
+    ) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail(dataTestSubj);
+
+        const actualColorStatsWithTolerance = await canvasElement.getColorStatsWithColorTolerance(
+          `[data-test-subj="${dataTestSubj}"] canvas`,
+          expectedColorStats,
+          exclude,
+          percentageThreshold,
+          channelTolerance,
+          valueTolerance
+        );
+
+        expect(actualColorStatsWithTolerance.every((d) => d.withinTolerance)).to.eql(
+          true,
+          `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
+            expectedColorStats
+          )}' (got '${JSON.stringify(actualColorStatsWithTolerance)}')`
+        );
+      });
     },
   };
 }
