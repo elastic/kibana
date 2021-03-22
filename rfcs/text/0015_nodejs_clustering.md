@@ -12,7 +12,8 @@ Leveraging NodeJS clustering API to have multi-processes Kibana instances.
 Kibana currently uses a single Node process/thread to serve HTTP traffic.
 This means Kibana cannot take advantage of multi-core hardware making it expensive to scale out Kibana.
 
-Clustering mode would allow spawning multiple Kibana processes ('workers') from a single Kibana instance.
+Clustering mode would allow spawning multiple Kibana processes ('workers') from a single Kibana instance. See the `alternatives`
+section for the difference between clustering and worker pool.
 
 This should be an optional way to run Kibana since users running Kibana inside docker containers might
 choose to rather use their container orchestration to run a container (with a single kibana process)per host CPU.
@@ -89,65 +90,20 @@ export const config = {
   path: 'clustering',
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
-    workers: schema.number({ defaultValue: 2 }),
+    workers: schema.conditional(
+      schema.siblingRef('enabled'),
+      false,
+      schema.number({ defaultValue: 1 }),
+      schema.number()
+    )
   }),
 };
 ```
 
 Notes:
-- What should be the default value for `clustering.workers`? We could go with `Max(1, os.cpus().length - 1)`, but do we really want to use all cpus by default,
-  knowing that every worker is going to have its own memory usage.
-
-## The clustering service
-
-We will be adding a new clustering service to core, that will add the necessary cluster APIs, and would be accessible via core's setup and start contracts (`coreSetup.clustering` and `coreStart.clustering`).
-
-At the moment, no need to extend Core's request handler context with clustering related APIs has been identified.
-
-The contract interface would look like (more APIs could be added depending on the discussions on this RFC)
-
-```ts
-type ClusterMessagePayload = Serializable;
-
-interface BroadcastOptions {
-  /**
-   * If true, will also send the message to the worker that sent it.
-   * Defaults to false.
-   */
-  sendToSelf?: boolean;
-  /**
-   * If true, the message will also be sent to subscribers subscribing after the message was effectively sent.
-   * Defaults to false.
-   */
-  persist?: boolean;
-}
-
-export interface ClusteringServiceSetup {
-  /**
-   * Return true if clustering mode is enabled, false otherwise
-   */
-  isEnabled: () => boolean;
-  /**
-   * Return the current worker's id. In non-clustered mode, will return `1`
-   */
-  getWorkerId: () => number;
-  /**
-   * Broadcast a message to other workers.
-   * In non-clustered mode, this is a no-op
-   */
-  broadcast: (type: string, payload?: ClusterMessagePayload, options?: BroadcastOptions) => void;
-  /**
-   * Registered a handler for given `type` of IPC messages
-   * In non-clustered mode, this is a no-op that returns a no-op unsubscription callback.
-   */
-  addMessageHandler: (type: string, handler: MessageHandler) => MessageHandlerUnsubscribeFn;
-  /**
-   * Returns true if the current worker has been elected as the main one. In non-clustered mode, will return true
-   */
-  isMainWorker: () => boolean;
-}
-```
-
+- As there isn't really a good way to automatically choose the correct number of workers automatically, It will be required 
+  for the user to manually specify `clustering.workers` when clustering is enabled.
+  
 ## Cross-worker communication
 
 For some of our changes (such as the /status API, see below), we will need some kind of cross-worker communication. This 
@@ -191,6 +147,56 @@ export interface ClusteringServiceSetup {
 Notes:
 - in non-clustered mode, `isMainWorker` would always return true, to reduce the divergence between clustered and 
   non-clustered modes.
+
+## The clustering service API
+
+We will be adding a new clustering service to core, that will add the necessary cluster APIs, and would be accessible via core's setup and start contracts (`coreSetup.clustering` and `coreStart.clustering`).
+
+At the moment, no need to extend Core's request handler context with clustering related APIs has been identified.
+
+The contract interface would look like (more APIs could be added depending on the discussions on this RFC)
+
+```ts
+type ClusterMessagePayload = Serializable;
+
+interface BroadcastOptions {
+  /**
+   * If true, will also send the message to the worker that sent it.
+   * Defaults to false.
+   */
+  sendToSelf?: boolean;
+  /**
+   * If true, the message will also be sent to subscribers subscribing after the message was effectively sent.
+   * Defaults to false.
+   */
+  persist?: boolean;
+}
+
+export interface ClusteringServiceSetup {
+  /**
+   * Return true if clustering mode is enabled, false otherwise
+   */
+  isEnabled: () => boolean;
+  /**
+   * Return the current worker's id. In non-clustered mode, will return `1`
+   */
+  getWorkerId: () => number;
+  /**
+   * Broadcast a message to other workers.
+   * In non-clustered mode, this is a no-op
+   */
+  broadcast: (type: string, payload?: ClusterMessagePayload, options?: BroadcastOptions) => void;
+  /**
+   * Registered a handler for given `type` of IPC messages
+   * In non-clustered mode, this is a no-op that returns a no-op unsubscription callback.
+   */
+  addMessageHandler: (type: string, handler: MessageHandler) => MessageHandlerUnsubscribeFn;
+  /**
+   * Returns true if the current worker has been elected as the main one. In non-clustered mode, will always return true
+   */
+  isMainWorker: () => boolean;
+}
+```
 
 ### Example: SO Migration
 
@@ -259,12 +265,12 @@ Note that this doesn’t solve the problem for the console appender, which is pr
 - Add the process info to the log pattern and output it with the log message
 
 We could add the process name information to the log messages, and add a new conversion to be able to display it with 
-the pattern layout, such as `%process` for example.
+the pattern layout, such as `%worker` for example.
 
 the default pattern could evolve to (ideally, only when clustering is enabled)
 
 ```
-[%date][%level][%process][%logger] %message
+[%date][%level][%worker][%logger] %message
 ```
 
 The logging output would then look like
@@ -279,7 +285,9 @@ enhance the log record with context information before forwarding it to its appe
 seems to be the best solution. (This may even be the first step to implement our MDC)
 
 Notes:
-- Even if we add the `%process` pattern, do we want to also allow users to specify per-worker log files? 
+- The coordinator will probably need to output logs too. `%worker` would be interpolated to `coordinator` 
+  for the coordinator process
+- Even if we add the `%worker` pattern, do we want to also allow users to specify per-worker log files? 
 
 ### The rolling-file appender
 
@@ -374,8 +382,8 @@ If that was confirmed, we would have to create and use a distinct data folder fo
 
 One pragmatic solution could be, when clustering is enabled, to create a sub folder under path.data for each worker. 
 
-If we need to do so, should this be considered a breaking change, or do we assume the usage of the data folder is an 
-implementation detail and not part of our public 'API'?
+The data folder is not considered part of our public API, and the implementation and path already changed in previous
+minor releases, so this should not be considered a breaking change.
 
 ### instanceUUID
 
@@ -385,7 +393,7 @@ We still need to identify with the teams if this is going to be a problem, in wh
 instance uuid per workers.
 
 Note that this could be a breaking change, as the single `server.uuid` configuration property would not be enough. 
-Could the new `clustering.getWorkerId()` API be used here somehow? We could have a unique worker id with `serverUUid-workerId`. 
+Could the new `clustering.getWorkerId()` API be used here somehow? We could have a unique worker id with `{serverUUid}-{workerId}`. 
 
 ### The Dev CLI
 
@@ -398,7 +406,8 @@ to finally extract the dev cli from Core and to avoid having it create a tempora
 and configuration.
 
 Note that extracting and refactoring the dev cli is going to be required anyway to remove the last bits of legacy, 
-as it currently relies on the legacy configuration to run (and is running from the legacy service).
+as it currently relies on the legacy configuration to run (and is running from the legacy service). This task is currently
+planned for 7.13 or early 7.14, see [the associated GH issue](https://github.com/elastic/kibana/issues/76935)
 
 ## Technical impact on our plugins codebase
 
@@ -445,7 +454,8 @@ We do store a state in the SavedObjects store of the last time the usage was sen
 We have tasks across several plugins storing data in savedobjects specifically for telemetry. Under clustering these 
 tasks will be registered multiple times.
 
-Note that sending the data multiple times doesn’t have any real consequences, so this should be considered 
+Note that sending the data multiple times doesn’t have any real consequences, apart from the additional number of ES requests, 
+so this should be considered 
 non-blocking and only an improvement.
 
 #### TaskManager
@@ -482,10 +492,6 @@ If we decide to have each worker output log in distinct files, we would have to 
 add a prefix/suffix to each log file, which would be a breaking change. Note that this option is probably not the one 
 we'll choose.
 
-## data folder
-
-We may need to have each worker uses a distinct data folder. Should this be considered a breaking change?
-
 # Drawbacks
 
 - Implementation cost is going to be significant, both in core and in plugins. Also, this will have to be a collaborative
@@ -504,9 +510,15 @@ ensure clustered mode compatibility when adding new features.
 
 # Alternatives
 
-Regarding the whole proposal, an alternative would be to provide tooling to ease the deployment of multi-instance Kibana setups.
+One alternative of the `cluster` module is using a worker pool via `worker_threads`. Both have distinct use cases
+though. Clustering is meant to have multiple workers with the same codebase, often sharing a network socket to balance
+network traffic. The worker pattern is a way to create specialized workers in charge of executing isolated, CPU intensive
+tasks on demand (e.g encrypting or descrypting a file). If we were to identify that under heavy load, the actual bottleneck
+is ES, maybe exposing a worker thread service and API from core (task_manager would be a perfect example of potential consumer) 
+would make more sense.
 
-Regarding the implementation proposal, the discussions are still ongoing.
+Another alternative would be to provide tooling to ease the deployment of multi-instance Kibana setups, and only support
+multi-instance mode.
 
 # Adoption strategy
 
