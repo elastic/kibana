@@ -8,7 +8,10 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiFormRow, EuiSelect, EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
 
-import { ConnectorTypes, ServiceNowSIRFieldsType } from '../../../../../../cases/common';
+import {
+  ConnectorTypes,
+  ServiceNowSIRFieldsType,
+} from '../../../../../../cases/common/api/connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';

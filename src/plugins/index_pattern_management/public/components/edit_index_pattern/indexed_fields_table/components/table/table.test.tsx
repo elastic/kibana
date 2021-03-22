@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { IndexedFieldItem } from '../../types';
-import { Table } from './table';
+import { Table, renderFieldName } from './table';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
@@ -47,6 +47,15 @@ const items: IndexedFieldItem[] = [
     excluded: false,
     format: '',
     isMapped: true,
+  },
+  {
+    name: 'customer',
+    displayName: 'customer',
+    type: 'keyword',
+    kbnType: 'text',
+    info: [],
+    excluded: false,
+    isMapped: false,
   },
 ];
 
@@ -102,5 +111,29 @@ describe('Table', () => {
     // Click the edit button
     renderTable({ editField }).prop('columns')[6].actions[0].onClick();
     expect(editField).toBeCalled();
+  });
+
+  test('render name', () => {
+    const mappedField = {
+      name: 'customer',
+      info: [],
+      excluded: false,
+      kbnType: 'string',
+      type: 'keyword',
+      isMapped: true,
+    };
+
+    expect(renderFieldName(mappedField)).toMatchSnapshot();
+
+    const runtimeField = {
+      name: 'customer',
+      info: [],
+      excluded: false,
+      kbnType: 'string',
+      type: 'keyword',
+      isMapped: false,
+    };
+
+    expect(renderFieldName(runtimeField)).toMatchSnapshot();
   });
 });

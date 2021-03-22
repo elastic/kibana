@@ -12,7 +12,7 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_obje
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../../common';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
 export function initDeleteCommentApi({
   caseService,
