@@ -43,12 +43,44 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   indexpattern_dimension_operation_count: { type: 'long' },
   indexpattern_dimension_operation_cardinality: { type: 'long' },
   indexpattern_dimension_operation_filters: { type: 'long' },
-  open_field_editor_edit: { type: 'long' },
-  open_field_editor_add: { type: 'long' },
-  save_field_edit: { type: 'long' },
-  save_field_add: { type: 'long' },
-  open_field_delete_modal: { type: 'long' },
-  delete_field: { type: 'long' },
+  open_field_editor_edit: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of times the user opened the editor flyout to edit a field from within Lens.',
+    },
+  },
+  open_field_editor_add: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of times the user opened the editor flyout to add a field from within Lens.',
+    },
+  },
+  save_field_edit: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user edited a field from within Lens.',
+    },
+  },
+  save_field_add: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user added a field from within Lens.',
+    },
+  },
+  open_field_delete_modal: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user opened the field delete modal from within Lens.',
+    },
+  },
+  delete_field: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user deleted a field from within Lens.',
+    },
+  },
 };
 
 const suggestionEventsSchema: MakeSchemaFrom<LensUsage['suggestion_events_30_days']> = {
