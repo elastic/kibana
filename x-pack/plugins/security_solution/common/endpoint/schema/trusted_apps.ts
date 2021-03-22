@@ -115,6 +115,8 @@ const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
   },
 });
 
+const useArtifactsByPolicy: boolean = true;
+
 const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
   schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
@@ -124,15 +126,19 @@ const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
       schema.literal(OperatingSystem.LINUX),
       schema.literal(OperatingSystem.MAC),
     ]),
-    effectScope: schema.oneOf([
-      schema.object({
-        type: schema.literal('global'),
-      }),
-      schema.object({
-        type: schema.literal('policy'),
-        policies: schema.arrayOf(schema.string({ minLength: 1 })),
-      }),
-    ]),
+    ...(useArtifactsByPolicy
+      ? {
+          effectScope: schema.oneOf([
+            schema.object({
+              type: schema.literal('global'),
+            }),
+            schema.object({
+              type: schema.literal('policy'),
+              policies: schema.arrayOf(schema.string({ minLength: 1 })),
+            }),
+          ]),
+        }
+      : {}),
     entries: EntriesSchema,
     ...(forUpdateFlow ? { version: schema.maybe(schema.string()) } : {}),
   });
