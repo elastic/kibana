@@ -1,5 +1,5 @@
 [[search-sessions]]
-=== Save a search session in the background
+=== Run a search session in the background
 
 Sometimes you might need to search through large amounts of data no matter
 how long the search takes. While this might not happen often,
@@ -29,7 +29,7 @@ and the <<kibana-feature-privileges, search sessions subfeature>>.
 * To view and restore a saved session, you must have access to *Stack Management*.
 
 [float]
-==== Example: Save and manage a search session
+==== Example: Save a search session
 
 You’re trying to understand a trend you see on a dashboard. You
 need to look at several years of data, currently in
@@ -63,7 +63,7 @@ You're returned to the place from where you started the search session. The data
 behaves differently:
 +
 * Relative dates are converted to absolute dates.
-* Panning is disabled in maps.
+* Panning and zooming is disabled for maps.
 * Changing a filter, query, or drilldown starts a new search session, which can be slow.
 
 . Use the edit menu in *Search Sessions* to:
