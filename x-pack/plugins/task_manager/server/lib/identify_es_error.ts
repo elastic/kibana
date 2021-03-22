@@ -76,3 +76,7 @@ export function identifyEsError(err: ElasticsearchResponseError) {
   }
   return [];
 }
+
+export function isEsCannotExecuteScriptError(err: ElasticsearchResponseError): boolean {
+  return identifyEsError(err).includes('cannot execute [inline] scripts');
+}

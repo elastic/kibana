@@ -9,6 +9,7 @@ import { interval, merge, of, Observable } from 'rxjs';
 import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Logger } from '../../../../../src/core/server';
+import { isEsCannotExecuteScriptError } from './identify_es_error';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;
@@ -121,7 +122,14 @@ function countErrors(errors$: Observable<Error>, countInterval: number): Observa
   return merge(
     // Flush error count at fixed interval
     interval(countInterval).pipe(map(() => FLUSH_MARKER)),
-    errors$.pipe(filter((e) => SavedObjectsErrorHelpers.isTooManyRequestsError(e)))
+    errors$.pipe(
+      filter(
+        (e) =>
+          SavedObjectsErrorHelpers.isTooManyRequestsError(e) ||
+          // unfortunatly there is no exsting ElasticsearchErrorHelpers
+          isEsCannotExecuteScriptError(e)
+      )
+    )
   ).pipe(
     // When tag is "flush", reset the error counter
     // Otherwise increment the error counter

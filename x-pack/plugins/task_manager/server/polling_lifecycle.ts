@@ -39,7 +39,7 @@ import {
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
 import { TaskStore } from './task_store';
-import { identifyEsError } from './lib/identify_es_error';
+import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
@@ -299,7 +299,7 @@ export function claimAvailableTasks(
           // we can identify the reason
           // if we can - we emit an FillPoolResult error rather than erroring out the wrapping Observable
           // returned by `claimAvailableTasks`
-          if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
+          if (isEsCannotExecuteScriptError(ex)) {
             logger.warn(
               `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
             );
