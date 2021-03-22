@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   function isLowerCase(str: string) {
-    return /^[a-z]+$/.test(str);
+    return !/[A-Z]+/.test(str);
   }
 
   describe('Datafeed preview', function () {

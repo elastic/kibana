@@ -83,10 +83,10 @@ function findFieldsInJob(job: Job, datafeed: Datafeed) {
   return [...usedFields];
 }
 
-function findFieldsInAgg(obj: Record<string, any>) {
+function findFieldsInAgg(obj: Record<string, object>) {
   const fields: string[] = [];
   Object.entries(obj).forEach(([key, val]) => {
-    if (typeof val === 'object' && val !== null) {
+    if (isPopulatedObject(val)) {
       fields.push(...findFieldsInAgg(val));
     } else if (typeof val === 'string' && key === 'field') {
       fields.push(val);
@@ -95,13 +95,13 @@ function findFieldsInAgg(obj: Record<string, any>) {
   return fields;
 }
 
-function findFieldsInQuery(obj: Record<string, any>) {
+function findFieldsInQuery(obj: object) {
   const fields: string[] = [];
   Object.entries(obj).forEach(([key, val]) => {
     // return all nested keys in the object
     // most will not be fields, but better to catch everything
     // and not accidentally remove a used runtime field.
-    if (typeof val === 'object' && val !== null) {
+    if (isPopulatedObject(val)) {
       fields.push(key);
       fields.push(...findFieldsInQuery(val));
     } else {
