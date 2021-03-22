@@ -9,10 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 export const FLYOUT_ARIA_LABEL_ID = 'documentCreationFlyoutHeadingId';
 
-export const FLYOUT_CONTINUE_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.documentCreation.flyoutContinue',
-  { defaultMessage: 'Continue' }
-);
 export const FLYOUT_CLOSE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.appSearch.documentCreation.modalClose',
   { defaultMessage: 'Close' }

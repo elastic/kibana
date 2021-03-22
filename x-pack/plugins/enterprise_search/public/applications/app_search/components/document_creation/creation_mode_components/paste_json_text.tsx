@@ -24,10 +24,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CANCEL } from '../../../../shared/constants';
+import { CANCEL, CONTINUE } from '../../../../shared/constants';
 import { AppLogic } from '../../../app_logic';
 
-import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CONTINUE_BUTTON } from '../constants';
+import { FLYOUT_ARIA_LABEL_ID } from '../constants';
 import { Errors } from '../creation_response_components';
 import { DocumentCreationLogic } from '../index';
 
@@ -108,7 +108,7 @@ export const FlyoutFooter: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={onSubmitJson} isLoading={isUploading} isDisabled={!textInput}>
-            {FLYOUT_CONTINUE_BUTTON}
+            {CONTINUE}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
