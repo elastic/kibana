@@ -12,7 +12,6 @@ import {
 } from '../../components/drilldown_template_table';
 import { DrilldownTemplate } from '../../types';
 import { useDrilldownManager } from '../context';
-import { StartFromTemplate } from './start_from_template';
 
 export interface TemplateListProps {
   items: DrilldownTemplate[];
@@ -32,12 +31,10 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
   }, [items]);
 
   return (
-    <StartFromTemplate>
-      <DrilldownTemplateTable
-        items={tableItems}
-        onCreate={drilldowns.onCreateFromTemplate}
-        onClone={drilldowns.onClone}
-      />
-    </StartFromTemplate>
+    <DrilldownTemplateTable
+      items={tableItems}
+      onCreate={drilldowns.onCreateFromTemplate}
+      onClone={drilldowns.onClone}
+    />
   );
 };
