@@ -21,6 +21,7 @@ import {
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { sortToSnake } from '../utils';
 import { combineFilters } from '../../../common';
+import { combineFilterWithAuthorizationFilter } from '../../../authorization/utils';
 
 export const addStatusFilter = ({
   status,
@@ -128,7 +129,10 @@ export const constructQueryOptions = ({
       });
       return {
         case: {
-          filter: caseFilters,
+          filter:
+            authorizationFilter != null
+              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
+              : caseFilters,
           sortField,
         },
       };
@@ -138,14 +142,21 @@ export const constructQueryOptions = ({
       // The sub case filter will use the query.status if it exists
       const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.collection}`;
       const caseFilters = combineFilters([tagsFilter, reportersFilter, typeFilter], 'AND');
+      const subCaseFilters = addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT });
 
       return {
         case: {
-          filter: caseFilters,
+          filter:
+            authorizationFilter != null
+              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
+              : caseFilters,
           sortField,
         },
         subCase: {
-          filter: addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }),
+          filter:
+            authorizationFilter != null
+              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
+              : subCaseFilters,
           sortField,
         },
       };
@@ -167,14 +178,21 @@ export const constructQueryOptions = ({
       const statusFilter = combineFilters([addStatusFilter({ status }), typeIndividual], 'AND');
       const statusAndType = combineFilters([statusFilter, typeParent], 'OR');
       const caseFilters = combineFilters([statusAndType, tagsFilter, reportersFilter], 'AND');
+      const subCaseFilters = addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT });
 
       return {
         case: {
-          filter: caseFilters,
+          filter:
+            authorizationFilter != null
+              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
+              : caseFilters,
           sortField,
         },
         subCase: {
-          filter: addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }),
+          filter:
+            authorizationFilter != null
+              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
+              : subCaseFilters,
           sortField,
         },
       };

@@ -19,6 +19,14 @@ export const getClassFilter = (savedObjectType: string, classNames: string[]): s
   return `(${reducesQuery})`;
 };
 
+export const combineFilterWithAuthorizationFilter = (
+  filter: string,
+  authorizationFilter: string
+) => {
+  const suffix = `AND ${authorizationFilter}`;
+  return filter.startsWith('(') ? `${filter} ${suffix}` : `(${filter}) ${suffix}`;
+};
+
 export const ensureFieldIsSafeForQuery = (field: string, value: string): boolean => {
   const invalid = value.match(/([>=<\*:()]+|\s+)/g);
   if (invalid) {

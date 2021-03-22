@@ -83,6 +83,7 @@ export const find = async ({
       ensureSavedObjectIsAuthorized(theCase.class);
     }
 
+    // TODO: Make sure we do not leak information when authorization is on
     const [openCases, inProgressCases, closedCases] = await Promise.all([
       ...caseStatuses.map((status) => {
         const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
