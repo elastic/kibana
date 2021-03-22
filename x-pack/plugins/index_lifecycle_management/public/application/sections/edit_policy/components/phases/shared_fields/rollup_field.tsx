@@ -20,12 +20,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiButton,
+  EuiConfirmModal,
 } from '@elastic/eui';
 
 import { RollupAction } from '../../../../../../../common/types';
@@ -40,6 +35,13 @@ interface Props {
 }
 
 const i18nTexts = {
+  description: i18n.translate('xpack.indexLifecycleMgmt.rollup.fieldDescription', {
+    // TODO: Copy required
+    defaultMessage: '[Brief description of rollups in the context of ILM]',
+  }),
+  rollupSummaryHeading: i18n.translate('xpack.indexLifecycleMgmt.rollup.fieldSummaryLabel', {
+    defaultMessage: 'Rollup summary',
+  }),
   configureRollupAction: i18n.translate(
     'xpack.indexLifecycleMgmt.rollup.addConfigurationButtonLabel',
     {
@@ -108,25 +110,15 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
     <>
       <DescribedFormRow
         title={<h3 id={`${phase}-rollup`}>{globalI18nTexts.editPolicy.rollupLabel}</h3>}
-        description={i18n.translate('xpack.indexLifecycleMgmt.rollup.fieldDescription', {
-          // TODO: Copy required
-          defaultMessage: '[Brief description of rollups in the context of ILM]',
-        })}
+        description={i18nTexts.description}
         fullWidth
       >
         <UseField<RollupAction['config'] | undefined> path={path}>
           {(field) => {
             if (!field.value) {
               return (
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    {!field.isValid && (
-                      <>
-                        <EuiIcon type="alert" color="danger" />{' '}
-                      </>
-                    )}
-                  </EuiFlexItem>
-                  <EuiFlexItem>{renderGoToRollupWizardButton()}</EuiFlexItem>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>{renderGoToRollupWizardButton()}</EuiFlexItem>
                 </EuiFlexGroup>
               );
             } else {
@@ -134,12 +126,7 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
                 <>
                   <EuiAccordion
                     id={`${phase}RollupActionDetailsAccordion`}
-                    buttonContent={i18n.translate(
-                      'xpack.indexLifecycleMgmt.rollup.fieldSummaryLabel',
-                      {
-                        defaultMessage: 'Rollup summary',
-                      }
-                    )}
+                    buttonContent={i18nTexts.rollupSummaryHeading}
                     extraAction={
                       <EuiFlexGroup gutterSize="s">
                         <EuiFlexItem>{renderGoToRollupWizardButton()}</EuiFlexItem>
@@ -213,30 +200,18 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
                     </EuiFlexGroup>
                   </EuiAccordion>
                   {isShowingDeleteModal && (
-                    <EuiModal onClose={closeModal} initialFocus="[name=popswitch]">
-                      <EuiModalHeader>
-                        <EuiModalHeaderTitle>{i18nTexts.modal.title}</EuiModalHeaderTitle>
-                      </EuiModalHeader>
-
-                      <EuiModalBody>{i18nTexts.modal.body}</EuiModalBody>
-
-                      <EuiModalFooter>
-                        <EuiButtonEmpty onClick={closeModal}>
-                          {i18nTexts.modal.footer.cancel}
-                        </EuiButtonEmpty>
-
-                        <EuiButton
-                          onClick={() => {
-                            field.setValue(undefined);
-                            closeModal();
-                          }}
-                          color="danger"
-                          fill
-                        >
-                          {i18nTexts.modal.footer.delete}
-                        </EuiButton>
-                      </EuiModalFooter>
-                    </EuiModal>
+                    <EuiConfirmModal
+                      title={i18nTexts.modal.title}
+                      cancelButtonText={i18nTexts.modal.footer.cancel}
+                      onCancel={closeModal}
+                      confirmButtonText={i18nTexts.modal.footer.delete}
+                      onConfirm={() => {
+                        field.setValue(undefined);
+                        closeModal();
+                      }}
+                      buttonColor="danger"
+                      defaultFocusedButton="cancel"
+                    />
                   )}
                 </>
               );

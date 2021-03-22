@@ -64,16 +64,7 @@ export function serializeRollup(rollupConfig: InternalRollup): RollupAction['con
   }
 
   if (metrics.length) {
-    serializedRollup.metrics = [];
-    metrics.forEach(({ name, types }) => {
-      // Exclude any metrics which have been selected but not configured with any types.
-      if (types.length) {
-        serializedRollup.metrics!.push({
-          field: name,
-          metrics: types,
-        });
-      }
-    });
+    serializedRollup.metrics = metrics.map(({ name, types }) => ({ field: name, metrics: types }));
   }
 
   return serializedRollup;
