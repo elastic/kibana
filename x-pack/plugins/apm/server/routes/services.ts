@@ -463,6 +463,8 @@ export const serviceInstancesPrimaryStatisticsRoute = createRoute({
       setup
     );
 
+    const { start, end } = setup;
+
     return getServiceInstancesPrimaryStatistics({
       environment,
       kuery,
@@ -471,6 +473,8 @@ export const serviceInstancesPrimaryStatisticsRoute = createRoute({
       setup,
       transactionType,
       searchAggregatedTransactions,
+      start,
+      end,
     });
   },
 });
