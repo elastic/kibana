@@ -122,6 +122,7 @@ export class DocLinksService {
         },
         indexPatterns: {
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
+          fieldFormattersNumber: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/numeral.html`,
           fieldFormattersString: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/field-formatters-string.html`,
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
@@ -391,6 +392,8 @@ export interface DocLinksStart {
     };
     readonly indexPatterns: {
       readonly introduction: string;
+      readonly fieldFormattersNumber: string;
+      readonly fieldFormattersString: string;
     };
     readonly addData: string;
     readonly kibana: string;
