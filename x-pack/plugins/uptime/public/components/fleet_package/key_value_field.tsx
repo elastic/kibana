@@ -121,6 +121,7 @@ export const KeyValuePairsField = ({ defaultPairs, onChange }: Props) => {
               prepend={
                 <EuiFormLabel>
                   <EuiCheckbox
+                    data-test-subj={`keyValuePairsCheckbox${index}`}
                     id={htmlIdGenerator()()}
                     checked={checked}
                     disabled={!key}
@@ -129,10 +130,15 @@ export const KeyValuePairsField = ({ defaultPairs, onChange }: Props) => {
                 </EuiFormLabel>
               }
               startControl={
-                <StyledField value={key} onChange={(event) => handleOnChange(event, index, true)} />
+                <StyledField
+                  data-test-subj={`keyValuePairsKey${index}`}
+                  value={key}
+                  onChange={(event) => handleOnChange(event, index, true)}
+                />
               }
               endControl={
                 <StyledField
+                  data-test-subj={`keyValuePairsValue${index}`}
                   value={value}
                   onChange={(event) => handleOnChange(event, index, false)}
                 />
