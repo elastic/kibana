@@ -19,9 +19,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n/react';
 
 import { KibanaLogic } from '../../../shared/kibana';
-import { LicensingLogic } from '../../../shared/licensing';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
+import { AppLogic } from '../../app_logic';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
 import { ENGINE_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
@@ -52,7 +52,9 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const {
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
 
   const generateEncodedEnginePath = (engineName: string) =>
     generateEncodedPath(ENGINE_PATH, { engineName });
@@ -200,7 +202,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
     ],
   };
 
-  if (hasPlatinumLicense) {
+  if (canManageEngines) {
     columns.push(actionsColumn);
   }
 
