@@ -144,7 +144,7 @@ export class CasePlugin {
       },
       featuresPluginStart: plugins.features,
       // we'll be removing this eventually but let's just default it to false if it wasn't specified explicitly in the config file
-      isAuthEnabled: this.config?.enabled ?? false,
+      isAuthEnabled: this.config?.enableAuthorization ?? false,
     });
 
     const getCasesClientWithRequestAndContext = async (
