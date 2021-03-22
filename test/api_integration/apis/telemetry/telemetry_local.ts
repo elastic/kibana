@@ -18,14 +18,6 @@ import { assertTelemetryPayload, flatKeys } from './utils';
 async function retrieveTelemetry(
   supertest: supertestAsPromised.SuperTest<supertestAsPromised.Test>
 ) {
-  // Opt in telemetry
-  await supertest
-    .post('/api/saved_objects/telemetry/telemetry')
-    .query({ overwrite: true })
-    .set('kbn-xsrf', 'xxx')
-    .send({ attributes: { enabled: true } })
-    .expect(200);
-
   const { body } = await supertest
     .post('/api/telemetry/v2/clusters/_stats')
     .set('kbn-xsrf', 'xxx')

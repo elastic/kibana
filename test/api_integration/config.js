@@ -31,6 +31,7 @@ export default async function ({ readConfigFile }) {
         '--server.xsrf.disableProtection=true',
         '--server.compression.referrerWhitelist=["some-host.com"]',
         `--savedObjects.maxImportExportSize=10001`,
+        '--telemetry.optIn=true',
       ],
     },
   };
