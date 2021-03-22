@@ -25,6 +25,7 @@ import {
   txtSingleItemCloneActionLabel,
   txtSourceColumnTitle,
   txtActionColumnTitle,
+  txtTriggerColumnTitle,
 } from './i18n';
 
 export interface DrilldownTemplateTableItem {
@@ -34,6 +35,7 @@ export interface DrilldownTemplateTableItem {
   description?: string;
   actionName?: string;
   actionIcon?: string;
+  trigger?: string;
 }
 
 export interface DrilldownTemplateTableProps {
@@ -80,6 +82,12 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+      ),
+    },
+    {
+      name: txtTriggerColumnTitle,
+      render: (item: DrilldownTemplateTableItem) => (
+        <EuiTextColor color={'subdued'}>{item.trigger}</EuiTextColor>
       ),
     },
     {

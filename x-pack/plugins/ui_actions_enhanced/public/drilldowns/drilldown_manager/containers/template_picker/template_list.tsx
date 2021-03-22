@@ -30,10 +30,15 @@ export const TemplateList: React.FC<TemplateListProps> = ({ items }) => {
         description: item.description,
       };
       const factory = drilldowns.deps.actionFactories.find(({ id }) => id === item.factoryId);
+      const trigger = drilldowns.deps.getTrigger(item.triggers[0]);
+
       if (factory) {
         const context = drilldowns.getActionFactoryContext();
         tableItem.actionName = factory.getDisplayName(context);
         tableItem.actionIcon = factory.getIconType(context);
+      }
+      if (trigger) {
+        tableItem.trigger = trigger.title;
       }
       return tableItem;
     });

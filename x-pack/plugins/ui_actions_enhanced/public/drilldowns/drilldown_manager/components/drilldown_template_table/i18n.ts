@@ -37,6 +37,13 @@ export const txtActionColumnTitle = i18n.translate(
   }
 );
 
+export const txtTriggerColumnTitle = i18n.translate(
+  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.triggerColumnTitle',
+  {
+    defaultMessage: 'Trigger',
+  }
+);
+
 export const txtSingleItemCloneActionLabel = i18n.translate(
   'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.singleItemCloneAction',
   {
