@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const MANAGE = i18n.translate('xpack.enterpriseSearch.actions.manage', {
+  defaultMessage: 'Manage',
+});
+
 export const EDIT = i18n.translate('xpack.enterpriseSearch.actions.edit', {
   defaultMessage: 'Edit',
 });

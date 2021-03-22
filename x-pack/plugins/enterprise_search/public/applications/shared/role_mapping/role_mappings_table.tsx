@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ASRoleMapping } from '../../app_search/types';
 import { WSRoleMapping } from '../../workplace_search/types';
+import { MANAGE } from '../constants';
 import { EuiLinkTo } from '../react_router_helpers';
 import { RoleRules } from '../types';
 
@@ -37,7 +38,6 @@ import {
   EXTERNAL_ATTRIBUTE_LABEL,
   ATTRIBUTE_VALUE_LABEL,
   FILTER_ROLE_MAPPINGS_PLACEHOLDER,
-  MANAGE_ROLE_MAPPING_BUTTON,
 } from './constants';
 
 interface AccessItem {
@@ -153,11 +153,7 @@ export const RoleMappingsTable: React.FC<Props> = ({
                     </EuiTableRowCell>
                   )}
                   <EuiTableRowCell>
-                    {id && (
-                      <EuiLinkTo to={getRoleMappingPath(id)}>
-                        {MANAGE_ROLE_MAPPING_BUTTON}
-                      </EuiLinkTo>
-                    )}
+                    {id && <EuiLinkTo to={getRoleMappingPath(id)}>{MANAGE}</EuiLinkTo>}
                     {toolTip && <EuiIconTip position="left" content={toolTip.content} />}
                   </EuiTableRowCell>
                 </EuiTableRow>
