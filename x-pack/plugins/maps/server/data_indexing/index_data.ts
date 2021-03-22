@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { WriteSettings } from '../common';
+import { WriteSettings } from '../../common';
 
 export async function writeDataToIndex(
   index: string,

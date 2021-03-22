@@ -25,11 +25,8 @@ import {
   FONTS_API_PATH,
   API_ROOT_PATH,
   INDEX_SOURCE_API_PATH,
-<<<<<<< HEAD
   MAX_DRAWING_SIZE_BYTES,
-=======
->>>>>>> upstream/master
-} from '../common/constants';
+} from '../common';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -38,11 +35,8 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
-import { createDocSource } from './create_doc_source';
-<<<<<<< HEAD
-import { writeDataToIndex } from './index_data';
-=======
->>>>>>> upstream/master
+import { createDocSource } from './data_indexing/create_doc_source';
+import { writeDataToIndex } from './data_indexing/index_data';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {

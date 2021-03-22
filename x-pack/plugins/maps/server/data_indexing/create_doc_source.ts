@@ -11,8 +11,8 @@ import {
   CreateDocSourceResp,
   IndexSourceMappings,
   BodySettings,
-} from '../common';
-import { IndexPatternsService } from '../../../../src/plugins/data/common';
+} from '../../common';
+import { IndexPatternsService } from '../../../../../src/plugins/data/common';
 
 const DEFAULT_SETTINGS = { number_of_shards: 1 };
 const DEFAULT_MAPPINGS = {
