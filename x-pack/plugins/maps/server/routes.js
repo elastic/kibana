@@ -25,7 +25,10 @@ import {
   FONTS_API_PATH,
   API_ROOT_PATH,
   INDEX_SOURCE_API_PATH,
+<<<<<<< HEAD
   MAX_DRAWING_SIZE_BYTES,
+=======
+>>>>>>> upstream/master
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
@@ -36,7 +39,10 @@ import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
 import { createDocSource } from './create_doc_source';
+<<<<<<< HEAD
 import { writeDataToIndex } from './index_data';
+=======
+>>>>>>> upstream/master
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {

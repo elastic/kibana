@@ -11,7 +11,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('doc source creation', () => {
-    it('should create an index and pattern', async () => {
+    it('should create a new index and pattern but not clobber an existing one', async () => {
       const resp = await supertest
         .post(`/api/maps/docSource`)
         .set('kbn-xsrf', 'kibana')
@@ -22,6 +22,16 @@ export default function ({ getService }) {
         .expect(200);
 
       expect(resp.body.success).to.be(true);
+
+      // Repeated index fails. We don't want the user clobbering indexes
+      await supertest
+        .post(`/api/maps/docSource`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          index: 'testing123',
+          mappings: { properties: { coordinates: { type: 'geo_point' } } },
+        })
+        .expect(500);
     });
 
     it('should fail to create index and pattern with invalid index', async () => {
