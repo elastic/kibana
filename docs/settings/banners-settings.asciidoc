@@ -1,0 +1,35 @@
+[role="xpack"]
+[[banners-settings-kb]]
+=== Banner settings in {kib}
+++++
+<titleabbrev>Banners settings</titleabbrev>
+++++
+
+Banners are disabled by default. You need to manually configure them in order to use the feature.
+
+You can configure the `xpack.banners` settings in your `kibana.yml` file.
+
+[[general-banners-settings-kb]]
+==== General banner settings
+
+[cols="2*<"]
+|===
+
+| `xpack.banners.placement`
+| Set to `header` to enable the header banner. Defaults to `disabled`.
+
+| `xpack.banners.textContent`
+| The text to display inside the banner, either plain text or Markdown.
+
+| `xpack.banners.textColor`
+| The color for the banner text. Defaults to `#8A6A0A`.
+
+| `xpack.banners.backgroundColor`
+| The color of the banner background. Defaults to `#FFF9E8`.
+
+|===
+
+[NOTE]
+====
+The `banners` plugin is a https://www.elastic.co/subscriptions[subscription feature]
+====
