@@ -7,8 +7,10 @@
 
 import { Logger } from '@kbn/logging';
 import axios from 'axios';
-import https from 'https';
 
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import { getErrorMessage, request } from '../lib/axios_utils';
+import { getBodyForEventAction } from './helpers';
 import {
   SwimlanePublicConfigurationType,
   ExternalService,
@@ -19,10 +21,6 @@ import {
   MappingConfigType,
 } from './types';
 import * as i18n from './translations';
-import { getErrorMessage, request } from '../lib/axios_utils';
-// import { ActionsConfigurationUtilities } from '../../actions_config';
-import { getBodyForEventAction } from './helpers';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const createExternalService = (
   { config, secrets }: ExternalServiceCredentials,
@@ -32,11 +30,7 @@ export const createExternalService = (
   const { apiUrl: url, appId, mappings } = config as SwimlanePublicConfigurationType;
   const { apiToken } = secrets as SwimlaneSecretConfigurationType;
 
-  const axiosInstance = axios.create({
-    httpsAgent: new https.Agent({
-      rejectUnauthorized: false,
-    }),
-  });
+  const axiosInstance = axios.create();
 
   if (!url || !appId || !apiToken || !mappings) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);

@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { Fragment } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -15,7 +13,8 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { Fragment } from 'react';
+import { FormattedMessage } from 'react-intl';
 import * as i18n from '../translations';
 import { StepProps } from './';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -142,7 +141,6 @@ export const SwimlaneConnection: React.FunctionComponent<StepProps> = ({
           <EuiFieldText
             fullWidth
             isInvalid={errors.apiToken.length > 0 && apiToken !== undefined}
-            // name="apiToken"
             readOnly={readOnly}
             value={apiToken || ''}
             data-test-subj="swimlaneApiTokenInput"
