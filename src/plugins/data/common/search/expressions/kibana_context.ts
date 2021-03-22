@@ -8,7 +8,11 @@
 
 import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
+import {
+  ExpressionFunctionDefinition,
+  ExecutionContext,
+  unboxExpressionValue,
+} from 'src/plugins/expressions/common';
 import { Adapters } from 'src/plugins/inspector/common';
 import { Query, uniqFilters } from '../../query';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
@@ -81,14 +85,7 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   async fn(input, args, { getSavedObject }) {
     const timeRange = args.timeRange || input?.timeRange;
     let queries = mergeQueries(input?.query, args?.q || []);
-    let filters = [
-      ...(input?.filters || []),
-      ...(args?.filters?.map((f) => {
-        // @ts-ignore
-        delete f.type;
-        return f;
-      }) || []),
-    ];
+    let filters = [...(input?.filters || []), ...(args?.filters?.map(unboxExpressionValue) || [])];
 
     if (args.savedSearchId) {
       if (typeof getSavedObject !== 'function') {

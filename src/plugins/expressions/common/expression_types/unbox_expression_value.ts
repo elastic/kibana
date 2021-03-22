@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './get_type';
-export * from './serialize_provider';
-export * from './expression_type';
-export * from './specs';
-export * from './unbox_expression_value';
+import { ExpressionValueBoxed } from './types';
+
+export function unboxExpressionValue<T extends object>({
+  type,
+  ...value
+}: ExpressionValueBoxed<string, T>): T {
+  return value as T;
+}
