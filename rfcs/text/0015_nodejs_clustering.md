@@ -119,6 +119,9 @@ export interface ClusteringServiceSetup {
 }
 ```
 
+To preserve isolation and to avoid creating an implicit cross-plugin API, handlers registered from a given plugin will only be
+invoked for messages sent by the same plugin.
+
 Notes:
 -  to reduce clustered and non-clustered mode divergence, in non-clustered mode, these APIs would just be no-ops. 
    It will avoid to force (most) code to check in which mode Kibana is running before calling them.
@@ -255,14 +258,14 @@ This is an example of log output in a 2 workers cluster, coming from the POC:
 The workers logs are interleaved, and, most importantly, there is no way to see which process each log entry is coming from. 
 We will need to address that.
 
-Our options are:
+Our (non-exclusive) options are:
 
-- Have a distinct logging configuration for each worker
+1. Have a distinct logging configuration for each worker
 
 We could do that by automatically adding a suffix depending on the process to the appropriate file appenders configuration. 
 Note that this doesn’t solve the problem for the console appender, which is probably a no-go.
 
-- Add the process info to the log pattern and output it with the log message
+2. Add the process info to the log pattern and output it with the log message
 
 We could add the process name information to the log messages, and add a new conversion to be able to display it with 
 the pattern layout, such as `%worker` for example.
@@ -296,12 +299,12 @@ concurrency issues during the rolling. We need to find a way to have this rollin
 
 Identified options are:
 
-- have the rolling file appenders coordinate themselves when rolling
+1. have the rolling file appenders coordinate themselves when rolling
 
 By using a broadcast message based mutex mechanism, the appenders could acquire a ‘lock’ to roll a specific file, and
 notify other workers when the rolling is complete (quite similar to what we want to do with SO migration for example).
 
-- have the coordinator process perform the rolling
+2. have the coordinator process perform the rolling
 
 Another option would be to have the coordinator perform the rotation instead. When a rolling is required, the appender 
 would send a message to the coordinator, which would perform the rolling and notify the workers once the operation is complete. 
@@ -309,16 +312,16 @@ would send a message to the coordinator, which would perform the rolling and not
 Note that this option is even more complicated than the previous one, as it forces to move the rolling implementation 
 outside of the appender, without any significant upsides identified.
 
-- centralize the logging system in the coordinator (and have the workers send messages to the coordinator when using the logging system)
+3. centralize the logging system in the coordinator
 
 We could go further, and change the way the logging system works in clustering mode by having the coordinator centralize 
 the logging system. The worker’s logger implementation would just send messages to the coordinator. If this may be a 
 correct design, the main downside is that the logging implementation would be totally different in cluster and 
 non cluster mode, and seems to be way more work that the other options.
 
-Overall, if no option is trivial, I feel like option 1) is still the most pragmatic one. Option 3) may be a better 
+Overall, if no option is trivial, I feel like option `1.` is still the most pragmatic one. Option `3.` may be a better 
 design, but represents more work. It would probably be fine if all our appenders were impacted, but as only the 
-rolling-file one is, I feel like going with 1) would be ok.
+rolling-file one is, I feel like going with `3.` would be ok.
 
 ### The status API
 
