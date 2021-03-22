@@ -10,9 +10,12 @@ import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrap
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningDataFrameAnalyticsResultsProvider({
-  getService,
-}: FtrProviderContext) {
+import type { CanvasElementColorStats, MlCommonUI } from './common_ui';
+
+export function MachineLearningDataFrameAnalyticsResultsProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -79,6 +82,16 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
       await testSubjects.existOrFail('mlDFADecisionPathPopoverTab-decision_path_json', {
         timeout: 5000,
       });
+    },
+
+    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+      await testSubjects.existOrFail('mlDFExpandableSection-splom > mlScatterplotMatrix loaded', {
+        timeout: 5000,
+      });
+      await testSubjects.scrollIntoView('mlDFExpandableSection-splom > mlScatterplotMatrix loaded');
+      await mlCommonUI.assertColorsInCanvasElement('mlDFExpandableSection-splom', expectedValue, [
+        '#000000',
+      ]);
     },
 
     async assertFeatureImportanceDecisionPathChartElementsExists() {

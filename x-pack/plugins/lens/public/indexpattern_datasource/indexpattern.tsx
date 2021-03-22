@@ -416,6 +416,10 @@ export function getIndexPatternDatasource({
       });
       return messages.length ? messages : undefined;
     },
+    checkIntegrity: (state) => {
+      const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);
+      return ids.filter((id) => !state.indexPatterns[id]);
+    },
   };
 
   return indexPatternDatasource;
