@@ -14,6 +14,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./node_detail'));
     loadTestFile(require.resolve('./node_detail_mb'));
     loadTestFile(require.resolve('./multicluster_pipelines'));
+    loadTestFile(require.resolve('./multicluster_pipelines_mb'));
     loadTestFile(require.resolve('./pipelines'));
     loadTestFile(require.resolve('./pipelines_mb'));
   });

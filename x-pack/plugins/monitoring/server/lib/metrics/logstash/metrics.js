@@ -249,6 +249,7 @@ export const metrics = {
     units: 'B',
   }),
   logstash_node_cpu_utilization: new LogstashMetric({
+    debug: true,
     field: 'logstash_stats.process.cpu.percent',
     label: instanceCpuUtilizationLabel,
     description: i18n.translate(
