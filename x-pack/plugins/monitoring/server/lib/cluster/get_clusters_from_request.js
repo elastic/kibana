@@ -127,8 +127,8 @@ export async function getClustersFromRequest(
         clusters.map((cluster) => cluster.cluster_uuid)
       );
 
+      const verification = await verifyMonitoringLicense(req.server);
       for (const cluster of clusters) {
-        const verification = verifyMonitoringLicense(req.server);
         if (!verification.enabled) {
           // return metadata detailing that alerts is disabled because of the monitoring cluster license
           cluster.alerts = {

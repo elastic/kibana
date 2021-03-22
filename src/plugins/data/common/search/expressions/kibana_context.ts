@@ -12,11 +12,13 @@ import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expr
 import { Adapters } from 'src/plugins/inspector/common';
 import { Query, uniqFilters } from '../../query';
 import { ExecutionContextSearch, KibanaContext } from './kibana_context_type';
+import { KibanaQueryOutput } from './kibana_context_type';
+import { KibanaTimerangeOutput } from './timerange';
 
 interface Arguments {
-  q?: string | null;
+  q?: KibanaQueryOutput | null;
   filters?: string | null;
-  timeRange?: string | null;
+  timeRange?: KibanaTimerangeOutput | null;
   savedSearchId?: string | null;
 }
 
@@ -46,7 +48,7 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   }),
   args: {
     q: {
-      types: ['string', 'null'],
+      types: ['kibana_query', 'null'],
       aliases: ['query', '_'],
       default: null,
       help: i18n.translate('data.search.functions.kibana_context.q.help', {
@@ -61,7 +63,7 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       }),
     },
     timeRange: {
-      types: ['string', 'null'],
+      types: ['timerange', 'null'],
       default: null,
       help: i18n.translate('data.search.functions.kibana_context.timeRange.help', {
         defaultMessage: 'Specify Kibana time range filter',
@@ -77,8 +79,8 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   },
 
   async fn(input, args, { getSavedObject }) {
-    const timeRange = getParsedValue(args.timeRange, input?.timeRange);
-    let queries = mergeQueries(input?.query, getParsedValue(args?.q, []));
+    const timeRange = args.timeRange || input?.timeRange;
+    let queries = mergeQueries(input?.query, args?.q || []);
     let filters = [...(input?.filters || []), ...getParsedValue(args?.filters, [])];
 
     if (args.savedSearchId) {
