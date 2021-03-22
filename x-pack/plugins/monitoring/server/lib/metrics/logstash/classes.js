@@ -406,11 +406,11 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
 
     this.calculation = (bucket) => {
       const pipelineNodesCounts = {};
-      const pipelineBuckets = _.get(
-        bucket,
-        'pipelines_mb_nested.by_pipeline_id.buckets',
-        _.get(bucket, 'pipelines_nested.by_pipeline_id.buckets', [])
-      );
+      const legacyPipelineBuckets = _.get(bucket, 'pipelines_nested.by_pipeline_id.buckets', []);
+      const mbPiplineBuckets = _.get(bucket, 'pipelines_mb_nested.by_pipeline_id.buckets', []);
+      const pipelineBuckets = legacyPipelineBuckets.length
+        ? legacyPipelineBuckets
+        : mbPiplineBuckets;
       pipelineBuckets.forEach((pipelineBucket) => {
         pipelineNodesCounts[pipelineBucket.key] = _.get(pipelineBucket, 'to_root.node_count.value');
       });

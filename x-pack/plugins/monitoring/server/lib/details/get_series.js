@@ -43,7 +43,10 @@ function getUuid(req, metric) {
 }
 
 function defaultCalculation(bucket, key) {
-  const value = get(bucket, key, null);
+  const mbKey = `metric_mb_deriv.normalized_value`;
+  const legacyValue = get(bucket, key, null);
+  const mbValue = get(bucket, mbKey, null);
+  const value = legacyValue || mbValue;
   // negatives suggest derivatives that have been reset (usually due to restarts that reset the count)
   if (value < 0) {
     return null;
@@ -249,7 +252,6 @@ function countBuckets(data, count = 0) {
 
 function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, response) {
   const { derivative, calculation: customCalculation } = metric;
-  // metric.mbField && console.log(JSON.stringify(response))
 
   function getAggregatedData(buckets) {
     const firstUsableBucketIndex = findFirstUsableBucketIndex(buckets, min);
@@ -276,8 +278,7 @@ function handleSeries(metric, groupBy, min, max, bucketSizeInSeconds, timezone, 
 
     if (firstUsableBucketIndex <= lastUsableBucketIndex) {
       // map buckets to values for charts
-      const metricName = metric.mbField ? `metric_mb` : `metric`;
-      const key = derivative ? `${metricName}_deriv.normalized_value` : `${metricName}.value`;
+      const key = derivative ? 'metric_deriv.normalized_value' : 'metric.value';
       const calculation = customCalculation !== undefined ? customCalculation : defaultCalculation;
 
       data = buckets
