@@ -18,13 +18,15 @@ import {
   throwErrors,
   caseStatuses,
   CasesFindResponseRt,
-  CASE_SAVED_OBJECT,
-} from '../../../common';
+} from '../../../common/api';
+
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { CaseServiceSetup } from '../../services';
 import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../../routes/api/cases/helpers';
 import { transformCases } from '../../routes/api/utils';
 import { Authorization } from '../../authorization/authorization';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 
 interface FindParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -67,7 +69,13 @@ export const find = async ({
     const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
     const cases = await caseService.findCasesGroupedByID({
       client: savedObjectsClient,
-      caseOptions: { ...queryParams, ...caseQueries.case },
+      caseOptions: {
+        ...queryParams,
+        ...caseQueries.case,
+        fields: queryParams.fields
+          ? includeFieldsRequiredForAuthentication(queryParams.fields)
+          : queryParams.fields,
+      },
       subCaseOptions: caseQueries.subCase,
     });
 

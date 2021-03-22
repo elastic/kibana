@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { GetSpaceFn, ReadOperations, WriteOperations } from './types';
-import { getClassFilter } from './authorization_query';
+import { getClassFilter } from './utils';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
