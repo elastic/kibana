@@ -63,10 +63,10 @@ describe('getSplitByTermsColor Function', () => {
     expect(color).toEqual(null);
   });
 
-  it('Should return null if no seriesName is given', () => {
+  it('Should return color for empty seriesName', () => {
     const newProps = { ...props, seriesName: '' };
     const color = getSplitByTermsColor(newProps);
-    expect(color).toEqual(null);
+    expect(color).toEqual('blue');
   });
 
   it('Should return color for the given palette', () => {

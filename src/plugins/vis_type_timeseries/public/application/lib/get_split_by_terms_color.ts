@@ -9,6 +9,7 @@ import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { PALETTES, PanelData } from '../../../common/types';
 import { computeGradientFinalColor } from './compute_gradient_final_color';
 import { rainbowColors } from './rainbow_colors';
+import { emptyLabel } from '../../../common/empty_label';
 
 interface PaletteParams {
   colors: string[];
@@ -34,7 +35,7 @@ export const getSplitByTermsColor = ({
   palettesRegistry,
   syncColors,
 }: SplitByTermsColorProps) => {
-  if (!seriesName || !seriesPalette) {
+  if (!seriesPalette) {
     return null;
   }
   const paletteName =
@@ -59,7 +60,7 @@ export const getSplitByTermsColor = ({
   const outputColor = palettesRegistry?.get(paletteName).getColor(
     [
       {
-        name: seriesName,
+        name: seriesName || emptyLabel,
         rankAtDepth: seriesById.findIndex(({ id }) => id === seriesId),
         totalSeriesAtDepth: seriesById.length,
       },
