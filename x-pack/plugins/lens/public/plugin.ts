@@ -21,6 +21,7 @@ import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/ch
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import { EditorFrameService } from './editor_frame_service';
+import { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
 import {
   IndexPatternDatasource,
   IndexPatternDatasourceSetupPlugins,
@@ -74,6 +75,7 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export interface LensPublicStart {
@@ -181,6 +183,13 @@ export class LensPlugin {
       return ContextProvider;
     };
 
+    const ensureDefaultIndexPattern = async () => {
+      const [, deps] = await core.getStartServices();
+      // make sure a default index pattern exists
+      // if not, the page will be redirected to management and visualize won't be rendered
+      await deps.data.indexPatterns.ensureDefaultIndexPattern();
+    };
+
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -188,6 +197,7 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { mountApp, stopReportManager } = await import('./async_services');
         this.stopReportManager = stopReportManager;
+        await ensureDefaultIndexPattern();
         return mountApp(core, params, {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,

@@ -12,8 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // Failing: See https://github.com/elastic/kibana/issues/91450
-  describe.skip('classification creation', function () {
+  describe('classification creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
@@ -43,24 +42,19 @@ export default function ({ getService }: FtrProviderContext) {
         createIndexPattern: true,
         expected: {
           rocCurveColorState: [
-            // background
-            { key: '#FFFFFF', value: 93 },
             // tick/grid/axis
-            { key: '#98A2B3', value: 1 },
-            { key: '#DDDDDD', value: 3 },
+            { key: '#DDDDDD', value: 50 },
             // line
-            { key: '#6092C0', value: 1 },
+            { key: '#98A2B3', value: 30 },
           ],
           scatterplotMatrixColorStats: [
-            // background
-            { key: '#000000', value: 94 },
+            // marker colors
+            { key: '#7FC6B3', value: 1 },
+            { key: '#88ADD0', value: 0.03 },
             // tick/grid/axis
-            { key: '#DDDDDD', value: 1 },
-            { key: '#D3DAE6', value: 1 },
-            { key: '#F5F7FA', value: 1 },
-            // scatterplot circles
-            { key: '#6A717D', value: 1 },
-            { key: '#54B39A', value: 1 },
+            { key: '#DDDDDD', value: 8 },
+            { key: '#D3DAE6', value: 8 },
+            { key: '#F5F7FA', value: 20 },
           ],
           row: {
             type: 'classification',
@@ -112,8 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
 
@@ -157,7 +150,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('checks validation callouts exist');
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
-          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
+          // Expect the follow callouts:
+          // - ✓ Dependent variable
+          // - ✓ Training percent
+          // - ✓ Top classes
+          // - ⚠ Analysis fields
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(4);
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
@@ -238,16 +236,21 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the results view for created job');
           await ml.dataFrameAnalyticsTable.openResultsView(testData.jobId);
           await ml.dataFrameAnalyticsResults.assertClassificationEvaluatePanelElementsExists();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
+          await ml.commonUI.assertColorsInCanvasElement(
             'mlDFAnalyticsClassificationExplorationRocCurveChart',
-            testData.expected.rocCurveColorState
+            testData.expected.rocCurveColorState,
+            ['#000000'],
+            undefined,
+            undefined,
+            // increased tolerance for ROC curve chart up from 10 to 20
+            // since the returned colors vary quite a bit on each run.
+            20
           );
           await ml.dataFrameAnalyticsResults.assertClassificationTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlDFExpandableSection-splom',
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
         });
