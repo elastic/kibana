@@ -193,6 +193,7 @@ interface CasesMapWithPageInfo {
   casesMap: Map<string, CaseResponse>;
   page: number;
   perPage: number;
+  total: number;
 }
 
 type FindCaseOptions = CasesFindRequest & SavedObjectFindOptions;
@@ -345,6 +346,7 @@ export class CaseService implements CaseServiceSetup {
       casesMap: casesWithComments,
       page: cases.page,
       perPage: cases.per_page,
+      total: cases.total,
     };
   }
 
