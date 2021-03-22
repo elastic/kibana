@@ -25,39 +25,7 @@ import {
   ROLL_DAILY_INDICES_INTERVAL,
   ROLL_INDICES_START,
 } from './constants';
-
-export interface ApplicationViewUsage {
-  appId: string;
-  viewId: string;
-  clicks_total: number;
-  clicks_7_days: number;
-  clicks_30_days: number;
-  clicks_90_days: number;
-  minutes_on_screen_total: number;
-  minutes_on_screen_7_days: number;
-  minutes_on_screen_30_days: number;
-  minutes_on_screen_90_days: number;
-}
-
-export interface ApplicationUsageViews {
-  [serializedKey: string]: ApplicationViewUsage;
-}
-
-export interface ApplicationUsageTelemetryReport {
-  [appId: string]: {
-    appId: string;
-    viewId: string;
-    clicks_total: number;
-    clicks_7_days: number;
-    clicks_30_days: number;
-    clicks_90_days: number;
-    minutes_on_screen_total: number;
-    minutes_on_screen_7_days: number;
-    minutes_on_screen_30_days: number;
-    minutes_on_screen_90_days: number;
-    views?: ApplicationViewUsage[];
-  };
-}
+import { ApplicationUsageTelemetryReport, ApplicationUsageViews } from './types';
 
 export const transformByApplicationViews = (
   report: ApplicationUsageViews

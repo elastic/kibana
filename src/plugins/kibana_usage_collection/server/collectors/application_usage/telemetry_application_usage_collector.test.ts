@@ -11,14 +11,14 @@ import {
   Collector,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
-
+import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 import {
   registerApplicationUsageCollector,
   transformByApplicationViews,
-  ApplicationUsageViews,
 } from './telemetry_application_usage_collector';
-import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
+import { ApplicationUsageViews } from './types';
+
 import { SAVED_OBJECTS_DAILY_TYPE, SAVED_OBJECTS_TOTAL_TYPE } from './saved_objects_types';
 
 // use fake timers to avoid triggering rollups during tests
