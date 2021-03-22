@@ -10,7 +10,7 @@ import {
   CasePostRequest,
   CasesConfigureRequest,
   ConnectorTypes,
-} from '../../../../common';
+} from '../../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '../../../../../actions/server/types';
 

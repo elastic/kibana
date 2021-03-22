@@ -1,4 +1,4 @@
-[[create-panels-with-timelion]]
+[[timelion]]
 === Timelion
 
 Instead of using a visual editor to create charts, you define a graph by chaining functions together, using the *Timelion*-specific syntax. 

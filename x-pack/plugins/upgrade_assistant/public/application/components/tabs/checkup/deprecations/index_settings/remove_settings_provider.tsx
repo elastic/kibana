@@ -58,29 +58,23 @@ export const RemoveIndexSettingsProvider = ({ children }: Props) => {
   const deprecatedSettings = useRef<string[]>([]);
   const indexName = useRef<string | undefined>(undefined);
 
-  const { http, notifications } = useAppContext();
+  const { api, notifications } = useAppContext();
 
   const removeIndexSettings = async () => {
     setIsLoading(true);
-    try {
-      await http.post(`/api/upgrade_assistant/${indexName.current}/index_settings`, {
-        body: JSON.stringify({
-          settings: deprecatedSettings.current,
-        }),
-      });
 
-      setIsLoading(false);
+    const { error } = await api.updateIndexSettings(indexName.current!, deprecatedSettings.current);
+
+    setIsLoading(false);
+    closeModal();
+
+    if (error) {
+      notifications.toasts.addDanger(i18nTexts.errorNotificationText);
+    } else {
       setSuccessfulRequests({
         [indexName.current!]: true,
       });
-      closeModal();
       notifications.toasts.addSuccess(i18nTexts.successNotificationText);
-    } catch (e) {
-      setIsLoading(false);
-      closeModal();
-      notifications.toasts.addError(e, {
-        title: i18nTexts.errorNotificationText,
-      });
     }
   };
 
