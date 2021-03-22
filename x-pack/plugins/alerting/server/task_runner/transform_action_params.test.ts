@@ -369,6 +369,61 @@ test('alertActionGroupName is passed to templates', () => {
   `);
 });
 
+test('rule variables are passed to templates', () => {
+  const actionParams = {
+    message: 'Value "{{rule.id}}", "{{rule.name}}", "{{rule.spaceId}}" and "{{rule.tags}}" exist',
+  };
+  const result = transformActionParams({
+    actionsPlugin,
+    actionTypeId,
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
+    alertActionSubgroup: 'subgroup',
+    alertParams: {},
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"1\\", \\"alert-name\\", \\"spaceId-A\\" and \\"tag-A,tag-B\\" exist",
+    }
+  `);
+});
+
+test('rule alert variables are passed to templates', () => {
+  const actionParams = {
+    message:
+      'Value "{{alert.id}}", "{{alert.actionGroup}}", "{{alert.actionGroupName}}" and "{{alert.actionSubgroup}}" exist',
+  };
+  const result = transformActionParams({
+    actionsPlugin,
+    actionTypeId,
+    actionParams,
+    state: {},
+    context: {},
+    alertId: '1',
+    alertName: 'alert-name',
+    tags: ['tag-A', 'tag-B'],
+    spaceId: 'spaceId-A',
+    alertInstanceId: '2',
+    alertActionGroup: 'action-group',
+    alertActionGroupName: 'Action Group',
+    alertActionSubgroup: 'subgroup',
+    alertParams: {},
+  });
+  expect(result).toMatchInlineSnapshot(`
+    Object {
+      "message": "Value \\"2\\", \\"action-group\\", \\"Action Group\\" and \\"subgroup\\" exist",
+    }
+  `);
+});
+
 test('date is passed to templates', () => {
   const actionParams = {
     message: '{{date}}',

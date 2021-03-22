@@ -7,9 +7,9 @@
 
 import React, { useCallback } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
-import 'brace/mode/sql';
 import 'brace/theme/tomorrow';
-import 'brace/ext/language_tools';
+
+import './osquery_mode.ts';
 
 const EDITOR_SET_OPTIONS = {
   enableBasicAutocompletion: true,
@@ -36,13 +36,14 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue, on
   return (
     <EuiCodeEditor
       value={defaultValue}
-      mode="sql"
+      mode="osquery"
       theme="tomorrow"
       onChange={handleChange}
       name="osquery_editor"
       setOptions={EDITOR_SET_OPTIONS}
       editorProps={EDITOR_PROPS}
-      height="200px"
+      height="100px"
+      width="100%"
     />
   );
 };

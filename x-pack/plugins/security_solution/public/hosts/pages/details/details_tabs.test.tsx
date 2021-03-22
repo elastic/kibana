@@ -120,6 +120,18 @@ describe('body', () => {
             { name: 'agent.test7', searchable: true, type: 'string', aggregatable: true },
             { name: 'agent.test8', searchable: true, type: 'string', aggregatable: true },
             { name: 'host.name', searchable: true, type: 'string', aggregatable: true },
+            {
+              aggregatable: false,
+              name: 'nestedField.firstAttributes',
+              searchable: true,
+              type: 'string',
+            },
+            {
+              aggregatable: false,
+              name: 'nestedField.secondAttributes',
+              searchable: true,
+              type: 'string',
+            },
           ],
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },

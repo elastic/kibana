@@ -77,6 +77,23 @@ export class SecurityNavControlService {
         this.userMenuLinks$.pipe(map(this.sortUserMenuLinks), takeUntil(this.stop$)),
       addUserMenuLinks: (userMenuLinks: UserMenuLink[]) => {
         const currentLinks = this.userMenuLinks$.value;
+        const hasCustomProfileLink = currentLinks.find(({ setAsProfile }) => setAsProfile === true);
+        const passedCustomProfileLinkCount = userMenuLinks.filter(
+          ({ setAsProfile }) => setAsProfile === true
+        ).length;
+
+        if (hasCustomProfileLink && passedCustomProfileLinkCount > 0) {
+          throw new Error(
+            `Only one custom profile link can be set. A custom profile link named ${hasCustomProfileLink.label} (${hasCustomProfileLink.href}) already exists`
+          );
+        }
+
+        if (passedCustomProfileLinkCount > 1) {
+          throw new Error(
+            `Only one custom profile link can be passed at a time (found ${passedCustomProfileLinkCount})`
+          );
+        }
+
         const newLinks = [...currentLinks, ...userMenuLinks];
         this.userMenuLinks$.next(newLinks);
       },

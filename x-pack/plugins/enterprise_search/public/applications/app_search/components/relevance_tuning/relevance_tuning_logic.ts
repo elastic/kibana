@@ -20,15 +20,9 @@ import {
   RESET_CONFIRMATION_MESSAGE,
   DELETE_SUCCESS_MESSAGE,
   DELETE_CONFIRMATION_MESSAGE,
+  BOOST_TYPE_TO_EMPTY_BOOST,
 } from './constants';
-import {
-  BaseBoost,
-  Boost,
-  BoostFunction,
-  BoostOperation,
-  BoostType,
-  SearchSettings,
-} from './types';
+import { Boost, BoostFunction, BoostOperation, BoostType, SearchSettings } from './types';
 import {
   filterIfTerm,
   parseBoostCenter,
@@ -87,12 +81,12 @@ interface RelevanceTuningActions {
   updateBoostSelectOption(
     name: string,
     boostIndex: number,
-    optionType: keyof BaseBoost,
+    optionType: keyof Pick<Boost, 'operation' | 'function'>,
     value: BoostOperation | BoostFunction
   ): {
     name: string;
     boostIndex: number;
-    optionType: keyof BaseBoost;
+    optionType: keyof Pick<Boost, 'operation' | 'function'>;
     value: string;
   };
   updateSearchValue(query: string): string;
@@ -376,7 +370,7 @@ export const RelevanceTuningLogic = kea<
     addBoost: ({ name, type }) => {
       const { searchSettings } = values;
       const { boosts } = searchSettings;
-      const emptyBoost = { type, factor: 1, newBoost: true };
+      const emptyBoost = BOOST_TYPE_TO_EMPTY_BOOST[type];
       let boostArray;
 
       if (Array.isArray(boosts[name])) {

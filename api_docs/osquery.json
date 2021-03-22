@@ -16,7 +16,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 14
+        "lineNumber": 18
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -30,7 +30,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/public/types.ts",
-        "lineNumber": 16
+        "lineNumber": 20
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -52,7 +52,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 15
+        "lineNumber": 16
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -66,7 +66,7 @@
       "children": [],
       "source": {
         "path": "x-pack/plugins/osquery/server/types.ts",
-        "lineNumber": 17
+        "lineNumber": 18
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -134,7 +134,7 @@
           "lineNumber": 11
         },
         "signature": [
-          "\"osquery\""
+          "\"Osquery\""
         ],
         "initialIsOpen": false
       }

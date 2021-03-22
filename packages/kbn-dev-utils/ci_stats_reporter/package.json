@@ -1,0 +1,3 @@
+{
+  "main": "../target/ci_stats_reporter/ci_stats_reporter"
+}
