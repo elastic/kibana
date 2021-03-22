@@ -11,6 +11,7 @@ import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
 import { DevToolsSettings } from '../../services';
 import { TextObject } from '../../../common/text_object';
+import { SenseEditor } from '../models';
 
 export interface Store {
   ready: boolean;
@@ -28,8 +29,8 @@ export const initialValue: Store = produce<Store>(
 );
 
 export type Action =
-  | { type: 'setInputEditor'; payload: any }
-  | { type: 'setCurrentTextObject'; payload: any }
+  | { type: 'setInputEditor'; payload: SenseEditor }
+  | { type: 'setCurrentTextObject'; payload: TextObject }
   | { type: 'updateSettings'; payload: DevToolsSettings };
 
 export const reducer: Reducer<Store, Action> = (state, action) =>

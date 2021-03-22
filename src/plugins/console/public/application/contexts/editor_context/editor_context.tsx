@@ -15,7 +15,7 @@ const EditorReadContext = createContext<editor.Store>(null as any);
 const EditorActionContext = createContext<Dispatch<editor.Action>>(null as any);
 
 export interface EditorContextArgs {
-  children: any;
+  children: JSX.Element;
   settings: DevToolsSettings;
 }
 

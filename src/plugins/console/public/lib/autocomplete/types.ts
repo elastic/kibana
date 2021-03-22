@@ -22,6 +22,7 @@ export interface AutoCompleteContext {
       getTopLevelComponents: (method?: string | null) => unknown;
     };
     bodyAutocompleteRootComponents: unknown;
+    id?: string;
   };
   urlPath?: null | unknown;
   urlParamsTokenPath?: Array<Record<string, string>> | null;

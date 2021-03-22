@@ -27,7 +27,7 @@ export class Settings {
     return this.storage.get('font_size', 14);
   }
 
-  setFontSize(size: any) {
+  setFontSize(size: number) {
     this.storage.set('font_size', size);
     return true;
   }
@@ -36,12 +36,12 @@ export class Settings {
     return this.storage.get('wrap_mode', true);
   }
 
-  setWrapMode(mode: any) {
+  setWrapMode(mode: string) {
     this.storage.set('wrap_mode', mode);
     return true;
   }
 
-  setTripleQuotes(tripleQuotes: any) {
+  setTripleQuotes(tripleQuotes: boolean) {
     this.storage.set('triple_quotes', tripleQuotes);
     return true;
   }
@@ -58,7 +58,7 @@ export class Settings {
     });
   }
 
-  setAutocomplete(settings: any) {
+  setAutocomplete(settings: boolean) {
     this.storage.set('autocomplete_settings', settings);
     return true;
   }
@@ -67,7 +67,7 @@ export class Settings {
     return this.storage.get('console_polling', true);
   }
 
-  setPolling(polling: any) {
+  setPolling(polling: boolean) {
     this.storage.set('console_polling', polling);
     return true;
   }
