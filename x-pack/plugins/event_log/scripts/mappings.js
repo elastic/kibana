@@ -5,75 +5,84 @@
  * 2.0.
  */
 
-exports.EcsKibanaExtensionsMappings = {
-  properties: {
-    // kibana server uuid
-    server_uuid: {
-      type: 'keyword',
-      ignore_above: 1024,
-    },
-    // alerting specific fields
-    alerting: {
-      properties: {
-        instance_id: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
-        action_group_id: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
-        action_subgroup: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
-        status: {
-          type: 'keyword',
-          ignore_above: 1024,
+/**
+ * These are mappings of custom properties that are not part of ECS.
+ * Must not interfere with standard ECS fields and field sets.
+ */
+exports.EcsCustomPropertyMappings = {
+  kibana: {
+    properties: {
+      // kibana server uuid
+      server_uuid: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+      // alerting specific fields
+      alerting: {
+        properties: {
+          instance_id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          action_group_id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          action_subgroup: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          status: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
         },
       },
-    },
-    // fields specific to Detection Engine of Elastic Security app (x-pack/plugins/security_solution)
-    detection_engine: {
-      properties: {
-        rule_status: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
-        rule_status_severity: {
-          type: 'integer',
+      // fields specific to Detection Engine of Elastic Security app (x-pack/plugins/security_solution)
+      detection_engine: {
+        properties: {
+          rule_status: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          rule_status_severity: {
+            type: 'integer',
+          },
         },
       },
-    },
-    // array of saved object references, for "linking" via search
-    saved_objects: {
-      type: 'nested',
-      properties: {
-        // relation; currently only supports "primary" or not set
-        rel: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
-        // relevant kibana space
-        namespace: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
-        id: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
-        type: {
-          type: 'keyword',
-          ignore_above: 1024,
+      // array of saved object references, for "linking" via search
+      saved_objects: {
+        type: 'nested',
+        properties: {
+          // relation; currently only supports "primary" or not set
+          rel: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          // relevant kibana space
+          namespace: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          type: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
         },
       },
     },
   },
 };
 
-// ECS and Kibana ECS extension properties to generate
-exports.EcsEventLogProperties = [
+/**
+ * These properties will be added to the generated event schema.
+ * Here you can specify single fields (log.level) and whole field sets (event).
+ */
+exports.EcsPropertiesToGenerate = [
   '@timestamp',
   'message',
   'tags',
@@ -87,5 +96,7 @@ exports.EcsEventLogProperties = [
   'kibana',
 ];
 
-// properties that can have multiple values (array vs single value)
+/**
+ * These properties can have multiple values (are arrays in the generated event schema).
+ */
 exports.EcsEventLogMultiValuedProperties = ['tags', 'event.category', 'event.type', 'rule.author'];
