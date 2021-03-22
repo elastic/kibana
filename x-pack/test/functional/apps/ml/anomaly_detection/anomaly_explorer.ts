@@ -236,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.swimLane.assertActivePage(viewBySwimLaneTestSubj, 1);
         });
 
-        it.skip('support cell selection by click on View By swim lane', async () => {
+        it('support cell selection by click on View By swim lane', async () => {
           await ml.testExecution.logTestStep('clicks on the View By swim lane cell');
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
           const sampleCell = (await ml.swimLane.getCells(viewBySwimLaneTestSubj))[0];
@@ -284,8 +284,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
         });
-
-        it('restores cell selection from the URL state', async () => {});
 
         it('adds swim lane embeddable to a dashboard', async () => {
           // should be the last step because it navigates away from the Anomaly Explorer page
