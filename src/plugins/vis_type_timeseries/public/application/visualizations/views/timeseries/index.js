@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
@@ -61,9 +61,10 @@ export const TimeSeries = ({
   xAxisFormatter,
   annotations,
   syncColors,
+  palettesService,
 }) => {
   const chartRef = useRef();
-  const [palettesRegistry, setPalettesRegistry] = useState(null);
+  // const [palettesRegistry, setPalettesRegistry] = useState(null);
 
   useEffect(() => {
     const updateCursor = (cursor) => {
@@ -90,15 +91,7 @@ export const TimeSeries = ({
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { theme: themeService, palettes } = getChartsSetup();
-
-  useEffect(() => {
-    const fetchPalettes = async () => {
-      const palettesService = await palettes.getPalettes();
-      setPalettesRegistry(palettesService);
-    };
-    fetchPalettes();
-  }, [palettes]);
+  const { theme: themeService } = getChartsSetup();
 
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
@@ -119,12 +112,12 @@ export const TimeSeries = ({
         seriesId,
         baseColor: seriesById[0].baseColor,
         seriesPalette: seriesById[0].palette,
-        palettesRegistry,
+        palettesRegistry: palettesService,
         syncColors,
       };
       return getSplitByTermsColor(props) || null;
     },
-    [palettesRegistry, series, syncColors]
+    [palettesService, series, syncColors]
   );
 
   return (

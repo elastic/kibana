@@ -11,6 +11,7 @@ import React, { useCallback, useEffect } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { PersistedState } from 'src/plugins/visualizations/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 
 // @ts-expect-error
 import { ErrorComponent } from './error';
@@ -26,6 +27,7 @@ interface TimeseriesVisualizationProps {
   visData: TimeseriesVisData;
   uiState: PersistedState;
   syncColors: boolean;
+  palettesService: PaletteRegistry;
 }
 
 function TimeseriesVisualization({
@@ -36,6 +38,7 @@ function TimeseriesVisualization({
   uiState,
   getConfig,
   syncColors,
+  palettesService,
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
     (gte: string, lte: string) => {
@@ -94,6 +97,7 @@ function TimeseriesVisualization({
         onBrush={onBrush}
         onUiState={handleUiState}
         syncColors={syncColors}
+        palettesService={palettesService}
       />
     );
   }

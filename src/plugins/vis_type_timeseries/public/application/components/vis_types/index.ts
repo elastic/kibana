@@ -10,6 +10,7 @@ import React, { lazy } from 'react';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 
 import { TimeseriesVisParams } from '../../../types';
 import { TimeseriesVisData } from '../../../../common/types';
@@ -55,4 +56,5 @@ export interface TimeseriesVisProps {
   visData: TimeseriesVisData;
   getConfig: IUiSettingsClient['get'];
   syncColors: boolean;
+  palettesService: PaletteRegistry;
 }

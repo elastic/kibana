@@ -6,27 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
-import { getChartsSetup } from '../../services';
 import { emptyLabel } from '../../../common/empty_label';
 import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
-    const [palettesRegistry, setPalettesRegistry] = useState(null);
-    const { model, visData, syncColors } = props;
-    const { palettes } = getChartsSetup();
-
-    useEffect(() => {
-      const fetchPalettes = async () => {
-        const palettesService = await palettes.getPalettes();
-        setPalettesRegistry(palettesService);
-      };
-      fetchPalettes();
-    }, [palettes]);
+    const { model, visData, syncColors, palettesService } = props;
 
     const getSeriesColor = useCallback(
       (seriesName, seriesId, baseColor) => {
@@ -43,12 +32,12 @@ export function visWithSplits(WrappedComponent) {
           seriesId,
           baseColor,
           seriesPalette: palette,
-          palettesRegistry,
+          palettesRegistry: palettesService,
           syncColors,
         };
         return getSplitByTermsColor(props) || null;
       },
-      [model, palettesRegistry, syncColors, visData]
+      [model, palettesService, syncColors, visData]
     );
 
     if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
