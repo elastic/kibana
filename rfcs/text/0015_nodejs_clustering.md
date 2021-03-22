@@ -464,8 +464,15 @@ We have tasks across several plugins storing data in savedobjects specifically f
 tasks will be registered multiple times.
 
 Note that sending the data multiple times doesn’t have any real consequences, apart from the additional number of ES requests, 
-so this should be considered 
-non-blocking and only an improvement.
+so this should be considered non-blocking and only an improvement.
+
+- Event-based telemetry
+
+Event-based telemetry may be affected as well. Both the existing one in the Security Solutions team and the general 
+one that is in the works. More specifically, the size of the queues will be multiplied per worker, also growing in the
+amount of network bandwidth used, and potentially affecting our customers.
+
+We could address that by making sure that the queues are held only in the main worker.
 
 #### TaskManager
 
