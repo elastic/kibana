@@ -16,10 +16,10 @@ export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServ
     params: schema.object({
       checkGroup: schema.string(),
       stepIndex: schema.number(),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
     query: schema.object({
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request, response }) => {
