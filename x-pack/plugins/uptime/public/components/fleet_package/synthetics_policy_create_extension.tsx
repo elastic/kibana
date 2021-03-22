@@ -16,10 +16,10 @@ import {
   Mode,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
-  Validation,
 } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
+import { validate } from './validation';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -95,66 +95,4 @@ const defaultValues = {
 const defaultConfig: Config = {
   name: '',
   ...defaultValues,
-};
-
-const digitsOnly = /^[0-9]*$/g;
-
-function validateHeaders<T>(headers: T): boolean {
-  return Object.keys(headers).some((key) => {
-    if (key) {
-      const whiteSpaceRegEx = /[\s]/g;
-      return whiteSpaceRegEx.test(key);
-    } else {
-      return false;
-    }
-  });
-}
-
-// validation functions return true when invalid
-const validateCommon = {
-  [ConfigKeys.MAX_REDIRECTS]: (value: unknown) =>
-    !!value &&
-    !digitsOnly.test(`${value}`) &&
-    (value as ICustomFields[ConfigKeys.MAX_REDIRECTS]) < 0,
-  [ConfigKeys.MONITOR_TYPE]: (value: unknown) => !value,
-  [ConfigKeys.SCHEDULE]: (value: unknown) => {
-    const { number, unit } = value as ICustomFields[ConfigKeys.SCHEDULE];
-    const parsedFloat = parseFloat(number);
-    return !parsedFloat || !unit || !`${number}`.match(digitsOnly) || parsedFloat < 1;
-  },
-  [ConfigKeys.TIMEOUT]: (value: unknown) =>
-    !!value && !digitsOnly.test(`${value}`) && (value as ICustomFields[ConfigKeys.TIMEOUT]) < 0,
-};
-
-const validateHTTP = {
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: (value: unknown) => {
-    const headers = value as ICustomFields[ConfigKeys.RESPONSE_HEADERS_CHECK];
-    return validateHeaders<ICustomFields[ConfigKeys.RESPONSE_HEADERS_CHECK]>(headers);
-  },
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: (value: unknown) => {
-    const headers = value as ICustomFields[ConfigKeys.REQUEST_HEADERS_CHECK];
-    return validateHeaders<ICustomFields[ConfigKeys.REQUEST_HEADERS_CHECK]>(headers);
-  },
-  [ConfigKeys.URLS]: (value: unknown) => !value, // TODO: regex for urls
-  ...validateCommon,
-};
-
-const validateTCP = {
-  [ConfigKeys.HOSTS]: (value: unknown) => !value, // TODO: regex for hosts,
-  ...validateCommon,
-};
-
-const validateICMP = {
-  [ConfigKeys.HOSTS]: (value: unknown) => !value,
-  [ConfigKeys.WAIT]: (value: unknown) =>
-    !!value && !digitsOnly.test(`${value}`) && (value as ICustomFields[ConfigKeys.WAIT]) < 0,
-  ...validateCommon,
-};
-
-type ValidateDictionary = Record<DataStream, Validation>;
-
-const validate: ValidateDictionary = {
-  [DataStream.HTTP]: validateHTTP,
-  [DataStream.TCP]: validateTCP,
-  [DataStream.ICMP]: validateICMP,
 };
