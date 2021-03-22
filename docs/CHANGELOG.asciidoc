@@ -66,7 +66,7 @@ In 7.12.0, {kib} introduces a major incompatibility with cross-cluster search. W
 unable to display the cluster data. For information about the cross-cluster search limitations in {kib}, refer to {kibana-issue}94965[#94965].
 
 *Impact* +
-Load documents directly from `_source`.
+To display the cluster data in *Discover*, load documents directly from `_source`.
 
 . Open the main menu, then click *Stack Management > Advanced Settings*.
 
