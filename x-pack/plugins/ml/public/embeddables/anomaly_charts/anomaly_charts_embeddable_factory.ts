@@ -37,7 +37,7 @@ export class AnomalyChartsEmbeddableFactory
 
   public getDisplayName() {
     return i18n.translate('xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName', {
-      defaultMessage: 'ML Anomaly charts',
+      defaultMessage: 'ML anomaly chart',
     });
   }
 
