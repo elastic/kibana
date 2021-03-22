@@ -141,6 +141,8 @@ export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
 export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
 
+export const NOTE_URL = '/api/note';
+
 /**
  * Default signals index key for kibana.dev.yml
  */
