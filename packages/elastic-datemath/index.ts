@@ -17,9 +17,18 @@
  * under the License.
  */
 
-const moment = require('moment');
+import moment from 'moment';
 
-const unitsMap = {
+export type Unit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
+export type UnitsMap = {
+  [k in Unit]: {
+    weight: number;
+    type: 'calendar' | 'fixed' | 'mixed';
+    base: number;
+  };
+};
+
+export const unitsMap: UnitsMap = {
   ms: { weight: 1, type: 'fixed', base: 1 },
   s: { weight: 2, type: 'fixed', base: 1000 },
   m: { weight: 3, type: 'mixed', base: 1000 * 60 },
@@ -30,13 +39,14 @@ const unitsMap = {
   // q: { weight: 8, type: 'calendar' }, // TODO: moment duration does not support quarter
   y: { weight: 9, type: 'calendar', base: NaN },
 };
-const units = Object.keys(unitsMap).sort((a, b) => unitsMap[b].weight - unitsMap[a].weight);
-const unitsDesc = [...units];
-const unitsAsc = [...units].reverse();
+export const units = Object.keys(unitsMap).sort(
+  (a, b) => unitsMap[b as Unit].weight - unitsMap[a as Unit].weight
+);
+export const unitsDesc = [...units];
+export const unitsAsc = [...units].reverse();
 
-const isDate = (d) => Object.prototype.toString.call(d) === '[object Date]';
-
-const isValidDate = (d) => isDate(d) && !isNaN(d.valueOf());
+const isDate = (d: string) => Object.prototype.toString.call(d) === '[object Date]';
+const isValidDate = (d: string) => isDate(d) && !isNaN(d.valueOf() as any);
 
 /*
  * This is a simplified version of elasticsearch's date parser.
@@ -44,11 +54,17 @@ const isValidDate = (d) => isDate(d) && !isNaN(d.valueOf());
  * will be done using this (and its locale settings) instead of the one bundled
  * with this library.
  */
-function parse(text, { roundUp = false, momentInstance = moment, forceNow } = {}) {
+export function parse(
+  input: string,
+  options: { roundUp?: boolean; momentInstance?: typeof moment; forceNow?: Date } = {}
+) {
+  const text = input;
+  const { roundUp = false, momentInstance = moment, forceNow } = options;
+
   if (!text) return undefined;
   if (momentInstance.isMoment(text)) return text;
   if (isDate(text)) return momentInstance(text);
-  if (forceNow !== undefined && !isValidDate(forceNow)) {
+  if (forceNow !== undefined && !isValidDate(forceNow as any)) {
     throw new Error('forceNow must be a valid Date');
   }
 
@@ -80,7 +96,7 @@ function parse(text, { roundUp = false, momentInstance = moment, forceNow } = {}
   return parseDateMath(mathString, time, roundUp);
 }
 
-function parseDateMath(mathString, time, roundUp) {
+function parseDateMath(mathString: string, time: moment.Moment, roundUp: boolean) {
   const dateTime = time;
   const len = mathString.length;
   let i = 0;
@@ -101,13 +117,13 @@ function parseDateMath(mathString, time, roundUp) {
       return;
     }
 
-    if (isNaN(mathString.charAt(i))) {
+    if (isNaN(mathString.charAt(i) as any)) {
       num = 1;
     } else if (mathString.length === 2) {
       num = mathString.charAt(i);
     } else {
       const numFrom = i;
-      while (!isNaN(mathString.charAt(i))) {
+      while (!isNaN(mathString.charAt(i) as any)) {
         i++;
         if (i >= len) return;
       }
@@ -138,23 +154,15 @@ function parseDateMath(mathString, time, roundUp) {
       return;
     } else {
       if (type === 0) {
-        if (roundUp) dateTime.endOf(unit);
-        else dateTime.startOf(unit);
+        if (roundUp) dateTime.endOf(unit as any);
+        else dateTime.startOf(unit as any);
       } else if (type === 1) {
-        dateTime.add(num, unit);
+        dateTime.add(num as any, unit);
       } else if (type === 2) {
-        dateTime.subtract(num, unit);
+        dateTime.subtract(num as any, unit);
       }
     }
   }
 
   return dateTime;
 }
-
-module.exports = {
-  parse: parse,
-  unitsMap: Object.freeze(unitsMap),
-  units: Object.freeze(units),
-  unitsAsc: Object.freeze(unitsAsc),
-  unitsDesc: Object.freeze(unitsDesc),
-};
