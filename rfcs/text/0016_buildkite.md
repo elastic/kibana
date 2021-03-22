@@ -271,7 +271,72 @@ Buildkite supports very advanced pipeline logic, and has support for generating 
 - [Artifacts](https://buildkite.com/docs/pipelines/artifacts) can be uploaded from and downloaded in steps, and are visible in the UI
 - [Parallelism and Concurrency](https://buildkite.com/docs/tutorials/parallel-builds) settings
 
-See [here](https://github.com/elastic/kibana/blob/2c1cd95b6028e9fd1f75a59eb7ff76c84667faf8/.buildkite/flaky-test-suite-runner.yml) and [here](https://github.com/elastic/kibana/blob/2c1cd95b6028e9fd1f75a59eb7ff76c84667faf8/.buildkite/scripts/flaky-test-suite-runner.sh) for an example of a dynamically-generated pipeline based on user input that runs a job `RUN_COUNT` times (from user input), across up to a maximum of 25 agents at once.
+Here's an example of a dynamically-generated pipeline based on user input that runs a job `RUN_COUNT` times (from user input), across up to a maximum of 25 agents at once:
+
+```yaml
+# pipeline.yml
+
+steps:
+  - input: 'Test Suite Runner'
+    fields:
+      - select: 'Test Suite'
+        key: 'test-suite'
+        required: true
+        options:
+          - label: 'Default CI Group 1'
+            value: 'default:cigroup:1'
+          - label: 'Default CI Group 2'
+            value: 'default:cigroup:2'
+      - text: 'Number of Runs'
+        key: 'run-count'
+        required: true
+        default: 75
+  - wait
+  - command: .buildkite/scripts/flaky-test-suite-runner.sh | buildkite-agent pipeline upload
+    label: ':pipeline: Upload'
+```
+
+```bash
+#!/usr/bin/env bash
+
+# flaky-test-suite-runner.sh
+
+set -euo pipefail
+
+TEST_SUITE="$(buildkite-agent meta-data get 'test-suite')"
+export TEST_SUITE
+
+RUN_COUNT="$(buildkite-agent meta-data get 'run-count')"
+export RUN_COUNT
+
+UUID="$(cat /proc/sys/kernel/random/uuid)"
+export UUID
+
+cat << EOF
+steps:
+  - command: |
+      echo 'Bootstrap'
+    label: Bootstrap
+    agents:
+      queue: bootstrap
+    key: bootstrap
+  - command: |
+      echo 'Build Default Distro'
+    label: Build Default Distro
+    agents:
+      queue: bootstrap
+    key: default-build
+    depends_on: bootstrap
+  - command: 'echo "Running $TEST_SUITE"; sleep 10;'
+    label: 'Run $TEST_SUITE'
+    agents:
+      queue: ci-group
+    parallelism: $RUN_COUNT
+    concurrency: 25
+    concurrency_group: '$UUID'
+    depends_on: default-build
+EOF
+```
 
 #### Cloud-friendly pricing model
 
@@ -366,9 +431,63 @@ Also planned:
 
 #### Design
 
+The agent manager is primarily concerned with ensuring that, given an agent configuration, the number of online agents for that configuration is **greather than or equal to** the desired number. Buildkite then determines how to use the agents: which jobs they should execute and when they should go offline (due to being idle, done with jobs, etc). Even when stopping agents due to having an outdated configuration, Buildkite still determines the actual time that the agent should disconnect.
+
+![High-Level Design](../images/0016_agent_manager.png)
+
+The high-level design for the agent manager is pretty straightforward. There are three primary stages during execution:
+
+1. Gather Current State
+   1. Data and agent configuration is gathered from various sources/APIs in parallel
+2. Create Plan
+   1. Given the current state across the various services, a plan is created based on agent configurations, current Buildkite job queue sizes, and current GCE instances.
+   2. Instances need to be created when there aren't enough online/in-progress agents of a particular configuration to satisfy the needs of its matching queue.
+   3. Agents need to be stopped when the agents have been online for too long (based on their configuration) or when their configuration is out-of-date. This is a soft stop, they will terminate after finishing their current job.
+   4. Instances need to be deleted if they have been stopped (which happens when their agent stops), or when they have been online past their hard stop time (based on configuration).
+3. Execute Plan
+   1. The different types of actions in the plan are executed in parallel. Instance creating and deleting is done in batches to handle spikes quickly.
+
+An error at any step, e.g. when checking current state of GCP instances, will cause the rest of the run to abort.
+
+Because the service gathers data about the total current state and creates a plan based on that state each run, it's reasonably resistant to errors and it's self-healing.
+
 #### Configuration
 
+```js
+{
+  gcp: {
+    // Configurations at this level are defaults for all configurations defined under `agents`
+    project: 'elastic-kibana-184716',
+    zone: 'us-central1-b',
+    serviceAccount: 'elastic-buildkite-agent@elastic-kibana-184716.iam.gserviceaccount.com',
+    agents: [
+      {
+        queue: 'default',
+        name: 'kibana-buildkite',
+        overprovision: 0, // percentage or flat number
+        minimumAgents: 1,
+        maximumAgents: 500,
+        gracefulStopAfterSecs: 60 * 60 * 6,
+        hardStopAfterSecs: 60 * 60 * 9,
+        idleTimeoutSecs: 60 * 60,
+        exitAfterOneJob: false,
+        imageFamily: 'kibana-bk-dev-agents',
+        machineType: 'n2-standard-1',
+        diskType: 'pd-ssd',
+        diskSizeGb: 75
+      },
+      {
+        // ...
+      },
+  }
+}
+```
+
 #### Build / Deploy
+
+Currently, the agent manager is built and deployed using [Google Cloud Build](https://cloud.google.com/build). It is deployed to and hosted using [GKE Auto-Pilot](https://cloud.google.com/blog/products/containers-kubernetes/introducing-gke-autopilot) (Kubernetes). GKE was used, rather than Cloud Run, primarily because the agent manager runs continuously (with a 30sec pause between executions) whereas Cloud Run is for services that respond to HTTP requests.
+
+It uses [Google Secret Manager](https://cloud.google.com/secret-manager) for storing/retrieving tokens for accessing Buildkite. It uses a GCP service account and [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) to manage GCP resources.
 
 ### Elastic Buildkite PR Bot
 
