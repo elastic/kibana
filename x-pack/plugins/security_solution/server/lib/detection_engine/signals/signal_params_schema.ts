@@ -23,7 +23,7 @@ export const signalSchema = schema.object({
   index: schema.nullable(schema.arrayOf(schema.string())),
   language: schema.nullable(schema.string()),
   license: schema.nullable(schema.string()),
-  outputIndex: schema.string(),
+  outputIndex: schema.nullable(schema.string()),
   savedId: schema.nullable(schema.string()),
   timelineId: schema.nullable(schema.string()),
   timelineTitle: schema.nullable(schema.string()),
