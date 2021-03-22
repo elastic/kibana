@@ -20,24 +20,44 @@ const breadcrumbs = {
       href: `/policies`,
     },
   ],
-  editPolicy: ({ editPolicyPath }: { editPolicyPath?: string }) => [
+  createPolicy: ({ policyPath }: { policyPath?: string }) => [
+    ...breadcrumbs.policies(),
+    {
+      text: i18n.translate('xpack.indexLifecycleMgmt.breadcrumb.createPolicyLabel', {
+        defaultMessage: 'Create policy',
+      }),
+      href: policyPath,
+    },
+  ],
+  editPolicy: ({ policyPath }: { policyPath?: string }) => [
     ...breadcrumbs.policies(),
     {
       text: i18n.translate('xpack.indexLifecycleMgmt.breadcrumb.editPolicyLabel', {
         defaultMessage: 'Edit policy',
       }),
-      href: editPolicyPath,
+      href: policyPath,
     },
   ],
-  configurePolicyRollup: ({ editPolicyPath }: { editPolicyPath: string }) => [
-    ...breadcrumbs.editPolicy({ editPolicyPath }),
-    {
-      text: i18n.translate('xpack.indexLifecycleMgmt.breadcrumb.editPolicyRollupLabel', {
-        defaultMessage: 'Configure rollup',
-      }),
-      href: undefined,
-    },
-  ],
+  configurePolicyRollup: ({
+    isNewPolicy,
+    policyPath,
+  }: {
+    isNewPolicy: boolean;
+    policyPath: string;
+  }) => {
+    const policyBreadcrumb = isNewPolicy
+      ? breadcrumbs.createPolicy({ policyPath })
+      : breadcrumbs.editPolicy({ policyPath });
+    return [
+      ...policyBreadcrumb,
+      {
+        text: i18n.translate('xpack.indexLifecycleMgmt.breadcrumb.editPolicyRollupLabel', {
+          defaultMessage: 'Configure rollup',
+        }),
+        href: undefined,
+      },
+    ];
+  },
 };
 
 type SetBreadcrumbsArg =
@@ -45,11 +65,14 @@ type SetBreadcrumbsArg =
       type: 'policies';
     }
   | {
+      type: 'createPolicy';
+    }
+  | {
       type: 'editPolicy';
     }
   | {
       type: 'configurePolicyRollup';
-      payload: { editPolicyPath: string };
+      payload: { isNewPolicy: boolean; policyPath: string };
     };
 
 export class BreadcrumbService {
@@ -68,6 +91,9 @@ export class BreadcrumbService {
     switch (arg.type) {
       case 'policies':
         newBreadcrumbs = breadcrumbs.policies();
+        break;
+      case 'createPolicy':
+        newBreadcrumbs = breadcrumbs.createPolicy({});
         break;
       case 'editPolicy':
         newBreadcrumbs = breadcrumbs.editPolicy({});

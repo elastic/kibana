@@ -34,7 +34,7 @@ interface ContextValue {
 const NavigationContext = createContext<ContextValue | null>(null);
 
 export const NavigationContextProvider: FunctionComponent = ({ children }) => {
-  const { policyName } = useEditPolicyContext();
+  const { policyName, isNewPolicy } = useEditPolicyContext();
 
   const [isColdRollupActionBlocked, setIsColdRollupActionBlocked] = useState(true);
 
@@ -72,18 +72,19 @@ export const NavigationContextProvider: FunctionComponent = ({ children }) => {
   useEffect(() => {
     switch (currentViewId) {
       case 'policy':
-        breadcrumbService.setBreadcrumbs({ type: 'editPolicy' });
+        breadcrumbService.setBreadcrumbs({ type: isNewPolicy ? 'createPolicy' : 'editPolicy' });
         break;
       case 'rollupAction':
         breadcrumbService.setBreadcrumbs({
           type: 'configurePolicyRollup',
           payload: {
-            editPolicyPath: policyName ? getPolicyEditPath(policyName) : getPolicyCreatePath(),
+            isNewPolicy,
+            policyPath: policyName ? getPolicyEditPath(policyName) : getPolicyCreatePath(),
           },
         });
         break;
     }
-  }, [breadcrumbService, search, currentViewId, policyName]);
+  }, [breadcrumbService, search, currentViewId, policyName, isNewPolicy]);
 
   return (
     <NavigationContext.Provider
