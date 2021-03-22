@@ -57,6 +57,11 @@ image::images/search-session-awhile.png[Search Session indicator displaying the 
 [role="screenshot"]
 image::images/search-sessions-menu.png[Search Sessions management view with actions for inspecting, extending, and deleting a session. ]
 
+. Use the edit menu in *Search Sessions* to:
+* *Inspect* the queries and filters that makeup the session.
+* *Extend* the expiration of a completed session.
+* *Delete* a session.
+
 . To restore a search session, click its name in the *Search Sessions* view.
 +
 You're returned to the place from where you started the search session. The data is the same, but
@@ -65,8 +70,3 @@ behaves differently:
 * Relative dates are converted to absolute dates.
 * Panning and zooming is disabled for maps.
 * Changing a filter, query, or drilldown starts a new search session, which can be slow.
-
-. Use the edit menu in *Search Sessions* to:
-* *Inspect* the queries and filters that makeup the session.
-* *Extend* the expiration of a completed session.
-* *Delete* a session.
