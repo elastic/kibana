@@ -6,11 +6,11 @@
  */
 
 import {
-  DeleteTrustedAppsRequestSchema,
-  GetOneTrustedAppRequestSchema,
-  GetTrustedAppsRequestSchema,
-  PostTrustedAppCreateRequestSchema,
-  PutTrustedAppUpdateRequestSchema,
+  getDeleteTrustedAppsRequestSchema,
+  getGetOneTrustedAppRequestSchema,
+  getGetTrustedAppsRequestSchema,
+  getPostTrustedAppCreateRequestSchema,
+  getPutTrustedAppUpdateRequestSchema,
 } from '../../../../common/endpoint/schema/trusted_apps';
 import {
   TRUSTED_APPS_CREATE_API,
@@ -20,6 +20,8 @@ import {
   TRUSTED_APPS_UPDATE_API,
   TRUSTED_APPS_SUMMARY_API,
 } from '../../../../common/endpoint/constants';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
+
 import {
   getTrustedAppsCreateRouteHandler,
   getTrustedAppsDeleteRouteHandler,
@@ -31,15 +33,17 @@ import {
 import { SecuritySolutionPluginRouter } from '../../../types';
 import { EndpointAppContext } from '../../types';
 
-export const registerTrustedAppsRoutes = (
+export const registerTrustedAppsRoutes = async (
   router: SecuritySolutionPluginRouter,
   endpointAppContext: EndpointAppContext
 ) => {
+  const config = await endpointAppContext.config();
+  const experimentalValues = parseExperimentalConfigValue(config.enableExperimental);
   // DELETE one
   router.delete(
     {
       path: TRUSTED_APPS_DELETE_API,
-      validate: DeleteTrustedAppsRequestSchema,
+      validate: getDeleteTrustedAppsRequestSchema(experimentalValues),
       options: { authRequired: true },
     },
     getTrustedAppsDeleteRouteHandler(endpointAppContext)
@@ -49,7 +53,7 @@ export const registerTrustedAppsRoutes = (
   router.get(
     {
       path: TRUSTED_APPS_GET_API,
-      validate: GetOneTrustedAppRequestSchema,
+      validate: getGetOneTrustedAppRequestSchema(experimentalValues),
       options: { authRequired: true },
     },
     getTrustedAppsGetOneHandler(endpointAppContext)
@@ -59,7 +63,7 @@ export const registerTrustedAppsRoutes = (
   router.get(
     {
       path: TRUSTED_APPS_LIST_API,
-      validate: GetTrustedAppsRequestSchema,
+      validate: getGetTrustedAppsRequestSchema(experimentalValues),
       options: { authRequired: true },
     },
     getTrustedAppsListRouteHandler(endpointAppContext)
@@ -69,7 +73,7 @@ export const registerTrustedAppsRoutes = (
   router.post(
     {
       path: TRUSTED_APPS_CREATE_API,
-      validate: PostTrustedAppCreateRequestSchema,
+      validate: getPostTrustedAppCreateRequestSchema(experimentalValues),
       options: { authRequired: true },
     },
     getTrustedAppsCreateRouteHandler(endpointAppContext)
@@ -79,7 +83,7 @@ export const registerTrustedAppsRoutes = (
   router.put(
     {
       path: TRUSTED_APPS_UPDATE_API,
-      validate: PutTrustedAppUpdateRequestSchema,
+      validate: getPutTrustedAppUpdateRequestSchema(experimentalValues),
       options: { authRequired: true },
     },
     getTrustedAppsUpdateRouteHandler(endpointAppContext)

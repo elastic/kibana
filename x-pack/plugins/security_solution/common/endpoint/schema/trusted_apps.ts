@@ -8,26 +8,27 @@
 import { schema } from '@kbn/config-schema';
 import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
 import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
+import { ExperimentalFeatures } from '../../experimental_features';
 
-export const DeleteTrustedAppsRequestSchema = {
+export const getDeleteTrustedAppsRequestSchema = (experimentalValues: ExperimentalFeatures) => ({
   params: schema.object({
     id: schema.string(),
   }),
-};
+});
 
-export const GetOneTrustedAppRequestSchema = {
+export const getGetOneTrustedAppRequestSchema = (experimentalValues: ExperimentalFeatures) => ({
   params: schema.object({
     id: schema.string(),
   }),
-};
+});
 
-export const GetTrustedAppsRequestSchema = {
+export const getGetTrustedAppsRequestSchema = (experimentalValues: ExperimentalFeatures) => ({
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
     per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
     kuery: schema.maybe(schema.string()),
   }),
-};
+});
 
 const ConditionEntryTypeSchema = schema.literal('match');
 const ConditionEntryOperatorSchema = schema.literal('included');
@@ -115,9 +116,10 @@ const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
   },
 });
 
-const useArtifactsByPolicy: boolean = true;
-
-const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
+const getTrustedAppForOsScheme = (
+  experimentalValues: ExperimentalFeatures,
+  forUpdateFlow: boolean = false
+) =>
   schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
     description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
@@ -126,7 +128,7 @@ const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
       schema.literal(OperatingSystem.LINUX),
       schema.literal(OperatingSystem.MAC),
     ]),
-    ...(useArtifactsByPolicy
+    ...(experimentalValues.trustedAppsByPolicyEnabled
       ? {
           effectScope: schema.oneOf([
             schema.object({
@@ -143,13 +145,13 @@ const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
     ...(forUpdateFlow ? { version: schema.maybe(schema.string()) } : {}),
   });
 
-export const PostTrustedAppCreateRequestSchema = {
-  body: getTrustedAppForOsScheme(),
-};
+export const getPostTrustedAppCreateRequestSchema = (experimentalValues: ExperimentalFeatures) => ({
+  body: getTrustedAppForOsScheme(experimentalValues),
+});
 
-export const PutTrustedAppUpdateRequestSchema = {
+export const getPutTrustedAppUpdateRequestSchema = (experimentalValues: ExperimentalFeatures) => ({
   params: schema.object({
     id: schema.string(),
   }),
-  body: getTrustedAppForOsScheme(true),
-};
+  body: getTrustedAppForOsScheme(experimentalValues, true),
+});
