@@ -184,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
           await Promise.all(
             savedObjectIds.map((savedObjectId) => {
               return supertest
-                .delete(`/api/saved_objects/application_usage_transactional/${savedObjectId}`)
+                .delete(`/api/saved_objects/application_usage_daily/${savedObjectId}`)
                 .expect(200);
             })
           );
@@ -237,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
             .post('/api/saved_objects/_bulk_create')
             .send(
               new Array(10001).fill(0).map(() => ({
-                type: 'application_usage_transactional',
+                type: 'application_usage_daily',
                 attributes: {
                   appId: 'test-app',
                   minutesOnScreen: 1,
@@ -255,7 +255,7 @@ export default function ({ getService }: FtrProviderContext) {
           // The SavedObjects API does not allow bulk deleting, and deleting one by one takes ages and the tests timeout
           await es.deleteByQuery({
             index: '.kibana',
-            body: { query: { term: { type: 'application_usage_transactional' } } },
+            body: { query: { term: { type: 'application_usage_daily' } } },
             conflicts: 'proceed',
           });
         });
