@@ -24,9 +24,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CANCEL } from '../../../../shared/constants';
 import { AppLogic } from '../../../app_logic';
 
-import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CANCEL_BUTTON, FLYOUT_CONTINUE_BUTTON } from '../constants';
+import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CONTINUE_BUTTON } from '../constants';
 import { Errors } from '../creation_response_components';
 import { DocumentCreationLogic } from '../index';
 
@@ -97,7 +98,7 @@ export const FlyoutFooter: React.FC = () => {
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={closeDocumentCreation}>{FLYOUT_CANCEL_BUTTON}</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL}</EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={onSubmitFile} isLoading={isUploading} isDisabled={!fileInput}>

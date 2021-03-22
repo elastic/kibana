@@ -24,6 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { CANCEL } from '../constants';
 import { TEXT, fieldTypeSelectOptions } from '../constants/field_types';
 
 import {
@@ -31,7 +32,6 @@ import {
   FIELD_NAME_CORRECTED_PREFIX,
   FIELD_NAME_MODAL_TITLE,
   FIELD_NAME_MODAL_DESCRIPTION,
-  FIELD_NAME_MODAL_CANCEL,
   FIELD_NAME_MODAL_ADD_FIELD,
 } from './constants';
 
@@ -127,7 +127,7 @@ export const SchemaAddFieldModal: React.FC<ISchemaAddFieldModalProps> = ({
           </EuiForm>
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeAddFieldModal}>{FIELD_NAME_MODAL_CANCEL}</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={closeAddFieldModal}>{CANCEL}</EuiButtonEmpty>
           <EuiButton
             color="primary"
             fill
