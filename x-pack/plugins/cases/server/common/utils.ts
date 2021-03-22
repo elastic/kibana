@@ -6,7 +6,13 @@
  */
 
 import { SavedObjectsFindResult, SavedObjectsFindResponse } from 'kibana/server';
-import { CaseStatuses, CommentAttributes, CommentRequest, CommentType, User } from '../../common';
+import {
+  CaseStatuses,
+  CommentAttributes,
+  CommentRequest,
+  CommentType,
+  User,
+} from '../../common/api';
 import { UpdateAlertRequest } from '../client/types';
 import { getAlertInfoFromComments } from '../routes/api/utils';
 
