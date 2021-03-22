@@ -105,6 +105,8 @@ This section summarizes the changes in each release.
 [[release-notes-6.8.15]]
 == {kib} 6.8.15
 
+coming::[6.8.15]
+
 The 6.8.15 release includes the following bug fix.
 
 Security::
