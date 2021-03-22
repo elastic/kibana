@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { keyBy, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
@@ -22,9 +22,9 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
-import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
 import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
-import { getServiceInstancesComparisonStatistics } from '../lib/services/get_service_instances/comparison_statistics';
+import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
+import { getServiceInstancesComparisonStatisticsPeriods } from '../lib/services/get_service_instances/comparison_statistics';
 import { getServiceInstancesPrimaryStatistics } from '../lib/services/get_service_instances/primary_statistics';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
@@ -519,9 +519,7 @@ export const serviceInstancesComparisonStatisticsRoute = createRoute({
       setup
     );
 
-    const { start, end } = setup;
-
-    const commonProps = {
+    return getServiceInstancesComparisonStatisticsPeriods({
       environment,
       kuery,
       latencyAggregationType,
@@ -531,62 +529,9 @@ export const serviceInstancesComparisonStatisticsRoute = createRoute({
       searchAggregatedTransactions,
       numBuckets,
       serviceNodeIds,
-    };
-
-    const currentPeriodPromise = getServiceInstancesComparisonStatistics({
-      ...commonProps,
-      start,
-      end,
+      comparisonStart,
+      comparisonEnd,
     });
-
-    const previousPeriodPromise =
-      comparisonStart && comparisonEnd
-        ? getServiceInstancesComparisonStatistics({
-            ...commonProps,
-            start: comparisonStart,
-            end: comparisonEnd,
-          })
-        : [];
-    const [currentPeriod, previousPeriod] = await Promise.all([
-      currentPeriodPromise,
-      previousPeriodPromise,
-    ]);
-
-    const firtCurrentPeriod = currentPeriod.length
-      ? currentPeriod[0]
-      : undefined;
-
-    return {
-      currentPeriod: keyBy(currentPeriod, 'serviceNodeName'),
-      previousPeriod: keyBy(
-        previousPeriod.map((data) => {
-          return {
-            ...data,
-            cpuUsage: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: firtCurrentPeriod?.cpuUsage,
-              previousPeriodTimeseries: data.cpuUsage,
-            }),
-            errorRate: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: firtCurrentPeriod?.errorRate,
-              previousPeriodTimeseries: data.errorRate,
-            }),
-            latency: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: firtCurrentPeriod?.latency,
-              previousPeriodTimeseries: data.latency,
-            }),
-            memoryUsage: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: firtCurrentPeriod?.memoryUsage,
-              previousPeriodTimeseries: data.memoryUsage,
-            }),
-            throughput: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: firtCurrentPeriod?.throughput,
-              previousPeriodTimeseries: data.throughput,
-            }),
-          };
-        }),
-        'serviceNodeName'
-      ),
-    };
   },
 });
 

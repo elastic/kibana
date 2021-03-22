@@ -25,18 +25,18 @@ export interface ServiceInstancePrimaryStatisticsParams {
   end: number;
 }
 
-// interface ServiceInstancesPrimaryStatistics {
-//   serviceNodeName: string;
-//   errorRate?: number | null;
-//   throughput?: number;
-//   latency?: number | null;
-//   cpuUsage?: number | null;
-//   memoryUsage?: number | null;
-// }
-
 export async function getServiceInstancesPrimaryStatistics(
   params: Omit<ServiceInstancePrimaryStatisticsParams, 'size'>
-) {
+): Promise<
+  Array<{
+    serviceNodeName: string;
+    errorRate?: number;
+    latency?: number;
+    throughput?: number;
+    cpuUsage?: number | null;
+    memoryUsage?: number | null;
+  }>
+> {
   return withApmSpan('get_service_instances_primary_statistics', async () => {
     const paramsForSubQueries = {
       ...params,

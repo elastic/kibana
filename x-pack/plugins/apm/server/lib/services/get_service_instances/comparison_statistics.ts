@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { keyBy } from 'lodash';
+import { Coordinate } from '../../../../typings/timeseries';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { offsetPreviousPeriodCoordinates } from '../../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup } from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getServiceInstanceSystemMetricComparisonStatistics } from './get_service_instance_system_metric_statistics';
 import { getServiceInstanceTransactionComparisonStatistics } from './get_service_instance_transaction_statistics';
 
@@ -26,18 +29,18 @@ export interface ServiceInstanceComparisonStatisticsParams {
   serviceNodeIds: string[];
 }
 
-// interface ServiceInstancesComparisonStatistics {
-//   serviceNodeName: string;
-//   errorRate?: Coordinate[];
-//   throughput?: Coordinate[];
-//   latency?: Coordinate[];
-//   cpuUsage?: Coordinate[];
-//   memoryUsage?: Coordinate[];
-// }
-
 export async function getServiceInstancesComparisonStatistics(
   params: ServiceInstanceComparisonStatisticsParams
-) {
+): Promise<
+  Array<{
+    serviceNodeName: string;
+    errorRate?: Coordinate[];
+    latency?: Coordinate[];
+    throughput?: Coordinate[];
+    cpuUsage?: Coordinate[];
+    memoryUsage?: Coordinate[];
+  }>
+> {
   return withApmSpan(
     'get_service_instances_comparison_statistics',
     async () => {
@@ -52,6 +55,106 @@ export async function getServiceInstancesComparisonStatistics(
       );
 
       return stats;
+    }
+  );
+}
+
+export async function getServiceInstancesComparisonStatisticsPeriods({
+  environment,
+  kuery,
+  latencyAggregationType,
+  setup,
+  serviceName,
+  transactionType,
+  searchAggregatedTransactions,
+  numBuckets,
+  serviceNodeIds,
+  comparisonStart,
+  comparisonEnd,
+}: {
+  environment?: string;
+  kuery?: string;
+  latencyAggregationType: LatencyAggregationType;
+  setup: Setup & SetupTimeRange;
+  serviceName: string;
+  transactionType: string;
+  searchAggregatedTransactions: boolean;
+  numBuckets: number;
+  serviceNodeIds: string[];
+  comparisonStart?: number;
+  comparisonEnd?: number;
+}) {
+  return withApmSpan(
+    'get_service_instances_comparison_statistics_periods',
+    async () => {
+      const { start, end } = setup;
+
+      const commonParams = {
+        environment,
+        kuery,
+        latencyAggregationType,
+        setup,
+        serviceName,
+        transactionType,
+        searchAggregatedTransactions,
+        numBuckets,
+        serviceNodeIds,
+      };
+
+      const currentPeriodPromise = getServiceInstancesComparisonStatistics({
+        ...commonParams,
+        start,
+        end,
+      });
+
+      const previousPeriodPromise =
+        comparisonStart && comparisonEnd
+          ? getServiceInstancesComparisonStatistics({
+              ...commonParams,
+              start: comparisonStart,
+              end: comparisonEnd,
+            })
+          : [];
+      const [currentPeriod, previousPeriod] = await Promise.all([
+        currentPeriodPromise,
+        previousPeriodPromise,
+      ]);
+
+      const firtCurrentPeriod = currentPeriod.length
+        ? currentPeriod[0]
+        : undefined;
+
+      return {
+        currentPeriod: keyBy(currentPeriod, 'serviceNodeName'),
+        previousPeriod: keyBy(
+          previousPeriod.map((data) => {
+            return {
+              ...data,
+              cpuUsage: offsetPreviousPeriodCoordinates({
+                currentPeriodTimeseries: firtCurrentPeriod?.cpuUsage,
+                previousPeriodTimeseries: data.cpuUsage,
+              }),
+              errorRate: offsetPreviousPeriodCoordinates({
+                currentPeriodTimeseries: firtCurrentPeriod?.errorRate,
+                previousPeriodTimeseries: data.errorRate,
+              }),
+              latency: offsetPreviousPeriodCoordinates({
+                currentPeriodTimeseries: firtCurrentPeriod?.latency,
+                previousPeriodTimeseries: data.latency,
+              }),
+              memoryUsage: offsetPreviousPeriodCoordinates({
+                currentPeriodTimeseries: firtCurrentPeriod?.memoryUsage,
+                previousPeriodTimeseries: data.memoryUsage,
+              }),
+              throughput: offsetPreviousPeriodCoordinates({
+                currentPeriodTimeseries: firtCurrentPeriod?.throughput,
+                previousPeriodTimeseries: data.throughput,
+              }),
+            };
+          }),
+          'serviceNodeName'
+        ),
+      };
     }
   );
 }

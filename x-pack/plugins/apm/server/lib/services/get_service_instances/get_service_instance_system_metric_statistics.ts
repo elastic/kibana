@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  AggregationOptionsByType,
-  AggregationResultOf,
-} from 'typings/elasticsearch';
+import { AggregationOptionsByType } from 'typings/elasticsearch';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_PROCESS_CPU_PERCENT,
@@ -19,6 +16,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
+import { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery, kqlQuery, rangeQuery } from '../../../utils/queries';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { Setup } from '../../helpers/setup_request';
@@ -27,71 +25,23 @@ import {
   percentSystemMemoryUsedScript,
 } from '../../metrics/by_agent/shared/memory';
 
-type ObjectReturnType<T> = T extends true
-  ? ComparisonStatistics
-  : PrimaryStatistics;
+interface ServiceInstanceSystemMetricPrimaryStatistics {
+  serviceNodeName: string;
+  cpuUsage: number | null;
+  memoryUsage: number | null;
+}
 
-type PrimaryStatistics = AggregationResultOf<
-  {
-    terms: AggregationOptionsByType['terms'];
-    aggs: {
-      memory_usage_cgroup: {
-        filter: AggregationOptionsByType['filter'];
-        aggs: { avg: { avg: AggregationOptionsByType['avg'] } };
-      };
-      memory_usage_system: {
-        filter: AggregationOptionsByType['filter'];
-        aggs: { avg: { avg: AggregationOptionsByType['avg'] } };
-      };
-      cpu_usage: {
-        filter: AggregationOptionsByType['filter'];
-        aggs: { avg: { avg: AggregationOptionsByType['avg'] } };
-      };
-    };
-  },
-  {}
->;
+interface ServiceInstanceSystemMetricComparisonStatistics {
+  serviceNodeName: string;
+  cpuUsage: Coordinate[];
+  memoryUsage: Coordinate[];
+}
 
-type ComparisonStatistics = AggregationResultOf<
-  {
-    terms: AggregationOptionsByType['terms'];
-    aggs: {
-      memory_usage_cgroup: {
-        filter: AggregationOptionsByType['filter'];
-        aggs: {
-          avg: { avg: AggregationOptionsByType['avg'] };
-          timeseries: {
-            date_histogram: AggregationOptionsByType['date_histogram'];
-            aggs: { avg: { avg: AggregationOptionsByType['avg'] } };
-          };
-        };
-      };
-      memory_usage_system: {
-        filter: AggregationOptionsByType['filter'];
-        aggs: {
-          avg: { avg: AggregationOptionsByType['avg'] };
-          timeseries: {
-            date_histogram: AggregationOptionsByType['date_histogram'];
-            aggs: { avg: { avg: AggregationOptionsByType['avg'] } };
-          };
-        };
-      };
-      cpu_usage: {
-        filter: AggregationOptionsByType['filter'];
-        aggs: {
-          avg: { avg: AggregationOptionsByType['avg'] };
-          timeseries: {
-            date_histogram: AggregationOptionsByType['date_histogram'];
-            aggs: { avg: { avg: AggregationOptionsByType['avg'] } };
-          };
-        };
-      };
-    };
-  },
-  {}
->;
+type ServiceInstanceSystemMetricStatistics<T> = T extends true
+  ? ServiceInstanceSystemMetricComparisonStatistics
+  : ServiceInstanceSystemMetricPrimaryStatistics;
 
-async function getServiceInstanceSystemMetricStatistics<
+export async function getServiceInstanceSystemMetricStatistics<
   T extends true | false
 >({
   environment,
@@ -115,7 +65,7 @@ async function getServiceInstanceSystemMetricStatistics<
   kuery?: string;
   size?: number;
   isComparisonSearch: T;
-}): Promise<ObjectReturnType<T> | undefined> {
+}): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {
   const { apmEventClient } = setup;
 
   const { intervalString } = getBucketSize({ start, end, numBuckets });
@@ -209,7 +159,46 @@ async function getServiceInstanceSystemMetricStatistics<
     },
   });
 
-  return response.aggregations?.[SERVICE_NODE_NAME] as ObjectReturnType<T>;
+  return (
+    (response.aggregations?.[SERVICE_NODE_NAME].buckets.map(
+      (serviceNodeBucket) => {
+        const serviceNodeName = String(serviceNodeBucket.key);
+        const hasCGroupData =
+          serviceNodeBucket.memory_usage_cgroup.avg.value !== null;
+
+        const memoryMetricsKey = hasCGroupData
+          ? 'memory_usage_cgroup'
+          : 'memory_usage_system';
+
+        const cpuUsage =
+          // Timeseries is available when isComparisonSearch is true
+          'timeseries' in serviceNodeBucket.cpu_usage
+            ? serviceNodeBucket.cpu_usage.timeseries.buckets.map(
+                (dateBucket) => ({
+                  x: dateBucket.key,
+                  y: dateBucket.avg.value,
+                })
+              )
+            : serviceNodeBucket.cpu_usage.avg.value;
+
+        const memoryUsageValue = serviceNodeBucket[memoryMetricsKey];
+        const memoryUsage =
+          // Timeseries is available when isComparisonSearch is true
+          'timeseries' in memoryUsageValue
+            ? memoryUsageValue.timeseries.buckets.map((dateBucket) => ({
+                x: dateBucket.key,
+                y: dateBucket.avg.value,
+              }))
+            : serviceNodeBucket[memoryMetricsKey].avg.value;
+
+        return {
+          serviceNodeName,
+          cpuUsage,
+          memoryUsage,
+        };
+      }
+    ) as Array<ServiceInstanceSystemMetricStatistics<T>>) || []
+  );
 }
 
 export async function getServiceInstanceSystemMetricPrimaryStatistics(params: {
@@ -221,25 +210,10 @@ export async function getServiceInstanceSystemMetricPrimaryStatistics(params: {
   environment?: string;
   kuery?: string;
 }) {
-  const response = await getServiceInstanceSystemMetricStatistics({
+  return await getServiceInstanceSystemMetricStatistics({
     ...params,
     isComparisonSearch: false,
   });
-  return (
-    response?.buckets.map((serviceNodeBucket) => {
-      const hasCGroupData =
-        serviceNodeBucket.memory_usage_cgroup.avg.value !== null;
-
-      const memoryMetricsKey = hasCGroupData
-        ? 'memory_usage_cgroup'
-        : 'memory_usage_system';
-      return {
-        serviceNodeName: String(serviceNodeBucket.key),
-        cpuUsage: serviceNodeBucket.cpu_usage.avg.value,
-        memoryUsage: serviceNodeBucket[memoryMetricsKey].avg.value,
-      };
-    }) || []
-  );
 }
 
 export async function getServiceInstanceSystemMetricComparisonStatistics(params: {
@@ -252,39 +226,8 @@ export async function getServiceInstanceSystemMetricComparisonStatistics(params:
   environment?: string;
   kuery?: string;
 }) {
-  const response = await getServiceInstanceSystemMetricStatistics({
+  return await getServiceInstanceSystemMetricStatistics({
     ...params,
     isComparisonSearch: true,
   });
-
-  return (
-    response?.buckets.map((serviceNodeBucket) => {
-      const hasCGroupData =
-        serviceNodeBucket.memory_usage_cgroup.avg.value !== null;
-
-      const memoryMetricsKey = hasCGroupData
-        ? 'memory_usage_cgroup'
-        : 'memory_usage_system';
-
-      const cpuUsage = serviceNodeBucket.cpu_usage.timeseries.buckets.map(
-        (dateBucket) => ({
-          x: dateBucket.key,
-          y: dateBucket.avg.value,
-        })
-      );
-
-      const memoryUsage = serviceNodeBucket[
-        memoryMetricsKey
-      ].timeseries.buckets.map((dateBucket) => ({
-        x: dateBucket.key,
-        y: dateBucket.avg.value,
-      }));
-
-      return {
-        serviceNodeName: String(serviceNodeBucket.key),
-        cpuUsage,
-        memoryUsage,
-      };
-    }) || []
-  );
 }
