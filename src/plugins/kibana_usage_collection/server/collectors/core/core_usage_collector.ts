@@ -269,11 +269,10 @@ export function getCoreUsageCollector(
                 'Maximum size of the payload in bytes of saved objects that can be imported.',
             },
           },
-          maxImportExportSizeBytes: {
+          maxImportExportSize: {
             type: 'long',
             _meta: {
-              description:
-                'Maximum size in bytes of saved object that can be imported or exported.',
+              description: 'Maximum count of saved objects that can be imported or exported.',
             },
           },
         },
