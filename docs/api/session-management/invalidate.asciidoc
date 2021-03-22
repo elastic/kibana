@@ -21,16 +21,16 @@ To use the invalidate sessions API, you must be a `superuser`.
 ==== Request body
 
 `match`::
-(Required, string) Specifies how {kib} should determine which sessions should be invalidated. Can either be `all` to invalidate all existing sessions, or `query` to only invalidate sessions that match the query specified in the additional `query` parameter.
+(Required, string) Specifies how {kib} determines which sessions to invalidate. Can either be `all` to invalidate all existing sessions, or `query` to only invalidate sessions that match the query specified in the additional `query` parameter.
 
 `query`::
-(Optional, object) Specifies the query that {kib} should use to match the sessions that should be invalidated when `match` parameter is set to `query`. This parameter is forbidden if `match` is set to `all`.
+(Optional, object) Specifies the query that {kib} uses to match the sessions to invalidate when the `match` parameter is set to `query`. You cannot use this parameter if `match` is set to `all`.
 +
 .Properties of `query`
 [%collapsible%open]
 =====
 `provider` :::
-(Required, object) Describes the <<authentication-security-settings, authentication provider(s)>> for which to invalidate sessions.
+(Required, object) Describes the <<authentication-security-settings, authentication providers>> for which to invalidate sessions.
 
 `type` ::::
 (Required, string) The authentication provider `type`.
@@ -55,7 +55,7 @@ To use the invalidate sessions API, you must be a `superuser`.
   Indicates a successful call.
 
 `403`::
-  Indicates that the user may not be authorized to invalidate sessions for other users, refer to <<session-management-api-invalidate-prereqs, Prerequisite section>>.
+  Indicates that the user may not be authorized to invalidate sessions for other users. Refer to <<session-management-api-invalidate-prereqs, prerequisites>>.
 
 ==== Examples
 
