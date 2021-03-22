@@ -43,7 +43,7 @@ export function ExploratoryView() {
   }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
 
   return (
-    <EuiPanel style={{ maxWidth: 1600, minWidth: 1200, margin: '0 auto' }}>
+    <EuiPanel style={{ maxWidth: 1800, minWidth: 1200, margin: '0 auto' }}>
       <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
       {!indexPattern && (
         <SpinnerWrap>
@@ -57,8 +57,6 @@ export function ExploratoryView() {
           style={{ height: 550 }}
           timeRange={series?.time}
           attributes={lensAttributes}
-          onBrushEnd={(data) => {}}
-          onLoad={(val) => {}}
         />
       ) : (
         <EmptyView />

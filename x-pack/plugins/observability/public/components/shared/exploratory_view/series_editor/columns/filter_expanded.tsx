@@ -34,6 +34,8 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
 
   const [value, setValue] = useState('');
 
+  const [isOpen, setIsOpen] = useState({ value: '', negate: false });
+
   const {
     services: { data },
   } = useKibana<ObservabilityClientPluginsStart>();
@@ -51,7 +53,7 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
 
   const filters = series?.filters ?? [];
 
-  let currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
+  const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
 
   return (
     <>
@@ -83,6 +85,8 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
                 negate={true}
                 nestedField={nestedField}
                 seriesId={seriesId}
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
               />
               <FilterValueButton
                 field={field}
@@ -91,6 +95,8 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
                 nestedField={nestedField}
                 seriesId={seriesId}
                 negate={false}
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
               />
             </EuiFilterGroup>
             <EuiSpacer size="s" />

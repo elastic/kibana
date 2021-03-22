@@ -33,6 +33,14 @@ export type ReportViewTypeId = keyof typeof ReportViewTypes;
 
 export type ReportViewType = ValueOf<typeof ReportViewTypes>;
 
+export interface ReportDefinition {
+  field: string;
+  required?: boolean;
+  custom?: boolean;
+  defaultValue?: string;
+  options?: Array<{ field: string; label: string; description?: string }>;
+}
+
 export interface DataSeries {
   reportType: ReportViewType;
   id: string;
@@ -46,11 +54,7 @@ export interface DataSeries {
   defaultFilters: Array<string | { field: string; nested: string }>;
   seriesTypes: string[];
   filters?: ESFilter[];
-  reportDefinitions: {
-    field: string;
-    required?: boolean;
-    custom?: boolean;
-  }[];
+  reportDefinitions: ReportDefinition[];
   labels: Record<string, string>;
   metricType: boolean;
   palette?: Record<string, string>;

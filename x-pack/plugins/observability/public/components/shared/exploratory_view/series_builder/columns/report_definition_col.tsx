@@ -11,8 +11,9 @@ import { FieldValueSelection } from '../../../field_value_selection';
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
+import { CustomReportField } from '../custom_report_field';
 
-export const ReportDefinitionCol = () => {
+export function ReportDefinitionCol() {
   const { indexPattern } = useIndexPatternContext();
 
   const { series, setSeries } = useUrlStorage(NEW_SERIES_KEY);
@@ -42,34 +43,44 @@ export const ReportDefinitionCol = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {indexPattern &&
-        reportDefinitions.map(({ field }) => (
+        reportDefinitions.map(({ field, custom, options, defaultValue }) => (
           <EuiFlexItem key={field}>
-            <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <FieldValueSelection
-                  label={labels[field]}
-                  sourceField={field}
-                  indexPattern={indexPattern}
-                  value={reportDefinitions?.[field]}
-                  onChange={(val: string) => onChange(field, val)}
-                  filters={(filters ?? []).map(({ query }) => query)}
-                />
-              </EuiFlexItem>
-              {rtd?.[field] && (
+            {!custom ? (
+              <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    iconSide="right"
-                    iconType="cross"
-                    color="hollow"
-                    onClick={() => onRemove(field)}
-                  >
-                    {rtd?.[field]}
-                  </EuiBadge>
+                  <FieldValueSelection
+                    label={labels[field]}
+                    sourceField={field}
+                    indexPattern={indexPattern}
+                    value={reportDefinitions?.[field]}
+                    onChange={(val: string) => onChange(field, val)}
+                    filters={(filters ?? []).map(({ query }) => query)}
+                    time={series.time}
+                  />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+                {rtd?.[field] && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge
+                      iconSide="right"
+                      iconType="cross"
+                      color="hollow"
+                      onClick={() => onRemove(field)}
+                    >
+                      {rtd?.[field]}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            ) : (
+              <CustomReportField
+                field={field}
+                options={options}
+                defaultValue={defaultValue}
+                seriesId={NEW_SERIES_KEY}
+              />
+            )}
           </EuiFlexItem>
         ))}
     </EuiFlexGroup>
   );
-};
+}

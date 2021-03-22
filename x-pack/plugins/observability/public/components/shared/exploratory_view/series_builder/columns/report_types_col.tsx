@@ -11,10 +11,10 @@ import { ReportViewTypeId } from '../../types';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 
 interface Props {
-  reportTypes: { id: ReportViewTypeId; label: string }[];
+  reportTypes: Array<{ id: ReportViewTypeId; label: string }>;
 }
 
-export const ReportTypesCol = ({ reportTypes }: Props) => {
+export function ReportTypesCol({ reportTypes }: Props) {
   const {
     series: { reportType: selectedReportType, ...restSeries },
     setSeries,
@@ -39,7 +39,8 @@ export const ReportTypesCol = ({ reportTypes }: Props) => {
               } else {
                 setSeries(NEW_SERIES_KEY, {
                   ...restSeries,
-                  reportType: reportType,
+                  reportType,
+                  reportDefinitions: {},
                 });
               }
             }}
@@ -52,4 +53,4 @@ export const ReportTypesCol = ({ reportTypes }: Props) => {
   ) : (
     <EuiText color="subdued"> Select a data type to start building a series. </EuiText>
   );
-};
+}

@@ -56,8 +56,8 @@ export function PageViewsTrend() {
   );
 
   const analyzeHref = {
-    [serviceName + '-pgv']: {
-      rt: 'pgv',
+    [serviceName + '-kpi']: {
+      rt: 'kpi',
       serviceName,
       time: { from: start, to: end },
     },

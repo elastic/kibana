@@ -8,18 +8,25 @@
 import { DataSeries } from '../types';
 import { FieldLabels } from './constants';
 
+export const TRANSACTION_DURATION = 'transaction.duration.us';
+export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';
+export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';
+export const TBT_FIELD = 'transaction.experience.tbt';
+export const FID_FIELD = 'transaction.experience.fid';
+export const CLS_FIELD = 'transaction.experience.cls';
+
 interface Props {
   seriesId: string;
 }
 
-export function getPageLoadDistLensConfig({ seriesId }: Props): DataSeries {
+export function getPerformanceDistLensConfig({ seriesId }: Props): DataSeries {
   return {
     id: seriesId ?? 'unique-key',
     reportType: 'page-load-dist',
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar'],
     xAxisColumn: {
-      sourceField: 'transaction.duration.us',
+      sourceField: 'performance.metric',
     },
     yAxisColumn: {
       operationType: 'count',
@@ -49,11 +56,28 @@ export function getPageLoadDistLensConfig({ seriesId }: Props): DataSeries {
       {
         field: 'service.environment',
       },
+      {
+        field: 'performance.metric',
+        custom: true,
+        defaultValue: TRANSACTION_DURATION,
+        options: [
+          { label: 'Page load time', field: TRANSACTION_DURATION },
+          { label: 'First contentful paint', field: FCP_FIELD },
+          { label: 'Total blocking time', field: TBT_FIELD },
+          { label: 'Largest contentful paint', field: LCP_FIELD, description: 'Core web vital' },
+          { label: 'First input delay', field: FID_FIELD, description: 'Core web vital' },
+          { label: 'Cumulative layout shift', field: CLS_FIELD, description: 'Core web vital' },
+        ],
+      },
     ],
     filters: [
       { query: { match_phrase: { 'transaction.type': 'page-load' } } },
       { query: { match_phrase: { 'processor.event': 'transaction' } } },
     ],
-    labels: { ...FieldLabels, 'service.name': 'Web Application' },
+    labels: {
+      ...FieldLabels,
+      'service.name': 'Web Application',
+      [TRANSACTION_DURATION]: 'Page load time',
+    },
   };
 }

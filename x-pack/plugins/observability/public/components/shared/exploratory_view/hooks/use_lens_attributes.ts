@@ -28,21 +28,29 @@ export const useLensAttributes = ({
   const { breakdown, seriesType, metric: metricType, reportType, reportDefinitions = {} } =
     series ?? {};
 
-  const getFiltersFromDefs = () => {
-    return Object.entries(reportDefinitions).map(([field, value]) => ({
-      field,
-      values: [value],
-    })) as UrlFilter[];
-  };
-
-  const filters: UrlFilter[] = useMemo(() => {
-    return (series.filters ?? []).concat(getFiltersFromDefs());
-  }, [series.filters, reportDefinitions]);
-
   const dataViewConfig = getDefaultConfigs({
     seriesId,
     reportType,
   });
+
+  const filters: UrlFilter[] = useMemo(() => {
+    const getFiltersFromDefs = () => {
+      const rdfFilters = Object.entries(reportDefinitions).map(([field, value]) => {
+        return {
+          field,
+          values: [value],
+        };
+      }) as UrlFilter[];
+
+      // let's filter out custom fields
+      return rdfFilters.filter(({ field }) => {
+        const rdf = dataViewConfig.reportDefinitions.find(({ field: fd }) => field === fd);
+        return !rdf?.custom;
+      });
+    };
+
+    return (series.filters ?? []).concat(getFiltersFromDefs());
+  }, [series.filters, reportDefinitions]);
 
   return useMemo(() => {
     if (!indexPattern || !reportType) {
@@ -54,7 +62,8 @@ export const useLensAttributes = ({
       dataViewConfig,
       seriesType!,
       filters,
-      metricType
+      metricType,
+      reportDefinitions
     );
 
     if (breakdown) {
@@ -62,5 +71,14 @@ export const useLensAttributes = ({
     }
 
     return lensAttributes.getJSON();
-  }, [indexPattern, breakdown, seriesType, filters, metricType, reportType]);
+  }, [
+    indexPattern,
+    breakdown,
+    seriesType,
+    filters,
+    metricType,
+    reportType,
+    reportDefinitions,
+    dataViewConfig,
+  ]);
 };

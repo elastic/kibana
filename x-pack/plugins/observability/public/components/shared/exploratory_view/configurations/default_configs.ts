@@ -6,7 +6,7 @@
  */
 
 import { ReportViewTypes } from '../types';
-import { getPageLoadDistLensConfig } from './page_load_dist_config';
+import { getPerformanceDistLensConfig } from './performance_dist_config';
 import { getMonitorDurationConfig } from './monitor_duration_config';
 import { getServiceLatencyLensConfig } from './service_latency_config';
 import { getMonitorPingsConfig } from './monitor_pings_config';
@@ -25,7 +25,7 @@ interface Props {
 export const getDefaultConfigs = ({ reportType, seriesId }: Props) => {
   switch (ReportViewTypes[reportType]) {
     case 'page-load-dist':
-      return getPageLoadDistLensConfig({ seriesId });
+      return getPerformanceDistLensConfig({ seriesId });
     case 'kpi-trends':
       return getKPITrendsLensConfig({ seriesId });
     case 'uptime-duration':

@@ -17,14 +17,14 @@ import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
 import { RemoveSeries } from './columns/remove_series';
 
-export const SeriesEditor = () => {
+export function SeriesEditor() {
   const { allSeries, firstSeriesId } = useUrlStorage();
 
   const columns = [
     {
       name: 'Name',
       field: 'id',
-      width: '20%',
+      width: '15%',
       render: (val: string) => (
         <EuiText>
           <EuiIcon type="dot" color="green" size="l" />{' '}
@@ -37,7 +37,7 @@ export const SeriesEditor = () => {
           {
             name: 'Filter',
             field: 'defaultFilters',
-            width: '20%',
+            width: '25%',
             render: (defaultFilters: string[], series: DataSeries) => (
               <SeriesFilter defaultFilters={defaultFilters} seriesId={series.id} series={series} />
             ),
@@ -114,4 +114,4 @@ export const SeriesEditor = () => {
       <SeriesBuilder />
     </>
   );
-};
+}

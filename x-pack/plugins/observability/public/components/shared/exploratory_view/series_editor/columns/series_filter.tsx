@@ -18,7 +18,7 @@ import { FilterExpanded } from './filter_expanded';
 import { DataSeries } from '../../types';
 import { FieldLabels } from '../../configurations/constants';
 import { SelectedFilters } from '../selected_filters';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 
 interface Props {
   seriesId: string;
@@ -39,12 +39,14 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
   const [selectedField, setSelectedField] = useState<Field | null>(null);
 
   const options = defaultFilters.map((field) => {
-    if (typeof field == 'string') {
+    if (typeof field === 'string') {
       return { label: FieldLabels[field], field };
     }
     return { label: FieldLabels[field.field], field: field.field, nested: field.nested };
   });
   const disabled = seriesId === NEW_SERIES_KEY && !isNew;
+
+  const { setSeries, series: urlSeries } = useUrlStorage(seriesId);
 
   const button = (
     <EuiButtonEmpty
@@ -99,18 +101,34 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
   };
 
   return (
-    <EuiFlexGroup wrap direction="column" gutterSize="xs">
+    <EuiFlexGroup wrap direction="column" gutterSize="xs" alignItems="flexStart">
       {!disabled && <SelectedFilters seriesId={seriesId} series={series} isNew={isNew} />}
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={button}
           isOpen={isPopoverVisible}
           closePopover={closePopover}
-          anchorPosition="rightCenter"
+          anchorPosition="leftCenter"
         >
           {!selectedField ? mainPanel : childPanel}
         </EuiPopover>
       </EuiFlexItem>
+      {(urlSeries.filters ?? []).length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            flush="left"
+            color="text"
+            iconType="cross"
+            onClick={() => {
+              setSeries(seriesId, { ...urlSeries, filters: undefined });
+            }}
+            isDisabled={disabled}
+            size="s"
+          >
+            Clear filters
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

@@ -10,9 +10,14 @@ import {
   TypedLensByValueInput,
   XYState,
 } from '../../../../../../lens/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import {
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  IIndexPattern,
+} from '../../../../../../../../src/plugins/data/common';
 import { FieldLabels } from './constants';
 import { DataSeries, UrlFilter } from '../types';
+import { ESFilter } from '../../../../../../../../typings/elasticsearch';
 
 export class LensAttributes {
   indexPattern: IIndexPattern;
@@ -21,17 +26,20 @@ export class LensAttributes {
   filters: UrlFilter[];
   seriesType: string;
   reportViewConfig: DataSeries;
+  reportDefinitions: Record<string, string>;
 
   constructor(
     indexPattern: IIndexPattern,
     reportViewConfig: DataSeries,
     seriesType: string,
     filters: UrlFilter[],
-    metricType?: string
+    metricType?: string,
+    reportDefinitions?: Record<string, string>
   ) {
     this.indexPattern = indexPattern;
     this.layers = {};
     this.filters = filters ?? [];
+    this.reportDefinitions = reportDefinitions ?? {};
 
     if (typeof reportViewConfig.yAxisColumn.operationType !== undefined && metricType) {
       reportViewConfig.yAxisColumn.operationType = metricType;
@@ -75,7 +83,7 @@ export class LensAttributes {
   getNumberColumn(sourceField: string) {
     return {
       sourceField,
-      label: FieldLabels[sourceField],
+      label: this.reportViewConfig.labels[sourceField],
       dataType: 'number',
       operationType: 'range',
       isBucketed: true,
@@ -103,13 +111,24 @@ export class LensAttributes {
   getXAxis() {
     const { xAxisColumn } = this.reportViewConfig;
 
-    if (xAxisColumn.sourceField) {
-      const fieldMeta = this.indexPattern.fields.find(
-        (field) => field.name === xAxisColumn.sourceField
-      );
+    let xAxisField = xAxisColumn.sourceField;
+
+    if (xAxisField) {
+      const rdf = this.reportViewConfig.reportDefinitions ?? [];
+
+      const customField = rdf.find(({ field }) => field === xAxisField);
+
+      if (customField && this.reportDefinitions[xAxisField]) {
+        xAxisField = this.reportDefinitions[xAxisField];
+      }
+
+      const fieldMeta = this.indexPattern.fields.find((field) => field.name === xAxisField);
 
       if (fieldMeta?.type === 'date') {
-        return this.getDateHistogramColumn(xAxisColumn.sourceField);
+        return this.getDateHistogramColumn(xAxisField);
+      }
+      if (fieldMeta?.type === 'number') {
+        return this.getNumberColumn(xAxisField);
       }
     }
 
@@ -181,12 +200,29 @@ export class LensAttributes {
     const parsedFilters = this.reportViewConfig.filters ? [...defaultFilters] : [];
 
     this.filters.forEach(({ field, values = [], notValues = [] }) => {
-      values?.forEach((value) => {
-        parsedFilters.push({ query: { match_phrase: { [field]: value } } });
-      });
-      notValues?.forEach((value) => {
-        parsedFilters.push({ query: { match_phrase: { [field]: value } }, meta: { negate: true } });
-      });
+      const fieldMeta = this.indexPattern.fields.find((fieldT) => fieldT.name === field)!;
+
+      if (values?.length > 0) {
+        if (values?.length > 1) {
+          const multiFilter = buildPhrasesFilter(fieldMeta, values, this.indexPattern);
+          parsedFilters.push(multiFilter as ESFilter);
+        } else {
+          const filter = buildPhraseFilter(fieldMeta, values[0], this.indexPattern);
+          parsedFilters.push(filter as ESFilter);
+        }
+      }
+
+      if (notValues?.length > 0) {
+        if (notValues?.length > 1) {
+          const multiFilter = buildPhrasesFilter(fieldMeta, notValues, this.indexPattern);
+          multiFilter.meta.negate = true;
+          parsedFilters.push(multiFilter as ESFilter);
+        } else {
+          const filter = buildPhraseFilter(fieldMeta, notValues[0], this.indexPattern);
+          filter.meta.negate = true;
+          parsedFilters.push(filter as ESFilter);
+        }
+      }
     });
 
     return parsedFilters;

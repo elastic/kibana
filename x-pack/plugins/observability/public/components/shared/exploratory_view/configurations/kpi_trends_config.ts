@@ -27,10 +27,13 @@ export function getKPITrendsLensConfig({ seriesId }: Props): DataSeries {
     },
     metricType: false,
     defaultFilters: [
-      'user_agent.name',
       'user_agent.os.name',
       'client.geo.country_name',
       'user_agent.device.name',
+      {
+        field: 'user_agent.name',
+        nested: 'user_agent.version',
+      },
     ],
     breakdowns: [
       'user_agent.name',
@@ -51,6 +54,17 @@ export function getKPITrendsLensConfig({ seriesId }: Props): DataSeries {
       },
       {
         field: 'service.environment',
+      },
+      {
+        field: 'Business.KPI',
+        custom: true,
+        defaultValue: 'Records',
+        options: [
+          {
+            field: 'Records',
+            label: 'Page views',
+          },
+        ],
       },
     ],
   };

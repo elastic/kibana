@@ -5,37 +5,39 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
 import { FieldValueSelection } from '../../../field_value_selection';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
-import styled from 'styled-components';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 interface Props {
   value: string;
   field: string;
   allValues?: string[];
-  negate?: boolean;
+  negate: boolean;
   nestedField?: string;
   seriesId: string;
+  isOpen: {
+    value: string;
+    negate: boolean;
+  };
+  setIsOpen: (val: { value: string; negate: boolean }) => void;
 }
 
-export const FilterValueButton = ({
+export function FilterValueButton({
+  isOpen,
+  setIsOpen,
   value,
   field,
   allValues,
   negate,
   seriesId,
   nestedField,
-}: Props) => {
+}: Props) {
   const { series } = useUrlStorage(seriesId);
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const [selected, setSelected] = useState('any');
 
   const { indexPattern } = useIndexPatternContext();
 
@@ -54,9 +56,9 @@ export const FilterValueButton = ({
           setFilter({ field, value, negate });
         }
         if (!hasActiveFilters) {
-          setIsOpen((prevState) => !prevState);
+          setIsOpen({ value, negate });
         } else {
-          setIsOpen(false);
+          setIsOpen({ value: '', negate });
         }
       }}
       className=""
@@ -65,26 +67,33 @@ export const FilterValueButton = ({
     </FilterButton>
   );
 
-  const onNestedChange = (val: string) => {
-    console.log(val);
+  const onNestedChange = (val?: string) => {
+    setFilter({ field: nestedField!, value: val });
+    setIsOpen({ value: '', negate });
   };
 
   return nestedField ? (
     <FieldValueSelection
       button={button}
-      label={'Choose version'}
+      label={'Version'}
       indexPattern={indexPattern}
       sourceField={nestedField}
       onChange={onNestedChange}
-      filters={[]}
-      forceOpen={isOpen}
+      filters={[
+        {
+          term: {
+            [field]: value,
+          },
+        },
+      ]}
+      forceOpen={isOpen?.value === value && isOpen.negate === negate}
       anchorPosition="rightCenter"
       time={series.time}
     />
   ) : (
     button
   );
-};
+}
 
 const FilterButton = euiStyled(EuiFilterButton)`
   background-color: rgba(${(props) => {

@@ -6,6 +6,7 @@
  */
 
 import { AppDataType, ReportViewTypeId } from '../types';
+import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './performance_dist_config';
 
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': 'Browser family',
@@ -17,6 +18,12 @@ export const FieldLabels: Record<string, string> = {
   'service.name': 'Service Name',
   'service.environment': 'Environment',
 
+  [LCP_FIELD]: 'Largest contentful paint',
+  [FCP_FIELD]: 'First contentful paint',
+  [TBT_FIELD]: 'Total blocking time',
+  [FID_FIELD]: 'First input delay',
+  [CLS_FIELD]: 'Cumulative layout shift',
+
   'monitor.id': 'Monitor Id',
   'monitor.status': 'Monitor Status',
 
@@ -26,6 +33,11 @@ export const FieldLabels: Record<string, string> = {
   'monitor.type': 'Monitor Type',
   'url.port': 'Port',
   tags: 'Tags',
+
+  // custom
+
+  'performance.metric': 'Metric',
+  'Business.KPI': 'KPI',
 };
 
 export const DataViewLabels: Record<ReportViewTypeId, string> = {
