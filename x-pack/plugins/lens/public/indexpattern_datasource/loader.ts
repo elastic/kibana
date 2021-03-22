@@ -22,6 +22,7 @@ import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
   IndexPatternsContract,
+  IndexPattern as IndexPatternInstance,
   indexPatterns as indexPatternsUtils,
 } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
@@ -48,7 +49,17 @@ export async function loadIndexPatterns({
     return cache;
   }
 
-  const indexPatterns = await Promise.all(missingIds.map((id) => indexPatternsService.get(id)));
+  const allIndexPatterns = await Promise.allSettled(
+    missingIds.map((id) => indexPatternsService.get(id))
+  );
+  // ignore rejected indexpatterns here, they're already handled at the app level
+  const indexPatterns = allIndexPatterns
+    .filter(
+      (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
+        response.status === 'fulfilled'
+    )
+    .map((response) => response.value);
+
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
       const newFields = indexPattern.fields
@@ -201,13 +212,16 @@ export async function loadInitialState({
   options?: InitializationOptions;
 }): Promise<IndexPatternPrivateState> {
   const { isFullEditor } = options ?? {};
-  const indexPatternRefs = await (isFullEditor ? loadIndexPatternRefs(indexPatternsService) : []);
+  // make it explicit or TS will infer never[] and break few lines down
+  const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
+    ? loadIndexPatternRefs(indexPatternsService)
+    : []);
   const lastUsedIndexPatternId = getLastUsedIndexPatternId(storage, indexPatternRefs);
 
   const state =
     persistedState && references ? injectReferences(persistedState, references) : undefined;
 
-  const requiredPatterns = _.uniq(
+  const requiredPatterns: string[] = _.uniq(
     state
       ? Object.values(state.layers)
           .map((l) => l.indexPatternId)
@@ -217,11 +231,26 @@ export async function loadInitialState({
     // take out the undefined from the list
     .filter(Boolean);
 
-  const currentIndexPatternId = initialContext?.indexPatternId ?? requiredPatterns[0];
+  const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
+  // Priority list:
+  // * start with the indexPattern in context
+  // * then fallback to the required ones
+  // * then as last resort use a random one from the available list
+  const availableIndexPatternIds = [
+    initialContext?.indexPatternId,
+    ...requiredPatterns,
+    indexPatternRefs[0]?.id,
+  ].filter((id) => id != null && availableIndexPatterns.has(id));
+
+  const currentIndexPatternId = availableIndexPatternIds[0]!;
+
   if (currentIndexPatternId) {
     setLastUsedIndexPatternId(storage, currentIndexPatternId);
   }
 
+  if (!requiredPatterns.includes(currentIndexPatternId)) {
+    requiredPatterns.push(currentIndexPatternId);
+  }
   const indexPatterns = await loadIndexPatterns({
     indexPatternsService,
     cache: {},
@@ -263,13 +292,17 @@ export async function changeIndexPattern({
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
 }) {
-  try {
-    const indexPatterns = await loadIndexPatterns({
-      indexPatternsService,
-      cache: state.indexPatterns,
-      patterns: [id],
-    });
+  const indexPatterns = await loadIndexPatterns({
+    indexPatternsService,
+    cache: state.indexPatterns,
+    patterns: [id],
+  });
 
+  if (indexPatterns[id] == null) {
+    return onError(Error('Missing indexpatterns'));
+  }
+
+  try {
     setState((s) => ({
       ...s,
       layers: isSingleEmptyLayer(state.layers)
@@ -306,13 +339,16 @@ export async function changeLayerIndexPattern({
   storage: IStorageWrapper;
   indexPatternsService: IndexPatternsService;
 }) {
-  try {
-    const indexPatterns = await loadIndexPatterns({
-      indexPatternsService,
-      cache: state.indexPatterns,
-      patterns: [indexPatternId],
-    });
+  const indexPatterns = await loadIndexPatterns({
+    indexPatternsService,
+    cache: state.indexPatterns,
+    patterns: [indexPatternId],
+  });
+  if (indexPatterns[indexPatternId] == null) {
+    return onError(Error('Missing indexpatterns'));
+  }
 
+  try {
     setState((s) => ({
       ...s,
       layers: {
