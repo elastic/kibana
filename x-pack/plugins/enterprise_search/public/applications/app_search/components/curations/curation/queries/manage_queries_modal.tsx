@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SAVE } from '../../../../../shared/constants';
+
 import { CurationQueries } from '../../components';
 import { CurationLogic } from '../curation_logic';
 
@@ -61,9 +63,7 @@ export const ManageQueriesModal: React.FC = () => {
             <EuiSpacer />
             <CurationQueries
               queries={queries}
-              submitButtonText={i18n.translate('xpack.enterpriseSearch.actions.save', {
-                defaultMessage: 'Save',
-              })}
+              submitButtonText={SAVE}
               onSubmit={(newQueries) => {
                 updateQueries(newQueries);
                 hideModal();

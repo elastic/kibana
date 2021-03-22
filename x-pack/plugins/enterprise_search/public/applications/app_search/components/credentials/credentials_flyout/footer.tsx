@@ -18,6 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SAVE } from '../../../../shared/constants';
+
 import { CredentialsLogic } from '../credentials_logic';
 
 export const CredentialsFlyoutFooter: React.FC = () => {
@@ -46,9 +48,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
               ? i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.updateText', {
                   defaultMessage: 'Update',
                 })
-              : i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.saveText', {
-                  defaultMessage: 'Save',
-                })}
+              : SAVE}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

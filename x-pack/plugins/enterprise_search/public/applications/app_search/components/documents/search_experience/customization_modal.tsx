@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { SAVE } from '../../../../shared/constants';
+
 import { EngineLogic } from '../../engine';
 
 interface Props {
@@ -141,12 +143,7 @@ export const CustomizationModal: React.FC<Props> = ({
             });
           }}
         >
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.documents.search.customizationModal.save',
-            {
-              defaultMessage: 'Save',
-            }
-          )}
+          {SAVE}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
