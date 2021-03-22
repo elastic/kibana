@@ -617,17 +617,17 @@ export async function initRoutes(
         },
       },
       async (context, request, response) => {
-        try {
-          const result = await writeDataToIndex(
-            request.body.index,
-            request.body.data,
-            context.core.elasticsearch.client.asCurrentUser
-          );
+        const result = await writeDataToIndex(
+          request.body.index,
+          request.body.data,
+          context.core.elasticsearch.client.asCurrentUser
+        );
+        if (result.success) {
           return response.ok({ body: result });
-        } catch (error) {
-          logger.error(error.message);
+        } else {
+          logger.error(result.error);
           return response.custom({
-            body: error.message,
+            body: result.error.message,
             statusCode: 500,
           });
         }

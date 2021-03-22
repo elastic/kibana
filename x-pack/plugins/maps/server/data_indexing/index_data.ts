@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ElasticsearchClient } from 'kibana/server';
 import { WriteSettings } from '../../common';
 
@@ -14,6 +15,17 @@ export async function writeDataToIndex(
   asCurrentUser: ElasticsearchClient
 ) {
   try {
+    const { body: indexExists } = await asCurrentUser.indices.exists({ index });
+    if (!indexExists) {
+      throw new Error(
+        i18n.translate('xpack.maps.indexData.indexExists', {
+          defaultMessage: `Index: '{index}' not found. A valid index must be provided`,
+          values: {
+            index,
+          },
+        })
+      );
+    }
     const settings: WriteSettings = { index, body: data };
     const { body: resp } = await asCurrentUser.index(settings);
     if (resp.errors) {
