@@ -534,6 +534,21 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         delete properties[metaField];
       }
     });
+
+    // There is a bug in Elasticsearch API where epoch_millis are returned as a string instead of a number
+    // https://github.com/elastic/elasticsearch/issues/50622
+    // Convert these field values to integers.
+    this._getTooltipPropertyNames().forEach((fieldName) => {
+      const field = getField(indexPattern, fieldName);
+      if (
+        field.readFromDocValues &&
+        field.type === 'date' &&
+        typeof properties[fieldName] === 'string'
+      ) {
+        properties[fieldName] = parseInt(properties[fieldName] as string, 10);
+      }
+    });
+
     return properties;
   }
 
