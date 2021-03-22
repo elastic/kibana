@@ -26,7 +26,7 @@ describe('interpreter/functions#kibanaFilter', () => {
   });
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(null, { query: { name: 'test' } }, context);
+    const actual = fn(null, { query: '{ "name": "test" }' }, context);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
