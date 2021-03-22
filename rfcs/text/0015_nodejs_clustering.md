@@ -304,6 +304,12 @@ Identified options are:
 By using a broadcast message based mutex mechanism, the appenders could acquire a ‘lock’ to roll a specific file, and
 notify other workers when the rolling is complete (quite similar to what we want to do with SO migration for example).
 
+An alternative to this option would be to only have the main worker handle the rolling logic. We will lose control
+on the exact size the file is when rolling, as we would need to wait until the main worker receives a log message
+for the rolling appender before the rolling is effectively performed. The upside would be that it reduces the inter-workers
+communication to a notification from the main worker to the others once the rolling is done for them to reopen their
+file handler.
+
 2. have the coordinator process perform the rolling
 
 Another option would be to have the coordinator perform the rotation instead. When a rolling is required, the appender 
