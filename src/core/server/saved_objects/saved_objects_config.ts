@@ -28,7 +28,7 @@ export const savedObjectsConfig = {
   path: 'savedObjects',
   schema: schema.object({
     maxImportPayloadBytes: schema.byteSize({ defaultValue: 26214400 }),
-    maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
+    maxImportExportSize: schema.number({ defaultValue: 10000 }),
   }),
 };
 
@@ -43,7 +43,7 @@ export class SavedObjectConfig {
     rawMigrationConfig: SavedObjectsMigrationConfigType
   ) {
     this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
-    this.maxImportExportSize = rawConfig.maxImportExportSize.getValueInBytes();
+    this.maxImportExportSize = rawConfig.maxImportExportSize;
     this.migration = rawMigrationConfig;
   }
 }

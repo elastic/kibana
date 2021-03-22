@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
-import { APP_ID } from '../common';
+import { APP_ID } from '../common/constants';
 
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
