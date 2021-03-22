@@ -29,7 +29,7 @@ import {
   getFieldNames,
   getNameCollisionMsg,
 } from './utils';
-import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+import { FindFileStructureResponse } from '../../../../../../../file_upload/common';
 
 interface Props {
   addCombinedField: (combinedField: CombinedField) => void;
