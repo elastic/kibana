@@ -73,8 +73,8 @@ export interface RuleTypeParams extends AlertTypeParams {
   license: LicenseOrUndefined;
   outputIndex: OutputIndex;
   savedId?: SavedIdOrUndefined;
-  timelineId?: TimelineIdOrUndefined;
-  timelineTitle?: TimelineTitleOrUndefined;
+  timelineId: TimelineIdOrUndefined;
+  timelineTitle: TimelineTitleOrUndefined;
   meta: MetaOrUndefined;
   machineLearningJobId?: MachineLearningJobIdOrUndefined;
   query?: QueryOrUndefined;

@@ -223,18 +223,6 @@ describe('rules_notification_alert_type', () => {
       );
     });
 
-    it('should set a warning when exception list for threshold rule contains value list exceptions', async () => {
-      (getExceptions as jest.Mock).mockReturnValue([
-        getExceptionListItemSchemaMock({ entries: [getEntryListMock()] }),
-      ]);
-      payload = getPayload(getThresholdResult(), alertServices);
-      await alert.executor(payload);
-      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
-      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
-      );
-    });
-
     it('should set a warning when exception list for EQL rule contains value list exceptions', async () => {
       (getExceptions as jest.Mock).mockReturnValue([
         getExceptionListItemSchemaMock({ entries: [getEntryListMock()] }),

@@ -12,6 +12,7 @@ import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
 import * as t from 'io-ts';
+import { pickBy } from 'lodash/fp';
 import { validateNonExact } from '../../../../common/validate';
 import { toError, toPromise } from '../../../../common/fp_utils';
 
@@ -396,7 +397,8 @@ export const asTypeSpecificSO = <T extends t.Mixed>(
   ruleSO: SavedObject<RuleAlertAttributes>,
   schema: T
 ) => {
-  const [validated, errors] = validateNonExact(ruleSO.attributes.params, schema);
+  const nonNullParams = pickBy((value: unknown) => value !== null, ruleSO.attributes.params);
+  const [validated, errors] = validateNonExact(nonNullParams, schema);
   if (validated == null || errors != null) {
     throw new Error(`Rule attempted to execute with invalid params: ${errors}`);
   }
