@@ -9,6 +9,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DropType } from '../../../../types';
 
 const getExtraDrop = ({
   type,
@@ -46,7 +47,7 @@ const getExtraDrop = ({
   );
 };
 
-export const customDropTargetsMap = {
+const customDropTargetsMap: Partial<{ [dropType in DropType]: React.ReactElement }> = {
   replace_duplicate_incompatible: getExtraDrop({ type: 'duplicate', isIncompatible: true }),
   duplicate_incompatible: getExtraDrop({ type: 'duplicate', isIncompatible: true }),
   swap_incompatible: getExtraDrop({ type: 'swap', isIncompatible: true }),
@@ -54,6 +55,8 @@ export const customDropTargetsMap = {
   duplicate_compatible: getExtraDrop({ type: 'duplicate' }),
   swap_compatible: getExtraDrop({ type: 'swap' }),
 };
+
+export const getCustomDropTarget = (dropType: DropType) => customDropTargetsMap?.[dropType] || null;
 
 export const getAdditionalClassesOnEnter = (dropType?: string) => {
   if (

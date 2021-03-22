@@ -14,7 +14,7 @@ import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop
 
 import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../../types';
 import { LayerDatasourceDropProps } from '../types';
-import { customDropTargetsMap, getAdditionalClassesOnDroppable } from './drop_targets_utils';
+import { getCustomDropTarget, getAdditionalClassesOnDroppable } from './drop_targets_utils';
 
 const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
   defaultMessage: 'Empty dimension',
@@ -96,7 +96,7 @@ export function EmptyDimensionButton({
         order={[2, layerIndex, groupIndex, itemIndex]}
         onDrop={handleOnDrop}
         dropTypes={dropTypes}
-        customDropTargets={customDropTargetsMap}
+        getCustomDropTarget={getCustomDropTarget}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
           <EuiButtonEmpty

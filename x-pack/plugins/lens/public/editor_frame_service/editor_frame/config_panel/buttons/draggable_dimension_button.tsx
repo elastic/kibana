@@ -15,7 +15,7 @@ import {
 } from '../../../../types';
 import { LayerDatasourceDropProps } from '../types';
 import {
-  customDropTargetsMap,
+  getCustomDropTarget,
   getAdditionalClassesOnDroppable,
   getAdditionalClassesOnEnter,
 } from './drop_targets_utils';
@@ -119,7 +119,7 @@ export function DraggableDimensionButton({
       data-test-subj={group.dataTestSubj}
     >
       <DragDrop
-        customDropTargets={customDropTargetsMap}
+        getCustomDropTarget={getCustomDropTarget}
         getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         order={[2, layerIndex, groupIndex, accessorIndex]}

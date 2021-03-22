@@ -87,7 +87,7 @@ interface BaseProps {
   dragType?: 'copy' | 'move';
 
   /**
-   * Indicates the type of a drop - when undefined, the currently dragged item
+   * Indicates the type of drop targets - when undefined, the currently dragged item
    * cannot be dropped onto this component.
    */
   dropTypes?: DropType[];
@@ -98,7 +98,7 @@ interface BaseProps {
   /**
    * Extra drop targets by dropType
    */
-  customDropTargets?: Partial<{ [dropType in DropType]: ReactElement }>;
+  getCustomDropTarget?: (dropType: DropType) => ReactElement | null;
 }
 
 /**
@@ -206,7 +206,7 @@ export const DragDrop = (props: BaseProps) => {
   return <DropsInner {...dropProps} />;
 };
 
-const removeSelectionBeforeDragging = () => {
+const removeSelection = () => {
   const selection = window.getSelection();
   if (selection) {
     selection.removeAllRanges();
@@ -421,7 +421,7 @@ const DragInner = memo(function DragInner({
         draggable: true,
         onDragEnd: dragEnd,
         onDragStart: dragStart,
-        onMouseDown: removeSelectionBeforeDragging,
+        onMouseDown: removeSelection,
       })}
     </div>
   );
@@ -448,14 +448,14 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     setKeyboardMode,
     setDragging,
     setA11yMessage,
-    customDropTargets,
+    getCustomDropTarget,
   } = props;
 
   const [isInZone, setIsInZone] = useState(false);
   const [activeDropType, setActiveDropType] = useState<DropType | undefined>(undefined);
 
-  const firstDropRef = useRef<HTMLDivElement>(null);
-  const extraDropsHeightRef = useRef<HTMLDivElement>(null);
+  const mainTargetRef = useRef<HTMLDivElement>(null);
+  const extraDropsRef = useRef<HTMLDivElement>(null);
 
   useShallowCompareEffect(() => {
     if (dropTypes && onDrop && keyboardMode) {
@@ -483,27 +483,30 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
 
   const dragEnter = () => setIsInZone(true);
 
-  const dragOver = (e: DroppableEvent, dropType?: DropType) => {
-    if (!dropType) {
-      return;
-    }
-
-    e.preventDefault();
+  const handleKeyModifiers = (e: DroppableEvent, dropType?: DropType) => {
     let nextActiveDropType = dropType;
     if (e.altKey && dropTypes?.[1]) {
       nextActiveDropType = dropTypes[1];
     } else if (e.shiftKey && dropTypes?.[2]) {
       nextActiveDropType = dropTypes[2];
     }
-    const isPrimaryDropType = dropTypes?.[0] === dropType;
+    const isMainTarget = dropTypes?.[0] === dropType;
 
     if (nextActiveDropType !== activeDropType) {
-      if (isPrimaryDropType) {
+      if (isMainTarget) {
         setActiveDropType(nextActiveDropType);
       } else {
         setActiveDropType(dropType);
       }
     }
+  };
+
+  const dragOver = (e: DroppableEvent, dropType?: DropType) => {
+    if (!dropType) {
+      return;
+    }
+    e.preventDefault();
+    handleKeyModifiers(e, dropType);
 
     const isActiveDropTarget = Boolean(
       activeDropTarget?.id === value.id && activeDropType === activeDropTarget?.dropType
@@ -571,13 +574,8 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
   };
 
   const getMainTargetClasses = () => {
-    if (!activeDropTarget) {
-      return;
-    }
-    const activeDropTargetIdMatches = Boolean(activeDropTarget?.id === value.id);
-    const classesOnEnter = getAdditionalClassesOnEnter?.(activeDropTarget.dropType);
-    const classes = classNames(classesOnEnter && { [classesOnEnter]: activeDropTargetIdMatches });
-    return classes;
+    const classesOnEnter = getAdditionalClassesOnEnter?.(activeDropTarget?.dropType);
+    return classNames(classesOnEnter && { [classesOnEnter]: activeDropTarget?.id === value.id });
   };
 
   const mainTargetProps = getProps(dropTypes && dropTypes[0]);
@@ -590,7 +588,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
           : 'lnsDragDrop__container'
       }
       onDragEnter={dragEnter}
-      ref={firstDropRef}
+      ref={mainTargetRef}
     >
       <SingleDropInner
         {...mainTargetProps}
@@ -598,51 +596,46 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
         children={children}
       />
       {dropTypes && dropTypes.length > 1 && (
-        <div
-          className="lnsDragDrop__diamondPath"
-          style={(() => {
-            const height = extraDropsHeightRef.current?.clientHeight || 40;
-            const minHeight = height - (firstDropRef.current?.clientHeight || 40);
+        <>
+          <div
+            className="lnsDragDrop__diamondPath"
+            style={(() => {
+              const height = extraDropsRef.current?.clientHeight || 40;
+              const minHeight = height - (mainTargetRef.current?.clientHeight || 40);
 
-            const clipPath = `polygon(100% ${minHeight * 0.5}px, 100% ${
-              height - minHeight * 0.5
-            }px, 0 100%, 0 0)`;
-            return {
-              height,
-              clipPath,
-            };
-          })()}
-          onDragEnter={dragEnter}
-        />
+              const clipPath = `polygon(100% ${minHeight * 0.5}px, 100% ${
+                height - minHeight * 0.5
+              }px, 0 100%, 0 0)`;
+              return {
+                height,
+                clipPath,
+              };
+            })()}
+            onDragEnter={dragEnter}
+          />
+          <EuiFlexGroup
+            gutterSize="s"
+            ref={extraDropsRef}
+            direction="column"
+            className={
+              isInZone || activeDropTarget?.id === value.id
+                ? 'lnsDragDrop__extraDrops  lnsDragDrop__extraDrops-visible'
+                : 'lnsDragDrop__extraDrops'
+            }
+          >
+            {dropTypes.slice(1).map((dropType) => {
+              const dropChildren = getCustomDropTarget?.(dropType);
+              return dropChildren ? (
+                <EuiFlexItem key={dropType} className="lnsDragDrop__container">
+                  <SingleDropInner {...getProps(dropType, dropChildren)}>
+                    {dropChildren}
+                  </SingleDropInner>
+                </EuiFlexItem>
+              ) : null;
+            })}
+          </EuiFlexGroup>
+        </>
       )}
-      <EuiFlexGroup
-        gutterSize="s"
-        ref={extraDropsHeightRef}
-        direction="column"
-        className={
-          isInZone || activeDropTarget?.id === value.id
-            ? 'lnsDragDrop__extraDrops  lnsDragDrop__extraDrops-visible'
-            : 'lnsDragDrop__extraDrops'
-        }
-      >
-        {dropTypes &&
-          dropTypes.length > 1 &&
-          dropTypes.slice(1).map((dropType) => {
-            const dropChildren = dropType && customDropTargets?.[dropType];
-
-            const singleDropProps = getProps(dropType, dropChildren);
-            return dropChildren ? (
-              <EuiFlexItem key={dropType} className="lnsDragDrop__container">
-                <SingleDropInner
-                  {...singleDropProps}
-                  style={{ minWidth: (firstDropRef.current?.clientWidth || 150) * 0.7 }}
-                >
-                  {dropChildren}
-                </SingleDropInner>
-              </EuiFlexItem>
-            ) : null;
-          })}
-      </EuiFlexGroup>
     </div>
   );
 });
