@@ -7,10 +7,10 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CreateCaseProps } from './components/create';
+import { CreateCaseProps } from '../components/create';
 
 export const getCreateCaseLazy = (props: CreateCaseProps) => {
-  const CreateCaseLazy = lazy(() => import('./components/create'));
+  const CreateCaseLazy = lazy(() => import('../components/create'));
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CreateCaseLazy {...props} />
