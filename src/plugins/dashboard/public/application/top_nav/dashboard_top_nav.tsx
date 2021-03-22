@@ -566,14 +566,14 @@ export function DashboardTopNav({
   const quickButtons = [
     {
       iconType: 'visText',
-      createType: i18n.translate('dashboard.panelToolbar.markdownQuickButtonLabel', {
+      createType: i18n.translate('dashboard.solutionToolbar.markdownQuickButtonLabel', {
         defaultMessage: 'Markdown',
       }),
       onClick: createNewVisType('markdown'),
     },
     {
       iconType: 'controlsHorizontal',
-      createType: i18n.translate('dashboard.panelToolbar.markdownQuickButtonLabel', {
+      createType: i18n.translate('dashboard.solutionToolbar.inputControlsQuickButtonLabel', {
         defaultMessage: 'Input control',
       }),
       onClick: createNewVisType('input_control_vis'),
@@ -588,7 +588,7 @@ export function DashboardTopNav({
           {{
             primaryActionButton: (
               <PrimaryActionButton
-                label={i18n.translate('dashboard.panelToolbar.addPanelButtonLabel', {
+                label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
                   defaultMessage: 'Create panel',
                 })}
                 onClick={createNew}
