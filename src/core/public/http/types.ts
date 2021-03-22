@@ -327,7 +327,7 @@ export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
 }
 
 /** @public */
-export interface IHttpFetchError extends Error {
+export interface IHttpFetchError<ErrorBody = any> extends Error {
   readonly name: string;
   readonly request: Request;
   readonly response?: Response;
@@ -339,7 +339,7 @@ export interface IHttpFetchError extends Error {
    * @deprecated Provided for legacy compatibility. Prefer the `response` property instead.
    */
   readonly res?: Response;
-  readonly body?: any;
+  readonly body?: ErrorBody;
 }
 
 /** @public */
