@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
@@ -15,11 +14,14 @@ import {
   removeServerGeneratedPropertiesFromCase,
 } from '../../../../common/lib/mock';
 import { deleteCases } from '../../../../common/lib/utils';
+import { secOnly, secOnlyRead } from '../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('post_case', () => {
     afterEach(async () => {
@@ -80,6 +82,41 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         })
         .expect(400);
+    });
+
+    describe('rbac', () => {
+      describe('Permissions: all', () => {
+        it('User: security solution only - should create a case', async () => {
+          const { body: theCase } = await supertestWithoutAuth
+            .post(CASES_URL)
+            .auth(secOnly.username, secOnly.password)
+            .set('kbn-xsrf', 'true')
+            .send(postCaseReq)
+            .expect(200);
+
+          expect(theCase.class).to.eql('securitySolution');
+        });
+
+        it('User: security solution only - should NOT create a case of different class', async () => {
+          await supertestWithoutAuth
+            .post(CASES_URL)
+            .auth(secOnly.username, secOnly.password)
+            .set('kbn-xsrf', 'true')
+            .send({ ...postCaseReq, class: 'observability' })
+            .expect(403);
+        });
+      });
+
+      describe('Permissions: read', () => {
+        it('User: security solution only - should NOT create a case', async () => {
+          await supertestWithoutAuth
+            .post(CASES_URL)
+            .auth(secOnlyRead.username, secOnlyRead.password)
+            .set('kbn-xsrf', 'true')
+            .send(postCaseReq)
+            .expect(403);
+        });
+      });
     });
   });
 };

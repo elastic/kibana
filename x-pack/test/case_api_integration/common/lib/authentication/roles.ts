@@ -65,6 +65,28 @@ export const securitySolutionOnlyAll: Role = {
   },
 };
 
+export const securitySolutionOnlyRead: Role = {
+  name: 'sec_only_all',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const observabilityOnlyAll: Role = {
   name: 'sec_only_all',
   privileges: {
@@ -90,9 +112,36 @@ export const observabilityOnlyAll: Role = {
   },
 };
 
+export const observabilityOnlyRead: Role = {
+  name: 'sec_only_all',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          logs: ['read'],
+          infrastructure: ['read'],
+          apm: ['read'],
+          uptime: ['read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const roles = [
   noKibanaPrivileges,
   globalRead,
   securitySolutionOnlyAll,
+  securitySolutionOnlyRead,
   observabilityOnlyAll,
+  observabilityOnlyRead,
 ];
