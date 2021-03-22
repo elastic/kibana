@@ -7,6 +7,7 @@
 
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import semverGt from 'semver/functions/gt';
 import {
   EuiButtonEmpty,
   EuiDescribedFormGroup,
@@ -38,6 +39,8 @@ import { DataStreamsGlobalStateCallOut } from './data_streams_global_state_call_
 
 import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
 
+import { SystemIndicesOverwrittenCallOut } from './system_indices_overwritten_callout';
+
 export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = ({
   snapshotDetails,
   restoreSettings,
@@ -50,6 +53,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
     indices: unfilteredSnapshotIndices,
     dataStreams: snapshotDataStreams = [],
     includeGlobalState: snapshotIncludeGlobalState,
+    version,
   } = snapshotDetails;
 
   const snapshotIndices = unfilteredSnapshotIndices.filter(
@@ -564,11 +568,23 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
           </EuiTitle>
         }
         description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
-            defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-              templates with the same name. Also restores persistent settings."
-          />
+          <>
+            <FormattedMessage
+              id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
+              defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
+              templates with the same name. Also restores persistent settings and all system indices."
+            />
+
+            {/* Only display callout if include global state is enabled and the snapshot was created by ES 7.12.0+
+             * Note: Once we support features states in the UI, we will also need to add a check here for that
+             */}
+            {includeGlobalState && semverGt(version, '7.12.0') && (
+              <>
+                <EuiSpacer size="xs" />
+                <SystemIndicesOverwrittenCallOut />
+              </>
+            )}
+          </>
         }
         fullWidth
       >
@@ -594,6 +610,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             checked={includeGlobalState === undefined ? false : includeGlobalState}
             onChange={(e) => updateRestoreSettings({ includeGlobalState: e.target.checked })}
             disabled={!snapshotIncludeGlobalState}
+            data-test-subj="includeGlobalStateSwitch"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
