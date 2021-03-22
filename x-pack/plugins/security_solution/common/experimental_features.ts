@@ -13,13 +13,13 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  */
 const allowedExperimentalValues = Object.freeze({
   fleetServerEnabled: false,
-  trustedAppsByPolicy: false,
 });
 
-const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ConfigValue>;
-
-type ConfigValue = Array<keyof ExperimentalFeatures>;
+type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
+
+const SecuritySolutionInvalidExperimentalValue = class extends Error {};
+const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
 /**
  * Parses the string value used in `xpack.securitySolution.enableExperimental` kibana configuration,
@@ -28,11 +28,15 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
  * @param configValue
  * @throws SecuritySolutionInvalidExperimentalValue
  */
-export const parseExperimentalConfigValue = (configValue: ConfigValue): ExperimentalFeatures => {
+export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
 
   for (const value of configValue) {
-    enabledFeatures[value] = true;
+    if (!isValidExperimentalValue(value)) {
+      throw new SecuritySolutionInvalidExperimentalValue(`[${value}] is not valid.`);
+    }
+
+    enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
   return {

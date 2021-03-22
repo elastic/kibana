@@ -21,7 +21,7 @@ export const createMockConfig = (): ConfigType => ({
   maxRuleImportPayloadBytes: 10485760,
   maxTimelineImportExportSize: 10000,
   maxTimelineImportPayloadBytes: 10485760,
-  enableExperimental: '',
+  enableExperimental: [],
   endpointResultListDefaultFirstPageIndex: 0,
   endpointResultListDefaultPageSize: 10,
   alertResultListDefaultDateRange: {
