@@ -201,7 +201,7 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
         />
       </span>
     ) : null}
-    {!field.isMapped ? (
+    {!field.isMapped && field.hasRuntime ? (
       <span>
         &nbsp;
         <EuiIconTip
