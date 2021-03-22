@@ -41,7 +41,18 @@ Geo containment alerts and the Geo threshold alert type have similar functionali
 *Impact* +
 Use Geo containment alerts.
 ====
-      
+
+[discrete]
+[[breaking-so-upgrade-migrations]]
+.New saved object upgrade migrations algorithm
+[%collapsible]
+====
+*Details* +
+When upgrading to 7.12.0, {kib} will use a new algorithm for performing saved object migrations. The new algorithm  enables {kib} to retry a failed migration without any user intervention. This can reduce downtime caused by temporary errors such as a bad network or temporarily overloaded {es} cluster because the upgrade migration will be able to proceed as soon as the underlying problem is resolved. For more information see <<upgrade-migrations, saved object upgrade migrations>>
+*Impact* +
+To rollback to an earlier version after upgrading to 7.12.0 requires different steps to previous versions of {kib}. Before upgrading, please carefully review the documentation for <<upgrade-migrations-rolling-back, rolling back to a previous version of {kib}>>
+====
+
 // end::notable-breaking-changes[]
 
 [float]
