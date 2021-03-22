@@ -113,8 +113,8 @@ Omit this section if it's not applicable. -->
 | Customization                        | TODO    | Yes       | No             | TODO     |
 | Core functionality is first-party    | TODO    | Mostly    | TODO           | TODO     |
 | First-class support for test results | Buggy   | No        | No             | TODO     |
-| GitHub Integration                   | Yes     | Simple    | Yes            | TODO     |
-| Local testing / reproduction?        |         | TODO      | TODO           | TODO     |
+| GitHub Integration                   | Yes     | Limited   | Yes            | TODO     |
+| Local testing / reproduction?        | TODO    | TODO      | TODO           | TODO     |
 
 # Motivation
 
