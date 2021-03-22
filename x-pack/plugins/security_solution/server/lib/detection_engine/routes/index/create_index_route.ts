@@ -85,6 +85,7 @@ export const createDetectionIndex = async (
   if (indexExists) {
     const indexVersion = await getIndexVersion(esClient, index);
     if (isOutdated({ current: indexVersion, target: SIGNALS_TEMPLATE_VERSION })) {
+      // @ts-expect-error @elastic/elasticsearch doesn't accept alias as a string
       await esClient.indices.rollover({ alias: index });
     }
   } else {
