@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { StepDefineFormHook } from '../step_define';
 import { isRuntimeMappings } from '../step_define/common/types';
+import { isEmptyObject } from '../../../../../../common/utils/object_utils';
 
 export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappingsEditor']> = memo(
   ({
@@ -44,8 +45,12 @@ export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappin
           // Try to parse the string passed on from the editor.
           // If parsing fails, the "Apply"-Button will be disabled
           try {
-            const parsedJson = JSON.parse(convertToJson(d));
-            setRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(parsedJson));
+            // if the user deletes the json in the editor
+            // they should still be able to apply changes
+            const parsedJson = d === '' ? {} : JSON.parse(convertToJson(d));
+            setRuntimeMappingsEditorApplyButtonEnabled(
+              isEmptyObject(parsedJson) || isRuntimeMappings(parsedJson)
+            );
           } catch (e) {
             setRuntimeMappingsEditorApplyButtonEnabled(false);
           }
