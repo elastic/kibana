@@ -362,6 +362,9 @@ export class SearchEmbeddable
       });
     } catch (error) {
       this.updateOutput({ loading: false, error });
+      this.searchScope.$apply(() => {
+        this.searchScope!.isLoading = false;
+      });
     }
   };
 
