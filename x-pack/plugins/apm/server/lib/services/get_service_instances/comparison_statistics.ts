@@ -12,8 +12,8 @@ import { joinByKey } from '../../../../common/utils/join_by_key';
 import { offsetPreviousPeriodCoordinates } from '../../../utils/offset_previous_period_coordinate';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getServiceInstanceSystemMetricComparisonStatistics } from './get_service_instance_system_metric_statistics';
-import { getServiceInstanceTransactionComparisonStatistics } from './get_service_instance_transaction_statistics';
+import { getServiceInstancesSystemMetricComparisonStatistics } from './get_service_instances_system_metric_statistics';
+import { getServiceInstancesTransactionComparisonStatistics } from './get_service_instances_transaction_statistics';
 
 interface ServiceInstanceComparisonStatisticsParams {
   environment?: string;
@@ -45,8 +45,8 @@ async function getServiceInstancesComparisonStatistics(
     'get_service_instances_comparison_statistics',
     async () => {
       const [transactionStats, systemMetricStats = []] = await Promise.all([
-        getServiceInstanceTransactionComparisonStatistics(params),
-        getServiceInstanceSystemMetricComparisonStatistics(params),
+        getServiceInstancesTransactionComparisonStatistics(params),
+        getServiceInstancesSystemMetricComparisonStatistics(params),
       ]);
 
       const stats = joinByKey(

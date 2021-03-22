@@ -9,8 +9,8 @@ import { LatencyAggregationType } from '../../../../common/latency_aggregation_t
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getServiceInstanceSystemMetricPrimaryStatistics } from './get_service_instance_system_metric_statistics';
-import { getServiceInstanceTransactionPrimaryStatistics } from './get_service_instance_transaction_statistics';
+import { getServiceInstancesSystemMetricPrimaryStatistics } from './get_service_instances_system_metric_statistics';
+import { getServiceInstancesTransactionPrimaryStatistics } from './get_service_instances_transaction_statistics';
 
 interface ServiceInstancePrimaryStatisticsParams {
   environment?: string;
@@ -44,8 +44,8 @@ export async function getServiceInstancesPrimaryStatistics(
     };
 
     const [transactionStats, systemMetricStats] = await Promise.all([
-      getServiceInstanceTransactionPrimaryStatistics(paramsForSubQueries),
-      getServiceInstanceSystemMetricPrimaryStatistics(paramsForSubQueries),
+      getServiceInstancesTransactionPrimaryStatistics(paramsForSubQueries),
+      getServiceInstancesSystemMetricPrimaryStatistics(paramsForSubQueries),
     ]);
 
     const stats = joinByKey(
