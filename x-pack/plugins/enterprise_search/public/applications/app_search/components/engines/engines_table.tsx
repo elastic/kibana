@@ -177,6 +177,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         ),
         type: 'icon',
         icon: 'trash',
+        color: 'danger',
         onClick: (engine) => {
           if (
             window.confirm(
