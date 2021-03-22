@@ -6,7 +6,7 @@
  */
 
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
-import { BaseRuleParams, ThresholdRuleParams } from './rule_schemas';
+import { BaseRuleParams, EqlRuleParams, ThresholdRuleParams } from './rule_schemas';
 
 const getBaseRuleParams = (): BaseRuleParams => {
   return {
@@ -51,5 +51,17 @@ export const getThresholdRuleParams = (): ThresholdRuleParams => {
       field: 'host.id',
       value: 5,
     },
+  };
+};
+
+export const getEqlRuleParams = (): EqlRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'eql',
+    language: 'eql',
+    index: ['some-index'],
+    query: 'any where true',
+    filters: undefined,
+    eventCategoryOverride: undefined,
   };
 };

@@ -90,6 +90,7 @@ export const eqlExecutor = async ({
     ruleParams.eventCategoryOverride
   );
   const eqlSignalSearchStart = performance.now();
+  // TODO: fix this later
   const { body: response } = (await services.scopedClusterClient.asCurrentUser.transport.request(
     request
   )) as ApiResponse<EqlSignalSearchResponse>;

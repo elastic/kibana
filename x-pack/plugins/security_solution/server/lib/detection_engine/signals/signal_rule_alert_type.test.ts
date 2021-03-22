@@ -7,12 +7,7 @@
 
 import moment from 'moment';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import {
-  getResult,
-  getMlResult,
-  getThresholdResult,
-  getEqlResult,
-} from '../routes/__mocks__/request_responses';
+import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
@@ -29,7 +24,6 @@ import { getListClientMock } from '../../../../../lists/server/services/lists/li
 import { getExceptionListClientMock } from '../../../../../lists/server/services/exception_lists/exception_list_client.mock';
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
@@ -220,18 +214,6 @@ describe('rules_notification_alert_type', () => {
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();
       expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'Missing required read privileges on the following indices: ["some*"]'
-      );
-    });
-
-    it('should set a warning when exception list for EQL rule contains value list exceptions', async () => {
-      (getExceptions as jest.Mock).mockReturnValue([
-        getExceptionListItemSchemaMock({ entries: [getEntryListMock()] }),
-      ]);
-      payload = getPayload(getEqlResult(), alertServices);
-      await alert.executor(payload);
-      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
-      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
       );
     });
 
