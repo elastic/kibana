@@ -1,436 +1,222 @@
-[[create-a-dashboard-of-panels-with-web-server-data]]
-== Tutorial: Create a dashboard of panels with web server data
+[[lens]]
+=== Lens
 
-You collected data from your web server, and you want to visualize and analyze the data on a dashboard. To create dashboard panels of the data, open the *Lens* visualization builder, then  
-create the visualization panels that best display the data.
+To create visualizations with *Lens*, you drag and drop data fields onto the visualization builder, 
+then *Lens* uses heuristics to apply each field. 
 
-[discrete]
-[[add-the-data-and-create-the-dashboard]]
-=== Add the data and create the dashboard
-
-To create visualizations of the data from the web server, add the data set, then create the dashboard.
-
-. From the {kib} *Home* page, click *Try our sample data*.
-
-. From *Sample web logs*, click *Add data*.
-
-. Open the main menu, click *Dashboard*.
-
-. Click *Create dashboard*.
+[role="screenshot"]
+image:dashboard/images/lens.png[Lens]
 
 [float]
-[[open-and-set-up-lens]]
-=== Open and set up Lens
+[[lens-required-choices]]
+==== Open and set up Lens
 
-With *Lens*, you identify the data fields you want to visualize, drag and drop the fields, then watch as
-*Lens* uses heuristics to apply the fields and create a visualization for you.
+Open *Lens*, then explore the fields in your data. The list of fields are determined by the index pattern and time filter.
 
-. From the dashboard, click *Create panel*.
+. On the dashboard, click *Create panel*.
 
 . On the *New visualization* window, click *Lens*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_1.png[New visualization popover]
 
-. Make sure the *kibana_sample_data_logs* index appears.
+. <<set-time-filter,Set the time filter>>. 
+
+. To view the fields in the a different index pattern, click the index pattern, then select a different index pattern from the dropdown.
+
+. Scan through the list of fields to see what’s in your data.
 +
-The list of fields are dependent on the <<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters. 
+TIP: For sparse datasets, *Empty fields* can contain data, which you can use to create visualizations.
+
+. To filter the data fields, use the following options:
+
+* Enter the field name in the *Search field names* field. 
+
+* Click *Field by type*, then select the filter. To show all fields in the index pattern, deselect *Only show fields with data*.
 
 [float]
 [[view-the-data-summaries]]
-=== View the data summaries
+===== View the data summaries
 
-For each field, *Lens* shows a summary depending on the type of data. Date fields show the time distribution, string fields show the top 10 values, 
-and numeric fields show a detailed summary with the top 10 values and a value distribution.
+For each field, *Lens* displays a summary depending on the type of data. To analyze the fields, *Lens* uses a sample of 5,000 documents. 
+Each summary displays the percentage of sampled documents over all available documents.
 
-To view the data summary for a field, click *i* next to the field.
+To view a data summary, click *i* next to the field.
 
 [role="screenshot"]
 image::images/lens_data_info_documents.png[Data summary analyzed documents]
 
-*Lens* uses a sample of 5,000 documents to perform the field analysis. The bottom line of the summary shows the percentage of sampled documents over all available documents.
+Each data type display the following summaries:
 
-When *Lens* presents the top 10 values distribution, it also shows the percentage of *Other* values. For array value fields, the percentage distribution considers each value in the array as separate.
+* *Date* &mdash; Displays the time distribution.
 
-[role="screenshot"]
-image::images/lens_data_info.png[Data summary window with Other]
+* *String* &mdash; Displays the top 10 values.
 
-NOTE: The sum of all the *Other* fields can equal more than 100% by a small amount.
+* *Numeric* &mdash; Displays the top 10 values and a value distribution. When *Lens* displays the top 10 values distribution, the percentage of *Other* values is also displayed. 
+For array value fields, the percentage distribution considers each value in the array as separate.
 
-[discrete]
-[[view-the-number-of-website-visitors]]
-=== View the number of website visitors
-
-To determine how many users have visited your website within the last 90 days, create a metric visualization, then add it to the dashboard.
-
-. Set the <<set-time-filter,time filter>> to *Last 90 days*.
-
-. From the *Chart Type* dropdown, select *Metric*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_2_1.png[Chart Type dropdown with Metric selected]
-
-. From the *Available fields* list, drag and drop *clientip* to the visualization builder.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_3.png[Changed type and dropped clientip field]
-
-. From the editor, click *Unique count of clientip*.
-
-.. In the *Display name* field, enter `Unique visitors`.
-
-.. Click *Close*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_4.png[Flyout config open]
-
-. *Save* the panel, enter `Unique visitors` in the *Title* field, then add the panel to the dashboard.
-
-[discrete]
-[[view-the-distribution-of-visitors-by-operating-system]]
-=== View the distribution of visitors by operating system
-
-To determine the operating systems you should continue to support, and the importance of mobile traffic from iOS devices, 
-create a donut chart that displays the top operating systems that your visitors used to access your website within the last 90 days.
-
-. Open *Lens*, then set the <<set-time-filter,time filter>> to *Last 90 days*.
-
-. From the *Chart Type* dropdown, select *Donut*.
-
-. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
-
-.. Drag and drop *clientip* to the *Size by* field.
-
-.. Drag and drop *machine.os.keyword* to the *Slice by* field.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_2_1_1.png[Donut chart with clientip and machine.os.keyword fields]
-
-. Change the color palette. 
-
-.. From the editor, click *Top values of machine.os.keyword*. 
-
-.. From the *Color palette* dropdown, select *Compatibility*.
-
-.. Click *Close*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_2_1.png[Donut chart with open config panel]
-
-. *Save* the panel, enter `Visitors by OS` in the *Title* field, then add the panel to the dashboard.
-
-[discrete]
-[[mixed-multiaxis]]
-=== View the average of bytes transfer per day
-
-To prevent potential server failures, and optimize the cost of website maintenance, create an area chart that displays the average of bytes transfer. To compare 
-the data to the number of visitors to your website, add a line chart layer.  
-
-. Open *Lens*.
-
-. From the *Available fields* list, drag and drop *bytes* to the visualization builder.
-
-. To zoom in on the data you want to view, click and drag your cursor across the bars. 
-+
-[role="screenshot"]
-image::images/lens_end_to_end_3_1_1.gif[Zoom in on the data]
-
-. Change the *timestamp* interval.
-
-.. From the editor, click *timestamp*.
-
-.. Select *Customize time interval*.
-
-.. Change the *Minimum interval* to `1 days`, then click *Close*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_3_1.png[Customize time interval]
-
-. From the *Chart Type* dropdown, select *Area*.
-
-[discrete]
-[[add-a-data-layer]]
-==== Add the line chart layer
-
-To compare the average of bytes transfer to the number of users that visit your website, add a line chart layer.
-
-. From the editor, click *+*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_3_2.png[Add new layer button]
-
-. From the new layer editor, click the *Chart type* dropdown, then click the line chart.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_3_3.png[Change layer type]
-+
-The chart type for the visualization changes to *Mixed XY*.
-
-. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
-
-.. Drag and drop *timestamp* to the *Horizontal axis* field.
-
-.. Drag and drop *clientip* to the *Vertical axis* field.
-
-. Change the *timestamp* interval.
-
-.. From the editor, click *timestamp* in the line chart layer.
-
-.. Select *Customize time interval*.
-
-.. Change the *Minimum interval* to `1 days`, then click *Close*.
-
-. Change the *Unique count of clientip* label and color.
-
-.. From the editor, click *Unique count of clientip*.
-
-.. In the *Display name* field, enter `Unique visitors` in the line chart layer.
-
-.. In the *Series color* field, enter *#CA8EAE*, then click *Close*.
-
-[discrete]
-[[configure-the-multiaxis-chart]]
-==== Configure the y-axes
-
-There is a significant difference between the *timestamp per day* and *Unique visitors* data, which makes the *Unique visitors* data difficult to read. To improve the readability, 
-display the *Unique visitors* data along a second y-axis, then change the formatting. When functions contain multiple formats, separate axes are created by default. 
-
-. From the editor, click *Unique visitors* in the line chart layer.
-
-. For *Axis side*, click *Right*, then click *Close*.
+TIP: *Other* can equal more than 100% by a small amount.
 
 [float]
-[[change-the-visualization-type]]
-==== Change the visualization type
+[[create-the-visualization-panel]]
+==== Create the visualization panel
 
-. From the editor, click *Average of bytes* in the area chart layer. 
+Drag and drop the fields on to the visualization builder, then 
 
-. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
+. Drag and drop the fields to the visualization builder.
+
+. To change the visualization type, use the following options:
+
+* Click the *Suggestions*.
+
+* From the *Chart Type* dropdown, click the visualization.
+
+. To configure the data, use the editor, then click *Close*.
+
+. To configure the visualization, use the dropdown menus.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_3_4.png[Multiaxis chart]
-
-[discrete]
-[[lens-legend-position]]
-==== Change the legend position
-
-The visualization is done, but the legend uses a lot of space. Change the legend position to the top of the chart.
-
-. From the *Legend* dropdown, select the top position.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_3_5.png[legend position]
-
-. *Save* the panel, enter `Average Bytes vs. Unique Visitors` in the *Title* field, then add the panel to the dashboard.
-
-[discrete]
-[[percentage-stacked-area]]
-=== View the health of your website 
-
-To detect unusual traffic, bad website links, and server errors, create a percentage stacked area chart that displays the associated response codes.
-
-. Open *Lens*.
-
-. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
-
-.. Drag and drop *Records* to the *Vertical axis* field.
-
-.. Drag and drop *@timestamp* to the *Horizontal axis* field.
-
-. From the *Chart Type* dropdown, select *Percentage bar*.
-
-. To remove the vertical axis label, click *Left axis*, then deselect *Show*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_4_3.png[Turn off axis name]
-
-[discrete]
-[[add-the-response-code-filters]]
-==== Add the response code filters
-
-For each response code that you want to display, create a filter. 
-
-. From the editor, click the *Drop a field or click to add* field for *Break down by*. 
-
-. From *Select a function*, click *Filters*.
-
-. Add the filter for the successful response codes. 
-
-.. Click *All records*.
-
-.. In the *KQL* field, enter `response.keyword>=200 AND response.keyword<300`. 
-
-.. In the *Label* field, enter `2XX`, then press Return.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_4_1.png[First filter in filters aggregation]
-
-. Add the filter for the redirect codes. 
-
-.. Click *Add a filter*.
-
-.. In the *KQL* field, enter `response.keyword>=300 AND response.keyword<400`. 
-
-.. In the *Label* field, enter `3XX`, then press Return.
-
-. Add the filter for the client error codes. 
-
-.. Click *Add a filter*.
-
-.. In the *KQL* field, enter `response.keyword>=400 AND response.keyword<500`. 
-
-.. In the *Label* field, enter `4XX`, then press Return.
-
-. Add the filter for the server error codes. 
-
-.. Click *Add a filter*.
-
-.. In the *KQL* field, enter `response.keyword>=500 AND response.keyword<600`. 
-
-.. In the *Label* field, enter `5XX`, then press Return.
-
-. To change the color palette, select *Status* from the *Color palette* dropdown, then click *Close*.
-
-. *Save* the panel, enter `Response Codes Over Time` in the *Title* field, then add the panel to the dashboard.
-
-[discrete]
-[[histogram]]
-=== View the traffic for your website by the hour 
-
-To find the best time to shut down your website for maintenance, create a histogram that displays the traffic for your website by the hour.
-
-. Open *Lens*.
-
-. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor, then configure the options.
-
-.. Click *Average of bytes*.
-
-.. From *Select a function*, click *Sum*.
-
-.. In the *Display name* field, enter `Transferred bytes`.
-
-.. From the *Value format* dropdown, select `Bytes (1024)`, then click *Close*.
-
-. From the *Available fields* list, drag and drop *hour_of_day* to *Horizontal axis* in the editor, then configure the options.
-
-.. Click *hour_of_day*.
-
-.. Click and slide the *Intervals granularity* slider until the horizontal axis displays hourly intervals.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_5_2.png[Create custom ranges]
-
-. *Save* the panel, enter `Hourly Traffic Distribution` in the *Title* field, then add the panel to the dashboard.
-
-[discrete]
-[[custom-ranges]]
-=== View the percent of small versus large transferred files 
- 
-To determine if your users transfer more small files versus large files, create a pie chart that displays the percentage of each size. 
-
-. Open *Lens*.
-
-. From the *Available fields* list, drag and drop *bytes* to *Vertical axis* in the editor, then configure the options.
-
-.. Click *Average of bytes*.
-
-.. From *Select a function*, click *Sum*, then click *Close*.
-
-. From the *Available fields* list, drag and drop *bytes* to *Break down by* in the editor, then specify the file size ranges.
-
-.. Click *bytes*.
-
-.. Click *Create custom ranges*, enter the following, then press Return:
-
-* *Ranges* &mdash; `0` -> `10240`
-
-* *Label* &mdash; `Below 10KB`
-
-.. Click *Add range*, enter the following, then press Return:
-
-* *Ranges* &mdash; `10240` -> `+∞`
-
-* *Label* &mdash; `Above 10KB`
-+
-[role="screenshot"]
-image::images/lens_end_to_end_6_1.png[Custom ranges configuration]
-
-.. From the *Value format* dropdown, select *Bytes (1024)*, then click *Close*.
-
-. From the *Chart Type* dropdown, select *Pie*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_6_2.png[Files size distribution]
-
-. *Save* the panel, enter `File size distribution` in the *Title* field, then add the panel to the dashboard.
-
-[discrete]
-[[treemap]]
-=== View the top sources of website traffic
-
-To determine how users find out about your website and where your users are located, create a treemap that displays the percentage of users that 
-enter your website from specific social media websites, and the top countries where users are located.  
-
-. Open *Lens*.
-
-. From the *Chart Type* dropdown, select *Treemap*.
-
-. From the *Available fields* list, drag and drop *Records* to the *Size by* field in the editor. 
-
-. From the editor, click the *Drop a field or click to add* field for *Group by*, then create a filter for each website traffic source.
-
-.. From *Select a function*, click *Filters*.
-
-.. Click *All records*, enter the following, then press Return:
-
-* *KQL* &mdash; `referer : *facebook.com*`
-
-* *Label* &mdash; `Facebook`
-
-.. Click *Add a filter*, enter the following, then press Return:
-
-* *KQL* &mdash; `referer : *twitter.com*`
-
-* *Label* &mdash; `Twitter`
-
-.. Click *Add a filter*, enter the following, then press Return:
-
-* *KQL* &mdash; `NOT referer : *twitter* OR NOT referer: *facebook.com*`
-
-* *Label* &mdash; `Other`
-
-.. Click *Close*.
-
-[discrete]
-[[add-the-countries]]
-==== Add the geographic data
-
-To determine the top countries where users are located, add the geographic data.
-
-Compare the top sources of website traffic data to the top three countries. 
-
-. From the *Available fields* list, drag and drop *geo.src* to the visualization builder. 
-
-. To change the *Group by* order, click and drag *Top values of geo.src* so that it appears first in the editor.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_7_2.png[Treemap vis]
-
-. To view only the Facebook and Twitter data, remove the *Other* category. 
-
-.. From the editor, click *Top values of geo.src*.
-
-.. From the *Advanced* dropdown, deselect *Group other values as "Other"*, then click *Close*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_7_3.png[Group other values as Other]
-
-. *Save* the panel, enter `Traffic Source For Top 3 Countries` in the *Title* field, then add the panel to the dashboard.
+image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
 
 [float]
-== What's next?
+[[drag-and-drop-keyboard-navigation]]
+===== Create visualization panels with keyboard navigation
 
-Your dashboard is complete and provides you with an overall picture of the data from your web server.
+*Lens* has a fully accessible, continuously improved drag and drop system, which allows you to use a keyboard instead of a mouse.
 
 [role="screenshot"]
-image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
+image::images/lens_drag_drop_1.gif[Presented Lens drag and drop]
+
+. Set a focus on the chosen item. Most of the draggable elements have two focus states. The inner focus state opens a panel with detailed information or options. 
+The outer focus state allows you to drag an item. Tab through the page until you get the outer focus state on the chosen item:
++
+[role="screenshot"]
+image::images/lens_drag_drop_2.png[Lens drag and drop focus state]
+
+. Complete the following actions:
+
+* To start dragging an item, press Space bar.
+
+* To select where you want to drop the item, use the Left and Right arrows.
+
+* To reorder the fields in the group, use Up and Down arrows.
+
+* To duplicate an operation, use the Left and Right arrows to select the `Drop a field or click to add` in the same group.
++
+[role="screenshot"]
+image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
+
+. Press Space bar to confirm, or to cancel, press Esc.
+
+[float]
+[[lens-faq]]
+==== Frequently asked questions
+
+For the answers to common *Lens* questions, review the following. 
+
+[float]
+[[kql-]]
+===== When should I use the Filter function instead of KQL filters?
+
+The easiest way to apply KQL filters is to use <<semi-structured-search>>, but you can also use the *Filters* function in the following scenarios:
+
+* When you want to apply more than one KQL filter to the visualization.
+
+* When you want to apply the KQL filter to a single layer, which allows you to visualize filtered and unfiltered data.
+
+[float]
+[[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]
+===== When should I normalize the data by unit or use a custom interval?
+
+* *Normalize by unit* &mdash; Calculates the average for the specified interval. When you normalize the data by unit, the data appears less granular, but *Lens* is able to calculate the data faster. 
+
+* *Customize time interval* &mdash; Creates a bucket for each specified interval. When you customize the time interval, you can use a large time range, but *Lens* calculates the data slower.
+
+To normalize the interval: 
+
+. In the editor, click a field.
+
+. Click *Add advanced options > Normalize by unit*. 
+
+. From the *Normalize by unit* dropdown, select an option, then click *Close*.
+
+To create a custom interval:
+
+. In the editor, click a field.
+
+. Select *Customize time interval*.
+
+. Change the *Minimum interval*, then click *Close*.
+
+[float]
+[[can-i-show-value-labels-for-my-chart]]
+===== How do I display value labels?
+
+A subset of *Lens* visualizations support value labels.
+
+* *Bar* and *Horizontal Bar*
++
+[role="screenshot"]
+image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
+
+* *Pie*, *Donut*, and *Treemap*
++
+[role="screenshot"]
+image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
+
+[float]
+[[what-is-the-other-category]]
+===== What data is categorized as Other?
+
+The *Other* category contains all of the documents that do not match the specified criteria or filters. 
+Use *Other* when you want to compare a value, or multiple values, to a whole.
+By default, *Group other values as "Other"* is enabled when you select the *Top values* function. 
+
+To disable *Group other values as "Other"*:
+
+. In the editor, click *Advanced*. 
+
+. Deselect *Group other values as "Other"*.
+
+[float]
+[[how-can-i-include-documents-without-the-field-in-the-operation]]
+===== How can I include documents without the field?
+
+By default, *Lens* retrieves only the documents from the specified field. 
+For bucket aggregations, such as *Top values*, you can choose to include documents that do not contain the specified field, 
+which is helpful when you want to compare to the whole documentation set.
+
+. In the editor, click *Advanced*.
+
+. Select *Include documents without this field*.
++
+[role="screenshot"]
+image::images/lens_bucketed_aggregation_advanced_dropdown.png[Lens Advanced options for bucketed aggregations]
+
+[float]
+[[is-it-possible-to-select-color-for-specific-bar-or-point]]
+===== How do I change the color for a single data point?
+
+*Lens* provides you with color pallettes that you can apply to the entire visualization, but you are unable to change the color for a single data point, such as a bar or line.
+
+[float]
+[[can-i-sort-by-multiple-columns]]
+===== How do I sort by multiple columns?
+
+Multiple column sorting is unsupported in *Lens*, but is supported in *Discover*. For information on how to sort multiple columns in *Discover*, 
+refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
+
+[float]
+[[is-it-possible-to-sort-dimensions-in-a-chart]]
+===== How do I sort the dimensions in a chart?
+
+Sorting dimensions in visualizations is unsupported in *Lens*.
+
+[float]
+[[is-it-possible-to-use-saved-serches-in-lens]]
+===== How do I visualize saved searches?
+
+Visualizing saved searches in unsupported in *Lens*.
+
+[float]
+[[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
+===== How do I change the number of suggestions?
+
+Configuring the *Suggestions* that *Lens* automatically populates is unsupported.
