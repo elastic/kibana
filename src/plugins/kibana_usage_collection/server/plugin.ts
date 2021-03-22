@@ -35,6 +35,7 @@ import {
   registerUiCounterSavedObjectType,
   registerUiCountersRollups,
 } from './collectors';
+import { migrateTransactionalDocs } from './collectors/application_usage';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -72,6 +73,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
     this.coreUsageData = core.coreUsageData;
+    migrateTransactionalDocs(this.logger.get('application-usage'), this.savedObjectsClient).catch(
+      (e) => {
+        this.logger.error('Error migrating application usage transactional documents', e);
+      }
+    );
   }
 
   public stop() {

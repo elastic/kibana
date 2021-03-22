@@ -19,12 +19,8 @@ import {
   SAVED_OBJECTS_TOTAL_TYPE,
 } from './saved_objects_types';
 import { applicationUsageSchema } from './schema';
-import { rollDailyData, rollTotals, serializeKey } from './rollups';
-import {
-  ROLL_TOTAL_INDICES_INTERVAL,
-  ROLL_DAILY_INDICES_INTERVAL,
-  ROLL_INDICES_START,
-} from './constants';
+import { rollTotals, serializeKey } from './rollups';
+import { ROLL_TOTAL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
 import { ApplicationUsageTelemetryReport, ApplicationUsageViews } from './types';
 
 export const transformByApplicationViews = (
@@ -55,6 +51,10 @@ export function registerApplicationUsageCollector(
   getSavedObjectsClient: () => ISavedObjectsRepository | undefined
 ) {
   registerMappings(registerType);
+
+  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL).subscribe(() =>
+    rollTotals(logger, getSavedObjectsClient())
+  );
 
   const collector = usageCollection.makeUsageCollector<ApplicationUsageTelemetryReport | undefined>(
     {
@@ -180,11 +180,4 @@ export function registerApplicationUsageCollector(
   );
 
   usageCollection.registerCollector(collector);
-
-  timer(ROLL_INDICES_START, ROLL_DAILY_INDICES_INTERVAL).subscribe(() =>
-    rollDailyData(logger, getSavedObjectsClient())
-  );
-  timer(ROLL_INDICES_START, ROLL_TOTAL_INDICES_INTERVAL).subscribe(() =>
-    rollTotals(logger, getSavedObjectsClient())
-  );
 }
