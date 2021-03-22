@@ -14,7 +14,12 @@ export {
 } from './components/saved_object_save_modal_dashboard';
 
 export { DashboardPicker } from './components/dashboard_picker';
-export { SolutionToolbar } from './components/solution_toolbar';
+export {
+  SolutionToolbar,
+  AddFromLibraryButton,
+  QuickButtonGroup,
+  PrimaryActionButton,
+} from './components/solution_toolbar';
 
 export function plugin() {
   return new PresentationUtilPlugin();
