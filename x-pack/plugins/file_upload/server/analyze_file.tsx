@@ -6,37 +6,25 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import {
-  AnalysisResult,
-  FormattedOverrides,
-  InputOverrides,
-  FindFileStructureResponse,
-} from '../../../common/types/file_datavisualizer';
+import { AnalysisResult, FormattedOverrides, InputData, InputOverrides } from '../common';
 
-export type InputData = any[];
+export async function analyzeFile(
+  client: IScopedClusterClient,
+  data: InputData,
+  overrides: InputOverrides
+): Promise<AnalysisResult> {
+  overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
+  const { body } = await client.asInternalUser.textStructure.findStructure({
+    body: data,
+    ...overrides,
+  });
 
-export function fileDataVisualizerProvider(client: IScopedClusterClient) {
-  async function analyzeFile(data: InputData, overrides: InputOverrides): Promise<AnalysisResult> {
-    overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
-    const {
-      body,
-    } = await client.asInternalUser.textStructure.findStructure<FindFileStructureResponse>({
-      // @ts-expect-error
-      body: data,
-      ...overrides,
-    });
-
-    const { hasOverrides, reducedOverrides } = formatOverrides(overrides);
-
-    return {
-      ...(hasOverrides && { overrides: reducedOverrides }),
-      // @ts-expect-error
-      results: body,
-    };
-  }
+  const { hasOverrides, reducedOverrides } = formatOverrides(overrides);
 
   return {
-    analyzeFile,
+    ...(hasOverrides && { overrides: reducedOverrides }),
+    // @ts-expect-error type incompatible with FindFileStructureResponse
+    results: body,
   };
 }
 
@@ -44,8 +32,8 @@ function formatOverrides(overrides: InputOverrides) {
   let hasOverrides = false;
 
   const reducedOverrides: FormattedOverrides = Object.keys(overrides).reduce((acc, overrideKey) => {
-    const overrideValue: string = overrides[overrideKey];
-    if (overrideValue !== '') {
+    const overrideValue: string | undefined = overrides[overrideKey];
+    if (overrideValue !== undefined && overrideValue !== '') {
       if (overrideKey === 'column_names') {
         acc.column_names = overrideValue.split(',');
       } else if (overrideKey === 'has_header_row') {

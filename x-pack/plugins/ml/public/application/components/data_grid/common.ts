@@ -339,7 +339,7 @@ export const useRenderCellValue = (
         return null;
       }
 
-      let format: any;
+      let format: ReturnType<typeof mlFieldFormatService.getFieldFormatFromIndexPattern>;
 
       if (indexPattern !== undefined) {
         format = mlFieldFormatService.getFieldFormatFromIndexPattern(indexPattern, columnId, '');

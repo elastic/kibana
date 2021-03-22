@@ -12,8 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // FAILING: https://github.com/elastic/kibana/issues/94854
-  describe.skip('outlier detection creation', function () {
+  describe('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
@@ -51,26 +50,21 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'Exterior2nd', legend: '3 categories' },
             { chartAvailable: true, id: 'Fireplaces', legend: '0 - 3' },
           ],
-          scatterplotMatrixColorStatsWizard: [
-            // background
-            { key: '#000000', value: 91 },
-            // tick/grid/axis
-            { key: '#6A717D', value: 2 },
-            { key: '#F5F7FA', value: 2 },
-            { key: '#D3DAE6', value: 1 },
-            // scatterplot circles
-            { key: '#69707D', value: 1 },
-            { key: '#98A1B3', value: 1 },
+          scatterplotMatrixColorsWizard: [
+            // markers
+            { key: '#52B398', value: 25 },
+            // grey boilerplate
+            { key: '#6A717D', value: 30 },
           ],
           scatterplotMatrixColorStatsResults: [
-            // background
-            { key: '#000000', value: 91 },
+            // red markers
+            { key: '#D98071', value: 1 },
             // tick/grid/axis, grey markers
-            // the red outlier color is not above the 1% threshold.
-            { key: '#6A717D', value: 2 },
-            { key: '#98A2B3', value: 1 },
-            { key: '#F5F7FA', value: 2 },
-            { key: '#D3DAE6', value: 1 },
+            { key: '#6A717D', value: 30 },
+            { key: '#D3DAE6', value: 8 },
+            { key: '#98A1B3', value: 25 },
+            // anti-aliasing
+            { key: '#F5F7FA', value: 27 },
           ],
           row: {
             type: 'outlier_detection',
@@ -94,6 +88,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToDataFrameAnalytics();
 
           await ml.testExecution.logTestStep('loads the source selection modal');
+
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await ml.commonUI.disableAntiAliasing();
+
           await ml.dataFrameAnalytics.startAnalyticsCreation();
 
           await ml.testExecution.logTestStep(
@@ -129,9 +127,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlAnalyticsCreateJobWizardScatterplotMatrixFormRow',
-            testData.expected.scatterplotMatrixColorStatsWizard
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorsWizard
           );
 
           await ml.testExecution.logTestStep('continues to the additional options step');
@@ -258,8 +255,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
-          await ml.dataFrameAnalyticsCanvasElement.assertCanvasElement(
-            'mlDFExpandableSection-splom',
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStatsResults
           );
         });
