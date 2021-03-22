@@ -671,6 +671,7 @@ Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 
 include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
+include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
 include::{kib-repo-dir}/settings/dev-settings.asciidoc[]
 include::{kib-repo-dir}/settings/graph-settings.asciidoc[]
 include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]

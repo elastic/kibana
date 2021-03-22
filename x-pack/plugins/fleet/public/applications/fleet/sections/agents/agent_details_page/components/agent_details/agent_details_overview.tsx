@@ -54,7 +54,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               <LinkAndRevision
                 href={getHref('policy_details', { policyId: agentPolicy.id })}
                 title={agentPolicy.name || agent.policy_id}
-                revision={agentPolicy.revision}
+                revision={agent.policy_revision || undefined}
               >
                 {agentPolicy.name || agentPolicy.id}
               </LinkAndRevision>
