@@ -33,7 +33,7 @@ interface ContextProps {
   children: JSX.Element;
 }
 
-const ServicesContext = createContext<ContextValue>(null as any);
+const ServicesContext = createContext<ContextValue | null>(null);
 
 export function ServicesContextProvider({ children, value }: ContextProps) {
   useEffect(() => {
@@ -46,8 +46,8 @@ export function ServicesContextProvider({ children, value }: ContextProps) {
 
 export const useServicesContext = () => {
   const context = useContext(ServicesContext);
-  if (context === undefined) {
+  if (context == null) {
     throw new Error('useServicesContext must be used inside the ServicesContextProvider.');
   }
-  return context;
+  return context!;
 };

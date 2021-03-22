@@ -15,6 +15,11 @@ import { jsSpecLoaders } from '../lib';
 
 const PATH_TO_OSS_JSON_SPEC = resolve(__dirname, '../lib/spec_definitions/json');
 
+interface EndpointDescription {
+  patterns?: string;
+  url_params?: Record<string, unknown>;
+}
+
 export class SpecDefinitionsService {
   private readonly name = 'es';
 
@@ -28,12 +33,19 @@ export class SpecDefinitionsService {
     this.globalRules[parentNode] = rules;
   }
 
-  public addEndpointDescription(endpoint: string, description: any = {}) {
-    let copiedDescription: any = {};
+  public addEndpointDescription(endpoint: string, description: EndpointDescription = {}) {
+    let copiedDescription: { patterns?: string; url_params?: Record<string, unknown> } = {};
     if (this.endpoints[endpoint]) {
       copiedDescription = { ...this.endpoints[endpoint] };
     }
-    let urlParamsDef: any;
+    let urlParamsDef:
+      | {
+          ignore_unavailable?: string;
+          allow_no_indices?: string;
+          expand_wildcards?: string[];
+        }
+      | undefined;
+
     _.each(description.patterns || [], function (p) {
       if (p.indexOf('{indices}') >= 0) {
         urlParamsDef = urlParamsDef || {};
@@ -104,11 +116,13 @@ export class SpecDefinitionsService {
 
     return generatedFiles.reduce((acc, file) => {
       const overrideFile = overrideFiles.find((f) => basename(f) === basename(file));
-      const loadedSpec = JSON.parse(readFileSync(file, 'utf8'));
+      const loadedSpec: Record<string, EndpointDescription> = JSON.parse(
+        readFileSync(file, 'utf8')
+      );
       if (overrideFile) {
         merge(loadedSpec, JSON.parse(readFileSync(overrideFile, 'utf8')));
       }
-      const spec: any = {};
+      const spec: Record<string, EndpointDescription> = {};
       Object.entries(loadedSpec).forEach(([key, value]) => {
         if (acc[key]) {
           // add time to remove key collision
@@ -119,7 +133,7 @@ export class SpecDefinitionsService {
       });
 
       return { ...acc, ...spec };
-    }, {} as any);
+    }, {} as Record<string, EndpointDescription>);
   }
 
   private loadJsonSpec() {

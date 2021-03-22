@@ -74,7 +74,7 @@ export class LegacyCoreEditor implements CoreEditor {
         // torn down, e.g. by closing the History tab, and we don't need to do anything further.
         if (session.bgTokenizer) {
           // Wait until the bgTokenizer is done running before executing the callback.
-          if ((session.bgTokenizer as any).running) {
+          if (((session.bgTokenizer as unknown) as { running: boolean }).running) {
             setTimeout(check, checkInterval);
           } else {
             resolve();
@@ -224,8 +224,10 @@ export class LegacyCoreEditor implements CoreEditor {
   }
 
   isCompleterActive() {
-    // Secrets of the arcane here.
-    return Boolean((this.editor as any).completer && (this.editor as any).completer.activated);
+    return Boolean(
+      ((this.editor as unknown) as { completer: { activated: unknown } }).completer &&
+        ((this.editor as unknown) as { completer: { activated: unknown } }).completer.activated
+    );
   }
 
   private forceRetokenize() {

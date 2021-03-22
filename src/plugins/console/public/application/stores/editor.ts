@@ -22,7 +22,13 @@ export interface Store {
 export const initialValue: Store = produce<Store>(
   {
     ready: false,
-    settings: null as any,
+    settings: {
+      fontSize: 12,
+      polling: true,
+      tripleQuotes: true,
+      wrapMode: true,
+      autocomplete: { fields: true, indices: true, templates: true },
+    },
     currentTextObject: null,
   },
   identity
