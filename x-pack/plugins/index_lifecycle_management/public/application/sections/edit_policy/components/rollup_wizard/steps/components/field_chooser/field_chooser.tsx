@@ -96,7 +96,6 @@ export interface Props {
     keyword?: true;
     numeric?: true;
   };
-  prompt?: string;
   dataTestSubj?: string;
 }
 
@@ -113,10 +112,6 @@ interface State {
 
 export class FieldChooser extends Component<Props, State> {
   static defaultProps = {
-    prompt: i18n.translate(
-      'xpack.indexLifecycleMgmt.rollup.create.fieldChooser.filterFieldPlaceholder',
-      { defaultMessage: 'Filter results' }
-    ),
     dataTestSubj: 'rollupFieldChooser',
   };
 
@@ -193,7 +188,7 @@ export class FieldChooser extends Component<Props, State> {
   }
 
   renderSearchTabContent() {
-    const { columns, selectedFields, prompt, onSelectField, dataTestSubj } = this.props;
+    const { columns, selectedFields, onSelectField, dataTestSubj } = this.props;
 
     const getRowProps = (item: { name: string }) => {
       return {
@@ -222,28 +217,14 @@ export class FieldChooser extends Component<Props, State> {
     const { isLoadingFields } = this.state;
 
     const renderResultsSection = () => {
-      if (isLoadingFields) {
-        return (
-          <div style={{ textAlign: 'center' }}>
-            <EuiLoadingSpinner />
-          </div>
-        );
-      }
-
       if (!indexPattern) {
         return <div />;
       }
 
-      if (!unselectedFields.length) {
-        return (
-          <p>
-            {i18n.translate(
-              'xpack.indexLifecycleMgmt.rollup.create.fieldChooser.noFieldsFoundDescription',
-              { defaultMessage: 'No fields found' }
-            )}
-          </p>
-        );
-      }
+      const placeholder = i18n.translate(
+        'xpack.indexLifecycleMgmt.rollup.create.fieldChooser.filterFieldsPlaceholderLabel',
+        { defaultMessage: 'Filter fields' }
+      );
 
       return (
         <>
@@ -253,29 +234,38 @@ export class FieldChooser extends Component<Props, State> {
                 <h3>
                   {i18n.translate(
                     'xpack.indexLifecycleMgmt.rollup.create.fieldChooser.resultSectionTitle',
-                    { defaultMessage: 'Results' }
+                    {
+                      // TODO: Copy required
+                      defaultMessage: 'Matched {fieldCount} fields',
+                      values: { fieldCount: unselectedFields.length },
+                    }
                   )}
                 </h3>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{isLoadingFields && <EuiLoadingSpinner />}</EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="s" />
 
           <EuiFieldSearch
-            placeholder={prompt}
+            placeholder={placeholder}
             value={searchValue}
             onChange={this.onSearch}
-            aria-label={prompt}
+            aria-label={placeholder}
             fullWidth
           />
           <EuiBasicTable
+            loading={isLoadingFields}
             items={searchedItems}
             columns={columns}
             rowProps={getRowProps}
             responsive={false}
             data-test-subj={`${dataTestSubj}-table`}
+            noItemsMessage={i18n.translate(
+              'xpack.indexLifecycleMgmt.rollup.create.fieldChooser.noFieldsFoundDescription',
+              // TODO: Copy required
+              { defaultMessage: 'No fields found' }
+            )}
           />
         </>
       );
