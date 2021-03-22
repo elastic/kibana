@@ -9,12 +9,12 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
 } from 'src/plugins/expressions/common';
-/* eslint-disable */
+
 // @ts-expect-error untyped local
-import { buildESRequest } from '../../../server/lib/build_es_request';
+import { buildESRequest } from '../../../common/lib/request/build_es_request';
 
 import { searchService } from '../../../public/services';
-/* eslint-enable */
+
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

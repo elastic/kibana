@@ -10,7 +10,7 @@ import { map, zipObject } from 'lodash';
 
 import { ISearchStrategy, PluginStart } from 'src/plugins/data/server';
 
-import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../types';
+import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
 
 import { buildBoolArray } from './build_bool_array';
 import { sanitizeName } from './sanitize_name';
