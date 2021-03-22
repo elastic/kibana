@@ -22,7 +22,7 @@ import {
   CasePostRequest,
   CaseType,
   User,
-} from '../../../common';
+} from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import {
   getConnectorFromConfiguration,

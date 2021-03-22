@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { ml } from '../../../../services/ml_api_service';
-import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';
+import { AnalysisResult, InputOverrides } from '../../../../../../../file_upload/common';
 import { MB } from '../../../../../../../file_upload/public';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;
