@@ -16,9 +16,8 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-import { CLOSE, SAVE } from '../../../../shared/constants';
+import { CLOSE, SAVE, UPDATE } from '../../../../shared/constants';
 
 import { CredentialsLogic } from '../credentials_logic';
 
@@ -42,11 +41,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
             iconType="check"
             data-test-subj="APIKeyActionButton"
           >
-            {activeApiTokenExists
-              ? i18n.translate('xpack.enterpriseSearch.appSearch.credentials.flyout.updateText', {
-                  defaultMessage: 'Update',
-                })
-              : SAVE}
+            {activeApiTokenExists ? UPDATE : SAVE}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -19,6 +19,10 @@ export const DELETE = i18n.translate('xpack.enterpriseSearch.actions.delete', {
   defaultMessage: 'Delete',
 });
 
+export const UPDATE = i18n.translate('xpack.enterpriseSearch.actions.update', {
+  defaultMessage: 'Update',
+});
+
 export const SAVE = i18n.translate('xpack.enterpriseSearch.actions.save', {
   defaultMessage: 'Save',
 });
