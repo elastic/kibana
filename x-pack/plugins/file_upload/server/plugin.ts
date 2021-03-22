@@ -19,7 +19,7 @@ interface SetupDeps {
 
 export class FileUploadPlugin implements Plugin {
   async setup(coreSetup: CoreSetup, plugins: SetupDeps) {
-    fileUploadRoutes(coreSetup.http.createRouter());
+    fileUploadRoutes(coreSetup);
 
     coreSetup.uiSettings.register({
       [UI_SETTING_MAX_FILE_SIZE]: {

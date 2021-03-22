@@ -7,6 +7,10 @@
 
 import { ES_FIELD_TYPES } from '../../../../src/plugins/data/common';
 
+export interface HasImportPermission {
+  hasImportPermission: boolean;
+}
+
 export interface InputOverrides {
   [key: string]: string | undefined;
 }

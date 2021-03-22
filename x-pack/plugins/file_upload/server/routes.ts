@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
+import { CoreSetup } from 'src/core/server';
 import {
   MAX_FILE_SIZE_BYTES,
   IngestPipelineWrapper,
@@ -20,6 +21,8 @@ import { importDataProvider } from './import_data';
 
 import { updateTelemetry } from './telemetry';
 import { analyzeFileQuerySchema, importFileBodySchema, importFileQuerySchema } from './schemas';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { CheckPrivilegesPayload } from '../../security/server/authorization';
 
 function importData(
   client: IScopedClusterClient,
@@ -37,7 +40,59 @@ function importData(
 /**
  * Routes for the file upload.
  */
-export function fileUploadRoutes(router: IRouter) {
+export function fileUploadRoutes(coreSetup: CoreSetup) {
+  const router = coreSetup.http.createRouter();
+
+  router.get(
+    {
+      path: '/api/file_upload/has_import_permission',
+      validate: {
+        query: schema.object({
+          indexName: schema.maybe(schema.string()),
+          checkCreateIndexPattern: schema.maybe(schema.boolean()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [, pluginsStart] = await coreSetup.getStartServices();
+        const { indexName, checkCreateIndexPattern } = request.query;
+
+        const authorizationService = pluginsStart.security?.authz;
+        const requiresAuthz = authorizationService?.mode.useRbacForRequest(request) ?? false;
+
+        if (!authorizationService || !requiresAuthz) {
+          return response.ok({ body: { hasImportPermission: true } });
+        }
+
+        const checkPrivilegesPayload: CheckPrivilegesPayload = {
+          elasticsearch: {
+            cluster: ['manage_index_templates', 'manage_pipeline'],
+          },
+        };
+        if (checkCreateIndexPattern) {
+          checkPrivilegesPayload.kibana = [
+            authorizationService.actions.savedObject.get('index-pattern', 'create'),
+          ];
+        }
+        if (indexName) {
+          checkPrivilegesPayload.elasticsearch.index = {
+            [indexName]: ['create', 'create_index'],
+          };
+        }
+
+        const checkPrivileges = authorizationService!.checkPrivilegesDynamicallyWithRequest(
+          request
+        );
+        const checkPrivilegesResp = await checkPrivileges(checkPrivilegesPayload);
+
+        return response.ok({ body: { hasImportPermission: checkPrivilegesResp.hasAllRequested } });
+      } catch (e) {
+        return response.ok({ body: { hasImportPermission: false } });
+      }
+    }
+  );
+
   /**
    * @apiGroup FileDataVisualizer
    *
