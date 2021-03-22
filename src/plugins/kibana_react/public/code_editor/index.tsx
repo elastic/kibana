@@ -13,7 +13,8 @@ import {
   EuiLoadingContent,
   EuiFormControlLayout,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { useUiSetting } from '../ui_settings';
 import type { Props } from './code_editor';
 
@@ -47,12 +48,13 @@ export const CodeEditor: React.FunctionComponent<Props> = (props) => {
 export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
   const { width, height, options } = props;
   const darkMode = useUiSetting<boolean>('theme:darkMode');
+  const theme = darkMode ? darkTheme : lightTheme;
   const style = {
     width,
     height,
     backgroundColor: options?.readOnly
-      ? euiThemeVars.euiFormBackgroundReadOnlyColor
-      : euiThemeVars.euiFormBackgroundColor,
+      ? theme.euiFormBackgroundReadOnlyColor
+      : theme.euiFormBackgroundColor,
   };
 
   return (
@@ -61,7 +63,7 @@ export const CodeEditorField: React.FunctionComponent<Props> = (props) => {
         fallback={
           <EuiFormControlLayout
             append={<div hidden />}
-            style={{ ...style, padding: euiThemeVars.paddingSizes.m }}
+            style={{ ...style, padding: theme.paddingSizes.m }}
             readOnly={options?.readOnly}
           >
             <Fallback />
