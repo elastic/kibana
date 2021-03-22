@@ -128,10 +128,10 @@ refer to {kibana-ref}/drilldowns.html#url-drilldowns[URL drilldowns].
 
 *Lens* now supports even more functions to meet your visualization needs,
 including percentiles, cumulative sum, moving average, counter rate, and differences.
-To give the new functions a try, take a look at the new <<create-a-dashboard-of-panels-with-ecommerce-data,Lens tutorial>>.
+To give the new functions a try, take a look at the new {kibana-ref}/create-a-dashboard-of-panels-with-ecommerce-data.html[Lens tutorial].
 
 To significantly speed up the visualization creation process, *Lens* now has a
-fully accessible drag and drop system. For more information, refer to <<lens,Lens>>.
+fully accessible drag and drop system. For more information, refer to {kibana-ref}/lens.html[Lens].
 
 To customize the data table, *Lens* now has options for
 column resize, text alignment, and the ability to hide columns.
