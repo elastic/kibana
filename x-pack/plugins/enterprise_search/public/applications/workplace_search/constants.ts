@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { UPDATE, SAVE, CANCEL } from '../shared/constants';
+
 export const NAV = {
   OVERVIEW: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.overview', {
     defaultMessage: 'Overview',
@@ -585,12 +587,9 @@ export const CUSTOMIZE_NAME_BUTTON = i18n.translate(
   }
 );
 
-export const UPDATE_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.update.button',
-  {
-    defaultMessage: 'Update',
-  }
-);
+export const UPDATE_BUTTON = UPDATE;
+export const SAVE_BUTTON = SAVE;
+export const CANCEL_BUTTON = CANCEL;
 
 export const RESET_BUTTON = i18n.translate('xpack.enterpriseSearch.workplaceSearch.reset.button', {
   defaultMessage: 'Reset',
@@ -600,17 +599,6 @@ export const CONFIGURE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.configure.button',
   {
     defaultMessage: 'Configure',
-  }
-);
-
-export const SAVE_BUTTON = i18n.translate('xpack.enterpriseSearch.workplaceSearch.save.button', {
-  defaultMessage: 'Save',
-});
-
-export const CANCEL_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.cancel.button',
-  {
-    defaultMessage: 'Cancel',
   }
 );
 
