@@ -29,6 +29,13 @@ export enum ResponseBodyIndexPolicy {
   ON_ERROR = 'on_error',
 }
 
+export enum Mode {
+  FORM = 'form',
+  JSON = 'json',
+  TEXT = 'text',
+  XML = 'xml',
+}
+
 export enum ContentType {
   JSON = 'application/json',
   TEXT = 'text/plain',
@@ -39,13 +46,6 @@ export enum ContentType {
 export enum ScheduleUnit {
   MINUTES = 'm',
   SECONDS = 's',
-}
-
-export enum Mode {
-  FORM = 'form',
-  JSON = 'json',
-  TEXT = 'text',
-  XML = 'xml',
 }
 
 // values must match keys in the integration package
@@ -113,3 +113,10 @@ export type Config = {
 } & ICustomFields;
 
 export type Validation = Partial<Record<ConfigKeys, (value: unknown) => void>>;
+
+export const contentTypesToMode = {
+  [ContentType.FORM]: Mode.FORM,
+  [ContentType.JSON]: Mode.JSON,
+  [ContentType.TEXT]: Mode.TEXT,
+  [ContentType.XML]: Mode.XML,
+};
