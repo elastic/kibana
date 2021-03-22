@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext, useEffect, ReactChildren } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { NotificationsSetup } from 'kibana/public';
 import { History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';

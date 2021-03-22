@@ -36,7 +36,7 @@ export class Settings {
     return this.storage.get('wrap_mode', true);
   }
 
-  setWrapMode(mode: string) {
+  setWrapMode(mode: boolean) {
     this.storage.set('wrap_mode', mode);
     return true;
   }
@@ -58,7 +58,7 @@ export class Settings {
     });
   }
 
-  setAutocomplete(settings: boolean) {
+  setAutocomplete(settings: object) {
     this.storage.set('autocomplete_settings', settings);
     return true;
   }

@@ -23,6 +23,7 @@ export interface AutoCompleteContext {
     };
     bodyAutocompleteRootComponents: unknown;
     id?: string;
+    documentation?: string;
   };
   urlPath?: null | unknown;
   urlParamsTokenPath?: Array<Record<string, string>> | null;

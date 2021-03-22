@@ -11,7 +11,11 @@ import { XJson } from '../../../../es_ui_shared/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
-export function textFromRequest(request: { method: string; url: string; data: string | string[] }) {
+export function textFromRequest(request: {
+  method: string;
+  url: string | null;
+  data: string | string[];
+}) {
   let data = request.data;
   if (typeof data !== 'string') {
     data = data.join('\n');

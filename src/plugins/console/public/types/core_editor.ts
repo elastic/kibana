@@ -251,7 +251,7 @@ export interface CoreEditor {
    * Register a keyboard shortcut and provide a function to be called.
    */
   registerKeyboardShortcut(opts: {
-    keys: { win?: string; mac: string };
+    keys: string | { win?: string; mac?: string };
     fn: () => void;
     name: string;
   }): void;

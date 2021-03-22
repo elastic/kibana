@@ -116,7 +116,7 @@ export class SenseEditor {
   };
 
   replaceRequestRange = (
-    newRequest: { method: string; url: string | null; data?: string | string[] },
+    newRequest: { method: string; url: string; data?: string | string[] },
     requestRange: Range
   ) => {
     const text = utils.textFromRequest(newRequest);
