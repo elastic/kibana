@@ -34,4 +34,4 @@ export interface FieldResultSetting {
   snippetFallback: boolean;
 }
 
-export type FieldResultSettingObject = Record<string, FieldResultSetting>;
+export type FieldResultSettingObject = Record<string, FieldResultSetting | {}>;
