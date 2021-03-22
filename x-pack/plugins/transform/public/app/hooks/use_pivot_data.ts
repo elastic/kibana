@@ -193,15 +193,7 @@ export const usePivotData = (
   );
 
   const renderCellValue: RenderCellValue = useMemo(() => {
-    return ({
-      rowIndex,
-      columnId,
-      setCellProps,
-    }: {
-      rowIndex: number;
-      columnId: string;
-      setCellProps: any;
-    }) => {
+    return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
 
       const cellValue = pageData.hasOwnProperty(adjustedRowIndex)

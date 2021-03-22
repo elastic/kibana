@@ -67,6 +67,12 @@ navigate to the NDJSON file that
 represents the objects to import.  By default,
 saved objects already in {kib} are overwritten.
 
+NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
+limits the number of saved objects which may be included in this file. Similarly, the
+<<savedObjects-maxImportPayloadBytes, `savedObjects.maxImportPayloadBytes`>> setting limits the overall
+size of the file that can be imported.
+
+
 [float]
 ==== Export
 
@@ -77,6 +83,10 @@ You have two options for exporting saved objects.
 
 This action creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects that are related to the saved
 objects. Exported dashboards include their associated index patterns.
+
+NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
+limits the number of saved objects which may be exported.
+
 
 [float]
 [role="xpack"]
