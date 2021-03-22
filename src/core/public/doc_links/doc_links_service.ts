@@ -190,7 +190,7 @@ export class DocLinksService {
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
           lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#create-panels-with-lens`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
-          vega: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/vega-graph.html`,
+          vega: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/vega.html`,
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
