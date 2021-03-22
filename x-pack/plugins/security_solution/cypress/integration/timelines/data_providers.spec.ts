@@ -28,14 +28,14 @@ import { openTimelineUsingToggle } from '../../tasks/security_main';
 import { addDataProvider, closeTimeline, createNewTimeline } from '../../tasks/timeline';
 
 import { HOSTS_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, scrollToBottom } from '../../tasks/common';
 
 describe('timeline data providers', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
-    cy.scrollTo('bottom');
+    scrollToBottom();
   });
 
   afterEach(() => {
