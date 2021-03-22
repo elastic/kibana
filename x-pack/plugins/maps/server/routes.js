@@ -602,40 +602,6 @@ export async function initRoutes(
   if (drawingFeatureEnabled) {
     router.post(
       {
-        path: `/${GIS_API_PATH}/feature`,
-        validate: {
-          body: schema.object({
-            index: schema.string(),
-            data: schema.any(),
-          }),
-        },
-        options: {
-          body: {
-            accepts: ['application/json'],
-            maxBytes: MAX_DRAWING_SIZE_BYTES,
-          },
-        },
-      },
-      async (context, request, response) => {
-        const result = await writeDataToIndex(
-          request.body.index,
-          request.body.data,
-          context.core.elasticsearch.client.asCurrentUser
-        );
-        if (result.success) {
-          return response.ok({ body: result });
-        } else {
-          logger.error(result.error);
-          return response.custom({
-            body: result.error.message,
-            statusCode: 500,
-          });
-        }
-      }
-    );
-
-    router.post(
-      {
         path: `/${INDEX_SOURCE_API_PATH}`,
         validate: {
           body: schema.object({
@@ -660,6 +626,40 @@ export async function initRoutes(
           mappings,
           context.core.elasticsearch.client,
           indexPatternsService
+        );
+        if (result.success) {
+          return response.ok({ body: result });
+        } else {
+          logger.error(result.error);
+          return response.custom({
+            body: result.error.message,
+            statusCode: 500,
+          });
+        }
+      }
+    );
+
+    router.post(
+      {
+        path: `/${GIS_API_PATH}/feature`,
+        validate: {
+          body: schema.object({
+            index: schema.string(),
+            data: schema.any(),
+          }),
+        },
+        options: {
+          body: {
+            accepts: ['application/json'],
+            maxBytes: MAX_DRAWING_SIZE_BYTES,
+          },
+        },
+      },
+      async (context, request, response) => {
+        const result = await writeDataToIndex(
+          request.body.index,
+          request.body.data,
+          context.core.elasticsearch.client.asCurrentUser
         );
         if (result.success) {
           return response.ok({ body: result });
