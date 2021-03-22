@@ -14,13 +14,23 @@ import { KeyValuePairsField, Pair } from './key_value_field';
 
 interface Props {
   contentMode?: Mode;
+  defaultValue: Record<string, string>;
   label: string | React.ReactElement;
   isInvalid: boolean;
   onChange: (value: Record<string, string>) => void;
 }
 
-export const HeaderField = ({ contentMode, label, isInvalid, onChange }: Props) => {
-  const [headers, setHeaders] = useState<Pair[]>([['', '', false]]);
+export const HeaderField = ({ contentMode, defaultValue, label, isInvalid, onChange }: Props) => {
+  const defaultValueKeys = Object.keys(defaultValue).filter((key) => key !== 'Content-Type'); // Content-Type is a secret header we hide from the user
+  const formattedDefaultValues: Pair[] = [
+    ...defaultValueKeys.map<Pair>((key) => {
+      return [key || '', defaultValue[key] || '', true]; // key, value, checked
+    }),
+    ['', '', false],
+  ];
+  const [headers, setHeaders] = useState<Pair[]>(
+    defaultValueKeys.length ? formattedDefaultValues : [['', '', false]]
+  );
 
   useEffect(() => {
     const formattedHeaders = headers.reduce((acc: Record<string, string>, header) => {
