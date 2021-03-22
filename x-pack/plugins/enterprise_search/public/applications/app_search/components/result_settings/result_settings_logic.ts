@@ -59,15 +59,17 @@ interface ResultSettingsActions {
   ): { fieldName: string; settings: FieldResultSetting };
   saving(): void;
   // Listeners
-  clearRawSizeForField(fieldName: string): string;
-  clearSnippetSizeForField(fieldName: string): string;
-  toggleRawForField(fieldName: string): string;
-  toggleSnippetForField(fieldName: string): string;
-  toggleSnippetFallbackForField(fieldName: string): string;
+  clearRawSizeForField(fieldName: string): { fieldName: string };
+  clearSnippetSizeForField(fieldName: string): { fieldName: string };
+  toggleRawForField(fieldName: string): { fieldName: string };
+  toggleSnippetForField(fieldName: string): { fieldName: string };
+  toggleSnippetFallbackForField(fieldName: string): { fieldName: string };
   updateRawSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
   updateSnippetSizeForField(fieldName: string, size: number): { fieldName: string; size: number };
   initializeResultSettingsData(): void;
-  saveResultSettings(resultFields: ServerFieldResultSettingObject): ServerFieldResultSettingObject;
+  saveResultSettings(
+    resultFields: ServerFieldResultSettingObject
+  ): { resultFields: ServerFieldResultSettingObject };
 }
 
 interface ResultSettingsValues {
@@ -114,15 +116,15 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     resetAllFields: () => true,
     updateField: (fieldName, settings) => ({ fieldName, settings }),
     saving: () => true,
-    clearRawSizeForField: (fieldName) => fieldName,
-    clearSnippetSizeForField: (fieldName) => fieldName,
-    toggleRawForField: (fieldName) => fieldName,
-    toggleSnippetForField: (fieldName) => fieldName,
-    toggleSnippetFallbackForField: (fieldName) => fieldName,
+    clearRawSizeForField: (fieldName) => ({ fieldName }),
+    clearSnippetSizeForField: (fieldName) => ({ fieldName }),
+    toggleRawForField: (fieldName) => ({ fieldName }),
+    toggleSnippetForField: (fieldName) => ({ fieldName }),
+    toggleSnippetFallbackForField: (fieldName) => ({ fieldName }),
     updateRawSizeForField: (fieldName, size) => ({ fieldName, size }),
     updateSnippetSizeForField: (fieldName, size) => ({ fieldName, size }),
     initializeResultSettingsData: () => true,
-    saveResultSettings: (resultFields) => resultFields,
+    saveResultSettings: (resultFields) => ({ resultFields }),
   }),
   reducers: () => ({
     dataLoading: [
@@ -223,16 +225,15 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
   selectors: ({ selectors }) => ({
     resultFieldsAtDefaultSettings: [
       () => [selectors.resultFields],
-      (resultFields: FieldResultSettingObject) => areFieldsAtDefaultSettings(resultFields),
+      (resultFields) => areFieldsAtDefaultSettings(resultFields),
     ],
     resultFieldsEmpty: [
       () => [selectors.resultFields],
-      (resultFields: FieldResultSettingObject) => areFieldsEmpty(resultFields),
+      (resultFields) => areFieldsEmpty(resultFields),
     ],
     stagedUpdates: [
       () => [selectors.lastSavedResultFields, selectors.resultFields],
-      (lastSavedResultFields: FieldResultSettingObject, resultFields: FieldResultSettingObject) =>
-        !isEqual(lastSavedResultFields, resultFields),
+      (lastSavedResultFields, resultFields) => !isEqual(lastSavedResultFields, resultFields),
     ],
     reducedServerResultFields: [
       () => [selectors.serverResultFields],
@@ -249,14 +250,14 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
   }),
   listeners: ({ actions, values }) => ({
-    clearRawSizeForField: (fieldName) => {
+    clearRawSizeForField: ({ fieldName }) => {
       actions.updateField(fieldName, omit(values.resultFields[fieldName], ['rawSize']));
     },
-    clearSnippetSizeForField: (fieldName) => {
+    clearSnippetSizeForField: ({ fieldName }) => {
       actions.updateField(fieldName, omit(values.resultFields[fieldName], ['snippetSize']));
     },
-    toggleRawForField: (fieldName: string) => {
-      // We cast this b/c it could be an empty object, which we can still treat as a FieldResultSetting safely
+    toggleRawForField: ({ fieldName }) => {
+      // We cast this because it could be an empty object, which we can still treat as a FieldResultSetting safely
       const field = values.resultFields[fieldName] as FieldResultSetting;
       const raw = !field.raw;
       actions.updateField(fieldName, {
@@ -265,8 +266,8 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         ...(raw ? { rawSize: field.rawSize } : {}),
       });
     },
-    toggleSnippetForField: (fieldName: string) => {
-      // We cast this b/c it could be an empty object, which we can still treat as a FieldResultSetting safely
+    toggleSnippetForField: ({ fieldName }) => {
+      // We cast this because it could be an empty object, which we can still treat as a FieldResultSetting safely
       const field = values.resultFields[fieldName] as FieldResultSetting;
       const snippet = !field.snippet;
 
@@ -276,8 +277,8 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         ...(snippet ? { snippetSize: DEFAULT_SNIPPET_SIZE } : {}),
       });
     },
-    toggleSnippetFallbackForField: (fieldName: string) => {
-      // We cast this b/c it could be an empty object, which we can still treat as a FieldResultSetting safely
+    toggleSnippetFallbackForField: ({ fieldName }) => {
+      // We cast this because it could be an empty object, which we can still treat as a FieldResultSetting safely
       const field = values.resultFields[fieldName] as FieldResultSetting;
       actions.updateField(fieldName, {
         ...field,
@@ -308,7 +309,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         flashAPIErrors(e);
       }
     },
-    saveResultSettings: async (resultFields: ServerFieldResultSettingObject) => {
+    saveResultSettings: async ({ resultFields }) => {
       actions.saving();
 
       const { http } = HttpLogic.values;
