@@ -40,7 +40,7 @@ export const configSchema = schema.object({
     validate(list) {
       for (const key of list) {
         if (!isValidExperimentalValue(key)) {
-          return `[${key}] is not a valid. Allowed values are: ${allowedExperimentalValues.join(
+          return `[${key}] is not allowed. Allowed values are: ${allowedExperimentalValues.join(
             ', '
           )}`;
         }
