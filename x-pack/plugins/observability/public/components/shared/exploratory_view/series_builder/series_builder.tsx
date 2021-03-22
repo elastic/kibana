@@ -43,7 +43,7 @@ export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; labe
   ],
 };
 
-export const SeriesBuilder = () => {
+export function SeriesBuilder() {
   const { series, setSeries, allSeriesIds, removeSeries } = useUrlStorage(NEW_SERIES_KEY);
 
   const { dataType, reportType, reportDefinitions = {}, filters = [] } = series;
@@ -97,10 +97,11 @@ export const SeriesBuilder = () => {
       }`;
 
       const newSeriesN = {
-        reportType: reportType,
+        reportType,
         time: { from: 'now-30m', to: 'now' },
         filters: getFiltersFromDefs().concat(filters),
       } as SeriesUrl;
+
       setSeries(newSeriesId, newSeriesN).then(() => {
         removeSeries(NEW_SERIES_KEY);
         setIsFlyoutVisible(false);
@@ -163,7 +164,7 @@ export const SeriesBuilder = () => {
       {flyout}
     </div>
   );
-};
+}
 
 const BottomFlyout = styled.div`
   height: 300px;

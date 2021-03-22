@@ -20,9 +20,9 @@ const SERIES_TYPE = 'st';
 const BREAK_DOWN = 'bd';
 const FILTERS = 'ft';
 
-export const UrlStorageContextProvider: React.FC<ProviderProps> = ({ children, storage }) => {
+export function UrlStorageContextProvider({ children, storage }: React.FC<ProviderProps>) {
   return <UrlStorageContext.Provider value={storage}>{children}</UrlStorageContext.Provider>;
-};
+}
 
 function convertToShortUrl(newValue: SeriesUrl): ShortUrlSeries {
   const { metric, seriesType, reportType, breakdown, filters, ...restSeries } = newValue;
@@ -95,7 +95,7 @@ export function useUrlStorage(seriesId?: string) {
   const removeSeries = (seriesIdN: string) => {
     delete allShortSeries[seriesIdN];
     delete allSeries[seriesIdN];
-    storage.set(allSeriesKey, allSeries);
+    storage.set(allSeriesKey, allShortSeries);
   };
 
   const firstSeriesId = allSeriesIds?.[0];

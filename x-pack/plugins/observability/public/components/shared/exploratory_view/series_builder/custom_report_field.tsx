@@ -28,7 +28,7 @@ export function CustomReportField({ field, seriesId, options: opts, defaultValue
 
   const NO_SELECT = 'no_select';
 
-  const options = [{ label: 'Select metric', field: NO_SELECT }, ...opts];
+  const options = [{ label: 'Select metric', field: NO_SELECT }, ...(opts ?? [])];
 
   return (
     <div style={{ maxWidth: 200 }}>

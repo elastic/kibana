@@ -12,7 +12,10 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { ObservabilityClientPluginsStart } from '../../../../plugin';
 import { AllShortSeries } from './use_url_strorage';
 import { ReportToDataTypeMap } from '../configurations/constants';
-import { ObservabilityIndexPatterns } from '../../../../utils/observability_Index_patterns';
+import {
+  DataType,
+  ObservabilityIndexPatterns,
+} from '../../../../utils/observability_Index_patterns';
 
 export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
   const {
@@ -31,9 +34,15 @@ export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
 
   const { data: indexPattern, status } = useFetcher(() => {
     const obsvIndexP = new ObservabilityIndexPatterns(data);
-    return obsvIndexP.getIndexPattern(
-      firstSeries?.rt ? ReportToDataTypeMap[firstSeries?.rt] : 'apm'
-    );
+    let reportType: DataType = 'apm';
+    if (firstSeries?.rt) {
+      reportType = ReportToDataTypeMap[firstSeries?.rt];
+    }
+    if (firstSeries?.reportType) {
+      reportType = ReportToDataTypeMap[firstSeries?.reportType];
+    }
+
+    return obsvIndexP.getIndexPattern(reportType);
   }, [firstSeries?.rt]);
 
   return useMemo(() => {
