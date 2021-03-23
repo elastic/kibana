@@ -226,7 +226,7 @@ export const reindexServiceFactory = (
     if (reindexOp.attributes.lastCompletedStep >= ReindexStep.readonly) {
       await esClient.indices.putSettings({
         index: reindexOp.attributes.indexName,
-        body: { index: { blocks: { write: true } } },
+        body: { index: { blocks: { write: false } } },
       });
     }
 
