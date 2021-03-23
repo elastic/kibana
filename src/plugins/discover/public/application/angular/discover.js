@@ -447,10 +447,10 @@ function discoverController($route, $scope) {
     if (getTimeField() && !$scope.state.hideChart) {
       const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
       $scope.volatileSearchSource.rawResponse = resp;
-      $scope.histogramData = discoverResponseHandler(
-        tabifiedData,
-        getDimensions($scope.opts.chartAggConfigs, data)
-      );
+      const dimensions = getDimensions($scope.opts.chartAggConfigs, data);
+      if (dimensions) {
+        $scope.histogramData = discoverResponseHandler(tabifiedData, dimensions);
+      }
     }
 
     $scope.hits = resp.hits.total;

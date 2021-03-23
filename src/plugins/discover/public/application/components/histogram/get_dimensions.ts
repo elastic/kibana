@@ -8,7 +8,7 @@
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { IAggConfigs, TimeRangeBounds } from '../../../../../data/common';
-import { DataPublicPluginStart } from '../../../../../data/public';
+import { DataPublicPluginStart, search } from '../../../../../data/public';
 
 export function getDimensions(aggs: IAggConfigs, data: DataPublicPluginStart) {
   const [metric, agg] = aggs.aggs;
@@ -20,8 +20,12 @@ export function getDimensions(aggs: IAggConfigs, data: DataPublicPluginStart) {
   const bounds = agg.params.timeRange
     ? data.query.timefilter.timefilter.calculateBounds(agg.params.timeRange)
     : null;
-  // @ts-expect-error
-  const buckets = agg.buckets;
+  const buckets = search.aggs.isDateHistogramBucketAggConfig(agg) ? agg.buckets : undefined;
+
+  if (!buckets) {
+    return;
+  }
+
   buckets.setBounds(bounds as TimeRangeBounds);
 
   const { esUnit, esValue } = buckets.getInterval();
