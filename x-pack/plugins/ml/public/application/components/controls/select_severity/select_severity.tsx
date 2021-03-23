@@ -121,16 +121,16 @@ interface Props {
 export const SelectSeverity: FC<Props> = ({ classNames } = { classNames: '' }) => {
   const [severity, setSeverity] = useTableSeverity();
 
-  return <SelectSeverityUI severity={severity} setSeverity={setSeverity} />;
+  return <SelectSeverityUI severity={severity} onChange={setSeverity} />;
 };
 
 export const SelectSeverityUI: FC<{
   classNames?: string;
   severity: TableSeverity;
-  setSeverity: (s: TableSeverity) => void;
-}> = ({ classNames = '', severity, setSeverity }) => {
-  const onChange = (valueDisplay: string) => {
-    setSeverity(optionValueToThreshold(optionsMap[valueDisplay]));
+  onChange: (s: TableSeverity) => void;
+}> = ({ classNames = '', severity, onChange }) => {
+  const handleOnChange = (valueDisplay: string) => {
+    onChange(optionValueToThreshold(optionsMap[valueDisplay]));
   };
 
   return (
@@ -140,7 +140,7 @@ export const SelectSeverityUI: FC<{
       hasDividers
       options={getSeverityOptions()}
       valueOfSelected={severity.display}
-      onChange={onChange}
+      onChange={handleOnChange}
     />
   );
 };

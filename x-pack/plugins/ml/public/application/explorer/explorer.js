@@ -169,7 +169,7 @@ export class ExplorerUI extends React.Component {
 
   // Escape regular parens from fieldName as that portion of the query is not wrapped in double quotes
   // and will cause a syntax error when called with getKqlQueryValues
-  applyFilter = (fieldName, fieldValue, action) => {
+  applyFilter = ({ fieldName, fieldValue, operation: action }) => {
     const { filterActive, indexPattern, queryString } = this.props.explorerState;
     let newQueryString = '';
     const operator = 'and ';
@@ -479,9 +479,7 @@ export class ExplorerUI extends React.Component {
                         timefilter,
                         mlUrlGenerator,
                         timeBuckets,
-                        onSelectEntity: ({ fieldName, fieldValue, operation }) => {
-                          this.applyFilter(fieldName, fieldValue, operation);
-                        },
+                        onSelectEntity: this.applyFilter,
                       }}
                     />
                   )}

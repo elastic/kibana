@@ -7,17 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, forkJoin, from, Observable, of, Subject } from 'rxjs';
-import { isEqual } from 'lodash';
-import {
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-  pluck,
-  skipWhile,
-  startWith,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
@@ -32,7 +22,6 @@ import {
 } from '../../application/explorer/explorer_utils';
 import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import {
   AnomalyChartsEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
@@ -42,24 +31,9 @@ import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
 import { processFilters } from '../common/process_filters';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { getJobsObservable } from '../common/get_jobs_observable';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
-
-function getJobsObservable(
-  embeddableInput: Observable<AnomalyChartsEmbeddableInput>,
-  anomalyDetectorService: AnomalyDetectorService,
-  setErrorHandler: (e: Error) => void
-) {
-  return embeddableInput.pipe(
-    pluck('jobIds'),
-    distinctUntilChanged(isEqual),
-    switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds)),
-    catchError((e) => {
-      setErrorHandler(e.body ?? e);
-      return of(undefined);
-    })
-  );
-}
 
 export function useAnomalyChartsInputResolver(
   embeddableInput: Observable<AnomalyChartsEmbeddableInput>,
@@ -149,7 +123,7 @@ export function useAnomalyChartsInputResolver(
           const bucketInterval = timeBuckets.getInterval();
 
           const timeRange = getSelectionTimeRange(selections, bucketInterval.asSeconds(), bounds);
-          const explorer$ = forkJoin({
+          return forkJoin({
             combinedJobs: anomalyExplorerService.getCombinedJobs(jobIds),
             anomalyChartRecords: loadDataForCharts(
               mlResultsService,
@@ -187,7 +161,6 @@ export function useAnomalyChartsInputResolver(
               });
             })
           );
-          return explorer$;
         }),
         catchError((e) => {
           setError(e.body);

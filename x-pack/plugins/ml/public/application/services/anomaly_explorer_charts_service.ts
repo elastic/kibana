@@ -15,7 +15,7 @@ import {
   isSourceDataChartableForDetector,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import { getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { CombinedJob, Datafeed, JobId } from '../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from './ml_api_service';
 import { SWIM_LANE_LABEL_WIDTH } from '../explorer/swimlane_container';
@@ -75,18 +75,15 @@ interface InfoTooltip {
   jobId: JobId;
   aggregationInterval?: string;
   chartFunction: string;
-  entityFields: Array<{
-    fieldName: string;
-    fieldValue: string;
-  }>;
+  entityFields: EntityField[];
 }
 interface SeriesConfigWithMetadata extends SeriesConfig {
   functionDescription?: string;
   bucketSpanSeconds: number;
   detectorLabel?: string;
   fieldName: string;
-  entityFields: any[];
-  infoTooltip: InfoTooltip;
+  entityFields: EntityField[];
+  infoTooltip?: InfoTooltip;
   loading?: boolean;
   chartData?: ChartPoint[] | null;
   mapData?: any[];
@@ -318,8 +315,6 @@ export class AnomalyExplorerChartsService {
       bucketSpanSeconds: 0,
       entityFields: [],
       fieldName: '',
-      // @ts-ignore
-      infoTooltip: {},
       ...config,
     };
     // Add extra properties used by the explorer dashboard charts.
@@ -601,7 +596,7 @@ export class AnomalyExplorerChartsService {
       config: SeriesConfigWithMetadata,
       range: ChartRange
     ) {
-      let criteria = [];
+      let criteria: EntityField[] = [];
       criteria.push({ fieldName: 'detector_index', fieldValue: config.detectorIndex });
       criteria = criteria.concat(config.entityFields);
       return mlResultsService
@@ -875,7 +870,6 @@ export class AnomalyExplorerChartsService {
       // Check if we can plot a chart for this record, depending on whether the source data
       // is chartable, and if model plot is enabled for the job.
 
-      // @TODO
       const job = jobRecords[record.job_id];
 
       // if we already know this job has datafeed aggregations we cannot support

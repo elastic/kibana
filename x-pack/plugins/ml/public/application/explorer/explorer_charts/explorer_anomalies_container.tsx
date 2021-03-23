@@ -58,7 +58,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
               defaultMessage: 'Severity threshold',
             })}
           >
-            <SelectSeverityUI severity={severity} setSeverity={setSeverity} />
+            <SelectSeverityUI severity={severity} onChange={setSeverity} />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

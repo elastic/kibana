@@ -64,16 +64,16 @@ export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] 
 export const SelectInterval: FC = () => {
   const [interval, setInterval] = useTableInterval();
 
-  return <SelectIntervalUI interval={interval} setInterval={setInterval} />;
+  return <SelectIntervalUI interval={interval} onChange={setInterval} />;
 };
 
 interface SelectIntervalUIProps {
   interval: TableInterval;
-  setInterval: (interval: TableInterval) => void;
+  onChange: (interval: TableInterval) => void;
 }
-export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, setInterval }) => {
-  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setInterval(optionValueToInterval(e.target.value));
+export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange }) => {
+  const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onChange(optionValueToInterval(e.target.value));
   };
 
   return (
@@ -81,7 +81,7 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, setInter
       options={OPTIONS}
       className="ml-select-interval"
       value={interval.val}
-      onChange={onChange}
+      onChange={handleOnChange}
     />
   );
 };

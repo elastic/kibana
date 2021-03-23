@@ -63,23 +63,18 @@ export class AnomalyChartsEmbeddable extends Embeddable<
       const indexPatternsService = this.services[1].data.indexPatterns;
 
       // First get list of unique indices from the selected jobs
-      const indices = new Set<string>();
-      jobs.forEach((j) => {
-        j.datafeed_config.indices.forEach((index) => {
-          if (!indices.has(index)) {
-            indices.add(index);
-          }
-        });
-      });
+      const indices = new Set(jobs.map((j) => j.datafeed_config.indices).flat());
 
       // Then find the index patterns assuming the index pattern title matches the index name
       const indexPatterns: Record<string, IndexPattern> = {};
       for (const indexName of indices) {
         const response = await indexPatternsService.find(`"${indexName}"`);
 
-        const ip = response.find((obj) => obj.title.toLowerCase() === indexName.toLowerCase());
-        if (ip !== undefined) {
-          indexPatterns[ip.id!] = ip;
+        const indexPattern = response.find(
+          (obj) => obj.title.toLowerCase() === indexName.toLowerCase()
+        );
+        if (indexPattern !== undefined) {
+          indexPatterns[indexPattern.id!] = indexPattern;
         }
       }
 

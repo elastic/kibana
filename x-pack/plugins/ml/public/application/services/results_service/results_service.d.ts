@@ -9,6 +9,7 @@ import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs'
 import { MlApiServices } from '../ml_api_service';
 import type { AnomalyRecordDoc } from '../../../../common/types/anomalies';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import { EntityField } from '../../../../common/util/anomaly_utils';
 
 type RecordForInfluencer = AnomalyRecordDoc;
 export function resultsServiceProvider(
@@ -67,8 +68,8 @@ export function resultsServiceProvider(
   ): Promise<any>;
   getEventDistributionData(
     index: string,
-    splitField: string,
-    filterField: string,
+    splitField: EntityField | undefined | null,
+    filterField: EntityField | undefined | null,
     query: any,
     metricFunction: string | undefined | null, // ES aggregation name
     metricFieldName: string | undefined,

@@ -26,18 +26,12 @@ export interface CombinedJobWithStats extends JobWithStats {
   datafeed_config: DatafeedWithStats;
 }
 
-export function isCombinedJob(arg: null | undefined | unknown): arg is CombinedJob {
-  return (
-    isPopulatedObject(arg) &&
-    typeof arg.job_id === 'string' &&
-    isPopulatedObject(arg.datafeed_config)
-  );
-}
-
 export function isCombinedJobWithStats(arg: unknown): arg is CombinedJobWithStats {
   return (
     isPopulatedObject(arg) &&
     typeof arg.job_id === 'string' &&
-    isPopulatedObject(arg.datafeed_config)
+    isPopulatedObject(arg.datafeed_config) &&
+    {}.hasOwnProperty.call(arg, 'data_counts') &&
+    {}.hasOwnProperty.call(arg, 'model_size_stats')
   );
 }

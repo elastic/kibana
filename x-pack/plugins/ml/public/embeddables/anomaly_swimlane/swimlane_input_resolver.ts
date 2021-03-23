@@ -7,13 +7,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, from, Observable, of, Subject } from 'rxjs';
-import { isEqual } from 'lodash';
 import {
   catchError,
   debounceTime,
   distinctUntilChanged,
   map,
-  pluck,
   skipWhile,
   startWith,
   switchMap,
@@ -31,7 +29,6 @@ import {
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { ExplorerJob, OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import {
@@ -41,24 +38,9 @@ import {
 } from '..';
 import { processFilters } from '../common/process_filters';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
+import { getJobsObservable } from '../common/get_jobs_observable';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
-
-function getJobsObservable(
-  embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
-  anomalyDetectorService: AnomalyDetectorService,
-  setErrorHandler: (e: Error) => void
-) {
-  return embeddableInput.pipe(
-    pluck('jobIds'),
-    distinctUntilChanged(isEqual),
-    switchMap((jobsIds) => anomalyDetectorService.getJobs$(jobsIds)),
-    catchError((e) => {
-      setErrorHandler(e.body ?? e);
-      return of(undefined);
-    })
-  );
-}
 
 export function useSwimlaneInputResolver(
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>,
