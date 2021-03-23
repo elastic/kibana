@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from 'kibana/server';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import {
   MAX_FILE_SIZE_BYTES,
   IngestPipelineWrapper,
@@ -40,12 +40,12 @@ function importData(
 /**
  * Routes for the file upload.
  */
-export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
+export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger) {
   const router = coreSetup.http.createRouter();
 
   router.get(
     {
-      path: '/api/file_upload/has_import_permission',
+      path: '/internal/file_upload/has_import_permission',
       validate: {
         query: schema.object({
           indexName: schema.maybe(schema.string()),
@@ -88,6 +88,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
 
         return response.ok({ body: { hasImportPermission: checkPrivilegesResp.hasAllRequested } });
       } catch (e) {
+        logger.warn(`Unable to check import permission, error: ${e.message}`);
         return response.ok({ body: { hasImportPermission: false } });
       }
     }

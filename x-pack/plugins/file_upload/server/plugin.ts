@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';
@@ -19,8 +19,14 @@ interface SetupDeps {
 }
 
 export class FileUploadPlugin implements Plugin {
+  private readonly _logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this._logger = initializerContext.logger.get();
+  }
+
   async setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
-    fileUploadRoutes(coreSetup);
+    fileUploadRoutes(coreSetup, this._logger);
 
     coreSetup.uiSettings.register({
       [UI_SETTING_MAX_FILE_SIZE]: {

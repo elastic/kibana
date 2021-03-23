@@ -47,7 +47,7 @@ export async function hasImportPermission(
   }
   try {
     const resp = await fileUploadModules.getHttp().fetch<HasImportPermission>({
-      path: `/api/file_upload/has_import_permission`,
+      path: `/internal/file_upload/has_import_permission`,
       method: 'GET',
       query,
     });
