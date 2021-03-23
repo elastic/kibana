@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
-import _ from 'lodash';
-import { AddDeleteButtons } from './add_delete_buttons';
-import { collectionActions } from './lib/collection_actions';
-import { ColorPicker } from './color_picker';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -19,76 +14,117 @@ import {
   EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-class ColorRulesUI extends Component {
-  constructor(props) {
+import { AddDeleteButtons } from './add_delete_buttons';
+import { collectionActions } from './lib/collection_actions';
+import { ColorPicker, ColorPickerProps } from './color_picker';
+import { TimeseriesVisParams } from '../../types';
+
+export interface ColorRulesProps {
+  name: keyof TimeseriesVisParams;
+  model: TimeseriesVisParams;
+  onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
+  primaryName?: string;
+  primaryVarName?: string;
+  secondaryName?: string;
+  secondaryVarName?: string;
+  hideSecondary?: boolean;
+}
+
+interface ColorRule {
+  value?: number;
+  id: string;
+  background_color?: string;
+  color?: string;
+  operator?: string;
+  text?: string;
+}
+
+const defaultSecondaryName = i18n.translate(
+  'visTypeTimeseries.colorRules.defaultSecondaryNameLabel',
+  {
+    defaultMessage: 'text',
+  }
+);
+const defaultPrimaryName = i18n.translate('visTypeTimeseries.colorRules.defaultPrimaryNameLabel', {
+  defaultMessage: 'background',
+});
+
+const operatorOptions = [
+  {
+    label: i18n.translate('visTypeTimeseries.colorRules.greaterThanLabel', {
+      defaultMessage: '> greater than',
+    }),
+    value: 'gt',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.colorRules.greaterThanOrEqualLabel', {
+      defaultMessage: '>= greater than or equal',
+    }),
+    value: 'gte',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.colorRules.lessThanLabel', {
+      defaultMessage: '< less than',
+    }),
+    value: 'lt',
+  },
+  {
+    label: i18n.translate('visTypeTimeseries.colorRules.lessThanOrEqualLabel', {
+      defaultMessage: '<= less than or equal',
+    }),
+    value: 'lte',
+  },
+];
+
+export class ColorRules extends Component<ColorRulesProps> {
+  constructor(props: ColorRulesProps) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
-  handleChange(item, name, cast = String) {
-    return (e) => {
-      const handleChange = collectionActions.handleChange.bind(null, this.props);
-      const part = {};
-      part[name] = cast(_.get(e, '[0].value', _.get(e, 'target.value')));
-      if (part[name] === 'undefined') part[name] = undefined;
-      if (cast === Number && isNaN(part[name])) part[name] = undefined;
-      handleChange(_.assign({}, item, part));
+  handleValueChange(item: ColorRule) {
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      let value: number | undefined = Number(e.target.value);
+      if (isNaN(value)) value = undefined;
+      collectionActions.handleChange(this.props, {
+        ...item,
+        value,
+      });
     };
   }
 
-  renderRow(row, i, items) {
+  handleOperatorChange = (item: ColorRule) => {
+    return (options: Array<EuiComboBoxOptionOption<string>>) => {
+      collectionActions.handleChange(this.props, {
+        ...item,
+        operator: options[0].value,
+      });
+    };
+  };
+
+  renderRow(row: ColorRule, i: number, items: ColorRule[]) {
     const defaults = { value: 0 };
     const model = { ...defaults, ...row };
     const handleAdd = () => collectionActions.handleAdd(this.props);
-    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const { intl } = this.props;
-    const operatorOptions = [
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.colorRules.greaterThanLabel',
-          defaultMessage: '> greater than',
-        }),
-        value: 'gt',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.colorRules.greaterThanOrEqualLabel',
-          defaultMessage: '>= greater than or equal',
-        }),
-        value: 'gte',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.colorRules.lessThanLabel',
-          defaultMessage: '< less than',
-        }),
-        value: 'lt',
-      },
-      {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.colorRules.lessThanOrEqualLabel',
-          defaultMessage: '<= less than or equal',
-        }),
-        value: 'lte',
-      },
-    ];
-    const handleColorChange = (part) => {
-      const handleChange = collectionActions.handleChange.bind(null, this.props);
-      handleChange(_.assign({}, model, part));
+    const handleDelete = () => collectionActions.handleDelete(this.props, model);
+    const handleColorChange: ColorPickerProps['onChange'] = (part) => {
+      collectionActions.handleChange(this.props, { ...model, ...part });
     };
     const htmlId = htmlIdGenerator(model.id);
-    const selectedOperatorOption = operatorOptions.find((option) => {
-      return model.operator === option.value;
-    });
+    const selectedOperatorOption = operatorOptions.find(
+      (option) => model.operator === option.value
+    );
 
     const labelStyle = { marginBottom: 0 };
 
     let secondary;
     if (!this.props.hideSecondary) {
+      const secondaryVarName = this.props.secondaryVarName ?? 'color';
       secondary = (
         <Fragment>
           <EuiFlexItem grow={false}>
@@ -96,7 +132,7 @@ class ColorRulesUI extends Component {
               <FormattedMessage
                 id="visTypeTimeseries.colorRules.setSecondaryColorLabel"
                 defaultMessage="and {secondaryName} to"
-                values={{ secondaryName: this.props.secondaryName }}
+                values={{ secondaryName: this.props.secondaryName ?? defaultSecondaryName }}
                 description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
                 metric is {greaterOrLessThan} {value}."
               />
@@ -105,8 +141,8 @@ class ColorRulesUI extends Component {
           <EuiFlexItem grow={false}>
             <ColorPicker
               onChange={handleColorChange}
-              name={this.props.secondaryVarName}
-              value={model[this.props.secondaryVarName]}
+              name={secondaryVarName}
+              value={model[secondaryVarName as keyof ColorRule] as string | undefined}
             />
           </EuiFlexItem>
         </Fragment>
@@ -126,7 +162,7 @@ class ColorRulesUI extends Component {
             <FormattedMessage
               id="visTypeTimeseries.colorRules.setPrimaryColorLabel"
               defaultMessage="Set {primaryName} to"
-              values={{ primaryName: this.props.primaryName }}
+              values={{ primaryName: this.props.primaryName ?? defaultPrimaryName }}
               description="Part of a larger string: Set {primaryName} to {color} and {secondaryName} to {color} if
               metric is {greaterOrLessThan} {value}."
             />
@@ -135,8 +171,12 @@ class ColorRulesUI extends Component {
         <EuiFlexItem grow={false}>
           <ColorPicker
             onChange={handleColorChange}
-            name={this.props.primaryVarName}
-            value={model[this.props.primaryVarName]}
+            name={this.props.primaryVarName ?? 'background_color'}
+            value={
+              model[(this.props.primaryVarName ?? 'background_color') as keyof ColorRule] as
+                | string
+                | undefined
+            }
           />
         </EuiFlexItem>
 
@@ -157,7 +197,7 @@ class ColorRulesUI extends Component {
             id={htmlId('ifMetricIs')}
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
-            onChange={this.handleChange(model, 'operator')}
+            onChange={this.handleOperatorChange(model)}
             singleSelection={{ asPlainText: true }}
             data-test-subj="colorRuleOperator"
             fullWidth
@@ -166,12 +206,11 @@ class ColorRulesUI extends Component {
 
         <EuiFlexItem>
           <EuiFieldNumber
-            aria-label={intl.formatMessage({
-              id: 'visTypeTimeseries.colorRules.valueAriaLabel',
+            aria-label={i18n.translate('visTypeTimeseries.colorRules.valueAriaLabel', {
               defaultMessage: 'Value',
             })}
-            value={model.value}
-            onChange={this.handleChange(model, 'value', Number)}
+            value={model.value ?? ''}
+            onChange={this.handleValueChange(model)}
             data-test-subj="colorRuleValue"
             fullWidth
           />
@@ -191,34 +230,6 @@ class ColorRulesUI extends Component {
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return <div />;
-    const rows = model[name].map(this.renderRow);
-    return <div>{rows}</div>;
+    return !model[name] ? <div /> : <div>{(model[name] as ColorRule[]).map(this.renderRow)}</div>;
   }
 }
-
-ColorRulesUI.defaultProps = {
-  name: 'color_rules',
-  primaryName: i18n.translate('visTypeTimeseries.colorRules.defaultPrimaryNameLabel', {
-    defaultMessage: 'background',
-  }),
-  primaryVarName: 'background_color',
-  secondaryName: i18n.translate('visTypeTimeseries.colorRules.defaultSecondaryNameLabel', {
-    defaultMessage: 'text',
-  }),
-  secondaryVarName: 'color',
-  hideSecondary: false,
-};
-
-ColorRulesUI.propTypes = {
-  name: PropTypes.string,
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-  primaryName: PropTypes.string,
-  primaryVarName: PropTypes.string,
-  secondaryName: PropTypes.string,
-  secondaryVarName: PropTypes.string,
-  hideSecondary: PropTypes.bool,
-};
-
-export const ColorRules = injectI18n(ColorRulesUI);

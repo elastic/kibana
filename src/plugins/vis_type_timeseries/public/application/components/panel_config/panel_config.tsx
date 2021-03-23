@@ -8,26 +8,29 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Observable } from 'rxjs';
 
-import { IUiSettingsClient } from 'kibana/public';
-import { TimeseriesVisData } from '../../../common/types';
-import { FormValidationContext } from '../contexts/form_validation_context';
-import { VisDataContext } from '../contexts/vis_data_context';
-import { panelConfigTypes } from './panel_config/index';
-import { TimeseriesVisParams } from '../../types';
-import { VisFields } from '../lib/fetch_fields';
+import { TimeseriesVisData } from '../../../../common/types';
+import { FormValidationContext } from '../../contexts/form_validation_context';
+import { VisDataContext } from '../../contexts/vis_data_context';
+import { PanelConfigProps } from './types';
+import { TimeseriesPanelConfig as timeseries } from './timeseries';
+import { MetricPanelConfig as metric } from './metric';
+import { TopNPanelConfig as topN } from './top_n';
+import { TablePanelConfig as table } from './table';
+import { GaugePanelConfig as gauge } from './gauge';
+import { MarkdownPanelConfig as markdown } from './markdown';
+
+const panelConfigTypes = {
+  timeseries,
+  table,
+  metric,
+  top_n: topN,
+  gauge,
+  markdown,
+};
 
 interface FormValidationResults {
   [key: string]: boolean;
-}
-
-interface PanelConfigProps {
-  fields?: VisFields;
-  model: TimeseriesVisParams;
-  visData$: Observable<TimeseriesVisData | undefined>;
-  getConfig: IUiSettingsClient['get'];
-  onChange: (partialModel: Partial<TimeseriesVisParams>) => void;
 }
 
 const checkModelValidity = (validationResults: FormValidationResults) =>
