@@ -57,6 +57,7 @@ export type IAggConfigs = AggConfigs;
 export class AggConfigs {
   public indexPattern: IndexPattern;
   public timeRange?: TimeRange;
+  public timeFields?: string[];
   private readonly typesRegistry: AggTypesRegistryStart;
 
   aggs: IAggConfig[];
@@ -74,6 +75,10 @@ export class AggConfigs {
     this.indexPattern = indexPattern;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
+  }
+
+  setTimeFields(timeFields: string[] | undefined) {
+    this.timeFields = timeFields;
   }
 
   setTimeRange(timeRange: TimeRange) {

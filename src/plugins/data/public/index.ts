@@ -313,6 +313,7 @@ import {
   toAbsoluteDates,
   boundsDescendingRaw,
   getNumberHistogramIntervalByDatatableColumn,
+  getDateHistogramMetaDataByDatatableColumn,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -423,6 +424,7 @@ export const search = {
     toAbsoluteDates,
     boundsDescendingRaw,
     getNumberHistogramIntervalByDatatableColumn,
+    getDateHistogramMetaDataByDatatableColumn,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

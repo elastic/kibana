@@ -45,11 +45,7 @@ import {
 import { XYArgs, SeriesType, visualizationTypes, LayerArgs } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
-import {
-  DataPublicPluginStart,
-  ExpressionValueSearchContext,
-  search,
-} from '../../../../../src/plugins/data/public';
+import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
   PaletteRegistry,
@@ -192,10 +188,7 @@ export const xyChart: ExpressionFunctionDefinition<
   },
 };
 
-export async function calculateMinInterval(
-  { args: { layers }, data }: XYChartProps,
-  getIntervalByColumn: DataPublicPluginStart['search']['aggs']['getDateMetaByDatatableColumn']
-) {
+export async function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
@@ -212,9 +205,9 @@ export async function calculateMinInterval(
       return undefined;
     }
   }
-  const dateMetaData = await getIntervalByColumn(xColumn);
-  if (!dateMetaData) return;
-  const intervalDuration = search.aggs.parseInterval(dateMetaData.interval);
+  const dateInterval = search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.interval;
+  if (!dateInterval) return;
+  const intervalDuration = search.aggs.parseInterval(dateInterval);
   if (!intervalDuration) return;
   return intervalDuration.as('milliseconds');
 }
@@ -223,7 +216,6 @@ export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
-  getIntervalByColumn: DataPublicPluginStart['search']['aggs']['getDateMetaByDatatableColumn'];
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
@@ -254,7 +246,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
-          minInterval={await calculateMinInterval(config, dependencies.getIntervalByColumn)}
+          minInterval={await calculateMinInterval(config)}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}

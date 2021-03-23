@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { Datatable } from 'src/plugins/expressions/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 import { getTimeScaleFunction, TimeScaleArgs } from './time_scale';
@@ -44,9 +44,25 @@ describe('time_scale', () => {
     targetUnit: 'h',
   };
 
+  function setDateHistogramMeta(options: {
+    timeZone: string;
+    timeRange: TimeRange;
+    interval: string;
+  }) {
+    emptyTable.columns[0].meta.source = 'esaggs';
+    emptyTable.columns[0].meta.sourceParams = {
+      type: 'date_histogram',
+      params: {
+        used_interval: options.interval,
+        used_time_zone: options.timeZone,
+      },
+      appliedTimeRange: options.timeRange,
+    };
+  }
+
   beforeEach(() => {
     dataMock = dataPluginMock.createStartContract();
-    (dataMock.search.aggs.getDateMetaByDatatableColumn as jest.Mock).mockReturnValue({
+    setDateHistogramMeta({
       timeZone: 'UTC',
       timeRange: {
         from: '2020-10-05T00:00:00.000Z',
@@ -156,7 +172,7 @@ describe('time_scale', () => {
   });
 
   it('should be able to scale up as well', async () => {
-    (dataMock.search.aggs.getDateMetaByDatatableColumn as jest.Mock).mockReturnValue({
+    setDateHistogramMeta({
       timeZone: 'UTC',
       timeRange: {
         from: '2020-10-05T12:00:00.000Z',
@@ -196,7 +212,7 @@ describe('time_scale', () => {
   });
 
   it('can scale starting from unit multiple target intervals', async () => {
-    (dataMock.search.aggs.getDateMetaByDatatableColumn as jest.Mock).mockReturnValue({
+    setDateHistogramMeta({
       timeZone: 'UTC',
       timeRange: {
         from: '2020-10-05T13:00:00.000Z',
@@ -238,7 +254,7 @@ describe('time_scale', () => {
   });
 
   it('take start and end of timerange into account', async () => {
-    (dataMock.search.aggs.getDateMetaByDatatableColumn as jest.Mock).mockReturnValue({
+    setDateHistogramMeta({
       timeZone: 'UTC',
       timeRange: {
         from: '2020-10-05T12:00:00.000Z',
@@ -283,7 +299,7 @@ describe('time_scale', () => {
   });
 
   it('should respect DST switches', async () => {
-    (dataMock.search.aggs.getDateMetaByDatatableColumn as jest.Mock).mockReturnValue({
+    setDateHistogramMeta({
       timeZone: 'Europe/Berlin',
       timeRange: {
         from: '2020-10-23T00:00:00.000+02:00',
@@ -323,7 +339,7 @@ describe('time_scale', () => {
   });
 
   it('take leap years into account', async () => {
-    (dataMock.search.aggs.getDateMetaByDatatableColumn as jest.Mock).mockReturnValue({
+    setDateHistogramMeta({
       timeZone: 'UTC',
       timeRange: {
         from: '2010-01-01T00:00:00.000Z',
