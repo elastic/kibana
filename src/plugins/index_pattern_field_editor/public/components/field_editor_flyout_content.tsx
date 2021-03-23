@@ -55,6 +55,19 @@ const geti18nTexts = (field?: Field) => {
         defaultMessage: 'Save',
       }
     ),
+    warningChangingFields: i18n.translate(
+      'indexPatternFieldEditor.deleteRuntimeField.confirmModal.warningChangingFields',
+      {
+        defaultMessage:
+          'Warning: Changing name or type may break searches or visualizations that rely on this field.',
+      }
+    ),
+    typeConfirm: i18n.translate(
+      'indexPatternFieldEditor.saveRuntimeField.confirmModal.typeConfirm',
+      {
+        defaultMessage: "Type 'confirm' to continue:",
+      }
+    ),
   };
 };
 
@@ -213,7 +226,8 @@ const FieldEditorFlyoutContentComponent = ({
       }}
     >
       <>
-        <p>Type &apos;confirm&apos; to continue:</p>
+        <p>{i18nTexts.warningChangingFields}</p>
+        <p>{i18nTexts.typeConfirm}</p>
         <EuiFieldText value={confirmContent} onChange={(e) => setConfirmContent(e.target.value)} />
       </>
     </EuiConfirmModal>
@@ -226,7 +240,7 @@ const FieldEditorFlyoutContentComponent = ({
             <EuiText>
               <FormattedMessage
                 id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                defaultMessage="Edit {fieldName} field"
+                defaultMessage="Edit {fieldName}"
                 values={{
                   fieldName: (
                     <h2 id="fieldEditorTitle" style={{ display: 'inline' }}>

@@ -55,11 +55,11 @@ const geti18nTexts = (fieldsToDelete?: string[]) => {
     typeConfirm: i18n.translate(
       'indexPatternFieldEditor.deleteRuntimeField.confirmModal.typeConfirm',
       {
-        defaultMessage: 'Type &apos;confirm&apos; to continue:',
+        defaultMessage: "Type 'confirm' to continue:",
       }
     ),
     warningRemovingFields: i18n.translate(
-      'indexPatternFieldEditor.deleteRuntimeField.confirmModal.typeConfirm',
+      'indexPatternFieldEditor.deleteRuntimeField.confirmModal.warningRemovingFields',
       {
         defaultMessage:
           'Warning: Removing fields may break searches or visualizations that rely on this field.',
