@@ -21,7 +21,10 @@ export const uploadLayerWizardConfig: LayerWizard = {
       'You do not have file upload privileges. Ask your system administrator to grant file upload privileges.',
   }),
   getIsDisabled: async () => {
-    const hasImportPermission = await getFileUpload().hasImportPermission(undefined, true);
+    const hasImportPermission = await getFileUpload().hasImportPermission({
+      checkCreateIndexPattern: true,
+      hasPipeline: false,
+    });
     return !hasImportPermission;
   },
   icon: 'importAction',

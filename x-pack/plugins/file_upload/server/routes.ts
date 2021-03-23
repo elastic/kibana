@@ -49,14 +49,15 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       validate: {
         query: schema.object({
           indexName: schema.maybe(schema.string()),
-          checkCreateIndexPattern: schema.maybe(schema.boolean()),
+          checkCreateIndexPattern: schema.boolean(),
+          hasPipeline: schema.boolean(),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const [, pluginsStart] = await coreSetup.getStartServices();
-        const { indexName, checkCreateIndexPattern } = request.query;
+        const { indexName, checkCreateIndexPattern, hasPipeline } = request.query;
 
         const authorizationService = pluginsStart.security?.authz;
         const requiresAuthz = authorizationService?.mode.useRbacForRequest(request) ?? false;
@@ -67,18 +68,14 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
 
         const checkPrivilegesPayload: CheckPrivilegesPayload = {
           elasticsearch: {
-            cluster: ['manage_pipeline'],
+            cluster: hasPipeline ? ['manage_pipeline'] : [],
+            index: indexName ? { [indexName]: ['create', 'create_index'] } : {},
           },
         };
         if (checkCreateIndexPattern) {
           checkPrivilegesPayload.kibana = [
             authorizationService.actions.savedObject.get('index-pattern', 'create'),
           ];
-        }
-        if (indexName) {
-          checkPrivilegesPayload.elasticsearch!.index = {
-            [indexName]: ['create', 'create_index'],
-          };
         }
 
         const checkPrivileges = authorizationService!.checkPrivilegesDynamicallyWithRequest(

@@ -15,7 +15,7 @@ export interface FileUploadStartApi {
   importerFactory(format: string, options: ImportFactoryOptions): Promise<IImporter | undefined>;
   getMaxBytes(): number;
   getMaxBytesFormatted(): string;
-  hasImportPermission(indexName?: string, checkCreateIndexPattern?: boolean): Promise<boolean>;
+  hasImportPermission(params: HasImportPermissionParams): Promise<boolean>;
 }
 
 export async function getFileUploadComponent(): Promise<
@@ -33,23 +33,19 @@ export async function importerFactory(
   return fileUploadModules.importerFactory(format, options);
 }
 
-export async function hasImportPermission(
-  indexName?: string,
-  checkCreateIndexPattern?: boolean
-): Promise<boolean> {
+interface HasImportPermissionParams {
+  checkCreateIndexPattern: boolean;
+  hasPipeline: boolean;
+  indexName?: string;
+}
+
+export async function hasImportPermission(params: HasImportPermissionParams): Promise<boolean> {
   const fileUploadModules = await lazyLoadFileUploadModules();
-  const query: { checkCreateIndexPattern?: boolean; indexName?: string } = {};
-  if (checkCreateIndexPattern !== undefined) {
-    query.checkCreateIndexPattern = checkCreateIndexPattern;
-  }
-  if (indexName !== undefined) {
-    query.indexName = indexName;
-  }
   try {
     const resp = await fileUploadModules.getHttp().fetch<HasImportPermission>({
       path: `/internal/file_upload/has_import_permission`,
       method: 'GET',
-      query,
+      query: { ...params },
     });
     return resp.hasImportPermission;
   } catch (error) {

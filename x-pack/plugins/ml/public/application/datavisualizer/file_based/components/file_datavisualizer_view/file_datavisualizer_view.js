@@ -61,7 +61,10 @@ export class FileDataVisualizerView extends Component {
     // check the user has the correct permission to import data.
     // note, calling hasImportPermission with no arguments just checks the
     // cluster privileges, the user will still need index privileges to create and ingest
-    const hasPermissionToImport = await getFileUpload().hasImportPermission();
+    const hasPermissionToImport = await getFileUpload().hasImportPermission({
+      checkCreateIndexPattern: false,
+      hasPipeline: true,
+    });
     this.setState({ hasPermissionToImport });
   }
 

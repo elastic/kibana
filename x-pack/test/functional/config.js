@@ -383,7 +383,7 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['*'],
-                privileges: ['create', 'read', 'view_index_metadata', 'monitor', 'create_index'],
+                privileges: ['create', 'read', 'view_index_metadata', 'create_index'],
               },
             ],
           },

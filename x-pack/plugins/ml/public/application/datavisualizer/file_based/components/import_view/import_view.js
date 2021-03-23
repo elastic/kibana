@@ -123,7 +123,13 @@ export class ImportView extends Component {
         },
         async () => {
           // check to see if the user has permission to create and ingest data into the specified index
-          if ((await getFileUpload().hasImportPermission(index, createIndexPattern)) === false) {
+          if (
+            (await getFileUpload().hasImportPermission({
+              checkCreateIndexPattern: createIndexPattern,
+              hasPipeline: true,
+              indexName: index,
+            })) === false
+          ) {
             errors.push(
               i18n.translate('xpack.ml.fileDatavisualizer.importView.importPermissionError', {
                 defaultMessage:
