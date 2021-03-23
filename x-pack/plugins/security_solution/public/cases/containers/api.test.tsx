@@ -7,22 +7,18 @@
 
 import { KibanaServices } from '../../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../../../cases/common/api';
-import { CASES_URL } from '../../../../cases/common/constants';
+import { CommentType, CaseStatuses } from '../../../../cases/common/api';
+import { CASES_URL } from '../../../../cases/common';
 
 import {
   deleteCases,
   getActionLicense,
   getCase,
   getCases,
-  getCasesStatus,
   getCaseUserActions,
-  getReporters,
   getTags,
   patchCase,
-  patchCasesStatus,
   patchComment,
-  postCase,
   postComment,
   pushCase,
 } from './api';
@@ -34,16 +30,12 @@ import {
   allCasesSnake,
   basicCaseSnake,
   pushedCaseSnake,
-  casesStatus,
-  casesSnake,
-  cases,
   caseUserActions,
   pushedCase,
   reporters,
   respReporters,
   tags,
   caseUserActionsSnake,
-  casesStatusSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -204,25 +196,6 @@ describe('Case Configuration API', () => {
     });
   });
 
-  describe('getCasesStatus', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesStatusSnake);
-    });
-    test('check url, method, signal', async () => {
-      await getCasesStatus(abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/status`, {
-        method: 'GET',
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await getCasesStatus(abortCtrl.signal);
-      expect(resp).toEqual(casesStatus);
-    });
-  });
-
   describe('getCaseUserActions', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -240,26 +213,6 @@ describe('Case Configuration API', () => {
     test('happy path', async () => {
       const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseUserActions);
-    });
-  });
-
-  describe('getReporters', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(respReporters);
-    });
-
-    test('check url, method, signal', async () => {
-      await getReporters(abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/reporters`, {
-        method: 'GET',
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await getReporters(abortCtrl.signal);
-      expect(resp).toEqual(respReporters);
     });
   });
 
@@ -311,34 +264,6 @@ describe('Case Configuration API', () => {
     });
   });
 
-  describe('patchCasesStatus', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesSnake);
-    });
-    const data = [
-      {
-        status: CaseStatuses.closed,
-        id: basicCase.id,
-        version: basicCase.version,
-      },
-    ];
-
-    test('check url, method, signal', async () => {
-      await patchCasesStatus(data, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ cases: data }),
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await patchCasesStatus(data, abortCtrl.signal);
-      expect(resp).toEqual({ ...cases });
-    });
-  });
-
   describe('patchComment', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -373,41 +298,6 @@ describe('Case Configuration API', () => {
         basicCase.comments[0].version,
         abortCtrl.signal
       );
-      expect(resp).toEqual(basicCase);
-    });
-  });
-
-  describe('postCase', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(basicCaseSnake);
-    });
-    const data = {
-      description: 'description',
-      tags: ['tag'],
-      title: 'title',
-      connector: {
-        id: 'none',
-        name: 'none',
-        type: ConnectorTypes.none,
-        fields: null,
-      },
-      settings: {
-        syncAlerts: true,
-      },
-    };
-
-    test('check url, method, signal', async () => {
-      await postCase(data, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('happy path', async () => {
-      const resp = await postCase(data, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
   });

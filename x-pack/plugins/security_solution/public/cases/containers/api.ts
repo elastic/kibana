@@ -9,16 +9,12 @@ import { assign, omit } from 'lodash';
 
 import {
   ACTION_TYPES_URL,
-  CASE_REPORTERS_URL,
-  CASE_STATUS_URL,
   CASE_TAGS_URL,
   CasePatchRequest,
-  CasePostRequest,
   CaseResponse,
   CASES_URL,
   CasesFindResponse,
   CasesResponse,
-  CasesStatusResponse,
   CaseType,
   CaseUserActionsResponse,
   CommentRequest,
@@ -34,7 +30,6 @@ import {
   SubCasePatchRequest,
   SubCaseResponse,
   SubCasesResponse,
-  User,
 } from '../../../../cases/common';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -45,7 +40,6 @@ import {
   AllCases,
   BulkUpdateStatus,
   Case,
-  CasesStatus,
   FetchCasesProps,
   SortFieldCase,
   CaseUserActions,
@@ -58,7 +52,6 @@ import {
   decodeCaseResponse,
   decodeCasesResponse,
   decodeCasesFindResponse,
-  decodeCasesStatusResponse,
   decodeCaseUserActionsResponse,
 } from './utils';
 
@@ -105,24 +98,8 @@ export const getSubCase = async (
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
-export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> => {
-  const response = await KibanaServices.get().http.fetch<CasesStatusResponse>(CASE_STATUS_URL, {
-    method: 'GET',
-    signal,
-  });
-  return convertToCamelCase<CasesStatusResponse, CasesStatus>(decodeCasesStatusResponse(response));
-};
-
 export const getTags = async (signal: AbortSignal): Promise<string[]> => {
   const response = await KibanaServices.get().http.fetch<string[]>(CASE_TAGS_URL, {
-    method: 'GET',
-    signal,
-  });
-  return response ?? [];
-};
-
-export const getReporters = async (signal: AbortSignal): Promise<User[]> => {
-  const response = await KibanaServices.get().http.fetch<User[]>(CASE_REPORTERS_URL, {
     method: 'GET',
     signal,
   });
@@ -188,15 +165,6 @@ export const getCases = async ({
     signal,
   });
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
-};
-
-export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> => {
-  const response = await KibanaServices.get().http.fetch<CaseResponse>(CASES_URL, {
-    method: 'POST',
-    body: JSON.stringify(newCase),
-    signal,
-  });
-  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
 export const patchCase = async (

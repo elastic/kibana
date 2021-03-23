@@ -114,7 +114,6 @@ BasicTable.displayName = 'BasicTable';
 export interface AllCasesProps {
   configureCasesHref: string;
   createCaseHref: string;
-  disabledCases?: CaseType[];
   disabledStatuses?: CaseStatuses[];
   getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
   isModal?: boolean;
@@ -129,7 +128,6 @@ export const AllCases = React.memo<AllCasesProps>(
   ({
     configureCasesHref,
     createCaseHref,
-    disabledCases = [],
     disabledStatuses,
     getCaseDetailsHref,
     isModal = false,
