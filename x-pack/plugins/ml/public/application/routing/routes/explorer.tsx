@@ -37,7 +37,7 @@ import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
-import { useTimeBuckets } from '../../util/use_time_buckets';
+import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
