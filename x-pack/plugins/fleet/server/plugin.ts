@@ -206,6 +206,10 @@ export class FleetPlugin
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
 
+    const config = await this.config$.pipe(first()).toPromise();
+
+    appContextService.fleetServerEnabled = config.agents.fleetServerEnabled;
+
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
@@ -244,8 +248,6 @@ export class FleetPlugin
     }
 
     const router = core.http.createRouter();
-
-    const config = await this.config$.pipe(first()).toPromise();
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);

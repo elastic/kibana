@@ -42,6 +42,11 @@ class AppContextService {
   private httpSetup?: HttpServiceSetup;
   private externalCallbacks: ExternalCallbacksStorage = new Map();
 
+  /**
+   * Temporary flag until v7.13 ships
+   */
+  public fleetServerEnabled: boolean = false;
+
   public async start(appContext: FleetAppContext) {
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
