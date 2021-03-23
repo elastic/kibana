@@ -259,9 +259,9 @@ describe('when on the list page', () => {
           };
 
           [
-            { status: HostStatus.ERROR, policy: (p: Policy) => p },
+            { status: HostStatus.UNHEALTHY, policy: (p: Policy) => p },
             {
-              status: HostStatus.ONLINE,
+              status: HostStatus.HEALTHY,
               policy: (p: Policy) => {
                 p.endpoint.id = 'xyz'; // represents change in endpoint policy assignment
                 p.endpoint.revision = 1;
@@ -276,7 +276,7 @@ describe('when on the list page', () => {
               },
             },
             {
-              status: HostStatus.UNENROLLING,
+              status: HostStatus.UPDATING,
               policy: (p: Policy) => {
                 p.agent.configured.revision += 1; // agent policy change, not propagated to agent yet
                 return p;
@@ -334,23 +334,25 @@ describe('when on the list page', () => {
         });
         const hostStatuses = await renderResult.findAllByTestId('rowHostStatus');
 
-        expect(hostStatuses[0].textContent).toEqual('Error');
-        expect(hostStatuses[0].querySelector('[data-euiicon-type][color="danger"]')).not.toBeNull();
+        expect(hostStatuses[0].textContent).toEqual('Unhealthy');
+        expect(hostStatuses[0].getAttribute('style')).toMatch(
+          /background-color\: rgb\(241\, 216\, 111\)\;/
+        );
 
-        expect(hostStatuses[1].textContent).toEqual('Online');
-        expect(
-          hostStatuses[1].querySelector('[data-euiicon-type][color="success"]')
-        ).not.toBeNull();
+        expect(hostStatuses[1].textContent).toEqual('Healthy');
+        expect(hostStatuses[1].getAttribute('style')).toMatch(
+          /background-color\: rgb\(109\, 204\, 177\)\;/
+        );
 
         expect(hostStatuses[2].textContent).toEqual('Offline');
-        expect(
-          hostStatuses[2].querySelector('[data-euiicon-type][color="subdued"]')
-        ).not.toBeNull();
+        expect(hostStatuses[2].getAttribute('style')).toMatch(
+          /background-color\: rgb\(211\, 218\, 230\)\;/
+        );
 
-        expect(hostStatuses[3].textContent).toEqual('Unenrolling');
-        expect(
-          hostStatuses[3].querySelector('[data-euiicon-type][color="warning"]')
-        ).not.toBeNull();
+        expect(hostStatuses[3].textContent).toEqual('Updating');
+        expect(hostStatuses[3].getAttribute('style')).toMatch(
+          /background-color\: rgb\(121\, 170\, 217\)\;/
+        );
       });
 
       it('should display correct policy status', async () => {

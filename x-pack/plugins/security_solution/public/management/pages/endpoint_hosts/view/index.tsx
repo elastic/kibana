@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiLink,
   EuiHealth,
+  EuiBadge,
   EuiToolTip,
   EuiSelectableProps,
   EuiSuperDatePicker,
@@ -38,7 +39,7 @@ import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
 import {
-  HOST_STATUS_TO_HEALTH_COLOR,
+  HOST_STATUS_TO_BADGE_COLOR,
   POLICY_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_TEXT,
 } from './host_constants';
@@ -306,17 +307,17 @@ export const EndpointList = () => {
         // eslint-disable-next-line react/display-name
         render: (hostStatus: HostInfo['host_status']) => {
           return (
-            <EuiHealth
-              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
+            <EuiBadge
+              color={HOST_STATUS_TO_BADGE_COLOR[hostStatus] || 'warning'}
               data-test-subj="rowHostStatus"
               className="eui-textTruncate"
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
+                defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive } other {UNHEALTHY}}"
                 values={{ hostStatus }}
               />
-            </EuiHealth>
+            </EuiBadge>
           );
         },
       },

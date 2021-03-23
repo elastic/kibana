@@ -375,12 +375,12 @@ export enum HostStatus {
    * Default state of the host when no host information is present or host information cannot
    * be retrieved. e.g. API error
    */
-  ERROR = 'error',
+  UNHEALTHY = 'unhealthy',
 
   /**
    * Host is online as indicated by its checkin status during the last checkin window
    */
-  ONLINE = 'online',
+  HEALTHY = 'healthy',
 
   /**
    * Host is offline as indicated by its checkin status during the last checkin window
@@ -388,9 +388,14 @@ export enum HostStatus {
   OFFLINE = 'offline',
 
   /**
-   * Host is unenrolling as indicated by its checkin status during the last checkin window
+   * Host is unenrolling, enrolling or updating as indicated by its checkin status during the last checkin window
    */
-  UNENROLLING = 'unenrolling',
+  UPDATING = 'updating',
+
+  /**
+   * Host is inactive as indicated by its checkin status during the last checkin window
+   */
+  INACTIVE = 'inactive',
 }
 
 export enum MetadataQueryStrategyVersions {

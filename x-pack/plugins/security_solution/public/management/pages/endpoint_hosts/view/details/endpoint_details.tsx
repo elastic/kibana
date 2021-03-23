@@ -8,7 +8,6 @@
 import styled from 'styled-components';
 import {
   EuiDescriptionList,
-  EuiHealth,
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
@@ -29,7 +28,7 @@ import { policyResponseStatus, uiQueryParams } from '../../store/selectors';
 import {
   POLICY_STATUS_TO_HEALTH_COLOR,
   POLICY_STATUS_TO_BADGE_COLOR,
-  HOST_STATUS_TO_HEALTH_COLOR,
+  HOST_STATUS_TO_BADGE_COLOR,
 } from '../host_constants';
 import { FormattedDateAndTime } from '../../../../../common/components/endpoint/formatted_date_time';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -96,18 +95,18 @@ export const EndpointDetails = memo(
             defaultMessage: 'Agent Status',
           }),
           description: (
-            <EuiHealth
-              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
-              data-test-subj="agentStatusHealth"
+            <EuiBadge
+              color={HOST_STATUS_TO_BADGE_COLOR[hostStatus] || 'warning'}
+              data-test-subj="hostDetailsAgentStatusBadge"
             >
               <EuiText size="m">
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                  defaultMessage="{hostStatus, select, online {Online} error {Error} unenrolling {Unenrolling} other {Offline}}"
+                  defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} inactive {Inactive} offline {Offline} other {Unhealthy}}"
                   values={{ hostStatus }}
                 />
               </EuiText>
-            </EuiHealth>
+            </EuiBadge>
           ),
         },
         {
