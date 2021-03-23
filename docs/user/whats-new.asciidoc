@@ -1,8 +1,6 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-coming::[7.12.0]
-
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check out the <<release-notes, release notes>>.
@@ -69,9 +67,8 @@ home for all of your saved panels.
 * *Copy to dashboard*. Have a panel that you want to instantly copy to a new or existing dashboard?
 Now you can right from the panel menu.
 
-* *Quick save*. A new *Save* option in the toolbar lets you can quickly
-save a dashboard without adding a title first. To pick up where you left off,
-simply navigate back to *Dashboard*.
+* *Quick save*. A new *Save* option in the toolbar lets you quickly
+save a dashboard without ending your editing session. To rename the dashboard or save as a copy press *Save as*.
 
 [float]
 [[runtime-fields-7-12]]
