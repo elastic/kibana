@@ -17,7 +17,6 @@ import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
 import { osquerySearchStrategyProvider } from './search_strategy/osquery';
-import { initSavedObjects } from './saved_objects';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
 
@@ -47,7 +46,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       config: (): ConfigType => config,
     };
 
-    initSavedObjects(core.savedObjects, osqueryContext);
+    // initSavedObjects(core.savedObjects, osqueryContext);
     defineRoutes(router, osqueryContext);
 
     core.getStartServices().then(([, depsStart]) => {
