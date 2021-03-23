@@ -6,17 +6,19 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { stringify, parse } from 'query-string';
 
 import styled from 'styled-components';
 
 import { EuiCodeEditor, EuiPanel, EuiTabbedContent } from '@elastic/eui';
-import { ConfigKeys, Mode } from './types';
+import { Mode } from './types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
 
 import 'brace/theme/github';
-import 'brace/mode/javascript';
+import 'brace/mode/xml';
+import 'brace/mode/json';
 import 'brace/snippets/javascript';
 import 'brace/ext/language_tools';
 
@@ -25,37 +27,42 @@ const CodeEditorContainer = styled(EuiPanel)`
 `;
 
 const CodeEditor = ({
+  ariaLabel,
+  id,
   mode,
   onChange,
   value,
 }: {
+  ariaLabel: string;
+  id: string;
   mode: Mode;
   onChange: (value: string) => void;
   value: string;
 }) => {
   return (
     <CodeEditorContainer borderRadius="none">
-      <EuiCodeEditor
-        mode={mode}
-        theme="github"
-        width="100%"
-        height="250px"
-        value={value}
-        onChange={onChange}
-        setOptions={{
-          fontSize: '14px',
-          enableBasicAutocompletion: true,
-          enableSnippets: true,
-          enableLiveAutocompletion: true,
-        }}
-        aria-label="Request body"
-      />
+      <div id={`${id}-editor`}>
+        <EuiCodeEditor
+          mode={mode}
+          theme="github"
+          width="100%"
+          height="250px"
+          value={value}
+          onChange={onChange}
+          setOptions={{
+            fontSize: '14px',
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+          }}
+          aria-label={ariaLabel}
+        />
+      </div>
     </CodeEditorContainer>
   );
 };
 
 interface Props {
-  configKey: ConfigKeys;
   onChange: (requestBody: { type: Mode; value: string }) => void;
   type: Mode;
   value: string;
@@ -131,6 +138,8 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
       name: modeLabels[Mode.TEXT],
       content: (
         <CodeEditor
+          ariaLabel={`${modeLabels[Mode.TEXT]} code editor`}
+          id={Mode.TEXT}
           mode={Mode.TEXT}
           onChange={(code) => setValues((prevValues) => ({ ...prevValues, [Mode.TEXT]: code }))}
           value={values[Mode.TEXT]}
@@ -142,6 +151,8 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
       name: modeLabels[Mode.JSON],
       content: (
         <CodeEditor
+          ariaLabel={`${modeLabels[Mode.JSON]} code editor`}
+          id={Mode.JSON}
           mode={Mode.JSON}
           onChange={(code) => setValues((prevValues) => ({ ...prevValues, [Mode.JSON]: code }))}
           value={values[Mode.JSON]}
@@ -153,6 +164,8 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
       name: modeLabels[Mode.XML],
       content: (
         <CodeEditor
+          ariaLabel={`${modeLabels[Mode.XML]} code editor`}
+          id={Mode.XML}
           mode={Mode.XML}
           onChange={(code) => setValues((prevValues) => ({ ...prevValues, [Mode.XML]: code }))}
           value={values[Mode.XML]}
@@ -171,14 +184,36 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
       tabs={tabs}
       initialSelectedTab={tabs.find((tab) => tab.id === type)}
       autoFocus="selected"
-      onTabClick={(tab) => handleSetMode(tab.id as Mode)}
+      onTabClick={(tab) => {
+        handleSetMode(tab.id as Mode);
+      }}
     />
   );
 };
 
 const modeLabels = {
-  [Mode.FORM]: 'Form',
-  [Mode.TEXT]: 'Text',
-  [Mode.JSON]: 'JSON',
-  [Mode.XML]: 'XML',
+  [Mode.FORM]: i18n.translate(
+    'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyType.form',
+    {
+      defaultMessage: 'Form',
+    }
+  ),
+  [Mode.TEXT]: i18n.translate(
+    'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyType.text',
+    {
+      defaultMessage: 'Text',
+    }
+  ),
+  [Mode.JSON]: i18n.translate(
+    'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyType.JSON',
+    {
+      defaultMessage: 'JSON',
+    }
+  ),
+  [Mode.XML]: i18n.translate(
+    'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyType.XML',
+    {
+      defaultMessage: 'XML',
+    }
+  ),
 };
