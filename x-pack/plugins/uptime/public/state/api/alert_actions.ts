@@ -84,6 +84,7 @@ function getIndexActionParams(): IndexActionParams {
         observerLocation: '{{state.observerLocation}}',
       },
     ],
+    indexOverride: null,
   };
 }
 
