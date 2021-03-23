@@ -105,6 +105,7 @@ function buildGradient(
     id,
     getColor,
     getColors: colors,
+    canDynamicColoring: true,
     toExpression: () => ({
       type: 'expression',
       chain: [
@@ -179,9 +180,16 @@ function buildCustomPalette(): PaletteDefinition {
     },
     internal: true,
     title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'Custom' }),
-    getColors: (size: number, { colors, gradient }: { colors: string[]; gradient: boolean }) => {
+    getColors: (
+      size: number,
+      { colors, gradient }: { colors: string[]; gradient: boolean } = {
+        colors: [],
+        gradient: false,
+      }
+    ) => {
       return gradient ? chroma.scale(colors).colors(size) : colors;
     },
+    canDynamicColoring: false,
     toExpression: ({ colors, gradient }: { colors: string[]; gradient: boolean }) => ({
       type: 'expression',
       chain: [

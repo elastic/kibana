@@ -6,6 +6,7 @@
  */
 
 import type { Direction } from '@elastic/eui';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import type { IAggType } from 'src/plugins/data/public';
 import type { Datatable, RenderMode } from 'src/plugins/expressions';
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensEditEvent } from '../../types';
@@ -55,4 +56,5 @@ export interface DataContextType {
   table?: Datatable;
   rowHasRowClickTriggerActions?: boolean[];
   alignments?: Record<string, 'left' | 'right' | 'center'>;
+  minMaxByColumnId?: Record<string, { min: number; max: number }>;
 }

@@ -14,11 +14,19 @@ export interface CustomPaletteArguments {
   color?: string[];
   gradient: boolean;
   reverse?: boolean;
+  stop?: number[];
+  range: 'auto' | 'number' | 'percent';
+  rangeMin: number;
+  rangeMax: number;
 }
 
 export interface CustomPaletteState {
   colors: string[];
   gradient: boolean;
+  stops: number[];
+  range: 'auto' | 'number' | 'percent';
+  rangeMin: number;
+  rangeMax: number;
 }
 
 export interface SystemPaletteArguments {
@@ -83,6 +91,31 @@ export function palette(): ExpressionFunctionDefinition<
         }),
         required: false,
       },
+      stop: {
+        multi: true,
+        types: ['number'],
+        help: i18n.translate('charts.functions.palette.args.stopHelpText', {
+          defaultMessage:
+            'The palette color stops. When used, it must be associated with each color.',
+        }),
+        required: false,
+      },
+      range: {
+        types: ['string'],
+        options: ['auto', 'number', 'percent'],
+        default: 'auto',
+        help: '',
+      },
+      rangeMin: {
+        types: ['number'],
+        help: '',
+        required: false,
+      },
+      rangeMax: {
+        types: ['number'],
+        help: '',
+        required: false,
+      },
       gradient: {
         types: ['boolean'],
         default: false,
@@ -101,14 +134,21 @@ export function palette(): ExpressionFunctionDefinition<
       },
     },
     fn: (input, args) => {
-      const { color, reverse, gradient } = args;
+      const { color, reverse, gradient, stop, range, rangeMin, rangeMax } = args;
       const colors = ([] as string[]).concat(color || defaultCustomColors);
-
+      const stops = ([] as number[]).concat(stop || []);
+      if (stops.length > 0 && colors.length !== stops.length) {
+        throw Error('When stop is used, each color must have an associated stop value.');
+      }
       return {
         type: 'palette',
         name: 'custom',
         params: {
           colors: reverse ? colors.reverse() : colors,
+          stops: reverse ? stops.reverse() : stops,
+          range,
+          rangeMin,
+          rangeMax,
           gradient,
         },
       };

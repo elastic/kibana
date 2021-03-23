@@ -39,6 +39,18 @@ describe('palette', () => {
       });
     });
 
+    describe('stop', () => {
+      it('sets stops', () => {
+        const result = fn(null, { color: ['red', 'green', 'blue'], stop: [1, 2, 3] });
+        expect(result.params!.stops).toEqual([1, 2, 3]);
+      });
+
+      it('defaults to pault_tor_14 colors', () => {
+        const result = fn(null);
+        expect(result.params!.colors).toEqual(defaultCustomColors);
+      });
+    });
+
     describe('gradient', () => {
       it('sets gradient', () => {
         let result = fn(null, { gradient: true });

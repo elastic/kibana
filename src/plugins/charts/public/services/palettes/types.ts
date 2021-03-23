@@ -104,6 +104,10 @@ export interface PaletteDefinition<T = unknown> {
    * This can be used if the chart wants to control color assignment locally.
    */
   getColors: (size: number, state?: T) => string[];
+  /**
+   * Define whether a palette supports dynamic coloring (i.e. gradient colors mapped to number values)
+   */
+  canDynamicColoring?: boolean;
 }
 
 export interface PaletteRegistry {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-import { EuiColorPalettePicker } from '@elastic/eui';
+import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NativeRenderer } from '../native_renderer';
@@ -16,11 +16,32 @@ export function PalettePicker({
   palettes,
   activePalette,
   setPalette,
+  showCustomPalette,
+  showDynamicColorOnly,
 }: {
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput;
   setPalette: (palette: PaletteOutput) => void;
+  showCustomPalette?: boolean;
+  showDynamicColorOnly?: boolean;
 }) {
+  const palettesToShow: EuiColorPalettePickerPaletteProps[] = palettes
+    .getAll()
+    .filter(({ internal, canDynamicColoring }) =>
+      showDynamicColorOnly ? canDynamicColoring : !internal
+    )
+    .map(({ id, title, getColors }) => {
+      return {
+        value: id,
+        title,
+        type: 'fixed' as const,
+        palette: getColors(10, id === activePalette?.name ? activePalette?.params : undefined),
+      };
+    });
+  if (showCustomPalette) {
+    const { id, title } = palettes.get('custom');
+    palettesToShow.push({ value: id, title, type: 'text' });
+  }
   return (
     <EuiFormRow
       display="columnCompressed"
@@ -33,20 +54,7 @@ export function PalettePicker({
         <EuiColorPalettePicker
           data-test-subj="lns-palettePicker"
           compressed
-          palettes={palettes
-            .getAll()
-            .filter(({ internal }) => !internal)
-            .map(({ id, title, getColors }) => {
-              return {
-                value: id,
-                title,
-                type: 'fixed',
-                palette: getColors(
-                  10,
-                  id === activePalette?.name ? activePalette?.params : undefined
-                ),
-              };
-            })}
+          palettes={palettesToShow}
           onChange={(newPalette) => {
             setPalette({
               type: 'palette',
@@ -56,7 +64,8 @@ export function PalettePicker({
           valueOfSelected={activePalette?.name || 'default'}
           selectionDisplay={'palette'}
         />
-        {activePalette && palettes.get(activePalette.name).renderEditor && (
+        {/* // TODO: remove it */}
+        {/* {activePalette && palettes.get(activePalette.name).renderEditor && (
           <NativeRenderer
             render={palettes.get(activePalette.name).renderEditor!}
             nativeProps={{
@@ -70,7 +79,7 @@ export function PalettePicker({
               },
             }}
           />
-        )}
+        )} */}
       </>
     </EuiFormRow>
   );

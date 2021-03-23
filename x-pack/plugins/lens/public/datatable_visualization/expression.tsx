@@ -17,6 +17,8 @@ import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
 } from 'src/plugins/expressions';
+import { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
+import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { getSortingCriteria } from './sorting';
 
 import { DatatableComponent } from './components/table_basic';
@@ -29,7 +31,12 @@ import { transposeTable } from './transpose_helpers';
 export interface Args {
   title: string;
   description?: string;
-  columns: Array<ColumnState & { type: 'lens_datatable_column' }>;
+  columns: Array<
+    Exclude<ColumnState, 'palette'> & {
+      type: 'lens_datatable_column';
+      palette: PaletteOutput<CustomPaletteState>;
+    }
+  >;
   sortingColumnId: string | undefined;
   sortingDirection: 'asc' | 'desc' | 'none';
 }
@@ -160,6 +167,11 @@ export const datatableColumn: ExpressionFunctionDefinition<
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },
     transposable: { types: ['boolean'], help: '' },
+    colorMode: { types: ['string'], help: '' },
+    palette: {
+      types: ['palette'],
+      help: '',
+    },
   },
   fn: function fn(input: unknown, args: ColumnState) {
     return {
@@ -168,6 +180,17 @@ export const datatableColumn: ExpressionFunctionDefinition<
     };
   },
 };
+
+export interface CustomPaletteParams {
+  name?: string;
+  reverse?: boolean;
+  rangeType?: 'auto' | 'number' | 'percent';
+  rangeMin?: number;
+  rangeMax?: number;
+  progression?: 'gradient' | 'stepped' | 'fixed';
+  stops?: Array<{ color: string; stop: number }>;
+  steps?: number;
+}
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;

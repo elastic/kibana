@@ -18,6 +18,7 @@ import {
   EuiDataGridSorting,
   EuiDataGridStyle,
 } from '@elastic/eui';
+import { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
 import { FormatFactory, LensFilterEvent, LensTableRowContextMenuEvent } from '../../types';
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '../../shared_components';
@@ -50,8 +51,9 @@ const gridStyle: EuiDataGridStyle = {
 
 export interface ColumnConfig {
   columns: Array<
-    ColumnState & {
+    Exclude<ColumnState, 'palette'> & {
       type: 'lens_datatable_column';
+      palette: PaletteOutput<CustomPaletteState>;
     }
   >;
   sortingColumnId: string | undefined;
@@ -203,20 +205,48 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     ]
   );
 
+  const isNumericMap: Record<string, boolean> = useMemo(() => {
+    const numericMap: Record<string, boolean> = {};
+    columnConfig.columns.forEach((column) => {
+      numericMap[column.columnId] =
+        firstLocalTable.columns.find((dataColumn) => dataColumn.id === column.columnId)?.meta
+          .type === 'number';
+    });
+    return numericMap;
+  }, [firstLocalTable, columnConfig]);
+
   const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
     const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
     columnConfig.columns.forEach((column) => {
       if (column.alignment) {
         alignmentMap[column.columnId] = column.alignment;
       } else {
-        const isNumeric =
-          firstLocalTable.columns.find((dataColumn) => dataColumn.id === column.columnId)?.meta
-            .type === 'number';
-        alignmentMap[column.columnId] = isNumeric ? 'right' : 'left';
+        alignmentMap[column.columnId] = isNumericMap[column.columnId] ? 'right' : 'left';
       }
     });
     return alignmentMap;
-  }, [firstLocalTable, columnConfig]);
+  }, [columnConfig, isNumericMap]);
+
+  const minMaxByColumnId: Record<string, { min: number; max: number }> = useMemo(() => {
+    const minMax: Record<string, { min: number; max: number }> = {};
+    columnConfig.columns
+      .filter(({ columnId }) => isNumericMap[columnId])
+      .forEach(({ columnId }) => {
+        minMax[columnId] = minMax[columnId] || { max: -Infinity, min: Infinity };
+        firstLocalTable.rows.forEach((row) => {
+          const rowValue = row[columnId];
+          if (rowValue != null) {
+            if (minMax[columnId].min > rowValue) {
+              minMax[columnId].min = rowValue;
+            }
+            if (minMax[columnId].max < rowValue) {
+              minMax[columnId].max = rowValue;
+            }
+          }
+        });
+      });
+    return minMax;
+  }, [firstLocalTable, isNumericMap, columnConfig]);
 
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {
@@ -254,7 +284,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     ];
   }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
 
-  const renderCellValue = useMemo(() => createGridCell(formatters, DataContext), [formatters]);
+  const renderCellValue = useMemo(() => createGridCell(formatters, columnConfig, DataContext), [
+    formatters,
+    columnConfig,
+  ]);
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns: () => {} }), [
     visibleColumns,
@@ -286,6 +319,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           table: firstLocalTable,
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
           alignments,
+          minMaxByColumnId,
         }}
       >
         <EuiDataGrid

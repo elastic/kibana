@@ -11,6 +11,7 @@ import { Ast } from '@kbn/interpreter/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { DatatableColumn } from 'src/plugins/expressions/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import {
   SuggestionRequest,
   Visualization,
@@ -19,6 +20,7 @@ import {
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
+import { CustomPaletteParams } from './expression';
 
 export interface ColumnState {
   columnId: string;
@@ -32,6 +34,8 @@ export interface ColumnState {
   originalName?: string;
   bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
   alignment?: 'left' | 'right' | 'center';
+  palette?: PaletteOutput<CustomPaletteParams>;
+  colorMode?: 'none' | 'cell' | 'text';
 }
 
 export interface SortingState {
@@ -49,7 +53,11 @@ const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
   defaultMessage: 'Table',
 });
 
-export const datatableVisualization: Visualization<DatatableVisualizationState> = {
+export const getDatatableVisualization = ({
+  paletteService,
+}: {
+  paletteService: PaletteRegistry;
+}): Visualization<DatatableVisualizationState> => ({
   id: 'lnsDatatable',
 
   visualizationTypes: [
@@ -284,7 +292,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <TableDimensionEditor {...props} />
+        <TableDimensionEditor {...props} paletteService={paletteService} />
       </I18nProvider>,
       domElement
     );
@@ -335,6 +343,38 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                       !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
                     ],
                     alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
+                    colorMode: [column.colorMode ?? 'none'],
+                    palette: [
+                      {
+                        type: 'expression',
+                        chain: [
+                          {
+                            type: 'function',
+                            function: 'palette',
+                            arguments: {
+                              gradient: [column.palette?.params?.progression === 'gradient'],
+                              reverse: [column.palette?.params?.reverse || false],
+                              range: [column.palette?.params?.rangeType || 'auto'],
+                              rangeMin:
+                                column.palette?.params?.rangeMin != null
+                                  ? [column.palette?.params?.rangeMin]
+                                  : [],
+                              rangeMax:
+                                column.palette?.params?.rangeMax != null
+                                  ? [column.palette?.params?.rangeMax]
+                                  : [],
+                              color: (column.palette?.params?.stops || []).map(
+                                ({ color }) => color
+                              ),
+                              stop:
+                                column.palette?.params?.name === 'custom'
+                                  ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
+                                  : [],
+                            },
+                          },
+                        ],
+                      },
+                    ],
                   },
                 },
               ],
@@ -394,7 +434,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         return state;
     }
   },
-};
+});
 
 function getDataSourceAndSortedColumns(
   state: DatatableVisualizationState,
