@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { RawConfigService, RawConfigurationProvider, RawConfigAdapter } from './raw_config_service';
-export { getConfigFromFiles } from './read_config';
+export type { DevConfig } from './dev_config';
+export type { PluginsConfig } from './plugins_config';
+export type { HttpConfig } from './http_config';
+export type { CliDevConfig } from './types';
+export { loadConfig } from './load_config';

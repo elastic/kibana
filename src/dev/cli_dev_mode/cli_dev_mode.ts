@@ -11,24 +11,31 @@ import Path from 'path';
 import { REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
 import { map, mapTo, filter, take, tap, distinctUntilChanged, switchMap } from 'rxjs/operators';
-
-import { CliArgs } from '../../core/server/config';
-import { LegacyConfig } from '../../core/server/legacy';
-import { BasePathProxyServer } from '../../core/server/http';
+import { CliArgs } from '@kbn/config';
 
 import { Log, CliLog } from './log';
 import { Optimizer } from './optimizer';
 import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
+import { BasePathProxyServer } from './base_path_proxy_server';
 import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
 import { getServerWatchPaths } from './get_server_watch_paths';
+import { CliDevConfig } from './config';
 
 // timeout where the server is allowed to exit gracefully
 const GRACEFUL_TIMEOUT = 5000;
 
 export type SomeCliArgs = Pick<
   CliArgs,
-  'quiet' | 'silent' | 'disableOptimizer' | 'watch' | 'oss' | 'runExamples' | 'cache' | 'dist'
+  | 'quiet'
+  | 'silent'
+  | 'disableOptimizer'
+  | 'watch'
+  | 'oss'
+  | 'runExamples'
+  | 'cache'
+  | 'dist'
+  | 'basePath'
 >;
 
 export interface CliDevModeOptions {
@@ -67,49 +74,28 @@ const firstAllTrue = (...sources: Array<Rx.Observable<boolean>>) =>
  *
  */
 export class CliDevMode {
-  static fromCoreServices(
-    cliArgs: SomeCliArgs,
-    config: LegacyConfig,
-    basePathProxy?: BasePathProxyServer
-  ) {
-    new CliDevMode({
-      quiet: !!cliArgs.quiet,
-      silent: !!cliArgs.silent,
-      cache: !!cliArgs.cache,
-      disableOptimizer: !!cliArgs.disableOptimizer,
-      dist: !!cliArgs.dist,
-      oss: !!cliArgs.oss,
-      runExamples: !!cliArgs.runExamples,
-      pluginPaths: config.get<string[]>('plugins.paths'),
-      pluginScanDirs: config.get<string[]>('plugins.scanDirs'),
-      watch: !!cliArgs.watch,
-      basePathProxy,
-    }).start();
-  }
   private readonly log: Log;
   private readonly basePathProxy?: BasePathProxyServer;
   private readonly watcher: Watcher;
   private readonly devServer: DevServer;
   private readonly optimizer: Optimizer;
   private startTime?: number;
-
   private subscription?: Rx.Subscription;
 
-  constructor(options: CliDevModeOptions) {
-    this.basePathProxy = options.basePathProxy;
-    this.log = options.log || new CliLog(!!options.quiet, !!options.silent);
+  constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
+    this.log = log || new CliLog(!!cliArgs.quiet, !!cliArgs.silent);
+
+    if (cliArgs.basePath) {
+      this.basePathProxy = new BasePathProxyServer(this.log, config.http, config.dev);
+    }
 
     const { watchPaths, ignorePaths } = getServerWatchPaths({
-      pluginPaths: options.pluginPaths ?? [],
-      pluginScanDirs: [
-        ...(options.pluginScanDirs ?? []),
-        Path.resolve(REPO_ROOT, 'src/plugins'),
-        Path.resolve(REPO_ROOT, 'x-pack/plugins'),
-      ],
+      pluginPaths: config.plugins.additionalPluginPaths,
+      pluginScanDirs: config.plugins.pluginSearchPaths,
     });
 
     this.watcher = new Watcher({
-      enabled: !!options.watch,
+      enabled: !!cliArgs.watch,
       log: this.log,
       cwd: REPO_ROOT,
       paths: watchPaths,
@@ -124,10 +110,10 @@ export class CliDevMode {
       script: Path.resolve(REPO_ROOT, 'scripts/kibana'),
       argv: [
         ...process.argv.slice(2).filter((v) => v !== '--no-watch'),
-        ...(options.basePathProxy
+        ...(this.basePathProxy
           ? [
-              `--server.port=${options.basePathProxy.targetPort}`,
-              `--server.basePath=${options.basePathProxy.basePath}`,
+              `--server.port=${this.basePathProxy.targetPort}`,
+              `--server.basePath=${this.basePathProxy.basePath}`,
               '--server.rewriteBasePath=true',
             ]
           : []),
@@ -144,16 +130,17 @@ export class CliDevMode {
     });
 
     this.optimizer = new Optimizer({
-      enabled: !options.disableOptimizer,
+      enabled: !cliArgs.disableOptimizer,
       repoRoot: REPO_ROOT,
-      oss: options.oss,
-      pluginPaths: options.pluginPaths,
-      runExamples: options.runExamples,
-      cache: options.cache,
-      dist: options.dist,
-      quiet: options.quiet,
-      silent: options.silent,
-      watch: options.watch,
+      oss: cliArgs.oss,
+      pluginPaths: config.plugins.additionalPluginPaths,
+      pluginScanDirs: config.plugins.pluginSearchPaths,
+      runExamples: cliArgs.runExamples,
+      cache: cliArgs.cache,
+      dist: cliArgs.dist,
+      quiet: !!cliArgs.quiet,
+      silent: !!cliArgs.silent,
+      watch: cliArgs.watch,
     });
   }
 

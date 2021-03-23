@@ -8,7 +8,6 @@
 
 import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
-
 import apm from 'elastic-apm-node';
 import { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
@@ -18,11 +17,12 @@ import { take } from 'rxjs/operators';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createServer, getListenerOptions, getServerOptions } from '@kbn/http-tools';
 
-import { DevConfig } from '../dev';
-import { Logger } from '../logging';
-import { HttpConfig } from './http_config';
+import { DevConfig, HttpConfig } from './config';
+import { Log } from './log';
 
+const ONE_GIGABYTE = 1024 * 1024 * 1024;
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
+const getRandomBasePath = () => sampleSize(alphabet, 3).join('');
 
 export interface BasePathProxyServerOptions {
   shouldRedirectFromOldBasePath: (path: string) => boolean;
@@ -30,8 +30,21 @@ export interface BasePathProxyServerOptions {
 }
 
 export class BasePathProxyServer {
+  private readonly httpConfig: HttpConfig;
   private server?: Server;
   private httpsAgent?: HttpsAgent;
+
+  constructor(
+    private readonly log: Log,
+    httpConfig: HttpConfig,
+    private readonly devConfig: DevConfig
+  ) {
+    this.httpConfig = {
+      ...httpConfig,
+      maxPayload: new ByteSizeValue(ONE_GIGABYTE),
+      basePath: httpConfig.basePath ?? `/${getRandomBasePath()}`,
+    };
+  }
 
   public get basePath() {
     return this.httpConfig.basePath;
@@ -49,21 +62,8 @@ export class BasePathProxyServer {
     return this.httpConfig.port;
   }
 
-  constructor(
-    private readonly log: Logger,
-    private readonly httpConfig: HttpConfig,
-    private readonly devConfig: DevConfig
-  ) {
-    const ONE_GIGABYTE = 1024 * 1024 * 1024;
-    httpConfig.maxPayload = new ByteSizeValue(ONE_GIGABYTE);
-
-    if (!httpConfig.basePath) {
-      httpConfig.basePath = `/${sampleSize(alphabet, 3).join('')}`;
-    }
-  }
-
   public async start(options: Readonly<BasePathProxyServerOptions>) {
-    this.log.debug('starting basepath proxy server');
+    this.log.good('starting basepath proxy server');
 
     const serverOptions = getServerOptions(this.httpConfig);
     const listenerOptions = getListenerOptions(this.httpConfig);
@@ -88,7 +88,7 @@ export class BasePathProxyServer {
 
     await this.server.start();
 
-    this.log.info(
+    this.log.good(
       `basepath proxy server running at ${Url.format({
         host: this.server.info.uri,
         pathname: this.httpConfig.basePath,
@@ -101,7 +101,7 @@ export class BasePathProxyServer {
       return;
     }
 
-    this.log.debug('stopping basepath proxy server');
+    this.log.good('stopping basepath proxy server');
     await this.server.stop();
     this.server = undefined;
 

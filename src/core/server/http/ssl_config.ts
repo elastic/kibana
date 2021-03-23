@@ -163,6 +163,4 @@ export class SslConfig {
   }
 }
 
-const readFile = (file: string) => {
-  return readFileSync(file, 'utf8');
-};
+const readFile = (file: string) => readFileSync(file, 'utf8');

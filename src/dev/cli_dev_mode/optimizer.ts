@@ -31,6 +31,7 @@ export interface Options {
   oss: boolean;
   runExamples: boolean;
   pluginPaths: string[];
+  pluginScanDirs: string[];
   writeLogTo?: Writable;
 }
 
@@ -56,6 +57,7 @@ export class Optimizer {
       oss: options.oss,
       examples: options.runExamples,
       pluginPaths: options.pluginPaths,
+      pluginScanDirs: options.pluginScanDirs,
     });
 
     const dim = Chalk.dim('np bld');

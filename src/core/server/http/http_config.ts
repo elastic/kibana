@@ -7,6 +7,7 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { IHttpConfig } from '@kbn/http-tools';
 import { hostname } from 'os';
 import url from 'url';
 
@@ -156,7 +157,7 @@ export const config = {
 };
 export type HttpConfigType = TypeOf<typeof config.schema>;
 
-export class HttpConfig {
+export class HttpConfig implements IHttpConfig {
   public name: string;
   public autoListen: boolean;
   public host: string;
