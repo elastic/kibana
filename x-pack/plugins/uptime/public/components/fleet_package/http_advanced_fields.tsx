@@ -95,7 +95,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           label={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestMethod"
-              defaultMessage="Request Method"
+              defaultMessage="Request method"
             />
           }
         >
@@ -142,7 +142,6 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         fullWidth
       >
         <RequestBodyField
-          configKey={ConfigKeys.REQUEST_BODY_CHECK}
           value={fields[ConfigKeys.REQUEST_BODY_CHECK].value}
           type={fields[ConfigKeys.REQUEST_BODY_CHECK].type}
           onChange={useCallback(
