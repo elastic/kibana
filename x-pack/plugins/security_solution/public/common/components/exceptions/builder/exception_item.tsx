@@ -13,9 +13,12 @@ import { Type } from '../../../../../common/detection_engine/schemas/common/sche
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
 import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } from '../types';
-import { BuilderEntryItem, ExceptionListType } from '../../../../shared_imports';
+import {
+  BuilderEntryItem,
+  BuilderAndBadgeComponent,
+  ExceptionListType,
+} from '../../../../shared_imports';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
-import { BuilderAndBadgeComponent } from './and_badge';
 import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { useKibana } from '../../../lib/kibana';
 

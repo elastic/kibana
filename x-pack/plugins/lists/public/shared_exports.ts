@@ -39,3 +39,4 @@ export {
   UseExceptionListsSuccess,
 } from './exceptions/types';
 export { BuilderEntryItem } from './exceptions/components/builder/entry_renderer';
+export { BuilderAndBadgeComponent } from './exceptions/components/builder/and_badge';

@@ -59,4 +59,5 @@ export {
   addEndpointExceptionList,
   withOptionalSignal,
   BuilderEntryItem,
+  BuilderAndBadgeComponent,
 } from '../../lists/public';
