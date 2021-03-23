@@ -12,9 +12,9 @@ import type { AggParamsDateHistogram } from '../buckets';
 import { BUCKET_TYPES } from '../buckets/bucket_agg_types';
 
 /**
- * Helper function returning the used interval for data table column created by the histogramm agg type.
+ * Helper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.
  * "auto" will get expanded to the actually used interval.
- * If the column is not a column created by a histogram aggregation of the esaggs data source,
+ * If the column is not a column created by a date_histogram aggregation of the esaggs data source,
  * this function will return undefined.
  */
 export const getDateHistogramMetaDataByDatatableColumn = (column: DatatableColumn) => {
