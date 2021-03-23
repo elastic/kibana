@@ -19,6 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           [application]: {
             read: {
+              // @ts-expect-error @elastic/elasticsearch PrivilegesActions doesn't declare application and name properties.
               application,
               name: 'read',
               actions: ['action:readAction1', 'action:readAction2'],
@@ -32,6 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         name: 'hp_read_user',
         body: {
           cluster: [],
+          // @ts-expect-error unknown property
           index: [],
           applications: [
             {
@@ -115,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           [application]: {
             read: {
+              // @ts-expect-error @elastic/elasticsearch PrivilegesActions doesn't declare application and name properties.
               application,
               name: 'read',
               actions: ['action:readAction1', 'action:readAction2', 'action:a_new_privilege'],
