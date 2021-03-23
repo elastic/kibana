@@ -11,7 +11,7 @@ import { ActionTypeId as EsIndexActionTypeId } from '../es_index';
 import { AlertHistoryEsIndexConnectorId } from '../../../common';
 import { getInitialIndexName } from './types';
 
-export function getAlertHistoryEsIndex(kibanaVersion: string): Readonly<PreConfiguredAction> {
+export function getAlertHistoryEsIndex(): Readonly<PreConfiguredAction> {
   return Object.freeze({
     name: i18n.translate('xpack.actions.alertHistoryEsIndexConnector.name', {
       defaultMessage: 'Alert History ES Index',
@@ -20,7 +20,7 @@ export function getAlertHistoryEsIndex(kibanaVersion: string): Readonly<PreConfi
     id: AlertHistoryEsIndexConnectorId,
     isPreconfigured: true,
     config: {
-      index: getInitialIndexName(kibanaVersion),
+      index: getInitialIndexName,
     },
     secrets: {},
   });

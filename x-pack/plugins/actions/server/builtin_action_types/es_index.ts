@@ -39,6 +39,15 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
 const ParamsSchema = schema.object({
   documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+  indexOverride: schema.nullable(
+    schema.string({
+      validate: (pattern) => {
+        if (!pattern.startsWith('alert-history-')) {
+          return `index must start with "alert-history-"`;
+        }
+      },
+    })
+  ),
 });
 
 export const ActionTypeId = '.index';
@@ -70,7 +79,7 @@ async function executor(
   const params = execOptions.params;
   const services = execOptions.services;
 
-  const index = config.index;
+  const index = params.indexOverride ?? config.index;
 
   const bulkBody = [];
   for (const document of params.documents) {
@@ -114,17 +123,17 @@ function renderParameterTemplates(
   variables: Record<string, unknown>,
   actionId: string
 ): ActionParamsType {
-  const { documents } = renderMustacheObject<ActionParamsType>(params, variables);
+  const { documents, indexOverride } = renderMustacheObject<ActionParamsType>(params, variables);
 
   if (actionId === AlertHistoryEsIndexConnectorId) {
     const alertHistoryDoc = buildAlertHistoryDocument(variables);
     if (!alertHistoryDoc) {
       throw new Error(`error creating alert history document for ${actionId} connector`);
     }
-    return { documents: [alertHistoryDoc] };
+    return { documents: [alertHistoryDoc], indexOverride };
   }
 
-  return { documents };
+  return { documents, indexOverride };
 }
 
 function wrapErr(

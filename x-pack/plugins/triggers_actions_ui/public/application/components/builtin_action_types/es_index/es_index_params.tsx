@@ -6,13 +6,23 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCodeBlock, EuiLink } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiText,
+  EuiCodeBlock,
+  EuiFieldText,
+  EuiFormRow,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ActionParamsProps,
   AlertHistoryEsIndexConnectorId,
   AlertHistoryDocumentSchema,
+  AlertHistoryDefaultIndexName,
+  ALERT_HISTORY_PREFIX,
 } from '../../../../types';
 import { IndexActionParams } from '.././types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
@@ -27,8 +37,15 @@ export const IndexParamsFields = ({
   actionConnector,
 }: ActionParamsProps<IndexActionParams>) => {
   const { docLinks } = useKibana().services;
-  const { documents } = actionParams;
+  const { documents, indexOverride } = actionParams;
+  const defaultAlertHistoryIndexSuffix = AlertHistoryDefaultIndexName.replace(
+    ALERT_HISTORY_PREFIX,
+    ''
+  );
 
+  const [alertHistoryIndexSuffix, setAlertHistoryIndexSuffix] = useState<string>(
+    defaultAlertHistoryIndexSuffix
+  );
   const [usePreconfiguredSchema, setUsePreconfiguredSchema] = useState<boolean>(false);
 
   useEffect(() => {
@@ -36,7 +53,7 @@ export const IndexParamsFields = ({
       setUsePreconfiguredSchema(true);
       onDocumentsChange(JSON.stringify(AlertHistoryDocumentSchema));
     } else {
-      onDocumentsChange('{}');
+      editAction('documents', null, index);
       setUsePreconfiguredSchema(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,16 +69,79 @@ export const IndexParamsFields = ({
     }
   };
 
-  return usePreconfiguredSchema ? (
-    <EuiCodeBlock
-      language="json"
-      fontSize="s"
-      paddingSize="s"
-      data-test-subj="preconfiguredDocumentToIndex"
-    >
-      {JSON.stringify(AlertHistoryDocumentSchema, null, 2)}
-    </EuiCodeBlock>
-  ) : (
+  const documentsFieldLabel = i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
+    {
+      defaultMessage: 'Document to index',
+    }
+  );
+
+  const resetDefaultIndex =
+    indexOverride && indexOverride !== AlertHistoryDefaultIndexName ? (
+      <EuiText size="xs">
+        <EuiLink
+          onClick={() => {
+            editAction('indexOverride', AlertHistoryDefaultIndexName, index);
+            setAlertHistoryIndexSuffix(defaultAlertHistoryIndexSuffix);
+          }}
+        >
+          <EuiIcon type="refresh" />
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertsList.refreshAlertsButtonLabel"
+            defaultMessage="Reset Default Index"
+          />
+        </EuiLink>
+      </EuiText>
+    ) : (
+      <></>
+    );
+
+  const preconfiguredDocumentSchema = (
+    <>
+      <EuiFormRow
+        fullWidth
+        error={errors.indexOverride as string[]}
+        isInvalid={(errors.indexOverride as string[]) && errors.indexOverride.length > 0}
+        label={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndex',
+          {
+            defaultMessage: 'ES Index',
+          }
+        )}
+        labelAppend={resetDefaultIndex}
+        helpText={i18n.translate(
+          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndexHelpText',
+          {
+            defaultMessage: 'Documents will be indexed into "{alertHistoryIndex}"',
+            values: { alertHistoryIndex: `${ALERT_HISTORY_PREFIX}${alertHistoryIndexSuffix}` },
+          }
+        )}
+      >
+        <EuiFieldText
+          fullWidth
+          prepend={ALERT_HISTORY_PREFIX}
+          value={alertHistoryIndexSuffix}
+          onChange={(e) => {
+            editAction('indexOverride', `${ALERT_HISTORY_PREFIX}${e.target.value}`, index);
+            setAlertHistoryIndexSuffix(e.target.value);
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow fullWidth label={documentsFieldLabel}>
+        <EuiCodeBlock
+          language="json"
+          fontSize="s"
+          paddingSize="s"
+          data-test-subj="preconfiguredDocumentToIndex"
+        >
+          {JSON.stringify(AlertHistoryDocumentSchema, null, 2)}
+        </EuiCodeBlock>
+      </EuiFormRow>
+    </>
+  );
+
+  const jsonDocumentEditor = (
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'documents'}
@@ -73,12 +153,7 @@ export const IndexParamsFields = ({
           ? ((documents[0] as unknown) as string)
           : undefined
       }
-      label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.documentsFieldLabel',
-        {
-          defaultMessage: 'Document to index',
-        }
-      )}
+      label={documentsFieldLabel}
       aria-label={i18n.translate(
         'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.jsonDocAriaLabel',
         {
@@ -105,6 +180,8 @@ export const IndexParamsFields = ({
       }}
     />
   );
+
+  return usePreconfiguredSchema ? preconfiguredDocumentSchema : jsonDocumentEditor;
 };
 
 // eslint-disable-next-line import/no-default-export

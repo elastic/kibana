@@ -69,7 +69,7 @@ import {
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './builtin_action_types/alert_history_es_index/alert_history_es_index';
-import { createAlertHistoryEsIndex } from './builtin_action_types/alert_history_es_index/create_alert_history_es_index';
+import { createAlertHistoryIndexTemplate } from './builtin_action_types/alert_history_es_index/create_alert_history_index_template';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -142,7 +142,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private readonly kibanaIndexConfig: { kibana: { index: string } };
-  private kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(initContext: PluginInitializerContext) {
     this.actionsConfig = initContext.config.get<ActionsConfig>();
@@ -150,7 +149,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
     this.kibanaIndexConfig = initContext.config.legacy.get();
-    this.kibanaVersion = initContext.env.packageInfo.version;
   }
 
   public setup(
@@ -184,7 +182,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
-      this.preconfiguredActions.push(getAlertHistoryEsIndex(this.kibanaVersion));
+      this.preconfiguredActions.push(getAlertHistoryEsIndex());
     }
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
@@ -365,9 +363,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
-      createAlertHistoryEsIndex({
+      createAlertHistoryIndexTemplate({
         client: core.elasticsearch.client.asInternalUser,
-        kibanaVersion: this.kibanaVersion,
         logger: this.logger,
       });
     }

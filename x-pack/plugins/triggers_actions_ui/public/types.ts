@@ -14,6 +14,8 @@ import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
   AlertHistoryDocumentSchema,
+  ALERT_HISTORY_PREFIX,
+  AlertHistoryDefaultIndexName,
 } from '../../actions/common';
 import { TypeRegistry } from './application/type_registry';
 import {
@@ -49,7 +51,13 @@ export {
   AlertNotifyWhenType,
   AlertTypeParams,
 };
-export { ActionType, AlertHistoryEsIndexConnectorId, AlertHistoryDocumentSchema };
+export {
+  ActionType,
+  AlertHistoryEsIndexConnectorId,
+  AlertHistoryDocumentSchema,
+  AlertHistoryDefaultIndexName,
+  ALERT_HISTORY_PREFIX,
+};
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Map<string, AlertType>;

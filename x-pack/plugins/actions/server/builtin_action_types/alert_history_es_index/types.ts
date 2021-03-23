@@ -8,30 +8,5 @@
 export const ALERT_HISTORY = 'alert-history';
 
 export const AlertHistoryEsIndexConnectorIndexName = `${ALERT_HISTORY}-index`;
-export const AlertHistoryIlmPolicyName = `${ALERT_HISTORY}-policy`;
 
-export const AlertHistoryIlmPolicy = {
-  policy: {
-    phases: {
-      hot: {
-        actions: {
-          rollover: {
-            max_size: '50GB',
-            max_age: '30d',
-          },
-        },
-      },
-      delete: {
-        min_age: '90d',
-        actions: {
-          delete: {},
-        },
-      },
-    },
-  },
-};
-
-export const getIndexName = (kibanaVersion: string) => `${ALERT_HISTORY}-${kibanaVersion}`;
-
-export const getInitialIndexName = (kibanaVersion: string) =>
-  `${getIndexName(kibanaVersion)}-000001`;
+export const getInitialIndexName = `${ALERT_HISTORY}-default`;
