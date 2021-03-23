@@ -187,7 +187,6 @@ For IBM Resilient connectors:
 [pr-url]: https://github.com/elastic/kibana/pulls?q=is%3Apr+label%3AFeature%3ACases+-is%3Adraft+is%3Aopen+
 [issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
 [issues-url]: https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3AFeature%3ACases
-[product-screenshot]: images/screenshot.png
 [cases-logo]: images/logo.png
 [configure-img]: images/configure.png
 [create-img]: images/create.png
