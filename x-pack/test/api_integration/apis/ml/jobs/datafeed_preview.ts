@@ -72,12 +72,18 @@ export default ({ getService }: FtrProviderContext) => {
         .send({ job, datafeed })
         .expect(200);
 
-      expect(body.hits.total.value).to.eql(3207);
-      expect(Array.isArray(body.hits?.hits[0]?.fields?.airline)).to.eql(true);
+      expect(body.hits.total.value).to.eql(3207, 'Response body total hits should be 3207');
+      expect(Array.isArray(body.hits?.hits[0]?.fields?.airline)).to.eql(
+        true,
+        'Response body airlines should be an array'
+      );
 
       const airlines: string[] = body.hits.hits.map((a: any) => a.fields.airline[0]);
-      expect(airlines.length).to.not.eql(0);
-      expect(airlines.every((a) => isUpperCase(a))).to.eql(true);
+      expect(airlines.length).to.not.eql(0, 'airlines length should not be 0');
+      expect(airlines.every((a) => isUpperCase(a))).to.eql(
+        true,
+        'Response body airlines should all be upper case'
+      );
     });
 
     it(`should return a datafeed preview using custom query`, async () => {
@@ -106,12 +112,18 @@ export default ({ getService }: FtrProviderContext) => {
         .send({ job, datafeed })
         .expect(200);
 
-      expect(body.hits.total.value).to.eql(300);
-      expect(Array.isArray(body.hits?.hits[0]?.fields?.airline)).to.eql(true);
+      expect(body.hits.total.value).to.eql(300, 'Response body total hits should be 300');
+      expect(Array.isArray(body.hits?.hits[0]?.fields?.airline)).to.eql(
+        true,
+        'Response body airlines should be an array'
+      );
 
       const airlines: string[] = body.hits.hits.map((a: any) => a.fields.airline[0]);
-      expect(airlines.length).to.not.eql(0);
-      expect(airlines.every((a) => a === 'AAL')).to.eql(true);
+      expect(airlines.length).to.not.eql(0, 'airlines length should not be 0');
+      expect(airlines.every((a) => a === 'AAL')).to.eql(
+        true,
+        'Response body airlines should all be AAL'
+      );
     });
 
     it(`should return a datafeed preview using runtime mappings`, async () => {
@@ -145,12 +157,18 @@ export default ({ getService }: FtrProviderContext) => {
         .send({ job, datafeed })
         .expect(200);
 
-      expect(body.hits.total.value).to.eql(3207);
-      expect(Array.isArray(body.hits?.hits[0]?.fields?.lowercase_airline)).to.eql(true);
+      expect(body.hits.total.value).to.eql(3207, 'Response body total hits should be 3207');
+      expect(Array.isArray(body.hits?.hits[0]?.fields?.lowercase_airline)).to.eql(
+        true,
+        'Response body airlines should be an array'
+      );
 
       const airlines: string[] = body.hits.hits.map((a: any) => a.fields.lowercase_airline[0]);
-      expect(airlines.length).to.not.eql(0);
-      expect(isLowerCase(airlines[0])).to.eql(true);
+      expect(airlines.length).to.not.eql(0, 'airlines length should not be 0');
+      expect(isLowerCase(airlines[0])).to.eql(
+        true,
+        'Response body airlines should all be lower case'
+      );
     });
 
     it(`should return a datafeed preview using custom query and runtime mappings which override the field name`, async () => {
@@ -187,12 +205,81 @@ export default ({ getService }: FtrProviderContext) => {
         .send({ job, datafeed })
         .expect(200);
 
-      expect(body.hits.total.value).to.eql(300);
-      expect(Array.isArray(body.hits?.hits[0]?.fields?.airline)).to.eql(true);
+      expect(body.hits.total.value).to.eql(300, 'Response body total hits should be 300');
+      expect(Array.isArray(body.hits?.hits[0]?.fields?.airline)).to.eql(
+        true,
+        'Response body airlines should be an array'
+      );
 
       const airlines: string[] = body.hits.hits.map((a: any) => a.fields.airline[0]);
-      expect(airlines.length).to.not.eql(0);
-      expect(isLowerCase(airlines[0])).to.eql(true);
+      expect(airlines.length).to.not.eql(0, 'airlines length should not be 0');
+      expect(isLowerCase(airlines[0])).to.eql(
+        true,
+        'Response body airlines should all be lower case'
+      );
+    });
+
+    it(`should return a normal datafeed preview for ML viewer user`, async () => {
+      const datafeed = {
+        datafeed_id: '',
+        job_id: '',
+        indices: ['ft_farequote'],
+        query: {
+          bool: {
+            must: [
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+        runtime_mappings: {},
+      };
+
+      const { body } = await supertest
+        .post('/api/ml/jobs/datafeed_preview')
+        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ job, datafeed })
+        .expect(200);
+
+      expect(body.hits.total.value).to.eql(3207, 'Response body total hits should be 3207');
+      expect(Array.isArray(body.hits?.hits[0]?.fields?.airline)).to.eql(
+        true,
+        'Response body airlines should be an array'
+      );
+
+      const airlines: string[] = body.hits.hits.map((a: any) => a.fields.airline[0]);
+      expect(airlines.length).to.not.eql(0, 'airlines length should not be 0');
+      expect(airlines.every((a) => isUpperCase(a))).to.eql(
+        true,
+        'Response body airlines should all be upper case'
+      );
+    });
+
+    it(`should return not return a preview for unauthorized user`, async () => {
+      const datafeed = {
+        datafeed_id: '',
+        job_id: '',
+        indices: ['ft_farequote'],
+        query: {
+          bool: {
+            must: [
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+        runtime_mappings: {},
+      };
+
+      await supertest
+        .post('/api/ml/jobs/datafeed_preview')
+        .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ job, datafeed })
+        .expect(403);
     });
   });
 };
