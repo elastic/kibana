@@ -15,7 +15,7 @@ export interface FileUploadStartApi {
   importerFactory(format: string, options: ImportFactoryOptions): Promise<IImporter | undefined>;
   getMaxBytes(): number;
   getMaxBytesFormatted(): string;
-  hasImportPermission(): Promise<boolean>;
+  hasImportPermission(indexName?: string, checkCreateIndexPattern?: boolean): Promise<boolean>;
 }
 
 export async function getFileUploadComponent(): Promise<

@@ -71,6 +71,6 @@ export interface CheckPrivilegesPayload {
   kibana?: string | string[];
   elasticsearch?: {
     cluster: string[];
-    index: Record<string, string[]>;
+    index?: Record<string, string[]>;
   };
 }

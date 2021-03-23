@@ -21,8 +21,8 @@ import { importDataProvider } from './import_data';
 
 import { updateTelemetry } from './telemetry';
 import { analyzeFileQuerySchema, importFileBodySchema, importFileQuerySchema } from './schemas';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CheckPrivilegesPayload } from '../../security/server/authorization';
+import { CheckPrivilegesPayload } from '../../security/server';
+import { StartDeps } from './types';
 
 function importData(
   client: IScopedClusterClient,
@@ -40,7 +40,7 @@ function importData(
 /**
  * Routes for the file upload.
  */
-export function fileUploadRoutes(coreSetup: CoreSetup) {
+export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>) {
   const router = coreSetup.http.createRouter();
 
   router.get(
@@ -76,7 +76,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup) {
           ];
         }
         if (indexName) {
-          checkPrivilegesPayload.elasticsearch.index = {
+          checkPrivilegesPayload.elasticsearch!.index = {
             [indexName]: ['create', 'create_index'],
           };
         }
