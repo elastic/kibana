@@ -24,7 +24,6 @@ export async function bootstrapDevMode({ configs, cliArgs }: BootstrapArgs) {
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
-    isDevCliParent: true,
   });
 
   const config = await loadConfig({

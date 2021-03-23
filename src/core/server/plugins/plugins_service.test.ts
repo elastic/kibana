@@ -91,7 +91,7 @@ const createPlugin = (
   });
 };
 
-async function testSetup(options: { isDevCliParent?: boolean } = {}) {
+async function testSetup() {
   mockPackage.raw = {
     branch: 'feature-v1',
     version: 'v1',
@@ -103,10 +103,7 @@ async function testSetup(options: { isDevCliParent?: boolean } = {}) {
   };
 
   coreId = Symbol('core');
-  env = Env.createDefault(REPO_ROOT, {
-    ...getEnvOptions(),
-    isDevCliParent: options.isDevCliParent ?? false,
-  });
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
   const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
@@ -623,33 +620,6 @@ describe('PluginsService', () => {
     it('`stop` stops plugins system', async () => {
       await pluginsService.stop();
       expect(mockPluginSystem.stopPlugins).toHaveBeenCalledTimes(1);
-    });
-  });
-});
-
-describe('PluginService when isDevCliParent is true', () => {
-  beforeEach(async () => {
-    await testSetup({
-      isDevCliParent: true,
-    });
-  });
-
-  describe('#discover()', () => {
-    it('does not try to run discovery', async () => {
-      await expect(pluginsService.discover({ environment: environmentSetup })).resolves
-        .toMatchInlineSnapshot(`
-              Object {
-                "pluginPaths": Array [],
-                "pluginTree": undefined,
-                "uiPlugins": Object {
-                  "browserConfigs": Map {},
-                  "internal": Map {},
-                  "public": Map {},
-                },
-              }
-            `);
-
-      expect(mockDiscover).not.toHaveBeenCalled();
     });
   });
 });

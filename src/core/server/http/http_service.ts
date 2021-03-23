@@ -161,7 +161,7 @@ export class HttpService
    * @internal
    * */
   private shouldListen(config: HttpConfig) {
-    return !this.coreContext.env.isDevCliParent && config.autoListen;
+    return config.autoListen;
   }
 
   public async stop() {

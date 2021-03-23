@@ -231,9 +231,6 @@ export default function (program) {
         cache: !!opts.cache,
         dist: !!opts.dist,
       },
-      features: {
-        isCliDevModeSupported: DEV_MODE_SUPPORTED,
-      },
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });

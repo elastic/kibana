@@ -242,29 +242,6 @@ test('returns http server contract on setup', async () => {
   });
 });
 
-test('does not start http server if process is dev cluster master', async () => {
-  const configService = createConfigService();
-  const httpServer = {
-    isListening: () => false,
-    setup: jest.fn().mockReturnValue({}),
-    start: jest.fn(),
-    stop: noop,
-  };
-  mockHttpServer.mockImplementation(() => httpServer);
-
-  const service = new HttpService({
-    coreId,
-    configService,
-    env: Env.createDefault(REPO_ROOT, getEnvOptions({ isDevCliParent: true })),
-    logger,
-  });
-
-  await service.setup(setupDeps);
-  await service.start();
-
-  expect(httpServer.start).not.toHaveBeenCalled();
-});
-
 test('does not start http server if configured with `autoListen:false`', async () => {
   const configService = createConfigService({
     autoListen: false,
