@@ -81,14 +81,13 @@ type SslConfigType = TypeOf<typeof sslSchema>;
 
 export class SslConfig {
   public enabled: boolean;
-  public redirectHttpFromPort: number | undefined;
-  public key: string | undefined;
-  public certificate: string | undefined;
-  public certificateAuthorities: string[] | undefined;
-  public keyPassphrase: string | undefined;
+  public redirectHttpFromPort?: number;
+  public key?: string;
+  public certificate?: string;
+  public certificateAuthorities?: string[];
+  public keyPassphrase?: string;
   public requestCert: boolean;
   public rejectUnauthorized: boolean;
-
   public cipherSuites: string[];
   public supportedProtocols: string[];
 
@@ -146,7 +145,7 @@ export class SslConfig {
   /**
    * Options that affect the OpenSSL protocol behavior via numeric bitmask of the SSL_OP_* options from OpenSSL Options.
    */
-  public getSecureOptions() {
+  public get secureOptions() {
     // our validation should ensure that this.supportedProtocols is at least an empty array,
     // which the following logic depends upon.
     if (this.supportedProtocols == null || this.supportedProtocols.length === 0) {

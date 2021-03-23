@@ -10,10 +10,10 @@ import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
+import { createServer, getListenerOptions, getServerOptions, getRequestId } from '@kbn/http-tools';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getListenerOptions, getServerOptions, getRequestId } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth, OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';

@@ -10,17 +10,17 @@ import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 
 import apm from 'elastic-apm-node';
-import { ByteSizeValue } from '@kbn/config-schema';
 import { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
 import { sampleSize } from 'lodash';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { createServer, getListenerOptions, getServerOptions } from '@kbn/http-tools';
 
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
-import { createServer, getListenerOptions, getServerOptions } from './http_tools';
 
 const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
