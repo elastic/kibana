@@ -59,12 +59,12 @@ export const Navigation = ({
         {isNewRollup ? (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.rollup.create.addRollupToPolicyButton.label"
-            defaultMessage="Add to policy"
+            defaultMessage="Add to policy and return to editing phases"
           />
         ) : (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.rollup.create.updatePolicyRollupButton.label"
-            defaultMessage="Update rollup"
+            defaultMessage="Update and return to editing phases"
           />
         )}
       </EuiButton>

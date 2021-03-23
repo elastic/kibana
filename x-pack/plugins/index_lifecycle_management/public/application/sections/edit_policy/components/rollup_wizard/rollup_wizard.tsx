@@ -93,7 +93,6 @@ export interface Props {
    */
   value?: RollupAction['config'];
   phase: 'hot' | 'cold';
-  policyName?: string;
   onCancel: () => void;
   onDone: (value: RollupAction['config']) => void;
 }
@@ -331,7 +330,7 @@ export class RollupWizard extends Component<Props, State> {
   };
 
   render() {
-    const { phase, onCancel, policyName } = this.props;
+    const { phase, onCancel } = this.props;
     return (
       <>
         <EuiPageContentHeader>
@@ -350,11 +349,8 @@ export class RollupWizard extends Component<Props, State> {
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
             <EuiButtonEmpty flush="left" onClick={onCancel} iconType="arrowLeft" iconSide="left">
-              {i18n.translate('xpack.indexLifecycleMgmt.rollup.backToPolicyButtonLabel', {
-                defaultMessage: 'Back to policy {policyName}',
-                values: {
-                  policyName,
-                },
+              {i18n.translate('xpack.indexLifecycleMgmt.rollup.backToPolicyPhasesButtonLabel', {
+                defaultMessage: 'Back to editing policy phases',
               })}
             </EuiButtonEmpty>
           </EuiPageContentHeaderSection>

@@ -14,7 +14,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiAccordion,
   EuiIconTip,
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -22,12 +21,14 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 
-import { RollupAction } from '../../../../../../../common/types';
+import { RollupAction } from '../../../../../../../../common/types';
 
-import { i18nTexts as globalI18nTexts } from '../../../i18n_texts';
+import { i18nTexts as globalI18nTexts } from '../../../../i18n_texts';
 
-import { DescribedFormRow } from '../../../components';
-import { UseField } from '../../../form';
+import { DescribedFormRow } from '../../../../components';
+import { UseField } from '../../../../form';
+
+import './rollup_field.scss';
 
 interface Props {
   phase: 'hot' | 'cold';
@@ -38,8 +39,9 @@ const i18nTexts = {
     // TODO: Copy required
     defaultMessage: '[Brief description of rollups in the context of ILM]',
   }),
-  rollupSummaryHeading: i18n.translate('xpack.indexLifecycleMgmt.rollup.fieldSummaryLabel', {
-    defaultMessage: 'Rollup summary',
+  editRollupAction: i18n.translate('xpack.indexLifecycleMgmt.rollup.editConfigurationButtonLabel', {
+    // TODO: Copy required
+    defaultMessage: '[Edit rollup]',
   }),
   configureRollupAction: i18n.translate(
     'xpack.indexLifecycleMgmt.rollup.addConfigurationButtonLabel',
@@ -93,18 +95,6 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
     setIsShowingDeleteModal(false);
   };
 
-  const renderGoToRollupWizardButton = () => (
-    <EuiButtonEmpty
-      iconType="exit"
-      iconSide="right"
-      onClick={() => {
-        history.push({ search: qs.stringify({ rollup: phase }) });
-      }}
-    >
-      {i18nTexts.configureRollupAction}
-    </EuiButtonEmpty>
-  );
-
   return (
     <>
       <DescribedFormRow
@@ -117,31 +107,23 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
             if (!field.value) {
               return (
                 <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>{renderGoToRollupWizardButton()}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconType="exit"
+                      iconSide="right"
+                      onClick={() => {
+                        history.push({ search: qs.stringify({ rollup: phase }) });
+                      }}
+                    >
+                      {i18nTexts.configureRollupAction}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               );
             } else {
               return (
                 <>
-                  <EuiAccordion
-                    id={`${phase}RollupActionDetailsAccordion`}
-                    buttonContent={i18nTexts.rollupSummaryHeading}
-                    extraAction={
-                      <EuiFlexGroup gutterSize="s">
-                        <EuiFlexItem>{renderGoToRollupWizardButton()}</EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiButtonEmpty
-                            color="danger"
-                            onClick={() => {
-                              setIsShowingDeleteModal(true);
-                            }}
-                          >
-                            {i18nTexts.deleteRollupAction}
-                          </EuiButtonEmpty>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    }
-                  >
+                  <div className="ilmRollupSummaryContainer">
                     <EuiFlexGroup>
                       <EuiFlexItem>
                         <EuiDescriptionList textStyle="reverse">
@@ -197,7 +179,32 @@ export const RollupField: FunctionComponent<Props> = ({ phase }) => {
                         </EuiDescriptionList>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  </EuiAccordion>
+                    <EuiFlexGroup gutterSize="none" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          flush="left"
+                          iconType="exit"
+                          iconSide="right"
+                          onClick={() => {
+                            history.push({ search: qs.stringify({ rollup: phase }) });
+                          }}
+                        >
+                          {i18nTexts.editRollupAction}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          flush="both"
+                          color="danger"
+                          onClick={() => {
+                            setIsShowingDeleteModal(true);
+                          }}
+                        >
+                          {i18nTexts.deleteRollupAction}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </div>
                   {isShowingDeleteModal && (
                     <EuiConfirmModal
                       title={i18nTexts.modal.title}

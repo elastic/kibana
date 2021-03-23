@@ -366,7 +366,6 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
           {currentView.id === 'rollupAction' && (
             <RollupWizard
               form={form}
-              policyName={currentPolicyName || originalPolicyName}
               phase={currentView.phase}
               onCancel={() => {
                 const { phase } = currentView;
