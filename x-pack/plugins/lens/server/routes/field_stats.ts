@@ -85,7 +85,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
             body: {
               query,
               aggs,
-              // @ts-expect-error @elastic/elasticsearch SearchRequest doesn't declare runtime_mappings property
+              // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
               runtime_mappings: field.runtimeField ? { [fieldName]: field.runtimeField } : {},
             },
             size: 0,

@@ -192,12 +192,12 @@ async function fetchIndexPatternStats({
       sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
       fields: ['*'],
       _source: false,
-      // @ts-expect-error @elastic/elasticsearch SearchRequest doesn't declare runtime_mappings property
       runtime_mappings: runtimeFields.reduce((acc, field) => {
         if (!field.runtimeField) return acc;
+        // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
         acc[field.name] = field.runtimeField;
         return acc;
-      }, {} as Record<string, unknown>),
+      }, {} as Record<string, estypes.RuntimeField>),
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {

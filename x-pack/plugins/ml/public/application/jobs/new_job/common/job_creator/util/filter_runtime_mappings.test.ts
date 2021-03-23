@@ -54,14 +54,14 @@ function getDatafeed(): Datafeed {
     runtime_mappings: {
       responsetime_big: {
         type: 'double',
-        // @ts-expect-error
+        // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
         script: {
           source: "emit(doc['responsetime'].value * 100.0)",
         },
       },
       airline_lower: {
         type: 'keyword',
-        // @ts-expect-error
+        // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
         script: {
           source: "emit(doc['airline'].value.toLowerCase())",
         },
