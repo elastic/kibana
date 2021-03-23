@@ -9,9 +9,9 @@
 import minimist from 'minimist';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import { chain } from 'lodash';
 import { basename } from 'path';
 import pMap from 'p-map';
+
 import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
 import { NewTrustedApp, OperatingSystem, TrustedApp } from '../../../common/endpoint/types';
 

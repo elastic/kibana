@@ -40,7 +40,7 @@ import { defaultIngestErrorHandler } from '../../errors';
 export const getAgentPoliciesHandler: RequestHandler<
   undefined,
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>,
-  GetOneAgentPolicyResponse
+  GetAgentPoliciesResponse
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -54,7 +54,7 @@ export const getAgentPoliciesHandler: RequestHandler<
     const agentPolicies = await pMap(
       items,
       async (agentPolicy: GetAgentPoliciesResponseItem) => {
-        const { total: agentTotal } = getAgentsByKuery(esClient, {
+        const { total: agentTotal } = await getAgentsByKuery(esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,

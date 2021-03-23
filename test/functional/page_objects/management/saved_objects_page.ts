@@ -195,25 +195,29 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
           //   data-test-subj="euiCollapsedItemActionsButton"
           // Maybe some objects still have the inspect element visible?
           // !!! Also note that since we don't have spaces on OSS, the actions for the same object can be different depending on OSS or not
+          let menuElement = null;
+          let inspectElement = null;
+          let relationshipsElement = null;
+          let copySaveObjectsElement = null;
           const actions = await row.findByClassName('euiTableRowCell--hasActions');
           // getting the innerHTML and checking if it 'includes' a string is faster than a timeout looking for each element
           const actionsHTML = await actions.getAttribute('innerHTML');
-          const [
-            menuElement = null,
-            inspectElement = null,
-            relationshipsElement = null,
-            copySaveObjectsElement = null,
-          ] = await Promise.all([
-            actionsHTML.includes('euiCollapsedItemActionsButton') &&
-              row.findByTestSubject('euiCollapsedItemActionsButton'),
-            actionsHTML.includes('savedObjectsTableAction-inspect') &&
-              row.findByTestSubject('savedObjectsTableAction-inspect'),
-            actionsHTML.includes('savedObjectsTableAction-relationships') &&
-              row.findByTestSubject('savedObjectsTableAction-relationships'),
-            actionsHTML.includes('savedObjectsTableAction-copy_saved_objects_to_space') &&
-              row.findByTestSubject('savedObjectsTableAction-copy_saved_objects_to_space'),
-          ]);
-
+          if (actionsHTML.includes('euiCollapsedItemActionsButton')) {
+            menuElement = await row.findByTestSubject('euiCollapsedItemActionsButton');
+          }
+          if (actionsHTML.includes('savedObjectsTableAction-inspect')) {
+            inspectElement = await row.findByTestSubject('savedObjectsTableAction-inspect');
+          }
+          if (actionsHTML.includes('savedObjectsTableAction-relationships')) {
+            relationshipsElement = await row.findByTestSubject(
+              'savedObjectsTableAction-relationships'
+            );
+          }
+          if (actionsHTML.includes('savedObjectsTableAction-copy_saved_objects_to_space')) {
+            copySaveObjectsElement = await row.findByTestSubject(
+              'savedObjectsTableAction-copy_saved_objects_to_space'
+            );
+          }
           return {
             checkbox,
             objectType: await objectType.getAttribute('aria-label'),
@@ -239,7 +243,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
     async getRelationshipFlyout() {
       const rows = await testSubjects.findAll('relationshipsTableRow');
-      return Promise.all(
+      return await Promise.all(
         rows.map(async (row) => {
           const objectType = await row.findByTestSubject('relationshipsObjectType');
           const relationship = await row.findByTestSubject('directRelationship');
@@ -258,7 +262,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
     async getInvalidRelations() {
       const rows = await testSubjects.findAll('invalidRelationshipsTableRow');
-      return Promise.all(
+      return await Promise.all(
         rows.map(async (row) => {
           const objectType = await row.findByTestSubject('relationshipsObjectType');
           const objectId = await row.findByTestSubject('relationshipsObjectId');
