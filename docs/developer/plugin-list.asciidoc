@@ -536,6 +536,9 @@ Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-produc
 |{kib-repo}blob/{branch}/x-pack/plugins/telemetry_collection_xpack/README.md[telemetryCollectionXpack]
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
+|{kib-repo}blob/{branch}/x-pack/plugins/timeline/README.md[timeline]
+|This plugin provides a common timeline table component and supporting functionality for use in other plugins.
+
 
 |{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
 |This plugin provides access to the transforms features provided by Elastic.
