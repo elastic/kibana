@@ -12780,7 +12780,6 @@
     "xpack.maps.mapListing.descriptionFieldTitle": "描述",
     "xpack.maps.mapListing.entityName": "地图",
     "xpack.maps.mapListing.entityNamePlural": "地图",
-    "xpack.maps.mapListing.errorAttemptingToLoadSavedMaps": "无法加载地图",
     "xpack.maps.mapListing.titleFieldTitle": "标题",
     "xpack.maps.maps.choropleth.rightSourcePlaceholder": "选择索引模式",
     "xpack.maps.mapSavedObjectLabel": "地图",

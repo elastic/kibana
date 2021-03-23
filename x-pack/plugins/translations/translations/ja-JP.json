@@ -12615,7 +12615,6 @@
     "xpack.maps.mapListing.descriptionFieldTitle": "説明",
     "xpack.maps.mapListing.entityName": "マップ",
     "xpack.maps.mapListing.entityNamePlural": "マップ",
-    "xpack.maps.mapListing.errorAttemptingToLoadSavedMaps": "マップを読み込めません",
     "xpack.maps.mapListing.titleFieldTitle": "タイトル",
     "xpack.maps.maps.choropleth.rightSourcePlaceholder": "インデックスパターンを選択",
     "xpack.maps.mapSavedObjectLabel": "マップ",
