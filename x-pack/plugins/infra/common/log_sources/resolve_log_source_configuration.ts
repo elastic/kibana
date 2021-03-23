@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-// import { SavedObjectsClientContract } from 'src/core/server';
-// import { InfraSources } from '../../server/lib/sources';
+import { LogSourceConfigurationProperties } from '../http_api/log_sources';
 
-// NOTE: This will handle real resolution for https://github.com/elastic/kibana/issues/92650 but for now just
-// hands back properties from the saved object.
-// export const resolveLogSourceConfiguration = (
-//   sourceConfiguration:
-// ) => {
-//   const source = await sources.getSourceConfiguration(savedObjectsClient, sourceId);
+// NOTE: Type will change, see below.
+type ResolvedLogsSourceConfiguration = LogSourceConfigurationProperties;
 
-//   return {
-//     indexPattern: source.configuration.logAlias,
-//     timestamp: source.configuration.fields.timestamp,
-//   };
-// }
+// NOTE: This will handle real resolution for https://github.com/elastic/kibana/issues/92650, via the index patterns service, but for now just
+// hands back properties from the saved object (and therefore looks pointless...).
+export const resolveLogSourceConfiguration = (
+  sourceConfiguration: LogSourceConfigurationProperties
+): ResolvedLogsSourceConfiguration => {
+  return sourceConfiguration;
+};

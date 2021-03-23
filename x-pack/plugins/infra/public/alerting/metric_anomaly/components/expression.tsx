@@ -27,7 +27,7 @@ import {
   AlertTypeParamsExpressionProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/types';
-import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { NodeTypeExpression } from './node_type';
@@ -75,12 +75,11 @@ export const Expression: React.FC<Props> = (props) => {
   } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
-    type: 'metrics',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
+  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
     createDerivedIndexPattern,
   ]);
 

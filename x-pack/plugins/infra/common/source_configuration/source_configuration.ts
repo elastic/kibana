@@ -6,12 +6,12 @@
  */
 
 /**
- * These are the core source configuration types that represent a source configuration in
- * it's entirety. There are then subsets of this configuration that form the logs_source_configuration
- * and metrics_source_configuration. The logs_source_configuration is further expanded to it's resolved form.
+ * These are the core source configuration types that represent a Source Configuration in
+ * it's entirety. There are then subsets of this configuration that form the Logs Source Configuration
+ * and Metrics Source Configuration. The Logs Source Configuration is further expanded to it's resolved form.
  * -> Source Configuration
  *  -> Logs source configuration
- *    -> Resolved logs source configuration
+ *    -> Resolved Logs Source Configuration
  *  -> Metrics Source Configuration
  */
 
@@ -99,7 +99,7 @@ const SourceConfigurationFieldsRT = rt.type({
  * Properties that represent a full source configuration, which is the result of merging static values with
  * saved values.
  */
-const SourceConfigurationRT = rt.type({
+export const SourceConfigurationRT = rt.type({
   name: rt.string,
   description: rt.string,
   metricAlias: rt.string,
@@ -180,7 +180,7 @@ const SourceStatusFieldRuntimeType = rt.type({
 
 export type InfraSourceIndexField = rt.TypeOf<typeof SourceStatusFieldRuntimeType>;
 
-const SourceStatusRuntimeType = rt.type({
+export const SourceStatusRuntimeType = rt.type({
   logIndicesExist: rt.boolean,
   metricIndicesExist: rt.boolean,
   indexFields: rt.array(SourceStatusFieldRuntimeType),

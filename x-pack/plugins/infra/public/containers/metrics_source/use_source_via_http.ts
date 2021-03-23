@@ -13,51 +13,47 @@ import createContainer from 'constate';
 import { HttpHandler } from 'src/core/public';
 import { ToastInput } from 'src/core/public';
 import {
-  SourceResponseRuntimeType,
-  SourceResponse,
-  InfraSource,
-} from '../../../common/source_configuration/source_configuration';
+  metricsSourceConfigurationResponseRT,
+  MetricsSourceConfigurationResponse,
+  MetricsSourceConfiguration,
+} from '../../../common/metrics_sources';
 import { useHTTPRequest } from '../../hooks/use_http_request';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
 
 export const pickIndexPattern = (
-  source: InfraSource | undefined,
-  type: 'logs' | 'metrics' | 'both'
+  source: MetricsSourceConfiguration | undefined,
+  type: 'metrics'
 ) => {
   if (!source) {
     return 'unknown-index';
   }
-  if (type === 'logs') {
-    return source.configuration.logAlias;
-  }
   if (type === 'metrics') {
     return source.configuration.metricAlias;
   }
-  return `${source.configuration.logAlias},${source.configuration.metricAlias}`;
+  return `${source.configuration.metricAlias}`;
 };
 
 interface Props {
   sourceId: string;
-  type: 'logs' | 'metrics' | 'both';
   fetch?: HttpHandler;
   toastWarning?: (input: ToastInput) => void;
 }
 
-export const useSourceViaHttp = ({
-  sourceId = 'default',
-  type = 'both',
-  fetch,
-  toastWarning,
-}: Props) => {
+export const useSourceViaHttp = ({ sourceId = 'default', fetch, toastWarning }: Props) => {
   const decodeResponse = (response: any) => {
     return pipe(
-      SourceResponseRuntimeType.decode(response),
+      metricsSourceConfigurationResponseRT.decode(response),
       fold(throwErrors(createPlainError), identity)
     );
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest<SourceResponse>(
-    `/api/metrics/source/${sourceId}/${type}`,
+  const {
+    error,
+    loading,
+    response,
+    makeRequest,
+  } = useHTTPRequest<MetricsSourceConfigurationResponse>(
+    `/api/metrics/source/${sourceId}`,
     'GET',
     null,
     decodeResponse,
@@ -71,15 +67,12 @@ export const useSourceViaHttp = ({
     })();
   }, [makeRequest]);
 
-  const createDerivedIndexPattern = useCallback(
-    (indexType: 'logs' | 'metrics' | 'both' = type) => {
-      return {
-        fields: response?.source.status ? response.source.status.indexFields : [],
-        title: pickIndexPattern(response?.source, indexType),
-      };
-    },
-    [response, type]
-  );
+  const createDerivedIndexPattern = useCallback(() => {
+    return {
+      fields: response?.source.status ? response.source.status.indexFields : [],
+      title: pickIndexPattern(response?.source, 'metrics'),
+    };
+  }, [response]);
 
   const source = useMemo(() => {
     return response ? response.source : null;

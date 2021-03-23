@@ -9,27 +9,25 @@ import createContainer from 'constate';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
-  InfraSavedSourceConfiguration,
-  InfraSource,
-  SourceResponse,
-} from '../../../common/source_configuration/source_configuration';
+  MetricsSourceConfigurationResponse,
+  MetricsSourceConfiguration,
+  PartialMetricsSourceConfigurationProperties,
+} from '../../../common/metrics_sources';
+
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const pickIndexPattern = (
-  source: InfraSource | undefined,
-  type: 'logs' | 'metrics' | 'both'
+  source: MetricsSourceConfiguration | undefined,
+  type: 'metrics'
 ) => {
   if (!source) {
     return 'unknown-index';
   }
-  if (type === 'logs') {
-    return source.configuration.logAlias;
-  }
   if (type === 'metrics') {
     return source.configuration.metricAlias;
   }
-  return `${source.configuration.logAlias},${source.configuration.metricAlias}`;
+  return `${source.configuration.metricAlias}`;
 };
 
 const DEPENDENCY_ERROR_MESSAGE = 'Failed to load source: No fetch client available.';
@@ -39,7 +37,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
   const fetchService = kibana.services.http?.fetch;
   const API_URL = `/api/metrics/source/${sourceId}`;
 
-  const [source, setSource] = useState<InfraSource | undefined>(undefined);
+  const [source, setSource] = useState<MetricsSourceConfiguration | undefined>(undefined);
 
   const [loadSourceRequest, loadSource] = useTrackedPromise(
     {
@@ -49,7 +47,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           throw new Error(DEPENDENCY_ERROR_MESSAGE);
         }
 
-        return await fetchService<SourceResponse>(`${API_URL}/metrics`, {
+        return await fetchService<MetricsSourceConfigurationResponse>(`${API_URL}`, {
           method: 'GET',
         });
       },
@@ -62,12 +60,12 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
   const [createSourceConfigurationRequest, createSourceConfiguration] = useTrackedPromise(
     {
-      createPromise: async (sourceProperties: InfraSavedSourceConfiguration) => {
+      createPromise: async (sourceProperties: PartialMetricsSourceConfigurationProperties) => {
         if (!fetchService) {
           throw new Error(DEPENDENCY_ERROR_MESSAGE);
         }
 
-        return await fetchService<SourceResponse>(API_URL, {
+        return await fetchService<MetricsSourceConfigurationResponse>(API_URL, {
           method: 'PATCH',
           body: JSON.stringify(sourceProperties),
         });
@@ -83,12 +81,12 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
   const [updateSourceConfigurationRequest, updateSourceConfiguration] = useTrackedPromise(
     {
-      createPromise: async (sourceProperties: InfraSavedSourceConfiguration) => {
+      createPromise: async (sourceProperties: PartialMetricsSourceConfigurationProperties) => {
         if (!fetchService) {
           throw new Error(DEPENDENCY_ERROR_MESSAGE);
         }
 
-        return await fetchService<SourceResponse>(API_URL, {
+        return await fetchService<MetricsSourceConfigurationResponse>(API_URL, {
           method: 'PATCH',
           body: JSON.stringify(sourceProperties),
         });
@@ -102,7 +100,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     [fetchService, sourceId]
   );
 
-  const createDerivedIndexPattern = (type: 'logs' | 'metrics' | 'both') => {
+  const createDerivedIndexPattern = (type: 'metrics') => {
     return {
       fields: source?.status ? source.status.indexFields : [],
       title: pickIndexPattern(source, type),
@@ -129,9 +127,6 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
   const sourceExists = useMemo(() => (source ? !!source.version : undefined), [source]);
 
-  const logIndicesExist = useMemo(() => source && source.status && source.status.logIndicesExist, [
-    source,
-  ]);
   const metricIndicesExist = useMemo(
     () => source && source.status && source.status.metricIndicesExist,
     [source]
@@ -144,7 +139,6 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
   return {
     createSourceConfiguration,
     createDerivedIndexPattern,
-    logIndicesExist,
     isLoading,
     isLoadingSource: loadSourceRequest.state === 'pending',
     isUninitialized,

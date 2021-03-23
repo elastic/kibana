@@ -7,7 +7,7 @@
 
 import { useState, useCallback, useContext } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSourceConfiguration } from '../../../../../common/source_configuration/source_configuration';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -28,7 +28,7 @@ export interface MetricExplorerViewState {
 }
 
 export const useMetricsExplorerState = (
-  source: InfraSourceConfiguration,
+  source: MetricsSourceConfigurationProperties,
   derivedIndexPattern: IIndexPattern,
   shouldLoadImmediately = true
 ) => {

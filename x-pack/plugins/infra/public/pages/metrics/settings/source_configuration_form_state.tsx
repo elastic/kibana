@@ -6,12 +6,12 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { InfraSourceConfiguration } from '../../../common/source_configuration/source_configuration';
-
+import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useIndicesConfigurationFormState } from './indices_configuration_form_state';
-import { useLogColumnsConfigurationFormState } from './log_columns_configuration_form_state';
 
-export const useSourceConfigurationFormState = (configuration?: InfraSourceConfiguration) => {
+export const useSourceConfigurationFormState = (
+  configuration?: MetricsSourceConfigurationProperties
+) => {
   const indicesConfigurationFormState = useIndicesConfigurationFormState({
     initialFormState: useMemo(
       () =>
@@ -19,11 +19,9 @@ export const useSourceConfigurationFormState = (configuration?: InfraSourceConfi
           ? {
               name: configuration.name,
               description: configuration.description,
-              logAlias: configuration.logAlias,
               metricAlias: configuration.metricAlias,
               containerField: configuration.fields.container,
               hostField: configuration.fields.host,
-              messageField: configuration.fields.message,
               podField: configuration.fields.pod,
               tiebreakerField: configuration.fields.tiebreaker,
               timestampField: configuration.fields.timestamp,
@@ -34,43 +32,26 @@ export const useSourceConfigurationFormState = (configuration?: InfraSourceConfi
     ),
   });
 
-  const logColumnsConfigurationFormState = useLogColumnsConfigurationFormState({
-    initialFormState: useMemo(
-      () =>
-        configuration
-          ? {
-              logColumns: configuration.logColumns,
-            }
-          : undefined,
-      [configuration]
-    ),
-  });
-
-  const errors = useMemo(
-    () => [...indicesConfigurationFormState.errors, ...logColumnsConfigurationFormState.errors],
-    [indicesConfigurationFormState.errors, logColumnsConfigurationFormState.errors]
-  );
+  const errors = useMemo(() => [...indicesConfigurationFormState.errors], [
+    indicesConfigurationFormState.errors,
+  ]);
 
   const resetForm = useCallback(() => {
     indicesConfigurationFormState.resetForm();
-    logColumnsConfigurationFormState.resetForm();
-  }, [indicesConfigurationFormState, logColumnsConfigurationFormState]);
+  }, [indicesConfigurationFormState]);
 
-  const isFormDirty = useMemo(
-    () => indicesConfigurationFormState.isFormDirty || logColumnsConfigurationFormState.isFormDirty,
-    [indicesConfigurationFormState.isFormDirty, logColumnsConfigurationFormState.isFormDirty]
-  );
+  const isFormDirty = useMemo(() => indicesConfigurationFormState.isFormDirty, [
+    indicesConfigurationFormState.isFormDirty,
+  ]);
 
-  const isFormValid = useMemo(
-    () => indicesConfigurationFormState.isFormValid && logColumnsConfigurationFormState.isFormValid,
-    [indicesConfigurationFormState.isFormValid, logColumnsConfigurationFormState.isFormValid]
-  );
+  const isFormValid = useMemo(() => indicesConfigurationFormState.isFormValid, [
+    indicesConfigurationFormState.isFormValid,
+  ]);
 
   const formState = useMemo(
     () => ({
       name: indicesConfigurationFormState.formState.name,
       description: indicesConfigurationFormState.formState.description,
-      logAlias: indicesConfigurationFormState.formState.logAlias,
       metricAlias: indicesConfigurationFormState.formState.metricAlias,
       fields: {
         container: indicesConfigurationFormState.formState.containerField,
@@ -79,17 +60,15 @@ export const useSourceConfigurationFormState = (configuration?: InfraSourceConfi
         tiebreaker: indicesConfigurationFormState.formState.tiebreakerField,
         timestamp: indicesConfigurationFormState.formState.timestampField,
       },
-      logColumns: logColumnsConfigurationFormState.formState.logColumns,
       anomalyThreshold: indicesConfigurationFormState.formState.anomalyThreshold,
     }),
-    [indicesConfigurationFormState.formState, logColumnsConfigurationFormState.formState]
+    [indicesConfigurationFormState.formState]
   );
 
   const formStateChanges = useMemo(
     () => ({
       name: indicesConfigurationFormState.formStateChanges.name,
       description: indicesConfigurationFormState.formStateChanges.description,
-      logAlias: indicesConfigurationFormState.formStateChanges.logAlias,
       metricAlias: indicesConfigurationFormState.formStateChanges.metricAlias,
       fields: {
         container: indicesConfigurationFormState.formStateChanges.containerField,
@@ -98,25 +77,18 @@ export const useSourceConfigurationFormState = (configuration?: InfraSourceConfi
         tiebreaker: indicesConfigurationFormState.formStateChanges.tiebreakerField,
         timestamp: indicesConfigurationFormState.formStateChanges.timestampField,
       },
-      logColumns: logColumnsConfigurationFormState.formStateChanges.logColumns,
       anomalyThreshold: indicesConfigurationFormState.formStateChanges.anomalyThreshold,
     }),
-    [
-      indicesConfigurationFormState.formStateChanges,
-      logColumnsConfigurationFormState.formStateChanges,
-    ]
+    [indicesConfigurationFormState.formStateChanges]
   );
 
   return {
-    addLogColumn: logColumnsConfigurationFormState.addLogColumn,
-    moveLogColumn: logColumnsConfigurationFormState.moveLogColumn,
     errors,
     formState,
     formStateChanges,
     isFormDirty,
     isFormValid,
     indicesConfigurationProps: indicesConfigurationFormState.fieldProps,
-    logColumnConfigurationProps: logColumnsConfigurationFormState.logColumnConfigurationProps,
     resetForm,
   };
 };

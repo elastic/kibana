@@ -14,6 +14,7 @@ interface LogRateFields {
   timestamp: string;
 }
 
+// NOTE: TEMPORARY: This will become a subset of the new resolved KIP compatible log source configuration.
 export const createGetLogRateFields = (sources: InfraSources) => {
   return async (
     sourceId: string,
