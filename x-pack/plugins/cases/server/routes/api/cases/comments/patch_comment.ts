@@ -14,12 +14,12 @@ import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { CommentableCase } from '../../../../common';
-import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common';
+import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { CaseServiceSetup } from '../../../../services';
 
 interface CombinedCaseParams {
@@ -64,7 +64,23 @@ async function getCommentableCase({
   }
 }
 
-export function initPatchCommentApi({ caseService, router, userActionService, logger }: RouteDeps) {
+export function initPatchCommentApi({
+  caseService,
+  router,
+  userActionService,
+  logger,
+  subCasesEnabled,
+}: RouteDeps) {
+  const querySchema = subCasesEnabled
+    ? {
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
+      }
+    : {};
+
   router.patch(
     {
       path: CASE_COMMENTS_URL,
@@ -72,11 +88,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
+        ...querySchema,
         body: escapeHatch,
       },
     },

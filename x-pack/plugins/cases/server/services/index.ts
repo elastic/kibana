@@ -33,7 +33,7 @@ import {
   CaseResponse,
   caseTypeField,
   CasesFindRequest,
-} from '../../common';
+} from '../../common/api';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
 import {
@@ -252,11 +252,13 @@ export interface CaseServiceSetup {
     client: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptions;
     subCaseOptions?: SavedObjectFindOptions;
+    subCasesEnabled: boolean;
   }): Promise<number>;
   findCasesGroupedByID(args: {
     client: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptions;
     subCaseOptions?: SavedObjectFindOptions;
+    subCasesEnabled: boolean;
   }): Promise<CasesMapWithPageInfo>;
 }
 
@@ -273,23 +275,27 @@ export class CaseService implements CaseServiceSetup {
     client,
     caseOptions,
     subCaseOptions,
+    subCasesEnabled,
   }: {
     client: SavedObjectsClientContract;
     caseOptions: FindCaseOptions;
     subCaseOptions?: SavedObjectFindOptions;
+    subCasesEnabled: boolean;
   }): Promise<CasesMapWithPageInfo> {
     const cases = await this.findCases({
       client,
       options: caseOptions,
     });
 
-    const subCasesResp = await this.findSubCasesGroupByCase({
-      client,
-      options: subCaseOptions,
-      ids: cases.saved_objects
-        .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
-        .map((caseInfo) => caseInfo.id),
-    });
+    const subCasesResp = subCasesEnabled
+      ? await this.findSubCasesGroupByCase({
+          client,
+          options: subCaseOptions,
+          ids: cases.saved_objects
+            .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
+            .map((caseInfo) => caseInfo.id),
+        })
+      : { subCasesMap: new Map<string, SubCaseResponse[]>(), page: 0, perPage: 0 };
 
     const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
       const subCasesForCase = subCasesResp.subCasesMap.get(caseInfo.id);
@@ -359,10 +365,12 @@ export class CaseService implements CaseServiceSetup {
     client,
     caseOptions,
     subCaseOptions,
+    subCasesEnabled,
   }: {
     client: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptions;
     subCaseOptions?: SavedObjectFindOptions;
+    subCasesEnabled: boolean;
   }): Promise<number> {
     const casesStats = await this.findCases({
       client,
@@ -410,7 +418,7 @@ export class CaseService implements CaseServiceSetup {
 
     let subCasesTotal = 0;
 
-    if (subCaseOptions) {
+    if (subCasesEnabled && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
         client,
         options: subCaseOptions,

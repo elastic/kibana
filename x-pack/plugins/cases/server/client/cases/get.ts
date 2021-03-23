@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
+import { SavedObjectsClientContract, Logger, SavedObject } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
-import { CaseResponseRt, CaseResponse } from '../../../common';
+import { CaseResponseRt, CaseResponse, ESCaseAttributes } from '../../../common/api';
 import { CaseServiceSetup } from '../../services';
 import { countAlertsForID } from '../../common';
 import { createCaseError } from '../../common/error';
@@ -19,6 +19,7 @@ interface GetParams {
   includeComments?: boolean;
   includeSubCaseComments?: boolean;
   logger: Logger;
+  subCasesEnabled: boolean;
 }
 
 /**
@@ -31,17 +32,29 @@ export const get = async ({
   logger,
   includeComments = false,
   includeSubCaseComments = false,
+  subCasesEnabled,
 }: GetParams): Promise<CaseResponse> => {
   try {
-    const [theCase, subCasesForCaseId] = await Promise.all([
-      caseService.getCase({
+    let theCase: SavedObject<ESCaseAttributes>;
+    let subCaseIds: string[] = [];
+
+    if (subCasesEnabled) {
+      const [caseInfo, subCasesForCaseId] = await Promise.all([
+        caseService.getCase({
+          client: savedObjectsClient,
+          id,
+        }),
+        caseService.findSubCasesByCaseId({ client: savedObjectsClient, ids: [id] }),
+      ]);
+
+      theCase = caseInfo;
+      subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
+    } else {
+      theCase = await caseService.getCase({
         client: savedObjectsClient,
         id,
-      }),
-      caseService.findSubCasesByCaseId({ client: savedObjectsClient, ids: [id] }),
-    ]);
-
-    const subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
+      });
+    }
 
     if (!includeComments) {
       return CaseResponseRt.encode(
@@ -58,7 +71,7 @@ export const get = async ({
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-      includeSubCaseComments,
+      includeSubCaseComments: subCasesEnabled && includeSubCaseComments,
     });
 
     return CaseResponseRt.encode(

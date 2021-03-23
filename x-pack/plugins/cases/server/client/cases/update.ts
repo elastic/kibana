@@ -38,7 +38,7 @@ import {
   AssociationType,
   CommentAttributes,
   User,
-} from '../../../common';
+} from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import {
   getCaseToUpdate,
@@ -93,6 +93,22 @@ function throwIfUpdateTypeCollectionToIndividual(
     const ids = requestsUpdatingTypeCollectionToInd.map((req) => req.id);
     throw Boom.badRequest(
       `Converting a collection to an individual case is not allowed ids: [${ids.join(', ')}]`
+    );
+  }
+}
+
+/**
+ * Throws an error if any of the requests attempt to update the type of a case.
+ */
+function throwIfUpdateType(requests: ESCasePatchRequest[]) {
+  const requestsUpdatingType = requests.filter((req) => req.type !== undefined);
+
+  if (requestsUpdatingType.length > 0) {
+    const ids = requestsUpdatingType.map((req) => req.id);
+    throw Boom.badRequest(
+      `Updating the type of a case when sub cases are disabled is not allowed ids: [${ids.join(
+        ', '
+      )}]`
     );
   }
 }
@@ -320,6 +336,7 @@ interface UpdateArgs {
   casesClient: CasesClientHandler;
   cases: CasesPatchRequest;
   logger: Logger;
+  subCasesEnabled: boolean;
 }
 
 export const update = async ({
@@ -330,6 +347,7 @@ export const update = async ({
   casesClient,
   cases,
   logger,
+  subCasesEnabled,
 }: UpdateArgs): Promise<CasesResponse> => {
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
@@ -395,6 +413,10 @@ export const update = async ({
       acc.set(so.id, so);
       return acc;
     }, new Map<string, SavedObject<ESCaseAttributes>>());
+
+    if (!subCasesEnabled) {
+      throwIfUpdateType(updateFilterCases);
+    }
 
     throwIfUpdateStatusOfCollection(updateFilterCases, casesMap);
     throwIfUpdateTypeCollectionToIndividual(updateFilterCases, casesMap);

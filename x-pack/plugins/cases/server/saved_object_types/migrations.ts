@@ -15,7 +15,7 @@ import {
   AssociationType,
   ESConnectorFields,
   CollectionState,
-} from '../../common';
+} from '../../common/api';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;

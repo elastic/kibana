@@ -18,7 +18,7 @@ import {
   GetFieldsResponse,
   CaseUserActionsResponse,
   User,
-} from '../../common';
+} from '../../common/api';
 import { AlertInfo } from '../common';
 import {
   CaseConfigureServiceSetup,
@@ -75,6 +75,7 @@ export interface CasesClientFactoryArguments {
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
   logger: Logger;
+  subCasesEnabled: boolean;
 }
 
 export interface ConfigureFields {

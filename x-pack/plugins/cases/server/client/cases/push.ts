@@ -29,7 +29,7 @@ import {
   User,
   ESCasesConfigureAttributes,
   CaseType,
-} from '../../../common';
+} from '../../../common/api';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
@@ -68,6 +68,7 @@ interface PushParams {
   casesClient: CasesClientHandler;
   actionsClient: ActionsClient;
   logger: Logger;
+  subCasesEnabled: boolean;
 }
 
 export const push = async ({
@@ -81,6 +82,7 @@ export const push = async ({
   caseId,
   user,
   logger,
+  subCasesEnabled,
 }: PushParams): Promise<CaseResponse> => {
   /* Start of push to external service */
   let theCase: CaseResponse;
@@ -92,7 +94,11 @@ export const push = async ({
 
   try {
     [theCase, connector, userActions] = await Promise.all([
-      casesClient.get({ id: caseId, includeComments: true, includeSubCaseComments: true }),
+      casesClient.get({
+        id: caseId,
+        includeComments: true,
+        includeSubCaseComments: subCasesEnabled,
+      }),
       actionsClient.get({ id: connectorId }),
       casesClient.getUserActions({ caseId }),
     ]);
@@ -183,7 +189,7 @@ export const push = async ({
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },
-        includeSubCaseComments: true,
+        includeSubCaseComments: subCasesEnabled,
       }),
     ]);
   } catch (e) {

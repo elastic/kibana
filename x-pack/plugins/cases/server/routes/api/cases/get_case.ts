@@ -9,9 +9,18 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASE_DETAILS_URL } from '../../../../common';
+import { CASE_DETAILS_URL } from '../../../../common/constants';
 
-export function initGetCaseApi({ router, logger }: RouteDeps) {
+export function initGetCaseApi({ router, logger, subCasesEnabled }: RouteDeps) {
+  const querySchema = subCasesEnabled
+    ? schema.object({
+        includeComments: schema.boolean({ defaultValue: true }),
+        includeSubCaseComments: schema.maybe(schema.boolean({ defaultValue: false })),
+      })
+    : schema.object({
+        includeComments: schema.boolean({ defaultValue: true }),
+      });
+
   router.get(
     {
       path: CASE_DETAILS_URL,
@@ -19,13 +28,15 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.object({
-          includeComments: schema.boolean({ defaultValue: true }),
-          includeSubCaseComments: schema.maybe(schema.boolean({ defaultValue: false })),
-        }),
+        query: querySchema,
       },
     },
     async (context, request, response) => {
+      const query = {
+        ...request.query,
+        ...(subCasesEnabled ? {} : { includeSubCaseComments: undefined }),
+      };
+
       try {
         const casesClient = context.cases.getCasesClient();
         const id = request.params.case_id;
@@ -33,13 +44,13 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
         return response.ok({
           body: await casesClient.get({
             id,
-            includeComments: request.query.includeComments,
-            includeSubCaseComments: request.query.includeSubCaseComments,
+            includeComments: query.includeComments,
+            includeSubCaseComments: query.includeSubCaseComments,
           }),
         });
       } catch (error) {
         logger.error(
-          `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${request.query.includeComments} \ninclude sub comments: ${request.query.includeSubCaseComments}: ${error}`
+          `Failed to retrieve case in route case id: ${request.params.case_id} \ninclude comments: ${query.includeComments} \ninclude sub comments: ${query.includeSubCaseComments}: ${error}`
         );
         return response.customError(wrapError(error));
       }

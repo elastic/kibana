@@ -339,6 +339,7 @@
 # Security Solution sub teams
 /x-pack/plugins/case @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
+/x-pack/test/case_api_no_sub_cases_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 
 # Security Intelligence And Analytics

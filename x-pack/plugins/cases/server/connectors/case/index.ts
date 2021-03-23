@@ -8,7 +8,12 @@
 import { curry } from 'lodash';
 import { Logger } from 'src/core/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import { CasePatchRequest, CasePostRequest, CommentRequest, CommentType } from '../../../common';
+import {
+  CasePatchRequest,
+  CasePostRequest,
+  CommentRequest,
+  CommentType,
+} from '../../../common/api';
 import { createExternalCasesClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema, CommentSchemaType } from './schema';
 import {
@@ -81,6 +86,9 @@ async function executor(
     userActionService,
     alertsService,
     logger,
+    // sub-cases-enabled: force this to true because we should never be able to call execute if the feature is disabled in the first
+    // place. The plugin won't register case as a connector if subCasesEnabled is false.
+    subCasesEnabled: true,
   });
 
   if (!supportedSubActions.includes(subAction)) {

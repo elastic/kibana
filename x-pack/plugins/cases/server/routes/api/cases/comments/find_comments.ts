@@ -19,10 +19,10 @@ import {
   CommentsResponseRt,
   SavedObjectFindOptionsRt,
   throwErrors,
-} from '../../../../../common';
+} from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 import { defaultPage, defaultPerPage } from '../..';
 
 const FindQueryParamsRt = rt.partial({
@@ -30,7 +30,12 @@ const FindQueryParamsRt = rt.partial({
   subCaseId: rt.string,
 });
 
-export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDeps) {
+export function initFindCaseCommentsApi({
+  caseService,
+  router,
+  logger,
+  subCasesEnabled,
+}: RouteDeps) {
   router.get(
     {
       path: `${CASE_COMMENTS_URL}/_find`,
@@ -44,10 +49,17 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        const query = pipe(
-          FindQueryParamsRt.decode(request.query),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+        const query = {
+          ...pipe(
+            // sub-cases-enabled: Don't allow subCaseId to be a valid query parameter
+            subCasesEnabled
+              ? FindQueryParamsRt.decode(request.query)
+              : SavedObjectFindOptionsRt.decode(request.query),
+            fold(throwErrors(Boom.badRequest), identity)
+          ),
+          // sub-cases-enabled: Avoid type errors because SavedObjectFindOptionsRt does not have 'subCaseId' field defined
+          ...(subCasesEnabled ? {} : { subCaseId: undefined }),
+        };
 
         const id = query.subCaseId ?? request.params.case_id;
         const associationType = query.subCaseId ? AssociationType.subCase : AssociationType.case;
