@@ -195,10 +195,6 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
           //   data-test-subj="euiCollapsedItemActionsButton"
           // Maybe some objects still have the inspect element visible?
           // !!! Also note that since we don't have spaces on OSS, the actions for the same object can be different depending on OSS or not
-          let menuElement = null;
-          let inspectElement = null;
-          let relationshipsElement = null;
-          let copySaveObjectsElement = null;
           const actions = await row.findByClassName('euiTableRowCell--hasActions');
           // getting the innerHTML and checking if it 'includes' a string is faster than a timeout looking for each element
           const actionsHTML = await actions.getAttribute('innerHTML');
@@ -207,7 +203,7 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
             inspectElement = null,
             relationshipsElement = null,
             copySaveObjectsElement = null,
-          ] = Promise.all([
+          ] = await Promise.all([
             actionsHTML.includes('euiCollapsedItemActionsButton') &&
               row.findByTestSubject('euiCollapsedItemActionsButton'),
             actionsHTML.includes('savedObjectsTableAction-inspect') &&

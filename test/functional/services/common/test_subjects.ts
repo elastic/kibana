@@ -264,7 +264,9 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
     ): Promise<T[]> {
       return await retry.try(async () => {
         const elements = await this.findAll(selectorAll);
-        return await Promise.all(elements.map(mapFn));
+        return await Promise.all(
+          elements.map((element, index, array) => mapFn(element, index, array.length))
+        );
       });
     }
 

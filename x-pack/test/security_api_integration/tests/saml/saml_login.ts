@@ -661,7 +661,12 @@ export default function ({ getService }: FtrProviderContext) {
         ['when access token is valid', async () => {}],
         // Scenario when active cookie has an expired access token. Access token expiration is set
         // to 15s for API integration tests so we need to wait for 20s to make sure token expires.
-        ['when access token is expired', async () => await timer(20000).toPromise()],
+        [
+          'when access token is expired',
+          async () => {
+            await timer(20000).toPromise();
+          },
+        ],
         // Scenario when active cookie references to access/refresh token pair that were already
         // removed from Elasticsearch (to simulate 24h when expired tokens are removed).
         [
