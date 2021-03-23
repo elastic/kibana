@@ -15,7 +15,7 @@ import {
   DEFAULT_MAX_RESULT_WINDOW,
   SCALING_TYPES,
 } from '../../../../common/constants';
-import { getFileUploadComponent } from '../../../kibana_services';
+import { getFileUpload } from '../../../kibana_services';
 import { GeoJsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
@@ -65,7 +65,7 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   }
 
   async _loadFileUploadComponent() {
-    const fileUploadComponent = await getFileUploadComponent();
+    const fileUploadComponent = await getFileUpload().getFileUploadComponent();
     if (this._isMounted) {
       this.setState({ fileUploadComponent });
     }

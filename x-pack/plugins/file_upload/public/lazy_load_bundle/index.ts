@@ -8,7 +8,9 @@
 import React from 'react';
 import { FeatureCollection } from 'geojson';
 import { IndexPattern } from 'src/plugins/data/public';
+import { HttpStart } from 'src/core/public';
 import { IImporter, ImportFactoryOptions, ImportResults } from '../importer';
+import { getHttp } from '../kibana_services';
 
 export interface FileUploadComponentProps {
   isIndexingTriggered: boolean;
@@ -27,6 +29,7 @@ let loadModulesPromise: Promise<LazyLoadedFileUploadModules>;
 interface LazyLoadedFileUploadModules {
   JsonUploadAndParse: React.ComponentType<FileUploadComponentProps>;
   importerFactory: (format: string, options: ImportFactoryOptions) => IImporter | undefined;
+  getHttp: () => HttpStart;
 }
 
 export async function lazyLoadFileUploadModules(): Promise<LazyLoadedFileUploadModules> {
@@ -40,6 +43,7 @@ export async function lazyLoadFileUploadModules(): Promise<LazyLoadedFileUploadM
     resolve({
       JsonUploadAndParse,
       importerFactory,
+      getHttp,
     });
   });
   return loadModulesPromise;

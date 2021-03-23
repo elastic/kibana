@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { ClientFileCreateSourceEditor, INDEX_SETUP_STEP_ID, INDEXING_STEP_ID } from './wizard';
-import { getHttp } from '../../../kibana_services';
-import { HasImportPermission } from '../../../../../file_upload/common';
+import { getFileUpload } from '../../../kibana_services';
 
 export const uploadLayerWizardConfig: LayerWizard = {
   categories: [],
@@ -22,16 +21,8 @@ export const uploadLayerWizardConfig: LayerWizard = {
       'You do not have file upload privileges. Ask your system administrator to grant file upload privileges.',
   }),
   getIsDisabled: async () => {
-    try {
-      const resp = await getHttp().fetch<HasImportPermission>({
-        path: `/api/file_upload/has_import_permission`,
-        method: 'GET',
-        query: { checkCreateIndexPattern: true },
-      });
-      return !resp.hasImportPermission;
-    } catch (e) {
-      return true;
-    }
+    const hasImportPermission = await getFileUpload().hasImportPermission(undefined, true);
+    return !hasImportPermission;
   },
   icon: 'importAction',
   prerequisiteSteps: [

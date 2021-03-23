@@ -35,7 +35,6 @@ import {
 import { ExperimentalBadge } from '../experimental_badge';
 import { getIndexPatternNames, loadIndexPatterns } from '../../../../util/index_utils';
 import { ml } from '../../../../services/ml_api_service';
-import { hasImportPermission } from '../utils';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
@@ -124,7 +123,7 @@ export class ImportView extends Component {
         },
         async () => {
           // check to see if the user has permission to create and ingest data into the specified index
-          if ((await hasImportPermission(index)) === false) {
+          if ((await getFileUpload().hasImportPermission(index, createIndexPattern)) === false) {
             errors.push(
               i18n.translate('xpack.ml.fileDatavisualizer.importView.importPermissionError', {
                 defaultMessage:

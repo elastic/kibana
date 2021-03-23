@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export {
-  createUrlOverrides,
-  hasImportPermission,
-  processResults,
-  readFile,
-  DEFAULT_LINES_TO_SAMPLE,
-} from './utils';
+export { createUrlOverrides, processResults, readFile, DEFAULT_LINES_TO_SAMPLE } from './utils';

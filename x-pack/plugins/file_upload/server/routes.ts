@@ -67,7 +67,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup) {
 
         const checkPrivilegesPayload: CheckPrivilegesPayload = {
           elasticsearch: {
-            cluster: ['manage_index_templates', 'manage_pipeline'],
+            cluster: ['manage_pipeline'],
           },
         };
         if (checkCreateIndexPattern) {
