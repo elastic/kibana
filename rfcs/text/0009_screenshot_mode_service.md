@@ -122,17 +122,19 @@ some other tool that is TBD.
 
 # Adoption strategy
 
-The Reporting Services team should create an few example in a developer example plugin
-on how to integrate an App with the Screenshot Mode Service. From there, the team should 
-work with App teams in a consulting role to establish usage of this service.
+Using this service doesn't mean that anything needs to be replaced or thrown away. It's an add on
+that any plugin or even application can use to add conditionals that previously weren't possible.
+The Reporting Services team should create an example in a developer example plugin on how to build
+a UI that is aware of Screenshot Mode Service. From there, the team would work on updating
+whichever code that would benefit from this the most, which we know from analyzing debugging logs
+of a report job. The team would work across teams to get it accepted by the owners.
 
 # How we teach this
 
-The Reporting Services team can offer statistics in a weekly update about how many 
-Reporting-enabled applications are using this service. This will help people remember
-that it is available. If the team can also provide statistics about how many bugs this is 
-fixing, how much time it saves in generating a report, etc, then it will also help
-people understand why it is important.
+The Reporting Services team will continue to analyze debug logs of reporting jobs to find if there
+is UI code running during a report job that could be optimized by this service. The team would
+reach out to the code owners and determine if it makes sense to use this service to improve
+screenshot performance of their code.
 
 # Further examples
 
