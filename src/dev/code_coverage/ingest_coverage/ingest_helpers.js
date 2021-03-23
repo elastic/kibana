@@ -45,11 +45,7 @@ function partial(x) {
 
 export function redact(x) {
   const url = new URL(x);
-  if (url.password) {
-    return `${url.protocol}//${url.host}`;
-  } else {
-    return x;
-  }
+  return url.password ? `${url.protocol}//${url.host}` : x;
 }
 
 function color(whichColor) {

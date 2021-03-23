@@ -23,7 +23,7 @@ import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { ActionsPlugin } from '../../actions/server';
-import { AlertingPlugin } from '../../alerts/server';
+import { AlertingPlugin } from '../../alerting/server';
 import { CloudSetup } from '../../cloud/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -71,7 +71,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       cloud?: CloudSetup;
       usageCollection?: UsageCollectionSetup;
       taskManager?: TaskManagerSetupContract;
-      alerts?: AlertingPlugin['setup'];
+      alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
       observability?: ObservabilityPluginSetup;
       features: FeaturesPluginSetup;
@@ -90,9 +90,9 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     core.uiSettings.register(uiSettings);
 
-    if (plugins.actions && plugins.alerts) {
+    if (plugins.actions && plugins.alerting) {
       registerApmAlerts({
-        alerts: plugins.alerts,
+        alerting: plugins.alerting,
         actions: plugins.actions,
         ml: plugins.ml,
         config$: mergedConfig$,

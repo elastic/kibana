@@ -20,7 +20,7 @@ import {
 } from '../../../types';
 import { AlertForm } from './alert_form';
 import { coreMock } from 'src/core/public/mocks';
-import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();

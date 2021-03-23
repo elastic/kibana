@@ -11,28 +11,28 @@ Reporting feature for a few reasons:
  - Fewer Reporting bugs in releases since App teams have more ownership and
    control over the reportability of their UI
 
+Currently, the applications that support screenshot reports are:
+ - Dashboard
+ - Visualize Editor
+ - Canvas
+
 **Screenshot mode service**
 
 Applications in Kibana should be aware of when their rendering is for a human
-user using the page interactively, and when it's not. Sometimes the page is
-loaded for display-purposes: there is no user in control of the
-browser and no need for interactivity. Having Kibana support that purpose
-allows higher-level features to be built on top of rapidly-available images of
-Kibana pages. This turns out to be crucial for features like scheduled PDF
-report generation, and automated alerts with embedded images.
+user using the page interactively, and when it's not. At a high level, the application
+can support that awareness through a customized URL for screenshot reports. Canvas
+demonstrates a great implementation of this today. However, Canvas has dependencies
+on other UI plugins, and can not control how they render or what type of network requests
+they send. Those plugins, and lower-level plugins that run on every page, do not have
+a way to control themselves when the page is rendering for taking a screenshot.
 
-As a bridge between the Kibana applications screenshot-capture features is
-needed as a service in Kibana. This RFC names that service the Screenshot
-Mode Service (name TBD). Applications would read from this service while
-loading UI components into the browser, and help the application make
-case-by-case bases for loading components and the parameters that get passed
-into the components.
+This RFC proposes a Screenshot Mode Service as a low-level plugin that allows
+other plugins (UI code) to make choices when the page is rendering for a screenshot.
 
-In most cases, the information coming from this service would help the
-application determine which UI components should **not** be loaded, as applications will
-use the service response for skipping components that aren't needed for
-presenting the data in a screenshot, and thus work towards better performance
-for the display-only purpose.
+In most cases, the information coming from this service would help the UI code
+decide what should **not** be loaded: for example, the NewsFeed component and
+Telemetry code should not load itself when the page is rendering for
+screenshots.
 
 More background on how Reporting currently works, including the lifecycle of
 creating a PNG report, is here: https://github.com/elastic/kibana/issues/59396
@@ -113,25 +113,28 @@ some other tool that is TBD.
   Reporting uses `page.print()` to capture the PDF, it would be easy for application 
   developers to test, and prevent bugs showing up in the report.
   
-  However, this solution doesn't include performance benefits of reducing objects 
-  in the headless browser memory: the headless browser still has to render the entire 
-  page as a "normal" render before it is able to call `page.print()`. No one sees the 
+  However, this proposal only provides high-level customization over visual rendering, which the
+  application already has if it uses a customized URL for rendering the layout for screenshots. It
+  has a performance downside, as well: the headless browser still has to render the entire 
+  page as a "normal" render before we can call `page.print()`. No one sees the 
   results of that initial render, so it is the same amount of wasted rendering cycles 
   during report generation that we have today.
 
 # Adoption strategy
 
-The Reporting Services team should create an few example in a developer example plugin
-on how to integrate an App with the Screenshot Mode Service. From there, the team should 
-work with App teams in a consulting role to establish usage of this service.
+Using this service doesn't mean that anything needs to be replaced or thrown away. It's an add on
+that any plugin or even application can use to add conditionals that previously weren't possible.
+The Reporting Services team should create an example in a developer example plugin on how to build
+a UI that is aware of Screenshot Mode Service. From there, the team would work on updating
+whichever code that would benefit from this the most, which we know from analyzing debugging logs
+of a report job. The team would work across teams to get it accepted by the owners.
 
 # How we teach this
 
-The Reporting Services team can offer statistics in a weekly update about how many 
-Reporting-enabled applications are using this service. This will help people remember
-that it is available. If the team can also provide statistics about how many bugs this is 
-fixing, how much time it saves in generating a report, etc, then it will also help
-people understand why it is important.
+The Reporting Services team will continue to analyze debug logs of reporting jobs to find if there
+is UI code running during a report job that could be optimized by this service. The team would
+reach out to the code owners and determine if it makes sense to use this service to improve
+screenshot performance of their code.
 
 # Further examples
 

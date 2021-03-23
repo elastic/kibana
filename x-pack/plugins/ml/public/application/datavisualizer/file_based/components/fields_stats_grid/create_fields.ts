@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+import { FindFileStructureResponse } from '../../../../../../../file_upload/common';
 import { getFieldNames, getSupportedFieldType } from './get_field_names';
 import { FileBasedFieldVisConfig } from '../../../stats_table/types';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';

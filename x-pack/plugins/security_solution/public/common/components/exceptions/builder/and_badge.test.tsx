@@ -10,8 +10,9 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
 import { BuilderAndBadgeComponent } from './and_badge';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 
-const mockTheme = { eui: { euiColorLightShade: '#ece' } };
+const mockTheme = getMockTheme({ eui: { euiColorLightShade: '#ece' } });
 
 describe('BuilderAndBadgeComponent', () => {
   test('it renders exceptionItemEntryFirstRowAndBadge for very first exception item in builder', () => {

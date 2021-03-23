@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useRequest, sendRequest, useConditionalRequest } from './use_request';
-import type { SendConditionalRequestConfig } from './use_request';
 import { agentPolicyRouteService } from '../../services';
+
 import type {
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
@@ -22,6 +21,9 @@ import type {
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
 } from '../../types';
+
+import { useRequest, sendRequest, useConditionalRequest } from './use_request';
+import type { SendConditionalRequestConfig } from './use_request';
 
 export const useGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
   return useRequest<GetAgentPoliciesResponse>({

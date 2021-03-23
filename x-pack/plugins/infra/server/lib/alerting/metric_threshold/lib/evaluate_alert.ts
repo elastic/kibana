@@ -6,6 +6,7 @@
  */
 
 import { mapValues, first, last, isNaN } from 'lodash';
+import { ElasticsearchClient } from 'kibana/server';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
@@ -13,7 +14,6 @@ import {
 import { InfraSource } from '../../../../../common/http_api/source_api';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
-import { AlertServices } from '../../../../../../alerts/server';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
@@ -43,7 +43,7 @@ export interface EvaluatedAlertParams {
 }
 
 export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAlertParams>(
-  callCluster: AlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   params: Params,
   config: InfraSource['configuration'],
   timeframe?: { start: number; end: number }
@@ -52,7 +52,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
   return Promise.all(
     criteria.map(async (criterion) => {
       const currentValues = await getMetric(
-        callCluster,
+        esClient,
         criterion,
         config.metricAlias,
         config.fields.timestamp,
@@ -91,7 +91,7 @@ export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAle
 };
 
 const getMetric: (
-  callCluster: AlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   params: MetricExpressionParams,
   index: string,
   timefield: string,
@@ -99,7 +99,7 @@ const getMetric: (
   filterQuery: string | undefined,
   timeframe?: { start: number; end: number }
 ) => Promise<Record<string, number[]>> = async function (
-  callCluster,
+  esClient,
   params,
   index,
   timefield,
@@ -127,7 +127,7 @@ const getMetric: (
         (response) => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
-        (body) => callCluster('search', { body, index }),
+        (body) => esClient.search({ body, index }),
         searchBody,
         bucketSelector,
         afterKeyHandler
@@ -142,7 +142,7 @@ const getMetric: (
         {}
       );
     }
-    const result = await callCluster('search', {
+    const { body: result } = await esClient.search({
       body: searchBody,
       index,
     });

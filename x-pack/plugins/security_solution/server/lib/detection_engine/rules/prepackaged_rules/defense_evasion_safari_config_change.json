@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Modification of Safari Settings via Defaults Command",
   "query": "event.category:process and event.type:start and process.name:defaults and process.args: (com.apple.Safari and write and not ( UniversalSearchEnabled or SuppressSearchSuggestions or WebKitTabToLinksPreferenceKey or ShowFullURLInSmartSearchField or com.apple.Safari.ContentPageGroupIdentifier.WebKit2TabsToLinks ) )",
   "references": [

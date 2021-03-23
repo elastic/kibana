@@ -7,7 +7,17 @@
 
 import uuid from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import type { CallESAsCurrentUser } from '../types';
+
+import {
+  packageToPackagePolicy,
+  DEFAULT_AGENT_POLICIES_PACKAGES,
+  FLEET_SERVER_PACKAGE,
+} from '../../common';
+
+import type { PackagePolicy, AgentPolicy, Installation, Output } from '../../common';
+
+import { SO_SEARCH_LIMIT } from '../constants';
+
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import {
@@ -15,13 +25,6 @@ import {
   ensureInstalledPackage,
   ensurePackagesCompletedInstall,
 } from './epm/packages/install';
-import {
-  packageToPackagePolicy,
-  DEFAULT_AGENT_POLICIES_PACKAGES,
-  FLEET_SERVER_PACKAGE,
-} from '../../common';
-import type { PackagePolicy, AgentPolicy, Installation, Output } from '../../common';
-import { SO_SEARCH_LIMIT } from '../constants';
 import { getPackageInfo } from './epm/packages';
 import { packagePolicyService } from './package_policy';
 import { generateEnrollmentAPIKey } from './api_keys';
@@ -29,7 +32,6 @@ import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
-import { appContextService } from './app_context';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
@@ -41,18 +43,15 @@ export interface SetupStatus {
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient, callCluster));
+  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
 }
 
 async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  callCluster: CallESAsCurrentUser
+  esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  const isFleetServerEnabled = appContextService.getConfig()?.agents.fleetServerEnabled;
   const [
     installedPackages,
     defaultOutput,
@@ -60,13 +59,11 @@ async function createSetupSideEffects(
     { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
   ] = await Promise.all([
     // packages installed by default
-    ensureInstalledDefaultPackages(soClient, callCluster),
+    ensureInstalledDefaultPackages(soClient, esClient),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
-    isFleetServerEnabled
-      ? agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient)
-      : {},
-    updateFleetRoleIfExists(callCluster),
+    agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient),
+    updateFleetRoleIfExists(esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -83,27 +80,24 @@ async function createSetupSideEffects(
   // will occur between upgrading the package and reinstalling the previously failed package.
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
-  await ensurePackagesCompletedInstall(soClient, callCluster);
+  await ensurePackagesCompletedInstall(soClient, esClient);
 
-  if (isFleetServerEnabled) {
-    await awaitIfFleetServerSetupPending();
+  await awaitIfFleetServerSetupPending();
 
-    const fleetServerPackage = await ensureInstalledPackage({
-      savedObjectsClient: soClient,
-      pkgName: FLEET_SERVER_PACKAGE,
-      callCluster,
-    });
+  const fleetServerPackage = await ensureInstalledPackage({
+    savedObjectsClient: soClient,
+    pkgName: FLEET_SERVER_PACKAGE,
+    esClient,
+  });
 
-    if (defaultFleetServerPolicyCreated) {
-      await addPackageToAgentPolicy(
-        soClient,
-        esClient,
-        callCluster,
-        fleetServerPackage,
-        defaultFleetServerPolicy,
-        defaultOutput
-      );
-    }
+  if (defaultFleetServerPolicyCreated) {
+    await addPackageToAgentPolicy(
+      soClient,
+      esClient,
+      fleetServerPackage,
+      defaultFleetServerPolicy,
+      defaultOutput
+    );
   }
 
   // If we just created the default fleet server policy add the fleet server package
@@ -143,7 +137,6 @@ async function createSetupSideEffects(
         await addPackageToAgentPolicy(
           soClient,
           esClient,
-          callCluster,
           installedPackage,
           agentPolicyWithPackagePolicies,
           defaultOutput
@@ -157,27 +150,23 @@ async function createSetupSideEffects(
   return { isIntialized: true };
 }
 
-async function updateFleetRoleIfExists(callCluster: CallESAsCurrentUser) {
+async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {
   try {
-    await callCluster('transport.request', {
-      method: 'GET',
-      path: `/_security/role/${FLEET_ENROLL_ROLE}`,
-    });
+    await esClient.security.getRole({ name: FLEET_ENROLL_ROLE });
   } catch (e) {
-    if (e.status === 404) {
+    if (e.statusCode === 404) {
       return;
     }
 
     throw e;
   }
 
-  return putFleetRole(callCluster);
+  return putFleetRole(esClient);
 }
 
-async function putFleetRole(callCluster: CallESAsCurrentUser) {
-  return callCluster('transport.request', {
-    method: 'PUT',
-    path: `/_security/role/${FLEET_ENROLL_ROLE}`,
+async function putFleetRole(esClient: ElasticsearchClient) {
+  return await esClient.security.putRole({
+    name: FLEET_ENROLL_ROLE,
     body: {
       cluster: ['monitor', 'manage_api_key'],
       indices: [
@@ -193,12 +182,11 @@ async function putFleetRole(callCluster: CallESAsCurrentUser) {
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  callCluster: CallESAsCurrentUser,
   options?: { forceRecreate?: boolean }
 ) {
   // Create fleet_enroll role
   // This should be done directly in ES at some point
-  const res = await putFleetRole(callCluster);
+  const { body: res } = await putFleetRole(esClient);
 
   // If the role is already created skip the rest unless you have forceRecreate set to true
   if (options?.forceRecreate !== true && res.role.created === false) {
@@ -206,9 +194,8 @@ export async function setupFleet(
   }
   const password = generateRandomPassword();
   // Create fleet enroll user
-  await callCluster('transport.request', {
-    method: 'PUT',
-    path: `/_security/user/${FLEET_ENROLL_USERNAME}`,
+  await esClient.security.putUser({
+    username: FLEET_ENROLL_USERNAME,
     body: {
       password,
       roles: [FLEET_ENROLL_ROLE],
@@ -240,6 +227,7 @@ export async function setupFleet(
       return generateEnrollmentAPIKey(soClient, esClient, {
         name: `Default`,
         agentPolicyId: agentPolicy.id,
+        forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up
       });
     })
   );
@@ -258,7 +246,6 @@ function generateRandomPassword() {
 async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
   defaultOutput: Output
@@ -276,7 +263,7 @@ async function addPackageToAgentPolicy(
     agentPolicy.namespace
   );
 
-  await packagePolicyService.create(soClient, esClient, callCluster, newPackagePolicy, {
+  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     bumpRevision: false,
   });
 }

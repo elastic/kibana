@@ -11,7 +11,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { SignalSearchResponse, BulkResponse, SignalHit, WrappedSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
@@ -158,7 +158,7 @@ export const singleBulkCreate = async ({
     }),
   ]);
   const start = performance.now();
-  const response: BulkResponse = await services.callCluster('bulk', {
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk<BulkResponse>({
     index: signalsIndex,
     refresh,
     body: bulkBody,
@@ -244,7 +244,7 @@ export const bulkInsertSignals = async (
     doc._source,
   ]);
   const start = performance.now();
-  const response: BulkResponse = await services.callCluster('bulk', {
+  const { body: response } = await services.scopedClusterClient.asCurrentUser.bulk<BulkResponse>({
     refresh,
     body: bulkBody,
   });

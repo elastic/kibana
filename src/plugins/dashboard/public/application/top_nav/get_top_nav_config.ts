@@ -46,11 +46,18 @@ export function getTopNavConfig(
       const navItems: TopNavMenuData[] = [
         getOptionsConfig(actions[TopNavIds.OPTIONS], disableButton),
         getShareConfig(actions[TopNavIds.SHARE], disableButton),
-        getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], disableButton),
-        getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton),
       ];
       if (!options.isNewDashboard) {
+        navItems.push(
+          getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton)
+        );
+        navItems.push(getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], disableButton));
         navItems.push(getQuickSave(actions[TopNavIds.QUICK_SAVE], disableButton, options.isDirty));
+      } else {
+        navItems.push(getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], true));
+        navItems.push(
+          getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton)
+        );
       }
       return navItems;
     default:
@@ -151,7 +158,7 @@ function getViewConfig(action: NavAction, disableButton?: boolean) {
     disableButton,
     id: 'cancel',
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
-      defaultMessage: 'Cancel',
+      defaultMessage: 'Switch to view mode',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Switch to view-only mode',

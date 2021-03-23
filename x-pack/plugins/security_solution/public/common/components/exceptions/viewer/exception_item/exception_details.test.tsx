@@ -13,12 +13,13 @@ import moment from 'moment-timezone';
 import { ExceptionDetails } from './exception_details';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
+import { getMockTheme } from '../../../../lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiColorLightestShade: '#ece',
   },
-};
+});
 
 describe('ExceptionDetails', () => {
   beforeEach(() => {

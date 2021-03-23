@@ -20,12 +20,12 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./agents/enroll'));
     loadTestFile(require.resolve('./agents/unenroll'));
     loadTestFile(require.resolve('./agents/checkin'));
-    loadTestFile(require.resolve('./agents/events'));
     loadTestFile(require.resolve('./agents/acks'));
     loadTestFile(require.resolve('./agents/complete_flow'));
     loadTestFile(require.resolve('./agents/actions'));
     loadTestFile(require.resolve('./agents/upgrade'));
     loadTestFile(require.resolve('./agents/reassign'));
+    loadTestFile(require.resolve('./agents/status'));
 
     // Enrollment API keys
     loadTestFile(require.resolve('./enrollment_api_keys/crud'));
