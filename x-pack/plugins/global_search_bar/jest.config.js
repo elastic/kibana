@@ -10,6 +10,6 @@ module.exports = {
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/global_search_bar'],
 
-  // The test environment that will be used for testing
+  // TODO: migrate to "jest-environment-jsdom" https://github.com/elastic/kibana/issues/95200
   testEnvironment: 'jest-environment-jsdom-thirteen',
 };
