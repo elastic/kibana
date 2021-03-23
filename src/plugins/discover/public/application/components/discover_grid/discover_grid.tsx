@@ -20,6 +20,11 @@ import {
   EuiText,
   htmlIdGenerator,
   EuiSwitch,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiCopy,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -157,6 +162,7 @@ export const DiscoverGrid = ({
 }: DiscoverGridProps) => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
+  const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
   const displayedRows = useMemo(() => {
@@ -253,13 +259,83 @@ export const DiscoverGrid = ({
   const additionalControls = useMemo(
     () =>
       selectedDocs.length ? (
-        <EuiSwitch
-          label={`Filter selection (${selectedDocs.length})`}
-          checked={isFilterActive}
-          onChange={() => setIsFilterActive(!isFilterActive)}
-        />
+        <>
+          <EuiPopover
+            closePopover={() => setIsSelectionPopoverOpen(false)}
+            isOpen={isSelectionPopoverOpen}
+            button={
+              <EuiButtonEmpty
+                size="xs"
+                iconType="documents"
+                className="euiDataGrid__controlBtn"
+                onClick={() => setIsSelectionPopoverOpen(true)}
+              >
+                <FormattedMessage
+                  id="discover.selectedDocumentsNumber"
+                  defaultMessage="{nr} documents selected"
+                  values={{ nr: selectedDocs.length }}
+                />
+              </EuiButtonEmpty>
+            }
+          >
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="right"
+                  iconType="trash"
+                  onClick={() => {
+                    setIsSelectionPopoverOpen(false);
+                    setSelectedDocs([]);
+                  }}
+                >
+                  <FormattedMessage
+                    id="discover.removeSelection"
+                    defaultMessage="Remove selection"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiCopy
+                  textToCopy={
+                    !rows
+                      ? ''
+                      : JSON.stringify(rows.filter((row) => selectedDocs.includes(getDocId(row))))
+                  }
+                >
+                  {(copy) => (
+                    <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
+                      <FormattedMessage
+                        id="discover.copyToClipboardJSON"
+                        defaultMessage="Copy to clipboard(JSON)"
+                      />
+                    </EuiButtonEmpty>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopover>
+
+          <EuiSwitch
+            label={
+              <span className="dscDiscoverGrid__euiSwitchLabel">
+                <FormattedMessage id="discover.filterSelection" defaultMessage="Filter selection" />
+              </span>
+            }
+            checked={isFilterActive}
+            onChange={() => setIsFilterActive(!isFilterActive)}
+            compressed
+          />
+        </>
       ) : null,
-    [isFilterActive, selectedDocs, setIsFilterActive]
+    [
+      isFilterActive,
+      selectedDocs,
+      setIsFilterActive,
+      setIsSelectionPopoverOpen,
+      isSelectionPopoverOpen,
+      rows,
+    ]
   );
 
   if (!rowCount) {
