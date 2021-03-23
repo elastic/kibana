@@ -314,7 +314,7 @@ export const EndpointList = () => {
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive } other {UNHEALTHY}}"
+                defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
                 values={{ hostStatus }}
               />
             </EuiBadge>
