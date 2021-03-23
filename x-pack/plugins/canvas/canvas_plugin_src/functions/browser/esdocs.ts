@@ -9,6 +9,10 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
 } from 'src/plugins/expressions/common';
+
+// @ts-expect-error untyped local
+import { buildESRequest } from '../../../common/lib/request/build_es_request';
+
 import { searchService } from '../../../public/services';
 import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';

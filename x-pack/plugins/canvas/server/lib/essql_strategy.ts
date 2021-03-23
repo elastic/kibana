@@ -10,11 +10,11 @@ import { map, zipObject } from 'lodash';
 
 import { ISearchStrategy, PluginStart } from 'src/plugins/data/server';
 
-import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
+import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../types';
 
-import { buildBoolArray } from './build_bool_array';
-import { sanitizeName } from './sanitize_name';
-import { normalizeType } from './normalize_type';
+import { buildBoolArray } from '../../common/lib/request/build_bool_array';
+import { sanitizeName } from '../../common/lib/request/sanitize_name';
+import { normalizeType } from '../../common/lib/request/normalize_type';
 interface CursorResponse {
   cursor?: string;
   rows: string[][];
