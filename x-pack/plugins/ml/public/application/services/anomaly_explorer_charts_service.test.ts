@@ -6,7 +6,6 @@
  */
 
 import { AnomalyExplorerChartsService } from './anomaly_explorer_charts_service';
-import { mlStartMock, mlApiServices } from '../../embeddables/anomaly_charts/__mocks__/services';
 import mockAnomalyChartRecords from '../explorer/explorer_charts/__mocks__/mock_anomaly_chart_records.json';
 import mockJobConfig from '../explorer/explorer_charts/__mocks__/mock_job_config.json';
 import mockSeriesPromisesResponse from '../explorer/explorer_charts/__mocks__/mock_series_promises_response.json';
@@ -18,6 +17,8 @@ import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';
 import { getDefaultChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
+import { timefilterMock } from '../contexts/kibana/__mocks__/use_timefilter';
+import { mlApiServicesMock } from './__mocks__/ml_api_services';
 
 // Some notes on the tests and mocks:
 //
@@ -80,15 +81,15 @@ const expectAnomalyDataResult = (anomalyData: ExplorerChartsData) => {
 };
 describe('AnomalyExplorerChartsService', () => {
   const jobId = 'mock-job-id';
-  mlApiServices.jobs.jobForCloning.mockImplementation(() =>
+  mlApiServicesMock.jobs.jobForCloning.mockImplementation(() =>
     Promise.resolve({ job: mockJobConfigClone, datafeed: mockJobConfigClone.datafeed_config })
   );
   const combinedJobRecords = {
     [jobId]: mockJobConfigClone,
   };
   const anomalyExplorerService = new AnomalyExplorerChartsService(
-    mlStartMock.data.query.timefilter.timefilter,
-    (mlApiServices as unknown) as MlApiServices,
+    timefilterMock,
+    (mlApiServicesMock as unknown) as MlApiServices,
     (mlResultsServiceMock as unknown) as MlResultsService
   );
   const explorerService = {
@@ -112,7 +113,7 @@ describe('AnomalyExplorerChartsService', () => {
       mockAnomalyChartRecords,
       timeRange.earliestMs,
       timeRange.latestMs,
-      mlStartMock.data.query.timefilter.timefilter,
+      timefilterMock,
       0,
       12
     )) as ExplorerChartsData;
@@ -127,7 +128,7 @@ describe('AnomalyExplorerChartsService', () => {
       mockAnomalyChartRecords,
       timeRange.earliestMs,
       timeRange.latestMs,
-      mlStartMock.data.query.timefilter.timefilter,
+      timefilterMock,
       0,
       12
     );
@@ -146,7 +147,7 @@ describe('AnomalyExplorerChartsService', () => {
       [],
       timeRange.earliestMs,
       timeRange.latestMs,
-      mlStartMock.data.query.timefilter.timefilter,
+      timefilterMock,
       0,
       12
     )) as ExplorerChartsData;
@@ -167,7 +168,7 @@ describe('AnomalyExplorerChartsService', () => {
       mockAnomalyChartRecordsClone,
       timeRange.earliestMs,
       timeRange.latestMs,
-      mlStartMock.data.query.timefilter.timefilter,
+      timefilterMock,
       0,
       12
     )) as ExplorerChartsData;

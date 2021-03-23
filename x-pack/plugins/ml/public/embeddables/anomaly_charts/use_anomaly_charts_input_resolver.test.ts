@@ -15,11 +15,11 @@ import {
   anomalyDetectorServiceMock,
   anomalyExplorerChartsServiceMock,
   coreStartMock,
-  mlResultsServiceMock,
   mlStartMock,
 } from './__mocks__/services';
 import { EmbeddableAnomalyChartsContainerProps } from './embeddable_anomaly_charts_container';
 import moment from 'moment';
+import { mlResultsServiceMock } from '../../application/services/ml_results_service';
 
 jest.mock('../common/process_filters', () => ({
   processFilters: jest.fn(),

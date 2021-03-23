@@ -18,9 +18,9 @@ import { ExplorerChartsContainer } from './explorer_charts_container';
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
 import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
+import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
 
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
@@ -43,8 +43,12 @@ const getUtilityProps = () => {
   const mlUrlGenerator = {
     createUrl: jest.fn(),
   };
-  const timefilter = dataPluginMock.createStartContract().query.timefilter.timefilter;
-  return { mlUrlGenerator, timefilter, timeBuckets: timeBucketsMock, kibana: kibanaContextMock };
+  return {
+    mlUrlGenerator,
+    timefilter: timefilterMock,
+    timeBuckets: timeBucketsMock,
+    kibana: kibanaContextMock,
+  };
 };
 
 describe('ExplorerChartsContainer', () => {

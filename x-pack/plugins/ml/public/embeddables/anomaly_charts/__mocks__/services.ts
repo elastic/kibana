@@ -44,14 +44,3 @@ export const anomalyExplorerChartsServiceMock = {
   setTimeRange: jest.fn(),
   getTimeBounds: jest.fn(),
 };
-export const mlResultsServiceMock = {
-  getMetricData: jest.fn(),
-  getRecordsForCriteria: jest.fn(),
-  getScheduledEventsByBucket: jest.fn(),
-  getEventDistributionData: jest.fn(),
-};
-export const mlApiServices = {
-  jobs: {
-    jobForCloning: jest.fn(),
-  },
-};

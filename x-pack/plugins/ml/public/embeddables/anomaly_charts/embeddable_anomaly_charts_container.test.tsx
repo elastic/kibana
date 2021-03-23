@@ -24,9 +24,9 @@ import {
   anomalyDetectorServiceMock,
   anomalyExplorerChartsServiceMock,
   coreStartMock,
-  mlResultsServiceMock,
   mlStartMock,
 } from './__mocks__/services';
+import { mlResultsServiceMock } from '../../application/services/ml_results_service';
 
 jest.mock('./use_anomaly_charts_input_resolver', () => ({
   useAnomalyChartsInputResolver: jest.fn(() => {
