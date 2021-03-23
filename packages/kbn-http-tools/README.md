@@ -1,3 +1,3 @@
-# @kbn/utils
+# @kbn/http-tools
 
-Shared server-side utilities shared across packages and plugins.
+Http utilities for core and the basepath server
