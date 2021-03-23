@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
-import type { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
@@ -140,7 +139,7 @@ export async function getAgentsByKuery(
 
   return {
     agents,
-    total: res.body.hits.total.value,
+    total: (res.body.hits.total as estypes.TotalHits).value,
     page,
     perPage,
   };
