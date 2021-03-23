@@ -14,6 +14,8 @@ import { getEntryListMock } from '../../../../../../lists/common/schemas/types/e
 import { getEqlRuleParams } from '../../schemas/rule_schemas.mock';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 jest.mock('../../routes/index/get_index_version');
 
@@ -56,24 +58,36 @@ describe('eql_executor', () => {
       error: jest.fn(),
       partialFailure: jest.fn(),
     };
+    alertServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          total: { value: 10 },
+        },
+      })
+    );
   });
 
   describe('eqlExecutor', () => {
     it('should set a warning when exception list for eql rule contains value list exceptions', async () => {
       const exceptionItems = [getExceptionListItemSchemaMock({ entries: [getEntryListMock()] })];
-      await eqlExecutor({
-        rule: eqlSO,
-        exceptionItems,
-        ruleStatusService: (ruleStatusService as unknown) as RuleStatusService,
-        services: alertServices,
-        version,
-        logger,
-        refresh: false,
-        searchAfterSize,
-      });
+      try {
+        await eqlExecutor({
+          rule: eqlSO,
+          exceptionItems,
+          ruleStatusService: (ruleStatusService as unknown) as RuleStatusService,
+          services: alertServices,
+          version,
+          logger,
+          refresh: false,
+          searchAfterSize,
+        });
+      } catch (err) {
+        // eqlExecutor will throw until we have an EQL response mock that conforms to the
+        // expected EQL response format, so just catch the error and check the status service
+      }
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();
       expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
-        'Exceptions that use "is in list" or "is not in list" operators are not applied to Eql rules'
+        'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
       );
     });
   });

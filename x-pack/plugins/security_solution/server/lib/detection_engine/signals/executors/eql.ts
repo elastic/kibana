@@ -6,6 +6,7 @@
  */
 
 import { ApiResponse } from '@elastic/elasticsearch';
+import { performance } from 'perf_hooks';
 import { Logger } from 'src/core/server';
 import { SavedObject } from 'src/core/types';
 import {

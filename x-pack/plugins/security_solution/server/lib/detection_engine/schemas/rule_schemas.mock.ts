@@ -6,7 +6,12 @@
  */
 
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
-import { BaseRuleParams, EqlRuleParams, ThresholdRuleParams } from './rule_schemas';
+import {
+  BaseRuleParams,
+  EqlRuleParams,
+  MachineLearningRuleParams,
+  ThresholdRuleParams,
+} from './rule_schemas';
 
 const getBaseRuleParams = (): BaseRuleParams => {
   return {
@@ -63,5 +68,14 @@ export const getEqlRuleParams = (): EqlRuleParams => {
     query: 'any where true',
     filters: undefined,
     eventCategoryOverride: undefined,
+  };
+};
+
+export const getMlRuleParams = (): MachineLearningRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'machine_learning',
+    anomalyThreshold: 42,
+    machineLearningJobId: 'my-job',
   };
 };

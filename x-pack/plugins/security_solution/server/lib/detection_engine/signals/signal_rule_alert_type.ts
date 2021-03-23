@@ -217,7 +217,6 @@ export const signalRulesAlertType = ({
           client: exceptionsClient,
           lists: params.exceptionsList ?? [],
         });
-
         if (isMlRule(type)) {
           const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
           result = await mlExecutor({
@@ -290,7 +289,6 @@ export const signalRulesAlertType = ({
         } else {
           throw new Error(`unknown rule type ${type}`);
         }
-
         if (result.success) {
           if (actions.length) {
             const notificationRuleParams: NotificationRuleTypeParams = {
