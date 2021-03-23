@@ -6,12 +6,12 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "sourceRoot": "../../../../packages/elastic-datemath/src"
+    "sourceRoot": "../../../../packages/elastic-datemath/src",
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src/index.ts"
-  ],
-  "exclude": [
-    "target"
   ]
 }

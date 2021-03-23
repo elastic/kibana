@@ -39,11 +39,11 @@ export const unitsMap: UnitsMap = {
   // q: { weight: 8, type: 'calendar' }, // TODO: moment duration does not support quarter
   y: { weight: 9, type: 'calendar', base: NaN },
 };
-export const units = Object.keys(unitsMap).sort(
+export const units: Unit[] = Object.keys(unitsMap).sort(
   (a, b) => unitsMap[b as Unit].weight - unitsMap[a as Unit].weight
-);
-export const unitsDesc = [...units];
-export const unitsAsc = [...units].reverse();
+) as Unit[];
+export const unitsDesc: Unit[] = [...units] as Unit[];
+export const unitsAsc: Unit[] = [...units].reverse() as Unit[];
 
 const isDate = (d: string) => Object.prototype.toString.call(d) === '[object Date]';
 const isValidDate = (d: string) => isDate(d) && !isNaN(d.valueOf() as any);
@@ -105,7 +105,7 @@ function parseDateMath(mathString: string, time: moment.Moment, roundUp: boolean
     const c = mathString.charAt(i++);
     let type;
     let num;
-    let unit;
+    let unit: Unit;
 
     if (c === '/') {
       type = 0;
@@ -137,7 +137,7 @@ function parseDateMath(mathString: string, time: moment.Moment, roundUp: boolean
       }
     }
 
-    unit = mathString.charAt(i++);
+    unit = mathString.charAt(i++) as Unit;
 
     // append additional characters in the unit
     for (let j = i; j < len; j++) {

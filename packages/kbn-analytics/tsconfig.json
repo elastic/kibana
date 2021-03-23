@@ -10,14 +10,10 @@
     "sourceMap": true,
     "sourceRoot": "../../../../../packages/kbn-analytics/src",
     "types": [
-      "jest",
       "node"
     ]
   },
   "include": [
     "src/**/*"
-  ],
-  "exclude": [
-    "target"
   ]
 }
