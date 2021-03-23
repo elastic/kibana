@@ -15,7 +15,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSwitch,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
@@ -64,7 +64,8 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
       <EuiForm>
         {mappedFilters.map((filter, i) => (
           <EuiFormRow key={i}>
-            <EuiSwitch
+            <EuiCheckbox
+              id={`filterCheckbox-${i}`}
               label={this.getLabel(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
