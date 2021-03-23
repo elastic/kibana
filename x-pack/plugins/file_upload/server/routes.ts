@@ -78,9 +78,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           ];
         }
 
-        const checkPrivileges = authorizationService!.checkPrivilegesDynamicallyWithRequest(
-          request
-        );
+        const checkPrivileges = authorizationService.checkPrivilegesDynamicallyWithRequest(request);
         const checkPrivilegesResp = await checkPrivileges(checkPrivilegesPayload);
 
         return response.ok({ body: { hasImportPermission: checkPrivilegesResp.hasAllRequested } });
