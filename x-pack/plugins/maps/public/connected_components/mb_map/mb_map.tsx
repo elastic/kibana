@@ -17,7 +17,6 @@ import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-// @ts-expect-error
 import { DrawControl } from './draw_control';
 import { ScaleControl } from './scale_control';
 // @ts-expect-error
@@ -67,7 +66,7 @@ export interface Props {
   clearMouseCoordinates: () => void;
   clearGoto: () => void;
   setMapInitError: (errorMessage: string) => void;
-  addFilters: ((filters: Filter[]) => Promise<void>) | null;
+  addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
@@ -418,7 +417,9 @@ export class MBMap extends Component<Props, State> {
     let tooltipControl;
     let scaleControl;
     if (this.state.mbMap) {
-      drawControl = <DrawControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />;
+      drawControl = this.props.addFilters ? (
+        <DrawControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+      ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
           mbMap={this.state.mbMap}

@@ -5,17 +5,21 @@
  * 2.0.
  */
 
+import { engines } from '../../../app_search/__mocks__/engines.mock';
+
+import { AttributeName } from '../../types';
+
 export const asRoleMapping = {
-  id: null,
-  attributeName: 'role',
-  attributeValue: ['superuser'],
+  id: 'sdgfasdgadf123',
+  attributeName: 'role' as AttributeName,
+  attributeValue: 'superuser',
   authProvider: ['*'],
   roleType: 'owner',
   rules: {
     role: 'superuser',
   },
   accessAllEngines: true,
-  engines: [],
+  engines,
   toolTip: {
     content: 'Elasticsearch superusers will always be able to log in as the owner',
   },
@@ -23,7 +27,7 @@ export const asRoleMapping = {
 
 export const wsRoleMapping = {
   id: '602d4ba85foobarbaz123',
-  attributeName: 'username',
+  attributeName: 'username' as AttributeName,
   attributeValue: 'user',
   authProvider: ['*', 'other_auth'],
   roleType: 'admin',
