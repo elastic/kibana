@@ -1,6 +1,6 @@
 [[elasticsearch-service]]
 == Elasticsearch service
-`Elasticsearch service` provides `elasticsearch.client` program API to communicate with Elasticsearch server REST API.
+`Elasticsearch service` provides `elasticsearch.client` program API to communicate with Elasticsearch server HTTP API.
 `elasticsearch.client` interacts with Elasticsearch service on behalf of:
 
 - `kibana_system` user via `elasticsearch.client.asInternalUser.*` methods.
