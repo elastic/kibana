@@ -96,6 +96,8 @@ Implement a CI system for Kibana teams that is highly scalable, is stable, surfa
 If the proposal involves a new or changed API, include a basic code example.
 Omit this section if it's not applicable. -->
 
+This table provides an overview of the conclusions made throughout the rest of this document. A lot of this is subjective, but we've tried to take an honest look at each system and feature, based on a large amount of research on and/or experience with each system.
+
 |                                      | Jenkins | Buildkite | GitHub Actions | CircleCI |
 | ------------------------------------ | ------- | --------- | -------------- | -------- |
 | Scalable                             | No      | Yes       | No             | Yes      |
@@ -115,6 +117,8 @@ Omit this section if it's not applicable. -->
 | First-class support for test results | Buggy   | No        | No             | TODO     |
 | GitHub Integration                   | Yes     | Limited   | Yes            | TODO     |
 | Local testing / reproduction?        | TODO    | TODO      | TODO           | TODO     |
+
+TODO link the conclusions to each section?
 
 # Motivation
 
@@ -657,17 +661,21 @@ cache image could run multiple times per day
 
 ### Buildkite org-level settings management
 
-TODO
+There are a few settings outside of pipelines that we will need to manage.
 
-Mostly/all terraform
+- Top-level pipelines and their settings
+- Pipeline schedules / scheduled jobs
+- Public visibility of pipelines
+- Teams and Permissions
+- Single Sign On settings
 
-Any settings not stored in pipeline yaml
+Most of the content for our pipelines will be stored in repositories as YAML. However, a job still must exist in Buildkite that points to that repo and that YAML. For managing those top-level configurations, an official [Terraform provider](https://registry.terraform.io/providers/buildkite/buildkite/latest/docs/resources/pipeline) exists, which we will likely take advantage of.
 
-Top-level pipelines and their settings
+Pipeline schedules can also be managed using the Terraform provider.
 
-Users/roles
+Teams can also be managed using Terraform, but it's unlikely we will need to use Teams.
 
-SSO
+For everything else, we will likely start off using UI and build automation (or contribute to the Terraform provider) where we see fit. Most of the other settings are easy to configure, and unlikely to change.
 
 ### IT Security Processes
 
@@ -816,6 +824,12 @@ TODO
 ### CircleCI
 
 ### GitHub Actions
+
+GitHub Actions is an interesting option, but it didn't pass our initial consideration round for one main reason: scalability.
+
+To ensure we're able to run the number of parallel tasks that we need to run, we'll have to use self-hosted runners. Self-hosted runners aren't subject to concurrency limits. However, managing auto-scaling runners seems to be pretty complex at the moment, and GitHub doesn't seem to have any official guidance on how to do it.
+
+Also, even with self-hosted runners, there is a 1,000 API request per hour hard limit, though it does not specify which APIs. Assuming even that 1 parallel step in a job is one API request, given the large number of small tasks that we'd like to split our CI into, we will likely hit this limit pretty quickly.
 
 # Adoption strategy
 
