@@ -679,18 +679,20 @@ There will likely be numerous IT Security processes we will need to follow, sinc
 
 # Drawbacks
 
-Why should we _not_ do this? Please consider:
+The biggest drawback to doing this is that we will be duplicating a large amount of work and providing/maintaining a service that is already provided to us by another team at Elastic. Jenkins is already provided to us, and there is automation for creating Jenkins worker images and managing worker instances in both AWS and GCP, and IT Security policies are already being handled for all of this. It is hard to predict what the extra workload will be for the Kibana Operations team if we move our CI processes to Buildkite, but we know we will have to maintain all of the things listed under [What we will build and manage](#what-we-will-build-and-manage).
 
-- implementation cost, both in term of code size and complexity
-- the impact on teaching people Kibana development
-- integration of this feature with other existing and planned features
-- cost of migrating existing Kibana plugins (is it a breaking change?)
+Some other drawbacks:
 
-There are tradeoffs to choosing any path. Attempt to identify them here.
+- CI Pipelines and other jobs built in Jenkins will need to be re-built, which includes building support for things like CI Stats, Slack notifications, GitHub PR comments, etc.
+- Developers will need to learn a new system.
+- The service is an additional cost to the company.
+- There is a lot of Jenkins knowledge throughout the company, but likely little Buildkite knowledge.
 
 # Alternatives
 
 ## Jenkins
+
+We are not happy with the experience provided by our instance of Jenkins and our current pipelines. If we stick with Jenkins, we will need to invest a likely significant amount of time in improving the experience and making our pipelines scale given the limitations we face.
 
 ### Required
 
@@ -786,7 +788,9 @@ Given that Jenkins is open-source, we pay only for infrastructure and people to 
 
 #### Support or Documentation
 
-TODO
+Documentation for Jenkins is notoriously fragmented. All major functionality is provided in plugins, and documentation is spread out across the Jenkins Handbook, the CloudBees website, JIRA issues, wikis, GitHub repos, JavaDoc pages. Many plugins have poor documentation, and source code often has to be read to understand how to configure something.
+
+CloudBees offers paid support, but we're not familiar with it at this time.
 
 #### Scheduled Builds
 
