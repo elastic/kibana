@@ -17,6 +17,7 @@ import type {
   Logger,
 } from 'src/core/server';
 
+import type { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
@@ -29,6 +30,7 @@ import type { CloudSetup } from '../../../cloud/server';
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
+  private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
   private security: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
@@ -43,6 +45,7 @@ class AppContextService {
   private externalCallbacks: ExternalCallbacksStorage = new Map();
 
   public async start(appContext: FleetAppContext) {
+    this.data = appContext.data;
     this.esClient = appContext.elasticsearch.client.asInternalUser;
     this.encryptedSavedObjects = appContext.encryptedSavedObjectsStart?.getClient();
     this.encryptedSavedObjectsSetup = appContext.encryptedSavedObjectsSetup;
@@ -65,6 +68,13 @@ class AppContextService {
 
   public stop() {
     this.externalCallbacks.clear();
+  }
+
+  public getData() {
+    if (!this.data) {
+      throw new Error('Data start service not set.');
+    }
+    return this.data;
   }
 
   public getEncryptedSavedObjects() {
