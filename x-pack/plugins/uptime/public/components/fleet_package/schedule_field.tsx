@@ -22,6 +22,13 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiFieldNumber
+          aria-label={i18n.translate(
+            'xpack.uptime.createPackagePolicy.stepConfigure.scheduleField.number',
+            {
+              defaultMessage: 'Number',
+            }
+          )}
+          id="syntheticsFleetScheduleField--number"
           data-test-subj="scheduleFieldInput"
           min={0}
           value={number}
@@ -33,6 +40,13 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSelect
+          aria-label={i18n.translate(
+            'xpack.uptime.createPackagePolicy.stepConfigure.scheduleField.unit',
+            {
+              defaultMessage: 'Unit',
+            }
+          )}
+          id="syntheticsFleetScheduleField--unit"
           data-test-subj="scheduleFieldSelect"
           options={options}
           value={unit}
