@@ -31,4 +31,32 @@ export { Field, SelectField } from '../../../../src/plugins/es_ui_shared/static/
 export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
 export { ERROR_CODE } from '../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
 
-export * from '../../lists/public/shared_exports';
+export {
+  exportList,
+  useIsMounted,
+  useCursor,
+  useApi,
+  useAsync,
+  useExceptionListItems,
+  useExceptionLists,
+  usePersistExceptionItem,
+  usePersistExceptionList,
+  useFindLists,
+  useDeleteList,
+  useImportList,
+  useCreateListIndex,
+  useReadListIndex,
+  useReadListPrivileges,
+  addExceptionListItem,
+  updateExceptionListItem,
+  fetchExceptionListById,
+  addExceptionList,
+  ExceptionListFilter,
+  ExceptionListIdentifiers,
+  ExceptionList,
+  Pagination,
+  UseExceptionListItemsSuccess,
+  addEndpointExceptionList,
+  withOptionalSignal,
+  BuilderEntryItem,
+} from '../../lists/public';
