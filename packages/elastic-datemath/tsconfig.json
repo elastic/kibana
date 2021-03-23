@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "sourceRoot": "../"
+    "sourceRoot": "../../../../packages/elastic-datemath"
   },
   "include": [
     "index.ts"
