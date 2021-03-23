@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSpacer, EuiSteps, EuiStep, EuiStepStatus } from '@elastic/eui';
+import { EuiButton, EuiSteps } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -64,18 +64,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
 
-  const [{ agentSelection, query }] = useFormData({ form, watch: ['agentSelection', 'query'] });
+  const [{ agents, query }] = useFormData({ form, watch: ['agents', 'query'] });
 
-  const agentSelected = useMemo(
-    () =>
-      !!(
-        agentSelection?.agents?.length ||
-        agentSelection?.allAgentsSelected ||
-        agentSelection?.platformsSelected?.length ||
-        agentSelection?.policiesSelected?.length
-      ),
-    [agentSelection]
-  );
+  const agentSelected = useMemo(() => !!agents?.agents?.length, [agents]);
 
   const queryValueProvided = useMemo(() => !!query?.query?.length, [query]);
 

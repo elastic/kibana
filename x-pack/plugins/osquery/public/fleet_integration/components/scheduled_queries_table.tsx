@@ -16,14 +16,7 @@
 /* eslint-disable react-perf/jsx-no-new-array-as-prop */
 
 import React, { useState } from 'react';
-import {
-  EuiBasicTable,
-  // EuiButtonIcon,
-  EuiCodeBlock,
-  // EuiHealth,
-  // EuiDescriptionList,
-  // RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiCodeBlock } from '@elastic/eui';
 
 // @ts-expect-error update types
 export const ScheduledQueryQueriesTable = ({ data }) => {
@@ -31,7 +24,6 @@ export const ScheduledQueryQueriesTable = ({ data }) => {
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState('firstName');
   const [sortDirection, setSortDirection] = useState('asc');
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
 
   const onTableChange = ({ page = {}, sort = {} }) => {
     // @ts-expect-error update types
@@ -44,31 +36,6 @@ export const ScheduledQueryQueriesTable = ({ data }) => {
     setSortField(field);
     setSortDirection(direction);
   };
-
-  // // @ts-expect-error update types
-  // const toggleDetails = (item) => {
-  //   const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-  //   // @ts-expect-error update types
-  //   if (itemIdToExpandedRowMapValues[item.vars.id.value]) {
-  //     // @ts-expect-error update types
-  //     delete itemIdToExpandedRowMapValues[item.vars.id.value];
-  //   } else {
-  //     const { online } = item;
-  //     const color = online ? 'success' : 'danger';
-  //     const label = online ? 'Online' : 'Offline';
-  //     const listItems = [
-  //       {
-  //         title: 'Online',
-  //         description: <EuiHealth color={color}>{label}</EuiHealth>,
-  //       },
-  //     ];
-  //     // @ts-expect-error update types
-  //     itemIdToExpandedRowMapValues[item.vars.id.value] = (
-  //       <EuiDescriptionList listItems={listItems} />
-  //     );
-  //   }
-  //   setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
-  // };
 
   const columns = [
     {
@@ -88,37 +55,6 @@ export const ScheduledQueryQueriesTable = ({ data }) => {
         </EuiCodeBlock>
       ),
     },
-    // {
-    //   field: 'enabled',
-    //   name: 'Active',
-    // },
-    // {
-    //   name: 'Actions',
-    //   actions: [
-    //     {
-    //       name: 'Clone',
-    //       description: 'Clone this person',
-    //       type: 'icon',
-    //       icon: 'copy',
-    //       onClick: () => '',
-    //     },
-    //   ],
-    // },
-    // {
-    //   align: RIGHT_ALIGNMENT,
-    //   width: '40px',
-    //   isExpander: true,
-    //   // @ts-expect-error update types
-    //   render: (item) => (
-    //     <EuiButtonIcon
-    //       onClick={() => toggleDetails(item)}
-    //       // @ts-expect-error update types
-    //       aria-label={itemIdToExpandedRowMap[item.vars.id.value] ? 'Collapse' : 'Expand'}
-    //       // @ts-expect-error update types
-    //       iconType={itemIdToExpandedRowMap[item.vars.id.value] ? 'arrowUp' : 'arrowDown'}
-    //     />
-    //   ),
-    // },
   ];
 
   const pagination = {
@@ -139,7 +75,6 @@ export const ScheduledQueryQueriesTable = ({ data }) => {
     <EuiBasicTable
       items={data.inputs[0].streams}
       itemId="vars.id.value"
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable={true}
       columns={columns}
       pagination={pagination}
