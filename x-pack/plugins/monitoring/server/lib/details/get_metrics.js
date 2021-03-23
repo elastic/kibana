@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 import { isPlainObject } from 'lodash';
-import Bluebird from 'bluebird';
 import { checkParam } from '../error_missing_required';
 import { getSeries } from './get_series';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
@@ -38,32 +37,36 @@ export async function getMetrics(
     min = max - numOfBuckets * bucketSize * 1000;
   }
 
-  return Bluebird.map(metricSet, (metric) => {
-    // metric names match the literal metric name, but they can be supplied in groups or individually
-    let metricNames;
+  const rows = await Promise.all(
+    metricSet.map(async (metric) => {
+      // metric names match the literal metric name, but they can be supplied in groups or individually
+      let metricNames;
 
-    if (isPlainObject(metric)) {
-      metricNames = metric.keys;
-    } else {
-      metricNames = [metric];
-    }
+      if (isPlainObject(metric)) {
+        metricNames = metric.keys;
+      } else {
+        metricNames = [metric];
+      }
 
-    return Bluebird.map(metricNames, (metricName) => {
-      return getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, {
-        min,
-        max,
-        bucketSize,
-        timezone,
-      });
-    });
-  }).then((rows) => {
-    const data = {};
-    metricSet.forEach((key, index) => {
-      // keyName must match the value stored in the html template
-      const keyName = isPlainObject(key) ? key.name : key;
-      data[keyName] = rows[index];
-    });
+      return await Promise.all(
+        metricNames.map(async (metricName) => {
+          return await getSeries(req, indexPattern, metricName, metricOptions, filters, groupBy, {
+            min,
+            max,
+            bucketSize,
+            timezone,
+          });
+        })
+      );
+    })
+  );
 
-    return data;
+  const data = {};
+  metricSet.forEach((key, index) => {
+    // keyName must match the value stored in the html template
+    const keyName = isPlainObject(key) ? key.name : key;
+    data[keyName] = rows[index];
   });
+
+  return data;
 }

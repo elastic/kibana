@@ -8,7 +8,6 @@
 
 import { IRouter, Logger, CoreSetup } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import Bluebird from 'bluebird';
 import _ from 'lodash';
 // @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';
@@ -95,7 +94,7 @@ export function runRoute(
         esShardTimeout: configManager.getEsShardTimeout(),
       });
       const chainRunner = chainRunnerFn(tlConfig);
-      const sheet = await Bluebird.all(chainRunner.processRequest(request.body));
+      const sheet = await Promise.all(chainRunner.processRequest(request.body));
 
       return response.ok({
         body: {

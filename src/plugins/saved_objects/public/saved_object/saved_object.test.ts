@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Bluebird from 'bluebird';
 import { createSavedObjectClass } from './saved_object';
 import {
   SavedObject,
@@ -57,25 +56,26 @@ describe('Saved Object', () => {
    */
   function stubESResponse(mockDocResponse: SimpleSavedObject<SavedObjectAttributes>) {
     // Stub out search for duplicate title:
-    savedObjectsClientStub.get = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
-    savedObjectsClientStub.update = jest.fn().mockReturnValue(Bluebird.resolve(mockDocResponse));
+    savedObjectsClientStub.get = jest.fn().mockResolvedValue(mockDocResponse);
+    savedObjectsClientStub.update = jest.fn().mockResolvedValue(mockDocResponse);
 
-    savedObjectsClientStub.find = jest
-      .fn()
-      .mockReturnValue(Bluebird.resolve({ savedObjects: [], total: 0 }));
+    savedObjectsClientStub.find = jest.fn().mockResolvedValue({ savedObjects: [], total: 0 });
 
     savedObjectsClientStub.bulkGet = jest
       .fn()
-      .mockReturnValue(Bluebird.resolve({ savedObjects: [mockDocResponse] }));
+      .mockResolvedValue({ savedObjects: [mockDocResponse] });
   }
 
   function stubSavedObjectsClientCreate(
     resp: SimpleSavedObject<SavedObjectAttributes> | string,
     resolve = true
   ) {
-    savedObjectsClientStub.create = jest
-      .fn()
-      .mockReturnValue(resolve ? Bluebird.resolve(resp) : Bluebird.reject(resp));
+    savedObjectsClientStub.create = jest.fn().mockImplementation(async () => {
+      if (resolve) {
+        return resp;
+      }
+      throw resp;
+    });
   }
 
   /**
@@ -257,21 +257,20 @@ describe('Saved Object', () => {
         );
       });
 
-      it('as false does not create a copy', () => {
+      it('as false does not create a copy', async () => {
         const myId = 'myId';
         stubESResponse(getMockedDocResponse(myId));
+        const savedObject = await createInitializedSavedObject({ type: 'dashboard', id: myId });
 
-        return createInitializedSavedObject({ type: 'dashboard', id: myId }).then((savedObject) => {
-          savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
-            expect(savedObject.id).toBe(myId);
-            return Bluebird.resolve({ id: myId });
-          });
-          savedObject.copyOnSave = false;
-
-          return savedObject.save(saveOptionsMock).then((id) => {
-            expect(id).toBe(myId);
-          });
+        savedObjectsClientStub.create = jest.fn().mockImplementation(async () => {
+          expect(savedObject.id).toBe(myId);
+          return { id: myId };
         });
+
+        savedObject.copyOnSave = false;
+        const id = await savedObject.save(saveOptionsMock);
+        expect(id).toBe(myId);
+        expect(savedObjectsClientStub.create).toBeCalled();
       });
     });
 
@@ -291,40 +290,40 @@ describe('Saved Object', () => {
     });
 
     describe('updates isSaving variable', () => {
-      it('on success', () => {
+      it('on success', async () => {
         const id = 'id';
         stubESResponse(getMockedDocResponse(id));
 
-        return createInitializedSavedObject({ type: 'dashboard', id }).then((savedObject) => {
-          savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
-            expect(savedObject.isSaving).toBe(true);
-            return Bluebird.resolve({
-              type: 'dashboard',
-              id,
-              _version: 'foo',
-            });
-          });
+        const savedObject = await createInitializedSavedObject({ type: 'dashboard', id });
 
-          expect(savedObject.isSaving).toBe(false);
-          return savedObject.save(saveOptionsMock).then(() => {
-            expect(savedObject.isSaving).toBe(false);
-          });
+        savedObjectsClientStub.create = jest.fn().mockImplementation(async () => {
+          expect(savedObject.isSaving).toBe(true);
+          return {
+            type: 'dashboard',
+            id,
+            _version: 'foo',
+          };
         });
+
+        expect(savedObject.isSaving).toBe(false);
+        await savedObject.save(saveOptionsMock);
+        expect(savedObjectsClientStub.create).toBeCalled();
+        expect(savedObject.isSaving).toBe(false);
       });
 
-      it('on failure', () => {
+      it('on failure', async () => {
         stubESResponse(getMockedDocResponse('id'));
-        return createInitializedSavedObject({ type: 'dashboard' }).then((savedObject) => {
-          savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
-            expect(savedObject.isSaving).toBe(true);
-            return Bluebird.reject('');
-          });
+        const savedObject = await createInitializedSavedObject({ type: 'dashboard' });
 
-          expect(savedObject.isSaving).toBe(false);
-          return savedObject.save(saveOptionsMock).catch(() => {
-            expect(savedObject.isSaving).toBe(false);
-          });
+        savedObjectsClientStub.create = jest.fn().mockImplementation(() => {
+          expect(savedObject.isSaving).toBe(true);
+          throw new Error('some error');
         });
+
+        expect(savedObject.isSaving).toBe(false);
+        await expect(() => savedObject.save(saveOptionsMock)).rejects.toThrowError('some error');
+        expect(savedObjectsClientStub.create).toBeCalled();
+        expect(savedObject.isSaving).toBe(false);
       });
     });
 
@@ -745,7 +744,7 @@ describe('Saved Object', () => {
         );
 
         const savedObject = new SavedObjectClass(config);
-        savedObject.hydrateIndexPattern = jest.fn().mockImplementation(() => {
+        savedObject.hydrateIndexPattern = jest.fn().mockImplementation(async () => {
           const indexPattern = getStubIndexPattern(
             indexPatternId,
             getConfig,
@@ -755,7 +754,7 @@ describe('Saved Object', () => {
           );
           indexPattern.title = indexPattern.id!;
           savedObject.searchSource!.setField('index', indexPattern);
-          return Bluebird.resolve(indexPattern);
+          return indexPattern;
         });
         expect(!!savedObject.searchSource!.getField('index')).toBe(false);
 

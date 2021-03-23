@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Bluebird from 'bluebird';
 import { chain, find, get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query.js';
@@ -31,137 +30,139 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
   const start = req.payload.timeRange.min;
   const end = req.payload.timeRange.max;
 
-  return Bluebird.map(clusters, (cluster) => {
-    const clusterUuid = cluster.cluster_uuid;
-    const metric = KibanaClusterMetric.getMetricFields();
-    const params = {
-      index: kbnIndexPattern,
-      size: 0,
-      ignoreUnavailable: true,
-      body: {
-        query: createQuery({
-          type: 'kibana_stats',
-          start,
-          end,
-          clusterUuid,
-          metric,
-        }),
-        aggs: {
-          kibana_uuids: {
-            terms: {
-              field: 'kibana_stats.kibana.uuid',
-              size: config.get('monitoring.ui.max_bucket_size'),
-            },
-            aggs: {
-              latest_report: {
-                terms: {
-                  field: 'kibana_stats.timestamp',
-                  size: 1,
-                  order: {
-                    _key: 'desc',
-                  },
-                },
-                aggs: {
-                  response_time_max: {
-                    max: {
-                      field: 'kibana_stats.response_times.max',
+  return Promise.all(
+    clusters.map(async (cluster) => {
+      const clusterUuid = cluster.cluster_uuid;
+      const metric = KibanaClusterMetric.getMetricFields();
+      const params = {
+        index: kbnIndexPattern,
+        size: 0,
+        ignoreUnavailable: true,
+        body: {
+          query: createQuery({
+            type: 'kibana_stats',
+            start,
+            end,
+            clusterUuid,
+            metric,
+          }),
+          aggs: {
+            kibana_uuids: {
+              terms: {
+                field: 'kibana_stats.kibana.uuid',
+                size: config.get('monitoring.ui.max_bucket_size'),
+              },
+              aggs: {
+                latest_report: {
+                  terms: {
+                    field: 'kibana_stats.timestamp',
+                    size: 1,
+                    order: {
+                      _key: 'desc',
                     },
                   },
-                  memory_rss: {
-                    max: {
-                      field: 'kibana_stats.process.memory.resident_set_size_in_bytes',
+                  aggs: {
+                    response_time_max: {
+                      max: {
+                        field: 'kibana_stats.response_times.max',
+                      },
+                    },
+                    memory_rss: {
+                      max: {
+                        field: 'kibana_stats.process.memory.resident_set_size_in_bytes',
+                      },
+                    },
+                    memory_heap_size_limit: {
+                      max: {
+                        field: 'kibana_stats.process.memory.heap.size_limit',
+                      },
+                    },
+                    concurrent_connections: {
+                      max: {
+                        field: 'kibana_stats.concurrent_connections',
+                      },
+                    },
+                    requests_total: {
+                      max: {
+                        field: 'kibana_stats.requests.total',
+                      },
                     },
                   },
-                  memory_heap_size_limit: {
-                    max: {
-                      field: 'kibana_stats.process.memory.heap.size_limit',
-                    },
-                  },
-                  concurrent_connections: {
-                    max: {
-                      field: 'kibana_stats.concurrent_connections',
-                    },
-                  },
-                  requests_total: {
-                    max: {
-                      field: 'kibana_stats.requests.total',
-                    },
+                },
+                response_time_max_per: {
+                  max_bucket: {
+                    buckets_path: 'latest_report>response_time_max',
                   },
                 },
-              },
-              response_time_max_per: {
-                max_bucket: {
-                  buckets_path: 'latest_report>response_time_max',
+                memory_rss_per: {
+                  max_bucket: {
+                    buckets_path: 'latest_report>memory_rss',
+                  },
                 },
-              },
-              memory_rss_per: {
-                max_bucket: {
-                  buckets_path: 'latest_report>memory_rss',
+                memory_heap_size_limit_per: {
+                  max_bucket: {
+                    buckets_path: 'latest_report>memory_heap_size_limit',
+                  },
                 },
-              },
-              memory_heap_size_limit_per: {
-                max_bucket: {
-                  buckets_path: 'latest_report>memory_heap_size_limit',
+                concurrent_connections_per: {
+                  max_bucket: {
+                    buckets_path: 'latest_report>concurrent_connections',
+                  },
                 },
-              },
-              concurrent_connections_per: {
-                max_bucket: {
-                  buckets_path: 'latest_report>concurrent_connections',
-                },
-              },
-              requests_total_per: {
-                max_bucket: {
-                  buckets_path: 'latest_report>requests_total',
+                requests_total_per: {
+                  max_bucket: {
+                    buckets_path: 'latest_report>requests_total',
+                  },
                 },
               },
             },
-          },
-          response_time_max: {
-            max_bucket: {
-              buckets_path: 'kibana_uuids>response_time_max_per',
-            },
-          },
-          memory_rss: {
-            sum_bucket: {
-              buckets_path: 'kibana_uuids>memory_rss_per',
-            },
-          },
-          memory_heap_size_limit: {
-            sum_bucket: {
-              buckets_path: 'kibana_uuids>memory_heap_size_limit_per',
-            },
-          },
-          concurrent_connections: {
-            sum_bucket: {
-              buckets_path: 'kibana_uuids>concurrent_connections_per',
-            },
-          },
-          requests_total: {
-            sum_bucket: {
-              buckets_path: 'kibana_uuids>requests_total_per',
-            },
-          },
-          status: {
-            terms: {
-              field: 'kibana_stats.kibana.status',
-              order: {
-                max_timestamp: 'desc',
+            response_time_max: {
+              max_bucket: {
+                buckets_path: 'kibana_uuids>response_time_max_per',
               },
             },
-            aggs: {
-              max_timestamp: {
-                max: {
-                  field: 'timestamp',
+            memory_rss: {
+              sum_bucket: {
+                buckets_path: 'kibana_uuids>memory_rss_per',
+              },
+            },
+            memory_heap_size_limit: {
+              sum_bucket: {
+                buckets_path: 'kibana_uuids>memory_heap_size_limit_per',
+              },
+            },
+            concurrent_connections: {
+              sum_bucket: {
+                buckets_path: 'kibana_uuids>concurrent_connections_per',
+              },
+            },
+            requests_total: {
+              sum_bucket: {
+                buckets_path: 'kibana_uuids>requests_total_per',
+              },
+            },
+            status: {
+              terms: {
+                field: 'kibana_stats.kibana.status',
+                order: {
+                  max_timestamp: 'desc',
+                },
+              },
+              aggs: {
+                max_timestamp: {
+                  max: {
+                    field: 'timestamp',
+                  },
                 },
               },
             },
           },
         },
-      },
-    };
+      };
 
-    const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-    return callWithRequest(req, 'search', params).then((result) => {
+      const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+      const result = await callWithRequest(req, 'search', params);
+
       const aggregations = get(result, 'aggregations', {});
       const kibanaUuids = get(aggregations, 'kibana_uuids.buckets', []);
       const statusBuckets = get(aggregations, 'status.buckets', []);
@@ -207,6 +208,6 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
           count: kibanaUuids.length,
         },
       };
-    });
-  });
+    })
+  );
 }
