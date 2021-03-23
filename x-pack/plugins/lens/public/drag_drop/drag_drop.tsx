@@ -28,6 +28,8 @@ import { DropType } from '../types';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
 
+const noop = () => {};
+
 /**
  * The base props to the DragDrop component.
  */
@@ -452,8 +454,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
   } = props;
 
   const [isInZone, setIsInZone] = useState(false);
-  const [activeDropType, setActiveDropType] = useState<DropType | undefined>(undefined);
-
   const mainTargetRef = useRef<HTMLDivElement>(null);
   const extraDropsRef = useRef<HTMLDivElement>(null);
 
@@ -481,35 +481,43 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     }, 1000);
   }, [activeDropTarget, setIsInZone, value.id]);
 
-  const dragEnter = () => setIsInZone(true);
-
-  const handleKeyModifiers = (e: DroppableEvent, dropType?: DropType) => {
-    let nextActiveDropType = dropType;
-    if (e.altKey && dropTypes?.[1]) {
-      nextActiveDropType = dropTypes[1];
-    } else if (e.shiftKey && dropTypes?.[2]) {
-      nextActiveDropType = dropTypes[2];
-    }
-    const isMainTarget = dropTypes?.[0] === dropType;
-    if (nextActiveDropType !== activeDropType) {
-      setActiveDropType(isMainTarget ? nextActiveDropType : dropType);
+  const dragEnter = () => {
+    if (!isInZone) {
+      setIsInZone(true);
     }
   };
 
-  const dragOver = (e: DroppableEvent, dropType?: DropType) => {
-    if (!dropType) {
+  const getModifiedDropType = (e: DroppableEvent, dropType: DropType) => {
+    if (!dropTypes || dropTypes.length <= 1) {
+      return dropType;
+    }
+    const dropIndex = dropTypes.indexOf(dropType);
+    if (dropIndex > 0) {
+      return dropType;
+    } else if (dropIndex === 0) {
+      if (e.altKey && dropTypes[1]) {
+        return dropTypes[1];
+      } else if (e.shiftKey && dropTypes[2]) {
+        return dropTypes[2];
+      }
+    }
+    return dropType;
+  };
+
+  const dragOver = (e: DroppableEvent, dropType: DropType) => {
+    e.preventDefault();
+    if (!dragging || !onDrop) {
       return;
     }
-    e.preventDefault();
-    handleKeyModifiers(e, dropType);
 
-    const isActiveDropTarget = Boolean(
-      activeDropTarget?.id === value.id && activeDropType === activeDropTarget?.dropType
+    const modifiedDropType = getModifiedDropType(e, dropType);
+    const isActiveDropTarget = !!(
+      activeDropTarget?.id === value.id && activeDropTarget?.dropType === modifiedDropType
     );
     // An optimization to prevent a bunch of React churn.
-    if (!isActiveDropTarget && dragging && onDrop && activeDropType) {
-      setActiveDropTarget({ ...value, dropType: activeDropType, onDrop });
-      setA11yMessage(announce.selectedTarget(dragging.humanData, value.humanData, activeDropType));
+    if (!isActiveDropTarget) {
+      setActiveDropTarget({ ...value, dropType: modifiedDropType, onDrop });
+      setA11yMessage(announce.selectedTarget(dragging.humanData, value.humanData, modifiedDropType));
     }
   };
 
@@ -517,15 +525,17 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     setActiveDropTarget(undefined);
   };
 
-  const drop = (e: DroppableEvent) => {
+  const drop = (e: DroppableEvent, dropType: DropType) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onDrop && activeDropType && dragging) {
-      onDrop(dragging, activeDropType);
+    if (onDrop && dragging) {
+      const modifiedDropType = getModifiedDropType(e, dropType);
+      onDrop(dragging, modifiedDropType);
       setTimeout(() =>
-        setA11yMessage(announce.dropped(dragging.humanData, value.humanData, activeDropType))
+        setA11yMessage(announce.dropped(dragging.humanData, value.humanData, modifiedDropType))
       );
     }
+
     setDragging(undefined);
     setActiveDropTarget(undefined);
     setKeyboardMode(false);
@@ -538,9 +548,10 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     return {
       'data-test-subj': dataTestSubj || 'lnsDragDrop',
       className: getClasses(dropType, dropChildren),
-      onDragOver: (e: DroppableEvent) => dragOver(e, dropType),
+      onDragEnter: dragEnter,
       onDragLeave: dragLeave,
-      onDrop: drop,
+      onDragOver: dropType ? (e: DroppableEvent) => dragOver(e, dropType) : noop,
+      onDrop: dropType ? (e: DroppableEvent) => drop(e, dropType) : noop,
       draggable,
       ghost:
         (isActiveDropTarget && dropType !== 'reorder' && dragging?.ghost && dragging.ghost) ||

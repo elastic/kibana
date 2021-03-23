@@ -18,6 +18,7 @@ exports[`DragDrop items that has dropTypes=undefined get special styling when an
 <SingleDropInner
   className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
   data-test-subj="lnsDragDrop"
+  onDragEnter={[Function]}
   onDragLeave={[Function]}
   onDragOver={[Function]}
   onDrop={[Function]}
@@ -25,6 +26,7 @@ exports[`DragDrop items that has dropTypes=undefined get special styling when an
   <button
     className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
     data-test-subj="lnsDragDrop"
+    onDragEnter={[Function]}
     onDragLeave={[Function]}
     onDragOver={[Function]}
     onDrop={[Function]}

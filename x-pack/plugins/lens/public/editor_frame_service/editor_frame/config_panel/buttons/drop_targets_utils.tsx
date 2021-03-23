@@ -34,7 +34,7 @@ const getExtraDrop = ({
       <EuiFlexItem grow={false}>
         <EuiIcon size="m" {...iconProps} />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj={`lnsDragDrop-${type}`}>
         {type === 'duplicate'
           ? i18n.translate('xpack.lens.dragDrop.duplicate', {
               defaultMessage: 'Duplicate',

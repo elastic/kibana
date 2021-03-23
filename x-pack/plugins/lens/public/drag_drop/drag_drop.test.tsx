@@ -166,12 +166,12 @@ describe('DragDrop', () => {
     );
 
     const dragDrop = component.find('[data-test-subj="lnsDragDrop"]').at(0);
-    dragDrop.simulate('dragOver');
+    dragDrop.simulate('dragover');
     dragDrop.simulate('drop', { preventDefault, stopPropagation });
 
-    expect(preventDefault).toBeCalled();
-    expect(stopPropagation).toBeCalled();
-    expect(setDragging).toBeCalledWith(undefined);
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(stopPropagation).not.toHaveBeenCalled();
+    expect(setDragging).not.toHaveBeenCalled();
     expect(onDrop).not.toHaveBeenCalled();
   });
 
@@ -585,7 +585,7 @@ describe('DragDrop', () => {
         .first()
         .simulate('dragstart', { dataTransfer });
 
-      component.find('SingleDropInner').at(0).simulate('dragover').simulate('dragover');
+      component.find('SingleDropInner').at(0).simulate('dragover');
 
       expect(setActiveDropTarget).toBeCalledWith({
         ...value,
@@ -593,7 +593,7 @@ describe('DragDrop', () => {
         onDrop,
       });
 
-      component.find('SingleDropInner').at(1).simulate('dragover').simulate('dragover');
+      component.find('SingleDropInner').at(1).simulate('dragover');
 
       expect(setActiveDropTarget).toBeCalledWith({
         ...value,
@@ -601,7 +601,7 @@ describe('DragDrop', () => {
         onDrop,
       });
 
-      component.find('SingleDropInner').at(2).simulate('dragover').simulate('dragover');
+      component.find('SingleDropInner').at(2).simulate('dragover');
       expect(setActiveDropTarget).toBeCalledWith({
         ...value,
         dropType: 'swap_compatible',
@@ -617,20 +617,19 @@ describe('DragDrop', () => {
         .first()
         .simulate('dragstart', { dataTransfer });
 
-      // needed to setup activeDropType
-      component.find('SingleDropInner').at(0).simulate('dragover').simulate('dragover');
+      component.find('SingleDropInner').at(0).simulate('dragover');
       component.find('SingleDropInner').at(0).simulate('drop');
       expect(onDrop).toBeCalledWith({ humanData: { label: 'Label1' }, id: '1' }, 'move_compatible');
 
-      component.find('SingleDropInner').at(1).simulate('dragover').simulate('dragover');
-      component.find('SingleDropInner').at(0).simulate('drop');
+      component.find('SingleDropInner').at(1).simulate('dragover');
+      component.find('SingleDropInner').at(1).simulate('drop');
       expect(onDrop).toBeCalledWith(
         { humanData: { label: 'Label1' }, id: '1' },
         'duplicate_compatible'
       );
 
-      component.find('SingleDropInner').at(2).simulate('dragover').simulate('dragover');
-      component.find('SingleDropInner').at(0).simulate('drop');
+      component.find('SingleDropInner').at(2).simulate('dragover');
+      component.find('SingleDropInner').at(2).simulate('drop');
       expect(onDrop).toBeCalledWith({ humanData: { label: 'Label1' }, id: '1' }, 'swap_compatible');
     });
 
@@ -671,9 +670,9 @@ describe('DragDrop', () => {
         .simulate('dragstart', { dataTransfer });
 
       const extraDrop = component.find('SingleDropInner').at(1);
-      extraDrop.simulate('dragover', { altKey: true }).simulate('dragover', { altKey: true });
-      extraDrop.simulate('dragover', { shiftKey: true }).simulate('dragover', { shiftKey: true });
-      extraDrop.simulate('dragover').simulate('dragover');
+      extraDrop.simulate('dragover', { altKey: true })
+      extraDrop.simulate('dragover', { shiftKey: true })
+      extraDrop.simulate('dragover');
       expect(
         setActiveDropTarget.mock.calls.every((call) => call[0].dropType === 'duplicate_compatible')
       );
