@@ -25,6 +25,7 @@ interface Arguments {
 export interface TimeseriesRenderValue {
   visData: TimeseriesVisData | {};
   visParams: TimeseriesVisParams;
+  syncColors: boolean;
 }
 
 export type TimeseriesExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -53,9 +54,10 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       help: '',
     },
   },
-  async fn(input, args, { getSearchSessionId }) {
+  async fn(input, args, { getSearchSessionId, isSyncColorsEnabled }) {
     const visParams: TimeseriesVisParams = JSON.parse(args.params);
     const uiState = JSON.parse(args.uiState);
+    const syncColors = isSyncColorsEnabled?.() ?? false;
 
     const response = await metricsRequestHandler({
       input,
@@ -70,6 +72,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       value: {
         visParams,
         visData: response,
+        syncColors,
       },
     };
   },
