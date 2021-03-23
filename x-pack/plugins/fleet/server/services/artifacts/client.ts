@@ -85,12 +85,17 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     }
   }
 
+  /**
+   * Get a list of artifacts.
+   * NOTE that when using the `kuery` filtering param, that all filters property names should
+   * match the internal attribute names of the index
+   */
   async listArtifacts({ kuery, ...options }: ListArtifactsProps = {}): Promise<
     ListResult<Artifact>
   > {
     // All filtering for artifacts should be bound to the `packageName`, so we insert
     // that into the KQL value and use `AND` to add the defined `kuery` (if any) to it.
-    const filter = `(packageName: "${this.packageName}")${kuery ? ` AND ${kuery}` : ''}`;
+    const filter = `(package_name: "${this.packageName}")${kuery ? ` AND ${kuery}` : ''}`;
 
     return listArtifacts(this.esClient, {
       ...options,
