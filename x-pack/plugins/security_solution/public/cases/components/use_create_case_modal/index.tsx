@@ -8,9 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { CaseType } from '../../../../../cases/common';
 import { Case } from '../../containers/types';
-// TO DO can delete this garbage once case_details is in
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CreateCaseModal } from '../../../../../cases/public/components/use_create_case_modal/create_case_modal';
+import { CreateCaseModal } from './create_case_modal';
 
 export interface UseCreateCaseModalProps {
   onCaseCreated: (theCase: Case) => void;

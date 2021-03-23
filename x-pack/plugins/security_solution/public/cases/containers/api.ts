@@ -10,6 +10,7 @@ import { assign, omit } from 'lodash';
 import {
   ACTION_TYPES_URL,
   CASE_TAGS_URL,
+  CasePostRequest,
   CasePatchRequest,
   CaseResponse,
   CASES_URL,
@@ -165,6 +166,15 @@ export const getCases = async ({
     signal,
   });
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
+};
+
+export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(CASES_URL, {
+    method: 'POST',
+    body: JSON.stringify(newCase),
+    signal,
+  });
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
 export const patchCase = async (
