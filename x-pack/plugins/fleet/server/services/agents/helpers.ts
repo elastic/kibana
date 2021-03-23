@@ -7,11 +7,13 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { SearchHit } from '../../../../../../typings/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 
 type FleetServerAgentESResponse =
   | estypes.GetResponse<FleetServerAgent>
-  | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0];
+  | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
+  | SearchHit<FleetServerAgent>;
 
 export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
   // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
