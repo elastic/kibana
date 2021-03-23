@@ -12,7 +12,6 @@ import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
 import { createStateContainer, StateContainer } from '../../../../kibana_utils/public';
 import { SearchSessionSavedObject } from './sessions_client';
-import { SearchSessionStatus } from '../../../common';
 
 /**
  * Possible state that current session can be in
