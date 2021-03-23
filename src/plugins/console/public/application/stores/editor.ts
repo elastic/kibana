@@ -9,7 +9,7 @@
 import { Reducer } from 'react';
 import { produce } from 'immer';
 import { identity } from 'fp-ts/lib/function';
-import { DevToolsSettings } from '../../services';
+import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
 import { TextObject } from '../../../common/text_object';
 import { SenseEditor } from '../models';
 
@@ -22,13 +22,7 @@ export interface Store {
 export const initialValue: Store = produce<Store>(
   {
     ready: false,
-    settings: {
-      fontSize: 12,
-      polling: true,
-      tripleQuotes: true,
-      wrapMode: true,
-      autocomplete: { fields: true, indices: true, templates: true },
-    },
+    settings: DEFAULT_SETTINGS,
     currentTextObject: null,
   },
   identity

@@ -8,6 +8,14 @@
 
 import { Storage } from './index';
 
+export const DEFAULT_SETTINGS = Object.freeze({
+  fontSize: 14,
+  polling: true,
+  tripleQuotes: true,
+  wrapMode: true,
+  autocomplete: Object.freeze({ fields: true, indices: true, templates: true }),
+});
+
 export interface DevToolsSettings {
   fontSize: number;
   wrapMode: boolean;
@@ -24,7 +32,7 @@ export class Settings {
   constructor(private readonly storage: Storage) {}
 
   getFontSize() {
-    return this.storage.get('font_size', 14);
+    return this.storage.get('font_size', DEFAULT_SETTINGS.fontSize);
   }
 
   setFontSize(size: number) {
@@ -33,7 +41,7 @@ export class Settings {
   }
 
   getWrapMode() {
-    return this.storage.get('wrap_mode', true);
+    return this.storage.get('wrap_mode', DEFAULT_SETTINGS.wrapMode);
   }
 
   setWrapMode(mode: boolean) {
@@ -47,15 +55,11 @@ export class Settings {
   }
 
   getTripleQuotes() {
-    return this.storage.get('triple_quotes', true);
+    return this.storage.get('triple_quotes', DEFAULT_SETTINGS.tripleQuotes);
   }
 
   getAutocomplete() {
-    return this.storage.get('autocomplete_settings', {
-      fields: true,
-      indices: true,
-      templates: true,
-    });
+    return this.storage.get('autocomplete_settings', DEFAULT_SETTINGS.autocomplete);
   }
 
   setAutocomplete(settings: object) {
@@ -64,7 +68,7 @@ export class Settings {
   }
 
   getPolling() {
-    return this.storage.get('console_polling', true);
+    return this.storage.get('console_polling', DEFAULT_SETTINGS.polling);
   }
 
   setPolling(polling: boolean) {

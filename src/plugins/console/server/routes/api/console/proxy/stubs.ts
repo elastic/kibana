@@ -9,11 +9,11 @@
 import { IncomingMessage } from 'http';
 import { Readable } from 'stream';
 
-export function createResponseStub(response: string) {
+export function createResponseStub(response?: string) {
   const resp: Readable & {
-    statusCode: number;
-    statusMessage: string;
-    headers: Record<string, unknown>;
+    statusCode?: number;
+    statusMessage?: string;
+    headers?: Record<string, unknown>;
   } = new Readable({
     read() {
       if (response) {

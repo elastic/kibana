@@ -16,8 +16,12 @@ import { jsSpecLoaders } from '../lib';
 const PATH_TO_OSS_JSON_SPEC = resolve(__dirname, '../lib/spec_definitions/json');
 
 interface EndpointDescription {
-  patterns?: string;
+  methods?: string[];
+  patterns?: string | string[];
   url_params?: Record<string, unknown>;
+  data_autocomplete_rules?: Record<string, unknown>;
+  url_components?: Record<string, unknown>;
+  priority?: number;
 }
 
 export class SpecDefinitionsService {
