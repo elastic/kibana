@@ -10,5 +10,8 @@
   },
   "include": [
     "src/index.ts"
+  ],
+  "exclude": [
+    "target"
   ]
 }
