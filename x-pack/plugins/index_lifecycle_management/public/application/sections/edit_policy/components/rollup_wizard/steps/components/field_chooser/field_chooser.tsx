@@ -22,7 +22,6 @@ import {
   EuiTitle,
   EuiFormRow,
   EuiFieldText,
-  EuiLoadingSpinner,
   EuiTabs,
   EuiTab,
   EuiCode,

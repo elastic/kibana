@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiAccordion,
-  EuiIcon,
   EuiIconTip,
   EuiDescriptionList,
   EuiDescriptionListTitle,

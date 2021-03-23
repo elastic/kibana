@@ -89,7 +89,7 @@ export class StepTerms extends Component {
           emptyMessage={
             <p>
               <FormattedMessage
-                id="xpack.rollupJobs.create.stepTerms.noTermsAddedMessage"
+                id="xpack.indexLifecycleMgmt.rollup.create.stepTerms.noTermsAddedMessage"
                 defaultMessage="No terms fields added"
               />
             </p>
