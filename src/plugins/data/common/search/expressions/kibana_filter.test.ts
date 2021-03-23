@@ -34,9 +34,7 @@ describe('interpreter/functions#kibanaFilter', () => {
           "disabled": false,
           "negate": false,
         },
-        "query": Object {
-          "name": "test",
-        },
+        "name": "test",
         "type": "kibana_filter",
       }
     `);

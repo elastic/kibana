@@ -24,16 +24,22 @@ describe('interpreter/functions#filtersToAst', () => {
     expect(actual[0].functions[0]).toHaveProperty('name', 'kibanaFilter');
     expect(actual[0].functions[0].arguments).toMatchInlineSnapshot(`
       Object {
+        "negate": Array [
+          false,
+        ],
         "query": Array [
-          "{\\"test\\":\\"something\\"}",
+          "{\\"query\\":{\\"test\\":\\"something\\"}}",
         ],
       }
     `);
     expect(actual[1].functions[0]).toHaveProperty('name', 'kibanaFilter');
     expect(actual[1].functions[0].arguments).toMatchInlineSnapshot(`
       Object {
+        "negate": Array [
+          true,
+        ],
         "query": Array [
-          "{\\"test\\":\\"something\\"}",
+          "{\\"query\\":{\\"test\\":\\"something\\"}}",
         ],
       }
     `);

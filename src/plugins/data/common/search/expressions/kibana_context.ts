@@ -8,12 +8,9 @@
 
 import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ExpressionFunctionDefinition,
-  ExecutionContext,
-  unboxExpressionValue,
-} from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
 import { Adapters } from 'src/plugins/inspector/common';
+import { unboxExpressionValue } from '../../../../expressions/common';
 import { Query, uniqFilters } from '../../query';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
