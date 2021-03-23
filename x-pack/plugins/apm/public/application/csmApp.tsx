@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
-import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
+import {
+  euiStyled,
+  EuiThemeProvider,
+} from '../../../../../src/plugins/kibana_react/common';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -51,18 +51,12 @@ function CsmApp() {
   useBreadcrumbs(rumRoutes);
 
   return (
-    <ThemeProvider
-      theme={(outerTheme?: DefaultTheme) => ({
-        ...outerTheme,
-        eui: darkMode ? euiDarkVars : euiLightVars,
-        darkMode,
-      })}
-    >
+    <EuiThemeProvider darkMode={darkMode}>
       <CsmMainContainer data-test-subj="csmMainContainer" role="main">
         <Route component={ScrollToTopOnPathChange} />
         <RumHome />
       </CsmMainContainer>
-    </ThemeProvider>
+    </EuiThemeProvider>
   );
 }
 

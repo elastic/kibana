@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import * as euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
@@ -26,7 +26,7 @@ import { ManagementAppMountParams } from '../../../../src/plugins/management/pub
 
 export const renderApp = ({ element, history }: ManagementAppMountParams, libs: FrontendLibs) => {
   ReactDOM.render(
-    <ThemeProvider theme={{ eui: euiVars }}>
+    <ThemeProvider theme={{ eui: euiThemeVars }}>
       <services.I18nContext>
         <Router history={history}>
           <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>

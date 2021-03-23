@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { render } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
-import { ThemeContext } from 'styled-components';
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { Controls } from './Controls';
 import { CytoscapeContext } from './Cytoscape';
@@ -22,9 +21,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <CytoscapeContext.Provider value={cy}>
       <MockApmPluginContextWrapper>
-        <ThemeContext.Provider value={{ eui: lightTheme }}>
-          {children}
-        </ThemeContext.Provider>
+        <EuiThemeProvider>{children}</EuiThemeProvider>
       </MockApmPluginContextWrapper>
     </CytoscapeContext.Provider>
   );

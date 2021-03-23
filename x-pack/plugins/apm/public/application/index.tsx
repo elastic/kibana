@@ -6,14 +6,14 @@
  */
 
 import { ApmRoute } from '@elastic/apm-rum-react';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import 'react-vis/dist/style.css';
-import { DefaultTheme, ThemeProvider } from 'styled-components';
-import { euiStyled } from '../../../../../src/plugins/kibana_react/common';
+import {
+  euiStyled,
+  EuiThemeProvider,
+} from '../../../../../src/plugins/kibana_react/common';
 import { ConfigSchema } from '../';
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
@@ -47,13 +47,7 @@ function App() {
   useBreadcrumbs(routes);
 
   return (
-    <ThemeProvider
-      theme={(outerTheme?: DefaultTheme) => ({
-        ...outerTheme,
-        eui: darkMode ? euiDarkVars : euiLightVars,
-        darkMode,
-      })}
-    >
+    <EuiThemeProvider darkMode={darkMode}>
       <MainContainer data-test-subj="apmMainContainer" role="main">
         <Route component={ScrollToTopOnPathChange} />
         <Switch>
@@ -62,7 +56,7 @@ function App() {
           ))}
         </Switch>
       </MainContainer>
-    </ThemeProvider>
+    </EuiThemeProvider>
   );
 }
 

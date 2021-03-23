@@ -6,9 +6,9 @@
  */
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import { isEqual } from 'lodash';
@@ -41,7 +41,7 @@ class TagCreatePageComponent extends React.PureComponent<
       tag: {
         id: '',
         name: '',
-        color: randomEUIColor(euiVars),
+        color: randomEUIColor(euiThemeVars),
         hasConfigurationBlocksTypes: [],
       },
       configuration_blocks: [],

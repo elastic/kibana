@@ -29,9 +29,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import useEvent from 'react-use/lib/useEvent';
 import {
   formatOptions,
@@ -39,22 +36,13 @@ import {
   UrlOption,
 } from './RenderOption';
 import { I18LABELS } from '../../translations';
-import { useUiSetting$ } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
-const StyledRow = styled.div<{
-  darkMode: boolean;
-}>`
+const StyledRow = euiStyled.div`
   text-align: center;
   padding: 8px 0px;
-  background-color: ${(props) =>
-    props.darkMode
-      ? euiDarkVars.euiPageBackgroundColor
-      : euiLightVars.euiPageBackgroundColor};
-  border-bottom: 1px solid
-    ${(props) =>
-      props.darkMode
-        ? euiDarkVars.euiColorLightestShade
-        : euiLightVars.euiColorLightestShade};
+  background-color: ${({ theme }) => theme.eui.euiPageBackgroundColor};
+  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorLightestShade};
 `;
 
 interface Props {
@@ -85,8 +73,6 @@ export function SelectableUrlList({
   setPopoverIsOpen,
   initialValue,
 }: Props) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
   const [popoverRef, setPopoverRef] = useState<HTMLElement | null>(null);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
 
@@ -211,7 +197,7 @@ export function SelectableUrlList({
           <div style={{ width: 600, maxWidth: '100%' }}>
             <PopOverTitle />
             {searchValue && (
-              <StyledRow darkMode={darkMode}>
+              <StyledRow>
                 <EuiText size="s">
                   <FormattedMessage
                     id="xpack.apm.ux.url.hitEnter.include"
