@@ -33,7 +33,7 @@ export const parseAgentSelection = async (
       // TODO: actually fetch all the agents
       const { agents: fetchedAgents } = await agentService.listAgents(esClient, {
         perPage: 9000,
-        showInactive: false,
+        showInactive: true,
       });
       selectedAgents.push(...fetchedAgents.map((a) => a.id));
     } else {
@@ -52,7 +52,7 @@ export const parseAgentSelection = async (
         const { agents: fetchedAgents } = await agentService.listAgents(esClient, {
           kuery,
           perPage: 9000,
-          showInactive: false,
+          showInactive: true,
         });
         selectedAgents.push(...fetchedAgents.map((a) => a.id));
       }

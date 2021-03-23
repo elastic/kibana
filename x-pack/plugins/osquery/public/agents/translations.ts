@@ -14,11 +14,3 @@ export const ERROR_ALL_AGENTS = i18n.translate('xpack.osquery.agents.errorSearch
 export const FAIL_ALL_AGENTS = i18n.translate('xpack.osquery.agents.failSearchDescription', {
   defaultMessage: `Failed to fetch agents`,
 });
-
-export const ERROR_AGENT_GROUPS = i18n.translate('xpack.osquery.agentGroups.errorSearchDescription', {
-  defaultMessage: `An error has occurred while fetching agent groups.`,
-});
-
-export const FAIL_AGENT_GROUPS = i18n.translate('xpack.osquery.agentGroups.failSearchDescription', {
-  defaultMessage: `Failed to fetch agent groups.`,
-});
