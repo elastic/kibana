@@ -30,7 +30,6 @@ export enum OsqueryQueries {
   actionResults = 'actionResults',
   agents = 'agents',
   results = 'results',
-  alertsHosts = 'alertsHosts',
 }
 
 export type FactoryQueryTypes = OsqueryQueries;

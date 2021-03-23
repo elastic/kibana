@@ -10,7 +10,6 @@ import { FactoryQueryTypes, OsqueryQueries } from '../../../../common/search_str
 import { allActions, actionDetails, actionResults } from './actions';
 import { allAgents } from './agents';
 import { allResults } from './results';
-import { alertsHosts } from './alerts_hosts';
 
 import { OsqueryFactory } from './types';
 
@@ -20,5 +19,4 @@ export const osqueryFactory: Record<FactoryQueryTypes, OsqueryFactory<FactoryQue
   [OsqueryQueries.actionResults]: actionResults,
   [OsqueryQueries.agents]: allAgents,
   [OsqueryQueries.results]: allResults,
-  [OsqueryQueries.alertsHosts]: alertsHosts,
 };

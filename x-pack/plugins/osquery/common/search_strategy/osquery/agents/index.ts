@@ -11,20 +11,9 @@ import { Inspect, Maybe, PageInfoPaginated } from '../../common';
 import { RequestOptionsPaginated } from '../..';
 import { Agent } from '../../../shared_imports';
 
-export interface AggregationDataPoint {
-  key: string;
-}
-
-export interface AgentAggregation {
-  [key: string]: {
-    buckets: AggregationDataPoint[];
-  };
-}
-
 export interface AgentsStrategyResponse extends IEsSearchResponse {
   edges: Agent[];
   totalCount: number;
-  aggregations?: AgentAggregation;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }

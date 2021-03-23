@@ -10,7 +10,7 @@ import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import { TimelineEventsType } from '../../../../common/types/timeline';
-// import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
 
 import { ACTIONS_COLUMN_ARIA_COL_INDEX } from './helpers';
 import { EVENTS_TABLE_ARIA_LABEL } from './translations';
@@ -35,7 +35,7 @@ export const SELECTOR_TIMELINE_BODY_CLASS_NAME = 'securitySolutionTimeline__body
 
 // SIDE EFFECT: the following creates a global class selector
 export const TimelineBodyGlobalStyle = createGlobalStyle`
-  body.is-timeline-field-dragging .${SELECTOR_TIMELINE_BODY_CLASS_NAME} {
+  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .${SELECTOR_TIMELINE_BODY_CLASS_NAME} {
     overflow: hidden;
   }
 `;

@@ -32,9 +32,6 @@ import {
   LazyOsqueryManagedEmptyEditPolicyExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
-import { getActionType } from './osquery_action_type';
-import { getLazyCasesIntegration } from './cases_integration/lazy_index';
-import { getLazyCreateOsqueryActionForm } from './shared_components/create_action_form/lazy_index';
 
 export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreStart['http']) {
   http.fetch('/api/fleet/epm/packages', { query: { experimental: true } }).then(({ response }) => {
@@ -96,10 +93,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    if (config.actionEnabled) {
-      plugins.triggersActionsUi.actionTypeRegistry.register(getActionType());
-    }
-
     // Return methods that should be available to other plugins
     return {};
   }
@@ -113,14 +106,12 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       packs: boolean;
     }>();
 
-    if (!config.enabled) {
-      return {};
-    }
-
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 
-      toggleOsqueryPlugin(this.appUpdater$, core.http);
+      if (config.enabled) {
+        toggleOsqueryPlugin(this.appUpdater$, core.http);
+      }
 
       registerExtension({
         package: 'osquery_elastic_managed',
@@ -141,7 +132,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       registerExtension({
         package: 'osquery_elastic_managed',
         view: 'package-detail-custom',
-        // component: LazyOsqueryManagedCustomExtension,
         component: LazyOsqueryManagedCustomButtonExtension,
       });
     } else {
@@ -150,10 +140,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       }));
     }
 
-    return {
-      getCasesIntegration: getLazyCasesIntegration,
-      getCreateOsqueryActionForm: getLazyCreateOsqueryActionForm,
-    };
+    return {};
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

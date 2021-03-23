@@ -504,57 +504,6 @@ export const sendAlertToTimelineAction = async ({
       to: thresholdTo,
       ruleNote: noteContent,
     });
-  } else if (
-    nonEcsData.some(
-      (item) => item.field === 'alert_type' && item.value && item.value[0] === 'osquery_alert'
-    ) &&
-    nonEcsData.find((item) => item.field === 'action_id')?.value
-  ) {
-    const { filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
-    const actionId = nonEcsData.find((item) => item.field === 'action_id')?.value;
-
-    return createTimeline({
-      from: moment(new Date()).subtract(1, 'days').toISOString(),
-      notes: null,
-      timeline: {
-        ...timelineDefaults,
-        dataProviders: [
-          ...alertIds.map((alertId) => ({
-            and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${alertId}`,
-            name: alertId,
-            enabled: true,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: '_id',
-              value: alertId,
-              operator: ':' as const,
-            },
-          })),
-        ],
-        id: TimelineId.active,
-        indexNames: [],
-        dateRange: {
-          start: moment(new Date()).subtract(1, 'days').toISOString(),
-          end: new Date().toISOString(),
-        },
-        eventType: 'all',
-        filters,
-        kqlQuery: {
-          filterQuery: {
-            kuery: {
-              kind: 'kuery',
-              expression: `action_id: ${actionId}`,
-            },
-            serializedQuery: '',
-          },
-        },
-        kqlMode: 'search',
-      },
-      to: new Date().toISOString(),
-      ruleNote: noteContent,
-    });
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(alertIds ?? [], ecsData._id);
     if (isEqlRuleWithGroupId(ecsData)) {

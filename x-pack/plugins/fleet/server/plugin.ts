@@ -80,7 +80,6 @@ import {
 import {
   getAgentStatusById,
   authenticateAgentWithAccessToken,
-  getAgents,
   getAgentsByKuery,
   getAgentById,
 } from './services/agents';
@@ -324,14 +323,12 @@ export class FleetPlugin
       },
       agentService: {
         getAgent: getAgentById,
-        getAgents,
         listAgents: getAgentsByKuery,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
       agentPolicyService: {
         get: agentPolicyService.get,
-        getByIDs: agentPolicyService.getByIDs,
         list: agentPolicyService.list,
         getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,

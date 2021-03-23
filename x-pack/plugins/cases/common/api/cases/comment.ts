@@ -37,7 +37,6 @@ export enum CommentType {
   user = 'user',
   alert = 'alert',
   generatedAlert = 'generated_alert',
-  osqueryAlert = 'osquery_alert',
 }
 
 export const ContextTypeUserRt = rt.type({
@@ -51,11 +50,7 @@ export const ContextTypeUserRt = rt.type({
  * it matches this structure. User attached alerts do not need to be transformed.
  */
 export const AlertCommentRequestRt = rt.type({
-  type: rt.union([
-    rt.literal(CommentType.generatedAlert),
-    rt.literal(CommentType.alert),
-    rt.literal(CommentType.osqueryAlert),
-  ]),
+  type: rt.union([rt.literal(CommentType.generatedAlert), rt.literal(CommentType.alert)]),
   alertId: rt.union([rt.array(rt.string), rt.string]),
   index: rt.union([rt.array(rt.string), rt.string]),
   rule: rt.type({

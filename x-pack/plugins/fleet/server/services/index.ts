@@ -48,10 +48,6 @@ export interface AgentService {
    */
   getAgent: typeof getAgentById;
   /**
-   * Get an Agents by ids
-   */
-  getAgents: typeof getAgents;
-  /**
    * Authenticate an agent with access toekn
    */
   authenticateAgentWithAccessToken(
@@ -70,7 +66,6 @@ export interface AgentService {
 
 export interface AgentPolicyServiceInterface {
   get: typeof agentPolicyService['get'];
-  getByIDs: typeof agentPolicyService['getByIDs'];
   list: typeof agentPolicyService['list'];
   getDefaultAgentPolicyId: typeof agentPolicyService['getDefaultAgentPolicyId'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
