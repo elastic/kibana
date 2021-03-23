@@ -27,6 +27,9 @@ Object {
             "type": "expression",
           },
         ],
+        "curveType": Array [
+          9,
+        ],
         "description": Array [
           "",
         ],
