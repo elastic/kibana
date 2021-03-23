@@ -6,13 +6,12 @@
  */
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
+import { ALERT_HISTORY_PREFIX } from '../../../common';
 import mappings from './mappings.json';
-
-import { ALERT_HISTORY } from './types';
 
 function getAlertHistoryIndexTemplate() {
   return {
-    index_patterns: [`${ALERT_HISTORY}-*`],
+    index_patterns: [`${ALERT_HISTORY_PREFIX}*`],
     settings: {
       number_of_shards: 1,
       auto_expand_replicas: '0-1',
@@ -92,7 +91,7 @@ export async function createAlertHistoryIndexTemplate({
     const indexTemplate = getAlertHistoryIndexTemplate();
     await createIndexTemplateIfNotExists({
       client,
-      templateName: `${ALERT_HISTORY}-template`,
+      templateName: `${ALERT_HISTORY_PREFIX}template`,
       template: indexTemplate,
     });
   } catch (err) {

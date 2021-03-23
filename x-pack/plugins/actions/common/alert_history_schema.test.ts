@@ -20,10 +20,6 @@ function getVariables(overrides = {}) {
       contextVar1: 'contextValue1',
       contextVar2: 'contextValue2',
     },
-    state: {
-      alertStateValue: true,
-      alertStateAnotherValue: 'yes',
-    },
     params: {
       ruleParam: 1,
       ruleParamString: 'another param',
@@ -73,12 +69,6 @@ describe('buildAlertHistoryDocument', () => {
     expect(alertHistoryDoc!.rule.params).toBeFalsy();
   });
 
-  it(`doesn't include state if state is empty`, () => {
-    const alertHistoryDoc = buildAlertHistoryDocument(getVariables({ state: {} }));
-    expect(alertHistoryDoc).not.toBeNull();
-    expect(alertHistoryDoc!.alert.state).toBeFalsy();
-  });
-
   it(`doesn't include tags if tags is empty array`, () => {
     const alertHistoryDoc = buildAlertHistoryDocument(getVariables({ tags: [] }));
     expect(alertHistoryDoc).not.toBeNull();
@@ -108,12 +98,6 @@ describe('buildAlertHistoryDocument', () => {
           },
         },
         id: 'alert-id',
-        state: {
-          'rule-type': {
-            alertStateAnotherValue: 'yes',
-            alertStateValue: true,
-          },
-        },
       },
       event: {
         kind: 'alert',

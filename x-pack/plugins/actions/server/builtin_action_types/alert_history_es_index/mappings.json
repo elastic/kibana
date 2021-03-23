@@ -1,5 +1,5 @@
 {
-    "dynamic": "strict",
+    "dynamic": "false",
     "properties": {
         "@timestamp": {
             "type": "date"
@@ -21,10 +21,6 @@
                 },
                 "id": {
                     "type": "keyword"
-                },
-                "state": {
-                    "type": "object",
-                    "enabled": false
                 }
             }
         },
@@ -38,14 +34,6 @@
         "message": {
             "norms": false,
             "type": "text"
-        },
-        "ecs": {
-            "properties": {
-                "version": {
-                    "ignore_above": 1024,
-                    "type": "keyword"
-                }
-            }
         },
         "event": {
             "properties": {

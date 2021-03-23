@@ -116,6 +116,7 @@ describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
     const params: Record<string, unknown> = {
       documents: [{ rando: 'thing' }],
+      indexOverride: null,
     };
     expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
         Object {
@@ -124,6 +125,7 @@ describe('params validation', () => {
               "rando": "thing",
             },
           ],
+          "indexOverride": null,
         }
     `);
   });
@@ -160,6 +162,7 @@ describe('execute()', () => {
     config = { index: 'index-value', refresh: false, executionTimeField: null };
     params = {
       documents: [{ jim: 'bob' }],
+      indexOverride: null,
     };
 
     const actionId = 'some-id';
@@ -201,6 +204,7 @@ describe('execute()', () => {
     config = { index: 'index-value', executionTimeField: 'field_to_use_for_time', refresh: true };
     params = {
       documents: [{ jimbob: 'jr' }],
+      indexOverride: null,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
@@ -238,6 +242,7 @@ describe('execute()', () => {
     config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
       documents: [{ jim: 'bob' }],
+      indexOverride: null,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
@@ -271,6 +276,7 @@ describe('execute()', () => {
     config = { index: 'index-value', executionTimeField: null, refresh: false };
     params = {
       documents: [{ a: 1 }, { b: 2 }],
+      indexOverride: null,
     };
 
     executorOptions = { actionId, config, secrets, params, services };
@@ -310,6 +316,7 @@ describe('execute()', () => {
     expect(actionType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],
+      indexOverride: null,
     };
     const variables = {
       who: 'world',
@@ -326,6 +333,7 @@ describe('execute()', () => {
             "hello": "world",
           },
         ],
+        "indexOverride": null,
       }
     `);
   });
@@ -334,6 +342,7 @@ describe('execute()', () => {
     expect(actionType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],
+      indexOverride: null,
     };
     const variables = {
       date: '2021-01-01T00:00:00.000Z',
@@ -381,12 +390,6 @@ describe('execute()', () => {
                 },
               },
               "id": "alert-id",
-              "state": Object {
-                "rule-type": Object {
-                  "alertStateAnotherValue": "yes",
-                  "alertStateValue": true,
-                },
-              },
             },
             "event": Object {
               "kind": "alert",
@@ -408,6 +411,7 @@ describe('execute()', () => {
             ],
           },
         ],
+        "indexOverride": null,
       }
     `);
   });
@@ -416,6 +420,7 @@ describe('execute()', () => {
     expect(actionType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],
+      indexOverride: null,
     };
     const variables = {};
 
@@ -436,6 +441,7 @@ describe('execute()', () => {
     const config = { index: 'index-value', refresh: false, executionTimeField: null };
     const params = {
       documents: [{ '': 'bob' }],
+      indexOverride: null,
     };
 
     const actionId = 'some-id';

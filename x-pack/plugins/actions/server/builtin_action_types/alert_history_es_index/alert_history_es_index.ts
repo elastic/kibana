@@ -8,8 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { PreConfiguredAction } from '../../types';
 import { ActionTypeId as EsIndexActionTypeId } from '../es_index';
-import { AlertHistoryEsIndexConnectorId } from '../../../common';
-import { getInitialIndexName } from './types';
+import { AlertHistoryEsIndexConnectorId, AlertHistoryDefaultIndexName } from '../../../common';
 
 export function getAlertHistoryEsIndex(): Readonly<PreConfiguredAction> {
   return Object.freeze({
@@ -20,7 +19,7 @@ export function getAlertHistoryEsIndex(): Readonly<PreConfiguredAction> {
     id: AlertHistoryEsIndexConnectorId,
     isPreconfigured: true,
     config: {
-      index: getInitialIndexName,
+      index: AlertHistoryDefaultIndexName,
     },
     secrets: {},
   });

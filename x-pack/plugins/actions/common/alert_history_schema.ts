@@ -8,25 +8,15 @@
 import { isEmpty } from 'lodash';
 
 export const ALERT_HISTORY_PREFIX = 'alert-history-';
-export const AlertHistoryEsIndexConnectorIndexName = `${ALERT_HISTORY_PREFIX}index`;
 export const AlertHistoryDefaultIndexName = `${ALERT_HISTORY_PREFIX}default`;
 export const AlertHistoryEsIndexConnectorId = 'preconfigured-alert-history-es-index';
 
 export const buildAlertHistoryDocument = (variables: Record<string, unknown>) => {
-  const {
-    date,
-    alert: alertVariables,
-    context,
-    params,
-    state,
-    tags,
-    rule: ruleVariables,
-  } = variables as {
+  const { date, alert: alertVariables, context, params, tags, rule: ruleVariables } = variables as {
     date: string;
     alert: Record<string, unknown>;
     context: Record<string, unknown>;
     params: Record<string, unknown>;
-    state: Record<string, unknown>;
     rule: Record<string, unknown>;
     tags: string[];
   };
@@ -64,7 +54,6 @@ export const buildAlertHistoryDocument = (variables: Record<string, unknown>) =>
   };
   const alert = {
     ...(alertId ? { id: alertId } : {}),
-    ...(!isEmpty(state) ? { state: { [ruleType]: state } } : {}),
     ...(!isEmpty(context) ? { context: { [ruleType]: context } } : {}),
     ...(actionGroup ? { actionGroup } : {}),
     ...(actionGroupName ? { actionGroupName } : {}),
@@ -90,7 +79,6 @@ export const AlertHistoryDocumentSchema = Object.freeze(
       spaceId: '{{rule.spaceId}}',
     },
     context: '{{context}}',
-    state: '{{state}}',
     params: '{{params}}',
     tags: '{{rule.tags}}',
     alert: {

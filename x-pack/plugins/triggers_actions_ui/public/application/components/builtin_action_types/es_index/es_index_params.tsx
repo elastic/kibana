@@ -38,34 +38,45 @@ export const IndexParamsFields = ({
 }: ActionParamsProps<IndexActionParams>) => {
   const { docLinks } = useKibana().services;
   const { documents, indexOverride } = actionParams;
+
   const defaultAlertHistoryIndexSuffix = AlertHistoryDefaultIndexName.replace(
     ALERT_HISTORY_PREFIX,
     ''
   );
 
+  const [documentToIndex, setDocumentToIndex] = useState<string | undefined>(undefined);
   const [alertHistoryIndexSuffix, setAlertHistoryIndexSuffix] = useState<string>(
     defaultAlertHistoryIndexSuffix
   );
   const [usePreconfiguredSchema, setUsePreconfiguredSchema] = useState<boolean>(false);
 
   useEffect(() => {
+    if (documents && documents.length > 0) {
+      setDocumentToIndex((documents[0] as unknown) as string);
+    } else {
+      setDocumentToIndex(undefined);
+    }
+  }, [documents]);
+
+  useEffect(() => {
     if (actionConnector?.id === AlertHistoryEsIndexConnectorId) {
       setUsePreconfiguredSchema(true);
-      onDocumentsChange(JSON.stringify(AlertHistoryDocumentSchema));
+      setDocumentToIndex(JSON.stringify(AlertHistoryDocumentSchema));
     } else {
-      editAction('documents', null, index);
+      setDocumentToIndex(undefined);
       setUsePreconfiguredSchema(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector?.id]);
 
   const onDocumentsChange = (updatedDocuments: string) => {
     try {
       const documentsJSON = JSON.parse(updatedDocuments);
       editAction('documents', [documentsJSON], index);
+      setDocumentToIndex(updatedDocuments);
     } catch (e) {
       // set document as empty to turn on the validation for non empty valid JSON object
       editAction('documents', [{}], index);
+      setDocumentToIndex(undefined);
     }
   };
 
@@ -147,10 +158,10 @@ export const IndexParamsFields = ({
       paramsProperty={'documents'}
       data-test-subj="documentToIndex"
       inputTargetValue={
-        documents === null
+        documentToIndex === null
           ? '{}' // need this to trigger validation
-          : documents && documents.length > 0
-          ? ((documents[0] as unknown) as string)
+          : documentToIndex
+          ? documentToIndex
           : undefined
       }
       label={documentsFieldLabel}
@@ -171,9 +182,7 @@ export const IndexParamsFields = ({
         </EuiLink>
       }
       onBlur={() => {
-        if (
-          !(documents && documents.length > 0 ? ((documents[0] as unknown) as string) : undefined)
-        ) {
+        if (!documentToIndex) {
           // set document as empty to turn on the validation for non empty valid JSON object
           onDocumentsChange('{}');
         }
