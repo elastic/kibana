@@ -56,6 +56,7 @@ Arguments:
 |onCreateCaseNavClick?|`(ev: React.MouseEvent) => void;` callback for nav click
 |onRowClick?|`(theCase?: Case ! SubCase) => void;` callback for row click, passing case in row
 |userCanCrud|boolean; user permissions to crud
+
 UI component:
  ![All Cases Component][all-cases-img] 
 
@@ -68,7 +69,6 @@ Arguments:
 |onCancel|`() => void;` callback when create case is canceled
 |onSuccess|`(theCase: Case) => Promise<void>;` callback passing newly created case after pushCaseToExternalService is called
 
-
 UI component:
  ![Create Component][create-img] 
  
@@ -78,6 +78,7 @@ UI component:
  |Property|Description|
  |---|---|
  |userCanCrud|`boolean;`  user permissions to crud
+ 
  UI component:
   ![Configure Component][configure-img] 
 
