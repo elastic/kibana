@@ -9,6 +9,7 @@
 import angular, { auto, ICompileService, IScope } from 'angular';
 import { render } from 'react-dom';
 import React, { useRef, useEffect } from 'react';
+import type { estypes } from '@elastic/elasticsearch';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices, IIndexPattern } from '../../../kibana_services';
@@ -19,7 +20,7 @@ export interface DocTableLegacyProps {
   searchDescription?: string;
   searchTitle?: string;
   onFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
-  rows: Array<Record<string, unknown>>;
+  rows: estypes.Hit[];
   indexPattern: IIndexPattern;
   minimumVisibleRows: number;
   onAddColumn?: (column: string) => void;

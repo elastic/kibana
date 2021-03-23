@@ -372,7 +372,7 @@ export function Discover({
                             columns={columns}
                             indexPattern={indexPattern}
                             minimumVisibleRows={minimumVisibleRows}
-                            rows={(rows as unknown) as Array<Record<string, unknown>>}
+                            rows={rows}
                             sort={state.sort || []}
                             searchDescription={opts.savedSearch.description}
                             searchTitle={opts.savedSearch.lastSavedTitle}
