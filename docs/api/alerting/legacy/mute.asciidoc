@@ -1,19 +1,23 @@
-[[alerts-api-mute]]
-=== Mute alert instance API
+[[alerts-legacy-api-mute]]
+=== Legacy mute alert instance API
 ++++
-<titleabbrev>Mute alert instance</titleabbrev>
+<titleabbrev>Legacy mute alert instance</titleabbrev>
 ++++
+
+deprecated::[7.13.0]
+
+Please use the <<rules-mute-api>> instead.
 
 Mute an alert instance.
 
-[[alerts-api-mute-request]]
+[[alerts-legacy-api-mute-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>/alert_instance/<alert_instance_id>/_mute`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/alert_instance/<alert_instance_id>/_mute`
 
-[[alerts-api-mute-path-params]]
+[[alerts-legacy-api-mute-path-params]]
 ==== Path parameters
 
 `id`::
@@ -25,7 +29,7 @@ Mute an alert instance.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-api-mute-response-codes]]
+[[alerts-legacy-api-mute-response-codes]]
 ==== Response code
 
 `200`::

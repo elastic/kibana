@@ -1,19 +1,19 @@
-[[alerts-api-create]]
-=== Create alert API
+[[rules-create-api]]
+=== Create rule API
 ++++
-<titleabbrev>Create alert</titleabbrev>
+<titleabbrev>Create rule</titleabbrev>
 ++++
 
-Create {kib} alerts.
+Create {kib} rules.
 
-[[alerts-api-create-request]]
+[[rules-create-api-request]]
 ==== Request
 
-`POST <kibana host>:<port>/api/alerts/alert/<id>`
+`POST <kibana host>:<port>/api/alerting/rule/<id>`
 
-`POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>`
+`POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
-[[alerts-api-create-path-params]]
+[[rules-create-api-path-params]]
 ==== Path parameters
 
 `<id>`::
@@ -22,7 +22,7 @@ Create {kib} alerts.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-api-create-request-body]]
+[[rules-create-api-request-body]]
 ==== Request body
 
 `name`::
@@ -31,37 +31,37 @@ Create {kib} alerts.
 `tags`::
   (Optional, string array) A list of keywords to reference and search.
 
-`alertTypeId`::
-  (Required, string) The ID of the alert type that you want to call when the alert is scheduled to run.
+`rule_type_id`::
+  (Required, string) The ID of the rule type that you want to call when the rule is scheduled to run.
 
 `schedule`::
-  (Required, object) The schedule specifying when this alert should be run, using one of the available schedule formats specified under
+  (Required, object) The schedule specifying when this rule should be run, using one of the available schedule formats specified under
 +
 ._Schedule Formats_.
 [%collapsible%open]
 =====
 A schedule is structured such that the key specifies the format you wish to use and its value specifies the schedule.
 
-We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the alert should execute.
+We currently support the _Interval format_ which specifies the interval in seconds, minutes, hours or days at which the rule should execute.
 Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ interval: "1d" }`.
 
 There are plans to support multiple other schedule formats in the near future.
 =====
 
 `throttle`::
-  (Optional, string) How often this alert should fire the same actions. This will prevent the alert from sending out the same notification over and over. For example, if an alert with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications during this period.
+  (Optional, string) How often this rule should fire the same actions. This will prevent the rule from sending out the same notification over and over. For example, if a rule with a `schedule` of 1 minute stays in a triggered state for 90 minutes, setting a `throttle` of `10m` or `1h` will prevent it from sending 90 notifications during this period.
 
-`notifyWhen`::
+`notify_when`::
   (Required, string) The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`, or `onThrottleInterval`.
 
 `enabled`::
-  (Optional, boolean) Indicates if you want to run the alert on an interval basis after it is created.
+  (Optional, boolean) Indicates if you want to run the rule on an interval basis after it is created.
 
 `consumer`::
-  (Required, string) The name of the application that owns the alert. This name has to match the Kibana Feature name, as that dictates the required RBAC privileges.
+  (Required, string) The name of the application that owns the rule. This name has to match the Kibana Feature name, as that dictates the required RBAC privileges.
 
 `params`::
-  (Required, object) The parameters to pass to the alert type executor `params` value. This will also validate against the alert type params validator, if defined.
+  (Required, object) The parameters to pass to the rule type executor `params` value. This will also validate against the rule type params validator, if defined.
 
 `actions`::
   (Optional, object array) An array of the following action objects.
@@ -70,31 +70,28 @@ There are plans to support multiple other schedule formats in the near future.
 [%collapsible%open]
 =====
   `group`:::
-    (Required, string) Grouping actions is recommended for escalations for different types of alert instances. If you don't need this, set this value to `default`.
+    (Required, string) Grouping actions is recommended for escalations for different types of alerts. If you don't need this, set this value to `default`.
 
   `id`:::
-    (Required, string) The ID of the action saved object to execute.
-
-  `actionTypeId`:::
-    (Required, string) The ID of the <<action-types,action type>>.
+    (Required, string) The ID of the connector saved object to execute.
 
   `params`:::
-    (Required, object) The map to the `params` that the <<action-types,action type>> will receive. ` params` are handled as Mustache templates and passed a default set of context.
+    (Required, object) The map to the `params` that the <<action-types,connector type>> will receive. ` params` are handled as Mustache templates and passed a default set of context.
 =====
 
 
-[[alerts-api-create-request-codes]]
+[[rules-create-api-request-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[alerts-api-create-example]]
+[[rules-create-api-example]]
 ==== Example
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/alerts/alert  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+$ curl -X POST api/alerting/rule  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
 {
   "params":{
       "aggType":"avg",
@@ -114,14 +111,13 @@ $ curl -X POST api/alerts/alert  -H 'kbn-xsrf: true' -H 'Content-Type: applicati
       "termField":"name.keyword"
    },
    "consumer":"alerts",
-   "alertTypeId":".index-threshold",
+   "rule_type_id":".index-threshold",
    "schedule":{
       "interval":"1m"
    },
    "actions":[
       {
          "id":"dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
-         "actionTypeId":".server-log",
          "group":"threshold met",
          "params":{
             "level":"info",
@@ -132,7 +128,7 @@ $ curl -X POST api/alerts/alert  -H 'kbn-xsrf: true' -H 'Content-Type: applicati
    "tags":[
       "cpu"
    ],
-   "notifyWhen":"onActionGroupChange",
+   "notify_when":"onActionGroupChange",
    "name":"my alert"
 }'
 --------------------------------------------------
@@ -144,7 +140,7 @@ The API returns the following:
 --------------------------------------------------
 {
   "id": "41893910-6bca-11eb-9e0d-85d233e3ee35",
-  "notifyWhen": "onActionGroupChange",
+  "notify_when": "onActionGroupChange",
   "params": {
     "aggType": "avg",
     "termSize": 6,
@@ -163,13 +159,13 @@ The API returns the following:
     "termField": "name.keyword"
   },
   "consumer": "alerts",
-  "alertTypeId": ".index-threshold",
+  "rule_type_id": ".index-threshold",
   "schedule": {
     "interval": "1m"
   },
   "actions": [
     {
-      "actionTypeId": ".server-log",
+      "connector_type_id": ".server-log",
       "group": "threshold met",
       "params": {
         "level": "info",
@@ -184,16 +180,16 @@ The API returns the following:
   "name": "my alert",
   "enabled": true,
   "throttle": null,
-  "apiKeyOwner": "elastic",
-  "createdBy": "elastic",
-  "updatedBy": "elastic",
-  "muteAll": false,
-  "mutedInstanceIds": [],
-  "updatedAt": "2021-02-10T18:03:19.961Z",
-  "createdAt": "2021-02-10T18:03:19.961Z",
-  "scheduledTaskId": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
-  "executionStatus": {
-    "lastExecutionDate": "2021-02-10T18:03:19.966Z",
+  "api_key_owner": "elastic",
+  "created_by": "elastic",
+  "updated_by": "elastic",
+  "mute_all": false,
+  "muted_alert_ids": [],
+  "updated_at": "2021-02-10T18:03:19.961Z",
+  "created_at": "2021-02-10T18:03:19.961Z",
+  "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
+  "execution_status": {
+    "last_execution_date": "2021-02-10T18:03:19.966Z",
     "status": "pending"
   }
 }

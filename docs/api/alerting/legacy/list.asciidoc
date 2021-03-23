@@ -1,31 +1,35 @@
-[[alerts-api-list]]
-=== List alert types API
+[[alerts-legacy-api-list]]
+=== Legacy list alert types API
 ++++
-<titleabbrev>List all alert types API</titleabbrev>
+<titleabbrev>Legacy list all alert types</titleabbrev>
 ++++
+
+deprecated::[7.13.0]
+
+Please use the <<alerting-list-rule-types-api>> instead.
 
 Retrieve a list of all alert types.
 
-[[alerts-api-list-request]]
+[[alerts-legacy-api-list-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/alerts/list_alert_types`
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerts/list_alert_types`
 
-[[alerts-api-list-params]]
+[[alerts-legacy-api-list-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-api-list-codes]]
+[[alerts-legacy-api-list-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[alerts-api-list-example]]
+[[alerts-legacy-api-list-example]]
 ==== Example
 
 [source,sh]

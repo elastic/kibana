@@ -1,19 +1,23 @@
-[[alerts-api-unmute-all]]
-=== Unmute all alert instances API
+[[alerts-legacy-api-unmute-all]]
+=== Legacy unmute all alert instances API
 ++++
-<titleabbrev>Unmute all alert instances</titleabbrev>
+<titleabbrev>Legacy unmute all alert instances</titleabbrev>
 ++++
+
+deprecated::[7.13.0]
+
+Please use the <<rules-unmute-all-api>> instead.
 
 Unmute all alert instances.
 
-[[alerts-api-unmute-all-request]]
+[[alerts-legacy-api-unmute-all-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>/_unmute_all`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/_unmute_all`
 
-[[alerts-api-unmute-all-path-params]]
+[[alerts-legacy-api-unmute-all-path-params]]
 ==== Path parameters
 
 `id`::
@@ -22,7 +26,7 @@ Unmute all alert instances.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-api-unmute-all-response-codes]]
+[[alerts-legacy-api-unmute-all-response-codes]]
 ==== Response code
 
 `200`::
