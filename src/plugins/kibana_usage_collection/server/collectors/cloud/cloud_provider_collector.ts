@@ -7,9 +7,16 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CloudDetector, CloudServiceResponseJson } from './detector';
+import { CloudDetector } from './detector';
 
-type Usage = Omit<CloudServiceResponseJson, 'metadata'> & { metadata?: string };
+interface Usage {
+  name: string;
+  id?: string;
+  vm_type?: string;
+  region?: string;
+  zone?: string;
+  metadata?: string;
+}
 
 export function registerCloudProviderUsageCollector(usageCollection: UsageCollectionSetup) {
   const cloudDetector = new CloudDetector();

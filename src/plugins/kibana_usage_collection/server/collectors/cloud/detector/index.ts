@@ -7,4 +7,3 @@
  */
 
 export { CloudDetector } from './cloud_detector';
-export type { CloudServiceResponseJson } from './cloud_response';

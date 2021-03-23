@@ -6370,6 +6370,46 @@
         }
       }
     },
+    "cloud_provider": {
+      "properties": {
+        "name": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The name of the cloud provider"
+          }
+        },
+        "id": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The ID of the VM"
+          }
+        },
+        "vm_type": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The VM instance type"
+          }
+        },
+        "region": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The cloud provider region"
+          }
+        },
+        "zone": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The availability zone within the region"
+          }
+        },
+        "metadata": {
+          "type": "text",
+          "_meta": {
+            "description": "Stringified object containing other metadata from the cloud provider"
+          }
+        }
+      }
+    },
     "core": {
       "properties": {
         "config": {
