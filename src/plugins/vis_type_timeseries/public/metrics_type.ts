@@ -79,13 +79,8 @@ export const metricsVisDefinition = {
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
+    const { indexPattern } = await fetchIndexPattern(params.index_pattern, indexPatterns);
 
-    if (params.index_pattern) {
-      const { indexPattern } = await fetchIndexPattern(params.index_pattern, indexPatterns);
-      if (indexPattern) {
-        return [indexPattern];
-      }
-    }
-    return [];
+    return indexPattern ? [indexPattern] : [];
   },
 };

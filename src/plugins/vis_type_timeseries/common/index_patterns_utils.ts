@@ -51,7 +51,7 @@ export const extractIndexPatternValues = (
 };
 
 export const fetchIndexPattern = async (
-  indexPatternValue: IndexPatternValue,
+  indexPatternValue: IndexPatternValue | undefined,
   indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>
 ): Promise<FetchedIndexPattern> => {
   let indexPattern: FetchedIndexPattern['indexPattern'];
