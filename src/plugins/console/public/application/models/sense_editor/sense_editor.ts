@@ -18,7 +18,7 @@ import * as es from '../../../lib/es/es';
 
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
-import Autocomplete from '../../../lib/autocomplete/autocomplete';
+import createAutocompleter from '../../../lib/autocomplete/autocomplete';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -26,13 +26,12 @@ export class SenseEditor {
   currentReqRange: (Range & { markerRef: unknown }) | null;
   parser: RowParser;
 
-  // @ts-ignore
-  private readonly autocomplete: Autocomplete;
+  private readonly autocomplete: ReturnType<typeof createAutocompleter>;
 
   constructor(private readonly coreEditor: CoreEditor) {
     this.currentReqRange = null;
     this.parser = new RowParser(this.coreEditor);
-    this.autocomplete = new (Autocomplete as any)({
+    this.autocomplete = createAutocompleter({
       coreEditor,
       parser: this.parser,
     });
