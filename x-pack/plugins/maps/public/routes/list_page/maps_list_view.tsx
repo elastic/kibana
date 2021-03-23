@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useState } from 'react';
+import React, { MouseEvent, useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import { SavedObjectReference } from 'src/core/types';
 import { i18n } from '@kbn/i18n';
@@ -25,6 +25,7 @@ import {
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
+import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public';
 
 interface MapItem {
   id: string;
@@ -123,9 +124,15 @@ async function deleteMaps(items: object[]) {
   await Promise.all(deletions);
 }
 
-export function MapsListView() {
+export function MapsListView({ stateTransfer }: { stateTransfer: EmbeddableStateTransfer }) {
+  useEffect(
+    () => {
+      stateTransfer.clearEditorState(APP_ID);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
   const [numMaps, setNumMaps] = useState(1);
-
   const isReadOnly = !getMapsCapabilities().save;
 
   getCoreChrome().docTitle.change(getAppTitle());

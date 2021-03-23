@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { LoadListAndRender as ListPage } from './load_list_and_render';
+export { MapsListView as ListPage } from './maps_list_view';
