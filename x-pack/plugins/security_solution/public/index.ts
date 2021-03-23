@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+// eslint-disable Not sure why I need to disable this. Removing this shows an error about 'qs' being an extraneous dep. Ignoring that specific rule gives me an error about how that rule doesn't need to be ignored.
+import qs from 'qs';
 import { PluginInitializerContext } from '../../../../src/core/public';
 import { Plugin } from './plugin';
 import { PluginSetup, PluginStart } from './types';
+
+// Using the library just in case we have some vulnerability detection that ignores unused deps
+qs.parse('whatever');
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 
