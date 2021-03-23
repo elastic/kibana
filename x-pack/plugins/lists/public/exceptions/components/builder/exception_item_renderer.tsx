@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { HttpStart } from 'kibana/public';
+import { AutocompleteStart } from 'src/plugins/data/public';
 
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { ExceptionListType } from '../../../../common';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+
+import { BuilderEntry, ExceptionsBuilderExceptionItem, FormattedBuilderEntry } from './types';
+import { BuilderAndBadgeComponent } from './and_badge';
+import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
+import { BuilderEntryItem } from './entry_renderer';
 import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
-import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } from '../types';
-import {
-  BuilderEntryItem,
-  BuilderAndBadgeComponent,
-  BuilderEntryDeleteButtonComponent,
-  ExceptionListType,
-} from '../../../../shared_imports';
-import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { useKibana } from '../../../lib/kibana';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
-    background: ${({ theme }) => theme.eui.euiColorLightShade};
+    background: ${({ theme }): string => theme.eui.euiColorLightShade};
     content: '';
     width: 2px;
     height: 40px;
@@ -38,6 +36,9 @@ const MyOverflowContainer = styled(EuiFlexItem)`
 `;
 
 interface BuilderExceptionListItemProps {
+  allowLargeValueLists: boolean;
+  httpService: HttpStart;
+  autocompleteService: AutocompleteStart;
   exceptionItem: ExceptionsBuilderExceptionItem;
   exceptionItemIndex: number;
   indexPattern: IIndexPattern;
@@ -48,11 +49,13 @@ interface BuilderExceptionListItemProps {
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
-  ruleType?: Type;
 }
 
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
   ({
+    allowLargeValueLists,
+    httpService,
+    autocompleteService,
     exceptionItem,
     exceptionItemIndex,
     indexPattern,
@@ -63,9 +66,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     onChangeExceptionItem,
     setErrorsExist,
     onlyShowListOperators = false,
-    ruleType,
   }) => {
-    const { http, data } = useKibana().services;
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
         const updatedEntries: BuilderEntry[] = [
@@ -122,9 +123,9 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                       {item.nested === 'child' && <MyBeautifulLine grow={false} />}
                       <MyOverflowContainer grow={1}>
                         <BuilderEntryItem
-                          allowLargeValueLists={!isEqlRule(ruleType) && !isThresholdRule(ruleType)}
-                          httpService={http}
-                          autocompleteService={data.autocomplete}
+                          allowLargeValueLists={allowLargeValueLists}
+                          httpService={httpService}
+                          autocompleteService={autocompleteService}
                           entry={item}
                           indexPattern={indexPattern}
                           listType={listType}

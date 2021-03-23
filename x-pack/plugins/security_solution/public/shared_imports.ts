@@ -61,4 +61,5 @@ export {
   BuilderEntryItem,
   BuilderAndBadgeComponent,
   BuilderEntryDeleteButtonComponent,
+  BuilderExceptionListItemComponent,
 } from '../../lists/public';
