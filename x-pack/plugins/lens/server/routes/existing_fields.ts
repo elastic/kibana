@@ -213,10 +213,7 @@ async function fetchIndexPatternStats({
 /**
  * Exported only for unit tests.
  */
-export function existingFields(
-  docs: Array<estypes.Hit>,
-  fields: Field[]
-): string[] {
+export function existingFields(docs: estypes.Hit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 
   for (const doc of docs) {
@@ -225,7 +222,7 @@ export function existingFields(
     }
 
     missingFields.forEach((field) => {
-      let fieldStore: Record<string, any> = doc.fields!;
+      let fieldStore = doc.fields!;
       if (field.isMeta) {
         fieldStore = doc;
       }
