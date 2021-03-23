@@ -23,6 +23,10 @@ import { CreateTrustedAppForm, CreateTrustedAppFormProps } from './create_truste
 import { defaultNewTrustedApp } from '../../store/builders';
 import { forceHTMLElementOffsetWidth } from './effected_policy_select/test_utils';
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+
+jest.mock('../../../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('When using the Trusted App Form', () => {
   const dataTestSubjForForm = 'createForm';
@@ -109,6 +113,7 @@ describe('When using the Trusted App Form', () => {
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
+    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 
     mockedContext = createAppRootMockRenderer();
 
@@ -291,6 +296,16 @@ describe('When using the Trusted App Form', () => {
           'true'
         );
       });
+    });
+  });
+
+  describe('the Policy Selection area under feature flag', () => {
+    it("shouldn't display the policiy selection area ", () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+      render();
+      expect(
+        renderResult.queryByText('Apply trusted application globally')
+      ).not.toBeInTheDocument();
     });
   });
 
