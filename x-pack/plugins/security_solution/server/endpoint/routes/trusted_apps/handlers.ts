@@ -18,6 +18,7 @@ import {
   PutTrustedAppsRequestParams,
   PutTrustedAppUpdateRequest,
 } from '../../../../common/endpoint/types';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { EndpointAppContext } from '../../types';
 
 import {
@@ -29,6 +30,19 @@ import {
   updateTrustedApp,
 } from './service';
 import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
+
+const getBodyAfterFeatureFlagCheck = async (
+  body: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest,
+  endpointAppContext: EndpointAppContext
+): Promise<PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest> => {
+  const config = await endpointAppContext.config();
+  const isTrustedAppsByPolicyEnabled = parseExperimentalConfigValue(config.enableExperimental)
+    .trustedAppsByPolicyEnabled;
+  return {
+    ...body,
+    ...(isTrustedAppsByPolicyEnabled ? body.effectScope : { effectSctope: { type: 'policy:all' } }),
+  };
+};
 
 const exceptionListClientFromContext = (
   context: SecuritySolutionRequestHandlerContext
@@ -133,11 +147,12 @@ export const getTrustedAppsCreateRouteHandler = (
   SecuritySolutionRequestHandlerContext
 > => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
-
   return async (context, req, res) => {
     try {
+      const body = await getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
+
       return res.ok({
-        body: await createTrustedApp(exceptionListClientFromContext(context), req.body),
+        body: await createTrustedApp(exceptionListClientFromContext(context), body),
       });
     } catch (error) {
       return errorHandler(logger, res, error);
@@ -157,12 +172,10 @@ export const getTrustedAppsUpdateRouteHandler = (
 
   return async (context, req, res) => {
     try {
+      const body = await getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
+
       return res.ok({
-        body: await updateTrustedApp(
-          exceptionListClientFromContext(context),
-          req.params.id,
-          req.body
-        ),
+        body: await updateTrustedApp(exceptionListClientFromContext(context), req.params.id, body),
       });
     } catch (error) {
       return errorHandler(logger, res, error);

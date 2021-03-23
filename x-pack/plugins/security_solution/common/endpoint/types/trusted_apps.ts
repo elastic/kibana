@@ -51,7 +51,8 @@ export interface PostTrustedAppCreateResponse {
 export type PutTrustedAppsRequestParams = TypeOf<typeof PutTrustedAppUpdateRequestSchema.params>;
 
 /** API Request body for Updating a new Trusted App entry */
-export type PutTrustedAppUpdateRequest = TypeOf<typeof PutTrustedAppUpdateRequestSchema.body>;
+export type PutTrustedAppUpdateRequest = TypeOf<typeof PutTrustedAppUpdateRequestSchema.body> &
+  (MacosLinuxConditionEntries | WindowsConditionEntries);
 
 export type PutTrustedAppUpdateResponse = PostTrustedAppCreateResponse;
 

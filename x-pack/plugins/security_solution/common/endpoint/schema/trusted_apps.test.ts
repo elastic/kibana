@@ -6,9 +6,9 @@
  */
 
 import {
-  getGetTrustedAppsRequestSchema,
-  getPostTrustedAppCreateRequestSchema,
-  getPutTrustedAppUpdateRequestSchema,
+  GetTrustedAppsRequestSchema,
+  PostTrustedAppCreateRequestSchema,
+  PutTrustedAppUpdateRequestSchema,
 } from './trusted_apps';
 import {
   ConditionEntry,
@@ -17,12 +17,6 @@ import {
   OperatingSystem,
   PutTrustedAppsRequestParams,
 } from '../types';
-import { ExperimentalFeatures } from '../../experimental_features';
-
-const experimentalValues: ExperimentalFeatures = {
-  fleetServerEnabled: false,
-  trustedAppsByPolicyEnabled: true,
-};
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -30,7 +24,7 @@ describe('When invoking Trusted Apps Schema', () => {
       page,
       per_page: perPage,
     });
-    const query = getGetTrustedAppsRequestSchema(experimentalValues).query;
+    const query = GetTrustedAppsRequestSchema.query;
 
     describe('query param validation', () => {
       it('should return query params if valid', () => {
@@ -103,7 +97,7 @@ describe('When invoking Trusted Apps Schema', () => {
       entries: [createConditionEntry()],
       ...(data || {}),
     });
-    const body = getPostTrustedAppCreateRequestSchema(experimentalValues).body;
+    const body = PostTrustedAppCreateRequestSchema.body;
 
     it('should not error on a valid message', () => {
       const bodyMsg = createNewTrustedApp();
@@ -368,8 +362,9 @@ describe('When invoking Trusted Apps Schema', () => {
       id: 'validId',
       ...(data || {}),
     });
-    const body = getPutTrustedAppUpdateRequestSchema(experimentalValues).body;
-    const params = getPutTrustedAppUpdateRequestSchema(experimentalValues).params;
+
+    const body = PutTrustedAppUpdateRequestSchema.body;
+    const params = PutTrustedAppUpdateRequestSchema.params;
 
     it('should not error on a valid message', () => {
       const bodyMsg = createNewTrustedApp();

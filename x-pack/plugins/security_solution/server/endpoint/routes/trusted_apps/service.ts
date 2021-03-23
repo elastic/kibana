@@ -6,7 +6,10 @@
  */
 
 import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
+import {
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ExceptionListItemSchema,
+} from '../../../../../lists/common';
 
 import {
   DeleteTrustedAppsRequestParams,
@@ -26,7 +29,6 @@ import {
   osFromExceptionItem,
   updatedTrustedAppToUpdateExceptionListItemOptions,
 } from './mapping';
-import { ExceptionListItemSchema } from '../../../../../lists/common';
 import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 
 export const deleteTrustedApp = async (
