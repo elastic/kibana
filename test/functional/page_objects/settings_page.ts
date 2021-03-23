@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { map as mapAsync } from 'bluebird';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../)ftr_provider_context';
 
 export function SettingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -200,23 +199,29 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getFieldNames() {
       const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldName');
-      return await mapAsync(fieldNameCells, async (cell) => {
-        return (await cell.getVisibleText()).trim();
-      });
+      return await Promise.all(
+        fieldNameCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
     }
 
     async getFieldTypes() {
       const fieldNameCells = await testSubjects.findAll('editIndexPattern > indexedFieldType');
-      return await mapAsync(fieldNameCells, async (cell) => {
-        return (await cell.getVisibleText()).trim();
-      });
+      return await await Promise.all(
+        fieldNameCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
     }
 
     async getScriptedFieldLangs() {
       const fieldNameCells = await testSubjects.findAll('editIndexPattern > scriptedFieldLang');
-      return await mapAsync(fieldNameCells, async (cell) => {
-        return (await cell.getVisibleText()).trim();
-      });
+      return await await Promise.all(
+        fieldNameCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
     }
 
     async setFieldTypeFilter(type: string) {
@@ -293,9 +298,11 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getAllIndexPatternNames() {
       const indexPatterns = await this.getIndexPatternList();
-      return await mapAsync(indexPatterns, async (index) => {
-        return await index.getVisibleText();
-      });
+      return await await Promise.all(
+        indexPatterns.map(async (index) => {
+          return await index.getVisibleText();
+        })
+      );
     }
 
     async isIndexPatternListEmpty() {

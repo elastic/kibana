@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
@@ -344,7 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await timer(20000).toPromise();
 
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access token.
@@ -368,7 +368,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await timer(20000).toPromise();
 
         // This request should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.

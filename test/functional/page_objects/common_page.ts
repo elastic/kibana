@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 import expect from '@kbn/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
@@ -198,7 +198,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async sleep(sleepMilliseconds: number) {
       log.debug(`... sleep(${sleepMilliseconds}) start`);
-      await delay(sleepMilliseconds);
+      await timer(sleepMilliseconds).toPromise();
       log.debug(`... sleep(${sleepMilliseconds}) end`);
     }
 

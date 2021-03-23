@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { props as propsAsync } from 'bluebird';
 
 export function PipelineEditorProvider({ getService }) {
   const retry = getService('retry');
@@ -125,22 +124,39 @@ export function PipelineEditorProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertInputs(expectedValues) {
-      const values = await propsAsync({
-        id: testSubjects.getAttribute(SUBJ_INPUT_ID, 'value'),
-        description: testSubjects.getAttribute(SUBJ_INPUT_DESCRIPTION, 'value'),
-        pipeline: aceEditor.getValue(SUBJ_UI_ACE_PIPELINE),
-        workers: testSubjects.getAttribute(SUBJ_INPUT_WORKERS, 'value'),
-        batchSize: testSubjects.getAttribute(SUBJ_INPUT_BATCH_SIZE, 'value'),
-        queueType: testSubjects.getAttribute(SUBJ_SELECT_QUEUE_TYPE, 'value'),
-        queueMaxBytesNumber: testSubjects.getAttribute(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, 'value'),
-        queueMaxBytesUnits: testSubjects.getAttribute(SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS, 'value'),
-        queueCheckpointWrites: testSubjects.getAttribute(
-          SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES,
-          'value'
-        ),
-      });
+      const [
+        id,
+        description,
+        pipeline,
+        workers,
+        batchSize,
+        queueType,
+        queueMaxBytesNumber,
+        queueMaxBytesUnits,
+        queueCheckpointWrites,
+      ] = Promise.all([
+        testSubjects.getAttribute(SUBJ_INPUT_ID, 'value'),
+        testSubjects.getAttribute(SUBJ_INPUT_DESCRIPTION, 'value'),
+        aceEditor.getValue(SUBJ_UI_ACE_PIPELINE),
+        testSubjects.getAttribute(SUBJ_INPUT_WORKERS, 'value'),
+        testSubjects.getAttribute(SUBJ_INPUT_BATCH_SIZE, 'value'),
+        testSubjects.getAttribute(SUBJ_SELECT_QUEUE_TYPE, 'value'),
+        testSubjects.getAttribute(SUBJ_INPUT_QUEUE_MAX_BYTES_NUMBER, 'value'),
+        testSubjects.getAttribute(SUBJ_SELECT_QUEUE_MAX_BYTES_UNITS, 'value'),
+        testSubjects.getAttribute(SUBJ_INPUT_QUEUE_CHECKPOINT_WRITES, 'value'),
+      ]);
 
-      expect(values).to.eql(expectedValues);
+      expect({
+        id,
+        description,
+        pipeline,
+        workers,
+        batchSize,
+        queueType,
+        queueMaxBytesNumber,
+        queueMaxBytesUnits,
+        queueCheckpointWrites,
+      }).to.eql(expectedValues);
     }
 
     async assertNoDeleteButton() {

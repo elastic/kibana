@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import bluebird, { promisify } from 'bluebird';
+import { promisify } from 'util';
 import Handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
@@ -73,56 +73,58 @@ async function compareScreenshots() {
   const screenshots = files.filter((file) => file.indexOf('.png') !== -1);
 
   // We'll use this data to build a screenshot gallery in HTML.
-  return await bluebird.map(screenshots, async (screenshot) => {
-    // We're going to load image data and cache it in this object.
-    const comparison = {
-      name: screenshot,
-      change: undefined,
-      percentage: undefined,
-      imageData: {
-        session: undefined,
-        baseline: undefined,
-        diff: undefined,
-      },
-    };
+  return await Promise.all(
+    screenshots.map(async (screenshot) => {
+      // We're going to load image data and cache it in this object.
+      const comparison = {
+        name: screenshot,
+        change: undefined,
+        percentage: undefined,
+        imageData: {
+          session: undefined,
+          baseline: undefined,
+          diff: undefined,
+        },
+      };
 
-    const sessionImagePath = path.resolve(SESSION_SCREENSHOTS_DIR, screenshot);
+      const sessionImagePath = path.resolve(SESSION_SCREENSHOTS_DIR, screenshot);
 
-    const baselineImagePath = path.resolve(BASELINE_SCREENSHOTS_DIR, screenshot);
+      const baselineImagePath = path.resolve(BASELINE_SCREENSHOTS_DIR, screenshot);
 
-    const diffImagePath = path.resolve(DIFF_SCREENSHOTS_DIR, screenshot);
+      const diffImagePath = path.resolve(DIFF_SCREENSHOTS_DIR, screenshot);
 
-    const sessionImage = PNG.sync.read(await readFileAsync(sessionImagePath));
-    const baselineImage = PNG.sync.read(await readFileAsync(baselineImagePath));
-    const { width, height } = sessionImage;
-    const diff = new PNG({ width, height });
+      const sessionImage = PNG.sync.read(await readFileAsync(sessionImagePath));
+      const baselineImage = PNG.sync.read(await readFileAsync(baselineImagePath));
+      const { width, height } = sessionImage;
+      const diff = new PNG({ width, height });
 
-    const numDiffPixels = pixelmatch(
-      sessionImage.data,
-      baselineImage.data,
-      diff.data,
-      width,
-      height,
-      { threshold: 0 }
-    );
+      const numDiffPixels = pixelmatch(
+        sessionImage.data,
+        baselineImage.data,
+        diff.data,
+        width,
+        height,
+        { threshold: 0 }
+      );
 
-    await writeFileAsync(diffImagePath, PNG.sync.write(diff));
+      await writeFileAsync(diffImagePath, PNG.sync.write(diff));
 
-    const change = numDiffPixels / (width * height);
-    const changePercentage = (change * 100).toFixed(2);
-    console.log(`(${changePercentage}%) ${screenshot}`);
-    comparison.percentage = changePercentage;
-    comparison.change = change;
+      const change = numDiffPixels / (width * height);
+      const changePercentage = (change * 100).toFixed(2);
+      console.log(`(${changePercentage}%) ${screenshot}`);
+      comparison.percentage = changePercentage;
+      comparison.change = change;
 
-    // Once the images have been diffed, we can load and store the image data.
-    comparison.imageData.session = await readFileAsync(sessionImagePath, 'base64');
+      // Once the images have been diffed, we can load and store the image data.
+      comparison.imageData.session = await readFileAsync(sessionImagePath, 'base64');
 
-    comparison.imageData.baseline = await readFileAsync(baselineImagePath, 'base64');
+      comparison.imageData.baseline = await readFileAsync(baselineImagePath, 'base64');
 
-    comparison.imageData.diff = await readFileAsync(diffImagePath, 'base64');
+      comparison.imageData.diff = await readFileAsync(diffImagePath, 'base64');
 
-    return comparison;
-  });
+      return comparison;
+    })
+  );
 }
 
 export function run(done) {

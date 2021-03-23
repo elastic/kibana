@@ -7,9 +7,9 @@
  */
 
 import { resolve, dirname, relative } from 'path';
-import { stat, Stats, rename, createReadStream, createWriteStream } from 'fs';
+import { createReadStream, createWriteStream } from 'fs';
+import { stat, rename } from 'fs/promises';
 import { Readable, Writable } from 'stream';
-import { fromNode } from 'bluebird';
 import { ToolingLog } from '@kbn/dev-utils';
 import { createPromiseFromStreams } from '@kbn/utils';
 import {
@@ -21,8 +21,8 @@ import {
 } from '../lib';
 
 async function isDirectory(path: string): Promise<boolean> {
-  const stats: Stats = await fromNode((cb) => stat(path, cb));
-  return stats.isDirectory();
+  const pathStats = await stat(path);
+  return pathStats.isDirectory();
 }
 
 export async function rebuildAllAction({
@@ -59,7 +59,7 @@ export async function rebuildAllAction({
       createWriteStream(tempFile),
     ] as [Readable, ...Writable[]]);
 
-    await fromNode((cb) => rename(tempFile, childPath, cb));
+    await rename(tempFile, childPath);
     log.info(`${archiveName} Rebuilt ${childName}`);
   }
 }

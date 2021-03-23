@@ -9,7 +9,7 @@
 import minimist from 'minimist';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import bluebird from 'bluebird';
+import { chain } from 'lodash';
 import { basename } from 'path';
 import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
 import { NewTrustedApp, OperatingSystem, TrustedApp } from '../../../common/endpoint/types';
@@ -73,21 +73,28 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
     path: TRUSTED_APPS_LIST_API,
   });
 
-  return bluebird.map(
-    Array.from({ length: count }),
-    () =>
-      kbnClient
-        .request<TrustedApp>({
-          method: 'POST',
-          path: TRUSTED_APPS_CREATE_API,
-          body: generateTrustedAppEntry(),
-        })
-        .then(({ data }) => {
-          logger.write(data.id);
-          return data;
-        }),
-    { concurrency: 10 }
-  );
+  const results = [];
+
+  // 10 concurrent requests at a time.
+  const invokeRequestChunks = chain(Array(count))
+    .fill(async () => {
+      const { data } = await kbnClient.request<TrustedApp>({
+        method: 'POST',
+        path: TRUSTED_APPS_CREATE_API,
+        body: generateTrustedAppEntry(),
+      });
+      logger.write(data.id);
+      return data;
+    })
+    .chunk(10)
+    .value();
+
+  for await (const invokeRequestChunk of invokeRequestChunks) {
+    const result = await Promise.all(invokeRequestChunk.map(invokeRequest));
+    results.concat(result);
+  }
+
+  return results;
 };
 
 interface GenerateTrustedAppEntryOptions {

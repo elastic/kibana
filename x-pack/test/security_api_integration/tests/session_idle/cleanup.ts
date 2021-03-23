@@ -6,7 +6,7 @@
  */
 
 import request, { Cookie } from 'request';
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
       // idle timeout, let's wait for 40s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(40000);
+      await timer(40000).toPromise();
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
       // idle timeout, let's wait for 40s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(40000);
+      await timer(40000).toPromise();
 
       // Session for basic and SAML that used global session settings should not be valid anymore.
       expect(await getNumberOfSessionDocuments()).to.be(2);
@@ -192,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
       // least twice.
       for (const counter of [...Array(20).keys()]) {
         // Session idle timeout is 15s, let's wait 10s and make a new request that would extend the session.
-        await delay(1500);
+        await timer(1500).toPromise();
 
         sessionCookie = (await checkSessionCookie(sessionCookie, basicUsername, {
           type: 'basic',

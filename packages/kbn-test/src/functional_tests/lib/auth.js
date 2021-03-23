@@ -11,7 +11,7 @@ import util from 'util';
 import { format as formatUrl } from 'url';
 
 import request from 'request';
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 
 export const DEFAULT_SUPERUSER_PASS = 'changeme';
 
@@ -56,7 +56,7 @@ async function updateCredentials({
   }
 
   if (retries > 0) {
-    await delay(2500);
+    await timer(2500).toPromise();
     return await updateCredentials({
       port,
       auth,
@@ -134,7 +134,7 @@ async function insertUser({
   }
 
   if (retries > 0) {
-    await delay(2500);
+    await timer(2500).toPromise();
     return await insertUser({
       port,
       auth,

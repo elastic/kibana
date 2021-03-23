@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { map as mapAsync } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IndexLifecycleManagementPageProvider({ getService }: FtrProviderContext) {
@@ -57,27 +56,29 @@ export function IndexLifecycleManagementPageProvider({ getService }: FtrProvider
 
     async getPolicyList() {
       const policies = await testSubjects.findAll('policyTableRow');
-      return mapAsync(policies, async (policy) => {
-        const policyNameElement = await policy.findByTestSubject('policyTableCell-name');
-        const policyLinkedIndicesElement = await policy.findByTestSubject(
-          'policyTableCell-linkedIndices'
-        );
-        const policyVersionElement = await policy.findByTestSubject('policyTableCell-version');
-        const policyModifiedDateElement = await policy.findByTestSubject(
-          'policyTableCell-modified_date'
-        );
-        const policyActionsButtonElement = await policy.findByTestSubject(
-          'policyActionsContextMenuButton'
-        );
+      return await Promise.all(
+        policies.map(async (policy) => {
+          const policyNameElement = await policy.findByTestSubject('policyTableCell-name');
+          const policyLinkedIndicesElement = await policy.findByTestSubject(
+            'policyTableCell-linkedIndices'
+          );
+          const policyVersionElement = await policy.findByTestSubject('policyTableCell-version');
+          const policyModifiedDateElement = await policy.findByTestSubject(
+            'policyTableCell-modified_date'
+          );
+          const policyActionsButtonElement = await policy.findByTestSubject(
+            'policyActionsContextMenuButton'
+          );
 
-        return {
-          name: await policyNameElement.getVisibleText(),
-          linkedIndices: await policyLinkedIndicesElement.getVisibleText(),
-          version: await policyVersionElement.getVisibleText(),
-          modifiedDate: await policyModifiedDateElement.getVisibleText(),
-          actionsButton: policyActionsButtonElement,
-        };
-      });
+          return {
+            name: await policyNameElement.getVisibleText(),
+            linkedIndices: await policyLinkedIndicesElement.getVisibleText(),
+            version: await policyVersionElement.getVisibleText(),
+            modifiedDate: await policyModifiedDateElement.getVisibleText(),
+            actionsButton: policyActionsButtonElement,
+          };
+        })
+      );
     },
   };
 }

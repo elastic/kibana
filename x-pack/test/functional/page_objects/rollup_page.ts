@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { map as mapAsync } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function RollupPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -112,31 +111,33 @@ export function RollupPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async getJobList() {
       const jobs = await testSubjects.findAll('jobTableRow');
-      return mapAsync(jobs, async (job) => {
-        const jobNameElement = await job.findByTestSubject('jobTableCell-id');
-        const jobStatusElement = await job.findByTestSubject('jobTableCell-status');
-        const jobIndexPatternElement = await job.findByTestSubject('jobTableCell-indexPattern');
-        const jobRollUpIndexPatternElement = await job.findByTestSubject(
-          'jobTableCell-rollupIndex'
-        );
-        const jobDelayElement = await job.findByTestSubject('jobTableCell-rollupDelay');
-        const jobIntervalElement = await job.findByTestSubject(
-          'jobTableCell-dateHistogramInterval'
-        );
-        const jobGroupElement = await job.findByTestSubject('jobTableCell-groups');
-        const jobMetricsElement = await job.findByTestSubject('jobTableCell-metrics');
+      return Promise.all(
+        jobs.map(async (job) => {
+          const jobNameElement = await job.findByTestSubject('jobTableCell-id');
+          const jobStatusElement = await job.findByTestSubject('jobTableCell-status');
+          const jobIndexPatternElement = await job.findByTestSubject('jobTableCell-indexPattern');
+          const jobRollUpIndexPatternElement = await job.findByTestSubject(
+            'jobTableCell-rollupIndex'
+          );
+          const jobDelayElement = await job.findByTestSubject('jobTableCell-rollupDelay');
+          const jobIntervalElement = await job.findByTestSubject(
+            'jobTableCell-dateHistogramInterval'
+          );
+          const jobGroupElement = await job.findByTestSubject('jobTableCell-groups');
+          const jobMetricsElement = await job.findByTestSubject('jobTableCell-metrics');
 
-        return {
-          jobName: await jobNameElement.getVisibleText(),
-          jobStatus: await jobStatusElement.getVisibleText(),
-          jobIndexPattern: await jobIndexPatternElement.getVisibleText(),
-          jobRollUpIndexPattern: await jobRollUpIndexPatternElement.getVisibleText(),
-          jobDelayElement: await jobDelayElement.getVisibleText(),
-          jobInterval: await jobIntervalElement.getVisibleText(),
-          jobGroup: await jobGroupElement.getVisibleText(),
-          jobMetrics: await jobMetricsElement.getVisibleText(),
-        };
-      });
+          return {
+            jobName: await jobNameElement.getVisibleText(),
+            jobStatus: await jobStatusElement.getVisibleText(),
+            jobIndexPattern: await jobIndexPatternElement.getVisibleText(),
+            jobRollUpIndexPattern: await jobRollUpIndexPatternElement.getVisibleText(),
+            jobDelayElement: await jobDelayElement.getVisibleText(),
+            jobInterval: await jobIntervalElement.getVisibleText(),
+            jobGroup: await jobGroupElement.getVisibleText(),
+            jobMetrics: await jobMetricsElement.getVisibleText(),
+          };
+        })
+      );
     }
   }
   return new RollupJobPage();

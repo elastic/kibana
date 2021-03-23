@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 import { cloneDeepWith } from 'lodash';
 import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
@@ -305,7 +305,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         to
       );
       // wait for 150ms to make sure the script has run
-      await delay(150);
+      await timer(150).toPromise();
     }
 
     /**

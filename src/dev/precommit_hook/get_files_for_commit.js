@@ -7,11 +7,9 @@
  */
 
 import SimpleGit from 'simple-git';
-import { fromNode as fcb } from 'bluebird';
-
 import { REPO_ROOT } from '@kbn/utils';
 import { File } from '../file';
-
+import { promisify } from 'util';
 /**
  * Get the files that are staged for commit (excluding deleted files)
  * as `File` objects that are aware of their commit status.
@@ -21,8 +19,10 @@ import { File } from '../file';
  */
 export async function getFilesForCommit(gitRef) {
   const simpleGit = new SimpleGit(REPO_ROOT);
+  const diffAsync = promisify(simpleGit.diff).bind(simpleGit);
+
   const gitRefForDiff = gitRef ? gitRef : '--cached';
-  const output = await fcb((cb) => simpleGit.diff(['--name-status', gitRefForDiff], cb));
+  const output = await diffAsync(['--name-status', gitRefForDiff]);
 
   return (
     output

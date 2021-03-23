@@ -7,7 +7,6 @@
  */
 
 import { keyBy } from 'lodash';
-import { map as mapAsync } from 'bluebird';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -182,53 +181,55 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
     async getElementsInTable() {
       const rows = await testSubjects.findAll('~savedObjectsTableRow');
-      return mapAsync(rows, async (row) => {
-        const checkbox = await row.findByCssSelector('[data-test-subj*="checkboxSelectRow"]');
-        // return the object type aria-label="index patterns"
-        const objectType = await row.findByTestSubject('objectType');
-        const titleElement = await row.findByTestSubject('savedObjectsTableRowTitle');
-        // not all rows have inspect button - Advanced Settings objects don't
-        // Advanced Settings has 2 actions,
-        //   data-test-subj="savedObjectsTableAction-relationships"
-        //   data-test-subj="savedObjectsTableAction-copy_saved_objects_to_space"
-        // Some other objects have the ...
-        //   data-test-subj="euiCollapsedItemActionsButton"
-        // Maybe some objects still have the inspect element visible?
-        // !!! Also note that since we don't have spaces on OSS, the actions for the same object can be different depending on OSS or not
-        let menuElement = null;
-        let inspectElement = null;
-        let relationshipsElement = null;
-        let copySaveObjectsElement = null;
-        const actions = await row.findByClassName('euiTableRowCell--hasActions');
-        // getting the innerHTML and checking if it 'includes' a string is faster than a timeout looking for each element
-        const actionsHTML = await actions.getAttribute('innerHTML');
-        if (actionsHTML.includes('euiCollapsedItemActionsButton')) {
-          menuElement = await row.findByTestSubject('euiCollapsedItemActionsButton');
-        }
-        if (actionsHTML.includes('savedObjectsTableAction-inspect')) {
-          inspectElement = await row.findByTestSubject('savedObjectsTableAction-inspect');
-        }
-        if (actionsHTML.includes('savedObjectsTableAction-relationships')) {
-          relationshipsElement = await row.findByTestSubject(
-            'savedObjectsTableAction-relationships'
-          );
-        }
-        if (actionsHTML.includes('savedObjectsTableAction-copy_saved_objects_to_space')) {
-          copySaveObjectsElement = await row.findByTestSubject(
-            'savedObjectsTableAction-copy_saved_objects_to_space'
-          );
-        }
-        return {
-          checkbox,
-          objectType: await objectType.getAttribute('aria-label'),
-          titleElement,
-          title: await titleElement.getVisibleText(),
-          menuElement,
-          inspectElement,
-          relationshipsElement,
-          copySaveObjectsElement,
-        };
-      });
+      return await Promise.all(
+        rows.map(async (row) => {
+          const checkbox = await row.findByCssSelector('[data-test-subj*="checkboxSelectRow"]');
+          // return the object type aria-label="index patterns"
+          const objectType = await row.findByTestSubject('objectType');
+          const titleElement = await row.findByTestSubject('savedObjectsTableRowTitle');
+          // not all rows have inspect button - Advanced Settings objects don't
+          // Advanced Settings has 2 actions,
+          //   data-test-subj="savedObjectsTableAction-relationships"
+          //   data-test-subj="savedObjectsTableAction-copy_saved_objects_to_space"
+          // Some other objects have the ...
+          //   data-test-subj="euiCollapsedItemActionsButton"
+          // Maybe some objects still have the inspect element visible?
+          // !!! Also note that since we don't have spaces on OSS, the actions for the same object can be different depending on OSS or not
+          let menuElement = null;
+          let inspectElement = null;
+          let relationshipsElement = null;
+          let copySaveObjectsElement = null;
+          const actions = await row.findByClassName('euiTableRowCell--hasActions');
+          // getting the innerHTML and checking if it 'includes' a string is faster than a timeout looking for each element
+          const actionsHTML = await actions.getAttribute('innerHTML');
+          const [
+            menuElement = null,
+            inspectElement = null,
+            relationshipsElement = null,
+            copySaveObjectsElement = null,
+          ] = Promise.all([
+            actionsHTML.includes('euiCollapsedItemActionsButton') &&
+              row.findByTestSubject('euiCollapsedItemActionsButton'),
+            actionsHTML.includes('savedObjectsTableAction-inspect') &&
+              row.findByTestSubject('savedObjectsTableAction-inspect'),
+            actionsHTML.includes('savedObjectsTableAction-relationships') &&
+              row.findByTestSubject('savedObjectsTableAction-relationships'),
+            actionsHTML.includes('savedObjectsTableAction-copy_saved_objects_to_space') &&
+              row.findByTestSubject('savedObjectsTableAction-copy_saved_objects_to_space'),
+          ]);
+
+          return {
+            checkbox,
+            objectType: await objectType.getAttribute('aria-label'),
+            titleElement,
+            title: await titleElement.getVisibleText(),
+            menuElement,
+            inspectElement,
+            relationshipsElement,
+            copySaveObjectsElement,
+          };
+        })
+      );
     }
 
     async getRowTitles() {
@@ -242,35 +243,39 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
     async getRelationshipFlyout() {
       const rows = await testSubjects.findAll('relationshipsTableRow');
-      return mapAsync(rows, async (row) => {
-        const objectType = await row.findByTestSubject('relationshipsObjectType');
-        const relationship = await row.findByTestSubject('directRelationship');
-        const titleElement = await row.findByTestSubject('relationshipsTitle');
-        const inspectElement = await row.findByTestSubject('relationshipsTableAction-inspect');
-        return {
-          objectType: await objectType.getAttribute('aria-label'),
-          relationship: await relationship.getVisibleText(),
-          titleElement,
-          title: await titleElement.getVisibleText(),
-          inspectElement,
-        };
-      });
+      return Promise.all(
+        rows.map(async (row) => {
+          const objectType = await row.findByTestSubject('relationshipsObjectType');
+          const relationship = await row.findByTestSubject('directRelationship');
+          const titleElement = await row.findByTestSubject('relationshipsTitle');
+          const inspectElement = await row.findByTestSubject('relationshipsTableAction-inspect');
+          return {
+            objectType: await objectType.getAttribute('aria-label'),
+            relationship: await relationship.getVisibleText(),
+            titleElement,
+            title: await titleElement.getVisibleText(),
+            inspectElement,
+          };
+        })
+      );
     }
 
     async getInvalidRelations() {
       const rows = await testSubjects.findAll('invalidRelationshipsTableRow');
-      return mapAsync(rows, async (row) => {
-        const objectType = await row.findByTestSubject('relationshipsObjectType');
-        const objectId = await row.findByTestSubject('relationshipsObjectId');
-        const relationship = await row.findByTestSubject('directRelationship');
-        const error = await row.findByTestSubject('relationshipsError');
-        return {
-          type: await objectType.getVisibleText(),
-          id: await objectId.getVisibleText(),
-          relationship: await relationship.getVisibleText(),
-          error: await error.getVisibleText(),
-        };
-      });
+      return Promise.all(
+        rows.map(async (row) => {
+          const objectType = await row.findByTestSubject('relationshipsObjectType');
+          const objectId = await row.findByTestSubject('relationshipsObjectId');
+          const relationship = await row.findByTestSubject('directRelationship');
+          const error = await row.findByTestSubject('relationshipsError');
+          return {
+            type: await objectType.getVisibleText(),
+            id: await objectId.getVisibleText(),
+            relationship: await relationship.getVisibleText(),
+            error: await error.getVisibleText(),
+          };
+        })
+      );
     }
 
     async getTableSummary() {

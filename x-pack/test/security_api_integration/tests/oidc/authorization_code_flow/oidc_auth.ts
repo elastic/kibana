@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import url from 'url';
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 import { adminTestUser } from '@kbn/test';
 import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -515,7 +515,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Access token expiration is set to 15s for API integration tests.
         // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        await timer(20000).toPromise();
 
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.

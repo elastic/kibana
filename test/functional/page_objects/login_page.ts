@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function LoginPageProvider({ getService }: FtrProviderContext) {
@@ -62,7 +62,7 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
 
     async sleep(sleepMilliseconds: number) {
       log.debug(`... sleep(${sleepMilliseconds}) start`);
-      await delay(sleepMilliseconds);
+      await timer(sleepMilliseconds).toPromise();
       log.debug(`... sleep(${sleepMilliseconds}) end`);
     }
   }

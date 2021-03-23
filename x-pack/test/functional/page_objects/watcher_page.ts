@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { map as mapAsync } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function WatcherPageProvider({ getPageObjects, getService }: FtrProviderContext) {
@@ -52,17 +51,19 @@ export function WatcherPageProvider({ getPageObjects, getService }: FtrProviderC
     // get all the watches in the list
     async getWatches() {
       const watches = await find.allByCssSelector('.euiTableRow');
-      return mapAsync(watches, async (watch) => {
-        const checkBox = await watch.findByCssSelector('td:nth-child(1)');
-        const id = await watch.findByCssSelector('td:nth-child(2)');
-        const name = await watch.findByCssSelector('td:nth-child(3)');
+      return Promise.all(
+        watches.map(async (watch) => {
+          const checkBox = await watch.findByCssSelector('td:nth-child(1)');
+          const id = await watch.findByCssSelector('td:nth-child(2)');
+          const name = await watch.findByCssSelector('td:nth-child(3)');
 
-        return {
-          checkBox: (await checkBox.getAttribute('innerHTML')).includes('input'),
-          id: await id.getVisibleText(),
-          name: (await name.getVisibleText()).split(',').map((role) => role.trim()),
-        };
-      });
+          return {
+            checkBox: (await checkBox.getAttribute('innerHTML')).includes('input'),
+            id: await id.getVisibleText(),
+            name: (await name.getVisibleText()).split(',').map((role) => role.trim()),
+          };
+        })
+      );
     }
   }
   return new WatcherPage();

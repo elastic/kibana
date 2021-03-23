@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 
 import { createPromiseFromStreams } from './promise_from_streams';
 import { createListStream } from './list_stream';
@@ -39,7 +39,7 @@ describe('createMapStream()', () => {
     const result = await createPromiseFromStreams([
       createListStream([1, 2, 3]),
       createMapStream(async (n: number, i: number) => {
-        await delay(n);
+        await timer(n).toPromise();
         return n * i;
       }),
       createConcatStream([]),
