@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import '../../../__mocks__/shallow_useeffect.mock';
+
+import { setMockActions } from '../../../__mocks__';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -12,12 +16,21 @@ import { shallow } from 'enzyme';
 import { ResultSettings } from './result_settings';
 
 describe('RelevanceTuning', () => {
+  const actions = {
+    initializeResultSettingsData: jest.fn(),
+  };
   beforeEach(() => {
+    setMockActions(actions);
     jest.clearAllMocks();
   });
 
   it('renders', () => {
     const wrapper = shallow(<ResultSettings engineBreadcrumb={['test']} />);
     expect(wrapper.isEmptyRender()).toBe(false);
+  });
+
+  it('initializes result settings data when mounted', () => {
+    shallow(<ResultSettings engineBreadcrumb={['test']} />);
+    expect(actions.initializeResultSettingsData).toHaveBeenCalled();
   });
 });

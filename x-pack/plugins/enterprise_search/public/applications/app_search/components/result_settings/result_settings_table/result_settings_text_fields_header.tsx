@@ -58,7 +58,7 @@ export const ResultSettingsTextFieldsHeader: React.FC = () => {
         <EuiTableHeaderCell align="left">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.textFieldsTitle',
-            { defaultMessage: 'Text Fields' }
+            { defaultMessage: 'Text fields' }
           )}
         </EuiTableHeaderCell>
         <EuiTableHeaderCell align="center">
@@ -70,7 +70,7 @@ export const ResultSettingsTextFieldsHeader: React.FC = () => {
         <EuiTableHeaderCell align="center">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.maxSizeTitle',
-            { defaultMessage: 'Max Size' }
+            { defaultMessage: 'Max size' }
           )}
         </EuiTableHeaderCell>
         <EuiTableHeaderCell align="center">
@@ -88,7 +88,7 @@ export const ResultSettingsTextFieldsHeader: React.FC = () => {
         <EuiTableHeaderCell align="center">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.maxSizeTitle',
-            { defaultMessage: 'Max Size' }
+            { defaultMessage: 'Max size' }
           )}
         </EuiTableHeaderCell>
       </EuiTableHeader>
