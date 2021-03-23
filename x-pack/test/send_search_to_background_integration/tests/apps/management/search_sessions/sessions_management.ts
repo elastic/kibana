@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
 
-  describe('Search Sessions Management UI', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('Search Sessions Management UI', () => {
     describe('New search sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
@@ -38,7 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.deleteAllSearchSessions();
       });
 
-      it('Saves a session and verifies it in the Management app', async () => {
+      // eslint-disable-next-line ban/ban
+      it.only('Saves a session and verifies it in the Management app', async () => {
         log.debug('loading the "Not Delayed" dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
         await PageObjects.dashboard.waitForRenderComplete();
