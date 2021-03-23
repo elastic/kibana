@@ -30,8 +30,10 @@ export const FieldTextSelect = ({
   }, []);
 
   useEffect(() => {
-    setInputValue(indexPatternString ?? '');
-  }, [indexPatternString]);
+    if (inputValue === undefined) {
+      setInputValue(indexPatternString ?? '');
+    }
+  }, [indexPatternString, inputValue]);
 
   useDebounce(
     () => {
