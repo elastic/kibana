@@ -86,7 +86,6 @@ import {
 } from './health';
 import { AlertsConfig } from './config';
 import { getHealth } from './health/get_health';
-import { createAlertHistoryIndexTemplate } from './alert_history/create_alert_history_index_template';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -383,11 +382,6 @@ export class AlertingPlugin {
         objects
           ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
           : Promise.resolve([]);
-    });
-
-    createAlertHistoryIndexTemplate({
-      client: core.elasticsearch.client.asInternalUser,
-      logger: this.logger,
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);

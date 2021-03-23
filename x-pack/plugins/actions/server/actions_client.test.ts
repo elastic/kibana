@@ -403,6 +403,7 @@ describe('create()', () => {
       enabled: true,
       enabledActionTypes: ['some-not-ignored-action-type'],
       allowedHosts: ['*'],
+      preconfiguredAlertHistoryEsIndex: true,
       preconfigured: {},
       proxyRejectUnauthorizedCertificates: true,
       rejectUnauthorized: true,

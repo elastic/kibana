@@ -29,6 +29,7 @@ export const configSchema = schema.object({
       defaultValue: [AllowedHosts.Any],
     }
   ),
+  preconfiguredAlertHistoryEsIndex: schema.boolean({ defaultValue: true }),
   preconfigured: schema.recordOf(schema.string(), preconfiguredActionSchema, {
     defaultValue: {},
     validate: validatePreconfigured,

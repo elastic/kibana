@@ -11,7 +11,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { renderMustacheObject } from '../lib/mustache_renderer';
-import { buildAlertHistoryDocument } from '../../common';
+import { buildAlertHistoryDocument, AlertHistoryEsIndexConnectorId } from '../../common';
 
 export type ESIndexActionType = ActionType<ActionTypeConfigType, {}, ActionParamsType, unknown>;
 export type ESIndexActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -39,7 +39,6 @@ export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
 const ParamsSchema = schema.object({
   documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-  usePreconfiguredSchema: schema.boolean({ defaultValue: false }),
 });
 
 export const ActionTypeId = '.index';
@@ -112,22 +111,20 @@ async function executor(
 
 function renderParameterTemplates(
   params: ActionParamsType,
-  variables: Record<string, unknown>
+  variables: Record<string, unknown>,
+  actionId: string
 ): ActionParamsType {
-  const { documents, usePreconfiguredSchema } = renderMustacheObject<ActionParamsType>(
-    params,
-    variables
-  );
+  const { documents } = renderMustacheObject<ActionParamsType>(params, variables);
 
-  if (usePreconfiguredSchema) {
+  if (actionId === AlertHistoryEsIndexConnectorId) {
     const alertHistoryDoc = buildAlertHistoryDocument(variables);
     if (!alertHistoryDoc) {
-      throw new Error(`error creating alert history document`);
+      throw new Error(`error creating alert history document for ${actionId} connector`);
     }
-    return { documents: [alertHistoryDoc], usePreconfiguredSchema };
+    return { documents: [alertHistoryDoc] };
   }
 
-  return { documents, usePreconfiguredSchema };
+  return { documents };
 }
 
 function wrapErr(

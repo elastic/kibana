@@ -34,6 +34,7 @@ describe('Actions Plugin', () => {
         enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
+        preconfiguredAlertHistoryEsIndex: true,
         preconfigured: {},
         proxyRejectUnauthorizedCertificates: true,
         rejectUnauthorized: true,
@@ -187,6 +188,7 @@ describe('Actions Plugin', () => {
         enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
+        preconfiguredAlertHistoryEsIndex: true,
         preconfigured: {
           preconfiguredServerLog: {
             actionTypeId: '.server-log',
@@ -224,6 +226,15 @@ describe('Actions Plugin', () => {
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
+      });
+
+      it('should handle preconfiguredAlertHistoryEsIndex = true', async () => {
+        await plugin.setup(coreSetup, pluginsSetup);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+        expect(
+          pluginStart.isActionExecutable('preconfigured-alert-history-es-index', '.index')
+        ).toBe(true);
       });
 
       it('should not throw error when ESO plugin has encryption key', async () => {

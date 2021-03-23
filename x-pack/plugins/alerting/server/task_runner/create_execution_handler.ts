@@ -128,6 +128,7 @@ export function createExecutionHandler<
             alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
+            actionId: action.id,
             state,
             kibanaBaseUrl,
             alertParams,

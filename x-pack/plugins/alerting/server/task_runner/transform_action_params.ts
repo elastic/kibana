@@ -17,6 +17,7 @@ interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
   alertId: string;
   alertType: string;
+  actionId: string;
   actionTypeId: string;
   alertName: string;
   spaceId: string;
@@ -36,6 +37,7 @@ export function transformActionParams({
   actionsPlugin,
   alertId,
   alertType,
+  actionId,
   actionTypeId,
   alertName,
   spaceId,
@@ -81,5 +83,10 @@ export function transformActionParams({
       actionSubgroup: alertActionSubgroup,
     },
   };
-  return actionsPlugin.renderActionParameterTemplates(actionTypeId, actionParams, variables);
+  return actionsPlugin.renderActionParameterTemplates(
+    actionTypeId,
+    actionId,
+    actionParams,
+    variables
+  );
 }

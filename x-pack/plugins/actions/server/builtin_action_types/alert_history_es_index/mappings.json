@@ -21,6 +21,10 @@
                 },
                 "id": {
                     "type": "keyword"
+                },
+                "state": {
+                    "type": "object",
+                    "enabled": false
                 }
             }
         },
