@@ -6,27 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from 'src/plugins/expressions/common';
+import { createMockContext } from '../../../../expressions/common';
 import { functionWrapper } from './utils';
 import { existsFilterFunction } from './exists_filter';
 
 describe('interpreter/functions#existsFilter', () => {
   const fn = functionWrapper(existsFilterFunction);
-  let context: ExecutionContext;
-
-  beforeEach(() => {
-    context = {
-      getSearchContext: () => ({}),
-      getSearchSessionId: () => undefined,
-      types: {},
-      variables: {},
-      abortSignal: {} as any,
-      inspectorAdapters: {} as any,
-    };
-  });
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(null, { field: { spec: { name: 'test' } } }, context);
+    const actual = fn(null, { field: { spec: { name: 'test' } } }, createMockContext());
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "exists": Object {

@@ -6,30 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from 'src/plugins/expressions/common';
+import { createMockContext } from '../../../../expressions/common';
 import { functionWrapper } from './utils';
 import { rangeFilterFunction } from './range_filter';
 
 describe('interpreter/functions#rangeFilter', () => {
   const fn = functionWrapper(rangeFilterFunction);
-  let context: ExecutionContext;
-
-  beforeEach(() => {
-    context = {
-      getSearchContext: () => ({}),
-      getSearchSessionId: () => undefined,
-      types: {},
-      variables: {},
-      abortSignal: {} as any,
-      inspectorAdapters: {} as any,
-    };
-  });
 
   it('returns an object with the correct structure', () => {
     const actual = fn(
       null,
       { field: { spec: { name: 'test' } }, range: { gt: 10, lt: 20 } },
-      context
+      createMockContext()
     );
     expect(actual).toMatchInlineSnapshot(`
       Object {

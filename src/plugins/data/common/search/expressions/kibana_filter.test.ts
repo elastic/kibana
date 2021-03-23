@@ -6,27 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from 'src/plugins/expressions/common';
+import { createMockContext } from '../../../../expressions/common';
 import { functionWrapper } from './utils';
 import { kibanaFilterFunction } from './kibana_filter';
 
 describe('interpreter/functions#kibanaFilter', () => {
   const fn = functionWrapper(kibanaFilterFunction);
-  let context: ExecutionContext;
-
-  beforeEach(() => {
-    context = {
-      getSearchContext: () => ({}),
-      getSearchSessionId: () => undefined,
-      types: {},
-      variables: {},
-      abortSignal: {} as any,
-      inspectorAdapters: {} as any,
-    };
-  });
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(null, { query: '{ "name": "test" }' }, context);
+    const actual = fn(null, { query: '{ "name": "test" }' }, createMockContext());
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "meta": Object {
