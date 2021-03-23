@@ -86,7 +86,7 @@ interface SeriesConfigWithMetadata extends SeriesConfig {
   infoTooltip?: InfoTooltip;
   loading?: boolean;
   chartData?: ChartPoint[] | null;
-  mapData?: any[];
+  mapData?: Array<ChartRecord | undefined>;
 }
 
 export const isSeriesConfigWithMetadata = (arg: unknown): arg is SeriesConfigWithMetadata => {
