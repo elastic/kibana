@@ -56,7 +56,7 @@ This section summarizes the changes in each release.
 // TEMPLATE:
 
 [[release-notes-n.n.n]]
-== {kib} n.n.n 
+== {kib} n.n.n
 
 coming::[n.n.n]
 
@@ -95,7 +95,47 @@ For detailed information about the n.n.n release, review the following sections.
 [[release-notes-7.11.2]]
 == {kib} 7.11.2
 
-The 7.11.2 release includes the following bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+The 7.11.2 release includes the following security update, known issue, and bug fixes. For information on the breaking changes, refer to <<breaking-changes-7.11,Breaking changes in 7.11>>.
+
+[float]
+[[security-update-v7.11.2]]
+=== Security update
+
+When you use the following background API calls, {kib} extends your session and fails to log you out:
+
+* POST /api/ui_metric/report
+
+* POST /api/index_management/indices/reload
+
+* POST /api/index_lifecycle_management/policies?withIndices=true
+
+* GET /api/remote_clusters
+
+* GET /api/saved_objects_tagging/tags
+
+To avoid extending the session, use the `kbn-system-request` header, which indicates that the API call is not a user request.
+
+[float]
+[[known-issues-v7.11.2]]
+=== Known issue
+
+When upgrading from 7.11.0 or 7.11.1 to 7.11.2, certain connectors, including those that connect to Jira,
+ServiceNow, and IBM Resilient, are not properly migrated during the upgrade process, causing them to be
+deleted.
+
+Impacts include:
+
+* Kibana *Alerts and Actions* that have been configured to use the affected connectors will no
+longer create these actions.
+* Security detection rules that have been configured to use the affected connectors as part of their
+rule actions will no longer create these actions.
+* Security Case workflow users will need to recreate external connectors before cases can be pushed
+or updated via the affected connectors.
+* Open cases that were previously connected to third-party systems via the affected connectors will
+need to be re-connected after the connector(s) are recreated.
+
+If you use these affected connectors, it is recommended to consider delaying the upgrade to 7.11.2,
+and instead upgrade to 7.12.0 once it is released.
 
 [float]
 [[bug-v7.11.2]]
@@ -160,9 +200,9 @@ Monitoring::
 
 
 [[release-notes-7.11.0]]
-== {kib} 7.11.0 
+== {kib} 7.11.0
 
-For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>. 
+For detailed information about the 7.11.0 release, review the <<deprecation-v7.11.0,Deprecations>>, <<enhancement-v7.11.0,Enhancements>>, and <<bug-v7.11.0,Bug fixes>>.
 For the 7.11.0 breaking changes, refer to <<breaking-changes-7.11,breaking changes in 7.11>>.
 
 [float]
@@ -550,7 +590,7 @@ Affected versions include 7.10.1 and earlier.
 Verify if you use *Vega* visualizations, then complete the following:
 
 * If you use *Vega* visualizations, upgrade to 7.10.2.
-* If you do not use *Vega* visualizations, open your kibana.yml file, then change `vega.enabled: true` to `vega.enabled: false`. 
+* If you do not use *Vega* visualizations, open your kibana.yml file, then change `vega.enabled: true` to `vega.enabled: false`.
 
 [float]
 [[bug-v7.10.2]]
