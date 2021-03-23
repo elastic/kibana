@@ -12,15 +12,11 @@ import moment from 'moment';
 
 import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export interface AgentsSelection {
-  agents: string[];
-  allAgentsSelected: boolean;
-  platformsSelected: string[];
-  policiesSelected: string[];
-}
+import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';
 
-export const createActionRoute = (router: IRouter) => {
+export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
       path: '/internal/osquery/action',
@@ -31,64 +27,8 @@ export const createActionRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
-      let selectedAgents: string[] = [];
-      const {
-        agentSelection: { allAgentsSelected, platformsSelected, policiesSelected, agents },
-      } = request.body as { agentSelection: AgentsSelection };
-      // TODO: fix up the types here
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const extractIds = ({ body }: Record<string, any>) =>
-        body.hits.hits
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .map((o: Record<string, any>) => o._source.local_metadata?.elastic.agent.id)
-          .filter((e: string) => e);
-      if (allAgentsSelected) {
-        // make a query for all agent ids
-        const idRes = await esClient.search({
-          index: '.fleet-agents',
-          body: {
-            _source: 'local_metadata.elastic.agent.id',
-            size: 9000,
-            query: {
-              match_all: {},
-            },
-          },
-        });
-        const ids = extractIds(idRes);
-        selectedAgents.push(...ids);
-      } else {
-        if (platformsSelected.length > 0 || policiesSelected.length > 0) {
-          const filters: Array<{
-            term: { [key: string]: string };
-          }> = platformsSelected.map((platform) => ({
-            term: { 'local_metadata.os.platform': platform },
-          }));
-          filters.push(...policiesSelected.map((policyId) => ({ term: { policy_id: policyId } })));
-          const query = {
-            index: '.fleet-agents',
-            body: {
-              _source: 'local_metadata.elastic.agent.id',
-              size: 9000,
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        should: filters,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          };
-          const ids = extractIds(await esClient.search<{}, {}>(query));
-          selectedAgents.push(...ids);
-        }
-        selectedAgents.push(...agents);
-        selectedAgents = Array.from(new Set(selectedAgents));
-      }
-
+      const { agentSelection } = request.body as { agentSelection: AgentSelection };
+      const selectedAgents = parseAgentSelection(esClient, osqueryContext, agentSelection);
       // @ts-expect-error update validation
       if (request.body.pack_id) {
         const savedObjectsClient = context.core.savedObjects.client;

@@ -13,7 +13,7 @@ import { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { initPackRoutes } from './pack';
 
 export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
-  initActionRoutes(router);
+  initActionRoutes(router, context);
   initPackRoutes(router);
   initSavedQueryRoutes(router);
   initScheduledQueryRoutes(router, context);
