@@ -33,15 +33,13 @@ const switchModeLabel = i18n.translate(
 const getReadyToSwitchCallOut = (value: string, onModeChange: () => void) => (
   <>
     <EuiText size="s" style={{ width: 300 }}>
-      <p>
-        <FormattedMessage
-          id="visTypeTimeseries.indexPatternSelect.migrationPopover.readyToSwitchText"
-          defaultMessage="{index}' is already on your instance."
-          values={{
-            index: <EuiTextColor color="secondary">{value}</EuiTextColor>,
-          }}
-        />
-      </p>
+      <FormattedMessage
+        id="visTypeTimeseries.indexPatternSelect.migrationPopover.readyToSwitchText"
+        defaultMessage="{index}' is already on your instance."
+        values={{
+          index: <EuiTextColor color="secondary">{value}</EuiTextColor>,
+        }}
+      />
     </EuiText>
     <EuiSpacer />
     <EuiButton fullWidth={true} iconType="gear" size="s" onClick={onModeChange}>
@@ -56,15 +54,13 @@ const getReadyToSwitchCallOut = (value: string, onModeChange: () => void) => (
 const getNoMatchedIndicesCallOut = (value: string, onCreateIndexClick: () => void) => (
   <>
     <EuiText size="s" style={{ width: 300 }}>
-      <p>
-        <FormattedMessage
-          id="visTypeTimeseries.indexPatternSelect.migrationPopover.noMatchedIndicesCallOutText"
-          defaultMessage="Before switching mode, create an index pattern pattern for '{index}'."
-          values={{
-            index: <EuiTextColor color="secondary">{value}</EuiTextColor>,
-          }}
-        />
-      </p>
+      <FormattedMessage
+        id="visTypeTimeseries.indexPatternSelect.migrationPopover.noMatchedIndicesCallOutText"
+        defaultMessage="Before switching mode, create an index pattern pattern for '{index}'."
+        values={{
+          index: <EuiTextColor color="secondary">{value}</EuiTextColor>,
+        }}
+      />
     </EuiText>
     <EuiSpacer />
     <EuiButton fullWidth={true} iconType="plusInCircle" size="s" onClick={onCreateIndexClick}>

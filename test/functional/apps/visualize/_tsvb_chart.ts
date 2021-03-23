@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('index_pattern_without_timefield');
       });
 
-      const switchIndexTest = async (useKibanaIndicies: boolean) => {
+      const switchIndexTest = async (useKibanaIndexes: boolean) => {
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         await PageObjects.visualBuilder.setIndexPatternValue('', false);
 
@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {
-          await PageObjects.visualBuilder.setIndexPatternValue('with-timefield', useKibanaIndicies);
+          await PageObjects.visualBuilder.setIndexPatternValue('with-timefield', useKibanaIndexes);
           await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });
