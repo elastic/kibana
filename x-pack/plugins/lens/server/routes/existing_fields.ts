@@ -142,8 +142,6 @@ export function buildFieldList(indexPattern: IndexPattern, metaFields: string[])
   });
 }
 
-type LensSearchResponseType = Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>;
-
 async function fetchIndexPatternStats({
   client,
   index,
@@ -160,7 +158,7 @@ async function fetchIndexPatternStats({
   fromDate?: string;
   toDate?: string;
   fields: Field[];
-}): Promise<LensSearchResponseType> {
+}) {
   const filter =
     timeFieldName && fromDate && toDate
       ? [
@@ -209,14 +207,14 @@ async function fetchIndexPatternStats({
       }, {} as Record<string, estypes.ScriptField>),
     },
   });
-  return (result.hits.hits as unknown[]) as LensSearchResponseType;
+  return result.hits.hits;
 }
 
 /**
  * Exported only for unit tests.
  */
 export function existingFields(
-  docs: Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>,
+  docs: Array<estypes.Hit>,
   fields: Field[]
 ): string[] {
   const missingFields = new Set(fields);
@@ -227,7 +225,7 @@ export function existingFields(
     }
 
     missingFields.forEach((field) => {
-      let fieldStore: Record<string, unknown> = doc.fields;
+      let fieldStore: Record<string, any> = doc.fields!;
       if (field.isMeta) {
         fieldStore = doc;
       }
