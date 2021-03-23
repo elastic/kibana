@@ -107,21 +107,6 @@ describe('LogRetentionLogic', () => {
       });
     });
 
-    describe('setLogRetentionUpdating', () => {
-      describe('isLogRetentionUpdating', () => {
-        it('sets isLogRetentionUpdating to true', () => {
-          mount();
-
-          LogRetentionLogic.actions.setLogRetentionUpdating();
-
-          expect(LogRetentionLogic.values).toEqual({
-            ...DEFAULT_VALUES,
-            isLogRetentionUpdating: true,
-          });
-        });
-      });
-    });
-
     describe('clearLogRetentionUpdating', () => {
       describe('isLogRetentionUpdating', () => {
         it('resets isLogRetentionUpdating to false', () => {
@@ -267,8 +252,27 @@ describe('LogRetentionLogic', () => {
     });
 
     describe('fetchLogRetention', () => {
+      beforeAll(() => jest.useFakeTimers());
+      afterAll(() => jest.useRealTimers());
+
+      describe('isLogRetentionUpdating', () => {
+        it('sets isLogRetentionUpdating to true', () => {
+          mount({
+            isLogRetentionUpdating: false,
+          });
+
+          LogRetentionLogic.actions.fetchLogRetention();
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            isLogRetentionUpdating: true,
+          });
+        });
+      });
+
       it('will call an API endpoint and update log retention', async () => {
         mount();
+        jest.spyOn(LogRetentionLogic.actions, 'clearLogRetentionUpdating');
         jest
           .spyOn(LogRetentionLogic.actions, 'updateLogRetention')
           .mockImplementationOnce(() => {});
@@ -276,14 +280,14 @@ describe('LogRetentionLogic', () => {
         http.get.mockReturnValue(Promise.resolve(TYPICAL_SERVER_LOG_RETENTION));
 
         LogRetentionLogic.actions.fetchLogRetention();
-        expect(LogRetentionLogic.values.isLogRetentionUpdating).toBe(true);
+        jest.runAllTimers();
+        await nextTick();
 
         expect(http.get).toHaveBeenCalledWith('/api/app_search/log_settings');
-        await nextTick();
         expect(LogRetentionLogic.actions.updateLogRetention).toHaveBeenCalledWith(
           TYPICAL_CLIENT_LOG_RETENTION
         );
-        expect(LogRetentionLogic.values.isLogRetentionUpdating).toBe(false);
+        expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
       });
 
       it('handles errors', async () => {
@@ -292,18 +296,11 @@ describe('LogRetentionLogic', () => {
         http.get.mockReturnValue(Promise.reject('An error occured'));
 
         LogRetentionLogic.actions.fetchLogRetention();
+        jest.runAllTimers();
         await nextTick();
 
         expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
         expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
-      });
-
-      it('does not run if isLogRetentionUpdating is true, preventing duplicate fetches', async () => {
-        mount({ isLogRetentionUpdating: true });
-
-        LogRetentionLogic.actions.fetchLogRetention();
-
-        expect(http.get).not.toHaveBeenCalled();
       });
     });
 
