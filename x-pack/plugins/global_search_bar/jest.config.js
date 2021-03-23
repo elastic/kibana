@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/global_search_bar'],
+
+  // The test environment that will be used for testing
+  testEnvironment: 'jest-environment-jsdom-thirteen',
 };

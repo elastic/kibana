@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/security_solution'],
+
+  // The test environment that will be used for testing
+  testEnvironment: 'jest-environment-jsdom-thirteen',
 };
