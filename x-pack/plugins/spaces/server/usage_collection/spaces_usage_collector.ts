@@ -404,35 +404,35 @@ export function getSpacesUsageCollector(
         type: 'long',
         _meta: {
           description:
-            'The number of times the "Resolve Copy Saved Objects Conflicts" API has been called.',
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called.',
         },
       },
       'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes': {
         type: 'long',
         _meta: {
           description:
-            'The number of times the "Resolve Copy Saved Objects Conflicts" API has been called via the Kibana client.',
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called via the Kibana client.',
         },
       },
       'apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no': {
         type: 'long',
         _meta: {
           description:
-            'The number of times the "Resolve Copy Saved Objects Conflicts" API has been called via an API consumer (e.g. curl).',
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called via an API consumer (e.g. curl).',
         },
       },
       'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes': {
         type: 'long',
         _meta: {
           description:
-            'The number of times the "Resolve Copy Saved Objects Conflicts" API has been called with "createNewCopies" set to true.',
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "createNewCopies" set to true.',
         },
       },
       'apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no': {
         type: 'long',
         _meta: {
           description:
-            'The number of times the "Resolve Copy Saved Objects Conflicts" API has been called with "createNewCopies" set to false.',
+            'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "createNewCopies" set to false.',
         },
       },
     },

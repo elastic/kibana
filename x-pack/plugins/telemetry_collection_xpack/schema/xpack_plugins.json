@@ -3864,31 +3864,31 @@
         "apiCalls.resolveCopySavedObjectsErrors.total": {
           "type": "long",
           "_meta": {
-            "description": "The number of times the \"Resolve Copy Saved Objects Conflicts\" API has been called."
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called."
           }
         },
         "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes": {
           "type": "long",
           "_meta": {
-            "description": "The number of times the \"Resolve Copy Saved Objects Conflicts\" API has been called via the Kibana client."
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called via the Kibana client."
           }
         },
         "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no": {
           "type": "long",
           "_meta": {
-            "description": "The number of times the \"Resolve Copy Saved Objects Conflicts\" API has been called via an API consumer (e.g. curl)."
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called via an API consumer (e.g. curl)."
           }
         },
         "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes": {
           "type": "long",
           "_meta": {
-            "description": "The number of times the \"Resolve Copy Saved Objects Conflicts\" API has been called with \"createNewCopies\" set to true."
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to true."
           }
         },
         "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no": {
           "type": "long",
           "_meta": {
-            "description": "The number of times the \"Resolve Copy Saved Objects Conflicts\" API has been called with \"createNewCopies\" set to false."
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
           }
         }
       }
