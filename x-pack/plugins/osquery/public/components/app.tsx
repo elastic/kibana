@@ -73,7 +73,7 @@ export const OsqueryAppComponent = () => {
                 <EuiFlexItem>
                   <EuiButtonEmpty
                     iconType="popout"
-                    href="https://ela.st/fleet-feedback"
+                    href="https://ela.st/osquery-feedback"
                     target="_blank"
                   >
                     <FormattedMessage

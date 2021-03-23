@@ -20,7 +20,7 @@ export const createActionRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
+      const esClient = context.core.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = context.core.savedObjects.client;
       const { query, actions } = await createActionHandler(
         esClient,

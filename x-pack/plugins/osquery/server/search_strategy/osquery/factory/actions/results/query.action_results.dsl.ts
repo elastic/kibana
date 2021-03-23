@@ -34,7 +34,8 @@ export const buildActionResultsQuery = ({
           terms: {
             script: {
               lang: 'painless',
-              source: "if (doc['error'].size()==0) { return 'success' } else { return 'error' }",
+              source:
+                "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
             },
           },
         },
