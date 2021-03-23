@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
 import { ToolbarPopover } from '../toolbar_popover';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
@@ -99,7 +98,6 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
             });
           }}
         />
-        <EuiSpacer />
 
         <MissingValuesOptions
           isValueLabelsEnabled={isValueLabelsEnabled}

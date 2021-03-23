@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CurveType } from '@elastic/charts';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 export interface LineCurveOptionProps {
   /**
@@ -28,26 +28,29 @@ export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
   isCurveTypeEnabled = true,
 }) => {
   return isCurveTypeEnabled ? (
-    <EuiFormRow
-      display="columnCompressedSwitch"
-      label={i18n.translate('xpack.lens.xyChart.curveStyleLabel', {
-        defaultMessage: 'Curve lines',
-      })}
-    >
-      <EuiSwitch
-        showLabel={false}
-        label="Curved"
-        checked={value === CurveType.CURVE_MONOTONE_X}
-        compressed={true}
-        onChange={(e) => {
-          if (e.target.checked) {
-            onChange(CurveType.CURVE_MONOTONE_X);
-          } else {
-            onChange(CurveType.LINEAR);
-          }
-        }}
-        data-test-subj="lnsCurveStyleToggle"
-      />
-    </EuiFormRow>
+    <>
+      <EuiFormRow
+        display="columnCompressedSwitch"
+        label={i18n.translate('xpack.lens.xyChart.curveStyleLabel', {
+          defaultMessage: 'Curve lines',
+        })}
+      >
+        <EuiSwitch
+          showLabel={false}
+          label="Curved"
+          checked={value === CurveType.CURVE_MONOTONE_X}
+          compressed={true}
+          onChange={(e) => {
+            if (e.target.checked) {
+              onChange(CurveType.CURVE_MONOTONE_X);
+            } else {
+              onChange(CurveType.LINEAR);
+            }
+          }}
+          data-test-subj="lnsCurveStyleToggle"
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+    </>
   ) : null;
 };

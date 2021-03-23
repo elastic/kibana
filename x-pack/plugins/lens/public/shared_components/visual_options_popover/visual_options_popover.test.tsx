@@ -131,7 +131,7 @@ describe('Visual options popover', () => {
   it('should show the popover and display field enabled for bar and horizontal_bar series', () => {
     const state = testState();
 
-    const component = mountWithIntl(
+    const component = shallow(
       <VisualOptionsPopover
         datasourceLayers={frame.datasourceLayers}
         setState={jest.fn()}
