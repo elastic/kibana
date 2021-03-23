@@ -128,8 +128,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         return;
       }
 
-      const createResponse = await es.indices.create({ index: indices });
-      expect(createResponse)
+      const { body } = await es.indices.create({ index: indices });
+      expect(body)
         .to.have.property('acknowledged')
         .eql(true, 'Response for create request indices should be acknowledged.');
 
