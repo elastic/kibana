@@ -28,15 +28,13 @@ export const SystemIndicesOverwrittenCallOut: FunctionComponent = () => {
       size="s"
     >
       <FormattedMessage
-        id="xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesDescription"
-        defaultMessage={`When this snapshot is restored, system indices will be overwritten with data from the snapshot. {learnMoreLink}`}
+        id="xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.description"
+        defaultMessage="When this snapshot is restored, system indices will be overwritten with data from the snapshot. {learnMoreLink}"
         values={{
-          includeGlobalStateField: <EuiCode>include_global_state</EuiCode>,
-          booleanValue: <EuiCode>false</EuiCode>,
           learnMoreLink: (
             <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotApi}>
               {i18n.translate(
-                'xpack.snapshotRestore.restoreForm.dataStreamsWarningCallOut.body.learnMoreLink',
+                'xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.learnMoreLink',
                 { defaultMessage: 'Learn more' }
               )}
             </EuiLink>

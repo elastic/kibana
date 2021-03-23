@@ -575,8 +575,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               templates with the same name. Also restores persistent settings and all system indices."
             />
 
-            {/* Only display callout if include global state is enabled and the snapshot was created by ES 7.12.0+
+            {/* Only display callout if include_global_state is enabled and the snapshot was created by ES 7.12+
              * Note: Once we support features states in the UI, we will also need to add a check here for that
+             * See https://github.com/elastic/kibana/issues/95128 more details
              */}
             {includeGlobalState && semverGt(version, '7.12.0') && (
               <>
