@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { CallWithRequest } from '../types';
+import { ElasticsearchClient } from 'kibana/server';
 
 export const setPolicy = async (
-  callWithRequest: CallWithRequest<{ path: string; method: 'PUT'; body: unknown }, unknown>,
+  esClient: ElasticsearchClient,
   policy: string,
-  body: unknown
+  body: Record<string, unknown>
 ): Promise<unknown> => {
-  return callWithRequest('transport.request', {
-    path: `/_ilm/policy/${policy}`,
-    method: 'PUT',
-    body,
-  });
+  return (
+    await esClient.transport.request({
+      path: `/_ilm/policy/${policy}`,
+      method: 'PUT',
+      body,
+    })
+  ).body;
 };

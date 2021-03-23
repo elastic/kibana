@@ -7,7 +7,6 @@
 
 import React from 'react';
 
-import classNames from 'classnames';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
 import _kebabCase from 'lodash/kebabCase';
@@ -34,8 +33,6 @@ import {
 } from '../../../routes';
 import { ContentSourceDetails } from '../../../types';
 import { SourceIcon } from '../source_icon';
-
-import './source_row.scss';
 
 const CREDENTIALS_INVALID_ERROR_REASON = 1;
 
@@ -72,15 +69,6 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   const showFix =
     isOrganization && hasError && allowsReauth && errorReason === CREDENTIALS_INVALID_ERROR_REASON;
 
-  const rowClass = classNames(
-    'source-row',
-    { 'content-section--disabled': !searchable },
-    { 'source-row source-row--error': hasError }
-  );
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const imageClass = classNames('source-row__icon', { 'source-row__icon--loading': isIndexing });
-
   const fixLink = (
     <EuiLinkTo
       to={getSourcesPath(
@@ -105,7 +93,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   );
 
   return (
-    <EuiTableRow data-test-subj="GroupsRow" className={rowClass}>
+    <EuiTableRow data-test-subj="GroupsRow">
       <EuiTableRowCell>
         <EuiFlexGroup
           justifyContent="flexStart"
@@ -114,15 +102,9 @@ export const SourceRow: React.FC<SourceRowProps> = ({
           responsive={false}
         >
           <EuiFlexItem grow={false}>
-            <SourceIcon
-              serviceType={isIndexing ? 'loadingSmall' : serviceType}
-              name={name}
-              className={imageClass}
-            />
+            <SourceIcon serviceType={isIndexing ? 'loadingSmall' : serviceType} name={name} />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <span className="source-row__name">{name}</span>
-          </EuiFlexItem>
+          <EuiFlexItem>{name}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiTableRowCell>
       <EuiTableRowCell>
@@ -138,17 +120,13 @@ export const SourceRow: React.FC<SourceRowProps> = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <EuiText
-              className={`source-row__status source-row__status--${status}`}
-              color={status === 'need-more-config' ? 'default' : 'subdued'}
-              size="xs"
-            >
+            <EuiText color={status === 'need-more-config' ? 'default' : 'subdued'} size="xs">
               {statusMessage}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTableRowCell>
-      <EuiTableRowCell className="source-row__document-count" data-test-subj="SourceDocumentCount">
+      <EuiTableRowCell data-test-subj="SourceDocumentCount">
         {isFederatedSource ? remoteTooltip : parseInt(documentCount, 10).toLocaleString('en-US')}
       </EuiTableRowCell>
       {onSearchableToggle && (
@@ -164,7 +142,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
           />
         </EuiTableRowCell>
       )}
-      <EuiTableRowCell className="source-row__actions">
+      <EuiTableRowCell align="right">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
           {showFix && <EuiFlexItem grow={false}>{fixLink}</EuiFlexItem>}
           <EuiFlexItem grow={false}>

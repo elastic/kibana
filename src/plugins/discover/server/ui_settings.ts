@@ -14,7 +14,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
-  AGGS_TERMS_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -46,20 +45,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: 500,
     description: i18n.translate('discover.advancedSettings.sampleSizeText', {
       defaultMessage: 'The number of rows to show in the table',
-    }),
-    category: ['discover'],
-    schema: schema.number(),
-  },
-  [AGGS_TERMS_SIZE_SETTING]: {
-    name: i18n.translate('discover.advancedSettings.aggsTermsSizeTitle', {
-      defaultMessage: 'Number of terms',
-    }),
-    value: 20,
-    type: 'number',
-    description: i18n.translate('discover.advancedSettings.aggsTermsSizeText', {
-      defaultMessage:
-        'Determines how many terms will be visualized when clicking the "visualize" ' +
-        'button, in the field drop downs, in the discover sidebar.',
     }),
     category: ['discover'],
     schema: schema.number(),

@@ -13,6 +13,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiDataGrid,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridPopoverContents,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -37,9 +39,11 @@ import { getRocCurveChartVegaLiteSpec } from './get_roc_curve_chart_vega_lite_sp
 
 import {
   getColumnData,
+  getTrailingControlColumns,
+  ConfusionMatrixColumn,
+  ConfusionMatrixColumnData,
   ACTUAL_CLASS_ID,
   MAX_COLUMNS,
-  getTrailingControlColumns,
 } from './column_data';
 
 import { isTrainingFilter } from './is_training_filter';
@@ -94,10 +98,10 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     services: { docLinks },
   } = useMlKibana();
 
-  const [columns, setColumns] = useState<any>([]);
-  const [columnsData, setColumnsData] = useState<any>([]);
+  const [columns, setColumns] = useState<ConfusionMatrixColumn[]>([]);
+  const [columnsData, setColumnsData] = useState<ConfusionMatrixColumnData[]>([]);
   const [showFullColumns, setShowFullColumns] = useState<boolean>(false);
-  const [popoverContents, setPopoverContents] = useState<any>([]);
+  const [popoverContents, setPopoverContents] = useState<EuiDataGridPopoverContents>({});
   const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() =>
@@ -144,8 +148,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
           const gridItem = columnData[rowIndex];
 
           if (gridItem !== undefined && colId !== ACTUAL_CLASS_ID) {
-            // @ts-ignore
-            const count = gridItem[colId];
+            const count = gridItem.predicted_classes_count[colId];
             return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
           }
 
@@ -160,7 +163,11 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     classificationClasses,
     error: errorRocCurve,
     isLoading: isLoadingRocCurve,
-  } = useRocCurve(jobConfig, searchQuery, visibleColumns);
+  } = useRocCurve(
+    jobConfig,
+    searchQuery,
+    columns.map((d) => d.id)
+  );
 
   const renderCellValue = ({
     rowIndex,
@@ -169,17 +176,20 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
   }: {
     rowIndex: number;
     columnId: string;
-    setCellProps: any;
+    setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
   }) => {
-    const cellValue = columnsData[rowIndex][columnId];
+    const cellValue =
+      columnId === ACTUAL_CLASS_ID
+        ? columnsData[rowIndex][columnId]
+        : columnsData[rowIndex].predicted_classes_count[columnId];
     const actualCount = columnsData[rowIndex] && columnsData[rowIndex].actual_class_doc_count;
-    let accuracy: number | string = '0%';
+    let accuracy: string = '0%';
 
-    if (columnId !== ACTUAL_CLASS_ID && actualCount) {
-      accuracy = cellValue / actualCount;
+    if (columnId !== ACTUAL_CLASS_ID && actualCount && typeof cellValue === 'number') {
+      let accuracyNumber: number = cellValue / actualCount;
       // round to 2 decimal places without converting to string;
-      accuracy = Math.round(accuracy * 100) / 100;
-      accuracy = `${Math.round(accuracy * 100)}%`;
+      accuracyNumber = Math.round(accuracyNumber * 100) / 100;
+      accuracy = `${Math.round(accuracyNumber * 100)}%`;
     }
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {

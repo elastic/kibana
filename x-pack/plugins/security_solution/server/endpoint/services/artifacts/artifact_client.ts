@@ -83,7 +83,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
   async getArtifact(id: string) {
     const { decodedSha256, identifier } = this.parseArtifactId(id);
     const artifacts = await this.fleetArtifacts.listArtifacts({
-      kuery: `decodedSha256: "${decodedSha256}" AND identifier: "${identifier}"`,
+      kuery: `decoded_sha256: "${decodedSha256}" AND identifier: "${identifier}"`,
       perPage: 1,
     });
 
