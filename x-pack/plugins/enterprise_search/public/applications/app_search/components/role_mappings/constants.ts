@@ -89,7 +89,7 @@ export const DEV_ROLE_TYPE_DESCRIPTION = i18n.translate(
 export const EDITOR_ROLE_TYPE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.editorRoleTypeDescription',
   {
-    defaultMessage: 'Editors can manage Search Settings.',
+    defaultMessage: 'Editors can manage search settings.',
   }
 );
 
