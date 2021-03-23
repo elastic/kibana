@@ -125,6 +125,8 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
      * @param y - number of pixels from the top of the canvas element
      */
     async selectSingleCell(testSubj: string, { x, y }: { x: number; y: number }) {
+      await testSubjects.existOrFail(testSubj);
+      await testSubjects.scrollIntoView(testSubj);
       const renderTracker = await getRenderTracker(testSubj);
       const el = await elasticChart.getCanvas(testSubj);
 
@@ -143,6 +145,8 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       testSubj: string,
       coordinates: { x1: number; x2: number; y1: number; y2: number }
     ) {
+      await testSubjects.existOrFail(testSubj);
+      await testSubjects.scrollIntoView(testSubj);
       const renderTracker = await getRenderTracker(testSubj);
 
       const el = await elasticChart.getCanvas(testSubj);
