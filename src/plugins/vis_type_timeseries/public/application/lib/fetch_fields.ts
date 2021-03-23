@@ -11,6 +11,7 @@ import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
 import { SanitizedFieldType, IndexPatternValue } from '../../../common/types';
 import { getIndexPatternKey } from '../../../common/index_patterns_utils';
+import { toSanitizedFieldType } from '../../../common/fields_utils';
 
 export type VisFields = Record<string, SanitizedFieldType[]>;
 
@@ -27,7 +28,9 @@ export async function fetchFields(
     const indexFields = await Promise.all(
       patterns.map(async (pattern) => {
         if (typeof pattern !== 'string' && pattern?.id) {
-          return (await dataStart.indexPatterns.get(pattern.id)).getNonScriptedFields();
+          return toSanitizedFieldType(
+            (await dataStart.indexPatterns.get(pattern.id)).getNonScriptedFields()
+          );
         } else {
           return coreStart.http.get(ROUTES.FIELDS, {
             query: {

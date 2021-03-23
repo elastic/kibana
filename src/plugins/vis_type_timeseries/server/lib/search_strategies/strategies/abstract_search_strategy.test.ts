@@ -9,14 +9,13 @@
 import { IndexPatternsService } from '../../../../../data/common';
 
 import { from } from 'rxjs';
-import { AbstractSearchStrategy, toSanitizedFieldType } from './abstract_search_strategy';
+import { AbstractSearchStrategy } from './abstract_search_strategy';
 import type { IFieldType } from '../../../../../data/common';
-import type { FieldSpec, RuntimeField } from '../../../../../data/common';
-import {
+import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
+import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 
 class FooSearchStrategy extends AbstractSearchStrategy {}
 
@@ -93,66 +92,5 @@ describe('AbstractSearchStrategy', () => {
         isStored: true,
       }
     );
-  });
-
-  describe('toSanitizedFieldType', () => {
-    const mockedField = {
-      lang: 'lang',
-      conflictDescriptions: {},
-      aggregatable: true,
-      name: 'name',
-      type: 'type',
-      esTypes: ['long', 'geo'],
-    } as FieldSpec;
-
-    test('should sanitize fields ', async () => {
-      const fields = [mockedField] as FieldSpec[];
-
-      expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "label": "name",
-            "name": "name",
-            "type": "type",
-          },
-        ]
-      `);
-    });
-
-    test('should filter runtime fields', async () => {
-      const fields: FieldSpec[] = [
-        {
-          ...mockedField,
-          runtimeField: {} as RuntimeField,
-        },
-      ];
-
-      expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`Array []`);
-    });
-
-    test('should filter non-aggregatable fields', async () => {
-      const fields: FieldSpec[] = [
-        {
-          ...mockedField,
-          aggregatable: false,
-        },
-      ];
-
-      expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`Array []`);
-    });
-
-    test('should filter nested fields', async () => {
-      const fields: FieldSpec[] = [
-        {
-          ...mockedField,
-          subType: {
-            nested: {
-              path: 'path',
-            },
-          },
-        },
-      ];
-      expect(toSanitizedFieldType(fields)).toMatchInlineSnapshot(`Array []`);
-    });
   });
 });
