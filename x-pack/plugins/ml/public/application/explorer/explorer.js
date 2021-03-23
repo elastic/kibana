@@ -68,11 +68,10 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 
-import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
+import { getToastNotifications } from '../util/dependency_cache';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
-import { getTimeBucketsFromCache } from '../util/time_buckets';
 
 const ExplorerPage = ({
   children,
@@ -232,9 +231,17 @@ export class ExplorerUI extends React.Component {
         urlGenerators: { getUrlGenerator },
       },
     } = this.props.kibana.services;
+
     const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
 
-    const { showCharts, severity, stoppedPartitions, selectedJobsRunning } = this.props;
+    const {
+      showCharts,
+      severity,
+      stoppedPartitions,
+      selectedJobsRunning,
+      timefilter,
+      timeBuckets,
+    } = this.props;
 
     const {
       annotations,
@@ -284,9 +291,7 @@ export class ExplorerUI extends React.Component {
     const mainColumnWidthClassName = noInfluencersConfigured === true ? 'col-xs-12' : 'col-xs-10';
     const mainColumnClasses = `column ${mainColumnWidthClassName}`;
 
-    const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
-    const timeBuckets = getTimeBucketsFromCache();
     const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
     return (
       <ExplorerPage
