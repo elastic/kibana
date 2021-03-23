@@ -70,6 +70,7 @@ import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { getAlertHistoryEsIndex } from './builtin_action_types/alert_history_es_index/alert_history_es_index';
 import { createAlertHistoryIndexTemplate } from './builtin_action_types/alert_history_es_index/create_alert_history_index_template';
+import { AlertHistoryEsIndexConnectorId } from '../common';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -186,11 +187,17 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     }
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
-      this.preconfiguredActions.push({
-        ...this.actionsConfig.preconfigured[preconfiguredId],
-        id: preconfiguredId,
-        isPreconfigured: true,
-      });
+      if (preconfiguredId !== AlertHistoryEsIndexConnectorId) {
+        this.preconfiguredActions.push({
+          ...this.actionsConfig.preconfigured[preconfiguredId],
+          id: preconfiguredId,
+          isPreconfigured: true,
+        });
+      } else {
+        this.logger.warn(
+          `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
+        );
+      }
     }
 
     const actionTypeRegistry = new ActionTypeRegistry({

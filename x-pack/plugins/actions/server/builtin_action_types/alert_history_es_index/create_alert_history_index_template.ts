@@ -9,7 +9,7 @@ import { ElasticsearchClient, Logger } from 'src/core/server';
 import { ALERT_HISTORY_PREFIX } from '../../../common';
 import mappings from './mappings.json';
 
-function getAlertHistoryIndexTemplate() {
+export function getAlertHistoryIndexTemplate() {
   return {
     index_patterns: [`${ALERT_HISTORY_PREFIX}*`],
     settings: {
