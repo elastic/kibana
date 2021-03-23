@@ -8,6 +8,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -19,6 +20,9 @@ import {
   EuiButton,
   EuiCallOut,
   EuiSpacer,
+  EuiText,
+  EuiConfirmModal,
+  EuiFieldText,
 } from '@elastic/eui';
 
 import { DocLinksStart, CoreStart } from 'src/core/public';
@@ -30,16 +34,6 @@ import type { Props as FieldEditorProps, FieldEditorFormState } from './field_ed
 
 const geti18nTexts = (field?: Field) => {
   return {
-    flyoutTitle: field
-      ? i18n.translate('indexPatternFieldEditor.editor.flyoutEditFieldTitle', {
-          defaultMessage: 'Edit {fieldName} field',
-          values: {
-            fieldName: field.name,
-          },
-        })
-      : i18n.translate('indexPatternFieldEditor.editor.flyoutDefaultTitle', {
-          defaultMessage: 'Create field',
-        }),
     closeButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCloseButtonLabel', {
       defaultMessage: 'Close',
     }),
@@ -49,6 +43,18 @@ const geti18nTexts = (field?: Field) => {
     formErrorsCalloutTitle: i18n.translate('indexPatternFieldEditor.editor.validationErrorTitle', {
       defaultMessage: 'Fix errors in form before continuing.',
     }),
+    cancelButtonText: i18n.translate(
+      'indexPatternFieldEditor.saveRuntimeField.confirmationModal.cancelButtonLabel',
+      {
+        defaultMessage: 'Cancel',
+      }
+    ),
+    confirmButtonText: i18n.translate(
+      'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.saveButtonLabel',
+      {
+        defaultMessage: 'Save',
+      }
+    ),
   };
 };
 
@@ -97,6 +103,7 @@ const FieldEditorFlyoutContentComponent = ({
   runtimeFieldValidator,
   isSavingField,
 }: Props) => {
+  const isEditingExistingField = !!field;
   const i18nTexts = geti18nTexts(field);
 
   const [formState, setFormState] = useState<FieldEditorFormState>({
@@ -112,6 +119,8 @@ const FieldEditorFlyoutContentComponent = ({
   );
 
   const [isValidating, setIsValidating] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [confirmContent, setConfirmContent] = useState<string>();
 
   const { submit, isValid: isFormValid, isSubmitted } = formState;
   const { fields } = indexPattern;
@@ -129,6 +138,8 @@ const FieldEditorFlyoutContentComponent = ({
 
   const onClickSave = useCallback(async () => {
     const { isValid, data } = await submit();
+    const nameChange = field?.name !== data.name;
+    const typeChange = field?.type !== data.type;
 
     if (isValid) {
       if (data.script) {
@@ -147,9 +158,13 @@ const FieldEditorFlyoutContentComponent = ({
         }
       }
 
-      onSave(data);
+      if (isEditingExistingField && (nameChange || typeChange)) {
+        setIsModalVisible(true);
+      } else {
+        onSave(data);
+      }
     }
-  }, [onSave, submit, runtimeFieldValidator]);
+  }, [onSave, submit, runtimeFieldValidator, field, isEditingExistingField]);
 
   const namesNotAllowed = useMemo(() => fields.map((fld) => fld.name), [fields]);
 
@@ -180,12 +195,65 @@ const FieldEditorFlyoutContentComponent = ({
     [fieldTypeToProcess, namesNotAllowed, existingConcreteFields]
   );
 
+  const modal = isModalVisible ? (
+    <EuiConfirmModal
+      title={'Confirm save'}
+      data-test-subj="runtimeFieldSaveConfirmModal"
+      cancelButtonText={i18nTexts.cancelButtonText}
+      buttonColor="danger"
+      confirmButtonText={i18nTexts.confirmButtonText}
+      confirmButtonDisabled={confirmContent?.toLowerCase() !== 'confirm'}
+      onCancel={() => {
+        setIsModalVisible(false);
+        setConfirmContent('');
+      }}
+      onConfirm={async () => {
+        const { data } = await submit();
+        onSave(data);
+      }}
+    >
+      <>
+        <p>Type &apos;confirm&apos; to continue:</p>
+        <EuiFieldText value={confirmContent} onChange={(e) => setConfirmContent(e.target.value)} />
+      </>
+    </EuiConfirmModal>
+  ) : null;
   return (
     <>
       <EuiFlyoutHeader>
         <EuiTitle size="m" data-test-subj="flyoutTitle">
-          <h2 id="fieldEditorTitle">{i18nTexts.flyoutTitle}</h2>
+          {field ? (
+            <EuiText>
+              <FormattedMessage
+                id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
+                defaultMessage="Edit {fieldName} field"
+                values={{
+                  fieldName: (
+                    <h2 id="fieldEditorTitle" style={{ display: 'inline' }}>
+                      {field.name}
+                    </h2>
+                  ),
+                }}
+              />
+            </EuiText>
+          ) : (
+            <h2>
+              <FormattedMessage
+                id="indexPatternFieldEditor.editor.flyoutDefaultTitle"
+                defaultMessage="Create field"
+              />
+            </h2>
+          )}
         </EuiTitle>
+        <EuiText>
+          <FormattedMessage
+            id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
+            defaultMessage="Index pattern: {patternName}"
+            values={{
+              patternName: <i>{indexPattern.title}</i>,
+            }}
+          />
+        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -246,6 +314,7 @@ const FieldEditorFlyoutContentComponent = ({
           </>
         )}
       </EuiFlyoutFooter>
+      {modal}
     </>
   );
 };
