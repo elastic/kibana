@@ -119,7 +119,7 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, depre
   if (has(settings, 'logging.events.ops')) {
     deprecationHook({
       documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
       message:
         '"logging.events.ops" has been deprecated and will be removed ' +
         'in 8.0. To access ops data moving forward, please enable debug logs for the ' +
@@ -134,7 +134,7 @@ const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, d
   if (has(settings, 'logging.events.request') || has(settings, 'logging.events.response')) {
     deprecationHook({
       documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
       message:
         '"logging.events.request" and "logging.events.response" have been deprecated and will be removed ' +
         'in 8.0. To access request and/or response data moving forward, please enable debug logs for the ' +
@@ -149,7 +149,7 @@ const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, depre
   if (has(settings, 'logging.timezone')) {
     deprecationHook({
       documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingtimezone',
       message:
         '"logging.timezone" has been deprecated and will be removed ' +
         'in 8.0. To set the timezone moving forward, please add a timezone date modifier to the log pattern ' +
@@ -164,7 +164,7 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecati
   if (has(settings, 'logging.dest')) {
     deprecationHook({
       documentationUrl:
-        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingdest',
       message:
         '"logging.dest" has been deprecated and will be removed ' +
         'in 8.0. To set the destination moving forward, you can use the "console" appender ' +
@@ -178,6 +178,8 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecati
 const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
   if (has(settings, 'logging.quiet')) {
     deprecationHook({
+      documentationUrl:
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingquiet',
       message:
         '"logging.quiet" has been deprecated and will be removed ' +
         'in 8.0. Moving forward, you can use "logging.root.level:error" in your logging configuration. ',
@@ -189,6 +191,8 @@ const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecat
 const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
   if (has(settings, 'logging.silent')) {
     deprecationHook({
+      documentationUrl:
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingsilent',
       message:
         '"logging.silent" has been deprecated and will be removed ' +
         'in 8.0. Moving forward, you can use "logging.root.level:off" in your logging configuration. ',
@@ -200,6 +204,8 @@ const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, depreca
 const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
   if (has(settings, 'logging.verbose')) {
     deprecationHook({
+      documentationUrl:
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingverbose',
       message:
         '"logging.verbose" has been deprecated and will be removed ' +
         'in 8.0. Moving forward, you can use "logging.root.level:all" in your logging configuration. ',
@@ -247,6 +253,8 @@ const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, deprecation
 const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
   if (has(settings, 'logging.events.log')) {
     deprecationHook({
+      documentationUrl:
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
       message:
         '"logging.events.log" has been deprecated and will be removed ' +
         'in 8.0. Moving forward, log levels can be customized on a per-logger basis using the new logging configuration. ',
@@ -258,6 +266,8 @@ const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, deprecat
 const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
   if (has(settings, 'logging.events.error')) {
     deprecationHook({
+      documentationUrl:
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
       message:
         '"logging.events.error" has been deprecated and will be removed ' +
         'in 8.0. Moving forward, you can use "logging.root.level: error" in your logging configuration. ',
@@ -269,6 +279,8 @@ const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, deprec
 const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
   if (has(settings, 'logging.filter')) {
     deprecationHook({
+      documentationUrl:
+        'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingfilter',
       message: '"logging.filter" has been deprecated and will be removed in 8.0.',
     });
   }
