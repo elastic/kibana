@@ -54,5 +54,3 @@ async function fetchData<ResponseType>(core: CoreStart) {
 ----
 See {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.httpsetup.md[for all available API].
 
-== Elasticsearch service
-Not available in the browser. Use {kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.md[Data plugin] instead.
