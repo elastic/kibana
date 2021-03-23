@@ -61,4 +61,6 @@ export type InfraClientPluginClass = PluginClass<
   InfraClientStartDeps
 >;
 
-export type InfraHttpError = IHttpFetchError<{ statusCode: number }>;
+export interface InfraHttpError extends IHttpFetchError {
+  readonly body?: { statusCode: number };
+}
