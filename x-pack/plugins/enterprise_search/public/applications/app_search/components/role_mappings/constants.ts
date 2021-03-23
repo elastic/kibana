@@ -82,7 +82,7 @@ export const ROLE_MAPPINGS_RESET_CANCEL_BUTTON = i18n.translate(
 export const DEV_ROLE_TYPE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.DEV_ROLE_TYPE_DESCRIPTION',
   {
-    defaultMessage: 'Devs can manage all aspects of an Engine.',
+    defaultMessage: 'Devs can manage all aspects of an engine.',
   }
 );
 
