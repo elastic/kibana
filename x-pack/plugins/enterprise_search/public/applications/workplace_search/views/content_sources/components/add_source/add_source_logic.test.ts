@@ -275,12 +275,12 @@ describe('AddSourceLogic', () => {
     describe('saveSourceParams', () => {
       const params = {
         code: 'code123',
-        state: '"{"state": "foo"}"',
-        session_state: 'session123',
+        state:
+          '{"action":"create","context":"organization","service_type":"gmail","csrf_token":"token==","index_permissions":false}',
       };
 
       const queryString =
-        'code=code123&state=%22%7B%22state%22%3A%20%22foo%22%7D%22&session_state=session123';
+        '?state=%7B%22action%22:%22create%22,%22context%22:%22organization%22,%22service_type%22:%22gmail%22,%22csrf_token%22:%22token%3D%3D%22,%22index_permissions%22:false%7D&code=code123';
 
       const response = { serviceName: 'name', indexPermissions: false, serviceType: 'zendesk' };
 
@@ -303,9 +303,18 @@ describe('AddSourceLogic', () => {
         await nextTick();
 
         expect(setAddedSourceSpy).toHaveBeenCalledWith(serviceName, indexPermissions, serviceType);
-        expect(navigateToUrl).toHaveBeenCalledWith(
-          getSourcesPath(SOURCES_PATH, AppLogic.values.isOrganization)
-        );
+        expect(navigateToUrl).toHaveBeenCalledWith(getSourcesPath(SOURCES_PATH, true));
+      });
+
+      it('redirects to private dashboard when account context', async () => {
+        const accountQueryString =
+          '?state=%7B%22action%22:%22create%22,%22context%22:%22account%22,%22service_type%22:%22gmail%22,%22csrf_token%22:%22token%3D%3D%22,%22index_permissions%22:false%7D&code=code';
+
+        AddSourceLogic.actions.saveSourceParams(accountQueryString);
+
+        await nextTick();
+
+        expect(navigateToUrl).toHaveBeenCalledWith(getSourcesPath(SOURCES_PATH, false));
       });
 
       it('handles error', async () => {
