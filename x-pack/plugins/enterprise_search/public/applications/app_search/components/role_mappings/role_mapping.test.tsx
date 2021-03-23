@@ -28,17 +28,19 @@ import { RoleMapping } from './role_mapping';
 
 describe('RoleMapping', () => {
   const mockRole = DEFAULT_INITIAL_APP_DATA.appSearch.role;
-  const initializeRoleMappings = jest.fn();
-  const initializeRoleMapping = jest.fn();
-  const handleSaveMapping = jest.fn();
-  const handleEngineSelectionChange = jest.fn();
-  const handleAccessAllEnginesChange = jest.fn();
-  const handleAttributeValueChange = jest.fn();
-  const handleAttributeSelectorChange = jest.fn();
-  const handleDeleteMapping = jest.fn();
-  const handleRoleChange = jest.fn();
-  const handleAuthProviderChange = jest.fn();
-  const resetState = jest.fn();
+  const actions = {
+    initializeRoleMappings: jest.fn(),
+    initializeRoleMapping: jest.fn(),
+    handleSaveMapping: jest.fn(),
+    handleEngineSelectionChange: jest.fn(),
+    handleAccessAllEnginesChange: jest.fn(),
+    handleAttributeValueChange: jest.fn(),
+    handleAttributeSelectorChange: jest.fn(),
+    handleDeleteMapping: jest.fn(),
+    handleRoleChange: jest.fn(),
+    handleAuthProviderChange: jest.fn(),
+    resetState: jest.fn(),
+  };
 
   const mockValues = {
     attributes: [],
@@ -61,19 +63,7 @@ describe('RoleMapping', () => {
   };
 
   beforeEach(() => {
-    setMockActions({
-      initializeRoleMappings,
-      initializeRoleMapping,
-      handleSaveMapping,
-      handleEngineSelectionChange,
-      handleAccessAllEnginesChange,
-      handleAttributeValueChange,
-      handleAttributeSelectorChange,
-      handleDeleteMapping,
-      handleRoleChange,
-      handleAuthProviderChange,
-      resetState,
-    });
+    setMockActions(actions);
     setMockValues(mockValues);
   });
 
@@ -111,6 +101,6 @@ describe('RoleMapping', () => {
       .first()
       .simulate('change', { target: { checked: true } });
 
-    expect(handleEngineSelectionChange).toHaveBeenCalledWith(engines[0].name, true);
+    expect(actions.handleEngineSelectionChange).toHaveBeenCalledWith(engines[0].name, true);
   });
 });
