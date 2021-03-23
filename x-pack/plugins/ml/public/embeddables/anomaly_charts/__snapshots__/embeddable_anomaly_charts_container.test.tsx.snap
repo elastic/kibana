@@ -21,13 +21,13 @@ Object {
   "showCharts": true,
   "timeBuckets": TimeBuckets {
     "_timeBucketsConfig": Object {
-      "dateFormat": null,
-      "dateFormat:scaled": null,
-      "histogram:barTarget": null,
-      "histogram:maxBars": null,
+      "dateFormat": undefined,
+      "dateFormat:scaled": undefined,
+      "histogram:barTarget": undefined,
+      "histogram:maxBars": undefined,
     },
-    "barTarget": null,
-    "maxBars": null,
+    "barTarget": undefined,
+    "maxBars": undefined,
   },
   "timefilter": Object {
     "calculateBounds": [MockFunction],

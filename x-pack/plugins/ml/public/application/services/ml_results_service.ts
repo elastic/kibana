@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export const mlResultsServiceMock = {
+export const createMlResultsServiceMock = () => ({
   getMetricData: jest.fn(),
+  getModelPlotOutput: jest.fn(),
   getRecordsForCriteria: jest.fn(),
   getScheduledEventsByBucket: jest.fn(),
+  fetchPartitionFieldsValues: jest.fn(),
   getEventDistributionData: jest.fn(),
-};
+});

@@ -11,7 +11,7 @@ import {
   EmbeddableAnomalyChartsContainer,
   EmbeddableAnomalyChartsContainerProps,
 } from './embeddable_anomaly_charts_container';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n/react';
 import { AnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import { CoreStart } from 'kibana/public';
@@ -20,13 +20,11 @@ import { MlDependencies } from '../../application/app';
 import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
 import { AnomalyChartsEmbeddableInput, AnomalyChartsServices } from '..';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
-import {
-  anomalyDetectorServiceMock,
-  anomalyExplorerChartsServiceMock,
-  coreStartMock,
-  mlStartMock,
-} from './__mocks__/services';
-import { mlResultsServiceMock } from '../../application/services/ml_results_service';
+import { createMlResultsServiceMock } from '../../application/services/ml_results_service';
+import { createCoreStartMock } from '../../__mocks__/core_start';
+import { createMlStartDepsMock } from '../../__mocks__/ml_start_deps';
+import { createAnomalyExplorerChartsServiceMock } from '../../application/services/__mocks__/anomaly_explorer_charts_service';
+import { createAnomalyDetectorServiceMock } from '../../application/services/__mocks__/anomaly_detector_service';
 
 jest.mock('./use_anomaly_charts_input_resolver', () => ({
   useAnomalyChartsInputResolver: jest.fn(() => {
@@ -94,15 +92,31 @@ describe('EmbeddableAnomalyChartsContainer', () => {
 
     trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
 
+    const mlStartMock = createMlStartDepsMock();
     mlStartMock.uiActions.getTrigger.mockReturnValue(trigger);
+
+    const coreStartMock = createCoreStartMock();
+    const anomalyDetectorServiceMock = createAnomalyDetectorServiceMock();
+
+    anomalyDetectorServiceMock.getJobs$.mockImplementation((jobId: string[]) => {
+      if (jobId.includes('invalid-job-id')) {
+        throw new Error('Invalid job');
+      }
+      return of([
+        {
+          job_id: 'cw_multi_1',
+          analysis_config: { bucket_span: '15m' },
+        },
+      ]);
+    });
 
     services = ([
       coreStartMock,
       mlStartMock,
       {
         anomalyDetectorService: anomalyDetectorServiceMock,
-        anomalyExplorerChartsService: anomalyExplorerChartsServiceMock,
-        mlResultsService: mlResultsServiceMock,
+        anomalyExplorerChartsService: createAnomalyExplorerChartsServiceMock(),
+        mlResultsService: createMlResultsServiceMock(),
       },
     ] as unknown) as EmbeddableAnomalyChartsContainerProps['services'];
   });

@@ -319,9 +319,11 @@ export class AnomalyExplorerChartsService {
     };
     // Add extra properties used by the explorer dashboard charts.
     fullSeriesConfig.functionDescription = record.function_description;
-    fullSeriesConfig.bucketSpanSeconds = parseInterval(
-      job.analysis_config.bucket_span
-    )!.asSeconds();
+
+    const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span);
+    if (parsedBucketSpan !== null) {
+      fullSeriesConfig.bucketSpanSeconds = parsedBucketSpan.asSeconds();
+    }
 
     fullSeriesConfig.detectorLabel = record.function;
     const jobDetectors = job.analysis_config.detectors;
