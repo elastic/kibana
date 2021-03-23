@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
-import { popupVersionsMap } from './popup_options_to_versions';
+import { popupVersionsMap } from '../protections/popup_options_to_versions';
 
 export const SupportedVersionNotice = ({ optionName }: { optionName: string }) => {
   const version = popupVersionsMap.get(optionName);
