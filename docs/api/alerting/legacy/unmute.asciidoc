@@ -1,19 +1,23 @@
-[[alerts-api-unmute]]
-=== Unmute alert instance API
+[[alerts-legacy-api-unmute]]
+=== Legacy unmute alert instance API
 ++++
-<titleabbrev>Unmute alert instance</titleabbrev>
+<titleabbrev>Legacy unmute alert instance</titleabbrev>
 ++++
+
+deprecated::[7.13.0]
+
+Please use the <<rules-unmute-api>> instead.
 
 Unmute an alert instance.
 
-[[alerts-api-unmute-request]]
+[[alerts-legacy-api-unmute-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>/alert_instance/<alert_instance_id>/_unmute`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/alert_instance/<alert_instance_id>/_unmute`
 
-[[alerts-api-unmute-path-params]]
+[[alerts-legacy-api-unmute-path-params]]
 ==== Path parameters
 
 `id`::
@@ -25,7 +29,7 @@ Unmute an alert instance.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-api-unmute-response-codes]]
+[[alerts-legacy-api-unmute-response-codes]]
 ==== Response code
 
 `200`::

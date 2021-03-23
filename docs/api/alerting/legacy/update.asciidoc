@@ -1,19 +1,23 @@
-[[alerts-api-update]]
-=== Update alert API
+[[alerts-legacy-api-update]]
+=== Legacy update alert API
 ++++
-<titleabbrev>Update alert</titleabbrev>
+<titleabbrev>Legacy update alert</titleabbrev>
 ++++
+
+deprecated::[7.13.0]
+
+Please use the <<rules-update-api>> instead.
 
 Update the attributes for an existing alert.
 
-[[alerts-api-update-request]]
+[[alerts-legacy-api-update-request]]
 ==== Request
 
 `PUT <kibana host>:<port>/api/alerts/alert/<id>`
 
 `PUT <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>`
 
-[[alerts-api-update-path-params]]
+[[alerts-legacy-api-update-path-params]]
 ==== Path parameters
 
 `id`::
@@ -22,7 +26,7 @@ Update the attributes for an existing alert.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-api-update-request-body]]
+[[alerts-legacy-api-update-request-body]]
 ==== Request body
 
 `name`::
@@ -72,13 +76,13 @@ Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ i
 =====
 
 
-[[alerts-api-update-errors-codes]]
+[[alerts-legacy-api-update-errors-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[alerts-api-update-example]]
+[[alerts-legacy-api-update-example]]
 ==== Example
 
 Update an alert with ID `ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74` with a different name:
