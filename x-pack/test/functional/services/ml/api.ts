@@ -408,8 +408,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
             (updatedEvent) =>
               updatedEvent.description === eventToCheck.description &&
               // updatedEvent are fetched with suptertest which converts start_time and end_time to number
-              String(updatedEvent.start_time) === eventToCheck.start_time &&
-              String(updatedEvent.end_time) === eventToCheck.end_time
+              // sometimes eventToCheck declared manually with types incompatible with estypes.ScheduledEvent
+              String(updatedEvent.start_time) === String(eventToCheck.start_time) &&
+              String(updatedEvent.end_time) === String(eventToCheck.end_time)
           ) < 0
         ) {
           allEventsAreUpdated = false;
