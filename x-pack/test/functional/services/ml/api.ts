@@ -8,7 +8,6 @@
 import { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
-import { IndexDocumentParams } from 'elasticsearch';
 import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
 import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
@@ -25,20 +24,8 @@ import {
 } from '../../../../plugins/ml/common/constants/index_patterns';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 
-type ScheduledEvent = estypes.ScheduledEvent;
-
-interface EsIndexResult {
-  _index: string;
-  _id: string;
-  _version: number;
-  result: string;
-  _shards: any;
-  _seq_no: number;
-  _primary_term: number;
-}
-
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
-  const es = getService('legacyEs');
+  const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');
@@ -47,7 +34,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
   return {
     async hasJobResults(jobId: string): Promise<boolean> {
-      const response = await es.search({
+      const { body } = await es.search({
         index: '.ml-anomalies-*',
         body: {
           size: 1,
@@ -59,7 +46,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         },
       });
 
-      return response.hits.hits.length > 0;
+      return body.hits.hits.length > 0;
     },
 
     async assertJobResultsExist(jobId: string) {
@@ -87,7 +74,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async hasDetectorResults(jobId: string, detectorIndex: number): Promise<boolean> {
-      const response = await es.search({
+      const { body } = await es.search({
         index: '.ml-anomalies-*',
         body: {
           size: 1,
@@ -115,7 +102,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         },
       });
 
-      return response.hits.hits.length > 0;
+      return body.hits.hits.length > 0;
     },
 
     async assertDetectorResultsExist(jobId: string, detectorIndex: number) {
@@ -136,7 +123,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createIndices(indices: string) {
       log.debug(`Creating indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === true) {
+      if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
         log.debug(`Indices '${indices}' already exist. Nothing to create.`);
         return;
       }
@@ -152,15 +139,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteIndices(indices: string) {
       log.debug(`Deleting indices: '${indices}'...`);
-      if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === false) {
+      if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === false) {
         log.debug(`Indices '${indices}' don't exist. Nothing to delete.`);
         return;
       }
 
-      const deleteResponse = await es.indices.delete({
+      const { body } = await es.indices.delete({
         index: indices,
       });
-      expect(deleteResponse)
+      expect(body)
         .to.have.property('acknowledged')
         .eql(true, 'Response for delete request should be acknowledged.');
 
@@ -319,7 +306,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async assertIndicesExist(indices: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === true) {
+        if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === true) {
           return true;
         } else {
           throw new Error(`indices '${indices}' should exist`);
@@ -329,7 +316,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async assertIndicesNotToExist(indices: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        if ((await es.indices.exists({ index: indices, allowNoIndices: false })) === false) {
+        if ((await es.indices.exists({ index: indices, allow_no_indices: false })).body === false) {
           return true;
         } else {
           throw new Error(`indices '${indices}' should not exist`);
@@ -339,14 +326,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async assertIndicesNotEmpty(indices: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        const response = await es.search({
+        const { body } = await es.search({
           index: indices,
           body: {
             size: 1,
           },
         });
 
-        if (response.hits.hits.length > 0) {
+        if (body.hits.hits.length > 0) {
           return true;
         } else {
           throw new Error(`indices '${indices}' should not be empty`);
@@ -396,7 +383,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async createCalendarEvents(calendarId: string, events: ScheduledEvent[]) {
+    async createCalendarEvents(calendarId: string, events: estypes.ScheduledEvent[]) {
       log.debug(`Creating events for calendar with id '${calendarId}'...`);
       await esSupertest.post(`/_ml/calendars/${calendarId}/events`).send({ events }).expect(200);
       await this.waitForEventsToExistInCalendar(calendarId, events);
@@ -408,10 +395,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     assertAllEventsExistInCalendar: (
-      eventsToCheck: ScheduledEvent[],
+      eventsToCheck: estypes.ScheduledEvent[],
       calendar: Calendar
     ): boolean => {
-      const updatedCalendarEvents = calendar.events as ScheduledEvent[];
+      const updatedCalendarEvents = calendar.events;
       let allEventsAreUpdated = true;
       for (const eventToCheck of eventsToCheck) {
         // if at least one of the events that we need to check is not in the updated events
@@ -420,8 +407,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           updatedCalendarEvents.findIndex(
             (updatedEvent) =>
               updatedEvent.description === eventToCheck.description &&
-              updatedEvent.start_time === eventToCheck.start_time &&
-              updatedEvent.end_time === eventToCheck.end_time
+              // updatedEvent are fetched with suptertest which converts start_time and end_time to number
+              String(updatedEvent.start_time) === eventToCheck.start_time &&
+              String(updatedEvent.end_time) === eventToCheck.end_time
           ) < 0
         ) {
           allEventsAreUpdated = false;
@@ -439,7 +427,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForEventsToExistInCalendar(
       calendarId: string,
-      eventsToCheck: ScheduledEvent[],
+      eventsToCheck: estypes.ScheduledEvent[],
       errorMsg?: string
     ) {
       await retry.waitForWithTimeout(`'${calendarId}' events to exist`, 5 * 1000, async () => {
@@ -808,7 +796,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async getAnnotations(jobId: string) {
       log.debug(`Fetching annotations for job '${jobId}'...`);
 
-      const results = await es.search<Annotation>({
+      const { body } = await es.search<Annotation>({
         index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
         body: {
           query: {
@@ -818,16 +806,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           },
         },
       });
-      expect(results).to.not.be(undefined);
-      expect(results).to.have.property('hits');
+      expect(body).to.not.be(undefined);
+      expect(body).to.have.property('hits');
       log.debug('> Annotations fetched.');
-      return results.hits.hits;
+      return body.hits.hits;
     },
 
     async getAnnotationById(annotationId: string): Promise<Annotation | undefined> {
       log.debug(`Fetching annotation '${annotationId}'...`);
 
-      const result = await es.search({
+      const { body } = await es.search({
         index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
         body: {
           size: 1,
@@ -839,9 +827,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         },
       });
       log.debug('> Annotation fetched.');
-      // @ts-ignore due to outdated type for hits.total
-      if (result.hits.total.value === 1) {
-        return result?.hits?.hits[0]?._source as Annotation;
+
+      // @ts-expect-error doesn't handle total as number
+      if (body.hits.total.value === 1) {
+        return body?.hits?.hits[0]?._source as Annotation;
       }
       return undefined;
     },
@@ -849,15 +838,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async indexAnnotation(annotationRequestBody: Partial<Annotation>) {
       log.debug(`Indexing annotation '${JSON.stringify(annotationRequestBody)}'...`);
       // @ts-ignore due to outdated type for IndexDocumentParams.type
-      const params: IndexDocumentParams<Partial<Annotation>> = {
+      const params = {
         index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
         body: annotationRequestBody,
         refresh: 'wait_for',
-      };
-      const results: EsIndexResult = await es.index(params);
-      await this.waitForAnnotationToExist(results._id);
+      } as const;
+      const { body } = await es.index(params);
+      await this.waitForAnnotationToExist(body._id);
       log.debug('> Annotation indexed.');
-      return results;
+      return body;
     },
 
     async waitForAnnotationToExist(annotationId: string, errorMsg?: string) {
