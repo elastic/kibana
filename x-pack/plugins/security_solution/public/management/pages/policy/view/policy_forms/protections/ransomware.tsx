@@ -33,10 +33,10 @@ export const Ransomware = React.memo(() => {
       })}
       supportedOss={[OperatingSystem.WINDOWS]}
       dataTestSubj="ransomwareProtectionsForm"
-      rightCorner={<ProtectionSwitch protection={protection} oses={OSes} />}
+      rightCorner={<ProtectionSwitch protection={protection} osList={OSes} />}
     >
-      <RadioButtons protection={protection} oses={OSes} />
-      <UserNotification protection={protection} oses={OSes} />
+      <RadioButtons protection={protection} osList={OSes} />
+      <UserNotification protection={protection} osList={OSes} />
       <EuiSpacer size="m" />
       <EuiCallOut iconType="iInCircle">
         <FormattedMessage

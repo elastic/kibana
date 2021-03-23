@@ -24,10 +24,10 @@ import { PolicyProtection, MacPolicyProtection } from '../../../types';
 export const ProtectionSwitch = React.memo(
   ({
     protection,
-    oses,
+    osList,
   }: {
     protection: PolicyProtection;
-    oses: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+    osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
@@ -39,7 +39,7 @@ export const ProtectionSwitch = React.memo(
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
           if (event.target.checked === false) {
-            for (const os of oses) {
+            for (const os of osList) {
               if (os === 'windows') {
                 newPayload[os][protection].mode = ProtectionModes.off;
               } else if (os === 'mac') {
@@ -55,7 +55,7 @@ export const ProtectionSwitch = React.memo(
               }
             }
           } else {
-            for (const os of oses) {
+            for (const os of osList) {
               if (os === 'windows') {
                 newPayload[os][protection].mode = ProtectionModes.prevent;
               } else if (os === 'mac') {
@@ -77,7 +77,7 @@ export const ProtectionSwitch = React.memo(
           });
         }
       },
-      [dispatch, policyDetailsConfig, isPlatinumPlus, protection, oses]
+      [dispatch, policyDetailsConfig, isPlatinumPlus, protection, osList]
     );
 
     return (

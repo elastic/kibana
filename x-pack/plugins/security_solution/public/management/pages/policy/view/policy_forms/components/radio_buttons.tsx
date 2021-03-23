@@ -32,10 +32,10 @@ export const RadioFlexGroup = styled(EuiFlexGroup)`
 export const RadioButtons = React.memo(
   ({
     protection,
-    oses,
+    osList,
   }: {
     protection: PolicyProtection;
-    oses: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+    osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   }) => {
     const radios: Immutable<
       Array<{
@@ -73,7 +73,7 @@ export const RadioButtons = React.memo(
             <ProtectionRadio
               protection={protection}
               protectionMode={radios[0].id}
-              oses={oses}
+              osList={osList}
               key={{ protection } + radios[0].id}
               label={radios[0].label}
             />
@@ -82,7 +82,7 @@ export const RadioButtons = React.memo(
             <ProtectionRadio
               protection={protection}
               protectionMode={radios[1].id}
-              oses={oses}
+              osList={osList}
               key={{ protection } + radios[1].id}
               label={radios[1].label}
             />

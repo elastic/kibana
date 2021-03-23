@@ -34,10 +34,10 @@ import { SupportedVersionNotice } from './supported_version';
 export const UserNotification = React.memo(
   ({
     protection,
-    oses,
+    osList,
   }: {
     protection: PolicyProtection;
-    oses: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+    osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
     const dispatch = useDispatch<(action: AppAction) => void>();
@@ -51,7 +51,7 @@ export const UserNotification = React.memo(
       (event) => {
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
-          for (const os of oses) {
+          for (const os of osList) {
             if (os === 'windows') {
               newPayload[os].popup[protection].enabled = event.target.checked;
             } else if (os === 'mac') {
@@ -65,14 +65,14 @@ export const UserNotification = React.memo(
           });
         }
       },
-      [policyDetailsConfig, dispatch, protection, oses]
+      [policyDetailsConfig, dispatch, protection, osList]
     );
 
     const handleCustomUserNotification = useCallback(
       (event) => {
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
-          for (const os of oses) {
+          for (const os of osList) {
             if (os === 'windows') {
               newPayload[os].popup[protection].message = event.target.value;
             } else if (os === 'mac') {
@@ -85,7 +85,7 @@ export const UserNotification = React.memo(
           });
         }
       },
-      [policyDetailsConfig, dispatch, protection, oses]
+      [policyDetailsConfig, dispatch, protection, osList]
     );
 
     return (

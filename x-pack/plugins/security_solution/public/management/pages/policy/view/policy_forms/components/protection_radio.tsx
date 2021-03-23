@@ -24,12 +24,12 @@ export const ProtectionRadio = React.memo(
   ({
     protection,
     protectionMode,
-    oses,
+    osList,
     label,
   }: {
     protection: PolicyProtection;
     protectionMode: ProtectionModes;
-    oses: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+    osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
     label: string;
   }) => {
     const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
@@ -41,7 +41,7 @@ export const ProtectionRadio = React.memo(
     const handleRadioChange = useCallback(() => {
       if (policyDetailsConfig) {
         const newPayload = cloneDeep(policyDetailsConfig);
-        for (const os of oses) {
+        for (const os of osList) {
           if (os === 'windows') {
             newPayload[os][protection].mode = protectionMode;
           } else if (os === 'mac') {
@@ -68,7 +68,7 @@ export const ProtectionRadio = React.memo(
           payload: { policyConfig: newPayload },
         });
       }
-    }, [dispatch, protectionMode, policyDetailsConfig, isPlatinumPlus, oses, protection]);
+    }, [dispatch, protectionMode, policyDetailsConfig, isPlatinumPlus, osList, protection]);
 
     /**
      *  Passing an arbitrary id because EuiRadio
