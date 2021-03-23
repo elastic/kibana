@@ -9,8 +9,10 @@
 /* eslint-disable max-classes-per-file */
 
 import Chalk from 'chalk';
+import { ToolingLog } from '@kbn/dev-utils';
 
 export interface Log {
+  toolingLog: ToolingLog;
   good(label: string, ...args: any[]): void;
   warn(label: string, ...args: any[]): void;
   bad(label: string, ...args: any[]): void;
@@ -18,6 +20,15 @@ export interface Log {
 }
 
 export class CliLog implements Log {
+  public toolingLog = new ToolingLog({
+    level: this.silent ? 'silent' : this.quiet ? 'error' : 'info',
+    writeTo: {
+      write: (msg) => {
+        this.write(msg);
+      },
+    },
+  });
+
   constructor(private readonly quiet: boolean, private readonly silent: boolean) {}
 
   good(label: string, ...args: any[]) {
@@ -54,6 +65,15 @@ export class CliLog implements Log {
 }
 
 export class TestLog implements Log {
+  public toolingLog = new ToolingLog({
+    level: 'verbose',
+    writeTo: {
+      write: (msg) => {
+        this.messages.push({ type: 'toolingLog', args: [msg] });
+      },
+    },
+  });
+
   public readonly messages: Array<{ type: string; args: any[] }> = [];
 
   bad(label: string, ...args: any[]) {

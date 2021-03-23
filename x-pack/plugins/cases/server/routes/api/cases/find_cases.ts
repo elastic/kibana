@@ -16,10 +16,10 @@ import {
   CasesFindRequestRt,
   throwErrors,
   caseStatuses,
-} from '../../../../common';
+} from '../../../../common/api';
 import { transformCases, wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
-import { CASES_URL } from '../../../../common';
+import { CASES_URL } from '../../../../common/constants';
 import { constructQueryOptions } from './helpers';
 
 export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
