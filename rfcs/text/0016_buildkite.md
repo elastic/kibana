@@ -91,12 +91,7 @@
 
 Implement a CI system for Kibana teams that is highly scalable, is stable, surfaces information in an intuitive way, and supports pipelines that are easy to understand and change.
 
-<!-- # Basic example
-
-If the proposal involves a new or changed API, include a basic code example.
-Omit this section if it's not applicable. -->
-
-This table provides an overview of the conclusions made throughout the rest of this document. A lot of this is subjective, but we've tried to take an honest look at each system and feature, based on a large amount of research on and/or experience with each system.
+This table provides an overview of the conclusions made throughout the rest of this document. A lot of this is subjective, but we've tried to take an honest look at each system and feature, based on a large amount of research on and/or experience with each system, our requirements, and our preferences as a team. Your team would likely come to different conclusions based on your preferences and requirements.
 
 |                                      | Jenkins | Buildkite | GitHub Actions | CircleCI |
 | ------------------------------------ | ------- | --------- | -------------- | -------- |
@@ -259,8 +254,6 @@ We were able to connect 2,200 running agents and run a [single job with 1,800 pa
 2,200 agents was the maximum that we were able to test because of quotas on our GCP account that could not easily be increased.
 
 TODO test a large number of parallel jobs as well?
-
-TODO link to agent manager info
 
 #### Stable
 
