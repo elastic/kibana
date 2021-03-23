@@ -17,7 +17,7 @@ async function deletePolicies(client: ElasticsearchClient, policyName: string): 
     ignore: [404],
   };
 
-  // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest doesn't declare policy
+  // @ts-expect-error @elastic/elasticsearch DeleteSnapshotLifecycleRequest.policy_id is required
   return client.ilm.deleteLifecycle({ policy: policyName }, options);
 }
 
