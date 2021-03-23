@@ -26,8 +26,14 @@ jest.mock('../kibana_services', () => ({
 }));
 
 import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
-import { areLayersLoaded, getDataFilters, getTimeFilters } from './map_selectors';
-import { LayerDescriptor } from '../../common/descriptor_types';
+import {
+  areLayersLoaded,
+  getDataFilters,
+  getTimeFilters,
+  getQueryableUniqueIndexPatternIds,
+} from './map_selectors';
+
+import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { Filter } from '../../../../../src/plugins/data/public';
 
@@ -191,5 +197,32 @@ describe('areLayersLoaded', () => {
     const waitingForMapReadyLayerList: LayerDescriptor[] = [];
     const zoom = 4;
     expect(areLayersLoaded.resultFunc(layerList, waitingForMapReadyLayerList, zoom)).toBe(true);
+  });
+});
+
+describe('getQueryableUniqueIndexPatternIds', () => {
+  function createLayerMock({
+    isVisible = true,
+    indexPatterns = [],
+  }: {
+    isVisible?: boolean;
+    indexPatterns?: string[];
+  }) {
+    return ({
+      isVisible: () => {
+        return isVisible;
+      },
+      getQueryableIndexPatternIds: () => {
+        return indexPatterns;
+      },
+    } as unknown) as ILayer;
+  }
+
+  test('should only include visible', () => {
+    const layerList: ILayer[] = [createLayerMock({})];
+    const waitingForMapReadyLayerList: VectorLayerDescriptor[] = [];
+    expect(
+      getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
+    ).toEqual([]);
   });
 });
