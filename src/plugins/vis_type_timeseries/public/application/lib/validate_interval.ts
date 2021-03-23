@@ -6,12 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { GTE_INTERVAL_RE } from '../../../common/interval_regexp';
 import { i18n } from '@kbn/i18n';
+import { GTE_INTERVAL_RE } from '../../../common/interval_regexp';
 import { search } from '../../../../../plugins/data/public';
+
+import type { TimeRangeBounds } from '../../../../data/common';
+import type { TimeseriesVisParams } from '../../types';
+
 const { parseInterval } = search.aggs;
 
-export function validateInterval(bounds, panel, maxBuckets) {
+export function validateInterval(
+  bounds: TimeRangeBounds,
+  panel: TimeseriesVisParams,
+  maxBuckets: number
+) {
   const { interval } = panel;
   const { min, max } = bounds;
   // No need to check auto it will return around 100
@@ -20,8 +28,9 @@ export function validateInterval(bounds, panel, maxBuckets) {
   const greaterThanMatch = interval.match(GTE_INTERVAL_RE);
   if (greaterThanMatch) return;
   const duration = parseInterval(interval);
+
   if (duration) {
-    const span = max.valueOf() - min.valueOf();
+    const span = max!.valueOf() - min!.valueOf();
     const buckets = Math.floor(span / duration.asMilliseconds());
     if (buckets > maxBuckets) {
       throw new Error(

@@ -27,7 +27,11 @@ export function dateHistogram(
     const maxBarsUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
-    const { timeField, interval, maxBars } = getIntervalAndTimefield(panel, series, indexPattern);
+    const { timeField, interval, maxBars } = getIntervalAndTimefield(
+      panel,
+      series,
+      indexPatternObject
+    );
     const { bucketSize, intervalString } = getBucketSize(
       req,
       interval,

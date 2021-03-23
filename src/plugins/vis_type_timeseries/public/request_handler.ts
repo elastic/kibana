@@ -28,14 +28,15 @@ export const metricsRequestHandler = async ({
   searchSessionId,
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
   const config = getUISettings();
+  const data = getDataStart();
+
   const timezone = getTimezone(config);
   const uiStateObj = uiState[visParams.type] ?? {};
-  const data = getDataStart();
-  const dataSearch = getDataStart().search;
+  const dataSearch = data.search;
   const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
   if (visParams && visParams.id && !visParams.isModelInvalid) {
-    const maxBuckets = config.get(MAX_BUCKETS_SETTING);
+    const maxBuckets = config.get<number>(MAX_BUCKETS_SETTING);
 
     validateInterval(parsedTimeRange, visParams, maxBuckets);
 
