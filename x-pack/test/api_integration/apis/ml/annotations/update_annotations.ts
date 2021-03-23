@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       const originalAnnotation = annotationsForJob[0];
       const annotationUpdateRequestBody = {
         ...commonAnnotationUpdateRequestBody,
-        job_id: originalAnnotation._source.job_id,
+        job_id: originalAnnotation._source?.job_id,
         _id: originalAnnotation._id,
       };
 
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       const originalAnnotation = annotationsForJob[0];
       const annotationUpdateRequestBody = {
         ...commonAnnotationUpdateRequestBody,
-        job_id: originalAnnotation._source.job_id,
+        job_id: originalAnnotation._source?.job_id,
         _id: originalAnnotation._id,
       };
 
@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const annotationUpdateRequestBody = {
         ...commonAnnotationUpdateRequestBody,
-        job_id: originalAnnotation._source.job_id,
+        job_id: originalAnnotation._source?.job_id,
         _id: originalAnnotation._id,
       };
 
@@ -144,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
         timestamp: Date.now(),
         end_timestamp: Date.now(),
         annotation: 'Updated annotation',
-        job_id: originalAnnotation._source.job_id,
+        job_id: originalAnnotation._source?.job_id,
         type: ANNOTATION_TYPE.ANNOTATION,
         event: 'model_change',
         detector_index: 2,
