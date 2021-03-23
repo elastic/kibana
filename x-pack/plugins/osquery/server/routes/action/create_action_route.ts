@@ -31,7 +31,7 @@ export const createActionRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
-      const selectedAgents: string[] = [];
+      let selectedAgents: string[] = [];
       const {
         agentSelection: { allAgentsSelected, platformsSelected, policiesSelected, agents },
       } = request.body as { agentSelection: AgentsSelection };
@@ -56,35 +56,37 @@ export const createActionRoute = (router: IRouter) => {
         });
         const ids = extractIds(idRes);
         selectedAgents.push(...ids);
-      } else if (platformsSelected.length > 0 || policiesSelected.length > 0) {
-        const filters: Array<{
-          term: { [key: string]: string };
-        }> = platformsSelected.map((platform) => ({
-          term: { 'local_metadata.os.platform': platform },
-        }));
-        filters.push(...policiesSelected.map((policyId) => ({ term: { policyId } })));
-        const query = {
-          index: '.fleet-agents',
-          body: {
-            _source: 'local_metadata.elastic.agent.id',
-            size: 9000,
-            query: {
-              bool: {
-                filter: [
-                  {
-                    bool: {
-                      should: filters,
+      } else {
+        if (platformsSelected.length > 0 || policiesSelected.length > 0) {
+          const filters: Array<{
+            term: { [key: string]: string };
+          }> = platformsSelected.map((platform) => ({
+            term: { 'local_metadata.os.platform': platform },
+          }));
+          filters.push(...policiesSelected.map((policyId) => ({ term: { policy_id: policyId } })));
+          const query = {
+            index: '.fleet-agents',
+            body: {
+              _source: 'local_metadata.elastic.agent.id',
+              size: 9000,
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: filters,
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
             },
-          },
-        };
-        const ids = extractIds(await esClient.search<{}, {}>(query));
-        selectedAgents.push(...ids);
-      } else {
+          };
+          const ids = extractIds(await esClient.search<{}, {}>(query));
+          selectedAgents.push(...ids);
+        }
         selectedAgents.push(...agents);
+        selectedAgents = Array.from(new Set(selectedAgents));
       }
 
       // @ts-expect-error update validation

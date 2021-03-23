@@ -78,7 +78,8 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
         label: 'Platform',
         options: groups.platforms.map(({ name, size }) => ({
           label: name,
-          value: { color: getColor(groupType), groupType, size },
+          color: getColor(groupType),
+          value: { groupType, size },
         })),
       });
     }
@@ -89,7 +90,8 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
         label: 'Policy',
         options: groups.policies.map(({ name, size }) => ({
           label: name,
-          value: { color: getColor(groupType), groupType, size },
+          color: getColor(groupType),
+          value: { groupType, size },
         })),
       });
     }
@@ -100,11 +102,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
         label: 'Agents',
         options: (agentData.agents as Agent[]).map((agent: Agent) => ({
           label: agent.local_metadata.host.hostname,
+          color: getColor(groupType),
           value: {
             groupType,
-            color: getColor(groupType),
             groups: { policy: agent.policy_id ?? '', platform: agent.local_metadata.os.platform },
-            id: agent.id,
+            id: agent.local_metadata.elastic.agent.id,
             online: agent.active,
           },
         })),
