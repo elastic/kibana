@@ -11,6 +11,11 @@ Reporting feature for a few reasons:
  - Fewer Reporting bugs in releases since App teams have more ownership and
    control over the reportability of their UI
 
+Currently, the applications that support screenshot reports are:
+ - Dashboard
+ - Visualize Editor
+ - Canvas
+
 **Screenshot mode service**
 
 Applications in Kibana should be aware of when their rendering is for a human
