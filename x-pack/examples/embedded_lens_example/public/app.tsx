@@ -111,7 +111,13 @@ export const App = (props: {
   defaultIndexPattern: IndexPattern | null;
 }) => {
   const [color, setColor] = useState('green');
+  const [isLoading, setIsLoading] = useState(false);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
+
+  const [time, setTime] = useState({
+    from: 'now-5d',
+    to: 'now',
+  });
   return (
     <EuiPage>
       <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -138,6 +144,7 @@ export const App = (props: {
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      isLoading={isLoading}
                       onClick={() => {
                         // eslint-disable-next-line no-bitwise
                         const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
@@ -171,11 +178,23 @@ export const App = (props: {
                 <LensComponent
                   id=""
                   style={{ height: 500 }}
-                  timeRange={{
-                    from: 'now-5d',
-                    to: 'now',
-                  }}
+                  timeRange={time}
                   attributes={getLensAttributes(props.defaultIndexPattern, color)}
+                  onLoad={(val) => {
+                    setIsLoading(val);
+                  }}
+                  onBrushEnd={({ range }) => {
+                    setTime({
+                      from: new Date(range[0]).toISOString(),
+                      to: new Date(range[1]).toISOString(),
+                    });
+                  }}
+                  onFilter={(_data) => {
+                    // call back event for on filter event
+                  }}
+                  onTableRowClick={(_data) => {
+                    // call back event for on table row click event
+                  }}
                 />
               </>
             ) : (
