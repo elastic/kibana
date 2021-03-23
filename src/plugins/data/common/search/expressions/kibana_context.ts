@@ -10,14 +10,15 @@ import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
 import { Adapters } from 'src/plugins/inspector/common';
+import { unboxExpressionValue } from '../../../../expressions/common';
 import { Query, uniqFilters } from '../../query';
-import { ExecutionContextSearch, KibanaContext } from './kibana_context_type';
+import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
 import { KibanaTimerangeOutput } from './timerange';
 
 interface Arguments {
   q?: KibanaQueryOutput | null;
-  filters?: string | null;
+  filters?: KibanaFilter[] | null;
   timeRange?: KibanaTimerangeOutput | null;
   savedSearchId?: string | null;
 }
@@ -56,8 +57,8 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       }),
     },
     filters: {
-      types: ['string', 'null'],
-      default: '"[]"',
+      types: ['kibana_filter', 'null'],
+      multi: true,
       help: i18n.translate('data.search.functions.kibana_context.filters.help', {
         defaultMessage: 'Specify Kibana generic filters',
       }),
@@ -81,7 +82,7 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   async fn(input, args, { getSavedObject }) {
     const timeRange = args.timeRange || input?.timeRange;
     let queries = mergeQueries(input?.query, args?.q || []);
-    let filters = [...(input?.filters || []), ...getParsedValue(args?.filters, [])];
+    let filters = [...(input?.filters || []), ...(args?.filters?.map(unboxExpressionValue) || [])];
 
     if (args.savedSearchId) {
       if (typeof getSavedObject !== 'function') {
