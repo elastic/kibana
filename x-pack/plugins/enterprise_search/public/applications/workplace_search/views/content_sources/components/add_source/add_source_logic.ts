@@ -499,10 +499,16 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       try {
         const response = await http.get(route, { query });
-        const { serviceName, indexPermissions, serviceType, preContentSourceId } = response;
+        const {
+          serviceName,
+          indexPermissions,
+          serviceType,
+          preContentSourceId,
+          hasConfigureStep,
+        } = response;
 
         // GitHub requires an intermediate configuration step, where we collect the repos to index.
-        if (preContentSourceId && !values.oauthConfigCompleted) {
+        if (hasConfigureStep && !values.oauthConfigCompleted) {
           actions.setPreContentSourceId(preContentSourceId);
           navigateToUrl(`${ADD_GITHUB_PATH}/configure${search}`);
         } else {
