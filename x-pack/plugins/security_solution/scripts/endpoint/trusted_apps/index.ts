@@ -11,6 +11,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { chain } from 'lodash';
 import { basename } from 'path';
+import pMap from 'p-map';
 import { TRUSTED_APPS_CREATE_API, TRUSTED_APPS_LIST_API } from '../../../common/endpoint/constants';
 import { NewTrustedApp, OperatingSystem, TrustedApp } from '../../../common/endpoint/types';
 
@@ -73,11 +74,9 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
     path: TRUSTED_APPS_LIST_API,
   });
 
-  const results = [];
-
-  // 10 concurrent requests at a time.
-  const invokeRequestChunks = chain(Array(count))
-    .fill(async () => {
+  return pMap(
+    Array.from({ length: count }),
+    async () => {
       const { data } = await kbnClient.request<TrustedApp>({
         method: 'POST',
         path: TRUSTED_APPS_CREATE_API,
@@ -85,16 +84,9 @@ export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
       });
       logger.write(data.id);
       return data;
-    })
-    .chunk(10)
-    .value();
-
-  for await (const invokeRequestChunk of invokeRequestChunks) {
-    const result = await Promise.all(invokeRequestChunk.map(invokeRequest));
-    results.concat(result);
-  }
-
-  return results;
+    },
+    { concurrency: 10 }
+  );
 };
 
 interface GenerateTrustedAppEntryOptions {

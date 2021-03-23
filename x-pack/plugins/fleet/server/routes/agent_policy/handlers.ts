@@ -8,6 +8,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, ResponseHeaders } from 'src/core/server';
 
+import pMap from 'p-map';
+
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
 import { getAgentsByKuery } from '../../services/agents';
@@ -37,7 +39,8 @@ import { defaultIngestErrorHandler } from '../../errors';
 
 export const getAgentPoliciesHandler: RequestHandler<
   undefined,
-  TypeOf<typeof GetAgentPoliciesRequestSchema.query>
+  TypeOf<typeof GetAgentPoliciesRequestSchema.query>,
+  GetOneAgentPolicyResponse
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -47,27 +50,31 @@ export const getAgentPoliciesHandler: RequestHandler<
       withPackagePolicies,
       ...restOfQuery,
     });
-    const body: GetAgentPoliciesResponse = {
-      items,
-      total,
-      page,
-      perPage,
-    };
 
-    await Promise.all(
-      items.map(
-        async (agentPolicy: GetAgentPoliciesResponseItem) =>
-          getAgentsByKuery(esClient, {
-            showInactive: false,
-            perPage: 0,
-            page: 1,
-            kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${agentPolicy.id}`,
-          }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
-        { concurrency: 10 }
-      )
+    const agentPolicies = await pMap(
+      items,
+      async (agentPolicy: GetAgentPoliciesResponseItem) => {
+        const { total: agentTotal } = getAgentsByKuery(esClient, {
+          showInactive: false,
+          perPage: 0,
+          page: 1,
+          kuery: `${AGENT_SAVED_OBJECT_TYPE}.policy_id:${agentPolicy.id}`,
+        });
+
+        agentPolicy.agents = agentTotal;
+        return agentPolicy;
+      },
+      { concurrency: 10 }
     );
 
-    return response.ok({ body });
+    return response.ok({
+      body: {
+        items: agentPolicies,
+        total,
+        page,
+        perPage,
+      },
+    });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

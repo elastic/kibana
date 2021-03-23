@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { delay } from 'bluebird';
+import { timer } from 'rxjs';
 
 export default function () {
   return {
@@ -22,13 +22,13 @@ export default function () {
 
         lifecycle.testFailure.add(async (err, test) => {
           log.info('testFailure %s %s', err.message, test.fullTitle());
-          await delay(10);
+          await timer(10).toPromise();
           log.info('testFailureAfterDelay %s %s', err.message, test.fullTitle());
         });
 
         lifecycle.testHookFailure.add(async (err, test) => {
           log.info('testHookFailure %s %s', err.message, test.fullTitle());
-          await delay(10);
+          await timer(10).toPromise();
           log.info('testHookFailureAfterDelay %s %s', err.message, test.fullTitle());
         });
       },
