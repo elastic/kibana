@@ -10,7 +10,6 @@ import * as rt from 'io-ts';
 import {
   SavedTimelineRuntimeType,
   TimelineStatusLiteralRt,
-  TimelineTypeLiteralRt,
 } from '../../../../../common/types/timeline';
 import { unionWithNullType } from '../../../../../common/utility_types';
 
@@ -21,9 +20,8 @@ export const createTimelineSchema = rt.intersection([
   rt.partial({
     status: unionWithNullType(TimelineStatusLiteralRt),
     timelineId: unionWithNullType(rt.string),
-    templateTimelineId: unionWithNullType(rt.string),
-    templateTimelineVersion: unionWithNullType(rt.number),
-    timelineType: unionWithNullType(TimelineTypeLiteralRt),
     version: unionWithNullType(rt.string),
   }),
 ]);
+
+export type CreateTimeline = rt.TypeOf<typeof createTimelineSchema>;

@@ -79,21 +79,27 @@ export const timelineSavedObjectOmittedFields = [
   'version',
 ];
 
-export const setTimeline = (
-  parsedTimelineObject: Partial<ImportedTimeline>,
-  parsedTimeline: ImportedTimeline,
-  isTemplateTimeline: boolean
-) => {
+export const setTimeline = ({
+  status,
+  templateTimelineId,
+  templateTimelineVersion,
+  isTemplateTimeline,
+  isImmutable,
+}: {
+  status?: TimelineStatus | null;
+  templateTimelineId?: string | null;
+  templateTimelineVersion?: number | null;
+  isTemplateTimeline?: boolean;
+  isImmutable?: boolean;
+}) => {
   return {
-    ...parsedTimelineObject,
-    status:
-      parsedTimeline.status === TimelineStatus.draft
-        ? TimelineStatus.active
-        : parsedTimeline.status ?? TimelineStatus.active,
-    templateTimelineVersion: isTemplateTimeline
-      ? parsedTimeline.templateTimelineVersion ?? 1
-      : null,
-    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuid.v4() : null,
+    status: isImmutable
+      ? TimelineStatus.immutable
+      : status === TimelineStatus.draft
+      ? TimelineStatus.active
+      : status ?? TimelineStatus.active,
+    templateTimelineVersion: isTemplateTimeline ? templateTimelineVersion ?? 1 : null,
+    templateTimelineId: isTemplateTimeline ? templateTimelineId ?? uuid.v4() : null,
   };
 };
 
@@ -170,7 +176,16 @@ export const importTimelines = async (
                 // create timeline / timeline template
                 newTimeline = await createTimelines({
                   frameworkRequest,
-                  timeline: setTimeline(parsedTimelineObject, parsedTimeline, isTemplateTimeline),
+                  timeline: {
+                    ...parsedTimelineObject,
+                    ...setTimeline({
+                      status: parsedTimeline.status,
+                      templateTimelineId: parsedTimeline.templateTimelineId,
+                      templateTimelineVersion: parsedTimeline.templateTimelineVersion,
+                      isTemplateTimeline: compareTimelinesStatus.isHandlingTemplateTimeline,
+                      isImmutable: parsedTimeline.status === TimelineStatus.immutable,
+                    }),
+                  },
                   pinnedEventIds: isTemplateTimeline ? null : pinnedEventIds,
                   notes: isTemplateTimeline ? globalNotes : [...globalNotes, ...eventNotes],
                   isImmutable,

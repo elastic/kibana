@@ -23,6 +23,8 @@ import {
 } from './utils/common';
 import { createTimelines } from './utils/create_timelines';
 import { DEFAULT_ERROR } from './utils/failure_cases';
+import { setTimeline } from './utils/import_timelines';
+import { TimelineStatus } from '../../../../common/types/timeline';
 
 export const createTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -73,7 +75,16 @@ export const createTimelinesRoute = (
         if (compareTimelinesStatus.isCreatable) {
           const newTimeline = await createTimelines({
             frameworkRequest,
-            timeline,
+            timeline: {
+              ...timeline,
+              ...setTimeline({
+                status: timeline.status,
+                templateTimelineId: timeline.templateTimelineId,
+                templateTimelineVersion: timeline.templateTimelineVersion,
+                isTemplateTimeline: compareTimelinesStatus.isHandlingTemplateTimeline,
+                isImmutable: timeline.status === TimelineStatus.immutable,
+              }),
+            },
             timelineVersion: version,
           });
 

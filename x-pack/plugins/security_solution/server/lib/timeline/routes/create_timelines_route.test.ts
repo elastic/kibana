@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
 
 import {
@@ -31,6 +30,7 @@ import {
   CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,
   CREATE_TIMELINE_ERROR_MESSAGE,
 } from './utils/failure_cases';
+import { TimelineStatus } from '../../../../common/types/timeline';
 
 describe('create timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -41,6 +41,10 @@ describe('create timelines', () => {
   let mockPersistTimeline: jest.Mock;
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
+
+  jest.mock('uuid', () => ({
+    v4: jest.fn().mockReturnValue('mockTemplaTetimelineId'),
+  }));
 
   beforeEach(() => {
     jest.resetModules();
@@ -109,8 +113,12 @@ describe('create timelines', () => {
         expect(mockPersistTimeline.mock.calls[0][2]).toBeNull();
       });
 
-      test('should Create a new timeline savedObject witn given timeline', async () => {
-        expect(mockPersistTimeline.mock.calls[0][3]).toEqual(inputTimeline);
+      test('should Create a new timeline savedObject with correct data', async () => {
+        expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
+          ...inputTimeline,
+          status: TimelineStatus.active,
+          templateTimelineVersion: null,
+        });
       });
 
       test('should NOT Create new pinned events', async () => {
@@ -214,9 +222,12 @@ describe('create timelines', () => {
       });
 
       test('should Create a new timeline template savedObject witn given timeline template', async () => {
-        expect(mockPersistTimeline.mock.calls[0][3]).toEqual(
-          createTemplateTimelineWithTimelineId.timeline
-        );
+        expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
+          ...createTemplateTimelineWithTimelineId.timeline,
+          status: TimelineStatus.active,
+          templateTimelineId: 'mockTemplaTetimelineId',
+          templateTimelineVersion: 1,
+        });
       });
 
       test('should NOT Create new pinned events', async () => {
