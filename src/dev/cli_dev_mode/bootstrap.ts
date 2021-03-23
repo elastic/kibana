@@ -7,7 +7,7 @@
  */
 
 import { REPO_ROOT } from '@kbn/utils';
-import { CliArgs, Env } from '@kbn/config';
+import { CliArgs, Env, RawConfigAdapter } from '@kbn/config';
 import { CliDevMode } from './cli_dev_mode';
 import { CliLog } from './log';
 import { convertToLogger } from './log_adapter';
@@ -16,9 +16,10 @@ import { loadConfig } from './config';
 interface BootstrapArgs {
   configs: string[];
   cliArgs: CliArgs;
+  applyConfigOverrides: RawConfigAdapter;
 }
 
-export async function bootstrapDevMode({ configs, cliArgs }: BootstrapArgs) {
+export async function bootstrapDevMode({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
   const log = new CliLog(!!cliArgs.quiet, !!cliArgs.silent);
 
   const env = Env.createDefault(REPO_ROOT, {
@@ -29,7 +30,7 @@ export async function bootstrapDevMode({ configs, cliArgs }: BootstrapArgs) {
   const config = await loadConfig({
     env,
     logger: convertToLogger(log),
-    rawConfigAdapter: (cfg) => cfg, // TODO: use from cli/serve
+    rawConfigAdapter: applyConfigOverrides,
   });
 
   const cliDevMode = new CliDevMode({

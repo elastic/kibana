@@ -15,7 +15,6 @@ import url from 'url';
 import { getConfigPath } from '@kbn/utils';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { fromRoot } from '../../core/server/utils';
-import { bootstrap } from '../../core/server';
 import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
@@ -33,6 +32,16 @@ function canRequire(path) {
 
 const DEV_MODE_PATH = resolve(__dirname, '../../dev/cli_dev_mode');
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
+
+const getBootstrapScript = () => {
+  if (DEV_MODE_SUPPORTED && process.env.isDevCliChild !== 'true') {
+    const { bootstrapDevMode } = require('../../dev/cli_dev_mode');
+    return bootstrapDevMode;
+  } else {
+    const { bootstrap } = require('../../core/server');
+    return bootstrap;
+  }
+};
 
 const pathCollector = function () {
   const paths = [];
@@ -78,6 +87,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
           throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
         }
       }
+
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('server.ssl.keystore.path');
@@ -209,28 +219,32 @@ export default function (program) {
     }
 
     const unknownOptions = this.getUnknownOptions();
-    await bootstrap({
-      configs: [].concat(opts.config || []),
-      cliArgs: {
-        dev: !!opts.dev,
-        envName: unknownOptions.env ? unknownOptions.env.name : undefined,
-        // no longer supported
-        quiet: !!opts.quiet,
-        silent: !!opts.silent,
-        watch: !!opts.watch,
-        runExamples: !!opts.runExamples,
-        // We want to run without base path when the `--run-examples` flag is given so that we can use local
-        // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
-        // We can tell users they only have to run with `yarn start --run-examples` to get those
-        // local links to work.  Similar to what we do for "View in Console" links in our
-        // elastic.co links.
-        basePath: opts.runExamples ? false : !!opts.basePath,
-        optimize: !!opts.optimize,
-        disableOptimizer: !opts.optimizer,
-        oss: !!opts.oss,
-        cache: !!opts.cache,
-        dist: !!opts.dist,
-      },
+    const configs = [].concat(opts.config || []);
+    const cliArgs = {
+      dev: !!opts.dev,
+      envName: unknownOptions.env ? unknownOptions.env.name : undefined,
+      // no longer supported
+      quiet: !!opts.quiet,
+      silent: !!opts.silent,
+      watch: !!opts.watch,
+      runExamples: !!opts.runExamples,
+      // We want to run without base path when the `--run-examples` flag is given so that we can use local
+      // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
+      // We can tell users they only have to run with `yarn start --run-examples` to get those
+      // local links to work.  Similar to what we do for "View in Console" links in our
+      // elastic.co links.
+      basePath: opts.runExamples ? false : !!opts.basePath,
+      optimize: !!opts.optimize,
+      disableOptimizer: !opts.optimizer,
+      oss: !!opts.oss,
+      cache: !!opts.cache,
+      dist: !!opts.dist,
+    };
+    const bootstrapScript = getBootstrapScript();
+
+    await bootstrapScript({
+      configs,
+      cliArgs,
       applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });
