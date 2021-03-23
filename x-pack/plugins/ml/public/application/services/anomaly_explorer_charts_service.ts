@@ -407,8 +407,15 @@ export class AnomalyExplorerChartsService {
     if (!Array.isArray(allSeriesRecords)) return;
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
     let chartsPerRow = Math.min(Math.max(Math.floor(containerWith / 550), 1), MAX_CHARTS_PER_ROW);
-    if (allSeriesRecords.length === 1) {
+
+    // Expand the chart to full size if there's only one viewable chart
+    if (allSeriesRecords.length === 1 || maxSeries === 1) {
       chartsPerRow = 1;
+    }
+
+    // Expand the charts to not have blank space in the row if necessary
+    if (maxSeries < chartsPerRow) {
+      chartsPerRow = maxSeries;
     }
 
     data.chartsPerRow = chartsPerRow;
