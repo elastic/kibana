@@ -1,5 +1,5 @@
 .kbnDocViewerTable {
-  @include euiBreakpoint('xs', 's') {
+  @include euiBreakpoint('xs', 's','m') {
     table-layout: fixed;
   }
 }
@@ -64,8 +64,8 @@
 
 .kbnDocViewer__field {
   width: $euiSize * 10;
-  @include euiBreakpoint('xs', 's', 'm', 'l', 'xl') {
-    width: $euiSize * 5;
+  @include euiBreakpoint('xs', 's', 'm') {
+    width: $euiSize * 6;
   }
 }
 
