@@ -35,7 +35,6 @@ interface CasesClientFactoryArgs {
   securityPluginStart?: SecurityPluginStart;
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
-  isAuthEnabled: boolean;
 }
 
 /**
@@ -88,7 +87,6 @@ export class CasesClientFactory {
       securityAuth: this.options.securityPluginStart?.authz,
       getSpace: this.options.getSpace,
       features: this.options.featuresPluginStart,
-      isAuthEnabled: this.options.isAuthEnabled,
     });
 
     const user = this.options.caseService.getUser({ request });

@@ -9,8 +9,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const ConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  // TODO: remove once authorization is complete
-  enableAuthorization: schema.boolean({ defaultValue: false }),
 });
 
 export type ConfigType = TypeOf<typeof ConfigSchema>;

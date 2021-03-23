@@ -9,8 +9,9 @@ import { KibanaRequest } from 'kibana/server';
 import Boom from '@hapi/boom';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { GetSpaceFn, ReadOperations, WriteOperations } from './types';
+import { GetSpaceFn } from './types';
 import { getClassFilter } from './utils';
+import { OperationDetails, Operations } from '.';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -20,7 +21,6 @@ export class Authorization {
   private readonly request: KibanaRequest;
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
   private readonly featureCaseClasses: Set<string>;
-  private readonly isAuthEnabled: boolean;
   // TODO: create this
   // private readonly auditLogger: AuthorizationAuditLogger;
 
@@ -28,17 +28,14 @@ export class Authorization {
     request,
     securityAuth,
     caseClasses,
-    isAuthEnabled,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     caseClasses: Set<string>;
-    isAuthEnabled: boolean;
   }) {
     this.request = request;
     this.securityAuth = securityAuth;
     this.featureCaseClasses = caseClasses;
-    this.isAuthEnabled = isAuthEnabled;
   }
 
   /**
@@ -49,13 +46,11 @@ export class Authorization {
     securityAuth,
     getSpace,
     features,
-    isAuthEnabled,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     getSpace: GetSpaceFn;
     features: FeaturesPluginStart;
-    isAuthEnabled: boolean;
   }): Promise<Authorization> {
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseClasses: Set<string>;
@@ -73,26 +68,23 @@ export class Authorization {
       caseClasses = new Set<string>();
     }
 
-    return new Authorization({ request, securityAuth, caseClasses, isAuthEnabled });
+    return new Authorization({ request, securityAuth, caseClasses });
   }
 
   private shouldCheckAuthorization(): boolean {
     return this.securityAuth?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async ensureAuthorized(className: string, operation: ReadOperations | WriteOperations) {
-    // TODO: remove
-    if (!this.isAuthEnabled) {
-      return;
-    }
-
+  public async ensureAuthorized(className: string, operation: OperationDetails) {
     const { securityAuth } = this;
     const isAvailableClass = this.featureCaseClasses.has(className);
 
     // TODO: throw if the request is not authorized
     if (securityAuth && this.shouldCheckAuthorization()) {
       // TODO: implement ensure logic
-      const requiredPrivileges: string[] = [securityAuth.actions.cases.get(className, operation)];
+      const requiredPrivileges: string[] = [
+        securityAuth.actions.cases.get(className, operation.name),
+      ];
 
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username, privileges } = await checkPrivileges({
@@ -146,7 +138,7 @@ export class Authorization {
   }> {
     const { securityAuth } = this;
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const { authorizedClassNames } = await this.getAuthorizedClassNames([ReadOperations.Find]);
+      const { authorizedClassNames } = await this.getAuthorizedClassNames([Operations.findCases]);
 
       if (!authorizedClassNames.length) {
         // TODO: Better error message, log error
@@ -168,7 +160,7 @@ export class Authorization {
   }
 
   private async getAuthorizedClassNames(
-    operations: Array<ReadOperations | WriteOperations>
+    operations: OperationDetails[]
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
@@ -181,7 +173,9 @@ export class Authorization {
 
       for (const className of featureCaseClasses) {
         for (const operation of operations) {
-          requiredPrivileges.set(securityAuth.actions.cases.get(className, operation), [className]);
+          requiredPrivileges.set(securityAuth.actions.cases.get(className, operation.name), [
+            className,
+          ]);
         }
       }
 
