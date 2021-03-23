@@ -86,7 +86,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
               timeBuckets,
               timefilter,
               onSelectEntity,
-              forDashboard: true,
+              noTimelineSelectionMsg: true,
             }}
           />
         )}

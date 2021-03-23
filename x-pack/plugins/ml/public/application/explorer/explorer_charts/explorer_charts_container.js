@@ -40,7 +40,7 @@ const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucke
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
 });
 
-const textTooManyBucketsForDashboard = i18n.translate(
+const textTooManyBucketsWithoutTimelineSelection = i18n.translate(
   'xpack.ml.explorer.charts.dashboardTooManyBucketsDescription',
   {
     defaultMessage:
@@ -79,7 +79,7 @@ function ExplorerChartContainer({
   timefilter,
   onSelectEntity,
   recentlyAccessed,
-  forDashboard,
+  noTimelineSelectionMsg,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
@@ -153,7 +153,11 @@ function ExplorerChartContainer({
             {tooManyBuckets && (
               <span className="ml-explorer-chart-icon">
                 <EuiIconTip
-                  content={forDashboard ? textTooManyBucketsForDashboard : textTooManyBuckets}
+                  content={
+                    noTimelineSelectionMsg
+                      ? textTooManyBucketsWithoutTimelineSelection
+                      : textTooManyBuckets
+                  }
                   position="top"
                   size="s"
                   type="alert"
@@ -244,7 +248,7 @@ export const ExplorerChartsContainerUI = ({
   timeBuckets,
   timefilter,
   onSelectEntity,
-  forDashboard,
+  noTimelineSelectionMsg,
 }) => {
   const {
     services: {
@@ -303,7 +307,7 @@ export const ExplorerChartsContainerUI = ({
                 timefilter={timefilter}
                 onSelectEntity={onSelectEntity}
                 recentlyAccessed={recentlyAccessed}
-                forDashboard={forDashboard}
+                noTimelineSelectionMsg={noTimelineSelectionMsg}
               />
             </EuiFlexItem>
           ))}
