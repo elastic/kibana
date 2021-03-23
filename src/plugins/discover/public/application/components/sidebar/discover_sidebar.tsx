@@ -36,7 +36,7 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 /**
  * Default number of available fields displayed and added on scroll
  */
-const PAGINATION_SIZE = 50;
+const PAGINATION_SIZE = 20;
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -124,20 +124,33 @@ export function DiscoverSidebar({
     ]
   );
 
+  const paginate = useCallback(() => {
+    setPageSize(
+      Math.max(PAGINATION_SIZE, Math.min(pageSize + PAGINATION_SIZE * 0.5, unpopularFields.length))
+    );
+  }, [setPageSize, pageSize, unpopularFields]);
+
+  useEffect(() => {
+    if (scrollContainer && unpopularFields) {
+      const { clientHeight, scrollHeight } = scrollContainer;
+
+      if (clientHeight === scrollHeight && pageSize < unpopularFields.length) {
+        // in case of there is so much height available that there's no scrolling at initial rendering
+        // pagination starts after the first bulk of rendering
+        paginate();
+      }
+    }
+  }, [scrollContainer, paginate, unpopularFields, pageSize]);
+
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {
       const { scrollTop, clientHeight, scrollHeight } = scrollContainer;
       const nearBottom = scrollTop + clientHeight > scrollHeight * 0.9;
       if (nearBottom && unpopularFields) {
-        setPageSize(
-          Math.max(
-            PAGINATION_SIZE,
-            Math.min(pageSize + PAGINATION_SIZE * 0.5, unpopularFields.length)
-          )
-        );
+        paginate();
       }
     }
-  }, [scrollContainer, pageSize, setPageSize, unpopularFields]);
+  }, [paginate, scrollContainer, unpopularFields]);
 
   const fieldTypes = useMemo(() => {
     const result = ['any'];
