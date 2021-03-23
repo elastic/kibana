@@ -28,7 +28,7 @@ const numberOptional = schema.maybe(schema.number());
 
 const queryObject = schema.object({
   language: schema.string(),
-  query: schema.string(),
+  query: schema.oneOf([schema.string(), schema.any()]),
 });
 const stringOrNumberOptionalNullable = schema.nullable(
   schema.oneOf([stringOptionalNullable, numberOptional])

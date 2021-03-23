@@ -31,10 +31,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldSelect } from '../aggs/field_select';
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
-// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { YesNo } from '../yes_no';
-// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
+
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
@@ -238,15 +238,13 @@ export class TablePanelConfig extends Component<
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language
-                        ? model.filter.language
-                        : getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
-                    onChange={(filter: PanelConfigProps['model']['filter']) =>
-                      this.props.onChange({ filter })
-                    }
-                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    onChange={(filter) => {
+                      this.props.onChange({ filter });
+                    }}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern || '']}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

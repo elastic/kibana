@@ -29,7 +29,7 @@ export function QueryBarWrapper({ query, onChange, indexPatterns }: QueryBarWrap
     async function fetchIndexes() {
       const i: QueryStringInputProps['indexPatterns'] = [];
 
-      for (const index of indexPatterns) {
+      for (const index of indexPatterns ?? []) {
         if (isStringTypeIndexPattern(index)) {
           i.push(index);
         } else if (index?.id) {
