@@ -27,8 +27,6 @@ const mockTheme = getMockTheme({
 const mockKibanaHttpService = coreMock.createStart().http;
 const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
 
-jest.mock('../../../../common/lib/kibana');
-
 describe('BuilderExceptionListItemComponent', () => {
   const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
 

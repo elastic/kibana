@@ -6,48 +6,47 @@
  */
 
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { ThemeProvider } from 'styled-components';
+import { mount } from 'enzyme';
 
-import { AndOrBadge } from '../and_or_badge';
+import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
 
-const MyInvisibleAndBadge = styled(EuiFlexItem)`
-  visibility: hidden;
-`;
+import { BuilderAndBadgeComponent } from './and_badge';
 
-const MyFirstRowContainer = styled(EuiFlexItem)`
-  padding-top: 20px;
-`;
+const mockTheme = getMockTheme({ eui: { euiColorLightShade: '#ece' } });
 
-interface BuilderAndBadgeProps {
-  entriesLength: number;
-  exceptionItemIndex: number;
-}
+describe('BuilderAndBadgeComponent', () => {
+  test('it renders exceptionItemEntryFirstRowAndBadge for very first exception item in builder', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={0} />
+      </ThemeProvider>
+    );
 
-export const BuilderAndBadgeComponent = React.memo<BuilderAndBadgeProps>(
-  ({ entriesLength, exceptionItemIndex }) => {
-    const badge = <AndOrBadge includeAntennas type="and" />;
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemEntryFirstRowAndBadge"]').exists()
+    ).toBeTruthy();
+  });
 
-    if (entriesLength > 1 && exceptionItemIndex === 0) {
-      return (
-        <MyFirstRowContainer grow={false} data-test-subj="exceptionItemEntryFirstRowAndBadge">
-          {badge}
-        </MyFirstRowContainer>
-      );
-    } else if (entriesLength <= 1) {
-      return (
-        <MyInvisibleAndBadge grow={false} data-test-subj="exceptionItemEntryInvisibleAndBadge">
-          {badge}
-        </MyInvisibleAndBadge>
-      );
-    } else {
-      return (
-        <EuiFlexItem grow={false} data-test-subj="exceptionItemEntryAndBadge">
-          {badge}
-        </EuiFlexItem>
-      );
-    }
-  }
-);
+  test('it renders exceptionItemEntryInvisibleAndBadge if "entriesLength" is 1 or less', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <BuilderAndBadgeComponent entriesLength={1} exceptionItemIndex={0} />
+      </ThemeProvider>
+    );
 
-BuilderAndBadgeComponent.displayName = 'BuilderAndBadge';
+    expect(
+      wrapper.find('[data-test-subj="exceptionItemEntryInvisibleAndBadge"]').exists()
+    ).toBeTruthy();
+  });
+
+  test('it renders regular "and" badge if exception item is not the first one and includes more than one entry', () => {
+    const wrapper = mount(
+      <ThemeProvider theme={mockTheme}>
+        <BuilderAndBadgeComponent entriesLength={2} exceptionItemIndex={1} />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="exceptionItemEntryAndBadge"]').exists()).toBeTruthy();
+  });
+});
