@@ -74,6 +74,7 @@ export interface AddSourceActions {
   setSourceIndexPermissionsValue(indexPermissionsValue: boolean): boolean;
   setCustomSourceData(data: CustomSource): CustomSource;
   setPreContentSourceConfigData(data: PreContentSourceResponse): PreContentSourceResponse;
+  setPreContentSourceId(preContentSourceId: string): string;
   setSelectedGithubOrganizations(option: string): string;
   resetSourceState(): void;
   createContentSource(
@@ -92,7 +93,7 @@ export interface AddSourceActions {
     successCallback: (oauthUrl: string) => void
   ): { serviceType: string; successCallback(oauthUrl: string): void };
   getSourceReConnectData(sourceId: string): { sourceId: string };
-  getPreContentSourceConfigData(preContentSourceId: string): { preContentSourceId: string };
+  getPreContentSourceConfigData(): void;
   setButtonNotLoading(): void;
 }
 
@@ -144,6 +145,7 @@ interface AddSourceValues {
   githubOrganizations: string[];
   selectedGithubOrganizationsMap: OrganizationsMap;
   selectedGithubOrganizations: string[];
+  preContentSourceId: string;
 }
 
 interface PreContentSourceResponse {
@@ -181,6 +183,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     setSourceIndexPermissionsValue: (indexPermissionsValue: boolean) => indexPermissionsValue,
     setCustomSourceData: (data: CustomSource) => data,
     setPreContentSourceConfigData: (data: PreContentSourceResponse) => data,
+    setPreContentSourceId: (preContentSourceId: string) => preContentSourceId,
     setSelectedGithubOrganizations: (option: string) => option,
     getSourceConfigData: (serviceType: string) => ({ serviceType }),
     getSourceConnectData: (serviceType: string, successCallback: (oauthUrl: string) => string) => ({
@@ -188,7 +191,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       successCallback,
     }),
     getSourceReConnectData: (sourceId: string) => ({ sourceId }),
-    getPreContentSourceConfigData: (preContentSourceId: string) => ({ preContentSourceId }),
+    getPreContentSourceConfigData: () => true,
     saveSourceConfig: (isUpdating: boolean, successCallback?: () => void) => ({
       isUpdating,
       successCallback,
@@ -344,6 +347,14 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         resetSourceState: () => ({}),
       },
     ],
+    preContentSourceId: [
+      '',
+      {
+        setPreContentSourceId: (_, preContentSourceId) => preContentSourceId,
+        setPreContentSourceConfigData: () => '',
+        resetSourceState: () => '',
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     selectedGithubOrganizations: [
@@ -407,8 +418,9 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         flashAPIErrors(e);
       }
     },
-    getPreContentSourceConfigData: async ({ preContentSourceId }) => {
+    getPreContentSourceConfigData: async () => {
       const { isOrganization } = AppLogic.values;
+      const { preContentSourceId } = values;
       const route = isOrganization
         ? `/api/workplace_search/org/pre_sources/${preContentSourceId}`
         : `/api/workplace_search/account/pre_sources/${preContentSourceId}`;

@@ -59,6 +59,7 @@ describe('AddSourceLogic', () => {
     githubOrganizations: [],
     selectedGithubOrganizationsMap: {} as OrganizationsMap,
     selectedGithubOrganizations: [],
+    preContentSourceId: '',
   };
 
   const sourceConnectData = {
@@ -440,13 +441,14 @@ describe('AddSourceLogic', () => {
 
       describe('getPreContentSourceConfigData', () => {
         it('calls API and sets values', async () => {
+          mount({ preContentSourceId: '123' });
           const setPreContentSourceConfigDataSpy = jest.spyOn(
             AddSourceLogic.actions,
             'setPreContentSourceConfigData'
           );
           http.get.mockReturnValue(Promise.resolve(config));
 
-          AddSourceLogic.actions.getPreContentSourceConfigData('123');
+          AddSourceLogic.actions.getPreContentSourceConfigData();
 
           expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/pre_sources/123');
           await nextTick();
@@ -456,7 +458,7 @@ describe('AddSourceLogic', () => {
         it('handles error', async () => {
           http.get.mockReturnValue(Promise.reject('this is an error'));
 
-          AddSourceLogic.actions.getPreContentSourceConfigData('123');
+          AddSourceLogic.actions.getPreContentSourceConfigData();
           await nextTick();
 
           expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
@@ -616,7 +618,8 @@ describe('AddSourceLogic', () => {
       });
 
       it('getPreContentSourceConfigData', () => {
-        AddSourceLogic.actions.getPreContentSourceConfigData('123');
+        mount({ preContentSourceId: '123' });
+        AddSourceLogic.actions.getPreContentSourceConfigData();
 
         expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/pre_sources/123');
       });
