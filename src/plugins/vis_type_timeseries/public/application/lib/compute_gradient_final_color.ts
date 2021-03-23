@@ -5,15 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import Color from 'color';
 
-import _ from 'lodash';
-import { detectIE } from './detect_ie';
-
-export const createNumberHandler = (handleChange) => {
-  return (name, defaultValue) => (e) => {
-    if (!detectIE() || e.keyCode === 13) e.preventDefault();
-
-    const value = Number(_.get(e, 'target.value', defaultValue));
-    return handleChange?.({ [name]: value });
-  };
+export const computeGradientFinalColor = (color: string): string => {
+  let inputColor = new Color(color);
+  const hsl = inputColor.hsl().object();
+  hsl.l -= inputColor.luminosity() * 100;
+  inputColor = Color.hsl(hsl);
+  return inputColor.rgb().toString();
 };
