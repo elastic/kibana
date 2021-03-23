@@ -146,6 +146,7 @@ interface AddSourceValues {
   selectedGithubOrganizationsMap: OrganizationsMap;
   selectedGithubOrganizations: string[];
   preContentSourceId: string;
+  oauthConfigCompleted: boolean;
 }
 
 interface PreContentSourceResponse {
@@ -355,6 +356,12 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         resetSourceState: () => '',
       },
     ],
+    oauthConfigCompleted: [
+      false,
+      {
+        setPreContentSourceConfigData: () => true,
+      },
+    ],
   },
   selectors: ({ selectors }) => ({
     selectedGithubOrganizations: [
@@ -495,11 +502,11 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         const { serviceName, indexPermissions, serviceType, preContentSourceId } = response;
 
         // GitHub requires an intermediate configuration step, where we collect the repos to index.
-        if (preContentSourceId) {
+        if (preContentSourceId && !values.oauthConfigCompleted) {
           actions.setPreContentSourceId(preContentSourceId);
           navigateToUrl(`${ADD_GITHUB_PATH}/configure${search}`);
         } else {
-        setAddedSource(serviceName, indexPermissions, serviceType);
+          setAddedSource(serviceName, indexPermissions, serviceType);
           navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
         }
       } catch (e) {

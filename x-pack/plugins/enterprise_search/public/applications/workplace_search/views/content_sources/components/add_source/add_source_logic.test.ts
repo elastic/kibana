@@ -55,6 +55,7 @@ describe('AddSourceLogic', () => {
     sourceConfigData: {} as SourceConfigData,
     sourceConnectData: {} as SourceConnectData,
     newCustomSource: {} as CustomSource,
+    oauthConfigCompleted: false,
     currentServiceType: '',
     githubOrganizations: [],
     selectedGithubOrganizationsMap: {} as OrganizationsMap,
