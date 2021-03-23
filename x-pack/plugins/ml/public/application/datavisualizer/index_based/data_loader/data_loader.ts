@@ -18,12 +18,14 @@ import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../common/constants/fiel
 
 import { ml } from '../../../services/ml_api_service';
 import { FieldHistogramRequestConfig, FieldRequestConfig } from '../common';
+import { RuntimeMappings } from '../../../../../common/types/fields';
 
 // Maximum number of examples to obtain for text type fields.
 const MAX_EXAMPLES_DEFAULT: number = 10;
 
 export class DataLoader {
   private _indexPattern: IndexPattern;
+  private _runtimeMappings: RuntimeMappings;
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
   private _toastNotifications: CoreSetup['notifications']['toasts'];
@@ -33,6 +35,7 @@ export class DataLoader {
     toastNotifications: CoreSetup['notifications']['toasts']
   ) {
     this._indexPattern = indexPattern;
+    this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields;
     this._indexPatternTitle = indexPattern.title;
     this._toastNotifications = toastNotifications;
   }
@@ -70,6 +73,7 @@ export class DataLoader {
       latest,
       aggregatableFields,
       nonAggregatableFields,
+      runtimeMappings: this._runtimeMappings,
     });
 
     return stats;
@@ -93,6 +97,7 @@ export class DataLoader {
       interval,
       fields,
       maxExamples: this._maxExamples,
+      runtimeMappings: this._runtimeMappings,
     });
 
     return stats;
@@ -108,6 +113,7 @@ export class DataLoader {
       query,
       fields,
       samplerShardSize,
+      runtimeMappings: this._runtimeMappings,
     });
 
     return stats;

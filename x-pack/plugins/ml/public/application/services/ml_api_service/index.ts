@@ -41,6 +41,7 @@ import {
 } from '../../datavisualizer/index_based/common';
 import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
+import { RuntimeMappings } from '../../../../common/types/fields';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;
@@ -473,6 +474,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       interval,
       fields,
       maxExamples,
+      runtimeMappings,
     }: {
       indexPatternTitle: string;
       query: any;
@@ -483,6 +485,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       interval?: number;
       fields?: FieldRequestConfig[];
       maxExamples?: number;
+      runtimeMappings?: RuntimeMappings;
     }) {
       const body = JSON.stringify({
         query,
@@ -493,6 +496,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
         interval,
         fields,
         maxExamples,
+        runtimeMappings,
       });
 
       return httpService.http<any>({
@@ -507,16 +511,19 @@ export function mlApiServicesProvider(httpService: HttpService) {
       query,
       fields,
       samplerShardSize,
+      runtimeMappings,
     }: {
       indexPatternTitle: string;
       query: any;
       fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
+      runtimeMappings?: RuntimeMappings;
     }) {
       const body = JSON.stringify({
         query,
         fields,
         samplerShardSize,
+        runtimeMappings,
       });
 
       return httpService.http<any>({
@@ -535,6 +542,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       samplerShardSize,
       aggregatableFields,
       nonAggregatableFields,
+      runtimeMappings,
     }: {
       indexPatternTitle: string;
       query: any;
@@ -544,6 +552,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       samplerShardSize?: number;
       aggregatableFields: string[];
       nonAggregatableFields: string[];
+      runtimeMappings?: RuntimeMappings;
     }) {
       const body = JSON.stringify({
         query,
@@ -553,6 +562,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
         samplerShardSize,
         aggregatableFields,
         nonAggregatableFields,
+        runtimeMappings,
       });
 
       return httpService.http<any>({
