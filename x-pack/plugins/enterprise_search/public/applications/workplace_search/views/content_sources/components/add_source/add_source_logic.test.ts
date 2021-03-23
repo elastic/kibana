@@ -20,7 +20,7 @@ jest.mock('../../../../app_logic', () => ({
 }));
 import { AppLogic } from '../../../../app_logic';
 
-import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
+import { ADD_GITHUB_PATH, SOURCES_PATH, getSourcesPath } from '../../../../routes';
 import { CustomSource } from '../../../../types';
 import { SourcesLogic } from '../../sources_logic';
 
@@ -184,6 +184,12 @@ describe('AddSourceLogic', () => {
       expect(AddSourceLogic.values.selectedGithubOrganizationsMap).toEqual({ foo: true });
     });
 
+    it('setPreContentSourceId', () => {
+      AddSourceLogic.actions.setPreContentSourceId('123');
+
+      expect(AddSourceLogic.values.preContentSourceId).toEqual('123');
+    });
+
     it('setButtonNotLoading', () => {
       AddSourceLogic.actions.setButtonNotLoading();
 
@@ -317,6 +323,34 @@ describe('AddSourceLogic', () => {
         await nextTick();
 
         expect(navigateToUrl).toHaveBeenCalledWith(getSourcesPath(SOURCES_PATH, false));
+      });
+
+      it('redirects to oauth config when preContentSourceId is present', async () => {
+        const preContentSourceId = 'id123';
+        const setPreContentSourceIdSpy = jest.spyOn(
+          AddSourceLogic.actions,
+          'setPreContentSourceId'
+        );
+
+        http.get.mockReturnValue(
+          Promise.resolve({
+            ...response,
+            hasConfigureStep: true,
+            preContentSourceId,
+          })
+        );
+        AddSourceLogic.actions.saveSourceParams(queryString);
+        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/sources/create', {
+          query: {
+            ...params,
+            kibana_host: '',
+          },
+        });
+
+        await nextTick();
+
+        expect(setPreContentSourceIdSpy).toHaveBeenCalledWith(preContentSourceId);
+        expect(navigateToUrl).toHaveBeenCalledWith(`${ADD_GITHUB_PATH}/configure${queryString}`);
       });
 
       it('handles error', async () => {
