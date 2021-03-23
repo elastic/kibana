@@ -43,7 +43,7 @@ export function ExplorerChartLabel({
     const key = `${infoTooltip.chartFunction}-${entity.fieldName}-${entity.fieldType}-${entity.fieldValue}`;
     return (
       <Fragment key={`badge-wrapper-${key}`}>
-        <ExplorerChartLabelBadge entity={entity} key={`badge-${key}`} />
+        <ExplorerChartLabelBadge entity={entity} />
         {onSelectEntity !== undefined && (
           <EntityFilter
             onFilter={({ operation }) =>
