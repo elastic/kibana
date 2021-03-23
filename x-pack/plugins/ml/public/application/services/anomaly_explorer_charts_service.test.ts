@@ -71,7 +71,7 @@ export const mlResultsServiceMock = {
   }),
 };
 
-const expectAnomalyDataResult = (anomalyData: ExplorerChartsData) => {
+const assertAnomalyDataResult = (anomalyData: ExplorerChartsData) => {
   expect(anomalyData.chartsPerRow).toBe(1);
   expect(Array.isArray(anomalyData.seriesToPlot)).toBe(true);
   expect(anomalyData.seriesToPlot.length).toBe(1);
@@ -81,9 +81,6 @@ const expectAnomalyDataResult = (anomalyData: ExplorerChartsData) => {
 };
 describe('AnomalyExplorerChartsService', () => {
   const jobId = 'mock-job-id';
-  mlApiServicesMock.jobs.jobForCloning.mockImplementation(() =>
-    Promise.resolve({ job: mockJobConfigClone, datafeed: mockJobConfigClone.datafeed_config })
-  );
   const combinedJobRecords = {
     [jobId]: mockJobConfigClone,
   };
@@ -101,6 +98,12 @@ describe('AnomalyExplorerChartsService', () => {
     latestMs: 1486670399999,
   };
 
+  beforeEach(() => {
+    mlApiServicesMock.jobs.jobForCloning.mockImplementation(() =>
+      Promise.resolve({ job: mockJobConfigClone, datafeed: mockJobConfigClone.datafeed_config })
+    );
+  });
+
   afterEach(() => {
     explorerService.setCharts.mockClear();
   });
@@ -117,7 +120,7 @@ describe('AnomalyExplorerChartsService', () => {
       0,
       12
     )) as ExplorerChartsData;
-    expectAnomalyDataResult(anomalyData);
+    assertAnomalyDataResult(anomalyData);
   });
 
   test('should set anomaly data with explorer service side effects', async () => {
@@ -134,8 +137,8 @@ describe('AnomalyExplorerChartsService', () => {
     );
 
     expect(explorerService.setCharts.mock.calls.length).toBe(2);
-    expectAnomalyDataResult(explorerService.setCharts.mock.calls[0][0]);
-    expectAnomalyDataResult(explorerService.setCharts.mock.calls[1][0]);
+    assertAnomalyDataResult(explorerService.setCharts.mock.calls[0][0]);
+    assertAnomalyDataResult(explorerService.setCharts.mock.calls[1][0]);
   });
 
   test('call anomalyChangeListener with empty series config', async () => {

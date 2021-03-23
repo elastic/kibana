@@ -13,13 +13,14 @@
  */
 
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import { SeriesConfigWithMetadata } from '../../services/anomaly_explorer_charts_service';
 
 export interface ExplorerChartSeriesErrorMessages {
   [key: string]: Set<JobId>;
 }
 export declare interface ExplorerChartsData {
   chartsPerRow: number;
-  seriesToPlot: any[];
+  seriesToPlot: SeriesConfigWithMetadata[];
   tooManyBuckets: boolean;
   timeFieldName: string;
   errorMessages: ExplorerChartSeriesErrorMessages | undefined;

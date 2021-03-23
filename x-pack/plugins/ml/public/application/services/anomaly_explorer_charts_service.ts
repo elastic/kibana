@@ -77,7 +77,7 @@ interface InfoTooltip {
   chartFunction: string;
   entityFields: EntityField[];
 }
-interface SeriesConfigWithMetadata extends SeriesConfig {
+export interface SeriesConfigWithMetadata extends SeriesConfig {
   functionDescription?: string;
   bucketSpanSeconds: number;
   detectorLabel?: string;
