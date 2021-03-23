@@ -78,13 +78,21 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
         }
       >
         <EuiSpacer size="s" />
-        <EuiFormRow label="Request payload" labelAppend={<OptionalLabel />}>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload"
+              defaultMessage="Request payload"
+            />
+          }
+          labelAppend={<OptionalLabel />}
+        >
           <EuiFieldText
             value={fields[ConfigKeys.REQUEST_SEND_CHECK]}
             onChange={useCallback(
-              (value) =>
+              (event) =>
                 handleInputChange({
-                  value,
+                  value: event.target.value,
                   configKey: ConfigKeys.REQUEST_SEND_CHECK,
                 }),
               [handleInputChange]
@@ -96,14 +104,14 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
         title={
           <h4>
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationTCPResponseSettingsSectionTitle"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvancedOptions.responseConfiguration.title"
               defaultMessage="Response checks"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationTCPResponseSettingsSectionDescription"
+            id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvancedOptions.responseConfiguration.description"
             defaultMessage="Configure your Heartbeat monitor with the following options. Find information about each option in the {link}."
             values={{
               link: (
@@ -121,7 +129,15 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
           />
         }
       >
-        <EuiFormRow label="Check response contains" labelAppend={<OptionalLabel />}>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload"
+              defaultMessage="Check response contains"
+            />
+          }
+          labelAppend={<OptionalLabel />}
+        >
           <ComboBox
             selectedOptions={fields[ConfigKeys.RESPONSE_RECEIVE_CHECK]}
             onChange={useCallback(
