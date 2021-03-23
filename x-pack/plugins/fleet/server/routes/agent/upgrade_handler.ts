@@ -92,21 +92,14 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 
   try {
-    if (Array.isArray(agents)) {
-      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
-        agentIds: agents,
-        sourceUri,
-        version,
-        force,
-      });
-    } else {
-      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
-        kuery: agents,
-        sourceUri,
-        version,
-        force,
-      });
-    }
+    const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+    const upgradeOptions = {
+      ...agentOptions,
+      sourceUri,
+      version,
+      force,
+    };
+    await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
 
     const body: PostBulkAgentUpgradeResponse = {};
     return response.ok({ body });
