@@ -57,6 +57,12 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange }: Props) => {
       {checked && (
         <EuiFlexItem>
           <EuiSelect
+            aria-label={i18n.translate(
+              'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.responseBodyIndexPolicy',
+              {
+                defaultMessage: 'Response body index policy',
+              }
+            )}
             data-test-subj="indexResponseBodyFieldSelect"
             options={responseBodyIndexPolicyOptions}
             value={policy}
