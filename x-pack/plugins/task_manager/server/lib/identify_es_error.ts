@@ -36,7 +36,7 @@ function extractCausedByChain(
 ): string[] {
   const { reason, caused_by: innerCausedBy } = causedBy;
 
-  if (reason) {
+  if (reason && !accumulator.includes(reason)) {
     accumulator.push(reason);
   }
 

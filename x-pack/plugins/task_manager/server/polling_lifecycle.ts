@@ -306,8 +306,9 @@ export function claimAvailableTasks(
             observer.next(asErr(FillPoolResult.Failed));
             observer.complete();
           } else {
+            const esError = identifyEsError(ex);
             // as we could't identify the reason - we'll error out the wrapping Observable too
-            observer.error(ex);
+            observer.error(esError.length > 0 ? esError : ex);
           }
         },
         () => {
