@@ -9,10 +9,10 @@ import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
-import { CommentType } from '../../../../../cases/common';
+import { CommentType } from '../../../../../cases/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
-import { MarkdownEditorForm } from '../../../common/components/markdown_editor';
+import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
 import { Form, useForm, UseField, useFormData } from '../../../shared_imports';
 
 import * as i18n from './translations';
