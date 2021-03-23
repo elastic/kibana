@@ -28,20 +28,8 @@ import {
   VisualizationDimensionEditorProps,
   FormatFactory,
 } from '../types';
-import {
-  State,
-  SeriesType,
-  visualizationTypes,
-  YAxisMode,
-  AxesSettingsConfig,
-  ValidLayer,
-} from './types';
-import {
-  isHorizontalChart,
-  isHorizontalSeries,
-  getSeriesColor,
-  hasHistogramSeries,
-} from './state_helpers';
+import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
+import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
@@ -132,45 +120,8 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   );
 }
 
-function getValueLabelDisableReason({
-  isAreaPercentage,
-  isHistogramSeries,
-}: {
-  isAreaPercentage: boolean;
-  isHistogramSeries: boolean;
-}): string {
-  if (isHistogramSeries) {
-    return i18n.translate('xpack.lens.xyChart.valuesHistogramDisabledHelpText', {
-      defaultMessage: 'This setting cannot be changed on histograms.',
-    });
-  }
-  if (isAreaPercentage) {
-    return i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
-      defaultMessage: 'This setting cannot be changed on percentage area charts.',
-    });
-  }
-  return i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
-    defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
-  });
-}
 export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
-
-  const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
-    ['area_stacked', 'area', 'line'].includes(seriesType)
-  );
-
-  const hasBarNotStacked = state?.layers.some(({ seriesType }) =>
-    ['bar', 'bar_horizontal'].includes(seriesType)
-  );
-
-  const isAreaPercentage = state?.layers.some(
-    ({ seriesType }) => seriesType === 'area_percentage_stacked'
-  );
-
-  const isHistogramSeries = Boolean(
-    hasHistogramSeries(state?.layers as ValidLayer[], frame.datasourceLayers)
-  );
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(state?.layers, shouldRotate);
@@ -240,31 +191,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       ? 'hide'
       : 'show';
 
-  const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
-  const isFittingEnabled = hasNonBarSeries;
-  const isCurveTypeEnabled = hasNonBarSeries;
-
-  const valueLabelsDisabledReason = getValueLabelDisableReason({
-    isAreaPercentage,
-    isHistogramSeries,
-  });
-
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <TooltipWrapper
-            tooltipContent={valueLabelsDisabledReason}
-            condition={!isValueLabelsEnabled && !isFittingEnabled}
-          >
-            <VisualOptionsPopover
-              state={state}
-              setState={setState}
-              isCurveTypeEnabled={isCurveTypeEnabled}
-              isValueLabelsEnabled={isValueLabelsEnabled}
-              isFittingEnabled={isFittingEnabled}
-            />
-          </TooltipWrapper>
+          <VisualOptionsPopover
+            state={state}
+            setState={setState}
+            datasourceLayers={frame.datasourceLayers}
+          />
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}

@@ -19,8 +19,8 @@ export interface MissingValuesOptionProps {
   fittingFunction?: FittingFunction;
   onValueLabelChange: (newMode: ValueLabelConfig) => void;
   onFittingFnChange: (newMode: FittingFunction) => void;
-  isValueLabelsEnabled: boolean;
-  isFittingEnabled: boolean;
+  isValueLabelsEnabled?: boolean;
+  isFittingEnabled?: boolean;
 }
 
 const valueLabelsOptions: Array<{
@@ -52,14 +52,14 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
   onFittingFnChange,
   valueLabels,
   fittingFunction,
-  isValueLabelsEnabled,
-  isFittingEnabled,
+  isValueLabelsEnabled = true,
+  isFittingEnabled = true,
 }) => {
   const valueLabelsVisibilityMode = valueLabels || 'hide';
 
   return (
     <>
-      {isValueLabelsEnabled > isValueLabelsEnabled ? (
+      {isValueLabelsEnabled ? (
         <EuiFormRow
           display="columnCompressed"
           label={
