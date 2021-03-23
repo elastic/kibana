@@ -113,9 +113,10 @@ some other tool that is TBD.
   Reporting uses `page.print()` to capture the PDF, it would be easy for application 
   developers to test, and prevent bugs showing up in the report.
   
-  However, this solution doesn't include performance benefits of reducing objects 
-  in the headless browser memory: the headless browser still has to render the entire 
-  page as a "normal" render before it is able to call `page.print()`. No one sees the 
+  However, this proposal only provides high-level customization over visual rendering, which the
+  application already has if it uses a customized URL for rendering the layout for screenshots. It
+  has a performance downside, as well: the headless browser still has to render the entire 
+  page as a "normal" render before we can call `page.print()`. No one sees the 
   results of that initial render, so it is the same amount of wasted rendering cycles 
   during report generation that we have today.
 
