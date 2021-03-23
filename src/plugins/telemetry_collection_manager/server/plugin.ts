@@ -28,7 +28,6 @@ import {
   UsageStatsPayload,
   StatsCollectionContext,
 } from './types';
-import { isClusterOptedIn } from './util';
 import { encryptTelemetry } from './encryption';
 
 interface TelemetryCollectionPluginsDepsSetup {
@@ -203,7 +202,7 @@ export class TelemetryCollectionManagerPlugin
               return usageData;
             }
 
-            return encryptTelemetry(usageData.filter(isClusterOptedIn), {
+            return await encryptTelemetry(usageData, {
               useProdKey: this.isDistributable,
             });
           }
