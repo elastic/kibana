@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
-import { ConfigSchema } from './config';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { ConfigType, ConfigSchema } from './config';
 import { CasePlugin } from './plugin';
 
 export { CaseRequestContext } from './types';
-export const config = { schema: ConfigSchema };
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: ConfigSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled'),
+  ],
+};
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CasePlugin(initializerContext);
