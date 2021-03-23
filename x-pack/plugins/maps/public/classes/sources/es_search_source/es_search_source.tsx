@@ -66,7 +66,8 @@ export interface ScriptField {
 
 function getDocValueAndSourceFields(
   indexPattern: IndexPattern,
-  fieldNames: string[]
+  fieldNames: string[],
+  dateFormat: string
 ): {
   docValueFields: Array<string | { format: string; field: string }>;
   sourceOnlyFields: string[];
@@ -89,7 +90,7 @@ function getDocValueAndSourceFields(
         field.type === 'date'
           ? {
               field: fieldName,
-              format: 'epoch_millis',
+              format: dateFormat,
             }
           : fieldName;
       docValueFields.push(docValueField);
@@ -272,7 +273,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames
+      searchFilters.fieldNames,
+      'epoch_millis'
     );
     const topHits: {
       size: number;
@@ -368,7 +370,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames
+      searchFilters.fieldNames,
+      'epoch_millis'
     );
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
@@ -493,7 +496,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const { docValueFields } = getDocValueAndSourceFields(
       indexPattern,
-      this._getTooltipPropertyNames()
+      this._getTooltipPropertyNames(),
+      'strict_date_optional_time'
     );
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
@@ -699,7 +703,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames
+      searchFilters.fieldNames,
+      'epoch_millis'
     );
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
