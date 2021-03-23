@@ -7,14 +7,8 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { FieldSelect } from '../aggs/field_select';
-import { SeriesEditor } from '../series_editor';
-import { IndexPattern } from '../index_pattern';
-import { createTextHandler } from '../lib/create_text_handler';
 import { get } from 'lodash';
 import uuid from 'uuid';
-import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -30,39 +24,50 @@ import {
   EuiHorizontalRule,
   EuiCode,
   EuiText,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { FieldSelect } from '../aggs/field_select';
+// @ts-expect-error not typed yet
+import { SeriesEditor } from '../series_editor';
+// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+import { IndexPattern } from '../index_pattern';
+import { YesNo } from '../yes_no';
+// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { BUCKET_TYPES } from '../../../../common/metric_types';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { TimeseriesVisParams } from '../../../types';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
-export class TablePanelConfig extends Component {
+
+export class TablePanelConfig extends Component<
+  PanelConfigProps,
+  { selectedTab: PANEL_CONFIG_TABS }
+> {
   static contextType = VisDataContext;
-  constructor(props) {
+  constructor(props: PanelConfigProps) {
     super(props);
-    this.state = { selectedTab: 'data' };
+    this.state = { selectedTab: PANEL_CONFIG_TABS.DATA };
   }
 
   UNSAFE_componentWillMount() {
     const { model } = this.props;
-    const parts = {};
-    if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {
-      parts.bar_color_rules = [{ id: uuid.v1() }];
+    if (!model.bar_color_rules || !model.bar_color_rules.length) {
+      this.props.onChange({ bar_color_rules: [{ id: uuid.v1() }] });
     }
-    this.props.onChange(parts);
   }
 
-  switchTab(selectedTab) {
+  switchTab(selectedTab: PANEL_CONFIG_TABS) {
     this.setState({ selectedTab });
   }
 
-  handlePivotChange = (selectedOption) => {
+  handlePivotChange = (selectedOption: Array<EuiComboBoxOptionOption<string>>) => {
     const { fields, model } = this.props;
     const pivotId = get(selectedOption, '[0].value', null);
-    const field = fields[getIndexPatternKey(model.index_pattern)].find(
-      (field) => field.name === pivotId
-    );
+    const field = fields[getIndexPatternKey(model.index_pattern)].find((f) => f.name === pivotId);
     const pivotType = get(field, 'type', model.pivot_type);
 
     this.props.onChange({
@@ -70,6 +75,10 @@ export class TablePanelConfig extends Component {
       pivot_type: pivotType,
     });
   };
+
+  handleTextChange = (name: keyof TimeseriesVisParams) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => this.props.onChange({ [name]: e.target.value });
 
   render() {
     const { selectedTab } = this.state;
@@ -81,11 +90,9 @@ export class TablePanelConfig extends Component {
       pivot_type: '',
     };
     const model = { ...defaults, ...this.props.model };
-    const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
-    let view;
-    if (selectedTab === 'data') {
-      view = (
+    const view =
+      selectedTab === PANEL_CONFIG_TABS.DATA ? (
         <div>
           <div className="tvbPanelConfig__container">
             <EuiPanel>
@@ -117,7 +124,6 @@ export class TablePanelConfig extends Component {
                       onChange={this.handlePivotChange}
                       uiRestrictions={this.context.uiRestrictions}
                       type={BUCKET_TYPES.TERMS}
-                      fullWidth
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -134,8 +140,8 @@ export class TablePanelConfig extends Component {
                   >
                     <EuiFieldText
                       data-test-subj="columnLabelName"
-                      onChange={handleTextChange('pivot_label')}
-                      value={model.pivot_label}
+                      onChange={this.handleTextChange('pivot_label')}
+                      value={model.pivot_label ?? ''}
                       fullWidth
                     />
                   </EuiFormRow>
@@ -157,8 +163,8 @@ export class TablePanelConfig extends Component {
                     <input
                       className="tvbAgg__input"
                       type="number"
-                      onChange={handleTextChange('pivot_rows')}
-                      value={model.pivot_rows}
+                      onChange={this.handleTextChange('pivot_rows')}
+                      value={model.pivot_rows ?? ''}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -169,13 +175,10 @@ export class TablePanelConfig extends Component {
           <SeriesEditor
             fields={this.props.fields}
             model={this.props.model}
-            name={this.props.name}
             onChange={this.props.onChange}
           />
         </div>
-      );
-    } else {
-      view = (
+      ) : (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
             <EuiTitle size="s">
@@ -206,8 +209,8 @@ export class TablePanelConfig extends Component {
               }
             >
               <EuiFieldText
-                onChange={handleTextChange('drilldown_url')}
-                value={model.drilldown_url}
+                onChange={this.handleTextChange('drilldown_url')}
+                value={model.drilldown_url ?? ''}
               />
             </EuiFormRow>
 
@@ -217,7 +220,6 @@ export class TablePanelConfig extends Component {
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
-              allowIndexSwitchingMode={true}
             />
 
             <EuiHorizontalRule />
@@ -241,7 +243,9 @@ export class TablePanelConfig extends Component {
                         : getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={(filter) => this.props.onChange({ filter })}
+                    onChange={(filter: PanelConfigProps['model']['filter']) =>
+                      this.props.onChange({ filter })
+                    }
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
@@ -255,7 +259,6 @@ export class TablePanelConfig extends Component {
                 </EuiFormLabel>
                 <EuiSpacer size="m" />
                 <YesNo
-                  id={htmlId('globalFilterOption')}
                   value={model.ignore_global_filter}
                   name="ignore_global_filter"
                   onChange={this.props.onChange}
@@ -265,17 +268,23 @@ export class TablePanelConfig extends Component {
           </EuiPanel>
         </div>
       );
-    }
+
     return (
       <>
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+          <EuiTab
+            isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+          >
             <FormattedMessage
               id="visTypeTimeseries.table.dataTab.columnsButtonLabel"
               defaultMessage="Columns"
             />
           </EuiTab>
-          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
+          <EuiTab
+            isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
+          >
             <FormattedMessage
               id="visTypeTimeseries.table.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
@@ -287,9 +296,3 @@ export class TablePanelConfig extends Component {
     );
   }
 }
-
-TablePanelConfig.propTypes = {
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-};
