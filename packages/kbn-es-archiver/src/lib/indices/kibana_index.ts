@@ -8,7 +8,7 @@
 
 import { inspect } from 'util';
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { Stats } from '../stats';
@@ -23,7 +23,7 @@ export async function deleteKibanaIndices({
   stats,
   log,
 }: {
-  client: Client;
+  client: KibanaClient;
   stats: Stats;
   log: ToolingLog;
 }) {
@@ -75,7 +75,7 @@ function isKibanaIndex(index?: string): index is string {
   );
 }
 
-async function fetchKibanaIndices(client: Client) {
+async function fetchKibanaIndices(client: KibanaClient) {
   const resp = await client.cat.indices(
     { index: '.kibana*', format: 'json' },
     {
@@ -98,7 +98,7 @@ export async function cleanKibanaIndices({
   log,
   kibanaPluginIds,
 }: {
-  client: Client;
+  client: KibanaClient;
   stats: Stats;
   log: ToolingLog;
   kibanaPluginIds: string[];
@@ -154,7 +154,13 @@ export async function cleanKibanaIndices({
   stats.deletedIndex('.kibana');
 }
 
-export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
+export async function createDefaultSpace({
+  index,
+  client,
+}: {
+  index: string;
+  client: KibanaClient;
+}) {
   await client.create(
     {
       index,
