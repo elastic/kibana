@@ -119,7 +119,7 @@ TODO link the conclusions to each section?
 
 We have lived with the scalability and stability problems of our current Jenkins infrastructure for several years. We have spent a significant amount of time designing around problems, and are limited in how we can design our pipelines. Since the company-wide effort to move to a new system has been cancelled for the forseeable future, we are faced with either re-engineering the way we use Jenkins, or exploring other solutions and potentially managing one ourselves.
 
-This RFC is focused on the option of using a system other than Jenkins, and managing it ourselves (to the extend that it must be managed). If the RFC is rejected, the alternative will be to instead invest significantly into Jenkins to further stablize and scale our usage of it.
+This RFC is focused on the option of using a system other than Jenkins, and managing it ourselves (to the extent that it must be managed). If the RFC is rejected, the alternative will be to instead invest significantly into Jenkins to further stabilize and scale our usage of it.
 
 ## Required and Desired Capabilities
 
@@ -140,7 +140,7 @@ This RFC is focused on the option of using a system other than Jenkins, and mana
 #### Surfaces information intuitively
 
 - Developers should be able to easily understand what happened during their builds, and find information related to failures.
-- Uer interfaces should be functional and easy to use.
+- User interfaces should be functional and easy to use.
 - Overview and details about failures and execution time are particularly important.
 
 #### Pipelines
@@ -151,7 +151,7 @@ This RFC is focused on the option of using a system other than Jenkins, and mana
 
 #### Advanced Pipeline logic
 
-With such a large codebase and CI pipeline, we often complex requirements around when and how certain tasks should run, and we want the ability to handle this built into the system we use. It can be very difficult and require complex solutions for fairly simple use cases when the system does not support advanced pipeline logic out of the box.
+With such a large codebase and CI pipeline, we often have complex requirements around when and how certain tasks should run, and we want the ability to handle this built into the system we use. It can be very difficult and require complex solutions for fairly simple use cases when the system does not support advanced pipeline logic out of the box.
 
 For example, the flaky test suite runner that we currently have in Jenkins is fairly simple: run a given task (which might have a dependency) `N` number of times on `M` agents. This is very difficult to model in a system like TeamCity, which does not have dynamic dependencies.
 
@@ -172,7 +172,7 @@ If the given system has a cost, the pricing model should be cloud-friendly and/o
 
 A per-agent or per-build model based on peak usage in a month is not a good model, because our peak build times are generally short-lived (e.g. around feature freeze).
 
-A model based on build-minutes can also be bad, if it encourages running things in parallel on bigger machines to keep costs down. For example, running two tasks on a single 2-CPU machine with our own orchestration should not be cheaper than running two tasks on two 1-CPU machines using the system's build-in orchestration.
+A model based on build-minutes can also be bad, if it encourages running things in parallel on bigger machines to keep costs down. For example, running two tasks on a single 2-CPU machine with our own orchestration should not be cheaper than running two tasks on two 1-CPU machines using the system's built-in orchestration.
 
 #### Public access
 
@@ -208,7 +208,7 @@ Required or Desired?
 
 #### Customization
 
-We have very large CI pipelines which generate a lot of information (bundle sizes, performance numbers, etc). Being able to attach this information to builds, so that it lives with the builds in the CI system, is highly desireable. The alternative is building custom reports and UIs outside of the system.
+We have very large CI pipelines which generate a lot of information (bundle sizes, performance numbers, etc). Being able to attach this information to builds, so that it lives with the builds in the CI system, is highly desirable. The alternative is building custom reports and UIs outside of the system.
 
 #### Core functionality is first-party
 
@@ -229,7 +229,7 @@ TODO
 
 # Buildkite - Detailed design
 
-For the alternative system in this RFC, we are recommending Buildkite. The UI, API, and documentation have been a joy to work with, they provide most of our desired features and functionality, the team is responsive and knowledgable, and the pricing model does not encourage bad practices to lower cost.
+For the alternative system in this RFC, we are recommending Buildkite. The UI, API, and documentation have been a joy to work with, they provide most of our desired features and functionality, the team is responsive and knowledgeable, and the pricing model does not encourage bad practices to lower cost.
 
 ## Overview
 
@@ -281,15 +281,17 @@ The Buildkite UI is very easy to use, and works as expected. Here is some of the
 - Artifacts uploaded by each step
 - The entire agent/job configuration at the time the step executed, expressed as environment variables
 
-TODO how are complex pipelines (dependencies) handled in the UI?
+![Example Build](../images/0016_buildkite_build.png)
 
-TODO screenshots? links?
+Note that dependencies between steps are mostly not shown in the UI. See screenshot below for an example. There are several layers of dependencies between all of the steps in this pipeline. The only one that is shown is the final step (`Post All`), which executes after all steps beforehand are finished. There are some other strategies to help organize the steps (such as the new grouping functionality) if we need.
 
-TODO link to customization section once complete - we can surface any extra information we want
+![Dependencies](../images/0016_buildkite_deps.png)
+
+Buildkite has rich build page customization via "annotations" which will let us surface custom information. See the [customization section](#customization-1)
 
 #### Pipelines
 
-- [Buildkite piplines](https://buildkite.com/docs/pipelines) must be defined as code. Even if you configure them through the UI, you still have to do so using yaml.
+- [Buildkite pipelines](https://buildkite.com/docs/pipelines) must be defined as code. Even if you configure them through the UI, you still have to do so using yaml.
 - This is subjective, but the yaml syntax for pipelines is friendly and straightforward. We feel that it will be easy for teams to create and modify pipelines with minimal instructions.
 - If your pipeline is configured to use yaml stored in your repo for its definition, branches and PRs will use the version in their source by default. This means that PRs that change the pipeline can be tested as part of the PR CI.
 - Top-level pipeline configurations, i.e. basically a pointer to a repo that has the real pipeline yaml in it, can be configured via the UI, API, or terraform.
@@ -409,7 +411,7 @@ Besides this, [Enterprise](https://buildkite.com/enterprise) customers get 24/7 
 
 #### Customization
 
-We have very large CI pipelines which generate a lot of information (bundle sizes, performance numbers, etc). Being able to attach this information to builds, so that it lives with the builds in the CI system, is highly desireable. The alternative is building custom reports and UIs outside of the system.
+We have very large CI pipelines which generate a lot of information (bundle sizes, performance numbers, etc). Being able to attach this information to builds, so that it lives with the builds in the CI system, is highly desirable. The alternative is building custom reports and UIs outside of the system.
 
 [Annotations](https://buildkite.com/docs/agent/v3/cli-annotate) provide a way to add rich, well-formatted, custom information to build pages using CommonMark Markdown. There are several built-in CSS classes for formatting and several visual styles. Images, emojis, and links can be embedded as well. Just for some examples: Metrics such as bundle sizes, links to the distro builds for that build, and screenshots for test failures could all be embedded directly into the build pages.
 
@@ -450,7 +452,7 @@ Features:
 - Handles many different agent configurations with one instance
 - Configures long-running agents, one-time use agents, and agents that will terminate after being idle for a configured amount of time
 - Configures both minimum and maximum agent limits - i.e. can ensure a certain number of agents are always online, even if no jobs currently require them
-- Supports overproivisioning agents by a percentage or a fixed number
+- Supports overprovisioning agents by a percentage or a fixed number
 - Supports many GCE settings: zone, image/image family, machine type, disk type and size, tags, metadata, custom startup scripts
 - Agent configuration is stored in a separate repo and read at runtime
 - Agents are gracefully replaced (e.g. after they finish their current job) if they are running using an out-of-date agent configuration that can affect the underlying GCE instance
@@ -466,7 +468,7 @@ Also planned:
 
 #### Design
 
-The agent manager is primarily concerned with ensuring that, given an agent configuration, the number of online agents for that configuration is **greather than or equal to** the desired number. Buildkite then determines how to use the agents: which jobs they should execute and when they should go offline (due to being idle, done with jobs, etc). Even when stopping agents due to having an outdated configuration, Buildkite still determines the actual time that the agent should disconnect.
+The agent manager is primarily concerned with ensuring that, given an agent configuration, the number of online agents for that configuration is **greater than or equal to** the desired number. Buildkite then determines how to use the agents: which jobs they should execute and when they should go offline (due to being idle, done with jobs, etc). Even when stopping agents due to having an outdated configuration, Buildkite still determines the actual time that the agent should disconnect.
 
 The current version of the agent manager only handles GCP-based agents, but support for other platforms could be added as well, such as AWS or Kubernetes. There's likely more complexity in managing all of the various agent images than in maintaining support in the agent manager.
 
@@ -492,7 +494,7 @@ Because the service gathers data about the total current state and creates a pla
 
 ##### Protection against creating too many instances
 
-Creating too many instances in GCP could be costly, so is worth mentioning here. Since the agent manager itself is stateless, and only looks at the current, external state when determining an execution plan, there is the possibility of creating too many instances.
+Creating too many instances in GCP could be costly, so it is worth mentioning here. Since the agent manager itself is stateless, and only looks at the current, external state when determining an execution plan, there is the possibility of creating too many instances.
 
 There are two primary mechanisms to protect against this:
 
@@ -503,9 +505,9 @@ The other is built into the agent manager. The agent manager checks both the num
 This is a simple failsafe, but means that a large number of unnecessary instances should only be able to be created in a pretty specific scenario (keep in mind that errors will abort the current agent manager run):
 
 - The GCP APIs (both read and create) are returning success codes
-- The GCP API for listing instances is returning partial/missing/erroroneous data, with a success code
+- The GCP API for listing instances is returning partial/missing/erroneous data, with a success code
 - GCP instances are successfully being created
-- Created GCP instances are unable to connect to Buildkite, or Buildkite Agents API is returning partial/missing/erroroneous data
+- Created GCP instances are unable to connect to Buildkite, or Buildkite Agents API is returning partial/missing/erroneous data
 
 All of these things would need to be true at the same time for a large number of instances to be created. In the unlikely event that that were to happen, the GCP quotas would still be in-place.
 
@@ -693,9 +695,9 @@ There are tradeoffs to choosing any path. Attempt to identify them here.
 
 #### Scalable
 
-Our current Jenkins instance only allows for 300-400 connected agents, before effectively going offline. We have strugged with this issue for several years, and completely redesigned our pipelines around this limitation. The resulting design, which involves running 20+ tasks in parallel on single, large machines, and managing all of the concurrency ourselves, is complicated and problematic.
+Our current Jenkins instance only allows for 300-400 connected agents, before effectively going offline. We have struggled with this issue for several years, and completely redesigned our pipelines around this limitation. The resulting design, which involves running 20+ tasks in parallel on single, large machines, and managing all of the concurrency ourselves, is complicated and problematic.
 
-Other teams at Elastic, especially over the last few months, have been experiencing this same limitation with their Jenkins instaces as well. The team that manages Jenkins at Elastic is well aware of this issue, and is actively investigating. It is currently unknown whether or not it is a solvable problem (without sharding) or a limitation of Jenkins.
+Other teams at Elastic, especially over the last few months, have been experiencing this same limitation with their Jenkins instances as well. The team that manages Jenkins at Elastic is well aware of this issue, and is actively investigating. It is currently unknown whether or not it is a solvable problem (without sharding) or a limitation of Jenkins.
 
 #### Stable
 
@@ -752,7 +754,7 @@ Pros:
 Cons:
 
 - The sandbox is pretty difficult to work with. There's a [hard-coded list](https://github.com/jenkinsci/script-security-plugin/tree/e99ba9cffb0502868b05d19ef5cd205ca7e0e5bd/src/main/resources/org/jenkinsci/plugins/scriptsecurity/sandbox/whitelists) of allowed methods for pipelines. Other methods must be approved separately, or put in a separate shared repository that runs trusted code.
-- Pipeline code is serialized by Jenkins, and the serializiation process leads to a lot of issues that are difficult to debug and reason about. See [JENKINS-44924](https://issues.jenkins.io/browse/JENKINS-44924) - `List.sort()` doesn't work and silently returns `-1` instead of a list
+- Pipeline code is serialized by Jenkins, and the serialization process leads to a lot of issues that are difficult to debug and reason about. See [JENKINS-44924](https://issues.jenkins.io/browse/JENKINS-44924) - `List.sort()` doesn't work and silently returns `-1` instead of a list
 - Reasonably complex pipelines are difficult to view in the UI ([see above](#surfaces-information-intuitively-2))
 - Using Pipelines to manage certain configurations (such as Build Parameters) requires running an outdated job once and letting it fail to update it
 - Jobs that reference a pipeline have to be managed separately. Only third-party tools exist for managing these jobs as code (JJB and Job DSL).
