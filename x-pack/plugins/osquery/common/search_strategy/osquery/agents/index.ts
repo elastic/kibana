@@ -11,9 +11,12 @@ import { Inspect, Maybe, PageInfoPaginated } from '../../common';
 import { RequestOptionsPaginated } from '../..';
 import { Agent } from '../../../shared_imports';
 
-export interface AggregationDataPoint {
+interface BaseDataPoint {
   key: string;
+  doc_count: number;
 }
+
+export type AggregationDataPoint = BaseDataPoint & AgentAggregation;
 
 export interface AgentAggregation {
   [key: string]: {

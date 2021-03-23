@@ -34,9 +34,15 @@ export enum OsqueryQueries {
 
 export type FactoryQueryTypes = OsqueryQueries;
 
+export type AggregationValue = string | { field: string; subaggs: Aggregation };
+
+export interface Aggregation {
+  [key: string]: AggregationValue;
+}
+
 export interface RequestBasicOptions extends IEsSearchRequest {
   filterQuery: ESQuery | string | undefined;
-  aggregations?: { [key: string]: string };
+  aggregations?: Aggregation;
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
 }

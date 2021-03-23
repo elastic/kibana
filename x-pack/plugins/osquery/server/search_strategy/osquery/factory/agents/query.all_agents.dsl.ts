@@ -7,16 +7,19 @@
 
 import { ISearchRequestParams } from '../../../../../../../../src/plugins/data/common';
 import { AgentsRequestOptions } from '../../../../../common/search_strategy';
-// import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
+import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
+import { parseAggregator } from '../../helpers';
 
 export const buildAgentsQuery = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   filterQuery,
   pagination: { cursorStart, querySize },
   sort,
   aggregations,
 }: AgentsRequestOptions): ISearchRequestParams => {
-  // const filter = [...createQueryFilterClauses(filterQuery)];
+  const filter = [
+    { term: { active: { value: 'true' } } },
+    ...createQueryFilterClauses(filterQuery),
+  ];
 
   const dslQuery = {
     allowNoIndices: true,
@@ -24,10 +27,8 @@ export const buildAgentsQuery = ({
     ignoreUnavailable: true,
     body: {
       query: {
-        term: {
-          active: {
-            value: 'true',
-          },
+        bool: {
+          filter,
         },
       },
       aggs: {},
@@ -45,14 +46,7 @@ export const buildAgentsQuery = ({
   };
 
   if (aggregations) {
-    Object.keys(aggregations).reduce((acc, aggKey) => {
-      acc[aggKey] = {
-        terms: {
-          field: aggregations[aggKey],
-        },
-      };
-      return acc;
-    }, dslQuery.body.aggs as { [key: string]: { terms: { field: string } } });
+    dslQuery.body.aggs = parseAggregator(aggregations);
   }
 
   return dslQuery;
