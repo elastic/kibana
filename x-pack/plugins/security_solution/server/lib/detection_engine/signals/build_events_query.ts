@@ -18,9 +18,9 @@ interface BuildEventsSearchQuery {
   filter?: estypes.QueryContainer;
   size: number;
   sortOrder?: SortOrderOrUndefined;
-  searchAfterSortId: string | number | undefined;
+  searchAfterSortId: string[] | number[] | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
-  excludeDocsWithTimestampOverride: boolean;
+  // excludeDocsWithTimestampOverride: boolean;
 }
 
 export const buildEventsSearchQuery = ({
@@ -33,8 +33,8 @@ export const buildEventsSearchQuery = ({
   searchAfterSortId,
   sortOrder,
   timestampOverride,
-  excludeDocsWithTimestampOverride,
-}: BuildEventsSearchQuery) => {
+}: // excludeDocsWithTimestampOverride,
+BuildEventsSearchQuery) => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
     timestampOverride != null ? [timestampOverride, ...defaultTimeFields] : defaultTimeFields;
@@ -43,33 +43,55 @@ export const buildEventsSearchQuery = ({
     format: 'strict_date_optional_time',
   }));
 
-  const sortField =
-    timestampOverride != null && !excludeDocsWithTimestampOverride
-      ? timestampOverride
-      : '@timestamp';
+  // const sortField =
+  //   timestampOverride != null && !excludeDocsWithTimestampOverride
+  //     ? timestampOverride
+  //     : '@timestamp';
 
-  const rangeFilter: estypes.QueryContainer[] = [
-    {
-      range: {
-        [sortField]: {
-          lte: to,
-          gte: from,
-          format: 'strict_date_optional_time',
-        },
-      },
-    },
-  ];
-  if (excludeDocsWithTimestampOverride) {
-    rangeFilter.push({
-      bool: {
-        must_not: {
-          exists: {
-            field: timestampOverride,
+  const rangeFilter: estypes.QueryContainer[] =
+    timestampOverride != null
+      ? [
+          {
+            range: {
+              '@timestamp': {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
+            },
           },
-        },
-      },
-    });
-  }
+          {
+            range: {
+              [timestampOverride]: {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ]
+      : [
+          {
+            range: {
+              '@timestamp': {
+                lte: to,
+                gte: from,
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ];
+  // if (excludeDocsWithTimestampOverride) {
+  //   rangeFilter.push({
+  //     bool: {
+  //       must_not: {
+  //         exists: {
+  //           field: timestampOverride,
+  //         },
+  //       },
+  //     },
+  //   });
+  // }
   // @ts-expect-error undefined in not assignable to QueryContainer
   // but tests contain undefined, so I suppose it's desired behaviour
   const filterWithTime: estypes.QueryContainer[] = [filter, { bool: { filter: rangeFilter } }];
@@ -84,7 +106,7 @@ export const buildEventsSearchQuery = ({
       query: {
         bool: {
           filter: [
-            ...filterWithTime,
+            { bool: { should: [...filterWithTime] } },
             {
               match_all: {},
             },
@@ -99,12 +121,29 @@ export const buildEventsSearchQuery = ({
       ],
       ...(aggregations ? { aggregations } : {}),
       sort: [
-        {
-          [sortField]: {
-            order: sortOrder ?? 'asc',
-            unmapped_type: 'date',
-          },
-        },
+        ...(timestampOverride != null
+          ? [
+              {
+                '@timestamp': {
+                  order: sortOrder ?? 'asc',
+                  unmapped_type: 'date',
+                },
+              },
+              {
+                [timestampOverride]: {
+                  order: sortOrder ?? 'asc',
+                  unmapped_type: 'date',
+                },
+              },
+            ]
+          : [
+              {
+                '@timestamp': {
+                  order: sortOrder ?? 'asc',
+                  unmapped_type: 'date',
+                },
+              },
+            ]),
       ],
     },
   };
@@ -114,7 +153,7 @@ export const buildEventsSearchQuery = ({
       ...searchQuery,
       body: {
         ...searchQuery.body,
-        search_after: [searchAfterSortId],
+        search_after: [...searchAfterSortId],
       },
     };
   }

@@ -23,7 +23,7 @@ import {
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationContainer>;
-  searchAfterSortId: string | undefined;
+  searchAfterSortId: number[] | undefined;
   index: string[];
   from: string;
   to: string;
@@ -34,7 +34,7 @@ interface SingleSearchAfterParams {
   filter?: estypes.QueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
-  excludeDocsWithTimestampOverride: boolean;
+  // excludeDocsWithTimestampOverride: boolean;
 }
 
 // utilize search_after for paging results into bulk.
@@ -51,8 +51,8 @@ export const singleSearchAfter = async ({
   sortOrder,
   timestampOverride,
   buildRuleMessage,
-  excludeDocsWithTimestampOverride,
-}: SingleSearchAfterParams): Promise<{
+}: // excludeDocsWithTimestampOverride,
+SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
   searchErrors: string[];
@@ -68,7 +68,7 @@ export const singleSearchAfter = async ({
       sortOrder,
       searchAfterSortId,
       timestampOverride,
-      excludeDocsWithTimestampOverride,
+      // excludeDocsWithTimestampOverride,
     });
 
     const start = performance.now();

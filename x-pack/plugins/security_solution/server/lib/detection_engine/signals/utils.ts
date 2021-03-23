@@ -825,3 +825,7 @@ export const getThresholdTermsHash = (
     )
     .digest('hex');
 };
+
+export const hasSafeSortIds = (sortIds: number[] | undefined) => {
+  return sortIds?.every((sortId) => sortId < Number.MAX_SAFE_INTEGER);
+};

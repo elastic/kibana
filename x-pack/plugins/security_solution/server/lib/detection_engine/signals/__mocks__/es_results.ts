@@ -173,7 +173,7 @@ export const sampleDocWithSortId = (
     'source.ip': ip ? (Array.isArray(ip) ? ip : [ip]) : ['127.0.0.1'],
     'destination.ip': destIp ? (Array.isArray(destIp) ? destIp : [destIp]) : ['127.0.0.1'],
   },
-  sort: ['1234567891111'],
+  sort: [1234567891111],
 });
 
 export const sampleDocNoSortId = (

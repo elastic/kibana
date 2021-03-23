@@ -44,7 +44,7 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
+      // excludeDocsWithTimestampOverride: false,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsNoSortId());
   });
@@ -63,7 +63,7 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
+      // excludeDocsWithTimestampOverride: false,
     });
     expect(searchErrors).toEqual([]);
   });
@@ -114,14 +114,14 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
+      // excludeDocsWithTimestampOverride: false,
     });
     expect(searchErrors).toEqual([
       'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
     ]);
   });
   test('if singleSearchAfter works with a given sort id', async () => {
-    const searchAfterSortId = '1234567891111';
+    const searchAfterSortId = [1234567891];
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         sampleDocSearchResultsWithSortId()
@@ -138,12 +138,12 @@ describe('singleSearchAfter', () => {
       filter: undefined,
       timestampOverride: undefined,
       buildRuleMessage,
-      excludeDocsWithTimestampOverride: false,
+      // excludeDocsWithTimestampOverride: false,
     });
     expect(searchResult).toEqual(sampleDocSearchResultsWithSortId());
   });
   test('if singleSearchAfter throws error', async () => {
-    const searchAfterSortId = '1234567891111';
+    const searchAfterSortId = [1234567891];
     mockService.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error('Fake Error'))
     );
@@ -159,7 +159,7 @@ describe('singleSearchAfter', () => {
         filter: undefined,
         timestampOverride: undefined,
         buildRuleMessage,
-        excludeDocsWithTimestampOverride: false,
+        // excludeDocsWithTimestampOverride: false,
       })
     ).rejects.toThrow('Fake Error');
   });

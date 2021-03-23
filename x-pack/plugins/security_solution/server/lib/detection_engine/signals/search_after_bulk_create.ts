@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import { identity } from 'lodash';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -19,6 +17,7 @@ import {
   createTotalHitsFromSearchResult,
   mergeReturns,
   mergeSearchResults,
+  hasSafeSortIds,
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 
@@ -53,10 +52,10 @@ export const searchAfterAndBulkCreate = async ({
   let toReturn = createSearchAfterReturnType();
 
   // sortId tells us where to start our next consecutive search_after query
-  let sortId: string | undefined;
+  let sortIds: number[] | undefined;
   let hasSortId = true; // default to true so we execute the search on initial run
-  let backupSortId: string | undefined;
-  let hasBackupSortId = ruleParams.timestampOverride ? true : false;
+  // let backupSortId: string | undefined;
+  // let hasBackupSortId = ruleParams.timestampOverride ? true : false;
 
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
@@ -78,70 +77,68 @@ export const searchAfterAndBulkCreate = async ({
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
         let mergedSearchResults = createSearchResultReturnType();
-        logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
+        logger.debug(buildRuleMessage(`sortIds: ${JSON.stringify(sortIds)}`));
 
         // if there is a timestampOverride param we always want to do a secondary search against @timestamp
-        if (ruleParams.timestampOverride != null && hasBackupSortId) {
-          // only execute search if we have something to sort on or if it is the first search
-          const {
-            searchResult: searchResultB,
-            searchDuration: searchDurationB,
-            searchErrors: searchErrorsB,
-          } = await singleSearchAfter({
-            buildRuleMessage,
-            searchAfterSortId: backupSortId,
-            index: inputIndexPattern,
-            from: tuple.from.toISOString(),
-            to: tuple.to.toISOString(),
-            services,
-            logger,
-            // @ts-expect-error please, declare a type explicitly instead of unknown
-            filter,
-            pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
-            timestampOverride: ruleParams.timestampOverride,
-            excludeDocsWithTimestampOverride: true,
-          });
+        // if (ruleParams.timestampOverride != null && hasBackupSortId) {
+        //   // only execute search if we have something to sort on or if it is the first search
+        //   const {
+        //     searchResult: searchResultB,
+        //     searchDuration: searchDurationB,
+        //     searchErrors: searchErrorsB,
+        //   } = await singleSearchAfter({
+        //     buildRuleMessage,
+        //     searchAfterSortId: backupSortId,
+        //     index: inputIndexPattern,
+        //     from: tuple.from.toISOString(),
+        //     to: tuple.to.toISOString(),
+        //     services,
+        //     logger,
+        //     // @ts-expect-error please, declare a type explicitly instead of unknown
+        //     filter,
+        //     pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
+        //     timestampOverride: ruleParams.timestampOverride,
+        //     excludeDocsWithTimestampOverride: true,
+        //   });
 
-          // call this function setSortIdOrExit()
-          const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
-          if (lastSortId != null && lastSortId.length !== 0) {
-            // @ts-expect-error @elastic/elasticsearch SortResults contains null not assignable to backupSortId
-            backupSortId = lastSortId[0];
-            hasBackupSortId = true;
-          } else {
-            logger.debug(buildRuleMessage('backupSortIds was empty on searchResultB'));
-            hasBackupSortId = false;
-          }
+        //   // call this function setSortIdOrExit()
+        //   const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
+        //   if (lastSortId != null && lastSortId.length !== 0) {
+        //     // @ts-expect-error @elastic/elasticsearch SortResults contains null not assignable to backupSortId
+        //     backupSortId = lastSortId[0];
+        //     hasBackupSortId = true;
+        //   } else {
+        //     logger.debug(buildRuleMessage('backupSortIds was empty on searchResultB'));
+        //     hasBackupSortId = false;
+        //   }
 
-          mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResultB]);
+        //   mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResultB]);
 
-          toReturn = mergeReturns([
-            toReturn,
-            createSearchAfterReturnTypeFromResponse({
-              searchResult: mergedSearchResults,
-              timestampOverride: undefined,
-            }),
-            createSearchAfterReturnType({
-              searchAfterTimes: [searchDurationB],
-              errors: searchErrorsB,
-            }),
-          ]);
-        }
+        //   toReturn = mergeReturns([
+        //     toReturn,
+        //     createSearchAfterReturnTypeFromResponse({
+        //       searchResult: mergedSearchResults,
+        //       timestampOverride: undefined,
+        //     }),
+        //     createSearchAfterReturnType({
+        //       searchAfterTimes: [searchDurationB],
+        //       errors: searchErrorsB,
+        //     }),
+        //   ]);
+        // }
 
         if (hasSortId) {
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
-            searchAfterSortId: sortId,
+            searchAfterSortId: sortIds,
             index: inputIndexPattern,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,
             logger,
-            // @ts-expect-error please, declare a type explicitly instead of unknown
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
-            excludeDocsWithTimestampOverride: false,
           });
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
           toReturn = mergeReturns([
@@ -156,10 +153,9 @@ export const searchAfterAndBulkCreate = async ({
             }),
           ]);
 
-          const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
-          if (lastSortId != null && lastSortId.length !== 0) {
-            // @ts-expect-error @elastic/elasticsearch SortResults contains null not assignable to sortId
-            sortId = lastSortId[0];
+          const lastSortIds = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
+          if (lastSortIds != null && lastSortIds.length !== 0 && hasSafeSortIds(lastSortIds)) {
+            sortIds = lastSortIds;
             hasSortId = true;
           } else {
             hasSortId = false;
@@ -261,7 +257,8 @@ export const searchAfterAndBulkCreate = async ({
           );
         }
 
-        if (!hasSortId && !hasBackupSortId) {
+        // if (!hasSortId && !hasBackupSortId) {
+        if (!hasSortId) {
           logger.debug(buildRuleMessage('ran out of sort ids to sort on'));
           break;
         }

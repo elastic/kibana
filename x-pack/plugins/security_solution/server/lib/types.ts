@@ -84,7 +84,7 @@ export interface SearchHits<T> {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       inner_hits?: any;
       matched_queries?: string[];
-      sort?: string[];
+      sort?: number[];
     }
   >;
 }

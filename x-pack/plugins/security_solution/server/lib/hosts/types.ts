@@ -112,7 +112,7 @@ export interface HostAggEsItem {
 }
 
 export interface HostEsData extends SearchHit {
-  sort: string[];
+  sort: number[];
   aggregations: {
     host_count: {
       value: number;
@@ -124,6 +124,6 @@ export interface HostEsData extends SearchHit {
 }
 
 export interface HostAggEsData extends SearchHit {
-  sort: string[];
+  sort: number[];
   aggregations: HostAggEsItem;
 }
