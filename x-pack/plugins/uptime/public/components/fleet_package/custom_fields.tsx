@@ -234,6 +234,7 @@ export const CustomFields = memo<Props>(({ defaultValues, onChange, validate }) 
                 </EuiFormRow>
               )}
               <EuiFormRow
+                id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
                 label={
                   <FormattedMessage
                     id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
