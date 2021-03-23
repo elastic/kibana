@@ -7,32 +7,23 @@
 
 import React, { FunctionComponent, createContext, useContext, useState } from 'react';
 
-export type Tab = 'search' | 'custom';
-
 interface ContextValue {
   indexPattern: string;
   updateIndexPattern: (value: string) => void;
-  currentTab: Tab;
-  setCurrentTab: (tab: Tab) => void;
 }
 
 const FieldChooserContext = createContext<ContextValue>({
   indexPattern: '',
   updateIndexPattern: () => {},
-  currentTab: 'search',
-  setCurrentTab: () => {},
 });
 
 export const FieldChooserProvider: FunctionComponent = ({ children }) => {
   const [indexPattern, updateIndexPattern] = useState<string>('');
-  const [currentTab, setCurrentTab] = useState<Tab>('search');
   return (
     <FieldChooserContext.Provider
       value={{
         indexPattern,
         updateIndexPattern,
-        currentTab,
-        setCurrentTab,
       }}
     >
       {children}

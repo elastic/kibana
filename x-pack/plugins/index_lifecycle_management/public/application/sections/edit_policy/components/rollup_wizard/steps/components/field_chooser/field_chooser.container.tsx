@@ -20,7 +20,7 @@ type Props = Omit<
 >;
 
 export const FieldChooser: FunctionComponent<Props> = (props) => {
-  const { indexPattern, updateIndexPattern, currentTab, setCurrentTab } = useFieldChooserContext();
+  const { indexPattern, updateIndexPattern } = useFieldChooserContext();
   const { form } = useForm<CustomFieldForm>();
   return (
     <FieldChooserView
@@ -28,8 +28,6 @@ export const FieldChooser: FunctionComponent<Props> = (props) => {
       customFieldForm={form}
       indexPattern={indexPattern}
       onIndexPatternChange={updateIndexPattern}
-      currentTab={currentTab}
-      onCurrentTabChange={setCurrentTab}
     />
   );
 };

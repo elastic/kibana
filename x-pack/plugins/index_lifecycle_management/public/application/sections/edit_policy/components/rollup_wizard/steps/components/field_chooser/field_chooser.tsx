@@ -41,9 +41,9 @@ import {
   fieldValidators,
 } from '../../../../../../../../shared_imports';
 
-import { Tab } from '../../../field_chooser_context';
-
 import { CustomFieldForm } from './types';
+
+export type Tab = 'search' | 'custom';
 
 const indexPatternIllegalCharacters = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE.join(' ');
 
@@ -86,8 +86,6 @@ export interface Props {
   onSelectField: (field: { name: string }) => void;
   indexPattern: string;
   onIndexPatternChange: (indexPattern: string) => void;
-  currentTab: Tab;
-  onCurrentTabChange: (tab: Tab) => void;
   customFieldForm: FormHook<CustomFieldForm>;
   excludeFields?: string[];
   includeFieldTypes?: {
@@ -103,6 +101,7 @@ interface State {
   isLoadingFields: boolean;
   loadingError?: Error;
   fields: Array<{ name: string; type: string }>;
+  currentTab: Tab;
   /**
    * The search value for filtering the results in the table
    */
@@ -122,6 +121,7 @@ export class FieldChooser extends Component<Props, State> {
       isLoadingFields: false,
       fields: [],
       searchValue: '',
+      currentTab: 'search',
     };
 
     this.updateFields();
@@ -390,12 +390,12 @@ export class FieldChooser extends Component<Props, State> {
   }
 
   renderTabs() {
-    const { currentTab, onCurrentTabChange } = this.props;
+    const { currentTab } = this.state;
     return tabs.map((tab, idx) => (
       <EuiTab
         key={idx}
         isSelected={tab.id === currentTab}
-        onClick={() => onCurrentTabChange(tab.id)}
+        onClick={() => this.setState({ currentTab: tab.id })}
       >
         {tab.name}
       </EuiTab>
@@ -403,8 +403,8 @@ export class FieldChooser extends Component<Props, State> {
   }
 
   render() {
-    const { buttonLabel, dataTestSubj, currentTab } = this.props;
-    const { isOpen } = this.state;
+    const { buttonLabel, dataTestSubj } = this.props;
+    const { isOpen, currentTab } = this.state;
 
     let content: React.ReactNode;
 
