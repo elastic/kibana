@@ -102,7 +102,7 @@ export const EndpointDetails = memo(
               <EuiText size="m">
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.list.hostStatusValue"
-                  defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} inactive {Inactive} offline {Offline} other {Unhealthy}}"
+                  defaultMessage="{hostStatus, select, healthy {Healthy} unhealthy {Unhealthy} updating {Updating} offline {Offline} inactive {Inactive} other {Unhealthy}}"
                   values={{ hostStatus }}
                 />
               </EuiText>
