@@ -20,8 +20,10 @@ interface Props {
 export function CustomReportField({ field, seriesId, options: opts, defaultValue }: Props) {
   const { series, setSeries } = useUrlStorage(seriesId);
 
+  const { reportDefinitions: rtd = {} } = series;
+
   const onChange = (value: string) => {
-    setSeries(seriesId, { ...series, reportDefinitions: { [field]: value } });
+    setSeries(seriesId, { ...series, reportDefinitions: { ...rtd, [field]: value } });
   };
 
   const { reportDefinitions } = series;

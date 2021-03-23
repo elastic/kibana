@@ -12,29 +12,25 @@ import { FilterLabel } from '../components/filter_label';
 import { DataSeries, UrlFilter } from '../types';
 import { useIndexPatternContext } from '../../../../hooks/use_default_index_pattern';
 import { useSeriesFilters } from '../hooks/use_series_filters';
+import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
 
 interface Props {
   seriesId: string;
   series: DataSeries;
   isNew?: boolean;
 }
-export const SelectedFilters = ({ seriesId, isNew, series: { labels } }: Props) => {
+export const SelectedFilters = ({ seriesId, isNew, series: dataSeries }: Props) => {
   const { series } = useUrlStorage(seriesId);
 
   const { reportDefinitions = {} } = series;
 
-  const getFiltersFromDefs = () => {
-    return Object.entries(reportDefinitions).map(([field, value]) => ({
-      field,
-      values: [value],
-    })) as UrlFilter[];
-  };
+  const { labels } = dataSeries;
 
   const filters: UrlFilter[] = useMemo(() => {
     if (seriesId === NEW_SERIES_KEY && isNew) {
       return series.filters ?? [];
     }
-    return (series.filters ?? []).concat(getFiltersFromDefs());
+    return (series.filters ?? []).concat(getFiltersFromDefs(reportDefinitions, dataSeries));
   }, [series.filters, reportDefinitions]);
 
   const { removeFilter } = useSeriesFilters({ seriesId });

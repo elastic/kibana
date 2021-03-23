@@ -12,12 +12,30 @@ import { useUrlStorage } from './use_url_strorage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { UrlFilter } from '../types';
+import { DataSeries, SeriesUrl, UrlFilter } from '../types';
 
 interface Props {
   seriesId: string;
   indexPattern?: IIndexPattern | null;
 }
+
+export const getFiltersFromDefs = (
+  reportDefinitions: SeriesUrl['reportDefinitions'],
+  dataViewConfig: DataSeries
+) => {
+  const rdfFilters = Object.entries(reportDefinitions ?? {}).map(([field, value]) => {
+    return {
+      field,
+      values: [value],
+    };
+  }) as UrlFilter[];
+
+  // let's filter out custom fields
+  return rdfFilters.filter(({ field }) => {
+    const rdf = dataViewConfig.reportDefinitions.find(({ field: fd }) => field === fd);
+    return !rdf?.custom;
+  });
+};
 
 export const useLensAttributes = ({
   seriesId,
@@ -34,22 +52,7 @@ export const useLensAttributes = ({
   });
 
   const filters: UrlFilter[] = useMemo(() => {
-    const getFiltersFromDefs = () => {
-      const rdfFilters = Object.entries(reportDefinitions).map(([field, value]) => {
-        return {
-          field,
-          values: [value],
-        };
-      }) as UrlFilter[];
-
-      // let's filter out custom fields
-      return rdfFilters.filter(({ field }) => {
-        const rdf = dataViewConfig.reportDefinitions.find(({ field: fd }) => field === fd);
-        return !rdf?.custom;
-      });
-    };
-
-    return (series.filters ?? []).concat(getFiltersFromDefs());
+    return (series.filters ?? []).concat(getFiltersFromDefs(reportDefinitions, dataViewConfig));
   }, [series.filters, reportDefinitions]);
 
   return useMemo(() => {
