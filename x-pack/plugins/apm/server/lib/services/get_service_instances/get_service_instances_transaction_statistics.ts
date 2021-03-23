@@ -46,7 +46,7 @@ type ServiceInstanceTransactionStatistics<T> = T extends true
   ? ServiceInstanceTransactionComparisonStatistics
   : ServiceInstanceTransactionPrimaryStatistics;
 
-async function getServiceInstancesTransactionStatistics<
+export async function getServiceInstancesTransactionStatistics<
   T extends true | false
 >({
   environment,
@@ -199,41 +199,4 @@ async function getServiceInstancesTransactionStatistics<
       );
     }
   );
-}
-
-export async function getServiceInstancesTransactionPrimaryStatistics(params: {
-  latencyAggregationType: LatencyAggregationType;
-  setup: Setup;
-  serviceName: string;
-  transactionType: string;
-  searchAggregatedTransactions: boolean;
-  start: number;
-  end: number;
-  environment?: string;
-  kuery?: string;
-  size?: number;
-}) {
-  return getServiceInstancesTransactionStatistics({
-    ...params,
-    isComparisonSearch: false,
-  });
-}
-
-export async function getServiceInstancesTransactionComparisonStatistics(params: {
-  latencyAggregationType: LatencyAggregationType;
-  setup: Setup;
-  serviceName: string;
-  transactionType: string;
-  searchAggregatedTransactions: boolean;
-  start: number;
-  end: number;
-  environment?: string;
-  kuery?: string;
-  numBuckets?: number;
-  serviceNodeIds: string[];
-}) {
-  return getServiceInstancesTransactionStatistics({
-    ...params,
-    isComparisonSearch: true,
-  });
 }

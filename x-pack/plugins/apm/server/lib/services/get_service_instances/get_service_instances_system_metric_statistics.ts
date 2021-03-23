@@ -42,7 +42,7 @@ type ServiceInstanceSystemMetricStatistics<T> = T extends true
   ? ServiceInstanceSystemMetricComparisonStatistics
   : ServiceInstanceSystemMetricPrimaryStatistics;
 
-async function getServiceInstancesSystemMetricStatistics<
+export async function getServiceInstancesSystemMetricStatistics<
   T extends true | false
 >({
   environment,
@@ -205,35 +205,4 @@ async function getServiceInstancesSystemMetricStatistics<
       );
     }
   );
-}
-
-export async function getServiceInstancesSystemMetricPrimaryStatistics(params: {
-  setup: Setup;
-  serviceName: string;
-  start: number;
-  end: number;
-  size: number;
-  environment?: string;
-  kuery?: string;
-}) {
-  return await getServiceInstancesSystemMetricStatistics({
-    ...params,
-    isComparisonSearch: false,
-  });
-}
-
-export async function getServiceInstancesSystemMetricComparisonStatistics(params: {
-  setup: Setup;
-  serviceName: string;
-  start: number;
-  end: number;
-  numBuckets: number;
-  serviceNodeIds: string[];
-  environment?: string;
-  kuery?: string;
-}) {
-  return await getServiceInstancesSystemMetricStatistics({
-    ...params,
-    isComparisonSearch: true,
-  });
 }
