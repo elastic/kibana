@@ -1,18 +1,100 @@
-# Case Workflow
-
-*Experimental Feature*
-
-Elastic is developing a Case Management Workflow. Follow our progress:
-
-- [Case API Documentation](https://www.elastic.co/guide/en/security/master/cases-overview.html)
 
 
-# Action types
 
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
+[![Issues][issues-shield]][issues-url]
+[![Pull Requests][pr-shield]][pr-url] 
+
+# Cases Plugin Docs
+
+![Cases Logo][cases-logo] 
+
+[Report Bug](https://github.com/elastic/kibana/issues/new?assignees=&labels=bug&template=Bug_report.md)
+·
+[Request Feature](https://github.com/elastic/kibana/issues/new?assignees=&labels=&template=Feature_request.md)
+
+## Table of Contents
+
+- [Cases API](#cases-api)
+- [Cases UI](#cases-ui)
+- [Case Action Type](#case-action-type)
+
+
+## Cases API
+[**Explore the API docs »**](https://www.elastic.co/guide/en/security/current/cases-api-overview.html)
+
+## Cases UI
+
+#### Embed Cases UI components in any Kibana plugin
+- Add `CasesUiStart` to Kibana plugin `StartServices` dependencies:
+
+```ts
+cases: CasesUiStart;
+```
+
+#### Cases UI Methods
+
+- From the UI component, get the component from the `useKibana` hook start services
+```tsx
+  const { cases } = useKibana().services;
+  // call in the return as you would any component
+  cases.getCreateCase({
+    onCancel: handleSetIsCancel,
+    onSuccess,
+  })
+```
+##### Methods:
+### `getAllCases`
+Arguments: 
+
+|Property|Description|
+|---|---|
+|configureCasesHref|`string;` route for configure cases page
+|createCaseHref|`string;` route for create cases page
+|disabledStatuses?|`CaseStatuses[];` array of disabled statuses
+|getCaseDetailsHref|`(caseDetails: CaseDetailsHrefSchema) => string;` callback to generate the case details url from the case id
+|isModal?|`boolean;` is All Cases table a modal
+|onCaseDetailsNavClick|`(caseDetails: CaseDetailsHrefSchema) => void;` callback for nav click
+|onConfigureCasesNavClick?|`(ev: React.MouseEvent) => void;` callback for nav click
+|onCreateCaseNavClick?|`(ev: React.MouseEvent) => void;` callback for nav click
+|onRowClick?|`(theCase?: Case ! SubCase) => void;` callback for row click, passing case in row
+|userCanCrud|boolean; user permissions to crud
+UI component:
+ ![All Cases Component][all-cases-img] 
+
+### `getCreateCase`
+Arguments: 
+
+|Property|Description|
+|---|---|
+|afterCaseCreated?|`(theCase: Case) => Promise<void>;` callback passing newly created case before pushCaseToExternalService is called
+|onCancel|`() => void;` callback when create case is canceled
+|onSuccess|`(theCase: Case) => Promise<void>;` callback passing newly created case after pushCaseToExternalService is called
+
+
+UI component:
+ ![Create Component][create-img] 
+ 
+ ### `getConfigureCases`
+ Arguments: 
+ 
+ |Property|Description|
+ |---|---|
+ |userCanCrud|`boolean;`  user permissions to crud
+ UI component:
+  ![Configure Component][configure-img] 
+
+## Case Action Type
 
 See [Kibana Actions](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions) for more information.
 
-## Case 
 
 ID: `.case`
 
@@ -102,3 +184,21 @@ For IBM Resilient connectors:
 | Property   | Description                    | Type    |
 | ---------- | ------------------------------ | ------- |
 | syncAlerts | Turn on or off alert synching. | boolean |
+
+
+
+
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[pr-shield]: https://img.shields.io/github/issues-pr/elangosundar/awesome-README-templates?style=for-the-badge
+[pr-url]: https://github.com/elastic/kibana/pulls?q=is%3Apr+label%3AFeature%3ACases+-is%3Adraft+is%3Aopen+
+[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
+[issues-url]: https://github.com/elastic/kibana/issues?q=is%3Aopen+is%3Aissue+label%3AFeature%3ACases
+[product-screenshot]: images/screenshot.png
+[cases-logo]: images/logo.png
+[configure-img]: images/configure.png
+[create-img]: images/create.png
+[all-cases-img]: images/all_cases.png
+
