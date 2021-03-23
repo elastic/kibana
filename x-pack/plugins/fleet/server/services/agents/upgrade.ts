@@ -135,7 +135,7 @@ export async function sendUpgradeAgentsActions(
         throw new IngestManagerError(`${agent.id} is not upgradeable`);
       }
 
-      if (agent.policy_id && managedPolicies[agent.policy_id]) {
+      if (!options.force && agent.policy_id && managedPolicies[agent.policy_id]) {
         throw new IngestManagerError(`Cannot upgrade agent in managed policy ${agent.policy_id}`);
       }
       return agent;

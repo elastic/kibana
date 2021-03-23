@@ -601,7 +601,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
       });
 
-      it.skip('enrolled in a managed policy bulk upgrade force:true should respond with 200 and object of all success results. Should update the managed agent SOs', async () => {
+      it('enrolled in a managed policy bulk upgrade force:true should respond with 200 and object of all success results. Should update the managed agent SOs', async () => {
         // update enrolled policy to managed
         await supertest.put(`/api/fleet/agent_policies/policy1`).set('kbn-xsrf', 'xxxx').send({
           name: 'Test policy',
