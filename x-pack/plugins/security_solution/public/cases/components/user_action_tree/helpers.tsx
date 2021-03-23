@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
 import { isObject, get, isString, isNumber, isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
-import { SearchResponse } from 'elasticsearch';
 
+import { SearchResponse } from 'elasticsearch';
 import {
   CaseFullExternalService,
   ActionConnector,

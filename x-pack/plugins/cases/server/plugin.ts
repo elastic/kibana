@@ -143,21 +143,7 @@ export class CasePlugin {
       });
     };
 
-    const getCasesClient = (scopedClusterClient, savedObjectsClient, user) =>
-      createExternalCasesClient({
-        scopedClusterClient,
-        savedObjectsClient,
-        user,
-        caseService: this.caseService!,
-        caseConfigureService: this.caseConfigureService!,
-        connectorMappingsService: this.connectorMappingsService!,
-        userActionService: this.userActionService!,
-        alertsService: this.alertsService!,
-        logger: this.log,
-      });
-
     return {
-      getCasesClient,
       getCasesClientWithRequestAndContext,
     };
   }

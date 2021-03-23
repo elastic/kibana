@@ -66,8 +66,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const [{ agentSelection, query }] = useFormData({ form, watch: ['agentSelection', 'query'] });
 
-  // console.error('agentSelection', agentSelection, query);
-
   const agentSelected = useMemo(
     () =>
       !!(
@@ -80,8 +78,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const queryValueProvided = useMemo(() => !!query?.query?.length, [query]);
-
-  // console.error('createActionMutation', createActionMutation);
 
   const queryStatus = useMemo(() => {
     if (!agentSelected) return 'disabled';
@@ -109,7 +105,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         title: i18n.translate('xpack.osquery.liveQueryForm.steps.agentsStepHeading', {
           defaultMessage: 'Select agents',
         }),
-        children: <UseField path="agentSelection" component={AgentsTableField} />,
+        children: <UseField path="agents" component={AgentsTableField} />,
         status: agentSelected ? 'complete' : 'incomplete',
       },
       {

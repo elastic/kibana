@@ -484,7 +484,7 @@ export class CaseService implements CaseServiceSetup {
       associationType,
       id: ids,
       options: {
-        filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.osqueryAlert})`,
+        filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert})`,
       },
     });
 
