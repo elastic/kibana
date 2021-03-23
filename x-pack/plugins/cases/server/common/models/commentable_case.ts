@@ -138,7 +138,7 @@ export class CommentableCase {
               ...user,
             },
           },
-          version: this.subCase.version,
+          // version: this.subCase.version,
         });
 
         updatedSubCaseAttributes = {
@@ -158,7 +158,7 @@ export class CommentableCase {
           updated_at: date,
           updated_by: { ...user },
         },
-        version: this.collection.version,
+        // version: this.collection.version,
       });
 
       // this will contain the updated sub case information if the sub case was defined initially

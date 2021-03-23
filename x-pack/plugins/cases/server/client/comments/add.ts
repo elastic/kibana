@@ -121,7 +121,7 @@ const addGeneratedAlerts = async ({
   decodeCommentRequest(comment);
 
   // This function only supports adding generated alerts
-  if (comment.type !== CommentType.generatedAlert) {
+  if (comment.type !== CommentType.generatedAlert && comment.type !== CommentType.osqueryAlert) {
     throw Boom.internal('Attempting to add a non generated alert in the wrong context');
   }
 
@@ -134,7 +134,7 @@ const addGeneratedAlerts = async ({
     });
 
     if (
-      query.type === CommentType.generatedAlert &&
+      (query.type === CommentType.generatedAlert || query.type === CommentType.osqueryAlert) &&
       caseInfo.attributes.type !== CaseType.collection
     ) {
       throw Boom.badRequest('Sub case style alert comment cannot be added to an individual case');
@@ -170,7 +170,8 @@ const addGeneratedAlerts = async ({
 
     if (
       (newComment.attributes.type === CommentType.alert ||
-        newComment.attributes.type === CommentType.generatedAlert) &&
+        newComment.attributes.type === CommentType.generatedAlert ||
+        newComment.attributes.type === CommentType.osqueryAlert) &&
       caseInfo.attributes.settings.syncAlerts
     ) {
       const alertsToUpdate = createAlertUpdateRequest({

@@ -5,11 +5,26 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiCommentProps } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiLoadingContent,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiCommentProps,
+} from '@elastic/eui';
 import { isObject, get, isString, isNumber, isEmpty } from 'lodash';
-import React, { useMemo } from 'react';
-
+import React, { useEffect, useMemo, useState } from 'react';
 import { SearchResponse } from 'elasticsearch';
+import { IndexPattern } from 'src/plugins/data/public';
+import {
+  TypedLensByValueInput,
+  PersistedIndexPatternLayer,
+  PieVisualizationState,
+} from '../../../../../../plugins/lens/public';
+
 import {
   CaseFullExternalService,
   ActionConnector,
@@ -35,7 +50,7 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { buildAlertsQuery } from '../case_view/helpers';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { KibanaServices } from '../../../common/lib/kibana';
+import { useKibana, KibanaServices } from '../../../common/lib/kibana';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
 
 interface LabelTitle {
@@ -378,6 +393,236 @@ export const getGeneratedAlertsAttachment = ({
       </EuiFlexGroup>
     ),
   };
+};
+
+export const getOsqueryAlertsAttachment = ({
+  action,
+  osqueryActionId,
+  alertIds,
+  ruleId,
+  ruleName,
+}: {
+  action: CaseUserActions;
+  alertIds: string[];
+  osqueryActionId: string[];
+  ruleId: string;
+  ruleName: string;
+}): EuiCommentProps => {
+  const fetchEcsAlertsData = async (fetchAlertIds?: string[]): Promise<Ecs[]> => {
+    if (isEmpty(fetchAlertIds)) {
+      return [];
+    }
+    const alertResponse = await KibanaServices.get().http.fetch<
+      SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
+    >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      method: 'POST',
+      body: JSON.stringify(buildAlertsQuery(fetchAlertIds ?? [])),
+    });
+    return (
+      alertResponse?.hits.hits.reduce<Ecs[]>(
+        (acc, { _id, _index, _source }) => [
+          ...acc,
+          {
+            ...formatAlertToEcsSignal(_source as {}),
+            _id,
+            _index,
+            timestamp: _source['@timestamp'],
+          },
+        ],
+        []
+      ) ?? []
+    );
+  };
+
+  return {
+    username: <EuiIcon type="logoOsquery" size="m" />,
+    className: 'comment-osquery_alert',
+    // type: 'update',
+    event: (
+      <AlertCommentEvent
+        alertId={alertIds[0]}
+        ruleId={ruleId}
+        ruleName={ruleName}
+        alertsCount={alertIds.length}
+        commentType={CommentType.generatedAlert}
+      />
+    ),
+    'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+    timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+    timelineIcon: 'bell',
+    actions: (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UserActionCopyLink id={action.actionId} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <InvestigateInTimelineAction
+            ariaLabel={i18n.SEND_ALERT_TO_TIMELINE}
+            alertIds={alertIds}
+            key="investigate-in-timeline"
+            ecsRowData={null}
+            fetchEcsAlertsData={fetchEcsAlertsData}
+            nonEcsRowData={[
+              {
+                field: 'action_id',
+                value: osqueryActionId,
+              },
+              { field: 'alert_type', value: ['osquery_alert'] },
+            ]}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    children: <LensComponent actionId={osqueryActionId[0]} />,
+  };
+};
+
+function getLensAttributes(
+  defaultIndexPattern: IndexPattern,
+  actionId: string
+): TypedLensByValueInput['attributes'] {
+  const dataLayer: PersistedIndexPatternLayer = {
+    columnOrder: ['68829d2b-267e-44ef-b533-dd9d79a0d8ba', 'col2'],
+    columns: {
+      '68829d2b-267e-44ef-b533-dd9d79a0d8ba': {
+        label: 'Top values of host.name',
+        dataType: 'string',
+        operationType: 'terms',
+        scale: 'ordinal',
+        sourceField: 'host.name',
+        isBucketed: true,
+        params: {
+          size: 5,
+          orderBy: {
+            type: 'column',
+            columnId: 'col2',
+          },
+          orderDirection: 'desc',
+          otherBucket: true,
+          missingBucket: false,
+        },
+      },
+      col2: {
+        dataType: 'number',
+        isBucketed: false,
+        label: 'Count of records',
+        operationType: 'count',
+        scale: 'ratio',
+        sourceField: 'Records',
+      },
+    },
+    incompleteColumns: {},
+  };
+
+  const xyConfig: PieVisualizationState = {
+    shape: 'donut',
+    layers: [
+      {
+        layerId: 'layer1',
+        groups: ['68829d2b-267e-44ef-b533-dd9d79a0d8ba'],
+        metric: 'col2',
+        numberDisplay: 'percent',
+        categoryDisplay: 'default',
+        legendDisplay: 'default',
+        nestedLegend: false,
+      },
+    ],
+  };
+  return {
+    visualizationType: 'lnsPie',
+    title: 'Prefilled from Case details view',
+    references: [
+      {
+        id: defaultIndexPattern.id!,
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: defaultIndexPattern.id!,
+        name: 'indexpattern-datasource-layer-layer1',
+        type: 'index-pattern',
+      },
+    ],
+    state: {
+      datasourceStates: {
+        indexpattern: {
+          layers: {
+            layer1: dataLayer,
+          },
+        },
+      },
+      filters: [
+        {
+          meta: {
+            index: 'logs-*',
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'action_id',
+            params: { query: actionId },
+          },
+          query: { match_phrase: { action_id: actionId } },
+          $state: { store: 'appState' },
+        },
+      ],
+      query: { language: 'kuery', query: '' },
+      visualization: xyConfig,
+    },
+  };
+}
+
+interface LensComponentProps {
+  actionId: string;
+}
+
+const LensComponent: React.FC<LensComponentProps> = ({ actionId }) => {
+  const { data, lens } = useKibana().services;
+  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      const result = await data.indexPatterns.get('logs-*');
+      if (result) {
+        setIndexPattern(result);
+      }
+    }
+    fetchData();
+  }, [data.indexPatterns]);
+
+  if (!indexPattern) {
+    return <EuiLoadingContent lines={3} />;
+  }
+
+  return (
+    <>
+      <EuiButton
+        isDisabled={!lens.canUseEditor()}
+        onClick={() => {
+          lens.navigateToPrefilledEditor({
+            id: '',
+            timeRange: {
+              from: 'now-30d',
+              to: 'now',
+            },
+            attributes: getLensAttributes(indexPattern, actionId),
+          });
+        }}
+      >
+        {'Investigate in Lens'}
+      </EuiButton>
+      <EuiSpacer />
+      <lens.EmbeddableComponent
+        id=""
+        style={{ height: 200 }}
+        timeRange={{
+          from: 'now-30d',
+          to: 'now',
+        }}
+        attributes={getLensAttributes(indexPattern, actionId)}
+      />
+    </>
+  );
 };
 
 interface Signal {

@@ -42,6 +42,7 @@ import {
   getUpdateAction,
   getAlertAttachment,
   getGeneratedAlertsAttachment,
+  getOsqueryAlertsAttachment,
   useFetchAlertData,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
@@ -411,6 +412,37 @@ export const UserActionTree = React.memo(
                   getGeneratedAlertsAttachment({
                     action,
                     alertIds,
+                    ruleId: comment.rule?.id ?? '',
+                    ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
+                  }),
+                ];
+              } else if (comment != null && comment.type === CommentType.osqueryAlert) {
+                const previousComment = caseData.comments.find(
+                  (c) => c.id === caseUserActions[index - 1]?.commentId
+                );
+                const osqueryActionId = Array.isArray(comment.alertId)
+                  ? comment.alertId
+                  : [comment.alertId];
+
+                const alertIds = previousComment
+                  ? // @ts-expect-error update types
+                    Array.isArray(previousComment.alertId)
+                    ? // @ts-expect-error update types
+                      previousComment.alertId
+                    : // @ts-expect-error update types
+                      [previousComment.alertId]
+                  : [];
+
+                // if (isEmpty(alertIds)) {
+                //   return comments;
+                // }
+
+                return [
+                  ...comments,
+                  getOsqueryAlertsAttachment({
+                    action,
+                    alertIds,
+                    osqueryActionId,
                     ruleId: comment.rule?.id ?? '',
                     ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
                   }),

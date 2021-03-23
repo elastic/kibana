@@ -353,7 +353,11 @@ export const isCommentRequestTypeUser = (
 export const isCommentRequestTypeAlertOrGenAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
-  return context.type === CommentType.alert || context.type === CommentType.generatedAlert;
+  return (
+    context.type === CommentType.alert ||
+    context.type === CommentType.generatedAlert ||
+    context.type === CommentType.osqueryAlert
+  );
 };
 
 /**
@@ -366,7 +370,7 @@ export const isCommentRequestTypeAlertOrGenAlert = (
 export const isCommentRequestTypeGenAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
-  return context.type === CommentType.generatedAlert;
+  return context.type === CommentType.generatedAlert || context.type === CommentType.osqueryAlert;
 };
 
 export const decodeCommentRequest = (comment: CommentRequest) => {

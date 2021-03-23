@@ -11,6 +11,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { NewsfeedPublicPluginStart } from '../../../../src/plugins/newsfeed/public';
+import { LensPublicStart } from '../../../plugins/lens/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
@@ -50,6 +51,7 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
+  lens?: LensPublicStart;
   fleet?: FleetStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
