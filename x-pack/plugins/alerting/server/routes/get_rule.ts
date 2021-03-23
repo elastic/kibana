@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ILicenseState } from '../lib';
@@ -30,8 +31,9 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   notifyWhen,
   muteAll,
   mutedInstanceIds,
-  executionStatus: { lastExecutionDate, ...executionStatus },
+  executionStatus,
   actions,
+  scheduledTaskId,
   ...rest
 }) => ({
   ...rest,
@@ -44,9 +46,10 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
-  execution_status: {
-    ...executionStatus,
-    last_execution_date: lastExecutionDate,
+  scheduled_task_id: scheduledTaskId,
+  execution_status: executionStatus && {
+    ...omit(executionStatus, 'lastExecutionDate'),
+    last_execution_date: executionStatus.lastExecutionDate,
   },
   actions: actions.map(({ group, id, actionTypeId, params }) => ({
     group,

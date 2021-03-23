@@ -17,39 +17,39 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
   describe('list_alert_types', () => {
     it('should return 200 with list of alert types', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule_types`
       );
       expect(response.status).to.eql(200);
-      const { authorizedConsumers, ...fixtureAlertType } = response.body.find(
+      const { authorized_consumers: authorizedConsumers, ...fixtureAlertType } = response.body.find(
         (alertType: any) => alertType.id === 'test.noop'
       );
       expect(fixtureAlertType).to.eql({
-        actionGroups: [
+        action_groups: [
           { id: 'default', name: 'Default' },
           { id: 'recovered', name: 'Recovered' },
         ],
-        defaultActionGroupId: 'default',
+        default_action_group_id: 'default',
         id: 'test.noop',
         name: 'Test: Noop',
-        actionVariables: {
+        action_variables: {
           state: [],
           params: [],
           context: [],
         },
-        recoveryActionGroup: {
+        recovery_action_group: {
           id: 'recovered',
           name: 'Recovered',
         },
         producer: 'alertsFixture',
-        minimumLicenseRequired: 'basic',
-        enabledInLicense: true,
+        minimum_license_required: 'basic',
+        enabled_in_license: true,
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });
 
     it('should return actionVariables with both context and state', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule_types`
       );
       expect(response.status).to.eql(200);
 
@@ -57,7 +57,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         (alertType: any) => alertType.id === 'test.always-firing'
       );
 
-      expect(fixtureAlertType.actionVariables).to.eql({
+      expect(fixtureAlertType.action_variables).to.eql({
         state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
         params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
         context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
@@ -66,7 +66,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
     it('should return actionVariables with just context', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule_types`
       );
       expect(response.status).to.eql(200);
 
@@ -74,7 +74,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         (alertType: any) => alertType.id === 'test.onlyContextVariables'
       );
 
-      expect(fixtureAlertType.actionVariables).to.eql({
+      expect(fixtureAlertType.action_variables).to.eql({
         state: [],
         params: [],
         context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
@@ -83,7 +83,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
 
     it('should return actionVariables with just state', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule_types`
       );
       expect(response.status).to.eql(200);
 
@@ -91,7 +91,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         (alertType: any) => alertType.id === 'test.onlyStateVariables'
       );
 
-      expect(fixtureAlertType.actionVariables).to.eql({
+      expect(fixtureAlertType.action_variables).to.eql({
         state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
         context: [],
         params: [],

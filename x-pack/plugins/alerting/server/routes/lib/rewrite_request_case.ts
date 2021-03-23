@@ -18,6 +18,8 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   ? `alertId`
   : K extends `mutedInstanceIds`
   ? `mutedAlertIds`
+  : K extends `instances`
+  ? `alerts`
   : K;
 
 export type AsApiContract<

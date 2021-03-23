@@ -38,9 +38,11 @@ const rewriteBodyRes: RewriteResponseCase<AlertInstanceSummary> = ({
   statusEndDate,
   errorMessages,
   lastRun,
+  instances: alerts,
   ...rest
 }) => ({
   ...rest,
+  alerts,
   rule_type_id: alertTypeId,
   mute_all: muteAll,
   status_start_date: statusStartDate,

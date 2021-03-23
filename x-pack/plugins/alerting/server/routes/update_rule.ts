@@ -73,15 +73,15 @@ const rewriteBodyRes: RewriteResponseCase<PartialAlert<AlertTypeParams>> = ({
   ...rest
 }) => ({
   ...rest,
+  api_key_owner: apiKeyOwner,
+  created_by: createdBy,
+  updated_by: updatedBy,
   ...(alertTypeId ? { rule_type_id: alertTypeId } : {}),
   ...(scheduledTaskId ? { scheduled_task_id: scheduledTaskId } : {}),
-  ...(createdBy ? { created_by: createdBy } : {}),
-  ...(updatedBy ? { updated_by: updatedBy } : {}),
   ...(createdAt ? { created_at: createdAt } : {}),
   ...(updatedAt ? { updated_at: updatedAt } : {}),
-  ...(apiKeyOwner ? { api_key_owner: apiKeyOwner } : {}),
   ...(notifyWhen ? { notify_when: notifyWhen } : {}),
-  ...(muteAll ? { mute_all: muteAll } : {}),
+  ...(muteAll !== undefined ? { mute_all: muteAll } : {}),
   ...(mutedInstanceIds ? { muted_alert_ids: mutedInstanceIds } : {}),
   ...(executionStatus
     ? {
