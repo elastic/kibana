@@ -22,7 +22,7 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { parseQueryParams } from '../../../../../shared/query_params';
 import { AppLogic } from '../../../../app_logic';
 import { CUSTOM_SERVICE_TYPE, WORKPLACE_SEARCH_URL_PREFIX } from '../../../../constants';
-import { SOURCES_PATH, getSourcesPath } from '../../../../routes';
+import { SOURCES_PATH, ADD_GITHUB_PATH, getSourcesPath } from '../../../../routes';
 import { CustomSource } from '../../../../types';
 import { staticSourceData } from '../../source_data';
 import { SourcesLogic } from '../../sources_logic';
@@ -492,12 +492,18 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
       try {
         const response = await http.get(route, { query });
+        const { serviceName, indexPermissions, serviceType, preContentSourceId } = response;
 
-        const { serviceName, indexPermissions, serviceType } = response;
+        // GitHub requires an intermediate configuration step, where we collect the repos to index.
+        if (preContentSourceId) {
+          actions.setPreContentSourceId(preContentSourceId);
+          navigateToUrl(`${ADD_GITHUB_PATH}/configure${search}`);
+        } else {
         setAddedSource(serviceName, indexPermissions, serviceType);
+          navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
+        }
       } catch (e) {
         flashAPIErrors(e);
-      } finally {
         navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
       }
     },
