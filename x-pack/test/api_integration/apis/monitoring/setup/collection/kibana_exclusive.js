@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/kibana_mb';
+import fixture from './fixtures/kibana_exclusive_mb';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('kibana_mb', () => {
-    const archive = 'monitoring/setup/collection/kibana_mb';
+  describe('kibana_exclusive', () => {
+    const archive = 'monitoring/setup/collection/kibana_exclusive';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',
       max: '2019-04-09T23:59:59.741Z',

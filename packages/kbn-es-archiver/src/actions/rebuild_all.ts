@@ -176,8 +176,13 @@ function applyCustomESRules(item: any, legacyDoc: any, mbDoc: any) {
   if (legacyDoc.type === 'cluster_stats') {
     set(
       mbDoc,
-      'elasticsearch.cluster.stats.indices.docs.total',
+      'elasticsearch.cluster.stats.indices.docs.count',
       legacyDoc.cluster_stats.indices.docs.count
+    );
+    set(
+      mbDoc,
+      'elasticsearch.cluster.stats.indices.docs.deleted',
+      legacyDoc.cluster_stats.indices.docs.deleted
     );
     set(
       mbDoc,
@@ -354,25 +359,33 @@ export async function rebuildAllAction({
                 set(mbDoc, alias.path, value);
               }
             }
+            const skipMbConversion =
+              archiveName.includes('monitoring/setup/collection') &&
+              item.value.index.indexOf('-mb') === -1;
             const mbDocs = [];
-            if (item.value.index.indexOf('-es') > -1) {
-              mbDocs.push(...applyCustomESRules(item, legacyDoc, mbDoc));
-            } else if (item.value.index.indexOf('-kibana') > -1) {
-              mbDocs.push(...applyCustomKibanaRules(item, legacyDoc, mbDoc));
-            } else if (item.value.index.indexOf('-logstash') > -1) {
-              mbDocs.push(...applyCustomLogstashRules(item, legacyDoc, mbDoc));
+            if (skipMbConversion) {
+              mbDocs.push(item);
             } else {
-              mbDocs.push({
-                ...item,
-                value: {
-                  ...item.value,
-                  index: `metricbeat-8.0.0`,
-                  source: {
-                    ...mbDoc,
+              if (item.value.index.indexOf('-es') > -1) {
+                mbDocs.push(...applyCustomESRules(item, legacyDoc, mbDoc));
+              } else if (item.value.index.indexOf('-kibana') > -1) {
+                mbDocs.push(...applyCustomKibanaRules(item, legacyDoc, mbDoc));
+              } else if (item.value.index.indexOf('-logstash') > -1) {
+                mbDocs.push(...applyCustomLogstashRules(item, legacyDoc, mbDoc));
+              } else {
+                mbDocs.push({
+                  ...item,
+                  value: {
+                    ...item.value,
+                    index: `metricbeat-8.0.0`,
+                    source: {
+                      ...mbDoc,
+                    },
                   },
-                },
-              });
+                });
+              }
             }
+
             if (mbDocs && mbDocs.length && !_.isEmpty(mbDocs[0])) {
               foundMbFiles = true;
               return mbDocs;
