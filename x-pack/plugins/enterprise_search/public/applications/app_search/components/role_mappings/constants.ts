@@ -7,6 +7,24 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SAVE_ROLE_MAPPING = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMapping.saveRoleMappingButtonLabel',
+  { defaultMessage: 'Save role mapping' }
+);
+export const UPDATE_ROLE_MAPPING = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMapping.updateRoleMappingButtonLabel',
+  { defaultMessage: 'Update role mapping' }
+);
+
+export const ADD_ROLE_MAPPING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMapping.newRoleMappingTitle',
+  { defaultMessage: 'Add role mapping' }
+);
+export const MANAGE_ROLE_MAPPING_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMapping.manageRoleMappingTitle',
+  { defaultMessage: 'Manage role mapping' }
+);
+
 export const EMPTY_ROLE_MAPPINGS_BODY = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMapping.emptyRoleMappingsBody',
   {

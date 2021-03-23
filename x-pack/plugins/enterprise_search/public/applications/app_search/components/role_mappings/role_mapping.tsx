@@ -25,7 +25,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -42,6 +41,10 @@ import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 import { Engine } from '../engine/types';
 
 import {
+  SAVE_ROLE_MAPPING,
+  UPDATE_ROLE_MAPPING,
+  ADD_ROLE_MAPPING_TITLE,
+  MANAGE_ROLE_MAPPING_TITLE,
   DEV_ROLE_TYPE_DESCRIPTION,
   EDITOR_ROLE_TYPE_DESCRIPTION,
   ANALYST_ROLE_TYPE_DESCRIPTION,
@@ -133,21 +136,8 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
 
   if (dataLoading) return <Loading />;
 
-  const SAVE_ROLE_MAPPING_LABEL = i18n.translate(
-    'xpack.enterpriseSearch.appSearch.roleMapping.saveRoleMappingButtonMessage',
-    {
-      defaultMessage: '{operation} role mapping',
-      values: { operation: isNew ? 'Save' : 'Update' },
-    }
-  );
-
-  const ACTIVE_BREADCRUMB_TEXT = i18n.translate(
-    'xpack.enterpriseSearch.appSearch.roleMapping.activeBreadcrumbText',
-    {
-      defaultMessage: '{operation} role mapping',
-      values: { operation: isNew ? 'Add' : 'Manage' },
-    }
-  );
+  const SAVE_ROLE_MAPPING_LABEL = isNew ? SAVE_ROLE_MAPPING : UPDATE_ROLE_MAPPING;
+  const TITLE = isNew ? ADD_ROLE_MAPPING_TITLE : MANAGE_ROLE_MAPPING_TITLE;
 
   const saveRoleMappingButton = (
     <EuiButton onClick={handleSaveMapping} fill>
@@ -190,8 +180,8 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
 
   return (
     <>
-      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE, ACTIVE_BREADCRUMB_TEXT]} />
-      <EuiPageHeader rightSideItems={[saveRoleMappingButton]} pageTitle={ROLE_MAPPINGS_TITLE} />
+      <SetPageChrome trail={[ROLE_MAPPINGS_TITLE, TITLE]} />
+      <EuiPageHeader rightSideItems={[saveRoleMappingButton]} pageTitle={TITLE} />
       <EuiSpacer />
       <EuiPageContent>
         <EuiPageContentBody>
