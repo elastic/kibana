@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           doc: {
             last_checkin: new Date().toISOString(),
-            updgrade_started_at: new Date().toISOString(),
+            upgrade_started_at: new Date().toISOString(),
           },
         },
       });
