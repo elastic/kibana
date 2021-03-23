@@ -36,7 +36,7 @@ import {
 } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 import { AppLogic } from '../../app_logic';
-import { RoleTypes } from '../../types';
+
 import { roleHasScopedEngines } from '../../utils/role/has_scoped_engines';
 import { Engine } from '../engine/types';
 
@@ -45,11 +45,8 @@ import {
   UPDATE_ROLE_MAPPING,
   ADD_ROLE_MAPPING_TITLE,
   MANAGE_ROLE_MAPPING_TITLE,
-  DEV_ROLE_TYPE_DESCRIPTION,
-  EDITOR_ROLE_TYPE_DESCRIPTION,
-  ANALYST_ROLE_TYPE_DESCRIPTION,
-  OWNER_ROLE_TYPE_DESCRIPTION,
-  ADMIN_ROLE_TYPE_DESCRIPTION,
+  ADVANCED_ROLE_TYPES,
+  STANDARD_ROLE_TYPES,
   ADVANCED_ROLE_SELECTORS_TITLE,
   ROLE_TITLE,
   FULL_ENGINE_ACCESS_TITLE,
@@ -63,37 +60,6 @@ import { RoleMappingsLogic } from './role_mappings_logic';
 interface RoleMappingProps {
   isNew?: boolean;
 }
-
-interface AdvanceRoleType {
-  type: RoleTypes;
-  description: string;
-}
-
-const advancedRoleTypes = [
-  {
-    type: 'dev',
-    description: DEV_ROLE_TYPE_DESCRIPTION,
-  },
-  {
-    type: 'editor',
-    description: EDITOR_ROLE_TYPE_DESCRIPTION,
-  },
-  {
-    type: 'analyst',
-    description: ANALYST_ROLE_TYPE_DESCRIPTION,
-  },
-] as AdvanceRoleType[];
-
-const standardRoleTypes = [
-  {
-    type: 'owner',
-    description: OWNER_ROLE_TYPE_DESCRIPTION,
-  },
-  {
-    type: 'admin',
-    description: ADMIN_ROLE_TYPE_DESCRIPTION,
-  },
-] as AdvanceRoleType[];
 
 export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
   const { roleId } = useParams() as { roleId: string };
@@ -165,7 +131,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
         <h4>{ADVANCED_ROLE_SELECTORS_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer />
-      {advancedRoleTypes.map(({ type, description }) => (
+      {ADVANCED_ROLE_TYPES.map(({ type, description }) => (
         <RoleSelector
           key={type}
           disabled={!myRole.availableRoleTypes.includes(type)}
@@ -211,7 +177,8 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
                   <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
                 </EuiTitle>
                 <EuiSpacer />
-                {standardRoleTypes.map(({ type, description }) => (
+                export{' '}
+                {STANDARD_ROLE_TYPES.map(({ type, description }) => (
                   <RoleSelector
                     key={type}
                     roleType={roleType}

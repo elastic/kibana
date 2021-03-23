@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { AdvanceRoleType } from '../../types';
+
 export const SAVE_ROLE_MAPPING = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMapping.saveRoleMappingButtonLabel',
   { defaultMessage: 'Save role mapping' }
@@ -178,3 +180,29 @@ export const ENGINE_ACCESS_TITLE = i18n.translate(
     defaultMessage: 'Engine access',
   }
 );
+
+export const ADVANCED_ROLE_TYPES = [
+  {
+    type: 'dev',
+    description: DEV_ROLE_TYPE_DESCRIPTION,
+  },
+  {
+    type: 'editor',
+    description: EDITOR_ROLE_TYPE_DESCRIPTION,
+  },
+  {
+    type: 'analyst',
+    description: ANALYST_ROLE_TYPE_DESCRIPTION,
+  },
+] as AdvanceRoleType[];
+
+export const STANDARD_ROLE_TYPES = [
+  {
+    type: 'owner',
+    description: OWNER_ROLE_TYPE_DESCRIPTION,
+  },
+  {
+    type: 'admin',
+    description: ADMIN_ROLE_TYPE_DESCRIPTION,
+  },
+] as AdvanceRoleType[];
