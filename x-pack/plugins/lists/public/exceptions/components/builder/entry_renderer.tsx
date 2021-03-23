@@ -39,7 +39,7 @@ const MyValuesInput = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-interface EntryItemProps {
+export interface EntryItemProps {
   allowLargeValueLists?: boolean;
   autocompleteService: AutocompleteStart;
   entry: FormattedBuilderEntry;
