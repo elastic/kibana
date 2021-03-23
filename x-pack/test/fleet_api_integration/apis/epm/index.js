@@ -23,5 +23,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./update_assets'));
     loadTestFile(require.resolve('./data_stream'));
     loadTestFile(require.resolve('./package_install_complete'));
+    loadTestFile(require.resolve('./delete'));
   });
 }
