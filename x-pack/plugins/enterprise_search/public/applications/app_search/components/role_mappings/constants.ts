@@ -96,7 +96,7 @@ export const EDITOR_ROLE_TYPE_DESCRIPTION = i18n.translate(
 export const ANALYST_ROLE_TYPE_DESCRIPTION = i18n.translate(
   'xpack.enterpriseSearch.appSearch.analystRoleTypeDescription',
   {
-    defaultMessage: 'Analysts can only view Documents, Query Tester, and Analytics.',
+    defaultMessage: 'Analysts can only view documents, query tester, and analytics.',
   }
 );
 
