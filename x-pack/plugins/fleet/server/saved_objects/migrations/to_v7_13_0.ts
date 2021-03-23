@@ -9,6 +9,10 @@ import type { SavedObjectMigrationFn } from 'kibana/server';
 
 import type { Settings } from '../../types';
 
+import type { PackagePolicy } from '../../../common';
+
+import { migrateEndpointPackagePolicyToV7130 } from './security_solution';
+
 export const migrateSettingsToV7130: SavedObjectMigrationFn<
   Settings & {
     package_auto_upgrade: string;
@@ -22,4 +26,17 @@ export const migrateSettingsToV7130: SavedObjectMigrationFn<
   delete settingsDoc.attributes.agent_auto_upgrade;
 
   return settingsDoc;
+};
+
+export const migratePackagePolicyToV7130: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
+  packagePolicyDoc,
+  migrationContext
+) => {
+  // Endpoint specific migrations
+  // FIXME:PT remove `-OFF` from below once ready to be released
+  if (packagePolicyDoc.attributes.package?.name === 'endpoint-OFF') {
+    return migrateEndpointPackagePolicyToV7130(packagePolicyDoc, migrationContext);
+  }
+
+  return packagePolicyDoc;
 };
