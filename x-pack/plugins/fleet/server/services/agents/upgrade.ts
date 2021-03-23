@@ -110,7 +110,6 @@ export async function sendUpgradeAgentsActions(
       }
     }
   }
-
   // Create upgrade action for each agent
   const now = new Date().toISOString();
   const data = {

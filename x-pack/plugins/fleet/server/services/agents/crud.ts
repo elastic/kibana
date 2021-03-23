@@ -10,6 +10,7 @@ import type { SearchResponse, MGetResponse, GetResponse } from 'elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
+import type { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
@@ -119,7 +120,7 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
-  const res = await esClient.search<SearchResponse<FleetServerAgent>>({
+  const res = await esClient.search<ESSearchResponse<FleetServerAgent, {}>>({
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
@@ -139,7 +140,7 @@ export async function getAgentsByKuery(
 
   return {
     agents,
-    total: agents.length,
+    total: res.body.hits.total.value,
     page,
     perPage,
   };
