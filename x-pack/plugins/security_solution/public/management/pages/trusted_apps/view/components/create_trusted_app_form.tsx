@@ -27,6 +27,7 @@ import {
 } from '../../../../../../common/endpoint/types';
 import { isValidHash } from '../../../../../../common/endpoint/validation/trusted_apps';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
   isGlobalEffectScope,
   isMacosLinuxTrustedAppCondition,
@@ -182,6 +183,10 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     const trustedApp = _trustedApp as NewTrustedApp;
 
     const dataTestSubj = formProps['data-test-subj'];
+
+    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
+      'trustedAppsByPolicyEnabled'
+    );
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
@@ -500,16 +505,18 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
 
         <EuiHorizontalRule />
 
-        <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
-          <EffectedPolicySelect
-            isGlobal={isGlobalEffectScope(trustedApp.effectScope)}
-            selected={selectedPolicies.selected}
-            options={policies.options}
-            onChange={handlePolicySelectChange}
-            isLoading={policies?.isLoading}
-            data-test-subj={getTestId('effectedPolicies')}
-          />
-        </EuiFormRow>
+        {isTrustedAppsByPolicyEnabled ? (
+          <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
+            <EffectedPolicySelect
+              isGlobal={isGlobalEffectScope(trustedApp.effectScope)}
+              selected={selectedPolicies.selected}
+              options={policies.options}
+              onChange={handlePolicySelectChange}
+              isLoading={policies?.isLoading}
+              data-test-subj={getTestId('effectedPolicies')}
+            />
+          </EuiFormRow>
+        ) : null}
       </EuiForm>
     );
   }
