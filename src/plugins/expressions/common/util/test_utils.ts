@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
-export * from './test_utils';
+import { ExecutionContext } from '../execution';
+
+export const createMockContext = () => {
+  return {
+    getSearchContext: () => ({}),
+    getSearchSessionId: () => undefined,
+    types: {},
+    variables: {},
+    abortSignal: {} as any,
+    inspectorAdapters: {} as any,
+  } as ExecutionContext;
+};
