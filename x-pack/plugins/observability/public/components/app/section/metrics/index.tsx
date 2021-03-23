@@ -105,14 +105,18 @@ export function MetricsSection({ bucketSize }: Props) {
   const columns: Array<EuiBasicTableColumn<MetricsFetchDataSeries>> = [
     {
       field: 'uptime',
-      name: 'Uptime',
+      name: i18n.translate('xpack.observability.overview.metrics.colunms.uptime', {
+        defaultMessage: 'Uptime',
+      }),
       sortable: true,
       width: '80px',
       render: (value: NumberOrNull) => (value == null ? 'N/A' : formatDuration(value / 1000)),
     },
     {
       field: 'name',
-      name: 'Hostname',
+      name: i18n.translate('xpack.observability.overview.metrics.colunms.hostname', {
+        defaultMessage: 'Hostname',
+      }),
       sortable: true,
       truncateText: true,
       isExpander: true,
@@ -128,7 +132,9 @@ export function MetricsSection({ bucketSize }: Props) {
     },
     {
       field: 'cpu',
-      name: 'CPU %',
+      name: i18n.translate('xpack.observability.overview.metrics.colunms.cpu', {
+        defaultMessage: 'CPU %',
+      }),
       sortable: true,
       width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
@@ -143,7 +149,9 @@ export function MetricsSection({ bucketSize }: Props) {
     },
     {
       field: 'load',
-      name: 'Load 15',
+      name: i18n.translate('xpack.observability.overview.metrics.colunms.load15', {
+        defaultMessage: 'Load 15',
+      }),
       sortable: true,
       width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
