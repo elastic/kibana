@@ -425,9 +425,8 @@ export class IndexPatternsService {
             runtimeField: value,
             aggregatable: true,
             searchable: true,
+            count: 0,
             readFromDocValues: false,
-            customLabel: spec.fieldAttrs?.[key]?.customLabel,
-            count: spec.fieldAttrs?.[key]?.count,
           };
         }
       }

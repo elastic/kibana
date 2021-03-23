@@ -17,13 +17,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
-  ConditionEntryField,
   MacosLinuxConditionEntry,
   NewTrustedApp,
   OperatingSystem,
 } from '../../../../../../common/endpoint/types';
-import { isValidHash } from '../../../../../../common/endpoint/validation/trusted_apps';
-
 import {
   isMacosLinuxTrustedAppCondition,
   isWindowsTrustedAppCondition,
@@ -116,7 +113,7 @@ const validateFormValues = (values: NewTrustedApp): ValidationResult => {
       })
     );
   } else {
-    values.entries.forEach((entry, index) => {
+    values.entries.some((entry, index) => {
       if (!entry.field || !entry.value.trim()) {
         isValid = false;
         addResultToValidation(
@@ -131,18 +128,9 @@ const validateFormValues = (values: NewTrustedApp): ValidationResult => {
             }
           )
         );
-      } else if (entry.field === ConditionEntryField.HASH && !isValidHash(entry.value)) {
-        isValid = false;
-        addResultToValidation(
-          validation,
-          'entries',
-          'errors',
-          i18n.translate('xpack.securitySolution.trustedapps.create.conditionFieldInvalidHashMsg', {
-            defaultMessage: '[{row}] Invalid hash value',
-            values: { row: index + 1 },
-          })
-        );
+        return true;
       }
+      return false;
     });
   }
 

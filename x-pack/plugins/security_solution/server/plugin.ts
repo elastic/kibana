@@ -77,7 +77,6 @@ import {
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
-import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -358,7 +357,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           logger: this.logger,
           cache: this.artifactsCache,
         },
-        parseExperimentalConfigValue(this.config.enableExperimental).fleetServerEnabled
+        this.config.fleetServerEnabled
       );
 
       if (this.manifestTask) {

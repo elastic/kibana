@@ -37,13 +37,11 @@ export class UiSettingsService
   implements CoreService<InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<UiSettingsConfigType>;
-  private readonly isDist: boolean;
   private readonly uiSettingsDefaults = new Map<string, UiSettingsParams>();
   private overrides: Record<string, any> = {};
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('ui-settings-service');
-    this.isDist = coreContext.env.packageInfo.dist;
     this.config$ = coreContext.configService.atPath<UiSettingsConfigType>(uiConfigDefinition.path);
   }
 
@@ -52,11 +50,7 @@ export class UiSettingsService
 
     savedObjects.registerType(uiSettingsType);
     registerRoutes(http.createRouter(''));
-    this.register(
-      getCoreSettings({
-        isDist: this.isDist,
-      })
-    );
+    this.register(getCoreSettings());
 
     const config = await this.config$.pipe(first()).toPromise();
     this.overrides = config.overrides;

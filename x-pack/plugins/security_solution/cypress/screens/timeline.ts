@@ -114,8 +114,6 @@ export const TIMELINE_CHANGES_IN_PROGRESS = '[data-test-subj="timeline"] .euiPro
 
 export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinner"]';
 
-export const IS_DRAGGING_DATA_PROVIDERS = '.is-dragging';
-
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
 export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';

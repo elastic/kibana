@@ -267,11 +267,6 @@ describe('When showing the Trusted App Create Form', () => {
       expect(renderResult.getByText('Name is required'));
     });
 
-    it('should validate invalid Hash value', () => {
-      setTextFieldValue(getConditionValue(getCondition(renderResult)), 'someHASH');
-      expect(renderResult.getByText('[1] Invalid hash value'));
-    });
-
     it('should validate that a condition value has a non empty space value', () => {
       setTextFieldValue(getConditionValue(getCondition(renderResult)), '  ');
       expect(renderResult.getByText('[1] Field entry must have a value'));
@@ -286,27 +281,13 @@ describe('When showing the Trusted App Create Form', () => {
       setTextFieldValue(getConditionValue(getCondition(renderResult)), 'someHASH');
       expect(renderResult.getByText('[2] Field entry must have a value'));
     });
-
-    it('should validate multiple errors in form', () => {
-      const andButton = getConditionBuilderAndButton(renderResult);
-      reactTestingLibrary.act(() => {
-        fireEvent.click(andButton, { button: 1 });
-      });
-
-      setTextFieldValue(getConditionValue(getCondition(renderResult)), 'someHASH');
-      expect(renderResult.getByText('[1] Invalid hash value'));
-      expect(renderResult.getByText('[2] Field entry must have a value'));
-    });
   });
 
   describe('and all required data passes validation', () => {
     it('should call change callback with isValid set to true and contain the new item', () => {
       const renderResult = render();
       setTextFieldValue(getNameField(renderResult), 'Some Process');
-      setTextFieldValue(
-        getConditionValue(getCondition(renderResult)),
-        'e50fb1a0e5fff590ece385082edc6c41'
-      );
+      setTextFieldValue(getConditionValue(getCondition(renderResult)), 'someHASH');
       setTextFieldValue(getDescriptionField(renderResult), 'some description');
 
       expect(getAllValidationErrors(renderResult)).toHaveLength(0);
@@ -319,7 +300,7 @@ describe('When showing the Trusted App Create Form', () => {
               field: ConditionEntryField.HASH,
               operator: 'included',
               type: 'match',
-              value: 'e50fb1a0e5fff590ece385082edc6c41',
+              value: 'someHASH',
             },
           ],
           name: 'Some Process',

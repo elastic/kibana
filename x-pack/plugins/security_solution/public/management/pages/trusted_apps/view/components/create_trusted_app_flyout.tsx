@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { EuiFlyoutProps } from '@elastic/eui/src/components/flyout/flyout';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
@@ -31,7 +31,7 @@ import {
 } from '../../store/selectors';
 import { AppAction } from '../../../../../common/store/actions';
 import { useTrustedAppsSelector } from '../hooks';
-import { ABOUT_TRUSTED_APPS, CREATE_TRUSTED_APP_ERROR } from '../translations';
+import { ABOUT_TRUSTED_APPS } from '../translations';
 
 type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -44,15 +44,6 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     const isFormValid = useTrustedAppsSelector(isCreationDialogFormValid);
 
     const dataTestSubj = flyoutProps['data-test-subj'];
-
-    const creationErrorsMessage = useMemo<string | undefined>(
-      () =>
-        creationErrors
-          ? CREATE_TRUSTED_APP_ERROR[creationErrors.message.replace(/(\[(.*)\]\: )/, '')] ||
-            creationErrors.message
-          : undefined,
-      [creationErrors]
-    );
 
     const getTestId = useCallback(
       (suffix: string): string | undefined => {
@@ -111,7 +102,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             fullWidth
             onChange={handleFormOnChange}
             isInvalid={!!creationErrors}
-            error={creationErrorsMessage}
+            error={creationErrors?.message}
             data-test-subj={getTestId('createForm')}
           />
         </EuiFlyoutBody>

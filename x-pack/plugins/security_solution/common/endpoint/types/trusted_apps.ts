@@ -27,13 +27,8 @@ export interface GetTrustedListAppsResponse {
   data: TrustedApp[];
 }
 
-/*
- * API Request body for creating a new Trusted App entry
- * As this is an inferred type and the schema type doesn't match at all with the
- * NewTrustedApp type it needs and overwrite from the MacosLinux/Windows custom types
- */
-export type PostTrustedAppCreateRequest = TypeOf<typeof PostTrustedAppCreateRequestSchema.body> &
-  (MacosLinuxConditionEntries | WindowsConditionEntries);
+/** API Request body for creating a new Trusted App entry */
+export type PostTrustedAppCreateRequest = TypeOf<typeof PostTrustedAppCreateRequestSchema.body>;
 
 export interface PostTrustedAppCreateResponse {
   data: TrustedApp;

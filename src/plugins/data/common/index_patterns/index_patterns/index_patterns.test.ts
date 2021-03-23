@@ -26,25 +26,6 @@ function setDocsourcePayload(id: string | null, providedPayload: any) {
   object = defaults(providedPayload || {}, stubbedSavedObjectIndexPattern(id));
 }
 
-const savedObject = {
-  id: 'id',
-  version: 'version',
-  attributes: {
-    title: 'kibana-*',
-    timeFieldName: '@timestamp',
-    fields: '[]',
-    sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
-    fieldFormatMap: '{"field":{}}',
-    typeMeta: '{}',
-    type: '',
-    runtimeFieldMap:
-      '{"aRuntimeField": { "type": "keyword", "script": {"source": "emit(\'hello\')"}}}',
-    fieldAttrs: '{"aRuntimeField": { "count": 5, "customLabel": "A Runtime Field"}}',
-  },
-  type: 'index-pattern',
-  references: [],
-};
-
 describe('IndexPatterns', () => {
   let indexPatterns: IndexPatternsService;
   let savedObjectsClient: SavedObjectsClientCommon;
@@ -238,14 +219,23 @@ describe('IndexPatterns', () => {
   });
 
   test('savedObjectToSpec', () => {
-    const spec = indexPatterns.savedObjectToSpec(savedObject);
-    expect(spec).toMatchSnapshot();
-  });
+    const savedObject = {
+      id: 'id',
+      version: 'version',
+      attributes: {
+        title: 'kibana-*',
+        timeFieldName: '@timestamp',
+        fields: '[]',
+        sourceFilters: '[{"value":"item1"},{"value":"item2"}]',
+        fieldFormatMap: '{"field":{}}',
+        typeMeta: '{}',
+        type: '',
+      },
+      type: 'index-pattern',
+      references: [],
+    };
 
-  test('correctly composes runtime field', async () => {
-    setDocsourcePayload('id', savedObject);
-    const indexPattern = await indexPatterns.get('id');
-    expect(indexPattern.fields).toMatchSnapshot();
+    expect(indexPatterns.savedObjectToSpec(savedObject)).toMatchSnapshot();
   });
 
   test('failed requests are not cached', async () => {
