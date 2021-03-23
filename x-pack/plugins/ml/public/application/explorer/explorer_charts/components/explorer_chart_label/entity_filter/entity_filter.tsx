@@ -33,7 +33,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.ml.influencersCell.addFilterTooltip"
+            id="xpack.ml.entityFilter.addFilterTooltip"
             defaultMessage="Add filter"
           />
         }
@@ -50,7 +50,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
             })
           }
           iconType="plusInCircle"
-          aria-label={i18n.translate('xpack.ml.influencersCell.addFilterAriaLabel', {
+          aria-label={i18n.translate('xpack.ml.entityFilter.addFilterAriaLabel', {
             defaultMessage: 'Add filter for {influencerFieldName} {influencerFieldValue}',
             values: { influencerFieldName, influencerFieldValue },
           })}
@@ -59,7 +59,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
       <EuiToolTip
         content={
           <FormattedMessage
-            id="xpack.ml.influencersCell.removeFilterTooltip"
+            id="xpack.ml.entityFilter.removeFilterTooltip"
             defaultMessage="Remove filter"
           />
         }
@@ -76,7 +76,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
             })
           }
           iconType="minusInCircle"
-          aria-label={i18n.translate('xpack.ml.influencersCell.removeFilterAriaLabel', {
+          aria-label={i18n.translate('xpack.ml.entityFilter.removeFilterAriaLabel', {
             defaultMessage: 'Remove filter for {influencerFieldName} {influencerFieldValue}',
             values: { influencerFieldName, influencerFieldValue },
           })}

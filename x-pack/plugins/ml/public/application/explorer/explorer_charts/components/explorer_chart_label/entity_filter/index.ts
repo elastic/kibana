@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EntityFilter } from './entity_filters';
+export { EntityFilter } from './entity_filter';

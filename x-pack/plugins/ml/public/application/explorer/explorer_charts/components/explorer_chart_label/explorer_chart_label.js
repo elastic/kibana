@@ -13,7 +13,7 @@ import { EuiIconTip } from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
-import { EntityFilter } from './entity_filters';
+import { EntityFilter } from './entity_filter';
 
 export function ExplorerChartLabel({
   detectorLabel,
