@@ -231,7 +231,7 @@ which also contains the timelion APIs and backend, look at the vis_type_timelion
 
 
 |{kib-repo}blob/{branch}/src/plugins/usage_collection/README.mdx[usageCollection]
-|IMPORTANT: Usage collection and telemetry applies to Kibana developers only.
+|IMPORTANT: Usage collection and telemetry applies to internal Elastic Kibana developers only.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_default_editor/README.md[visDefaultEditor]
