@@ -177,7 +177,9 @@ describe('LogRetentionLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('saveLogRetention', () => {
       beforeEach(() => {
         mount();
