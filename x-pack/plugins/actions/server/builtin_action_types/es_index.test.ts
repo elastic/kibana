@@ -338,7 +338,33 @@ describe('execute()', () => {
     `);
   });
 
-  test('renders parameter templates as expected for preconfigured alert history index', async () => {
+  test('ignores indexOverride for generic es index connector', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: 'hello-world',
+    };
+    const variables = {
+      who: 'world',
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      'action-type-id'
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "hello": "world",
+          },
+        ],
+        "indexOverride": null,
+      }
+    `);
+  });
+
+  test('renders parameter templates as expected for preconfigured alert history connector', async () => {
     expect(actionType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],
@@ -412,6 +438,84 @@ describe('execute()', () => {
           },
         ],
         "indexOverride": null,
+      }
+    `);
+  });
+
+  test('passes through indexOverride for preconfigured alert history connector', async () => {
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      documents: [{ hello: '{{who}}' }],
+      indexOverride: 'hello-world',
+    };
+    const variables = {
+      date: '2021-01-01T00:00:00.000Z',
+      rule: {
+        id: 'rule-id',
+        name: 'rule-name',
+        type: 'rule-type',
+      },
+      context: {
+        contextVar1: 'contextValue1',
+        contextVar2: 'contextValue2',
+      },
+      params: {
+        ruleParam: 1,
+        ruleParamString: 'another param',
+      },
+      tags: ['abc', 'xyz'],
+      alert: {
+        id: 'alert-id',
+        actionGroup: 'action-group-id',
+        actionGroupName: 'Action Group',
+      },
+      state: {
+        alertStateValue: true,
+        alertStateAnotherValue: 'yes',
+      },
+    };
+    const renderedParams = actionType.renderParameterTemplates!(
+      paramsWithTemplates,
+      variables,
+      AlertHistoryEsIndexConnectorId
+    );
+    expect(renderedParams).toMatchInlineSnapshot(`
+      Object {
+        "documents": Array [
+          Object {
+            "@timestamp": "2021-01-01T00:00:00.000Z",
+            "alert": Object {
+              "actionGroup": "action-group-id",
+              "actionGroupName": "Action Group",
+              "context": Object {
+                "rule-type": Object {
+                  "contextVar1": "contextValue1",
+                  "contextVar2": "contextValue2",
+                },
+              },
+              "id": "alert-id",
+            },
+            "event": Object {
+              "kind": "alert",
+            },
+            "rule": Object {
+              "id": "rule-id",
+              "name": "rule-name",
+              "params": Object {
+                "rule-type": Object {
+                  "ruleParam": 1,
+                  "ruleParamString": "another param",
+                },
+              },
+              "type": "rule-type",
+            },
+            "tags": Array [
+              "abc",
+              "xyz",
+            ],
+          },
+        ],
+        "indexOverride": "hello-world",
       }
     `);
   });

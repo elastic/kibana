@@ -133,7 +133,7 @@ function renderParameterTemplates(
     return { documents: [alertHistoryDoc], indexOverride };
   }
 
-  return { documents, indexOverride };
+  return { documents, indexOverride: null };
 }
 
 function wrapErr(
