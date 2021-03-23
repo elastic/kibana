@@ -114,25 +114,16 @@ export default function (providerContext: FtrProviderContext) {
           agent2: { success: true },
           INVALID_ID: {
             success: false,
-            error: {
-              name: 'AgentReassignmentError',
-              message: 'Cannot find agent INVALID_ID',
-            },
+            error: 'AgentReassignmentError: Cannot find agent INVALID_ID',
           },
           agent3: { success: true },
           MISSING_ID: {
             success: false,
-            error: {
-              name: 'AgentReassignmentError',
-              message: 'Cannot find agent MISSING_ID',
-            },
+            error: 'AgentReassignmentError: Cannot find agent MISSING_ID',
           },
           etc: {
             success: false,
-            error: {
-              name: 'AgentReassignmentError',
-              message: 'Cannot find agent etc',
-            },
+            error: 'AgentReassignmentError: Cannot find agent etc',
           },
         });
 
@@ -163,24 +154,17 @@ export default function (providerContext: FtrProviderContext) {
         expect(body).to.eql({
           agent2: {
             success: false,
-            error: {
-              name: 'AgentReassignmentError',
-              message: 'Cannot reassign an agent from managed agent policy policy1',
-            },
+            error:
+              'AgentReassignmentError: Cannot reassign an agent from managed agent policy policy1',
           },
           INVALID_ID: {
             success: false,
-            error: {
-              name: 'AgentReassignmentError',
-              message: 'Cannot find agent INVALID_ID',
-            },
+            error: 'AgentReassignmentError: Cannot find agent INVALID_ID',
           },
           agent3: {
             success: false,
-            error: {
-              name: 'AgentReassignmentError',
-              message: 'Cannot reassign an agent from managed agent policy policy1',
-            },
+            error:
+              'AgentReassignmentError: Cannot reassign an agent from managed agent policy policy1',
           },
         });
 

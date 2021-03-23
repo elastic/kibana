@@ -323,13 +323,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
     const body = results.items.reduce<PostBulkAgentReassignResponse>((acc, so) => {
       acc[so.id] = {
         success: !so.error,
-        error: so.error
-          ? {
-              name: so.error.name,
-              message: so.error.message,
-              // so.error.stack is also available
-            }
-          : undefined,
+        error: so.error ? so.error.toString() : undefined,
       };
       return acc;
     }, {});

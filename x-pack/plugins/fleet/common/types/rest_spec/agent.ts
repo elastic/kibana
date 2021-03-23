@@ -168,7 +168,7 @@ export type PostBulkAgentReassignResponse = Record<
   Agent['id'],
   {
     success: boolean;
-    error?: Error;
+    error?: string;
   }
 >;
 
