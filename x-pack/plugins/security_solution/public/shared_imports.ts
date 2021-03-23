@@ -60,4 +60,5 @@ export {
   withOptionalSignal,
   BuilderEntryItem,
   BuilderAndBadgeComponent,
+  BuilderEntryDeleteButtonComponent,
 } from '../../lists/public';

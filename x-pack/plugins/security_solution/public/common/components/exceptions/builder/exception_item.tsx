@@ -16,9 +16,9 @@ import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } f
 import {
   BuilderEntryItem,
   BuilderAndBadgeComponent,
+  BuilderEntryDeleteButtonComponent,
   ExceptionListType,
 } from '../../../../shared_imports';
-import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { useKibana } from '../../../lib/kibana';
 
