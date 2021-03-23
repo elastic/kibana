@@ -6,16 +6,8 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { SeriesEditor } from '../series_editor';
-import { IndexPattern } from '../index_pattern';
-import { createSelectHandler } from '../lib/create_select_handler';
-import { createTextHandler } from '../lib/create_text_handler';
-import { ColorRules } from '../color_rules';
-import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -31,26 +23,40 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import type { Writable } from '@kbn/utility-types';
+
+// @ts-ignore
+import { SeriesEditor } from '../series_editor';
+// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+import { IndexPattern } from '../index_pattern';
+import { createSelectHandler } from '../lib/create_select_handler';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
+// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+import { YesNo } from '../yes_no';
 
 import { limitOfSeries } from '../../../../common/ui_restrictions';
 import { PANEL_TYPES } from '../../../../common/panel_types';
+import { TimeseriesVisParams } from '../../../types';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 
-class GaugePanelConfigUi extends Component {
-  constructor(props) {
+export class GaugePanelConfig extends Component<
+  PanelConfigProps,
+  { selectedTab: PANEL_CONFIG_TABS }
+> {
+  constructor(props: PanelConfigProps) {
     super(props);
-    this.state = { selectedTab: 'data' };
+    this.state = { selectedTab: PANEL_CONFIG_TABS.DATA };
   }
 
   UNSAFE_componentWillMount() {
     const { model } = this.props;
-    const parts = {};
-    if (
-      !model.gauge_color_rules ||
-      (model.gauge_color_rules && model.gauge_color_rules.length === 0)
-    ) {
+    const parts: Writable<Partial<TimeseriesVisParams>> = {};
+    if (!model.gauge_color_rules || !model.gauge_color_rules.length) {
       parts.gauge_color_rules = [{ id: uuid.v1() }];
     }
     if (model.gauge_width == null) parts.gauge_width = 10;
@@ -59,14 +65,17 @@ class GaugePanelConfigUi extends Component {
     this.props.onChange(parts);
   }
 
-  switchTab(selectedTab) {
+  switchTab(selectedTab: PANEL_CONFIG_TABS) {
     this.setState({ selectedTab });
   }
 
+  handleTextChange = (name: keyof TimeseriesVisParams) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => this.props.onChange({ [name]: e.target.value });
+
   render() {
     const { selectedTab } = this.state;
-    const { intl } = this.props;
-    const defaults = {
+    const defaults: Partial<TimeseriesVisParams> = {
       gauge_max: '',
       filter: { query: '', language: getDefaultQueryLanguage() },
       gauge_style: 'circle',
@@ -75,41 +84,34 @@ class GaugePanelConfigUi extends Component {
     };
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
-    const handleTextChange = createTextHandler(this.props.onChange);
     const styleOptions = [
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.gauge.styleOptions.circleLabel',
+        label: i18n.translate('visTypeTimeseries.gauge.styleOptions.circleLabel', {
           defaultMessage: 'Circle',
         }),
         value: 'circle',
       },
       {
-        label: intl.formatMessage({
-          id: 'visTypeTimeseries.gauge.styleOptions.halfCircleLabel',
+        label: i18n.translate('visTypeTimeseries.gauge.styleOptions.halfCircleLabel', {
           defaultMessage: 'Half Circle',
         }),
         value: 'half',
       },
     ];
     const htmlId = htmlIdGenerator();
-    const selectedGaugeStyleOption = styleOptions.find((option) => {
-      return model.gauge_style === option.value;
-    });
-    let view;
-    if (selectedTab === 'data') {
-      view = (
+    const selectedGaugeStyleOption = styleOptions.find(
+      (option) => model.gauge_style === option.value
+    );
+    const view =
+      selectedTab === PANEL_CONFIG_TABS.DATA ? (
         <SeriesEditor
           colorPicker={true}
           fields={this.props.fields}
           limit={limitOfSeries[PANEL_TYPES.GAUGE]}
           model={this.props.model}
-          name={this.props.name}
           onChange={this.props.onChange}
         />
-      );
-    } else {
-      view = (
+      ) : (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
             <EuiTitle size="s">
@@ -144,10 +146,12 @@ class GaugePanelConfigUi extends Component {
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language || getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
-                    onChange={(filter) => this.props.onChange({ filter })}
+                    onChange={(filter: PanelConfigProps['model']['filter']) =>
+                      this.props.onChange({ filter })
+                    }
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
@@ -193,15 +197,8 @@ class GaugePanelConfigUi extends Component {
                     />
                   }
                 >
-                  {/*
-                    EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-                    It accepts a null value, but is passed a empty string.
-                  */}
-                  <input
-                    id={htmlId('gaugeMax')}
-                    className="tvbAgg__input"
-                    type="number"
-                    onChange={handleTextChange('gauge_max')}
+                  <EuiFieldNumber
+                    onChange={this.handleTextChange('gauge_max')}
                     value={model.gauge_max}
                   />
                 </EuiFormRow>
@@ -236,7 +233,7 @@ class GaugePanelConfigUi extends Component {
                   }
                 >
                   <EuiFieldNumber
-                    onChange={handleTextChange('gauge_inner_width')}
+                    onChange={this.handleTextChange('gauge_inner_width')}
                     value={Number(model.gauge_inner_width)}
                   />
                 </EuiFormRow>
@@ -252,7 +249,7 @@ class GaugePanelConfigUi extends Component {
                   }
                 >
                   <EuiFieldNumber
-                    onChange={handleTextChange('gauge_width')}
+                    onChange={this.handleTextChange('gauge_width')}
                     value={Number(model.gauge_width)}
                   />
                 </EuiFormRow>
@@ -317,17 +314,23 @@ class GaugePanelConfigUi extends Component {
           </EuiPanel>
         </div>
       );
-    }
+
     return (
       <>
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+          <EuiTab
+            isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+          >
             <FormattedMessage
               id="visTypeTimeseries.gauge.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
-          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
+          <EuiTab
+            isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
+          >
             <FormattedMessage
               id="visTypeTimeseries.gauge.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
@@ -339,11 +342,3 @@ class GaugePanelConfigUi extends Component {
     );
   }
 }
-
-GaugePanelConfigUi.propTypes = {
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-};
-
-export const GaugePanelConfig = injectI18n(GaugePanelConfigUi);

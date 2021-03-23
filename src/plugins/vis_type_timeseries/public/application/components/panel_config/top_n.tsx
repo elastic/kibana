@@ -6,15 +6,8 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { SeriesEditor } from '../series_editor';
-import { IndexPattern } from '../index_pattern';
-import { createTextHandler } from '../lib/create_text_handler';
-import { ColorRules } from '../color_rules';
-import { ColorPicker } from '../color_picker';
 import uuid from 'uuid';
-import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -31,27 +24,43 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-import { QueryBarWrapper } from '../query_bar_wrapper';
 
-export class TopNPanelConfig extends Component {
-  constructor(props) {
+// @ts-expect-error not typed yet
+import { SeriesEditor } from '../series_editor';
+// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+import { IndexPattern } from '../index_pattern';
+import { ColorRules } from '../color_rules';
+import { ColorPicker } from '../color_picker';
+import { YesNo } from '../yes_no';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
+import { QueryBarWrapper } from '../query_bar_wrapper';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { TimeseriesVisParams } from '../../../types';
+
+export class TopNPanelConfig extends Component<
+  PanelConfigProps,
+  { selectedTab: PANEL_CONFIG_TABS }
+> {
+  constructor(props: PanelConfigProps) {
     super(props);
-    this.state = { selectedTab: 'data' };
+    this.state = { selectedTab: PANEL_CONFIG_TABS.DATA };
   }
 
   UNSAFE_componentWillMount() {
     const { model } = this.props;
-    const parts = {};
-    if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {
-      parts.bar_color_rules = [{ id: uuid.v1() }];
+    if (!model.bar_color_rules || !model.bar_color_rules.length) {
+      this.props.onChange({ bar_color_rules: [{ id: uuid.v1() }] });
     }
-    this.props.onChange(parts);
   }
 
-  switchTab(selectedTab) {
+  switchTab(selectedTab: PANEL_CONFIG_TABS) {
     this.setState({ selectedTab });
   }
+
+  handleTextChange = (name: keyof TimeseriesVisParams) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => this.props.onChange({ [name]: e.target.value });
 
   render() {
     const { selectedTab } = this.state;
@@ -61,20 +70,15 @@ export class TopNPanelConfig extends Component {
     };
     const model = { ...defaults, ...this.props.model };
     const htmlId = htmlIdGenerator();
-    const handleTextChange = createTextHandler(this.props.onChange);
-    let view;
-    if (selectedTab === 'data') {
-      view = (
+    const view =
+      selectedTab === PANEL_CONFIG_TABS.DATA ? (
         <SeriesEditor
           colorPicker={false}
           fields={this.props.fields}
           model={this.props.model}
-          name={this.props.name}
           onChange={this.props.onChange}
         />
-      );
-    } else {
-      view = (
+      ) : (
         <div className="tvbPanelConfig__container">
           <EuiPanel>
             <EuiTitle size="s">
@@ -105,8 +109,8 @@ export class TopNPanelConfig extends Component {
               }
             >
               <EuiFieldText
-                onChange={handleTextChange('drilldown_url')}
-                value={model.drilldown_url}
+                onChange={this.handleTextChange('drilldown_url')}
+                value={model.drilldown_url ?? ''}
               />
             </EuiFormRow>
 
@@ -134,12 +138,12 @@ export class TopNPanelConfig extends Component {
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language
-                        ? model.filter.language
-                        : getDefaultQueryLanguage(),
+                      language: model.filter.language || getDefaultQueryLanguage(),
                       query: model.filter.query || '',
                     }}
-                    onChange={(filter) => this.props.onChange({ filter })}
+                    onChange={(filter: PanelConfigProps['model']['filter']) =>
+                      this.props.onChange({ filter })
+                    }
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
                 </EuiFormRow>
@@ -214,17 +218,23 @@ export class TopNPanelConfig extends Component {
           </EuiPanel>
         </div>
       );
-    }
+
     return (
       <>
         <EuiTabs size="s">
-          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+          <EuiTab
+            isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+          >
             <FormattedMessage
               id="visTypeTimeseries.topN.dataTab.dataButtonLabel"
               defaultMessage="Data"
             />
           </EuiTab>
-          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
+          <EuiTab
+            isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
+            onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
+          >
             <FormattedMessage
               id="visTypeTimeseries.topN.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
@@ -236,9 +246,3 @@ export class TopNPanelConfig extends Component {
     );
   }
 }
-
-TopNPanelConfig.propTypes = {
-  fields: PropTypes.object,
-  model: PropTypes.object,
-  onChange: PropTypes.func,
-};
