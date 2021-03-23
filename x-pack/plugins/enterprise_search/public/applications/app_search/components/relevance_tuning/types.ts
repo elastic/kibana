@@ -45,7 +45,7 @@ export interface RawBoost extends Omit<Boost, 'value'> {
 }
 
 export interface ValueBoost extends Boost {
-  value?: string[];
+  value: string[];
   operation: undefined;
   function: undefined;
 }

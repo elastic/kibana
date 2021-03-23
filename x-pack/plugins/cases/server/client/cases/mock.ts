@@ -12,7 +12,7 @@ import {
   CaseUserActionsResponse,
   AssociationType,
   CommentResponseAlertsType,
-} from '../../../common';
+} from '../../../common/api';
 
 import { BasicParams } from './types';
 
