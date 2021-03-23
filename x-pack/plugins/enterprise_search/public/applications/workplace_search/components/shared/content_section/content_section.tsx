@@ -12,8 +12,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { SpacerSizeTypes } from '../../../types';
 import { ViewContentHeader } from '../view_content_header';
 
-import './content_section.scss';
-
 interface ContentSectionProps {
   children: React.ReactNode;
   className?: string;
@@ -35,7 +33,7 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
   headerSpacer,
   testSubj,
 }) => (
-  <div className={`${className} content-section`} data-test-subj={testSubj}>
+  <div className={className} data-test-subj={testSubj}>
     {title && (
       <>
         <ViewContentHeader title={title} titleSize="s" description={description} action={action} />
@@ -44,5 +42,6 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
       </>
     )}
     {children}
+    <EuiSpacer size={'xxl'} />
   </div>
 );
