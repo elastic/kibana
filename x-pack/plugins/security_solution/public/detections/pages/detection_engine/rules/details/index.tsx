@@ -566,17 +566,19 @@ const RuleDetailsPageComponent = () => {
                       position="top"
                       content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
                     >
-                      <RuleSwitch
-                        id={rule?.id ?? '-1'}
-                        isDisabled={
-                          !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                          userHasNoPermissions(canUserCRUD) ||
-                          (!hasMlPermissions && !rule?.enabled)
-                        }
-                        enabled={rule?.enabled ?? false}
-                        optionLabel={i18n.ACTIVATE_RULE}
-                        onChange={handleOnChangeEnabledRule}
-                      />
+                      <EuiFlexGroup>
+                        <RuleSwitch
+                          id={rule?.id ?? '-1'}
+                          isDisabled={
+                            !canEditRuleWithActions(rule, hasActionsPrivileges) ||
+                            userHasNoPermissions(canUserCRUD) ||
+                            (!hasMlPermissions && !rule?.enabled)
+                          }
+                          enabled={rule?.enabled ?? false}
+                          onChange={handleOnChangeEnabledRule}
+                        />
+                        <EuiFlexItem>{i18n.ACTIVATED_RULE}</EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiToolTip>
                   </EuiFlexItem>
 
