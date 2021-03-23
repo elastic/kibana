@@ -28,7 +28,7 @@ export const fieldFunction: ExpressionFunctionField = {
   type: 'kibana_field',
   inputTypes: ['null'],
   help: i18n.translate('data.search.functions.field.help', {
-    defaultMessage: 'Create kibana_field',
+    defaultMessage: 'Create a Kibana field.',
   }),
   args: {
     name: {
@@ -48,7 +48,7 @@ export const fieldFunction: ExpressionFunctionField = {
     script: {
       types: ['string'],
       help: i18n.translate('data.search.functions.field.script.help', {
-        defaultMessage: 'script in case the field is scripted',
+        defaultMessage: 'A field script, in case the field is scripted.',
       }),
     },
   },

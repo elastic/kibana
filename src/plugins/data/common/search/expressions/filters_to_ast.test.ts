@@ -18,7 +18,7 @@ describe('interpreter/functions#filtersToAst', () => {
     query: { test: 'something' },
   };
 
-  it('returns an object with the correct structure', () => {
+  it('converts a list of filters to an expression AST node', () => {
     const actual = filtersToAst([normalFilter, negatedFilter]);
     expect(actual).toHaveLength(2);
     expect(actual[0].functions[0]).toHaveProperty('name', 'kibanaFilter');

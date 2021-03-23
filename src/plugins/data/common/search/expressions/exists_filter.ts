@@ -43,7 +43,7 @@ export const existsFilterFunction: ExpressionFunctionExistsFilter = {
       types: ['boolean'],
       default: false,
       help: i18n.translate('data.search.functions.existsFilter.negate.help', {
-        defaultMessage: 'Should the filter be negated',
+        defaultMessage: 'Should the filter be negated.',
       }),
     },
   },

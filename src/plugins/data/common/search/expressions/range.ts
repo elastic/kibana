@@ -60,12 +60,12 @@ export const rangeFunction: ExpressionFunctionRange = {
   },
 
   fn(input, args) {
-    if (!args.lt && !args.lte) {
+    if (args.lt === undefined && args.lte === undefined) {
       throw new Error('lt or lte must be provided');
     }
 
-    if (!args.gt && !args.gte) {
-      throw new Error('lt or lte must be provided');
+    if (args.gt === undefined && args.gte === undefined) {
+      throw new Error('gt or gte must be provided');
     }
 
     return {
