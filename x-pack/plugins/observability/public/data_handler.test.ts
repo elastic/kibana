@@ -321,13 +321,14 @@ describe('registerDataHandler', () => {
   });
 
   describe('Metrics', () => {
+    const makeRequestResponse = {
+      title: 'metrics',
+      appLink: '/metrics',
+      sort: () => makeRequest(),
+      series: [],
+    };
     const makeRequest = async () => {
-      return {
-        title: 'metrics',
-        appLink: '/metrics',
-        sort: () => makeRequest(),
-        series: [],
-      };
+      return makeRequestResponse;
     };
     registerDataHandler({
       appName: 'infra_metrics',
@@ -344,11 +345,7 @@ describe('registerDataHandler', () => {
     it('returns data when fetchData is called', async () => {
       const dataHandler = getDataHandler('infra_metrics');
       const response = await dataHandler?.fetchData(params);
-      expect(response).toEqual({
-        title: 'metrics',
-        appLink: '/metrics',
-        series: [],
-      });
+      expect(response).toEqual(makeRequestResponse);
     });
 
     it('returns true when hasData is called', async () => {
