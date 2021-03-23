@@ -41,7 +41,7 @@
 }
 
 .dscTable__flyoutDocumentNavigation {
-  justify-content: end;
+  justify-content: flex-end;
 }
 
 // We only truncate if the cell is not a control column.
