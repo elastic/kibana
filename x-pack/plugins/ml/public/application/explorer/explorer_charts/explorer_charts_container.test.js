@@ -18,6 +18,9 @@ import { ExplorerChartsContainer } from './explorer_charts_container';
 import { chartData } from './__mocks__/mock_chart_data';
 import seriesConfig from './__mocks__/mock_series_config_filebeat.json';
 import seriesConfigRare from './__mocks__/mock_series_config_rare.json';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_context';
+import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
@@ -40,29 +43,8 @@ const getUtilityProps = () => {
   const mlUrlGenerator = {
     createUrl: jest.fn(),
   };
-  const timefilter = {
-    getActiveBounds: jest.fn(),
-  };
-  const timeBuckets = {
-    setBounds: jest.fn(),
-    setInterval: jest.fn(),
-    getScaledDateFormat: jest.fn(),
-  };
-  const kibanaContextMock = {
-    services: {
-      chrome: { recentlyAccessed: { add: jest.fn() } },
-      application: { navigateToApp: jest.fn() },
-      http: {
-        basePath: {
-          get: jest.fn(),
-        },
-      },
-      share: {
-        urlGenerators: { getUrlGenerator: jest.fn() },
-      },
-    },
-  };
-  return { mlUrlGenerator, timefilter, timeBuckets, kibana: kibanaContextMock };
+  const timefilter = dataPluginMock.createStartContract().query.timefilter.timefilter;
+  return { mlUrlGenerator, timefilter, timeBuckets: timeBucketsMock, kibana: kibanaContextMock };
 };
 
 describe('ExplorerChartsContainer', () => {

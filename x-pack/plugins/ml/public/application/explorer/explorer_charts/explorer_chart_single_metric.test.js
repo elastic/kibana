@@ -18,13 +18,10 @@ import React from 'react';
 
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { chartLimits } from '../../util/chart_utils';
+import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 
 const utilityProps = {
-  timeBuckets: {
-    setBounds: jest.fn(),
-    setInterval: jest.fn(),
-    getScaledDateFormat: jest.fn(),
-  },
+  timeBuckets: timeBucketsMock,
 };
 
 describe('ExplorerChart', () => {
