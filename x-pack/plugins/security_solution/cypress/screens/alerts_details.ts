@@ -7,4 +7,4 @@
 
 export const JSON_CONTENT = '.ace_content';
 
-export const JSON_VIEW_TAB = '#json-view';
+export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
