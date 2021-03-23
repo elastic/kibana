@@ -59,6 +59,7 @@ export const ComboBox = ({ onChange, selectedOptions }: Props) => {
 
   return (
     <EuiComboBox<string>
+      data-test-subj="syntheticsFleetComboBox"
       noSuggestions
       selectedOptions={formattedSelectedOptions}
       onCreateOption={onCreateOption}
