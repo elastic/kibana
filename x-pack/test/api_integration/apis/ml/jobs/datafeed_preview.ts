@@ -219,7 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it(`should return a normal datafeed preview for ML viewer user`, async () => {
+    it(`should return not a datafeed preview for ML viewer user`, async () => {
       const datafeed = {
         datafeed_id: '',
         job_id: '',
@@ -236,28 +236,15 @@ export default ({ getService }: FtrProviderContext) => {
         runtime_mappings: {},
       };
 
-      const { body } = await supertest
+      await supertest
         .post('/api/ml/jobs/datafeed_preview')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send({ job, datafeed })
-        .expect(200);
-
-      expect(body.hits.total.value).to.eql(3207, 'Response body total hits should be 3207');
-      expect(Array.isArray(body.hits?.hits[0]?.fields?.airline)).to.eql(
-        true,
-        'Response body airlines should be an array'
-      );
-
-      const airlines: string[] = body.hits.hits.map((a: any) => a.fields.airline[0]);
-      expect(airlines.length).to.not.eql(0, 'airlines length should not be 0');
-      expect(airlines.every((a) => isUpperCase(a))).to.eql(
-        true,
-        'Response body airlines should all be upper case'
-      );
+        .expect(403);
     });
 
-    it(`should return not return a preview for unauthorized user`, async () => {
+    it(`should return not a datafeed preview for unauthorized user`, async () => {
       const datafeed = {
         datafeed_id: '',
         job_id: '',
