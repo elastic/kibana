@@ -14,7 +14,6 @@ import {
   ESCaseConnector,
   ESCasesConfigureAttributes,
   ConnectorTypeFields,
-  CollectionState,
   ConnectorTypes,
   CaseStatuses,
   CaseType,
@@ -164,21 +163,9 @@ export const constructQueryOptions = ({
        */
       const typeIndividual = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.individual}`;
       const typeParent = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.collection}`;
-      let parentFilter = typeParent;
-
-      // if we are filtering on status then we do not want empty collections so remove them
-      if (status !== undefined) {
-        parentFilter = combineFilters(
-          [
-            typeParent,
-            `${CASE_SAVED_OBJECT}.attributes.collectionState: ${CollectionState.hasSubCases}`,
-          ],
-          'AND'
-        );
-      }
 
       const statusFilter = combineFilters([addStatusFilter({ status }), typeIndividual], 'AND');
-      const statusAndType = combineFilters([statusFilter, parentFilter], 'OR');
+      const statusAndType = combineFilters([statusFilter, typeParent], 'OR');
       const caseFilters = combineFilters([statusAndType, tagsFilter, reportersFilter], 'AND');
 
       return {

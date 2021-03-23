@@ -300,7 +300,6 @@ export class CaseService implements CaseServiceSetup {
     const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
       const subCasesForCase = subCasesResp.subCasesMap.get(caseInfo.id);
 
-      // TODO: we might not need this anymore since we're filtering it prior to this function call
       /**
        * If this case is an individual add it to the return map
        * If it is a collection and it has sub cases add it to the return map
