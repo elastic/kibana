@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Launch Agent Creation or Modification and Immediate Loading",
   "query": "sequence by host.id with maxspan=1m\n [file where event.type != \"deletion\" and \n  file.path : (\"/System/Library/LaunchAgents/*\", \"/Library/LaunchAgents/*\", \"/Users/*/Library/LaunchAgents/*\")\n ]\n [process where event.type in (\"start\", \"process_started\") and process.name == \"launchctl\" and process.args == \"load\"]\n",
   "references": [
@@ -53,5 +53,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

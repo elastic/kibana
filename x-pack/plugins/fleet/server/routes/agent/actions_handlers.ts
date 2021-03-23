@@ -9,7 +9,8 @@
 
 import type { RequestHandler } from 'kibana/server';
 import type { TypeOf } from '@kbn/config-schema';
-import { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
+
+import type { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
 import type { ActionsService } from '../../services/agents';
 import type { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -26,7 +27,7 @@ export const postNewAgentActionHandlerBuilder = function (
       const soClient = context.core.savedObjects.client;
       const esClient = context.core.elasticsearch.client.asInternalUser;
 
-      const agent = await actionsService.getAgent(soClient, esClient, request.params.agentId);
+      const agent = await actionsService.getAgent(esClient, request.params.agentId);
 
       const newAgentAction = request.body.action;
 

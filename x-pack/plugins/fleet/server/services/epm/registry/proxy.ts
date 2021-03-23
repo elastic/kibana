@@ -6,8 +6,12 @@
  */
 
 import HttpProxyAgent from 'http-proxy-agent';
-import HttpsProxyAgent, { HttpsProxyAgent as IHttpsProxyAgent } from 'https-proxy-agent';
-import type { HttpsProxyAgentOptions } from 'https-proxy-agent';
+import HttpsProxyAgent from 'https-proxy-agent';
+import type {
+  HttpsProxyAgentOptions,
+  HttpsProxyAgent as IHttpsProxyAgent,
+} from 'https-proxy-agent';
+
 import { appContextService } from '../../index';
 
 export interface RegistryProxySettings {

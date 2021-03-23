@@ -20,10 +20,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
   const docTable = getService('docTable');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'settings',
+    'dashboard',
+    'header',
+  ]);
   const defaultSettings = { defaultIndex: 'logstash-*', 'doc_table:legacy': false };
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const browser = getService('browser');
 
   describe('discover data grid context tests', () => {
     before(async () => {
@@ -77,6 +86,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       }
       expect(disabledFilterCounter).to.be(TEST_FILTER_COLUMN_NAMES.length);
+    });
+
+    it('navigates to context view from embeddable', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.addSavedSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      await rowActions[1].click();
+      await PageObjects.common.sleep(250);
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      await alert?.accept();
+      expect(await browser.getCurrentUrl()).to.contain('#/context');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await docTable.getRowsText()).to.have.length(6);
     });
   });
 }

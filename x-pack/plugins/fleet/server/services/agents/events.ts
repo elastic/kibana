@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from 'src/core/server';
+
 import { AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
 import type { AgentEventSOAttributes, AgentEvent } from '../../types';
 import { normalizeKuery } from '../saved_object';

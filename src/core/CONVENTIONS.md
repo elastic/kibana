@@ -202,14 +202,14 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-Prefer the pattern shown above, using `core.getStartServices()`, rather than store local references retrieved from `start`. 
+Prefer the pattern shown above, using `core.getStartServices()`, rather than store local references retrieved from `start`.
 
 **Bad:**
 ```ts
 export class MyPlugin implements Plugin {
  // Anti pattern
   private coreStart?: CoreStart;
-  private depsStart?: DepsStart;  
+  private depsStart?: DepsStart;
 
   public setup(core) {
     core.application.register({
@@ -220,7 +220,7 @@ export class MyPlugin implements Plugin {
         return renderApp(this.coreStart, this.depsStart, params);
       }
     });
-  }  
+  }
 
   public start(core, deps) {
     // Anti pattern
@@ -361,5 +361,5 @@ Migration example from the legacy format is available in `src/core/MIGRATION_EXA
 
 ### Naming conventions
 
-Export start and setup contracts as `MyPluginStart` and `MyPluginSetup`. 
+Export start and setup contracts as `MyPluginStart` and `MyPluginSetup`.
 This avoids naming clashes, if everyone exported them simply as `Start` and `Setup`.

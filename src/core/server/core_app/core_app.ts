@@ -7,27 +7,36 @@
  */
 
 import Path from 'path';
-import { fromRoot } from '../../../core/server/utils';
+import { Env } from '@kbn/config';
 
+import { fromRoot } from '../utils';
 import { InternalCoreSetup } from '../internal_types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
+import { registerBundleRoutes } from './bundle_routes';
+import { UiPlugins } from '../plugins';
 
 /** @internal */
 export class CoreApp {
   private readonly logger: Logger;
+  private readonly env: Env;
+
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-app');
+    this.env = core.env;
   }
-  setup(coreSetup: InternalCoreSetup) {
+
+  setup(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     this.logger.debug('Setting up core app.');
-    this.registerDefaultRoutes(coreSetup);
+    this.registerDefaultRoutes(coreSetup, uiPlugins);
     this.registerStaticDirs(coreSetup);
   }
 
-  private registerDefaultRoutes(coreSetup: InternalCoreSetup) {
+  private registerDefaultRoutes(coreSetup: InternalCoreSetup, uiPlugins: UiPlugins) {
     const httpSetup = coreSetup.http;
-    const router = httpSetup.createRouter('/');
+    const router = httpSetup.createRouter('');
+    const resources = coreSetup.httpResources.createRegistrar(router);
+
     router.get({ path: '/', validate: false }, async (context, req, res) => {
       const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
       const basePath = httpSetup.basePath.get(req);
@@ -39,12 +48,33 @@ export class CoreApp {
         },
       });
     });
+
     router.get({ path: '/core', validate: false }, async (context, req, res) =>
       res.ok({ body: { version: '0.0.1' } })
     );
 
+    registerBundleRoutes({
+      router,
+      uiPlugins,
+      packageInfo: this.env.packageInfo,
+      serverBasePath: coreSetup.http.basePath.serverBasePath,
+    });
+
+    resources.register(
+      {
+        path: '/app/{id}/{any*}',
+        validate: false,
+        options: {
+          authRequired: true,
+        },
+      },
+      async (context, request, response) => {
+        return response.renderCoreApp();
+      }
+    );
+
     const anonymousStatusPage = coreSetup.status.isStatusPageAnonymous();
-    coreSetup.httpResources.createRegistrar(router).register(
+    resources.register(
       {
         path: '/status',
         validate: false,
@@ -61,6 +91,7 @@ export class CoreApp {
       }
     );
   }
+
   private registerStaticDirs(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerStaticDir('/ui/{path*}', Path.resolve(__dirname, './assets'));
 

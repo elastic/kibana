@@ -24,10 +24,6 @@ export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('xy data.fieldFormats');
 
-export const [getTimefilter, setTimefilter] = createGetterSetter<
-  DataPublicPluginStart['query']['timefilter']['timefilter']
->('xy data.query.timefilter.timefilter');
-
 export const [getThemeService, setThemeService] = createGetterSetter<ChartsPluginSetup['theme']>(
   'xy charts.theme'
 );

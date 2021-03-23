@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Remote File Copy via TeamViewer",
   "query": "event.category:file and event.type:creation and process.name:TeamViewer.exe and file.extension:(exe or dll or scr or com or bat or ps1 or vbs or vbe or js or wsh or hta)",
   "references": [
