@@ -287,7 +287,7 @@ Note that dependencies between steps are mostly not shown in the UI. See screens
 
 ![Dependencies](../images/0016_buildkite_deps.png)
 
-Buildkite has rich build page customization via "annotations" which will let us surface custom information. See the [customization section](#customization-1)
+Buildkite has rich build page customization via "annotations" which will let us surface custom information. See the [customization section](#customization-1).
 
 #### Pipelines
 
@@ -593,7 +593,7 @@ Example configuration:
       "allowed_list": ["renovate[bot]"],
       "set_commit_status": true,
       "commit_status_context": "kibana-buildkite",
-      "trigger_comment_regex": "^(?:(?:jenkins\\W+)?(?:build|test)\\W+(?:this|it))|^retest$"
+      "trigger_comment_regex": "^(?:(?:buildkite\\W+)?(?:build|test)\\W+(?:this|it))|^retest$"
     }
   ]
 }
@@ -646,13 +646,14 @@ We could likely maintain a single linux-based image to cover all of our current 
 
 For our testing, we have a single GCP image, built using Packer, with the Buildkite agent installed and all of our dependencies.
 
-TODO
+Summary of Responsibilities
 
-automated process for updating images
-cleaning out old images
-rolling back images
-base vs cache
-cache image could run multiple times per day
+- An automated process for creating new images, at least daily
+- Delete old images when creating new ones
+- Ability to roll back images easily and/or pin specific image versions
+- Manage dependencies, failures, updates, etc across all supported OSes and architectures, on a regular basis
+
+TODO public and link to code for current agent image
 
 ### Buildkite org-level settings management
 
@@ -674,7 +675,7 @@ For everything else, we will likely start off using UI and build automation (or 
 
 ### IT Security Processes
 
-TODO
+There will likely be numerous IT Security processes we will need to follow, since we will be managing infrastructure. This could include regular audits, specific software and configurations that must be baked into our agents, documentation procedures, or other conditions that we will need to satisfy. There is risk here, as the processes and workload are currently unknown to us.
 
 # Drawbacks
 
@@ -750,6 +751,7 @@ Pros:
 
 - Overall pretty powerful, pipelines execute Groovy code at runtime, so pipelines can do a lot and can be pretty complex, if you're willing to write the code
 - Pipeline changes can be tested in PRs
+- Shared Libraries allow shared code to be used across pipelines easily
 
 Cons:
 
