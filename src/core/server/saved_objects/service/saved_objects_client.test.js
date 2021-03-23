@@ -295,9 +295,10 @@ test(`#collectMultiNamespaceReferences`, async () => {
   const client = new SavedObjectsClient(mockRepository);
 
   const objects = Symbol();
-  const result = await client.collectMultiNamespaceReferences(objects);
+  const options = Symbol();
+  const result = await client.collectMultiNamespaceReferences(objects, options);
 
-  expect(mockRepository.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects);
+  expect(mockRepository.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects, options);
   expect(result).toBe(returnValue);
 });
 

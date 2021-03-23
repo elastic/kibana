@@ -45,7 +45,7 @@ export function setupSavedObjects({
     }
   );
 
-  savedObjects.addClientWrapper(Number.MAX_SAFE_INTEGER - 1, 'security', ({ client, request }) => {
+  savedObjects.addClientWrapper(Number.MAX_SAFE_INTEGER - 2, 'security', ({ client, request }) => {
     const kibanaRequest = getKibanaRequest(request);
     return authz.mode.useRbacForRequest(kibanaRequest)
       ? new SecureSavedObjectsClientWrapper({

@@ -14,3 +14,8 @@ export const createTagUsageCollectorMock = jest.fn();
 jest.doMock('./usage', () => ({
   createTagUsageCollector: createTagUsageCollectorMock,
 }));
+
+export const setupSavedObjectsMock = jest.fn();
+jest.doMock('./saved_objects', () => ({
+  setupSavedObjects: setupSavedObjectsMock,
+}));

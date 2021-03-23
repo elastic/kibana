@@ -19,6 +19,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
@@ -281,16 +282,17 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   }
 
   public async collectMultiNamespaceReferences(
-    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options?: SavedObjectsCollectMultiNamespaceReferencesOptions
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-    return await this.options.baseClient.collectMultiNamespaceReferences(objects);
+    return await this.options.baseClient.collectMultiNamespaceReferences(objects, options);
   }
 
   public async updateObjectsSpaces(
     objects: SavedObjectsUpdateObjectsSpacesObject[],
     spacesToAdd: string[],
     spacesToRemove: string[],
-    options: SavedObjectsUpdateObjectsSpacesOptions
+    options?: SavedObjectsUpdateObjectsSpacesOptions
   ) {
     return await this.options.baseClient.updateObjectsSpaces(
       objects,

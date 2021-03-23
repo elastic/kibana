@@ -18,6 +18,7 @@ export type {
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
   SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsUpdateObjectsSpacesObject,

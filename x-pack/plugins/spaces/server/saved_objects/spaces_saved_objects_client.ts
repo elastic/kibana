@@ -18,6 +18,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
@@ -393,12 +394,17 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
    *
    * @param objects
+   * @param options
    */
   public async collectMultiNamespaceReferences(
-    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options: SavedObjectsCollectMultiNamespaceReferencesOptions = {}
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-    // This function is not scoped to the current space
-    return await this.client.collectMultiNamespaceReferences(objects);
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.collectMultiNamespaceReferences(objects, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
   }
 
   /**
@@ -413,10 +419,13 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     objects: SavedObjectsUpdateObjectsSpacesObject[],
     spacesToAdd: string[],
     spacesToRemove: string[],
-    options: SavedObjectsUpdateObjectsSpacesOptions
+    options: SavedObjectsUpdateObjectsSpacesOptions = {}
   ) {
-    // This function is not scoped to the current space
-    return await this.client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
   }
 
   /**

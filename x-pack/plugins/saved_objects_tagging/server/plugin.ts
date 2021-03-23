@@ -17,10 +17,10 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { savedObjectsTaggingFeature } from './features';
-import { tagType } from './saved_objects';
 import type { TagsHandlerContext } from './types';
 import { TagsRequestHandlerContext } from './request_handler_context';
 import { registerRoutes } from './routes';
+import { setupSavedObjects } from './saved_objects';
 import { createTagUsageCollector } from './usage';
 
 interface SetupDeps {
@@ -40,7 +40,7 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
     { savedObjects, http }: CoreSetup,
     { features, usageCollection, security }: SetupDeps
   ) {
-    savedObjects.registerType(tagType);
+    setupSavedObjects({ savedObjects });
 
     const router = http.createRouter<TagsHandlerContext>();
     registerRoutes({ router });

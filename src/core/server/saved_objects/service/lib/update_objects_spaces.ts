@@ -6,20 +6,28 @@
  * Side Public License, v 1.
  */
 
+import type { BulkOperationContainer, MultiGetOperation } from '@elastic/elasticsearch/api/types';
+import intersection from 'lodash/intersection';
+
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
-import type { MutatingOperationRefreshSetting, SavedObjectError } from '../../types';
 import type {
-  SavedObjectsCollectMultiNamespaceReferencesObject,
-  SavedObjectsCollectMultiNamespaceReferencesResponse,
-} from './collect_multi_namespace_references';
+  MutatingOperationRefreshSetting,
+  SavedObjectError,
+  SavedObjectsBaseOptions,
+} from '../../types';
 import type { DecoratedError } from './errors';
 import { SavedObjectsErrorHelpers } from './errors';
-import { getBulkOperationError, getExpectedVersionProperties } from './internal_utils';
+import {
+  getBulkOperationError,
+  getExpectedVersionProperties,
+  rawDocExistsInNamespace,
+} from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
 
 /**
+ * An object that should have its spaces updated.
  *
  * @public
  */
@@ -28,12 +36,14 @@ export interface SavedObjectsUpdateObjectsSpacesObject {
   id: string;
   /** The ID of the object to update */
   type: string;
-  /** The space(s) that the object to update exists in
+  /**
+   * The space(s) that the object to update currently exists in. This is only intended to be used by SOC wrappers.
    *
    * @internal
    */
   spaces?: string[];
-  /** The version of the object to update; this is used for optimistic concurency control
+  /**
+   * The version of the object to update; this is used for optimistic concurrency control. This is only intended to be used by SOC wrappers.
    *
    * @internal
    */
@@ -41,17 +51,17 @@ export interface SavedObjectsUpdateObjectsSpacesObject {
 }
 
 /**
+ * Options for the update operation.
  *
  * @public
  */
-export interface SavedObjectsUpdateObjectsSpacesOptions {
-  /** Whether or not to include references when sharing the objects */
-  includeReferences?: boolean;
+export interface SavedObjectsUpdateObjectsSpacesOptions extends SavedObjectsBaseOptions {
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
 }
 
 /**
+ * The response when objects' spaces are updated.
  *
  * @public
  */
@@ -60,6 +70,7 @@ export interface SavedObjectsUpdateObjectsSpacesResponse {
 }
 
 /**
+ * Details about a specific object's update result.
  *
  * @public
  */
@@ -88,9 +99,6 @@ export interface UpdateObjectsSpacesParams {
   client: RepositoryEsClient;
   serializer: SavedObjectsSerializer;
   getIndexForType: (type: string) => string;
-  collectMultiNamespaceReferences: (
-    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
-  ) => Promise<SavedObjectsCollectMultiNamespaceReferencesResponse>;
   objects: SavedObjectsUpdateObjectsSpacesObject[];
   spacesToAdd: string[];
   spacesToRemove: string[];
@@ -107,7 +115,6 @@ export async function updateObjectsSpaces({
   client,
   serializer,
   getIndexForType,
-  collectMultiNamespaceReferences,
   objects,
   spacesToAdd,
   spacesToRemove,
@@ -118,20 +125,17 @@ export async function updateObjectsSpaces({
       'spacesToAdd and/or spacesToRemove must be a non-empty array of strings'
     );
   }
-  if (doArraysIntersect(spacesToAdd, spacesToRemove)) {
+  if (intersection(spacesToAdd, spacesToRemove).length > 0) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
       'spacesToAdd and spacesToRemove cannot contain any of the same strings'
     );
   }
 
-  const { includeReferences } = options;
-  const expandedObjects: Array<
-    SavedObjectsUpdateObjectsSpacesObject & { isMissing?: boolean }
-  > = includeReferences ? (await collectMultiNamespaceReferences(objects)).objects : objects;
+  const { namespace } = options;
 
   let bulkGetRequestIndexCounter = 0;
-  const expectedBulkGetResults: Either[] = expandedObjects.map((object) => {
-    const { type, id, spaces, version, isMissing } = object;
+  const expectedBulkGetResults: Either[] = objects.map((object) => {
+    const { type, id, spaces, version } = object;
 
     if (!allowedTypes.includes(type)) {
       const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
@@ -151,13 +155,6 @@ export async function updateObjectsSpaces({
         error: { id, type, spaces: [], error },
       };
     }
-    if (isMissing) {
-      const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
-      return {
-        tag: 'Left' as 'Left',
-        error: { id, type, spaces: [], error },
-      };
-    }
 
     return {
       tag: 'Right' as 'Right',
@@ -171,14 +168,16 @@ export async function updateObjectsSpaces({
     };
   });
 
-  const bulkGetDocs = expectedBulkGetResults
-    .filter(isRight)
-    .filter(({ value }) => value.esRequestIndex !== undefined)
-    .map(({ value: { type, id } }) => ({
-      _id: serializer.generateRawId(undefined, type, id),
-      _index: getIndexForType(type),
-      _source: ['type', 'namespaces'],
-    }));
+  const bulkGetDocs = expectedBulkGetResults.reduce<MultiGetOperation[]>((acc, x) => {
+    if (isRight(x) && x.value.esRequestIndex !== undefined) {
+      acc.push({
+        _id: serializer.generateRawId(undefined, x.value.type, x.value.id),
+        _index: getIndexForType(x.value.type),
+        _source: ['type', 'namespaces'],
+      });
+    }
+    return acc;
+  }, []);
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { body: { docs: bulkGetDocs } },
@@ -188,7 +187,7 @@ export async function updateObjectsSpaces({
 
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
-  const bulkOperationParams: object[] = [];
+  const bulkOperationParams: BulkOperationContainer[] = [];
   const expectedBulkOperationResults: Either[] = expectedBulkGetResults.map(
     (expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
@@ -201,7 +200,8 @@ export async function updateObjectsSpaces({
       let versionProperties;
       if (esRequestIndex !== undefined) {
         const doc = bulkGetResponse?.body.docs[esRequestIndex];
-        if (!doc?.found) {
+        // @ts-expect-error MultiGetHit._source is optional
+        if (!doc?.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
           const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
           return {
             tag: 'Left' as 'Left',
@@ -215,7 +215,7 @@ export async function updateObjectsSpaces({
         versionProperties = getExpectedVersionProperties(version);
       }
 
-      const { remainingSpaces, skip } = getRemainingSpaces(
+      const { remainingSpaces, isUpdateRequired } = getRemainingSpaces(
         currentSpaces,
         spacesToAdd,
         spacesToRemove
@@ -224,10 +224,10 @@ export async function updateObjectsSpaces({
         type,
         id,
         remainingSpaces,
-        ...(!skip && { esRequestIndex: bulkOperationRequestIndexCounter++ }),
+        ...(isUpdateRequired && { esRequestIndex: bulkOperationRequestIndexCounter++ }),
       };
 
-      if (!skip) {
+      if (isUpdateRequired) {
         const documentMetadata = {
           _id: serializer.generateRawId(undefined, type, id),
           _index: getIndexForType(type),
@@ -235,8 +235,10 @@ export async function updateObjectsSpaces({
         };
         if (remainingSpaces.length) {
           const documentToSave = { updated_at: time, namespaces: remainingSpaces };
+          // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
           bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
         } else {
+          // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
           bulkOperationParams.push({ delete: documentMetadata });
         }
       }
@@ -278,17 +280,6 @@ function errorContent(error: DecoratedError) {
   return error.output.payload;
 }
 
-/** Determines whether or not two arrays have any elements that intersect. */
-function doArraysIntersect<T>(a: T[], b: T[]) {
-  const aSet = new Set(a);
-  for (const x of b) {
-    if (aSet.has(x)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 /** Gets the remaining spaces for an object after adding new ones and removing old ones. */
 function getRemainingSpaces(
   existingSpaces: string[],
@@ -306,7 +297,7 @@ function getRemainingSpaces(
 
   const isAnySpaceAdded = addSet.size > 0;
   const isAnySpaceRemoved = removeSet.size < spacesToRemove.length;
-  const skip = remainingSpaces.length && !isAnySpaceAdded && !isAnySpaceRemoved;
+  const isUpdateRequired = remainingSpaces.length === 0 || isAnySpaceAdded || isAnySpaceRemoved;
 
-  return { remainingSpaces, skip };
+  return { remainingSpaces, isUpdateRequired };
 }

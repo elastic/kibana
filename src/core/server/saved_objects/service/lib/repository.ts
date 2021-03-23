@@ -71,6 +71,7 @@ import {
   getBulkOperationError,
   getExpectedVersionProperties,
   getSavedObjectFromSource,
+  rawDocExistsInNamespace,
 } from './internal_utils';
 import {
   ALL_NAMESPACES_STRING,
@@ -81,6 +82,7 @@ import {
 import {
   collectMultiNamespaceReferences,
   SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
 } from './collect_multi_namespace_references';
 import {
   updateObjectsSpaces,
@@ -998,7 +1000,7 @@ export class SavedObjectsRepository {
         }
 
         // @ts-expect-error MultiGetHit._source is optional
-        return this.getSavedObjectFromSource(type, id, doc);
+        return getSavedObjectFromSource(this._registry, type, id, doc);
       }),
     };
   }
@@ -1042,7 +1044,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    return this.getSavedObjectFromSource(type, id, body);
+    return getSavedObjectFromSource(this._registry, type, id, body);
   }
 
   /**
@@ -1147,20 +1149,25 @@ export class SavedObjectsRepository {
     if (foundExactMatch && foundAliasMatch) {
       return {
         // @ts-expect-error MultiGetHit._source is optional
-        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
+        saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
         outcome: 'conflict',
         aliasTargetId: legacyUrlAlias.targetId,
       };
     } else if (foundExactMatch) {
       return {
         // @ts-expect-error MultiGetHit._source is optional
-        saved_object: this.getSavedObjectFromSource(type, id, exactMatchDoc),
+        saved_object: getSavedObjectFromSource(this._registry, type, id, exactMatchDoc),
         outcome: 'exactMatch',
       };
     } else if (foundAliasMatch) {
       return {
-        // @ts-expect-error MultiGetHit._source is optional
-        saved_object: this.getSavedObjectFromSource(type, legacyUrlAlias.targetId, aliasMatchDoc),
+        saved_object: getSavedObjectFromSource(
+          this._registry,
+          type,
+          legacyUrlAlias.targetId,
+          // @ts-expect-error MultiGetHit._source is optional
+          aliasMatchDoc
+        ),
         outcome: 'aliasMatch',
         aliasTargetId: legacyUrlAlias.targetId,
       };
@@ -1278,15 +1285,17 @@ export class SavedObjectsRepository {
    * @param objects The objects to get the references for.
    */
   async collectMultiNamespaceReferences(
-    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options?: SavedObjectsCollectMultiNamespaceReferencesOptions
   ) {
     return collectMultiNamespaceReferences({
       registry: this._registry,
       allowedTypes: this._allowedTypes,
       client: this.client,
       serializer: this._serializer,
-      getIndexForType: this.getIndexForType,
+      getIndexForType: this.getIndexForType.bind(this),
       objects,
+      options,
     });
   }
 
@@ -1302,15 +1311,14 @@ export class SavedObjectsRepository {
     objects: SavedObjectsUpdateObjectsSpacesObject[],
     spacesToAdd: string[],
     spacesToRemove: string[],
-    options: SavedObjectsUpdateObjectsSpacesOptions
+    options?: SavedObjectsUpdateObjectsSpacesOptions
   ) {
     return updateObjectsSpaces({
       registry: this._registry,
       allowedTypes: this._allowedTypes,
       client: this.client,
       serializer: this._serializer,
-      getIndexForType: this.getIndexForType,
-      collectMultiNamespaceReferences: this.collectMultiNamespaceReferences,
+      getIndexForType: this.getIndexForType.bind(this),
       objects,
       spacesToAdd,
       spacesToRemove,
@@ -1686,13 +1694,6 @@ export class SavedObjectsRepository {
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { [type]: attributes, references, updated_at } = documentToSave;
-        if (error) {
-          return {
-            id,
-            type,
-            error: getBulkOperationError(error, type, id),
-          };
-        }
 
         const { originId } = get._source;
         return {
@@ -2169,28 +2170,8 @@ export class SavedObjectsRepository {
     return omit(savedObject, ['namespace']) as SavedObject<T>;
   }
 
-  /**
-   * Check to ensure that a raw document exists in a namespace. If the document is not a multi-namespace type, then this returns `true` as
-   * we rely on the guarantees of the document ID format. If the document is a multi-namespace type, this checks to ensure that the
-   * document's `namespaces` value includes the string representation of the given namespace.
-   *
-   * WARNING: This should only be used for documents that were retrieved from Elasticsearch. Otherwise, the guarantees of the document ID
-   * format mentioned above do not apply.
-   */
-  private rawDocExistsInNamespace(raw: SavedObjectsRawDoc, namespace?: string) {
-    const rawDocType = raw._source.type;
-
-    // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
-    // of the document ID format and don't need to check this
-    if (!this._registry.isMultiNamespace(rawDocType)) {
-      return true;
-    }
-
-    const namespaces = raw._source.namespaces;
-    const existsInNamespace =
-      namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ||
-      namespaces?.includes('*');
-    return existsInNamespace ?? false;
+  private rawDocExistsInNamespace(raw: SavedObjectsRawDoc, namespace: string | undefined) {
+    return rawDocExistsInNamespace(this._registry, raw, namespace);
   }
 
   /**
@@ -2263,14 +2244,6 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
     return body;
-  }
-
-  private getSavedObjectFromSource<T>(
-    type: string,
-    id: string,
-    doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
-  ): SavedObject<T> {
-    return getSavedObjectFromSource(this._registry, type, id, doc);
   }
 
   private async resolveExactMatch<T>(

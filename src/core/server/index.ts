@@ -327,6 +327,7 @@ export type {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
   SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsUpdateObjectsSpacesObject,

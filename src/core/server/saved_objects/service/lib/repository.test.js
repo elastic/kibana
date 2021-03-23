@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { pointInTimeFinderMock } from './repository.test.mock';
-import { mockCollectMultiNamespaceReferences } from './__mocks__/collect_multi_namespace_references';
-import { mockUpdateObjectsSpaces } from './__mocks__/update_objects_spaces';
-import { mockGetBulkOperationError } from './__mocks__/internal_utils';
+import {
+  pointInTimeFinderMock,
+  mockCollectMultiNamespaceReferences,
+  mockGetBulkOperationError,
+  mockUpdateObjectsSpaces,
+} from './repository.test.mock';
 
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';

@@ -11,7 +11,7 @@ import { tagSavedObjectTypeName, TagAttributes } from '../../common';
 export const tagType: SavedObjectsType = {
   name: tagSavedObjectTypeName,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple', // TODO: this is temporary for testing, remove before merging!!!
   mappings: {
     properties: {
       name: {

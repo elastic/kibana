@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
+  SavedObjectReferenceWithContext,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -16,6 +17,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCreateOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
@@ -637,20 +639,134 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async collectMultiNamespaceReferences(
-    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options: SavedObjectsCollectMultiNamespaceReferencesOptions = {}
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-    // TODO: authZ
-    return await this.baseClient.collectMultiNamespaceReferences(objects);
+    const currentSpaceId = SavedObjectsUtils.namespaceIdToString(options.namespace); // We need this whether the Spaces plugin is enabled or not.
+
+    // We don't know the space(s) that each object exists in, so we'll collect the objects and references first, then check authorization.
+    const response = await this.baseClient.collectMultiNamespaceReferences(objects, options);
+    const uniqueTypes = this.getUniqueObjectTypes(response.objects);
+    const uniqueSpaces = this.getUniqueSpaces(
+      ...currentSpaceId,
+      ...response.objects.flatMap(({ spaces }) => spaces)
+    );
+
+    const authAction = options.purpose === 'updateObjectsSpaces' ? 'share_to_space' : 'bulk_get';
+    const { typeMap } = await this.ensureAuthorized(uniqueTypes, authAction, uniqueSpaces, {
+      args: { objects, options },
+      requireFullAuthorization: false,
+      auditAction: 'collectMultiNamespaceReferences',
+    });
+
+    // The user must be authorized to access every requested object in the current space.
+    // Note: non-multi-namespace object types will have an empty spaces array.
+    try {
+      this.ensureAuthorizedInAllSpaces(objects, authAction, typeMap, currentSpaceId);
+    } catch (error) {
+      objects.forEach(({ type, id }) =>
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.COLLECT_MULTINAMESPACE_REFERENCES,
+            savedObject: { type, id },
+            error,
+          })
+        )
+      );
+      throw error;
+    }
+
+    // The user is authorized to access all of the requested objects in the space(s) that they exist in.
+    // Now: 1. omit any result objects that the user has no access to, 2. for the rest, redact any space(s) that the user is not authorized
+    // for, and 3. create audit records for any objects that will be returned to the user.
+    const requestedObjectsSet = objects.reduce(
+      (acc, { type, id }) => acc.add(`${type}:${id}`),
+      new Set<string>()
+    );
+    const filteredAndRedactedObjectsMap = response.objects.reduce(
+      (acc, { type, id, spaces, inboundReferences }) => {
+        if (!spaces.length) {
+          return acc;
+        }
+        // Is the user authorized to access this object in all required space(s)?
+        const isAuthorizedForObject = isAuthorizedForObjectInAllSpaces(type, typeMap, [
+          currentSpaceId,
+        ]);
+        // If the user is not authorized to access at least one inbound reference of this object, then we should omit this object.
+        // Note: this check relies on the fact that the order of the objects array is retained!
+        const isAuthorizedForInboundReference =
+          requestedObjectsSet.has(`${type}:${id}`) || // If true, this is one of the requested objects, and we checked authorization above
+          inboundReferences.some((inbound) => acc.has(`${inbound.type}:${inbound.id}`)); // If true, this object can be linked back to one of the requested objects
+
+        if (isAuthorizedForObject && isAuthorizedForInboundReference) {
+          this.auditLogger.log(
+            savedObjectEvent({
+              action: SavedObjectAction.COLLECT_MULTINAMESPACE_REFERENCES,
+              savedObject: { type, id },
+            })
+          );
+          const redactedSpaces = getRedactedSpaces(type, typeMap, spaces);
+          return acc.set(`${type}:${id}`, { type, id, spaces: redactedSpaces, inboundReferences });
+        }
+        return acc;
+      },
+      new Map<string, SavedObjectReferenceWithContext>()
+    );
+
+    return {
+      objects: Array.from(filteredAndRedactedObjectsMap.values()),
+    };
   }
 
-  async updateObjectsSpaces(
+  public async updateObjectsSpaces(
     objects: SavedObjectsUpdateObjectsSpacesObject[],
     spacesToAdd: string[],
     spacesToRemove: string[],
-    options: SavedObjectsUpdateObjectsSpacesOptions
+    options: SavedObjectsUpdateObjectsSpacesOptions = {}
   ) {
-    // TODO: authZ
-    return await this.baseClient.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
+    const { namespace } = options;
+    const currentSpaceId = SavedObjectsUtils.namespaceIdToString(namespace); // We need this whether the Spaces plugin is enabled or not.
+
+    const uniqueSpaces = this.getUniqueSpaces(currentSpaceId, ...spacesToAdd, ...spacesToRemove);
+    const uniqueTypes = this.getUniqueObjectTypes(objects);
+    const { typeMap } = await this.ensureAuthorized(uniqueTypes, 'share_to_space', uniqueSpaces, {
+      args: { objects, spacesToAdd, spacesToRemove, options },
+      requireFullAuthorization: false,
+      auditAction: 'updateObjectsSpaces',
+    });
+
+    // The user must be authorized to share every requested object in each of: the current space, spacesToAdd, and spacesToRemove.
+    try {
+      this.ensureAuthorizedInAllSpaces(objects, 'share_to_space', typeMap, uniqueSpaces);
+    } catch (error) {
+      objects.forEach(({ type, id }) =>
+        this.auditLogger.log(
+          savedObjectEvent({
+            action: SavedObjectAction.UPDATE_OBJECTS_SPACES,
+            savedObject: { type, id },
+            ...(spacesToAdd.length && { addToSpaces: spacesToAdd }),
+            ...(spacesToRemove.length && { deleteFromSpaces: spacesToRemove }),
+            error,
+          })
+        )
+      );
+      throw error;
+    }
+
+    const response = await this.baseClient.updateObjectsSpaces(
+      objects,
+      spacesToAdd,
+      spacesToRemove,
+      { namespace } // Intentionally omit `includeReferences`, as we've already resolved references above.
+    );
+    // Now that we have updated the objects' spaces, redact any spaces that the user is not authorized to see from the response.
+    const redactedObjects = response.objects.map((obj) => {
+      const { type, spaces } = obj;
+      const redactedSpaces = getRedactedSpaces(type, typeMap, spaces);
+      return { ...obj, spaces: redactedSpaces };
+    });
+
+    return { objects: redactedObjects };
   }
 
   private async checkPrivileges(
@@ -745,6 +861,31 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
   }
 
+  /**
+   * If `ensureAuthorized` was called with `requireFullAuthorization: false`, this can be used with the result to ensure that a given array
+   * of objects are authorized in the required space(s).
+   */
+  private ensureAuthorizedInAllSpaces(
+    objects: Array<{ type: string }>,
+    action: string,
+    typeMap: Map<string, EnsureAuthorizedTypeResult>,
+    spaceOrSpaces: string | string[]
+  ) {
+    const spaces = Array.isArray(spaceOrSpaces) ? spaceOrSpaces : [spaceOrSpaces];
+    const uniqueTypes = uniq(objects.map(({ type }) => type));
+    const unauthorizedTypes = new Set<string>();
+    for (const type of uniqueTypes) {
+      if (!isAuthorizedForObjectInAllSpaces(type, typeMap, spaces)) {
+        unauthorizedTypes.add(type);
+      }
+    }
+    if (unauthorizedTypes.size > 0) {
+      const targetTypes = Array.from(unauthorizedTypes).sort().join(',');
+      const msg = `Unable to ${action} ${targetTypes}`;
+      throw this.errors.decorateForbiddenError(new Error(msg));
+    }
+  }
+
   private getMissingPrivileges(privileges: CheckPrivilegesResponse['privileges']) {
     return privileges.kibana
       .filter(({ authorized }) => !authorized)
@@ -753,6 +894,16 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private getUniqueObjectTypes(objects: Array<{ type: string }>) {
     return uniq(objects.map((o) => o.type));
+  }
+
+  /**
+   * Given a list of spaces, returns a unique array of spaces.
+   * Excludes `'*'`, which is an identifier for All Spaces but is not an actual space.
+   */
+  private getUniqueSpaces(...spaces: string[]) {
+    const set = new Set(spaces);
+    set.delete(ALL_SPACES_ID);
+    return Array.from(set);
   }
 
   private async getNamespacesPrivilegeMap(
@@ -874,4 +1025,34 @@ function namespaceComparator(a: string, b: string) {
     return -1;
   }
   return A > B ? 1 : A < B ? -1 : 0;
+}
+
+function isAuthorizedForObjectInAllSpaces(
+  objectType: string,
+  authorizationTypeMap: Map<string, EnsureAuthorizedTypeResult>,
+  spacesToAuthorizeFor: string[]
+) {
+  const { isGloballyAuthorized, authorizedSpaces } = authorizationTypeMap.get(objectType) ?? {
+    authorizedSpaces: [],
+  };
+  const authorizedSpacesSet = new Set(authorizedSpaces);
+  return (
+    isGloballyAuthorized || spacesToAuthorizeFor.every((space) => authorizedSpacesSet.has(space))
+  );
+}
+
+function getRedactedSpaces(
+  objectType: string,
+  authorizationTypeMap: Map<string, EnsureAuthorizedTypeResult>,
+  spacesToRedact: string[]
+) {
+  const { authorizedSpaces, isGloballyAuthorized } = authorizationTypeMap.get(objectType) ?? {
+    authorizedSpaces: [],
+  };
+  const authorizedSpacesSet = new Set(authorizedSpaces);
+  return spacesToRedact
+    .map((x) =>
+      isGloballyAuthorized || x === ALL_SPACES_ID || authorizedSpacesSet.has(x) ? x : UNKNOWN_SPACE
+    )
+    .sort(namespaceComparator);
 }

@@ -1823,10 +1823,11 @@ describe('#closePointInTime', () => {
   describe('#collectMultiNamespaceReferences', () => {
     it('redirects request to underlying base client', async () => {
       const objects = [{ type: 'foo', id: 'bar' }];
-      await wrapper.collectMultiNamespaceReferences(objects);
+      const options = { namespace: 'some-ns' };
+      await wrapper.collectMultiNamespaceReferences(objects, options);
 
       expect(mockBaseClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
-      expect(mockBaseClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects);
+      expect(mockBaseClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects, options);
     });
 
     it('returns response from underlying client', async () => {

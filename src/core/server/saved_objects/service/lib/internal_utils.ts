@@ -109,3 +109,35 @@ export function getSavedObjectFromSource<T>(
     coreMigrationVersion: doc._source.coreMigrationVersion,
   };
 }
+
+/**
+ * Check to ensure that a raw document exists in a namespace. If the document is not a multi-namespace type, then this returns `true` as
+ * we rely on the guarantees of the document ID format. If the document is a multi-namespace type, this checks to ensure that the
+ * document's `namespaces` value includes the string representation of the given namespace.
+ *
+ * WARNING: This should only be used for documents that were retrieved from Elasticsearch. Otherwise, the guarantees of the document ID
+ * format mentioned above do not apply.
+ *
+ * @param registry
+ * @param raw
+ * @param namespace
+ */
+export function rawDocExistsInNamespace(
+  registry: ISavedObjectTypeRegistry,
+  raw: SavedObjectsRawDoc,
+  namespace: string | undefined
+) {
+  const rawDocType = raw._source.type;
+
+  // if the type is namespace isolated, or namespace agnostic, we can continue to rely on the guarantees
+  // of the document ID format and don't need to check this
+  if (!registry.isMultiNamespace(rawDocType)) {
+    return true;
+  }
+
+  const namespaces = raw._source.namespaces;
+  const existsInNamespace =
+    namespaces?.includes(SavedObjectsUtils.namespaceIdToString(namespace)) ||
+    namespaces?.includes('*');
+  return existsInNamespace ?? false;
+}

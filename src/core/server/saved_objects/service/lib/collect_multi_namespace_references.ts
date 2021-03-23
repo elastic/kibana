@@ -8,12 +8,17 @@
 
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsSerializer } from '../../serialization';
-import type { SavedObject } from '../../types';
+import type { SavedObject, SavedObjectsBaseOptions } from '../../types';
 import { getRootFields } from './included_fields';
-import { getSavedObjectFromSource } from './internal_utils';
+import { getSavedObjectFromSource, rawDocExistsInNamespace } from './internal_utils';
 import type { RepositoryEsClient } from './repository_es_client';
 
 /**
+ * An object to collect references for. It must be a multi-namespace type (in other words, the object type must be registered with the
+ * `namespaceType: 'multi'` or `namespaceType: 'multi-isolated'` option).
+ *
+ * Note: if options.purpose is 'updateObjectsSpaces', it must be a shareable type (in other words, the object type must be registered with
+ * the `namespaceType: 'multi'`).
  *
  * @public
  */
@@ -23,6 +28,22 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject {
 }
 
 /**
+ * Options for collecting references.
+ *
+ * @public
+ */
+export interface SavedObjectsCollectMultiNamespaceReferencesOptions
+  extends SavedObjectsBaseOptions {
+  /** Whether or not to include tags when collecting references */
+  excludeTags?: boolean;
+  /** Any types that should be excluded when collecting references */
+  typesToExclude?: string[];
+  /** Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences' */
+  purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
+}
+
+/**
+ * A returned input object or one of its references, with additional context.
  *
  * @public
  */
@@ -33,8 +54,11 @@ export interface SavedObjectReferenceWithContext {
   id: string;
   /** The space(s) that the referenced object exists in */
   spaces: string[];
-  /** References to this object */
-  from: Array<{
+  /**
+   * References to this object; note that this does not contain _all inbound references everywhere for this object_, it only contains
+   * inbound references for the scope of this operation
+   */
+  inboundReferences: Array<{
     /** The type of the object that has the inbound reference */
     type: string;
     /** The ID of the object that has the inbound reference */
@@ -42,13 +66,12 @@ export interface SavedObjectReferenceWithContext {
     /** The name of the inbound reference */
     name: string;
   }>;
-  /** The version of the referenced object (undefined if this reference is missing); this is used for optimistic concurrency control */
-  version?: string;
-  /** Whether or not this reference is missing */
+  /** Whether or not this object or reference is missing */
   isMissing?: boolean;
 }
 
 /**
+ * The response when object references are collected.
  *
  * @public
  */
@@ -63,6 +86,7 @@ export interface CollectMultiNamespaceReferencesParams {
   serializer: SavedObjectsSerializer;
   getIndexForType: (type: string) => string;
   objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
+  options?: SavedObjectsCollectMultiNamespaceReferencesOptions;
 }
 
 /**
@@ -76,7 +100,9 @@ export async function collectMultiNamespaceReferences({
   serializer,
   getIndexForType,
   objects,
+  options = {},
 }: CollectMultiNamespaceReferencesParams): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
+  const { namespace, purpose, typesToExclude = [] } = options;
   const inboundReferencesMap = objects.reduce(
     // Add the input objects to the references map so they are returned with the results, even if they have no inbound references
     (acc, { type, id }) => acc.set(`${type}:${id}`, new Map()),
@@ -92,10 +118,15 @@ export async function collectMultiNamespaceReferences({
       _source: rootFields, // Optimized to only retrieve root fields (ignoring type-specific fields)
     }));
   const objectFilter = ({ type }: SavedObjectsCollectMultiNamespaceReferencesObject) =>
-    allowedTypes.includes(type) && registry.isMultiNamespace(type);
+    allowedTypes.includes(type) &&
+    (purpose === 'updateObjectsSpaces'
+      ? registry.isShareable(type)
+      : registry.isMultiNamespace(type)) &&
+    !typesToExclude.includes(type);
 
   let bulkGetObjects = objects.filter(objectFilter);
-  while (bulkGetObjects.length) {
+  let count = 0; // this is a circuit-breaker to ensure we don't hog too many resources; we should never have an object graph this deep
+  while (bulkGetObjects.length && count++ < 20) {
     const bulkGetResponse = await client.mget(
       { body: { docs: makeBulkGetDocs(bulkGetObjects) } },
       { ignore: [404] }
@@ -105,7 +136,8 @@ export async function collectMultiNamespaceReferences({
       const { type, id } = bulkGetObjects[i];
       const objectKey = `${type}:${id}`;
       const doc = bulkGetResponse.body.docs[i];
-      if (!doc.found) {
+      // @ts-expect-error MultiGetHit._source is optional
+      if (!doc.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
         objectMap.set(objectKey, null);
         continue;
       }
@@ -131,15 +163,14 @@ export async function collectMultiNamespaceReferences({
 
   const results = Array.from(inboundReferencesMap.entries()).map<SavedObjectReferenceWithContext>(
     ([referenceKey, referenceVal]) => {
-      const from = Array.from(referenceVal.entries()).map(([objectKey, name]) => {
+      const inboundReferences = Array.from(referenceVal.entries()).map(([objectKey, name]) => {
         const { type, id } = parseKey(objectKey);
         return { type, id, name };
       });
       const { type, id } = parseKey(referenceKey);
       const object = objectMap.get(referenceKey);
       const spaces = object?.namespaces ?? [];
-      const version = object?.version;
-      return { type, id, spaces, from, version, ...(object === null && { isMissing: true }) };
+      return { type, id, spaces, inboundReferences, ...(object === null && { isMissing: true }) };
     }
   );
 

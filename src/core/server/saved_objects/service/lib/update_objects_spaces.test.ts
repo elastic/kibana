@@ -9,7 +9,8 @@
 import {
   mockGetBulkOperationError,
   mockGetExpectedVersionProperties,
-} from './__mocks__/internal_utils';
+  mockRawDocExistsInNamespace,
+} from './update_objects_spaces.test.mock';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
 import type { ElasticsearchClient } from 'src/core/server/elasticsearch';
@@ -17,8 +18,10 @@ import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mo
 
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
-import type { SavedObjectsCollectMultiNamespaceReferencesObject } from './collect_multi_namespace_references';
-import type { UpdateObjectsSpacesParams } from './update_objects_spaces';
+import type {
+  SavedObjectsUpdateObjectsSpacesObject,
+  UpdateObjectsSpacesParams,
+} from './update_objects_spaces';
 import { updateObjectsSpaces } from './update_objects_spaces';
 
 type SetupParams = Partial<
@@ -41,12 +44,14 @@ const SHAREABLE_HIDDEN_OBJ_TYPE = 'type-c';
 
 beforeEach(() => {
   mockGetExpectedVersionProperties.mockReturnValue(EXPECTED_VERSION_PROPS);
+  mockRawDocExistsInNamespace.mockReset();
+  mockRawDocExistsInNamespace.mockReturnValue(true); // return true by default
 });
 
 describe('#updateObjectsSpaces', () => {
   let client: DeeplyMockedKeys<ElasticsearchClient>;
 
-  /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `collectMultiNamespaceReferences` */
+  /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `updateObjectsSpaces` */
   function setup({ objects = [], spacesToAdd = [], spacesToRemove = [], options }: SetupParams) {
     const registry = typeRegistryMock.create();
     registry.isShareable.mockImplementation(
@@ -60,9 +65,6 @@ describe('#updateObjectsSpaces', () => {
       client,
       serializer,
       getIndexForType: (type: string) => `index-for-${type}`,
-      collectMultiNamespaceReferences: jest
-        .fn()
-        .mockReturnValue({ objects: objects.map((x) => ({ ...x, spaces: [EXISTING_SPACE] })) }),
       objects,
       spacesToAdd,
       spacesToRemove,
@@ -94,7 +96,7 @@ describe('#updateObjectsSpaces', () => {
   }
 
   /** Asserts that mget is called for the given objects */
-  function expectMgetArgs(...objects: SavedObjectsCollectMultiNamespaceReferencesObject[]) {
+  function expectMgetArgs(...objects: SavedObjectsUpdateObjectsSpacesObject[]) {
     const docs = objects.map(({ type, id }) => expect.objectContaining({ _id: `${type}:${id}` }));
     expect(client.mget).toHaveBeenCalledWith({ body: { docs } }, expect.anything());
   }
@@ -166,16 +168,6 @@ describe('#updateObjectsSpaces', () => {
       );
     });
 
-    it('throws when collectMultiNamespaceReferences call fails', async () => {
-      const objects = [{ type: SHAREABLE_OBJ_TYPE, id: 'id-1' }];
-      const spacesToAdd = ['foo-space'];
-      const options = { includeReferences: true };
-      const params = setup({ objects, spacesToAdd, options });
-      params.collectMultiNamespaceReferences.mockRejectedValue(new Error('collect error'));
-
-      await expect(() => updateObjectsSpaces(params)).rejects.toThrow('collect error');
-    });
-
     it('throws when mget cluster call fails', async () => {
       const objects = [{ type: SHAREABLE_OBJ_TYPE, id: 'id-1' }];
       const spacesToAdd = ['foo-space'];
@@ -202,65 +194,33 @@ describe('#updateObjectsSpaces', () => {
     it('returns mix of type errors, mget/bulk cluster errors, and successes', async () => {
       const obj1 = { type: SHAREABLE_HIDDEN_OBJ_TYPE, id: 'id-1' }; // invalid type (Not Found)
       const obj2 = { type: NON_SHAREABLE_OBJ_TYPE, id: 'id-2' }; // non-shareable type (Bad Request)
-      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' }; // mget error (Not Found)
-      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' }; // bulk error (mocked as BULK_ERROR)
-      const obj5 = { type: SHAREABLE_OBJ_TYPE, id: 'id-5' }; // success
+      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' }; // mget error (found but doesn't exist in the current space)
+      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' }; // mget error (Not Found)
+      const obj5 = { type: SHAREABLE_OBJ_TYPE, id: 'id-5' }; // bulk error (mocked as BULK_ERROR)
+      const obj6 = { type: SHAREABLE_OBJ_TYPE, id: 'id-6' }; // success
 
-      const objects = [obj1, obj2, obj3, obj4, obj5];
+      const objects = [obj1, obj2, obj3, obj4, obj5, obj6];
       const spacesToAdd = ['foo-space'];
       const params = setup({ objects, spacesToAdd });
-      mockMgetResults({ found: false }, { found: true }, { found: true }); // results for obj3, obj4, and obj5
-      mockBulkResults({ error: true }, { error: false }); // results for obj4 and obj5
+      mockMgetResults({ found: true }, { found: false }, { found: true }, { found: true }); // results for obj3, obj4, obj5, and obj6
+      mockRawDocExistsInNamespace.mockReturnValueOnce(false); // for obj3
+      mockRawDocExistsInNamespace.mockReturnValueOnce(true); // for obj5
+      mockRawDocExistsInNamespace.mockReturnValueOnce(true); // for obj6
+      mockBulkResults({ error: true }, { error: false }); // results for obj5 and obj6
 
       const result = await updateObjectsSpaces(params);
       expect(client.mget).toHaveBeenCalledTimes(1);
-      expectMgetArgs(obj3, obj4, obj5);
+      expectMgetArgs(obj3, obj4, obj5, obj6);
+      expect(mockRawDocExistsInNamespace).toHaveBeenCalledTimes(3);
       expect(client.bulk).toHaveBeenCalledTimes(1);
-      expectBulkArgs({ action: 'update', object: obj4 }, { action: 'update', object: obj5 });
+      expectBulkArgs({ action: 'update', object: obj5 }, { action: 'update', object: obj6 });
       expect(result.objects).toEqual([
         { ...obj1, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
         { ...obj2, spaces: [], error: expect.objectContaining({ error: 'Bad Request' }) },
         { ...obj3, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
-        { ...obj4, spaces: [], error: BULK_ERROR },
-        { ...obj5, spaces: [EXISTING_SPACE, 'foo-space'] },
-      ]);
-    });
-
-    it('returns mix of type errors, collector errors, bulk cluster errors, and successes if the "includeReferences" option is used', async () => {
-      const obj1 = { type: SHAREABLE_HIDDEN_OBJ_TYPE, id: 'id-1' }; // invalid type (Not Found)
-      const obj2 = { type: NON_SHAREABLE_OBJ_TYPE, id: 'id-2' }; // non-shareable type (Bad Request)
-      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' }; // collector error (Not Found)
-      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' }; // bulk error (mocked as BULK_ERROR)
-      const obj5 = { type: SHAREABLE_OBJ_TYPE, id: 'id-5' }; // success
-
-      const objects = [obj1, obj2, obj3, obj4, obj5]; // doesn't matter what the input is, when "includeReferences" is enabled, the output of collectMultiNamespaceReferences is used instead
-      const spacesToAdd = ['foo-space'];
-      const options = { includeReferences: true };
-      const params = setup({ objects, spacesToAdd, options });
-      // this test case does not call mget
-      params.collectMultiNamespaceReferences.mockResolvedValue({
-        objects: [
-          { ...obj1, spaces: [] }, // realistically, obj1 would include 'isMissing: true' because it's an invalid type, but for the purposes of this test let's ensure that it is treated as Not Found regardless
-          { ...obj2, spaces: [] },
-          { ...obj3, spaces: [], isMissing: true },
-          { ...obj4, spaces: [EXISTING_SPACE] },
-          { ...obj5, spaces: [EXISTING_SPACE] },
-        ],
-      });
-      mockBulkResults({ error: true }, { error: false }); // results for obj4 and obj5
-
-      const result = await updateObjectsSpaces(params);
-      expect(params.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
-      expect(params.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects);
-      expect(client.mget).not.toHaveBeenCalled();
-      expect(client.bulk).toHaveBeenCalledTimes(1);
-      expectBulkArgs({ action: 'update', object: obj4 }, { action: 'update', object: obj5 });
-      expect(result.objects).toEqual([
-        { ...obj1, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
-        { ...obj2, spaces: [], error: expect.objectContaining({ error: 'Bad Request' }) },
-        { ...obj3, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
-        { ...obj4, spaces: [], error: BULK_ERROR },
-        { ...obj5, spaces: [EXISTING_SPACE, 'foo-space'] },
+        { ...obj4, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
+        { ...obj5, spaces: [], error: BULK_ERROR },
+        { ...obj6, spaces: [EXISTING_SPACE, 'foo-space'] },
       ]);
     });
   });
@@ -290,23 +250,6 @@ describe('#updateObjectsSpaces', () => {
       mockBulkResults({ error: false }); // result for obj1
 
       await updateObjectsSpaces(params);
-      expect(client.mget).not.toHaveBeenCalled();
-    });
-
-    it('calls collectMultiNamespaceReferences and does not call mget if the "includeReferences" option is used', async () => {
-      // Both assertions are true because the return value of collectMultiNamespaceReferences includes a "spaces" attribute for each object.
-      // That's an implementation detail of collectMultiNamespaceReferences, but this test case is included for clarity.
-      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1' }; // will not be passed to mget
-
-      const objects = [obj1];
-      const spacesToAdd = ['foo-space'];
-      const options = { includeReferences: true };
-      const params = setup({ objects, spacesToAdd, options });
-      mockBulkResults({ error: false }); // result for obj1
-
-      await updateObjectsSpaces(params);
-      expect(params.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
-      expect(params.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects);
       expect(client.mget).not.toHaveBeenCalled();
     });
 
@@ -482,35 +425,6 @@ describe('#updateObjectsSpaces', () => {
       const spacesToRemove = [space2];
       const params = setup({ objects, spacesToAdd, spacesToRemove });
       // this test case does not call mget
-      mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
-
-      const result = await updateObjectsSpaces(params);
-      expect(result.objects).toEqual([
-        { ...obj1, spaces: [space1] },
-        { ...obj2, spaces: [space3, space1] },
-        { ...obj3, spaces: [space1] },
-        { ...obj4, spaces: [space3, space1] },
-      ]);
-    });
-
-    it('when the "includeReferences" option is used and extra references are found', async () => {
-      const space1 = 'space-to-add';
-      const space2 = 'space-to-remove';
-      const space3 = 'other-space';
-      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space1] }; // will not be changed
-      const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space3] }; // will be updated to add space1
-      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3', spaces: [space1, space2] }; // will be updated to remove space2
-      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4', spaces: [space2, space3] }; // will be updated to add space1 and remove space2
-
-      const objects = [{ type: obj1.type, id: obj1.id }]; // doesn't matter what the input is, when "includeReferences" is enabled, the output of collectMultiNamespaceReferences is used instead
-      const spacesToAdd = [space1];
-      const spacesToRemove = [space2];
-      const options = { includeReferences: true };
-      const params = setup({ objects, spacesToAdd, spacesToRemove, options });
-      // this test case does not call mget
-      params.collectMultiNamespaceReferences.mockResolvedValue({
-        objects: [obj1, obj2, obj3, obj4],
-      });
       mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
 
       const result = await updateObjectsSpaces(params);

@@ -70,8 +70,9 @@ describe('share to space', () => {
     });
 
     const [
-      [shareAdd, ctsRouteHandler],
-      [shareRemove, resolveRouteHandler],
+      [shareAdd, shareAddRouteHandler],
+      [shareRemove, shareRemoveRouteHandler],
+      [updateObjectsSpaces, updateObjectsSpacesRouteHandler],
     ] = router.post.mock.calls;
 
     return {
@@ -79,11 +80,15 @@ describe('share to space', () => {
       savedObjectsClient,
       shareAdd: {
         routeValidation: shareAdd.validate as RouteValidatorConfig<{}, {}, {}>,
-        routeHandler: ctsRouteHandler,
+        routeHandler: shareAddRouteHandler,
       },
       shareRemove: {
         routeValidation: shareRemove.validate as RouteValidatorConfig<{}, {}, {}>,
-        routeHandler: resolveRouteHandler,
+        routeHandler: shareRemoveRouteHandler,
+      },
+      updateObjectsSpaces: {
+        routeValidation: updateObjectsSpaces.validate as RouteValidatorConfig<{}, {}, {}>,
+        routeHandler: updateObjectsSpacesRouteHandler,
       },
       savedObjectsRepositoryMock,
     };
@@ -246,6 +251,121 @@ describe('share to space', () => {
         payload.object.type,
         payload.object.id,
         payload.spaces
+      );
+    });
+  });
+
+  describe('POST /api/spaces/_update_objects_spaces', () => {
+    const objects = [{ id: 'foo', type: 'bar' }];
+
+    it(`returns http/403 when the license is invalid`, async () => {
+      const { updateObjectsSpaces } = await setup();
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+      });
+
+      const response = await updateObjectsSpaces.routeHandler(
+        mockRouteContextWithInvalidLicense,
+        request,
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toEqual(403);
+      expect(response.payload).toEqual({
+        message: 'License is invalid for spaces',
+      });
+    });
+
+    it(`requires at least 1 space ID`, async () => {
+      const { updateObjectsSpaces } = await setup();
+      const payload = { objects, spacesToAdd: [], spacesToRemove: [] };
+
+      expect(() =>
+        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"spacesToAdd and/or spacesToRemove must be a non-empty array of strings"`
+      );
+    });
+
+    it(`requires space IDs to be unique`, async () => {
+      const { updateObjectsSpaces } = await setup();
+      const targetSpaces = ['a-space', 'a-space'];
+      const payload1 = { objects, spacesToAdd: targetSpaces, spacesToRemove: [] };
+      const payload2 = { objects, spacesToAdd: [], spacesToRemove: targetSpaces };
+
+      expect(() =>
+        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1)
+      ).toThrowErrorMatchingInlineSnapshot(`"[spacesToAdd]: duplicate space ids are not allowed"`);
+      expect(() =>
+        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[spacesToRemove]: duplicate space ids are not allowed"`
+      );
+    });
+
+    it(`requires well-formed space IDS`, async () => {
+      const { updateObjectsSpaces } = await setup();
+      const targetSpaces = ['a-space', 'a-space-invalid-!@#$%^&*()'];
+      const payload1 = { objects, spacesToAdd: targetSpaces, spacesToRemove: [] };
+      const payload2 = { objects, spacesToAdd: [], spacesToRemove: targetSpaces };
+
+      expect(() =>
+        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[spacesToAdd.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\""`
+      );
+      expect(() =>
+        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[spacesToRemove.1]: lower case, a-z, 0-9, \\"_\\", and \\"-\\" are allowed, OR \\"*\\""`
+      );
+    });
+
+    it(`requires spacesToAdd and spacesToRemove not to intersect`, async () => {
+      const { updateObjectsSpaces } = await setup();
+      const targetSpaces = ['a-space'];
+      const payload = { objects, spacesToAdd: targetSpaces, spacesToRemove: targetSpaces };
+
+      expect(() =>
+        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"spacesToAdd and spacesToRemove cannot contain any of the same strings"`
+      );
+    });
+
+    it(`allows all spaces ("*")`, async () => {
+      const { updateObjectsSpaces } = await setup();
+      const targetSpaces = ['*'];
+      const payload1 = { objects, spacesToAdd: targetSpaces, spacesToRemove: [] };
+      const payload2 = { objects, spacesToAdd: [], spacesToRemove: targetSpaces };
+
+      expect(() =>
+        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1)
+      ).not.toThrowError();
+      expect(() =>
+        (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
+      ).not.toThrowError();
+    });
+
+    it('passes arguments to the saved objects client and returns the result', async () => {
+      const { updateObjectsSpaces, savedObjectsClient } = await setup();
+      const payload = { objects, spacesToAdd: ['a-space'], spacesToRemove: ['b-space'] };
+
+      const request = httpServerMock.createKibanaRequest({ body: payload, method: 'post' });
+      const response = await updateObjectsSpaces.routeHandler(
+        mockRouteContext,
+        request,
+        kibanaResponseFactory
+      );
+
+      const { status } = response;
+      expect(status).toEqual(200);
+      expect(savedObjectsClient.updateObjectsSpaces).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.updateObjectsSpaces).toHaveBeenCalledWith(
+        objects,
+        payload.spacesToAdd,
+        payload.spacesToRemove
       );
     });
   });

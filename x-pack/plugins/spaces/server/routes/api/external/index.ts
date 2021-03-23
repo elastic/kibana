@@ -14,6 +14,7 @@ import { initCopyToSpacesApi } from './copy_to_space';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpaceApi } from './get';
 import { initGetAllSpacesApi } from './get_all';
+import { initGetShareableReferencesApi } from './get_shareable_references';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
 import { initShareToSpacesApi } from './share_to_space';
@@ -34,4 +35,5 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   initPutSpacesApi(deps);
   initCopyToSpacesApi(deps);
   initShareToSpacesApi(deps);
+  initGetShareableReferencesApi(deps);
 }

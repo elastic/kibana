@@ -21,3 +21,16 @@ export type GetAllSpacesPurpose =
 export interface GetSpaceResult extends Space {
   authorizedPurposes?: Record<GetAllSpacesPurpose, boolean>;
 }
+
+export interface GetShareableReferencesResponse {
+  /** The count of references that are not tags */
+  relativesCount: number;
+  /** The count of references that are tags */
+  tagsCount: number;
+  /** The spaces that are selected (all objects are in these spaces) */
+  selectedSpaces: string[];
+  /** The spaces that are partially selected (some -- but not all -- objects are in these spaces) */
+  partiallySelectedSpaces: string[];
+  /** The spaces that are unknown */
+  unknownSpacesCount: number;
+}

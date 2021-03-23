@@ -683,7 +683,15 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
     });
 
     describe('#collectMultiNamespaceReferences', () => {
-      test(`calls base client`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(
+          client.collectMultiNamespaceReferences([], { namespace: 'bar' })
+        ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
+      });
+
+      test(`supplements options with the current namespace`, async () => {
         const { client, baseClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = { objects: [] };
         baseClient.collectMultiNamespaceReferences.mockReturnValue(
@@ -691,15 +699,28 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         );
 
         const objects = [{ type: 'foo', id: 'bar' }];
-        const actualReturnValue = await client.collectMultiNamespaceReferences(objects);
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.collectMultiNamespaceReferences(objects, options);
 
         expect(actualReturnValue).toBe(expectedReturnValue);
-        expect(baseClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects);
+        expect(baseClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(objects, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
       });
     });
 
     describe('#updateObjectsSpaces', () => {
-      test(`calls base client`, async () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        await expect(client.updateObjectsSpaces([], [], [], { namespace: 'bar' })).rejects.toThrow(
+          ERROR_NAMESPACE_SPECIFIED
+        );
+      });
+
+      test(`supplements options with the current namespace`, async () => {
         const { client, baseClient } = createSpacesSavedObjectsClient();
         const expectedReturnValue = { objects: [] };
         baseClient.updateObjectsSpaces.mockReturnValue(Promise.resolve(expectedReturnValue));
@@ -707,11 +728,12 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         const objects = [{ type: 'foo', id: 'bar' }];
         const spacesToAdd = ['space-x'];
         const spacesToRemove = ['space-y'];
-        const options = {};
+        const options = Object.freeze({ foo: 'bar' });
         const actualReturnValue = await client.updateObjectsSpaces(
           objects,
           spacesToAdd,
           spacesToRemove,
+          // @ts-expect-error
           options
         );
 
@@ -720,7 +742,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
           objects,
           spacesToAdd,
           spacesToRemove,
-          options
+          { foo: 'bar', namespace: currentSpace.expectedNamespace }
         );
       });
     });

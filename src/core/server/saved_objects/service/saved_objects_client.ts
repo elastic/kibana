@@ -12,6 +12,7 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
@@ -684,11 +685,13 @@ export class SavedObjectsClient {
    * Gets all references and transitive references of the listed objects. Ignores any object that is not a multi-namespace type.
    *
    * @param objects
+   * @param options
    */
   async collectMultiNamespaceReferences(
-    objects: SavedObjectsCollectMultiNamespaceReferencesObject[]
+    objects: SavedObjectsCollectMultiNamespaceReferencesObject[],
+    options?: SavedObjectsCollectMultiNamespaceReferencesOptions
   ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-    return await this._repository.collectMultiNamespaceReferences(objects);
+    return await this._repository.collectMultiNamespaceReferences(objects, options);
   }
 
   /**
@@ -703,7 +706,7 @@ export class SavedObjectsClient {
     objects: SavedObjectsUpdateObjectsSpacesObject[],
     spacesToAdd: string[],
     spacesToRemove: string[],
-    options: SavedObjectsUpdateObjectsSpacesOptions
+    options?: SavedObjectsUpdateObjectsSpacesOptions
   ) {
     return await this._repository.updateObjectsSpaces(
       objects,

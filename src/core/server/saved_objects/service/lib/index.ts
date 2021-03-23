@@ -30,6 +30,7 @@ export { SavedObjectsUtils } from './utils';
 
 export type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from './collect_multi_namespace_references';
