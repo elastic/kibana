@@ -25,7 +25,6 @@ import {
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import { BucketSpanEstimatorData } from '../../../../common/types/job_service';
-import { RuntimeMappings } from '../../../../common/types/fields';
 import {
   Job,
   JobStats,
@@ -42,7 +41,7 @@ import {
 } from '../../datavisualizer/index_based/common';
 import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
-import { RuntimeMappings } from '../../../../common/types/fields';
+import type { RuntimeMappings } from '../../../../common/types/fields';
 
 export interface MlInfoResponse {
   defaults: MlServerDefaults;

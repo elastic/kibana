@@ -626,9 +626,14 @@ export class DataVisualizer {
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
     const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
-    const runtimeMappings: { runtime_mappings?: RuntimeMappings } = runtimeFields
-      ? { runtime_mappings: runtimeFields }
-      : {};
+
+    // Combine runtime mappings from the index pattern as well as the datafeed
+    const runtimeMappings: RuntimeMappings = {
+      ...(isPopulatedObject(runtimeFields) ? runtimeFields : {}),
+      ...(datafeedConfig !== undefined && isPopulatedObject(datafeedConfig.runtime_mappings)
+        ? datafeedConfig.runtime_mappings
+        : {}),
+    };
 
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
@@ -645,15 +650,6 @@ export class DataVisualizer {
         cardinalityField = {
           cardinality: { field },
         };
-
-        // runtimeMappings.runtime_mappings = {
-        //   ...runtimeMappings.runtime_mappings,
-        //   [field]: datafeedConfig.runtime_mappings[field],
-        // };
-
-        if (datafeedConfig !== undefined && isPopulatedObject(datafeedConfig?.runtime_mappings)) {
-          runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
-        }
       }
       aggs[`${safeFieldName}_cardinality`] = cardinalityField;
     });
@@ -665,7 +661,7 @@ export class DataVisualizer {
         },
       },
       ...(isPopulatedObject(aggs) ? { aggs: buildSamplerAggregation(aggs, samplerShardSize) } : {}),
-      ...runtimeMappings,
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
