@@ -97,25 +97,25 @@ This table provides an overview of the conclusions made throughout the rest of t
 
 <!-- eslint-disable max-len -->
 
-|                                      | Jenkins | Buildkite | GitHub Actions | CircleCI |
-| ------------------------------------ | ------- | --------- | -------------- | -------- |
-| Scalable                             | No      | Yes       | No             | Yes      |
-| Stable                               | No      | Yes       | No             | Yes      |
-| Surfaces information intuitively     | No      | Yes       | No             | Yes      |
-| Pipelines                            | Yes     | Yes       | Yes            | Yes      |
-| Advanced Pipeline logic              | Yes     | Yes       | Partial        | Partial  |
-| Cloud-friendly pricing model         | Yes     | Yes       | Yes            | No       |
-| Public access                        | Yes     | Yes       | Yes            | Partial  |
-| Secrets handling                     | Yes     | No        | Yes            | Partial  |
-| Support or Documentation             | No      | Yes       | Yes            | Partial  |
-| Scheduled Builds                     | Yes     | Yes       | Yes            | Yes      |
-| Container support                    | Partial | Yes       | Yes            | Yes      |
-|                                      |         |           |                |          |
-| Customization                        | No      | Yes       | No             | No       |
-| Core functionality is first-party    | No      | Mostly    | Mostly         | TODO     |
-| First-class support for test results | Buggy   | No        | No             | Yes      |
-| GitHub Integration                   | Yes     | Limited   | Yes            | Yes      |
-| Local testing / reproduction?        | TODO    | TODO      | TODO           | TODO     |
+|                                      | Jenkins | Buildkite | GitHub Actions | CircleCI | TeamCity |
+| ------------------------------------ | ------- | --------- | -------------- | -------- | -------- |
+| Scalable                             | No      | Yes       | No             | Yes      | No       |
+| Stable                               | No      | Yes       | No             | Yes      | Partial  |
+| Surfaces information intuitively     | No      | Yes       | No             | Yes      | Yes      |
+| Pipelines                            | Yes     | Yes       | Yes            | Yes      | Partial  |
+| Advanced Pipeline logic              | Yes     | Yes       | Partial        | Partial  | No       |
+| Cloud-friendly pricing model         | Yes     | Yes       | Yes            | No       | No       |
+| Public access                        | Yes     | Yes       | Yes            | Partial  | Yes      |
+| Secrets handling                     | Yes     | No        | Yes            | Partial  | Partial  |
+| Support or Documentation             | No      | Yes       | Yes            | Partial  | Yes      |
+| Scheduled Builds                     | Yes     | Yes       | Yes            | Yes      | Yes      |
+| Container support                    | Partial | Yes       | Yes            | Yes      | Partial  |
+|                                      |         |           |                |          |          |
+| Customization                        | No      | Yes       | No             | No       | No       |
+| Core functionality is first-party    | No      | Mostly    | Mostly         | TODO     | Mostly   |
+| First-class support for test results | Buggy   | No        | No             | Yes      | Yes      |
+| GitHub Integration                   | Yes     | Limited   | Yes            | Yes      | Yes      |
+| Local testing / reproduction?        | TODO    | TODO      | TODO           | TODO     | TODO     |
 
 TODO link the conclusions to each section?
 
