@@ -716,6 +716,7 @@ class AgentPolicyService {
           throw new Error('kibana_urls is missing');
 
         fullAgentPolicy.fleet = {
+          hosts: settings.kibana_urls,
           kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
         };
       }
