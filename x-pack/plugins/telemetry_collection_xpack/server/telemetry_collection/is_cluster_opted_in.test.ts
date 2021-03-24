@@ -1,12 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { isClusterOptedIn } from './util';
+import { isClusterOptedIn } from './is_cluster_opted_in';
 
 const createMockClusterUsage = (plugins: any) => {
   return {
@@ -32,9 +31,9 @@ describe('isClusterOptedIn', () => {
     const result = isClusterOptedIn(mockClusterUsage);
     expect(result).toBe(false);
   });
-  it('returns false if cluster stats is malformed', () => {
-    expect(isClusterOptedIn(createMockClusterUsage({}))).toBe(false);
-    expect(isClusterOptedIn({})).toBe(false);
-    expect(isClusterOptedIn(undefined)).toBe(false);
+  it('returns true if kibana.plugins.telemetry does not exist', () => {
+    expect(isClusterOptedIn(createMockClusterUsage({}))).toBe(true);
+    expect(isClusterOptedIn({})).toBe(true);
+    expect(isClusterOptedIn(undefined)).toBe(true);
   });
 });
