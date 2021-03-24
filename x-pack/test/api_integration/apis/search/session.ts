@@ -303,7 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it.skip('should complete session when searches complete', async () => {
+    it('should complete session when searches complete', async () => {
       const sessionId = `my-session-${Math.random()}`;
 
       // run search
@@ -376,9 +376,12 @@ export default function ({ getService }: FtrProviderContext) {
         return true;
       });
 
+      // session refresh interval is 10 seconds, wait to give a chance for status to update
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+
       await retry.waitForWithTimeout(
         'searches eventually complete and session gets into the complete state',
-        15000,
+        5000,
         async () => {
           const resp = await supertest
             .get(`/internal/session/${sessionId}`)
