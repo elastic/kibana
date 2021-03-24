@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(404);
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     describe.skip('sub cases', () => {
       let actionID: string;
       before(async () => {

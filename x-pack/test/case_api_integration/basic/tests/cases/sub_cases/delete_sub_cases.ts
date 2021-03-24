@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // ENABLE_SUB_CASES: remove this outer describe once the case connector feature is completed
+  // ENABLE_CASE_CONNECTOR: remove this outer describe once the case connector feature is completed
   describe('delete_sub_cases disabled routes', () => {
     it('should return a 404 when attempting to access the route and the case connector feature is disabled', async () => {
       await supertest
@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     describe.skip('delete_sub_cases', () => {
       let actionID: string;
       before(async () => {

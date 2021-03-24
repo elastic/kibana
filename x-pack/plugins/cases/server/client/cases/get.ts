@@ -11,7 +11,7 @@ import { CaseResponseRt, CaseResponse, ESCaseAttributes } from '../../../common/
 import { CaseServiceSetup } from '../../services';
 import { countAlertsForID } from '../../common';
 import { createCaseError } from '../../common/error';
-import { ENABLE_SUB_CASES } from '../../../common/constants';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 interface GetParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -37,7 +37,7 @@ export const get = async ({
     let theCase: SavedObject<ESCaseAttributes>;
     let subCaseIds: string[] = [];
 
-    if (ENABLE_SUB_CASES) {
+    if (ENABLE_CASE_CONNECTOR) {
       const [caseInfo, subCasesForCaseId] = await Promise.all([
         caseService.getCase({
           client: savedObjectsClient,
@@ -70,7 +70,7 @@ export const get = async ({
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-      includeSubCaseComments: ENABLE_SUB_CASES && includeSubCaseComments,
+      includeSubCaseComments: ENABLE_CASE_CONNECTOR && includeSubCaseComments,
     });
 
     return CaseResponseRt.encode(

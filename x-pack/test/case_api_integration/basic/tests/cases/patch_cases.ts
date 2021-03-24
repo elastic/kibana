@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(404);
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('should 400 and not allow converting a collection back to an individual case', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('should allow converting an individual case to a collection when it does not have alerts', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
@@ -236,7 +236,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip("should 400 when attempting to update a collection case's status", async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)

@@ -912,7 +912,7 @@ describe('case connector', () => {
     }
   });
 
-  // ENABLE_SUB_CASES: enable these tests after the case connector feature is completed
+  // ENABLE_CASE_CONNECTOR: enable these tests after the case connector feature is completed
   describe.skip('execute', () => {
     it('allows only supported sub-actions', async () => {
       expect.assertions(2);

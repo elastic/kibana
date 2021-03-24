@@ -227,7 +227,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('400s when adding an alert to a collection case', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
@@ -386,7 +386,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.message).to.contain('subCaseId');
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     describe.skip('sub case comments', () => {
       let actionID: string;
       before(async () => {

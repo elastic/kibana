@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASE_DETAILS_URL, ENABLE_SUB_CASES } from '../../../../common/constants';
+import { CASE_DETAILS_URL, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
 
 export function initGetCaseApi({ router, logger }: RouteDeps) {
   router.get(
@@ -28,7 +28,7 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        if (!ENABLE_SUB_CASES && request.query.includeSubCaseComments !== undefined) {
+        if (!ENABLE_CASE_CONNECTOR && request.query.includeSubCaseComments !== undefined) {
           throw Boom.badRequest(
             'The `subCaseId` is not supported when the case connector feature is disabled'
           );

@@ -36,7 +36,10 @@ import { CommentableCase, createAlertUpdateRequest } from '../../common';
 import { CasesClientHandler } from '..';
 import { createCaseError } from '../../common/error';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
-import { ENABLE_SUB_CASES, MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
+import {
+  ENABLE_CASE_CONNECTOR,
+  MAX_GENERATED_ALERTS_PER_SUB_CASE,
+} from '../../../common/constants';
 
 async function getSubCase({
   caseService,
@@ -224,7 +227,7 @@ async function getCombinedCase({
       client,
       id,
     }),
-    ...(ENABLE_SUB_CASES
+    ...(ENABLE_CASE_CONNECTOR
       ? [
           service.getSubCase({
             client,
@@ -291,7 +294,7 @@ export const addComment = async ({
   );
 
   if (isCommentRequestTypeGenAlert(comment)) {
-    if (!ENABLE_SUB_CASES) {
+    if (!ENABLE_CASE_CONNECTOR) {
       throw Boom.badRequest(
         'Attempting to add a generated alert when case connector feature is disabled'
       );

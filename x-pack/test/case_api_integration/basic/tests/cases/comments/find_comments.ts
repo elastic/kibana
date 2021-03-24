@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.message).to.contain('subCaseId');
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     describe.skip('sub case comments', () => {
       let actionID: string;
       before(async () => {

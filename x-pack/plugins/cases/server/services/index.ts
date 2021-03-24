@@ -34,7 +34,7 @@ import {
   caseTypeField,
   CasesFindRequest,
 } from '../../common/api';
-import { ENABLE_SUB_CASES } from '../../common/constants';
+import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
 import {
@@ -283,7 +283,7 @@ export class CaseService implements CaseServiceSetup {
       options: caseOptions,
     });
 
-    const subCasesResp = ENABLE_SUB_CASES
+    const subCasesResp = ENABLE_CASE_CONNECTOR
       ? await this.findSubCasesGroupByCase({
           client,
           options: subCaseOptions,
@@ -410,7 +410,7 @@ export class CaseService implements CaseServiceSetup {
 
     let subCasesTotal = 0;
 
-    if (ENABLE_SUB_CASES && subCaseOptions) {
+    if (ENABLE_CASE_CONNECTOR && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
         client,
         options: subCaseOptions,

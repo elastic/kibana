@@ -29,13 +29,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  // ENABLE_SUB_CASES: remove this outer describe once the case connector feature is completed
+  // ENABLE_CASE_CONNECTOR: remove this outer describe once the case connector feature is completed
   describe('find_sub_cases disabled route', () => {
     it('should return a 404 when attempting to access the route and the case connector feature is disabled', async () => {
       await supertest.get(`${getSubCasesUrl('case-id')}/_find`).expect(404);
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     describe.skip('find_sub_cases', () => {
       let actionID: string;
       before(async () => {

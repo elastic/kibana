@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('should return 200 when creating a case action successfully', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/action')

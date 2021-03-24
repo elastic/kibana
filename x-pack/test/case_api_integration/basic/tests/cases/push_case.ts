@@ -234,7 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.status).to.eql('closed');
     });
 
-    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
     it.skip('should push a collection case but not close it when closure_type: close-by-pushing', async () => {
       const { body: connector } = await supertest
         .post('/api/actions/action')

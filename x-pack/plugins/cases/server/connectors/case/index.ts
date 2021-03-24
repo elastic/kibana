@@ -27,7 +27,7 @@ import * as i18n from './translations';
 import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
 import { nullUser } from '../../common';
 import { createCaseError } from '../../common/error';
-import { ENABLE_SUB_CASES } from '../../../common/constants';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
@@ -71,7 +71,7 @@ async function executor(
   }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
-  if (!ENABLE_SUB_CASES) {
+  if (!ENABLE_CASE_CONNECTOR) {
     const msg = '[Action][Case] connector not supported';
     logger.error(msg);
     throw new Error(msg);

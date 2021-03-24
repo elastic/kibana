@@ -11,7 +11,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASES_URL, ENABLE_SUB_CASES } from '../../../../common/constants';
+import { CASES_URL, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
 import { CaseServiceSetup } from '../../../services';
 
 async function deleteSubCases({
@@ -91,7 +91,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
           );
         }
 
-        if (ENABLE_SUB_CASES) {
+        if (ENABLE_CASE_CONNECTOR) {
           await deleteSubCases({ caseService, client, caseIds: request.query.ids });
         }
 
@@ -113,7 +113,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
                 'status',
                 'tags',
                 'title',
-                ...(ENABLE_SUB_CASES ? ['sub_case'] : []),
+                ...(ENABLE_CASE_CONNECTOR ? ['sub_case'] : []),
               ],
             })
           ),

@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { escapeHatch, wrapError } from '../../utils';
 import { RouteDeps } from '../../types';
-import { CASE_COMMENTS_URL, ENABLE_SUB_CASES } from '../../../../../common/constants';
+import { CASE_COMMENTS_URL, ENABLE_CASE_CONNECTOR } from '../../../../../common/constants';
 import { CommentRequest } from '../../../../../common/api';
 
 export function initPostCommentApi({ router, logger }: RouteDeps) {
@@ -30,7 +30,7 @@ export function initPostCommentApi({ router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        if (!ENABLE_SUB_CASES && request.query?.subCaseId !== undefined) {
+        if (!ENABLE_CASE_CONNECTOR && request.query?.subCaseId !== undefined) {
           throw Boom.badRequest(
             'The `subCaseId` is not supported when the case connector feature is disabled'
           );
