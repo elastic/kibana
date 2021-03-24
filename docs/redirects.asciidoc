@@ -302,3 +302,9 @@ This content has moved. See {ref}/ingest.html[Ingest pipelines].
 == Timelion
 
 This content has moved. refer to <<timelion>>.
+
+[role="exclude",id="breaking-changes"]
+== Breaking changes
+
+This content has moved. Refer to <<release-notes, Release notes>>.
+
