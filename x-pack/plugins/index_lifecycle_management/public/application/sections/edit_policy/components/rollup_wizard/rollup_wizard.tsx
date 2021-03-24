@@ -54,7 +54,7 @@ import {
 
 const stepIdToTitleMap: Record<string, string> = {
   [STEP_DATE_HISTOGRAM]: i18n.translate(
-    'xpack.indexLifecycleMgmt.rollupJob.create.steps.stepDateHistogramTitle',
+    'xpack.indexLifecycleMgmt.rollup.create.steps.stepDateHistogramTitle',
     {
       defaultMessage: 'Date histogram',
     }

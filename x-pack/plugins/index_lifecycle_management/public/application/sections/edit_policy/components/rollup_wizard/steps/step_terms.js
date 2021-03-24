@@ -56,7 +56,7 @@ export class StepTerms extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" data-test-subj="rollupJobCreateTermsTitle">
+            <EuiTitle size="s" data-test-subj="rollupCreateTermsTitle">
               <h2>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.create.stepTermsTitle"
@@ -105,14 +105,14 @@ export class StepTerms extends Component {
               columns={columns}
               selectedFields={terms}
               onSelectField={this.onSelectField}
-              dataTestSubj="rollupJobTermsFieldChooser"
+              dataTestSubj="rollupTermsFieldChooser"
               includeFieldTypes={{
                 keyword: true,
                 numeric: true,
               }}
             />
           }
-          dataTestSubj="rollupJobTermsFieldList"
+          dataTestSubj="rollupTermsFieldList"
         />
       </Fragment>
     );

@@ -71,7 +71,7 @@ export class StepHistogram extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" data-test-subj="rollupJobCreateHistogramTitle">
+            <EuiTitle size="s" data-test-subj="rollupCreateHistogramTitle">
               <h2>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.create.stepHistogramTitle"
@@ -111,13 +111,13 @@ export class StepHistogram extends Component {
               columns={columns}
               selectedFields={histogram}
               onSelectField={this.onSelectField}
-              dataTestSubj="rollupJobHistogramFieldChooser"
+              dataTestSubj="rollupHistogramFieldChooser"
               includeFieldTypes={{
                 numeric: true,
               }}
             />
           }
-          dataTestSubj="rollupJobHistogramFieldList"
+          dataTestSubj="rollupHistogramFieldList"
         />
 
         {this.renderInterval()}
@@ -180,7 +180,7 @@ export class StepHistogram extends Component {
               onChange={(e) => onFieldsChange({ histogramInterval: e.target.value })}
               isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
               fullWidth
-              data-test-subj="rollupJobCreateHistogramInterval"
+              data-test-subj="rollupCreateHistogramInterval"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>

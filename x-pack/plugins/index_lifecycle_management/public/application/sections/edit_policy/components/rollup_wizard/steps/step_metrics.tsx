@@ -156,7 +156,7 @@ export class StepMetrics extends Component<Props, State> {
         return (
           <EuiCheckbox
             id={`${idx}-select-all-checkbox`}
-            data-test-subj={`rollupJobMetricsSelectAllCheckbox-${metricType}`}
+            data-test-subj={`rollupMetricsSelectAllCheckbox-${metricType}`}
             disabled={isDisabled}
             label={label}
             checked={!isDisabled && isChecked}
@@ -194,7 +194,7 @@ export class StepMetrics extends Component<Props, State> {
             <EuiButton
               disabled={allCheckboxesDisabled}
               onClick={this.openMetricsPopover}
-              data-test-subj="rollupJobSelectAllMetricsPopoverButton"
+              data-test-subj="rollupSelectAllMetricsPopoverButton"
             >
               {i18n.translate(
                 'xpack.indexLifecycleMgmt.rollup.create.stepMetrics.selectAllPopoverButtonLabel',
@@ -240,7 +240,7 @@ export class StepMetrics extends Component<Props, State> {
     return (
       <EuiCheckbox
         id={`${fieldName}-selectAll-checkbox`}
-        data-test-subj="rollupJobMetricsCheckbox-selectAll"
+        data-test-subj="rollupMetricsCheckbox-selectAll"
         label={label}
         checked={allSelected}
         onChange={onChange}
@@ -265,7 +265,7 @@ export class StepMetrics extends Component<Props, State> {
             <EuiFlexItem grow={false} key={`${fieldName}-${type}-checkbox`}>
               <EuiCheckbox
                 id={`${fieldName}-${type}-checkbox`}
-                data-test-subj={`rollupJobMetricsCheckbox-${type}`}
+                data-test-subj={`rollupMetricsCheckbox-${type}`}
                 label={label}
                 checked={isSelected}
                 onChange={() =>
@@ -361,7 +361,7 @@ export class StepMetrics extends Component<Props, State> {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" data-test-subj="rollupJobCreateMetricsTitle">
+            <EuiTitle size="s" data-test-subj="rollupCreateMetricsTitle">
               <h2>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.rollup.create.stepMetricsTitle"
@@ -412,7 +412,7 @@ export class StepMetrics extends Component<Props, State> {
                   columns={StepMetrics.chooserColumns}
                   selectedFields={metrics}
                   onSelectField={this.onSelectField}
-                  dataTestSubj="rollupJobMetricsFieldChooser"
+                  dataTestSubj="rollupMetricsFieldChooser"
                   includeFieldTypes={{
                     date: true,
                     numeric: true,
@@ -422,7 +422,7 @@ export class StepMetrics extends Component<Props, State> {
               <EuiFlexItem>{this.getMetricsSelectAllMenu()}</EuiFlexItem>
             </EuiFlexGroup>
           }
-          dataTestSubj="rollupJobMetricsFieldList"
+          dataTestSubj="rollupMetricsFieldList"
         />
 
         {this.renderErrors()}

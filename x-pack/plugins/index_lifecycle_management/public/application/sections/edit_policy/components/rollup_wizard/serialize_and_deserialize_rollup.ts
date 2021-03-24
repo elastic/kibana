@@ -133,7 +133,7 @@ export function deserializeRollup(rollupAction: RollupAction['config']): Interna
     }
   }
 
-  const deserializedJob: InternalRollup = {
+  const deserializedRollup: InternalRollup = {
     dateHistogramIntervalType,
     dateHistogramInterval,
     rollupDelay,
@@ -146,7 +146,7 @@ export function deserializeRollup(rollupAction: RollupAction['config']): Interna
 
   if (metrics) {
     metrics.forEach(({ field, metrics: innerMetrics }) => {
-      deserializedJob.metrics.push({
+      deserializedRollup.metrics.push({
         name: field,
         types: innerMetrics,
       });
@@ -154,13 +154,13 @@ export function deserializeRollup(rollupAction: RollupAction['config']): Interna
   }
 
   if (terms) {
-    deserializedJob.terms = terms.fields.map((name) => ({ name }));
+    deserializedRollup.terms = terms.fields.map((name) => ({ name }));
   }
 
   if (histogram) {
-    deserializedJob.histogram = histogram.fields.map((name) => ({ name }));
-    deserializedJob.histogramInterval = histogram.interval;
+    deserializedRollup.histogram = histogram.fields.map((name) => ({ name }));
+    deserializedRollup.histogramInterval = histogram.interval;
   }
 
-  return deserializedJob;
+  return deserializedRollup;
 }

@@ -21,7 +21,7 @@ interface Props {
 export const StepReview: FunctionComponent<Props> = ({ rollupAction }) => {
   return (
     <>
-      <EuiTitle size="s" data-test-subj="rollupJobCreateReviewTitle">
+      <EuiTitle size="s" data-test-subj="rollupCreateReviewTitle">
         <h2>
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.rollup.create.stepReviewTitle"
