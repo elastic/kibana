@@ -66,28 +66,30 @@ export default function ({ getService }: FtrProviderContext) {
       let response: null | UncommonProcessesResponse = null;
 
       before(async () => {
-        response = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
-            factoryQueryType: HostsQueries.uncommonProcesses,
-            sourceId: 'default',
-            timerange: {
-              interval: '12h',
-              to: TO,
-              from: FROM,
-            },
-            pagination: {
-              activePage: 0,
-              cursorStart: 0,
-              fakePossibleCount: 3,
-              querySize: 2,
-            },
-            defaultIndex: ['auditbeat-uncommon-processes'],
-            docValueFields: [],
-            inspect: false,
-            wait_for_completion_timeout: '10s',
-          });
+        await retry.try(async () => {
+          response = await supertest
+            .post('/internal/search/securitySolutionSearchStrategy/')
+            .set('kbn-xsrf', 'true')
+            .send({
+              factoryQueryType: HostsQueries.uncommonProcesses,
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              pagination: {
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 3,
+                querySize: 2,
+              },
+              defaultIndex: ['auditbeat-uncommon-processes'],
+              docValueFields: [],
+              inspect: false,
+              wait_for_completion_timeout: '10s',
+            });
+        });
       });
       it('should return an edge of length 2 ', () => {
         expect(response!.body.edges.length).to.be(2);
