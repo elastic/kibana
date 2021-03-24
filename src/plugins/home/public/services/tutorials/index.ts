@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export {
-  TutorialService,
+export { TutorialService } from './tutorial_service';
+
+export type {
   TutorialVariables,
   TutorialServiceSetup,
   TutorialDirectoryNoticeComponent,

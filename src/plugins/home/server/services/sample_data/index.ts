@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-export {
-  SampleDataRegistry,
-  SampleDataRegistrySetup,
-  SampleDataRegistryStart,
-} from './sample_data_registry';
+export { SampleDataRegistry } from './sample_data_registry';
 
-export { SampleDatasetSchema, SampleDatasetProvider } from './lib/sample_dataset_registry_types';
+export type { SampleDataRegistrySetup, SampleDataRegistryStart } from './sample_data_registry';
+
+export type {
+  SampleDatasetSchema,
+  SampleDatasetProvider,
+} from './lib/sample_dataset_registry_types';
