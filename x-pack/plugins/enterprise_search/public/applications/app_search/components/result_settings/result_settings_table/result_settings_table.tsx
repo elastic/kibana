@@ -8,6 +8,8 @@ import React from 'react';
 
 import { EuiTable } from '@elastic/eui';
 
+import { ResultSettingsNonTextFieldsBody } from './result_settings_non_text_fields_body';
+import { ResultSettingsNonTextFieldsHeader } from './result_settings_non_text_fields_header';
 import { ResultSettingsTextFieldsBody } from './result_settings_text_fields_body';
 import { ResultSettingsTextFieldsHeader } from './result_settings_text_fields_header';
 
@@ -16,6 +18,8 @@ export const ResultSettingsTable: React.FC = () => {
     <EuiTable className="resultSettingsTable" responsive={false}>
       <ResultSettingsTextFieldsHeader />
       <ResultSettingsTextFieldsBody />
+      <ResultSettingsNonTextFieldsHeader />
+      <ResultSettingsNonTextFieldsBody />
     </EuiTable>
   );
 };
