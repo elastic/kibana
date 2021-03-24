@@ -514,7 +514,7 @@
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
-              ">, \"type\" | \"id\" | \"description\" | \"title\" | \"params\" | \"uiState\"> & Pick<{ data: Partial<",
+              ">, \"type\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\"> & Pick<{ data: Partial<",
               {
                 "pluginId": "visualizations",
                 "scope": "public",
@@ -530,7 +530,7 @@
                 "section": "def-public.SerializedVisData",
                 "text": "SerializedVisData"
               },
-              ">; }, never>, \"type\" | \"id\" | \"data\" | \"description\" | \"title\" | \"params\" | \"uiState\">) => Promise<void>"
+              ">; }, never>, \"type\" | \"data\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\">) => Promise<void>"
             ],
             "description": [],
             "children": [
@@ -555,7 +555,7 @@
                     "section": "def-common.VisParams",
                     "text": "VisParams"
                   },
-                  ">, \"type\" | \"id\" | \"description\" | \"title\" | \"params\" | \"uiState\"> & Pick<{ data: Partial<",
+                  ">, \"type\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\"> & Pick<{ data: Partial<",
                   {
                     "pluginId": "visualizations",
                     "scope": "public",
@@ -571,7 +571,7 @@
                     "section": "def-public.SerializedVisData",
                     "text": "SerializedVisData"
                   },
-                  ">; }, never>, \"type\" | \"id\" | \"data\" | \"description\" | \"title\" | \"params\" | \"uiState\">"
+                  ">; }, never>, \"type\" | \"data\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\">"
                 ],
                 "description": [],
                 "source": {
