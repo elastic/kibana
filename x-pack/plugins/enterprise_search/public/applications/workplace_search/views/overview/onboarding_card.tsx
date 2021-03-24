@@ -18,7 +18,7 @@ import {
   IconType,
 } from '@elastic/eui';
 
-import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 
 interface OnboardingCardProps {
@@ -49,9 +49,9 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
     });
 
   const completeButton = actionPath ? (
-    <EuiButtonEmptyTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill={true}>
+    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill={true}>
       {actionTitle}
-    </EuiButtonEmptyTo>
+    </EuiButtonTo>
   ) : (
     <EuiButtonEmpty data-test-subj={testSubj}>{actionTitle}</EuiButtonEmpty>
   );
