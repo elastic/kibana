@@ -97,5 +97,39 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         params: [],
       });
     });
+
+    describe('legacy', () => {
+      it('should return 200 with list of alert types', async () => {
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/list_alert_types`
+        );
+        expect(response.status).to.eql(200);
+        const { authorizedConsumers, ...fixtureAlertType } = response.body.find(
+          (alertType: any) => alertType.id === 'test.noop'
+        );
+        expect(fixtureAlertType).to.eql({
+          actionGroups: [
+            { id: 'default', name: 'Default' },
+            { id: 'recovered', name: 'Recovered' },
+          ],
+          defaultActionGroupId: 'default',
+          id: 'test.noop',
+          name: 'Test: Noop',
+          actionVariables: {
+            state: [],
+            params: [],
+            context: [],
+          },
+          recoveryActionGroup: {
+            id: 'recovered',
+            name: 'Recovered',
+          },
+          producer: 'alertsFixture',
+          minimumLicenseRequired: 'basic',
+          enabledInLicense: true,
+        });
+        expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
+      });
+    });
   });
 }
