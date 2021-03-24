@@ -127,7 +127,6 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     },
 
     async assertAnomalyExplorerChartsCount(expectedChartsCount: number) {
-      await testSubjects.existOrFail('mlExplorerChartsContainer');
       const chartsContainer = await testSubjects.find('mlExplorerChartsContainer');
       const actualChartsCount = (
         await chartsContainer.findAllByClassName('ml-explorer-chart-container')

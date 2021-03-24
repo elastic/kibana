@@ -178,6 +178,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('checking page state before the cell selection');
           await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
           await ml.anomaliesTable.assertTableRowsCount(25);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
 
           await ml.testExecution.logTestStep('clicks on the Overall swim lane cell');
           const sampleCell = (await ml.swimLane.getCells(overallSwimLaneTestSubj))[0];
@@ -206,16 +208,17 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('updates the URL state');
           await ml.navigation.assertCurrentURLContains(
-            "/app/ml/explorer?_g=(ml%3A(jobIds%3A!(fq_multi_1_ae))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2016-02-07T00%3A00%3A00.000Z'%2Cto%3A'2016-02-11T23%3A59%3A54.000Z'))&_a=(explorer%3A(mlExplorerFilter%3A()%2CmlExplorerSwimlane%3A(selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1454846400%2C1454860800)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t%2CviewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10))%2Cquery%3A(query_string%3A(analyze_wildcard%3A!t%2Cquery%3A'*')))"
+            'selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1454846400%2C1454860800)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t%2CviewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10'
           );
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
-          await ml.navigation.assertCurrentURLContains(
-            "/app/ml/explorer?_g=(ml%3A(jobIds%3A!(fq_multi_1_ae))%2CrefreshInterval%3A(display%3AOff%2Cpause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3A'2016-02-07T00%3A00%3A00.000Z'%2Cto%3A'2016-02-11T23%3A59%3A54.000Z'))&_a=(explorer%3A(mlExplorerFilter%3A()%2CmlExplorerSwimlane%3A(viewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10))%2Cquery%3A(query_string%3A(analyze_wildcard%3A!t%2Cquery%3A'*')))"
+          await ml.navigation.assertCurrentURLNotContain(
+            'selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1454846400%2C1454860800)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t%2CviewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10'
           );
-          await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
           await ml.anomaliesTable.assertTableRowsCount(25);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
         });
 
         it('allows to change the swim lane pagination', async () => {
@@ -236,20 +239,30 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.swimLane.assertActivePage(viewBySwimLaneTestSubj, 1);
         });
 
-        it('support cell selection by click on View By swim lane', async () => {
+        it('supports cell selection by click on View By swim lane', async () => {
+          await ml.testExecution.logTestStep('checking page state before the cell selection');
+          await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
+          await ml.anomaliesTable.assertTableRowsCount(25);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
+
           await ml.testExecution.logTestStep('clicks on the View By swim lane cell');
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
           const sampleCell = (await ml.swimLane.getCells(viewBySwimLaneTestSubj))[0];
-
           await ml.swimLane.selectSingleCell(viewBySwimLaneTestSubj, {
             x: sampleCell.x + cellSize,
             y: sampleCell.y + cellSize,
           });
 
+          await ml.testExecution.logTestStep('check page content');
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
             x: [1454817600000, 1454832000000],
             y: ['AAL'],
           });
+
+          await ml.anomaliesTable.assertTableRowsCount(1);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 1);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(1);
 
           await ml.testExecution.logTestStep('highlights the Overall swim lane');
           await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
@@ -259,9 +272,18 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
+          await ml.anomaliesTable.assertTableRowsCount(25);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
         });
 
         it('supports cell selection by brush action', async () => {
+          await ml.testExecution.logTestStep('checking page state before the cell selection');
+          await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
+          await ml.anomaliesTable.assertTableRowsCount(25);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
+
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
           const cells = await ml.swimLane.getCells(viewBySwimLaneTestSubj);
 
@@ -281,8 +303,15 @@ export default function ({ getService }: FtrProviderContext) {
             y: ['AAL', 'VRD'],
           });
 
+          await ml.anomaliesTable.assertTableRowsCount(2);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 2);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(2);
+
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
+          await ml.anomaliesTable.assertTableRowsCount(25);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
+          await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
         });
 
         it('adds swim lane embeddable to a dashboard', async () => {
