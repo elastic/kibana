@@ -31,14 +31,9 @@ export function registerResolveIndexRoute(router: IRouter): void {
       },
     },
     async (context, req, res) => {
-      const queryString = req.query.expand_wildcards
-        ? { expand_wildcards: req.query.expand_wildcards }
-        : null;
-      const { body } = await context.core.elasticsearch.client.asCurrentUser.transport.request({
-        method: 'GET',
-        path: `/_resolve/index/${encodeURIComponent(req.params.query)}${
-          queryString ? '?' + new URLSearchParams(queryString).toString() : ''
-        }`,
+      const { body } = await context.core.elasticsearch.client.asCurrentUser.indices.resolveIndex({
+        name: req.params.query,
+        expand_wildcards: req.query.expand_wildcards || 'open',
       });
       return res.ok({ body });
     }
