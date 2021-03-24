@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { DrawControl } from './draw_control';
-export { DrawCircleProperties } from './draw_circle';
+export { DrawFilterControl } from './draw_filter_control';

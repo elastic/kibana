@@ -17,7 +17,7 @@ import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { DrawFilterControl } from './draw_filter_control';
+import { DrawFilterControl } from './draw_control';
 import { ScaleControl } from './scale_control';
 // @ts-expect-error
 import { TooltipControl } from './tooltip_control';

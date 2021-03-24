@@ -6,21 +6,26 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Component } from 'react';
 import { Map as MbMap } from 'mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { Filter } from 'src/plugins/data/public';
 import { Feature, Polygon } from 'geojson';
-import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
-import { DrawState } from '../../../../common/descriptor_types';
+import {
+  DRAW_TYPE,
+  ES_GEO_FIELD_TYPE,
+  ES_SPATIAL_RELATIONS,
+} from '../../../../../common/constants';
+import { DrawState } from '../../../../../common/descriptor_types';
 import {
   createDistanceFilterWithMeta,
   createSpatialFilterWithGeometry,
   getBoundingBoxGeometry,
   roundCoordinates,
-} from '../../../../common/elasticsearch_util';
-import { getToasts } from '../../../kibana_services';
-import { DrawControl, DrawCircleProperties } from '../draw_control';
+} from '../../../../../common/elasticsearch_util';
+import { getToasts } from '../../../../kibana_services';
+import { DrawControl } from '../draw_control';
+import { DrawCircleProperties } from '../draw_circle';
 
 export interface Props {
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;
@@ -30,19 +35,19 @@ export interface Props {
   mbMap: MbMap;
 }
 
-export function DrawFilterControl(props: Props) {
-  async function onDraw(e: { features: Feature[] }) {
+export class DrawFilterControl extends Component<Props, {}> {
+  _onDraw = async (e: { features: Feature[] }) => {
     if (
       !e.features.length ||
-      !props.drawState ||
-      !props.drawState.geoFieldName ||
-      !props.drawState.indexPatternId
+      !this.props.drawState ||
+      !this.props.drawState.geoFieldName ||
+      !this.props.drawState.indexPatternId
     ) {
       return;
     }
 
     let filter: Filter | undefined;
-    if (props.drawState.drawType === DRAW_TYPE.DISTANCE) {
+    if (this.props.drawState.drawType === DRAW_TYPE.DISTANCE) {
       const circle = e.features[0] as Feature & { properties: DrawCircleProperties };
       const distanceKm = _.round(
         circle.properties.radiusKm,
@@ -58,10 +63,10 @@ export function DrawFilterControl(props: Props) {
         precision = 3;
       }
       filter = createDistanceFilterWithMeta({
-        alias: props.drawState.filterLabel ? props.drawState.filterLabel : '',
+        alias: this.props.drawState.filterLabel ? this.props.drawState.filterLabel : '',
         distanceKm,
-        geoFieldName: props.drawState.geoFieldName,
-        indexPatternId: props.drawState.indexPatternId,
+        geoFieldName: this.props.drawState.geoFieldName,
+        indexPatternId: this.props.drawState.indexPatternId,
         point: [
           _.round(circle.properties.center[0], precision),
           _.round(circle.properties.center[1], precision),
@@ -74,23 +79,23 @@ export function DrawFilterControl(props: Props) {
 
       filter = createSpatialFilterWithGeometry({
         geometry:
-          props.drawState.drawType === DRAW_TYPE.BOUNDS
+          this.props.drawState.drawType === DRAW_TYPE.BOUNDS
             ? getBoundingBoxGeometry(geometry)
             : geometry,
-        indexPatternId: props.drawState.indexPatternId,
-        geoFieldName: props.drawState.geoFieldName,
-        geoFieldType: props.drawState.geoFieldType
-          ? props.drawState.geoFieldType
+        indexPatternId: this.props.drawState.indexPatternId,
+        geoFieldName: this.props.drawState.geoFieldName,
+        geoFieldType: this.props.drawState.geoFieldType
+          ? this.props.drawState.geoFieldType
           : ES_GEO_FIELD_TYPE.GEO_POINT,
-        geometryLabel: props.drawState.geometryLabel ? props.drawState.geometryLabel : '',
-        relation: props.drawState.relation
-          ? props.drawState.relation
+        geometryLabel: this.props.drawState.geometryLabel ? this.props.drawState.geometryLabel : '',
+        relation: this.props.drawState.relation
+          ? this.props.drawState.relation
           : ES_SPATIAL_RELATIONS.INTERSECTS,
       });
     }
 
     try {
-      await props.addFilters([filter!], props.drawState.actionId);
+      await this.props.addFilters([filter!], this.props.drawState.actionId);
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawControl.unableToCreatFilter', {
@@ -101,15 +106,21 @@ export function DrawFilterControl(props: Props) {
         })
       );
     } finally {
-      props.disableDrawState();
+      this.props.disableDrawState();
     }
-  }
+  };
 
-  return (
-    <DrawControl
-      drawType={props.isDrawingFilter && props.drawState ? props.drawState.drawType : undefined}
-      onDraw={onDraw}
-      mbMap={props.mbMap}
-    />
-  );
+  render() {
+    return (
+      <DrawControl
+        drawType={
+          this.props.isDrawingFilter && this.props.drawState
+            ? this.props.drawState.drawType
+            : undefined
+        }
+        onDraw={this._onDraw}
+        mbMap={this.props.mbMap}
+      />
+    );
+  }
 }
