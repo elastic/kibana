@@ -13,7 +13,7 @@ import Joi from 'joi';
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
-// it will find for --inspect and --inspect-brk
+// it will search both --inspect and --inspect-brk
 const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
 const urlPartsSchema = () =>
