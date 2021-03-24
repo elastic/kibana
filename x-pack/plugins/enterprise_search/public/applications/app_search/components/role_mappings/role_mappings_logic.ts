@@ -48,7 +48,7 @@ const getFirstAttributeName = (roleMapping: ASRoleMapping) =>
 const getFirstAttributeValue = (roleMapping: ASRoleMapping) =>
   Object.entries(roleMapping.rules)[0][1] as AttributeName;
 
-export interface RoleMappingsActions {
+interface RoleMappingsActions {
   handleAccessAllEnginesChange(): void;
   handleAuthProviderChange(value: string[]): { value: string[] };
   handleAttributeSelectorChange(
@@ -74,7 +74,7 @@ export interface RoleMappingsActions {
   setRoleMappingsData(data: RoleMappingsServerDetails): RoleMappingsServerDetails;
 }
 
-export interface RoleMappingsValues {
+interface RoleMappingsValues {
   accessAllEngines: boolean;
   attributeName: AttributeName;
   attributeValue: string;

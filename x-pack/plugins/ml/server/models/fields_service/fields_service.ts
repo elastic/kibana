@@ -14,6 +14,7 @@ import { AggCardinality } from '../../../common/types/fields';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
+import { RuntimeMappings } from '../../../common/types/fields';
 
 /**
  * Service for carrying out queries to obtain data
@@ -212,6 +213,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     index: string[] | string,
     timeFieldName: string,
     query: any,
+    runtimeMappings?: RuntimeMappings,
     indicesOptions?: IndicesOptions
   ): Promise<{
     success: boolean;
@@ -239,6 +241,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
             },
           },
         },
+        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
       },
       ...(indicesOptions ?? {}),
     });

@@ -9,7 +9,6 @@
 // @ts-ignore
 import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'src/core/public';
 import {
   euiPaletteColorBlind,
   euiPaletteCool,
@@ -130,7 +129,8 @@ function buildSyncedKibanaPalette(
       colors.mappedColors.mapKeys([series[0].name]);
       outputColor = colors.mappedColors.get(series[0].name);
     } else {
-      outputColor = staticColors[series[0].rankAtDepth % staticColors.length];
+      const configColor = colors.mappedColors.getColorFromConfig(series[0].name);
+      outputColor = configColor || staticColors[series[0].rankAtDepth % staticColors.length];
     }
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
@@ -199,9 +199,8 @@ function buildCustomPalette(): PaletteDefinition {
 }
 
 export const buildPalettes: (
-  uiSettings: IUiSettingsClient,
   legacyColorsService: LegacyColorsService
-) => Record<string, PaletteDefinition> = (uiSettings, legacyColorsService) => {
+) => Record<string, PaletteDefinition> = (legacyColorsService) => {
   return {
     default: {
       title: i18n.translate('charts.palettes.defaultPaletteLabel', {
