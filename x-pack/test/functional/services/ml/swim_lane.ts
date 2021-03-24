@@ -175,8 +175,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
     },
 
     async assertActivePage(testSubj: string, expectedPage: number) {
-      const swimLaneContainer = await testSubjects.find(testSubj);
-      const pagination = await swimLaneContainer.findByTestSubject('mlSwimLanePagination');
+      const pagination = await testSubjects.find(`${testSubj} > mlSwimLanePagination`);
       const activePage = await pagination.findByCssSelector(
         '.euiPaginationButton-isActive .euiButtonEmpty__text'
       );
@@ -185,30 +184,21 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
     },
 
     async assertPageSize(testSubj: string, expectedPageSize: number) {
-      const swimLaneContainer = await testSubjects.find(testSubj);
-      const actualPageSize = await swimLaneContainer.findByTestSubject(expectedPageSize.toString());
+      const actualPageSize = await testSubjects.find(
+        `${testSubj} > ${expectedPageSize.toString()}`
+      );
       expect(await actualPageSize.isDisplayed()).to.be(true);
     },
 
     async selectPage(testSubj: string, page: number) {
-      const swimLaneContainer = await testSubjects.find(testSubj);
-      const el = await swimLaneContainer.findByTestSubject(`pagination-button-${page - 1}`);
-      await el.click();
+      await testSubjects.click(`${testSubj} > pagination-button-${page - 1}`);
       await this.assertActivePage(testSubj, page);
     },
 
     async setPageSize(testSubj: string, rowsCount: 5 | 10 | 20 | 50 | 100) {
-      const swimLaneContainer = await testSubjects.find(testSubj);
-      const paginationControl = await swimLaneContainer.findByTestSubject(
-        'mlSwimLanePageSizeControl'
-      );
-
-      await paginationControl.click();
-
+      await testSubjects.click(`${testSubj} > mlSwimLanePageSizeControl`);
       await testSubjects.existOrFail('mlSwimLanePageSizePanel');
-      const panel = await testSubjects.find('mlSwimLanePageSizePanel');
-      const button = await panel.findByTestSubject(`${rowsCount} rows`);
-      await button.click();
+      await testSubjects.click(`mlSwimLanePageSizePanel > ${rowsCount} rows`);
       await this.assertPageSize(testSubj, rowsCount);
     },
   };
