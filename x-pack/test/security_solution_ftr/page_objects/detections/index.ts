@@ -37,7 +37,8 @@ export function DetectionsPageProvider({ getService, getPageObjects }: FtrProvid
     async addEqlQuery(query: string): Promise<void> {
       await testSubjects.setValue(
         'detectionEngineStepDefineRuleEqlQueryBar > eqlQueryBarTextInput',
-        query
+        query,
+        topOffset
       );
     }
 
@@ -48,7 +49,8 @@ export function DetectionsPageProvider({ getService, getPageObjects }: FtrProvid
     }
 
     async openImportQueryModal(): Promise<void> {
-      await testSubjects.click('importQueryFromSavedTimeline');
+      const element = await testSubjects.find('importQueryFromSavedTimeline');
+      await element.click(500);
       await testSubjects.exists('open-timeline-modal-body-filter-default');
     }
 
@@ -91,10 +93,11 @@ export function DetectionsPageProvider({ getService, getPageObjects }: FtrProvid
       name: string = 'test rule name',
       description: string = 'test rule description'
     ): Promise<void> {
-      await find.setValue(`[aria-describedby="detectionEngineStepAboutRuleName"]`, name);
+      await find.setValue(`[aria-describedby="detectionEngineStepAboutRuleName"]`, name, 500);
       await find.setValue(
         `[aria-describedby="detectionEngineStepAboutRuleDescription"]`,
-        description
+        description,
+        500
       );
     }
 
@@ -110,7 +113,12 @@ export function DetectionsPageProvider({ getService, getPageObjects }: FtrProvid
     }
 
     async preview(): Promise<void> {
-      await common.clickAndValidate('queryPreviewButton', 'queryPreviewCustomHistogram');
+      await common.clickAndValidate(
+        'queryPreviewButton',
+        'queryPreviewCustomHistogram',
+        undefined,
+        500
+      );
     }
 
     async continue(prefix: string): Promise<void> {
@@ -118,7 +126,7 @@ export function DetectionsPageProvider({ getService, getPageObjects }: FtrProvid
     }
 
     async addCustomQuery(query: string): Promise<void> {
-      await testSubjects.setValue('queryInput', query);
+      await testSubjects.setValue('queryInput', query, undefined, 500);
     }
 
     async selectMLRule(): Promise<void> {
@@ -134,7 +142,7 @@ export function DetectionsPageProvider({ getService, getPageObjects }: FtrProvid
     }
 
     async selectThresholdRule(): Promise<void> {
-      await common.clickAndValidate('thresholdRuleType', 'mlJobSelect');
+      await common.clickAndValidate('thresholdRuleType', 'input');
     }
 
     private async navigateToDetectionsPage(path: string = ''): Promise<void> {

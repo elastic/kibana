@@ -471,9 +471,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async clickAndValidate(
       clickTarget: string,
       validator: string,
-      isValidatorCssString: boolean = false
+      isValidatorCssString: boolean = false,
+      topOffset?: number
     ) {
-      await testSubjects.click(clickTarget);
+      await testSubjects.click(clickTarget, undefined, topOffset);
       const validate = isValidatorCssString ? find.byCssSelector : testSubjects.exists;
       await validate(validator);
     }

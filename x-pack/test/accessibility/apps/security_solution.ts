@@ -9,13 +9,17 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
-  const browser = getService('browser');
+  const security = getService('security');
   const { common, detections } = getPageObjects(['common', 'detections']);
 
   describe('Security Solution', () => {
     before(async () => {
+      await security.testUser.setRoles(['superuser'], false);
       await common.navigateToApp('security');
-      await browser.setWindowSize(1600, 1200);
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults(false);
     });
 
     describe('Detections', () => {
@@ -25,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         describe('Custom Query Rule', () => {
-          describe('First Step', () => {
+          describe('Define Step', () => {
             it('default view meets a11y requirements', async () => {
               await a11y.testAppSnapshot();
             });
@@ -37,6 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               });
 
               it('contents of the templates tab meets a11y requirements', async () => {
+                await common.scrollKibanaBodyTop();
                 await detections.openImportQueryModal();
                 await detections.viewTemplatesInImportQueryModal();
                 await a11y.testAppSnapshot();
@@ -49,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               await a11y.testAppSnapshot();
             });
 
-            describe('Second Step', () => {
+            describe('About Step', () => {
               beforeEach(async () => {
                 await detections.addCustomQuery('_id');
                 await detections.continue('define');
@@ -64,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 await a11y.testAppSnapshot();
               });
 
-              describe('Third Step', () => {
+              describe('Schedule Step', () => {
                 beforeEach(async () => {
                   await detections.addNameAndDescription();
                   await detections.continue('about');
@@ -74,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   await a11y.testAppSnapshot();
                 });
 
-                describe('Fourth Step', () => {
+                describe('Actions Step', () => {
                   it('meets a11y requirements', async () => {
                     await detections.continue('schedule');
                     await a11y.testAppSnapshot();
@@ -114,13 +119,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           it('default view meets a11y requirements', async () => {
-            await a11y.testAppSnapshot();
-          });
-
-          it('preview section meets a11y requirements', async () => {
-            await detections.replaceIndexPattern();
-            await detections.addEqlQuery('any where true');
-            await detections.preview();
             await a11y.testAppSnapshot();
           });
         });
