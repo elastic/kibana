@@ -19,7 +19,7 @@ import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
 
-export const OPERATION_NAME = 'differences';
+const OPERATION_NAME = 'differences';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.derivativeOf', {
@@ -70,7 +70,7 @@ export const derivativeOperation: OperationDefinition<
     return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
   },
   toExpression: (layer, columnId) => {
-    return dateBasedOperationToExpression(layer, columnId, OPERATION_NAME);
+    return dateBasedOperationToExpression(layer, columnId, 'derivative');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const ref = layer.columns[referenceIds[0]];
