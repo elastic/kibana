@@ -15,8 +15,9 @@ import { mockEngineValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { DocumentDetailLogic } from './document_detail_logic';
 import { InternalSchemaTypes } from '../../../shared/types';
+
+import { DocumentDetailLogic } from './document_detail_logic';
 
 describe('DocumentDetailLogic', () => {
   const { mount } = new LogicMounter(DocumentDetailLogic);
@@ -53,7 +54,9 @@ describe('DocumentDetailLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('getDocumentDetails', () => {
       it('will call an API endpoint and then store the result', async () => {
         const fields = [{ name: 'name', value: 'python', type: 'string' }];

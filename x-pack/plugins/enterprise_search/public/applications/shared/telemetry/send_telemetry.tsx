@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+
 import { useActions } from 'kea';
 
 import { TelemetryLogic, SendTelemetryHelper } from './telemetry_logic';

@@ -238,7 +238,8 @@ describe('CoreUsageDataService', () => {
                 "loggersConfiguredCount": 0,
               },
               "savedObjects": Object {
-                "maxImportExportSizeBytes": 10000,
+                "customIndex": false,
+                "maxImportExportSize": 10000,
                 "maxImportPayloadBytes": 26214400,
               },
             },

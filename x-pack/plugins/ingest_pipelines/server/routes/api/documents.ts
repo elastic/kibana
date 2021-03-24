@@ -51,7 +51,7 @@ export const registerDocumentsRoute = ({
           });
         }
 
-        return res.internalError({ body: error });
+        throw error;
       }
     })
   );

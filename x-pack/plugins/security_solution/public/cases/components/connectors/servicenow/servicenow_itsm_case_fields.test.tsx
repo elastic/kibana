@@ -20,12 +20,18 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_get_choices', () => ({
   useGetChoices: (args: { onSuccess: () => void }) => {
     onChoicesSuccess = args.onSuccess;
-    return { isLoading: false, mockChoices };
+    return { isLoading: false, choices: mockChoices };
   },
 }));
 
 describe('ServiceNowITSM Fields', () => {
-  const fields = { severity: '1', urgency: '2', impact: '3' };
+  const fields = {
+    severity: '1',
+    urgency: '2',
+    impact: '3',
+    category: 'software',
+    subcategory: 'os',
+  };
   const onChange = jest.fn();
 
   beforeEach(() => {
@@ -37,6 +43,8 @@ describe('ServiceNowITSM Fields', () => {
     expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="categorySelect"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeTruthy();
   });
 
   it('all params fields are rendered - isEdit: false', () => {
@@ -56,6 +64,42 @@ describe('ServiceNowITSM Fields', () => {
     expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
       'Impact: 3 - Moderate'
     );
+  });
+
+  test('it transforms the categories to options correctly', async () => {
+    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="categorySelect"]').first().prop('options')).toEqual([
+      { value: 'Priviledge Escalation', text: 'Priviledge Escalation' },
+      {
+        value: 'Criminal activity/investigation',
+        text: 'Criminal activity/investigation',
+      },
+      { value: 'Denial of Service', text: 'Denial of Service' },
+      {
+        value: 'software',
+        text: 'Software',
+      },
+    ]);
+  });
+
+  test('it transforms the subcategories to options correctly', async () => {
+    const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+
+    wrapper.update();
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').first().prop('options')).toEqual([
+      {
+        text: 'Operation System',
+        value: 'os',
+      },
+    ]);
   });
 
   it('it transforms the options correctly', async () => {
@@ -81,7 +125,7 @@ describe('ServiceNowITSM Fields', () => {
 
     expect(onChange).toHaveBeenCalledWith(fields);
 
-    const testers = ['severity', 'urgency', 'impact'];
+    const testers = ['severity', 'urgency', 'impact', 'subcategory'];
     testers.forEach((subj) =>
       test(`${subj.toUpperCase()}`, async () => {
         await waitFor(() => {
@@ -99,5 +143,22 @@ describe('ServiceNowITSM Fields', () => {
         });
       })
     );
+
+    test('it should set subcategory to null when changing category', async () => {
+      await waitFor(() => {
+        const select = wrapper.find(EuiSelect).filter(`[data-test-subj="categorySelect"]`)!;
+        select.prop('onChange')!({
+          target: {
+            value: 'network',
+          },
+        } as React.ChangeEvent<HTMLSelectElement>);
+      });
+      wrapper.update();
+      expect(onChange).toHaveBeenCalledWith({
+        ...fields,
+        subcategory: null,
+        category: 'network',
+      });
+    });
   });
 });

@@ -13,37 +13,39 @@ import {
   SavedObjectsServiceStart,
   IRouter,
   KibanaRequest,
-} from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { SpacesPluginStart } from '../../spaces/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import { SecurityPluginSetup } from '../../security/server';
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../src/core/server';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { SecurityPluginSetup } from '../../security/server';
+import { SpacesPluginStart } from '../../spaces/server';
 
 import {
   ENTERPRISE_SEARCH_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
-import { ConfigType } from './';
+
+import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
+import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
+
 import { checkAccess } from './lib/check_access';
 import {
   EnterpriseSearchRequestHandler,
   IEnterpriseSearchRequestHandler,
 } from './lib/enterprise_search_request_handler';
 
-import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
-import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
-import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
+import { registerAppSearchRoutes } from './routes/app_search';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
+import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
+import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
-import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
-import { registerAppSearchRoutes } from './routes/app_search';
-
+import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
-import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
-import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
+
+import { ConfigType } from './';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;

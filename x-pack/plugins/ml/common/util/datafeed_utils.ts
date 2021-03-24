@@ -20,7 +20,7 @@ export const getDatafeedAggregations = (
 };
 
 export const getAggregationBucketsName = (aggregations: any): string | undefined => {
-  if (typeof aggregations === 'object') {
+  if (aggregations !== null && typeof aggregations === 'object') {
     const keys = Object.keys(aggregations);
     return keys.length > 0 ? keys[0] : undefined;
   }

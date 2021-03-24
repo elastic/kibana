@@ -8,11 +8,13 @@
 import { setMockValues, mockTelemetryActions } from '../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiCard } from '@elastic/eui';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
+
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 
 import { ProductCard } from './';
 

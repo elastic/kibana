@@ -48,7 +48,7 @@ export const registerGetRoute = ({
           return response.customError(formatEsError(err));
         }
         // Case: default
-        return response.internalError({ body: err });
+        throw err;
       }
     })
   );

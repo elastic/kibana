@@ -94,7 +94,11 @@ export const AlertMonitorStatus: React.FC<Props> = ({
   );
   useEffect(() => {
     dispatch(
-      getSnapshotCountAction({ dateRangeStart: 'now-24h', dateRangeEnd: 'now', filters: esKuery })
+      getSnapshotCountAction.get({
+        dateRangeStart: 'now-24h',
+        dateRangeEnd: 'now',
+        filters: esKuery,
+      })
     );
   }, [dispatch, esKuery]);
 

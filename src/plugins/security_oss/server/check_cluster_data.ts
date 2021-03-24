@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
 
 export const createClusterDataCheck = () => {
   let clusterHasUserData = false;

@@ -56,7 +56,8 @@ class WithKueryAutocompletionComponent extends React.Component<
   private loadSuggestions = async (
     expression: string,
     cursorPosition: number,
-    maxSuggestions?: number
+    maxSuggestions?: number,
+    transformSuggestions?: (s: QuerySuggestion[]) => QuerySuggestion[]
   ) => {
     const { indexPattern } = this.props;
     const language = 'kuery';
@@ -86,6 +87,10 @@ class WithKueryAutocompletionComponent extends React.Component<
         boolFilter: [],
       })) || [];
 
+    const transformedSuggestions = transformSuggestions
+      ? transformSuggestions(suggestions)
+      : suggestions;
+
     this.setState((state) =>
       state.currentRequest &&
       state.currentRequest.expression !== expression &&
@@ -94,7 +99,9 @@ class WithKueryAutocompletionComponent extends React.Component<
         : {
             ...state,
             currentRequest: null,
-            suggestions: maxSuggestions ? suggestions.slice(0, maxSuggestions) : suggestions,
+            suggestions: maxSuggestions
+              ? transformedSuggestions.slice(0, maxSuggestions)
+              : transformedSuggestions,
           }
     );
   };

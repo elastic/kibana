@@ -12,7 +12,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import '../../../common/mock/match_media';
 import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
-
+import { TimelineId } from '../../../../common/types/timeline';
 import { mockIndexNames, mockIndexPattern, TestProviders } from '../../../common/mock';
 
 import { StatefulTimeline, Props as StatefulTimelineOwnProps } from './index';
@@ -25,7 +25,15 @@ jest.mock('../../containers/index', () => ({
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
@@ -55,7 +63,7 @@ jest.mock('../../../common/containers/sourcerer', () => {
 });
 describe('StatefulTimeline', () => {
   const props: StatefulTimelineOwnProps = {
-    timelineId: 'timeline-test',
+    timelineId: TimelineId.test,
   };
 
   beforeEach(() => {
@@ -91,7 +99,7 @@ describe('StatefulTimeline', () => {
     );
     expect(
       wrapper
-        .find(`[data-timeline-id="timeline-test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
+        .find(`[data-timeline-id="test"].${SELECTOR_TIMELINE_GLOBAL_CONTAINER}`)
         .first()
         .exists()
     ).toEqual(true);

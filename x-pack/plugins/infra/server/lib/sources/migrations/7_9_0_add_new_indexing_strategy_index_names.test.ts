@@ -126,6 +126,7 @@ const createTestSourceConfiguration = (logAlias: string, metricAlias: string) =>
     ],
     logAlias,
     metricAlias,
+    anomalyThreshold: 20,
   },
   id: 'TEST_ID',
   type: infraSourceConfigurationSavedObjectName,

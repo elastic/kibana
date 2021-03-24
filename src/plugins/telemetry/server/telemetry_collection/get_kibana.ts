@@ -77,5 +77,5 @@ export async function getKibana(
   kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
 ): Promise<KibanaUsageStats> {
   const usage = await usageCollection.bulkFetch(asInternalUser, soClient, kibanaRequest);
-  return usageCollection.toObject(usage);
+  return usageCollection.toObject<KibanaUsageStats>(usage);
 }

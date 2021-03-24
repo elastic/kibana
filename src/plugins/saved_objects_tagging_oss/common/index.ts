@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Tag, TagAttributes, ITagsClient } from './types';
+export { Tag, TagAttributes, GetAllTagsOptions, ITagsClient } from './types';

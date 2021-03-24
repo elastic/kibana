@@ -26,6 +26,9 @@ const mockUseKibana = {
               next(mockData);
               /* eslint-disable no-empty */
             } catch (e) {}
+            return {
+              unsubscribe: jest.fn(),
+            };
           }),
         }),
       },

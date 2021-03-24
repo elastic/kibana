@@ -6,6 +6,8 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+
 import classNames from 'classnames';
 
 import './result.scss';
@@ -14,13 +16,14 @@ import { EuiPanel, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
-import { generateEncodedPath } from '../../utils/encode_path_params';
-import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 
 import { Schema } from '../../../shared/types';
-import { FieldValue, Result as ResultType } from './types';
+import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
+import { generateEncodedPath } from '../../utils/encode_path_params';
+
 import { ResultField } from './result_field';
 import { ResultHeader } from './result_header';
+import { FieldValue, Result as ResultType, ResultAction } from './types';
 
 interface Props {
   result: ResultType;
@@ -28,6 +31,8 @@ interface Props {
   showScore?: boolean;
   shouldLinkToDetailPage?: boolean;
   schemaForTypeHighlights?: Schema;
+  actions?: ResultAction[];
+  dragHandleProps?: DraggableProvidedDragHandleProps;
 }
 
 const RESULT_CUTOFF = 5;
@@ -38,6 +43,8 @@ export const Result: React.FC<Props> = ({
   showScore = false,
   shouldLinkToDetailPage = false,
   schemaForTypeHighlights,
+  actions = [],
+  dragHandleProps,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -83,6 +90,11 @@ export const Result: React.FC<Props> = ({
         values: { id: result[ID].raw },
       })}
     >
+      {dragHandleProps && (
+        <div {...dragHandleProps} className="appSearchResult__dragHandle">
+          <EuiIcon type="grab" />
+        </div>
+      )}
       {conditionallyLinkedArticle(
         <>
           <ResultHeader
@@ -140,6 +152,18 @@ export const Result: React.FC<Props> = ({
             </a>
           </ReactRouterHelper>
         )}
+        {actions.map(({ onClick, title, iconType, iconColor }) => (
+          <button
+            key={title}
+            aria-label={title}
+            title={title}
+            onClick={onClick}
+            className="appSearchResult__actionButton"
+            type="button"
+          >
+            <EuiIcon type={iconType} color={iconColor} />
+          </button>
+        ))}
       </div>
     </EuiPanel>
   );

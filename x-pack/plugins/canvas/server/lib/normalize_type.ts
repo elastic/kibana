@@ -7,7 +7,7 @@
 
 export function normalizeType(type: string) {
   const normalTypes: Record<string, string[]> = {
-    string: ['string', 'text', 'keyword', '_type', '_id', '_index', 'geo_point'],
+    string: ['string', 'text', 'keyword', '_type', '_id', '_index', 'geo_point', 'ip'],
     number: [
       'float',
       'half_float',

@@ -7,12 +7,13 @@
 
 import { Unit } from '@elastic/datemath';
 import { first } from 'lodash';
+import { PreviewResult } from '../common/types';
 import { InventoryMetricConditions } from './types';
 import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
-import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
+import { ElasticsearchClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
@@ -26,23 +27,27 @@ interface InventoryMetricThresholdParams {
 }
 
 interface PreviewInventoryMetricThresholdAlertParams {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   params: InventoryMetricThresholdParams;
   source: InfraSource;
   lookback: Unit;
   alertInterval: string;
   alertThrottle: string;
   alertOnNoData: boolean;
+  alertNotifyWhen: string;
 }
 
-export const previewInventoryMetricThresholdAlert = async ({
-  callCluster,
+export const previewInventoryMetricThresholdAlert: (
+  params: PreviewInventoryMetricThresholdAlertParams
+) => Promise<PreviewResult[]> = async ({
+  esClient,
   params,
   source,
   lookback,
   alertInterval,
   alertThrottle,
   alertOnNoData,
+  alertNotifyWhen,
 }: PreviewInventoryMetricThresholdAlertParams) => {
   const { criteria, filterQuery, nodeType } = params as InventoryMetricThresholdParams;
 
@@ -59,13 +64,11 @@ export const previewInventoryMetricThresholdAlert = async ({
   const alertIntervalInSeconds = getIntervalInSeconds(alertInterval);
   const alertResultsPerExecution = alertIntervalInSeconds / bucketIntervalInSeconds;
   const throttleIntervalInSeconds = getIntervalInSeconds(alertThrottle);
-  const executionsPerThrottle = Math.floor(
-    (throttleIntervalInSeconds / alertIntervalInSeconds) * alertResultsPerExecution
-  );
+
   try {
     const results = await Promise.all(
       criteria.map((c) =>
-        evaluateCondition(c, nodeType, source, callCluster, filterQuery, lookbackSize)
+        evaluateCondition(c, nodeType, source, esClient, filterQuery, lookbackSize)
       )
     );
 
@@ -74,13 +77,22 @@ export const previewInventoryMetricThresholdAlert = async ({
       const numberOfResultBuckets = lookbackSize;
       const numberOfExecutionBuckets = Math.floor(numberOfResultBuckets / alertResultsPerExecution);
       let numberOfTimesFired = 0;
+      let numberOfTimesWarned = 0;
       let numberOfNoDataResults = 0;
       let numberOfErrors = 0;
       let numberOfNotifications = 0;
       let throttleTracker = 0;
-      const notifyWithThrottle = () => {
-        if (throttleTracker === 0) numberOfNotifications++;
-        throttleTracker++;
+      let previousActionGroup: string | null = null;
+      const notifyWithThrottle = (actionGroup: string) => {
+        if (alertNotifyWhen === 'onActionGroupChange') {
+          if (previousActionGroup !== actionGroup) numberOfNotifications++;
+        } else if (alertNotifyWhen === 'onThrottleInterval') {
+          if (throttleTracker === 0) numberOfNotifications++;
+          throttleTracker += alertIntervalInSeconds;
+        } else {
+          numberOfNotifications++;
+        }
+        previousActionGroup = actionGroup;
       };
       for (let i = 0; i < numberOfExecutionBuckets; i++) {
         const mappedBucketIndex = Math.floor(i * alertResultsPerExecution);
@@ -88,6 +100,9 @@ export const previewInventoryMetricThresholdAlert = async ({
           const shouldFire = result[item].shouldFire as boolean[];
           return shouldFire[mappedBucketIndex];
         });
+        const allConditionsWarnInMappedBucket =
+          !allConditionsFiredInMappedBucket &&
+          results.every((result) => result[item].shouldWarn[mappedBucketIndex]);
         const someConditionsNoDataInMappedBucket = results.some((result) => {
           const hasNoData = result[item].isNoData as boolean[];
           return hasNoData[mappedBucketIndex];
@@ -98,24 +113,36 @@ export const previewInventoryMetricThresholdAlert = async ({
         if (someConditionsErrorInMappedBucket) {
           numberOfErrors++;
           if (alertOnNoData) {
-            notifyWithThrottle();
+            notifyWithThrottle('fired'); // TODO: Update this when No Data alerts move to an action group
           }
         } else if (someConditionsNoDataInMappedBucket) {
           numberOfNoDataResults++;
           if (alertOnNoData) {
-            notifyWithThrottle();
+            notifyWithThrottle('fired'); // TODO: Update this when No Data alerts move to an action group
           }
         } else if (allConditionsFiredInMappedBucket) {
           numberOfTimesFired++;
-          notifyWithThrottle();
-        } else if (throttleTracker > 0) {
-          throttleTracker++;
+          notifyWithThrottle('fired');
+        } else if (allConditionsWarnInMappedBucket) {
+          numberOfTimesWarned++;
+          notifyWithThrottle('warning');
+        } else {
+          previousActionGroup = 'recovered';
+          if (throttleTracker > 0) {
+            throttleTracker += alertIntervalInSeconds;
+          }
         }
-        if (throttleTracker === executionsPerThrottle) {
+        if (throttleTracker >= throttleIntervalInSeconds) {
           throttleTracker = 0;
         }
       }
-      return [numberOfTimesFired, numberOfNoDataResults, numberOfErrors, numberOfNotifications];
+      return {
+        fired: numberOfTimesFired,
+        warning: numberOfTimesWarned,
+        noData: numberOfNoDataResults,
+        error: numberOfErrors,
+        notifications: numberOfNotifications,
+      };
     });
 
     return previewResults;

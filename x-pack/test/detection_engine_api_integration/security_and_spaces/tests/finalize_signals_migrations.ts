@@ -21,7 +21,7 @@ import {
   getIndexNameFromLoad,
   waitFor,
 } from '../../utils';
-import { createUserAndRole } from '../roles_users_utils';
+import { createUserAndRole, deleteUserAndRole } from '../roles_users_utils';
 
 interface StatusResponse {
   index: string;
@@ -44,12 +44,10 @@ interface FinalizeResponse {
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const kbnClient = getService('kibanaServer');
-  const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/88302
-  describe.skip('Finalizing signals migrations', () => {
+  describe('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;
     let createdMigrations: CreateResponse[];
@@ -223,18 +221,21 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(indicesAfter).not.to.contain(createdMigration.index);
     });
 
-    it('returns an empty array indicating a no-op for DNE migrations', async () => {
+    it('returns a 404 for DNE migrations', async () => {
       const { body } = await supertest
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
         .set('kbn-xsrf', 'true')
         .send({ migration_ids: ['dne-migration'] })
-        .expect(200);
+        .expect(404);
 
-      expect(body).to.eql({ migrations: [] });
+      expect(body).to.eql({
+        message: 'Saved object [security-solution-signals-migration/dne-migration] not found',
+        status_code: 404,
+      });
     });
 
     it('rejects the request if the user does not have sufficient privileges', async () => {
-      await createUserAndRole(security, ROLES.t1_analyst);
+      await createUserAndRole(getService, ROLES.t1_analyst);
 
       const { body } = await supertestWithoutAuth
         .post(DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL)
@@ -243,15 +244,15 @@ export default ({ getService }: FtrProviderContext): void => {
         .auth(ROLES.t1_analyst, 'changeme')
         .expect(200);
 
-      const finalizeResponse: FinalizeResponse = body.migrations[0];
+      const finalizeResponse: FinalizeResponse & {
+        error: { message: string; status_code: number };
+      } = body.migrations[0];
 
       expect(finalizeResponse.id).to.eql(createdMigration.migration_id);
       expect(finalizeResponse.completed).not.to.eql(true);
-      expect(finalizeResponse.error).to.eql({
-        message:
-          'security_exception: action [cluster:monitor/task/get] is unauthorized for user [t1_analyst]',
-        status_code: 403,
-      });
+      expect(finalizeResponse.error.message).to.match(/^security_exception/);
+      expect(finalizeResponse.error.status_code).to.eql(403);
+      await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
   });
 };

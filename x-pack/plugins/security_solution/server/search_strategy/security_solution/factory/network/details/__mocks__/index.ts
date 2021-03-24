@@ -314,6 +314,7 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignoreUnavailable: true,
+          track_total_hits: false,
           body: {
             docvalue_fields: mockOptions.docValueFields,
             aggs: {
@@ -390,7 +391,6 @@ export const formattedSearchStrategyResponse = {
             },
             query: { bool: { should: [] } },
             size: 0,
-            track_total_hits: false,
           },
         },
         null,
@@ -455,6 +455,7 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignoreUnavailable: true,
+  track_total_hits: false,
   body: {
     aggs: {
       source: {
@@ -521,6 +522,5 @@ export const expectedDsl = {
     docvalue_fields: mockOptions.docValueFields,
     query: { bool: { should: [] } },
     size: 0,
-    track_total_hits: false,
   },
 };

@@ -5,7 +5,7 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
   data-eui="EuiFocusTrap"
 >
   <div
-    className="euiFlyout euiFlyout--small"
+    className="euiFlyout euiFlyout--small euiFlyout--paddingLarge"
     role="dialog"
     tabIndex={0}
   >

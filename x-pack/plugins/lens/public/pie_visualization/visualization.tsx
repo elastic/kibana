@@ -45,16 +45,19 @@ export const getPieVisualization = ({
       id: 'donut',
       icon: CHART_NAMES.donut.icon,
       label: CHART_NAMES.donut.label,
+      groupLabel: CHART_NAMES.donut.groupLabel,
     },
     {
       id: 'pie',
       icon: CHART_NAMES.pie.icon,
       label: CHART_NAMES.pie.label,
+      groupLabel: CHART_NAMES.pie.groupLabel,
     },
     {
       id: 'treemap',
       icon: CHART_NAMES.treemap.icon,
       label: CHART_NAMES.treemap.label,
+      groupLabel: CHART_NAMES.treemap.groupLabel,
     },
   ],
 
@@ -193,11 +196,6 @@ export const getPieVisualization = ({
   setDimension({ prevState, layerId, columnId, groupId }) {
     return {
       ...prevState,
-
-      shape:
-        prevState.shape === 'donut' && prevState.layers.every((l) => l.groups.length === 1)
-          ? 'pie'
-          : prevState.shape,
       layers: prevState.layers.map((l) => {
         if (l.layerId !== layerId) {
           return l;
@@ -227,7 +225,7 @@ export const getPieVisualization = ({
   renderDimensionEditor(domElement, props) {
     render(
       <I18nProvider>
-        <DimensionEditor {...props} />
+        <DimensionEditor {...props} paletteService={paletteService} />
       </I18nProvider>,
       domElement
     );
@@ -274,7 +272,7 @@ export const getPieVisualization = ({
     ));
   },
 
-  getErrorMessages(state, frame) {
+  getErrorMessages(state) {
     // not possible to break it?
     return undefined;
   },

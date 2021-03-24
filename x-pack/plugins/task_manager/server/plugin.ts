@@ -16,13 +16,12 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '../../../../src/core/server';
-import { TaskDefinition } from './task';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects } from './saved_objects';
-import { TaskTypeDictionary } from './task_type_dictionary';
+import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
@@ -100,7 +99,7 @@ export class TaskManagerPlugin
         this.assertStillInSetup('add Middleware');
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
       },
-      registerTaskDefinitions: (taskDefinition: Record<string, TaskDefinition>) => {
+      registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.assertStillInSetup('register task definitions');
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
@@ -110,12 +109,12 @@ export class TaskManagerPlugin
   public start({ savedObjects, elasticsearch }: CoreStart): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository(['task']);
 
+    const serializer = savedObjects.createSerializer();
     const taskStore = new TaskStore({
-      serializer: savedObjects.createSerializer(),
+      serializer,
       savedObjectsRepository,
       esClient: elasticsearch.createClient('taskManager').asInternalUser,
       index: this.config!.index,
-      maxAttempts: this.config!.max_attempts,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
     });
@@ -151,6 +150,7 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      definitions: this.definitions,
     });
 
     return {

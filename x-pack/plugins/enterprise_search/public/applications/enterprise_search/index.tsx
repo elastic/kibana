@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
+
 import { useValues } from 'kea';
 
-import { KibanaLogic } from '../shared/kibana';
 import { InitialAppData } from '../../../common/types';
-
 import { HttpLogic } from '../shared/http';
-
-import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
+import { KibanaLogic } from '../shared/kibana';
 
 import { ErrorConnecting } from './components/error_connecting';
 import { ProductSelector } from './components/product_selector';
 import { SetupGuide } from './components/setup_guide';
+import { ROOT_PATH, SETUP_GUIDE_PATH } from './routes';
 
 import './index.scss';
 

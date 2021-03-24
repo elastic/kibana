@@ -39,7 +39,7 @@ export const createRouteWithAuth = (
       case 403:
         return response.forbidden({ body: { message } });
       default:
-        return response.internalError();
+        throw new Error('Failed to validate the license');
     }
   };
 

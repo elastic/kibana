@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-// TODO: Remove EuiPage & EuiPageBody before exposing full app
-
 import React, { useEffect } from 'react';
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
 import { useActions, useValues } from 'kea';
 
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-
-import { AppLogic } from '../../app_logic';
-import { OverviewLogic } from './overview_logic';
-
 import { Loading } from '../../../shared/loading';
-import { ProductButton } from '../../components/shared/product_button';
+import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { AppLogic } from '../../app_logic';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
+import { OverviewLogic } from './overview_logic';
 import { RecentActivity } from './recent_activity';
 
 const ONBOARDING_HEADER_TITLE = i18n.translate(
@@ -57,13 +54,8 @@ export const Overview: React.FC = () => {
     initializeOverview();
   }, [initializeOverview]);
 
-  // TODO: Remove div wrapper once the Overview page is using the full Layout
   if (dataLoading) {
-    return (
-      <div style={{ height: '90vh' }}>
-        <Loading />
-      </div>
-    );
+    return <Loading />;
   }
 
   const hideOnboarding = hasUsers && hasOrgSources && isOldAccount && orgName !== defaultOrgName;
@@ -72,22 +64,16 @@ export const Overview: React.FC = () => {
   const headerDescription = hideOnboarding ? HEADER_DESCRIPTION : ONBOARDING_HEADER_DESCRIPTION;
 
   return (
-    <EuiPage restrictWidth>
+    <>
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
 
-      <EuiPageBody>
-        <ViewContentHeader
-          title={headerTitle}
-          description={headerDescription}
-          action={<ProductButton />}
-        />
-        {!hideOnboarding && <OnboardingSteps />}
-        <EuiSpacer size="xl" />
-        <OrganizationStats />
-        <EuiSpacer size="xl" />
-        <RecentActivity />
-      </EuiPageBody>
-    </EuiPage>
+      <ViewContentHeader title={headerTitle} description={headerDescription} />
+      {!hideOnboarding && <OnboardingSteps />}
+      <EuiSpacer size="xl" />
+      <OrganizationStats />
+      <EuiSpacer size="xl" />
+      <RecentActivity />
+    </>
   );
 };

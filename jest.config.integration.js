@@ -17,6 +17,7 @@ module.exports = {
   testPathIgnorePatterns: preset.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
   ),
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-test/target/jest/setup/after_env.integration.js'],
   reporters: [
     'default',
     [
@@ -24,5 +25,7 @@ module.exports = {
       { reportName: 'Jest Integration Tests' },
     ],
   ],
-  setupFilesAfterEnv: ['<rootDir>/packages/kbn-test/target/jest/setup/after_env.integration.js'],
+  coverageReporters: !!process.env.CI
+    ? [['json', { file: 'jest-integration.json' }]]
+    : ['html', 'text'],
 };

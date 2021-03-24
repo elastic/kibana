@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
 import {
   ADD_BOX_PATH,
   ADD_CONFLUENCE_PATH,
@@ -62,10 +63,7 @@ import {
   ZENDESK_DOCS_URL,
   CUSTOM_SOURCE_DOCS_URL,
 } from '../../routes';
-
 import { FeatureIds, SourceDataItem } from '../../types';
-
-import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
 
 const connectStepDescription = {
   attachments: i18n.translate(

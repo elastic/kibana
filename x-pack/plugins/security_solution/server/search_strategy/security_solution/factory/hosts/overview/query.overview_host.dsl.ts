@@ -31,6 +31,7 @@ export const buildOverviewHostQuery = ({
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
+    track_total_hits: false,
     body: {
       aggregations: {
         auditd_count: {
@@ -289,7 +290,6 @@ export const buildOverviewHostQuery = ({
         },
       },
       size: 0,
-      track_total_hits: false,
     },
   };
 

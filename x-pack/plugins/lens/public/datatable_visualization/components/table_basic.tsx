@@ -38,9 +38,10 @@ import {
   createGridHideHandler,
   createGridResizeHandler,
   createGridSortingConfig,
+  createTransposeColumnFilterHandler,
 } from './table_actions';
 
-const DataContext = React.createContext<DataContextType>({});
+export const DataContext = React.createContext<DataContextType>({});
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -81,6 +82,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const firstTableRef = useRef(firstLocalTable);
   firstTableRef.current = firstLocalTable;
+
+  const untransposedDataRef = useRef(props.untransposedData);
+  untransposedDataRef.current = props.untransposedData;
 
   const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions?.some((x) => x);
 
@@ -124,6 +128,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     firstTableRef,
     onClickValue,
   ]);
+
+  const handleTransposedColumnClick = useMemo(
+    () => createTransposeColumnFilterHandler(onClickValue, untransposedDataRef),
+    [onClickValue, untransposedDataRef]
+  );
 
   const bucketColumns = useMemo(
     () =>
@@ -172,6 +181,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         bucketColumns,
         firstLocalTable,
         handleFilterClick,
+        handleTransposedColumnClick,
         isReadOnlySorted,
         columnConfig,
         visibleColumns,
@@ -183,6 +193,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       bucketColumns,
       firstLocalTable,
       handleFilterClick,
+      handleTransposedColumnClick,
       isReadOnlySorted,
       columnConfig,
       visibleColumns,
@@ -191,6 +202,21 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       onColumnHide,
     ]
   );
+
+  const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
+    const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
+    columnConfig.columns.forEach((column) => {
+      if (column.alignment) {
+        alignmentMap[column.columnId] = column.alignment;
+      } else {
+        const isNumeric =
+          firstLocalTable.columns.find((dataColumn) => dataColumn.id === column.columnId)?.meta
+            .type === 'number';
+        alignmentMap[column.columnId] = isNumeric ? 'right' : 'left';
+      }
+    });
+    return alignmentMap;
+  }, [firstLocalTable, columnConfig]);
 
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {
@@ -259,6 +285,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         value={{
           table: firstLocalTable,
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
+          alignments,
         }}
       >
         <EuiDataGrid

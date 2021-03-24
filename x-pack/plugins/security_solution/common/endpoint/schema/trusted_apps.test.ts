@@ -106,7 +106,7 @@ describe('When invoking Trusted Apps Schema', () => {
       expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
     });
 
-    it('should validate `os` to to only accept known values', () => {
+    it('should validate `os` to only accept known values', () => {
       const bodyMsg = createNewTrustedApp({ os: undefined });
       expect(() => body.validate(bodyMsg)).toThrow();
 
@@ -250,7 +250,9 @@ describe('When invoking Trusted Apps Schema', () => {
         const bodyMsg = createNewTrustedApp({
           entries: [createConditionEntry(), createConditionEntry()],
         });
-        expect(() => body.validate(bodyMsg)).toThrow('[Path] field can only be used once');
+        expect(() => body.validate(bodyMsg)).toThrow(
+          '[entries]: duplicatedEntry.process.executable.caseless'
+        );
       });
 
       it('should validate that `entry.field` hash field value can only be used once', () => {
@@ -266,7 +268,7 @@ describe('When invoking Trusted Apps Schema', () => {
             }),
           ],
         });
-        expect(() => body.validate(bodyMsg)).toThrow('[Hash] field can only be used once');
+        expect(() => body.validate(bodyMsg)).toThrow('[entries]: duplicatedEntry.process.hash.*');
       });
 
       it('should validate that `entry.field` signer field value can only be used once', () => {
@@ -282,7 +284,9 @@ describe('When invoking Trusted Apps Schema', () => {
             }),
           ],
         });
-        expect(() => body.validate(bodyMsg)).toThrow('[Signer] field can only be used once');
+        expect(() => body.validate(bodyMsg)).toThrow(
+          '[entries]: duplicatedEntry.process.Ext.code_signature'
+        );
       });
 
       it('should validate Hash field valid value', () => {

@@ -11,10 +11,15 @@ import rison from 'rison-node';
 
 import { i18n } from '@kbn/i18n';
 import { IFieldType, IndexPattern } from 'src/plugins/data/public';
-import { FeatureCollection, GeoJsonProperties } from 'geojson';
+import { GeoJsonProperties } from 'geojson';
 import { AbstractESSource } from '../es_source';
 import { getHttp, getSearchService } from '../../../kibana_services';
-import { addFieldToDSL, getField, hitsToGeoJson } from '../../../../common/elasticsearch_util';
+import {
+  addFieldToDSL,
+  getField,
+  hitsToGeoJson,
+  PreIndexedShape,
+} from '../../../../common/elasticsearch_util';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 
@@ -43,7 +48,7 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import { ImmutableSourceProperty, PreIndexedShape, SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import {
   GeoJsonWithMeta,
@@ -66,7 +71,8 @@ export interface ScriptField {
 
 function getDocValueAndSourceFields(
   indexPattern: IndexPattern,
-  fieldNames: string[]
+  fieldNames: string[],
+  dateFormat: string
 ): {
   docValueFields: Array<string | { format: string; field: string }>;
   sourceOnlyFields: string[];
@@ -89,7 +95,7 @@ function getDocValueAndSourceFields(
         field.type === 'date'
           ? {
               field: fieldName,
-              format: 'epoch_millis',
+              format: dateFormat,
             }
           : fieldName;
       docValueFields.push(docValueField);
@@ -272,7 +278,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames
+      searchFilters.fieldNames,
+      'epoch_millis'
     );
     const topHits: {
       size: number;
@@ -368,7 +375,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames
+      searchFilters.fieldNames,
+      'epoch_millis'
     );
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
@@ -399,6 +407,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
+        resultsCount: resp.hits.hits.length,
         areResultsTrimmed: resp.hits.total > resp.hits.hits.length,
       },
     };
@@ -492,7 +501,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const { docValueFields } = getDocValueAndSourceFields(
       indexPattern,
-      this._getTooltipPropertyNames()
+      this._getTooltipPropertyNames(),
+      'strict_date_optional_time'
     );
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
@@ -589,11 +599,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
-    const featureCollection: FeatureCollection | null = sourceDataRequest
-      ? (sourceDataRequest.getData() as FeatureCollection)
-      : null;
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : null;
-    if (!featureCollection || !meta) {
+    if (!meta) {
       // no tooltip content needed when there is no feature collection or meta
       return {
         tooltipContent: null,
@@ -631,7 +638,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       return {
         tooltipContent: i18n.translate('xpack.maps.esSearch.resultsTrimmedMsg', {
           defaultMessage: `Results limited to first {count} documents.`,
-          values: { count: featureCollection.features.length },
+          values: { count: meta.resultsCount },
         }),
         areResultsTrimmed: true,
       };
@@ -640,7 +647,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       tooltipContent: i18n.translate('xpack.maps.esSearch.featureCountMsg', {
         defaultMessage: `Found {count} documents.`,
-        values: { count: featureCollection.features.length },
+        values: { count: meta.resultsCount },
       }),
       areResultsTrimmed: false,
     };
@@ -701,7 +708,8 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
-      searchFilters.fieldNames
+      searchFilters.fieldNames,
+      'epoch_millis'
     );
 
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source

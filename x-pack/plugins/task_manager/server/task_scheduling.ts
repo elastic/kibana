@@ -8,7 +8,7 @@
 import { filter } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
+import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option';
 
 import { Logger } from '../../../../src/core/server';
 import { asOk, either, map, mapErr, promiseResult } from './lib/result_type';
@@ -20,6 +20,8 @@ import {
   ErroredTask,
   OkResultOf,
   ErrResultOf,
+  ClaimTaskErr,
+  TaskClaimErrorType,
 } from './task_events';
 import { Middleware } from './lib/middleware';
 import {
@@ -33,6 +35,7 @@ import {
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
+import { TaskTypeDictionary } from './task_type_dictionary';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -41,6 +44,7 @@ export interface TaskSchedulingOpts {
   taskStore: TaskStore;
   taskPollingLifecycle: TaskPollingLifecycle;
   middleware: Middleware;
+  definitions: TaskTypeDictionary;
 }
 
 interface RunNowResult {
@@ -52,6 +56,7 @@ export class TaskScheduling {
   private taskPollingLifecycle: TaskPollingLifecycle;
   private logger: Logger;
   private middleware: Middleware;
+  private definitions: TaskTypeDictionary;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -63,6 +68,7 @@ export class TaskScheduling {
     this.middleware = opts.middleware;
     this.taskPollingLifecycle = opts.taskPollingLifecycle;
     this.store = opts.taskStore;
+    this.definitions = opts.definitions;
   }
 
   /**
@@ -122,10 +128,27 @@ export class TaskScheduling {
         .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
         .subscribe((taskEvent: TaskLifecycleEvent) => {
           if (isTaskClaimEvent(taskEvent)) {
-            mapErr(async (error: Option<ConcreteTaskInstance>) => {
+            mapErr(async (error: ClaimTaskErr) => {
               // reject if any error event takes place for the requested task
               subscription.unsubscribe();
-              return reject(await this.identifyTaskFailureReason(taskId, error));
+              if (
+                isSome(error.task) &&
+                error.errorType === TaskClaimErrorType.CLAIMED_BY_ID_OUT_OF_CAPACITY
+              ) {
+                const task = error.task.value;
+                const definition = this.definitions.get(task.taskType);
+                return reject(
+                  new Error(
+                    `Failed to run task "${taskId}" as we would exceed the max concurrency of "${
+                      definition?.title ?? task.taskType
+                    }" which is ${
+                      definition?.maxConcurrency
+                    }. Rescheduled the task to ensure it is picked up as soon as possible.`
+                  )
+                );
+              } else {
+                return reject(await this.identifyTaskFailureReason(taskId, error.task));
+              }
             }, taskEvent.event);
           } else {
             either<OkResultOf<TaskLifecycleEvent>, ErrResultOf<TaskLifecycleEvent>>(

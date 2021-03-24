@@ -129,6 +129,7 @@ export const formattedSearchStrategyResponse = {
             'winlogbeat-*',
           ],
           ignoreUnavailable: true,
+          track_total_hits: false,
           body: {
             aggs: {
               user_count: { cardinality: { field: 'user.name' } },
@@ -160,7 +161,6 @@ export const formattedSearchStrategyResponse = {
               },
             },
             size: 0,
-            track_total_hits: false,
           },
         },
         null,
@@ -174,6 +174,7 @@ export const formattedSearchStrategyResponse = {
 
 export const expectedDsl = {
   allowNoIndices: true,
+  track_total_hits: false,
   body: {
     aggs: {
       user_count: { cardinality: { field: 'user.name' } },
@@ -205,7 +206,6 @@ export const expectedDsl = {
       },
     },
     size: 0,
-    track_total_hits: false,
   },
   ignoreUnavailable: true,
   index: [

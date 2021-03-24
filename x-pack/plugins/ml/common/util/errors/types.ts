@@ -11,6 +11,7 @@ import Boom from '@hapi/boom';
 export interface EsErrorRootCause {
   type: string;
   reason: string;
+  caused_by?: EsErrorRootCause;
 }
 
 export interface EsErrorBody {
@@ -37,6 +38,7 @@ export interface ErrorMessage {
 }
 
 export interface MLErrorObject {
+  causedBy?: string;
   message: string;
   statusCode?: number;
   fullError?: EsErrorBody;

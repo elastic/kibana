@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env/no_transpilation');
-require('@kbn/release-notes').runReleaseNotesCli();
+require('@kbn/docs-utils').runReleaseNotesCli();

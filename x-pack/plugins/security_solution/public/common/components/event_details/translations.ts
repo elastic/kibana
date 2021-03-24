@@ -61,3 +61,10 @@ export const VIEW_COLUMN = (field: string) =>
     values: { field },
     defaultMessage: 'View {field} column',
   });
+
+export const NESTED_COLUMN = (field: string) =>
+  i18n.translate('xpack.securitySolution.eventDetails.nestedColumnCheckboxAriaLabel', {
+    values: { field },
+    defaultMessage:
+      'The {field} field is an object, and is broken down into nested fields which can be added as column',
+  });

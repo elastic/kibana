@@ -12,10 +12,7 @@ import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { Router } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import {
-  UrlParamsContext,
-  useUiFilters,
-} from '../../../context/url_params_context/url_params_context';
+import { UrlParamsContext } from '../../../context/url_params_context/url_params_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { DatePicker } from './';
 
@@ -35,7 +32,7 @@ function MockUrlParamsProvider({
         rangeId: 0,
         refreshTimeRange: mockRefreshTimeRange,
         urlParams,
-        uiFilters: useUiFilters(urlParams),
+        uiFilters: {},
       }}
       children={children}
     />

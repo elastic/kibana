@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea.mock';
-import { mountWithIntl } from '../../../../__mocks__';
+import { setMockValues, mountWithIntl } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { LogRetentionOptions } from '../types';
+
 import { LogRetentionMessage } from './';
 
 describe('LogRetentionMessage', () => {

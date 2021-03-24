@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../common/constants';
 import { upsertUIOpenOption } from '../lib/telemetry/es_ui_open_apis';
 import { upsertUIReindexOption } from '../lib/telemetry/es_ui_reindex_apis';
 import { RouteDependencies } from '../types';
@@ -13,7 +14,7 @@ import { RouteDependencies } from '../types';
 export function registerTelemetryRoutes({ router, getSavedObjectsService }: RouteDependencies) {
   router.put(
     {
-      path: '/api/upgrade_assistant/stats/ui_open',
+      path: `${API_BASE_PATH}/stats/ui_open`,
       validate: {
         body: schema.object({
           overview: schema.boolean({ defaultValue: false }),
@@ -24,24 +25,20 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
     },
     async (ctx, request, response) => {
       const { cluster, indices, overview } = request.body;
-      try {
-        return response.ok({
-          body: await upsertUIOpenOption({
-            savedObjects: getSavedObjectsService(),
-            cluster,
-            indices,
-            overview,
-          }),
-        });
-      } catch (e) {
-        return response.internalError({ body: e });
-      }
+      return response.ok({
+        body: await upsertUIOpenOption({
+          savedObjects: getSavedObjectsService(),
+          cluster,
+          indices,
+          overview,
+        }),
+      });
     }
   );
 
   router.put(
     {
-      path: '/api/upgrade_assistant/stats/ui_reindex',
+      path: `${API_BASE_PATH}/stats/ui_reindex`,
       validate: {
         body: schema.object({
           close: schema.boolean({ defaultValue: false }),
@@ -53,19 +50,15 @@ export function registerTelemetryRoutes({ router, getSavedObjectsService }: Rout
     },
     async (ctx, request, response) => {
       const { close, open, start, stop } = request.body;
-      try {
-        return response.ok({
-          body: await upsertUIReindexOption({
-            savedObjects: getSavedObjectsService(),
-            close,
-            open,
-            start,
-            stop,
-          }),
-        });
-      } catch (e) {
-        return response.internalError({ body: e });
-      }
+      return response.ok({
+        body: await upsertUIReindexOption({
+          savedObjects: getSavedObjectsService(),
+          close,
+          open,
+          start,
+          stop,
+        }),
+      });
     }
   );
 }

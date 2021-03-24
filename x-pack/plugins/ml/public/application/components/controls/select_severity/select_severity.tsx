@@ -16,6 +16,7 @@ import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
 
 import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
 import { usePageUrlState } from '../../../util/url_state';
+import { ANOMALY_THRESHOLD } from '../../../../../common';
 
 const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',
@@ -31,10 +32,10 @@ const criticalLabel = i18n.translate('xpack.ml.controls.selectSeverity.criticalL
 });
 
 const optionsMap = {
-  [warningLabel]: 0,
-  [minorLabel]: 25,
-  [majorLabel]: 50,
-  [criticalLabel]: 75,
+  [warningLabel]: ANOMALY_THRESHOLD.LOW,
+  [minorLabel]: ANOMALY_THRESHOLD.MINOR,
+  [majorLabel]: ANOMALY_THRESHOLD.MAJOR,
+  [criticalLabel]: ANOMALY_THRESHOLD.CRITICAL,
 };
 
 interface TableSeverity {
@@ -45,24 +46,24 @@ interface TableSeverity {
 
 export const SEVERITY_OPTIONS: TableSeverity[] = [
   {
-    val: 0,
+    val: ANOMALY_THRESHOLD.LOW,
     display: warningLabel,
-    color: getSeverityColor(0),
+    color: getSeverityColor(ANOMALY_THRESHOLD.LOW),
   },
   {
-    val: 25,
+    val: ANOMALY_THRESHOLD.MINOR,
     display: minorLabel,
-    color: getSeverityColor(25),
+    color: getSeverityColor(ANOMALY_THRESHOLD.MINOR),
   },
   {
-    val: 50,
+    val: ANOMALY_THRESHOLD.MAJOR,
     display: majorLabel,
-    color: getSeverityColor(50),
+    color: getSeverityColor(ANOMALY_THRESHOLD.MAJOR),
   },
   {
-    val: 75,
+    val: ANOMALY_THRESHOLD.CRITICAL,
     display: criticalLabel,
-    color: getSeverityColor(75),
+    color: getSeverityColor(ANOMALY_THRESHOLD.CRITICAL),
   },
 ];
 
@@ -84,7 +85,7 @@ export const useTableSeverity = (): [TableSeverity, (v: TableSeverity) => void] 
   return usePageUrlState('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
 };
 
-const getSeverityOptions = () =>
+export const getSeverityOptions = () =>
   SEVERITY_OPTIONS.map(({ color, display, val }) => ({
     value: display,
     inputDisplay: (

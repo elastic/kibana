@@ -11,7 +11,9 @@ export const useDocumentationLinks = () => {
   const deps = useAppDependencies();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = deps.docLinks;
   return {
+    esAggsCompositeMissingBucket: deps.docLinks.links.aggs.composite_missing_bucket,
     esIndicesCreateIndex: deps.docLinks.links.apis.createIndex,
+    esNodeRoles: deps.docLinks.links.elasticsearch.nodeRoles,
     esPluginDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`,
     esQueryDsl: deps.docLinks.links.query.queryDsl,
     esTransform: deps.docLinks.links.transforms.guide,

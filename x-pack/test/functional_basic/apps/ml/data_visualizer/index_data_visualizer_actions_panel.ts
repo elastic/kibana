@@ -41,8 +41,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('navigates to Discover page', async () => {
-        await ml.testExecution.logTestStep('should not display create job card');
+        await ml.testExecution.logTestStep('should not display create job cards');
         await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
+        await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
 
         await ml.testExecution.logTestStep('displays the actions panel with view in Discover card');
         await ml.dataVisualizerIndexBased.assertActionsPanelExists();

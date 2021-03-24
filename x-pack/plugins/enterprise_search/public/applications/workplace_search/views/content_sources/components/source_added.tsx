@@ -6,10 +6,12 @@
  */
 
 import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import { Location } from 'history';
 import { useActions } from 'kea';
-import { useLocation } from 'react-router-dom';
+
+import { EuiPage, EuiPageBody } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
 
@@ -28,5 +30,11 @@ export const SourceAdded: React.FC = () => {
     saveSourceParams(search);
   }, []);
 
-  return <Loading />;
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <Loading />
+      </EuiPageBody>
+    </EuiPage>
+  );
 };

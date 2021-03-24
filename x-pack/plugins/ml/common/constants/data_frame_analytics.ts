@@ -29,4 +29,6 @@ export const JOB_MAP_NODE_TYPES = {
   TRAINED_MODEL: 'trainedModel',
 } as const;
 
+export const BUILT_IN_MODEL_TAG = 'prepackaged';
+
 export type JobMapNodeTypes = typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES];

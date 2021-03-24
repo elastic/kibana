@@ -6,6 +6,7 @@
  */
 
 import { TestScheduler } from 'rxjs/testing';
+
 import { createRateLimiter } from './rxjs_utils';
 
 describe('createRateLimiter', () => {

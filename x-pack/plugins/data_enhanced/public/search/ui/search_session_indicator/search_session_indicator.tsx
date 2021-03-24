@@ -21,21 +21,27 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { PartialClock, CheckInEmptyCircle } from './custom_icons';
+import { CheckInEmptyCircle, PartialClock } from './custom_icons';
 import './search_session_indicator.scss';
 import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
+import { SearchSessionName } from './components';
 
 export interface SearchSessionIndicatorProps {
   state: SearchSessionState;
   onContinueInBackground?: () => void;
   onCancel?: () => void;
   viewSearchSessionsLink?: string;
+  onViewSearchSessions?: () => void;
   onSaveResults?: () => void;
-
+  managementDisabled?: boolean;
+  managementDisabledReasonText?: string;
   saveDisabled?: boolean;
   saveDisabledReasonText?: string;
 
   onOpened?: (openedState: SearchSessionState) => void;
+
+  searchSessionName?: string;
+  saveSearchSessionNameFn?: (newName: string) => Promise<unknown>;
 }
 
 type ActionButtonProps = SearchSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
@@ -77,18 +83,26 @@ const ContinueInBackgroundButton = ({
 
 const ViewAllSearchSessionsButton = ({
   viewSearchSessionsLink = 'management/kibana/search_sessions',
+  onViewSearchSessions = () => {},
   buttonProps = {},
+  managementDisabled,
+  managementDisabledReasonText,
 }: ActionButtonProps) => (
-  <EuiButtonEmpty
-    href={viewSearchSessionsLink}
-    data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
-    {...buttonProps}
-  >
-    <FormattedMessage
-      id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
-      defaultMessage="Manage sessions"
-    />
-  </EuiButtonEmpty>
+  <EuiToolTip content={managementDisabledReasonText}>
+    {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+    <EuiButtonEmpty
+      href={viewSearchSessionsLink}
+      onClick={onViewSearchSessions}
+      data-test-subj={'searchSessionIndicatorViewSearchSessionsLink'}
+      isDisabled={managementDisabled}
+      {...buttonProps}
+    >
+      <FormattedMessage
+        id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
+        defaultMessage="Manage sessions"
+      />
+    </EuiButtonEmpty>
+  </EuiToolTip>
 );
 
 const SaveButton = ({
@@ -153,7 +167,7 @@ const searchSessionIndicatorViewStateToProps: {
   [SearchSessionState.Completed]: {
     button: {
       color: 'subdued',
-      iconType: 'clock',
+      iconType: 'check',
       'aria-label': i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
         defaultMessage: 'Search session complete',
       }),
@@ -355,7 +369,16 @@ export const SearchSessionIndicator = React.forwardRef<
       }
     >
       <div data-test-subj="searchSessionIndicatorPopoverContainer">
-        <EuiText size="s">
+        {props.searchSessionName && props.saveSearchSessionNameFn ? (
+          <>
+            <SearchSessionName
+              name={props.searchSessionName}
+              editName={props.saveSearchSessionNameFn}
+            />
+            <EuiSpacer size={'xs'} />
+          </>
+        ) : null}
+        <EuiText size={'s'}>
           <p>{popover.title}</p>
         </EuiText>
         <EuiSpacer size={'xs'} />

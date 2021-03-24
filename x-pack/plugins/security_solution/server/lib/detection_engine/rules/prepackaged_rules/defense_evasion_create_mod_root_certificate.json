@@ -1,0 +1,60 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the creation or modification of a local trusted root certificate in Windows. The install of a malicious root certificate would allow an attacker the ability to masquerade malicious files as valid signed components from any entity (e.g. Microsoft). It could also allow an attacker to decrypt SSL traffic.",
+  "false_positives": [
+    "Certain applications may install root certificates for the purpose of inspecting SSL traffic."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*",
+    "logs-windows.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Creation or Modification of Root Certificate",
+  "query": "registry where event.type in (\"creation\", \"change\") and\n  registry.path :\n    (\n      \"HKLM\\\\Software\\\\Microsoft\\\\SystemCertificates\\\\Root\\\\Certificates\\\\*\\\\Blob\",\n      \"HKLM\\\\Software\\\\Microsoft\\\\SystemCertificates\\\\AuthRoot\\\\Certificates\\\\*\\\\Blob\",\n      \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\SystemCertificates\\\\Root\\\\Certificates\\\\*\\\\Blob\",\n      \"HKLM\\\\Software\\\\Policies\\\\Microsoft\\\\SystemCertificates\\\\AuthRoot\\\\Certificates\\\\*\\\\Blob\"\n    )\n",
+  "references": [
+    "https://posts.specterops.io/code-signing-certificate-cloning-attacks-and-defenses-6f98657fc6ec",
+    "https://www.ired.team/offensive-security/persistence/t1130-install-root-certificate"
+  ],
+  "risk_score": 21,
+  "rule_id": "203ab79b-239b-4aa5-8e54-fc50623ee8e4",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1553",
+          "name": "Subvert Trust Controls",
+          "reference": "https://attack.mitre.org/techniques/T1553/",
+          "subtechnique": [
+            {
+              "id": "T1553.004",
+              "name": "Install Root Certificate",
+              "reference": "https://attack.mitre.org/techniques/T1553/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

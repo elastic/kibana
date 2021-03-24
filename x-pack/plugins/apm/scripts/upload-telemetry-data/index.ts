@@ -83,7 +83,7 @@ async function uploadData() {
         apmAgentConfigurationIndex: '.apm-agent-configuration',
       },
       search: (body) => {
-        return unwrapEsResponse(client.search<any>(body));
+        return unwrapEsResponse(client.search<any>(body as any));
       },
       indicesStats: (body) => {
         return unwrapEsResponse(client.indices.stats<any>(body));

@@ -3,11 +3,11 @@
 //
 
 .visEditorSidebar {
-  min-width: $visEditorSidebarMinWidth;
+  height: 100%;
+  padding-left: $euiSizeS;
 
-  // a hack for IE, issue: https://github.com/elastic/kibana/issues/66586
-  > .visEditorSidebar__formWrapper {
-    flex-basis: auto;
+  @include euiBreakpoint('xs', 's', 'm') {
+    padding-left: 0;
   }
 }
 

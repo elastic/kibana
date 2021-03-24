@@ -15,6 +15,7 @@ import { EnvironmentFilter } from '../EnvironmentFilter';
 
 const HeaderFlexGroup = euiStyled(EuiFlexGroup)`
   padding: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
 `;
 

@@ -8,12 +8,14 @@
 import { setMockValues } from '../../__mocks__/kea.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
 import { EuiButton as EuiButtonExternal, EuiEmptyPrompt } from '@elastic/eui';
 
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../common/constants';
 import { SetAppSearchChrome } from '../kibana_chrome';
+
 import { AppSearchLogo } from './assets/app_search_logo';
 import { WorkplaceSearchLogo } from './assets/workplace_search_logo';
 

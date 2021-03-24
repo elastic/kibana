@@ -9,10 +9,11 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { TableFilterUsersDropdown } from './table_filter_users_dropdown';
 import { FilterableUsersPopover } from './filterable_users_popover';
+import { TableFilterUsersDropdown } from './table_filter_users_dropdown';
 
 const closeFilterUsersDropdown = jest.fn();
 const toggleFilterUsersDropdown = jest.fn();

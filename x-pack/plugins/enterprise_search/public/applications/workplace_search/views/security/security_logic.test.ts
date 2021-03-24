@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea.mock';
 import { mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
-import { SecurityLogic } from './security_logic';
+import { LogicMounter } from '../../../__mocks__/kea.mock';
+
 import { nextTick } from '@kbn/test/jest';
+
+import { SecurityLogic } from './security_logic';
 
 describe('SecurityLogic', () => {
   const { http } = mockHttpValues;

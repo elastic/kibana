@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { useValues, useActions } from 'kea';
+
 import { EuiCheckbox, EuiText, EuiTitle, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

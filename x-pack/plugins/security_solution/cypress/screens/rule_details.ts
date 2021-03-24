@@ -97,3 +97,5 @@ export const getDetails = (title: string) =>
 
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
+
+export const BACK_TO_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';

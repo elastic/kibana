@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type {
   AppClient,
   SecuritySolutionPluginRouter,
@@ -33,7 +34,7 @@ import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
 
 import { transformError, buildSiemResponse } from '../utils';
-import { AlertsClient } from '../../../../../../alerts/server';
+import { AlertsClient } from '../../../../../../alerting/server';
 import { FrameworkRequest } from '../../../framework';
 
 import { ExceptionListClient } from '../../../../../../lists/server';
@@ -49,6 +50,13 @@ export const addPrepackedRulesRoute = (
       validate: false,
       options: {
         tags: ['access:securitySolution'],
+        timeout: {
+          // FUNFACT: If we do not add a very long timeout what will happen
+          // is that Chrome which receive a 408 error and then do a retry.
+          // This retry can cause lots of connections to happen. Using a very
+          // long timeout will ensure that Chrome does not do retries and saturate the connections.
+          idleSocket: moment.duration('1', 'hour').asMilliseconds(),
+        },
       },
     },
     async (context, _, response) => {
@@ -98,7 +106,7 @@ export const createPrepackagedRules = async (
   maxTimelineImportExportSize: number,
   exceptionsClient?: ExceptionListClient
 ): Promise<PrePackagedRulesAndTimelinesSchema | null> => {
-  const clusterClient = context.core.elasticsearch.legacy.client;
+  const esClient = context.core.elasticsearch.client;
   const savedObjectsClient = context.core.savedObjects.client;
   const exceptionsListClient =
     context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
@@ -118,7 +126,7 @@ export const createPrepackagedRules = async (
   const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();
   if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-    const signalsIndexExists = await getIndexExists(clusterClient.callAsCurrentUser, signalsIndex);
+    const signalsIndexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
     if (!signalsIndexExists) {
       throw new PrepackagedRulesError(
         `Pre-packaged rules cannot be installed until the signals index is created: ${signalsIndex}`,

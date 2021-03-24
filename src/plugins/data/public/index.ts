@@ -40,6 +40,7 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
+import { FilterItem } from './ui/filter_bar';
 
 import {
   generateFilters,
@@ -54,6 +55,7 @@ import {
 // Filter helpers namespace:
 export const esFilters = {
   FilterLabel,
+  FilterItem,
 
   FILTERS,
   FilterStateStore,
@@ -92,7 +94,7 @@ export const esFilters = {
   extractTimeRange,
 };
 
-export {
+export type {
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -158,6 +160,7 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
 import { DateNanosFormat, DateFormat } from './field_formats';
@@ -188,6 +191,7 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
 export {
@@ -308,6 +312,7 @@ import {
   parseInterval,
   toAbsoluteDates,
   boundsDescendingRaw,
+  getNumberHistogramIntervalByDatatableColumn,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -381,6 +386,7 @@ export {
   TimeoutErrorMode,
   PainlessError,
   noSearchSessionStorageCapabilityMessage,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
 } from './search';
 
 export type {
@@ -388,6 +394,7 @@ export type {
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
+  SearchUsageCollector,
 } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
@@ -415,6 +422,7 @@ export const search = {
     termsAggFilter,
     toAbsoluteDates,
     boundsDescendingRaw,
+    getNumberHistogramIntervalByDatatableColumn,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,

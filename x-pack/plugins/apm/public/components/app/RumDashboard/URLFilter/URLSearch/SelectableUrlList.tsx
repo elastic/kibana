@@ -206,6 +206,7 @@ export function SelectableUrlList({
           panelRef={setPopoverRef}
           button={search}
           closePopover={closePopover}
+          style={{ minWidth: 200 }}
         >
           <div style={{ width: 600, maxWidth: '100%' }}>
             <PopOverTitle />

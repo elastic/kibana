@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import './loading.scss';
@@ -13,5 +14,11 @@ import './loading.scss';
 export const Loading: React.FC = () => (
   <div className="enterpriseSearchLoading">
     <EuiLoadingSpinner size="xl" />
+  </div>
+);
+
+export const LoadingOverlay: React.FC = () => (
+  <div className="enterpriseSearchLoadingOverlay">
+    <Loading />
   </div>
 );

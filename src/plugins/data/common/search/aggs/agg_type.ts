@@ -10,7 +10,7 @@ import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { ISearchSource } from 'src/plugins/data/public';
-import { SerializedFieldFormat } from 'src/plugins/expressions/common';
+import { DatatableColumnType, SerializedFieldFormat } from 'src/plugins/expressions/common';
 import type { RequestAdapter } from 'src/plugins/inspector/common';
 
 import { initParams } from './agg_params';
@@ -32,7 +32,9 @@ export interface AggTypeConfig<
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
   ordered?: any;
   hasNoDsl?: boolean;
+  hasNoDslParams?: boolean;
   params?: Array<Partial<TParam>>;
+  valueType?: DatatableColumnType;
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
@@ -92,6 +94,11 @@ export class AggType<
    */
   title: string;
   /**
+   * The type the values produced by this agg will have in the final data table.
+   * If not specified, the type of the field is used.
+   */
+  valueType?: DatatableColumnType;
+  /**
    * a function that will be called when this aggType is assigned to
    * an aggConfig, and that aggConfig is being rendered (in a form, chart, etc.).
    *
@@ -123,6 +130,12 @@ export class AggType<
    * @type {Boolean}
    */
   hasNoDsl: boolean;
+  /**
+   * Flag that prevents params from this aggregation from being included in the dsl. Sibling and parent aggs are still written.
+   *
+   * @type {Boolean}
+   */
+  hasNoDslParams: boolean;
   /**
    * The method to create a filter representation of the bucket
    * @param {object} aggConfig The instance of the aggConfig
@@ -222,9 +235,11 @@ export class AggType<
     this.dslName = config.dslName || config.name;
     this.expressionName = config.expressionName;
     this.title = config.title;
+    this.valueType = config.valueType;
     this.makeLabel = config.makeLabel || constant(this.name);
     this.ordered = config.ordered;
     this.hasNoDsl = !!config.hasNoDsl;
+    this.hasNoDslParams = !!config.hasNoDslParams;
 
     if (config.createFilter) {
       this.createFilter = config.createFilter;

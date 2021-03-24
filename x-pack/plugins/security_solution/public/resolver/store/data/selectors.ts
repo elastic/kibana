@@ -64,11 +64,24 @@ export function resolverComponentInstanceID(state: DataState): string {
 }
 
 /**
+ * The indices resolver should use, passed in as external props.
+ */
+const currentIndices = (state: DataState): string[] => {
+  return state.indices;
+};
+
+/**
  * The last NewResolverTree we received, if any. It may be stale (it might not be for the same databaseDocumentID that
  * we're currently interested in.
  */
 const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => {
   return state.tree?.lastResponse?.successful ? state.tree?.lastResponse.result : undefined;
+};
+
+const lastResponseIndices = (state: DataState): string[] | undefined => {
+  return state.tree?.lastResponse?.successful
+    ? state.tree?.lastResponse?.parameters?.indices
+    : undefined;
 };
 
 /**
@@ -336,9 +349,21 @@ export const timeRangeFilters = createSelector(
 /**
  * The indices to use for the requests with the backend.
  */
-export const treeParamterIndices = createSelector(treeParametersToFetch, (parameters) => {
+export const treeParameterIndices = createSelector(treeParametersToFetch, (parameters) => {
   return parameters?.indices ?? [];
 });
+
+/**
+ * Panel requests should not use indices derived from the tree parameter selector, as this is only defined briefly while the resolver_tree_fetcher middleware is running.
+ * Instead, panel requests should use the indices used by the last good request, falling back to the indices passed as external props.
+ */
+export const eventIndices = createSelector(
+  lastResponseIndices,
+  currentIndices,
+  function eventIndices(lastIndices, current): string[] {
+    return lastIndices ?? current ?? [];
+  }
+);
 
 export const layout: (state: DataState) => IsometricTaxiLayout = createSelector(
   tree,

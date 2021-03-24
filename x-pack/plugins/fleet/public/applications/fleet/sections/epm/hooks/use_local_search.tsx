@@ -7,7 +7,8 @@
 
 import { Search as LocalSearch } from 'js-search';
 import { useEffect, useRef } from 'react';
-import { PackageList, PackageListItem } from '../../../types';
+
+import type { PackageList, PackageListItem } from '../../../types';
 
 export type SearchField = keyof PackageListItem;
 export const searchIdField: SearchField = 'name';

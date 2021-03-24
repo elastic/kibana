@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Agent,
   AgentAction,
   NewAgentAction,
@@ -164,12 +164,13 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
-export interface PostBulkAgentReassignResponse {
-  [key: string]: {
+export type PostBulkAgentReassignResponse = Record<
+  Agent['id'],
+  {
     success: boolean;
-    error?: Error;
-  };
-}
+    error?: string;
+  }
+>;
 
 export interface GetOneAgentEventsRequest {
   params: {

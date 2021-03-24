@@ -7,17 +7,25 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { metricsItems, panel, seriesItems, visPayloadSchema, fieldObject } from './vis_schema';
+import {
+  metricsItems,
+  panel,
+  seriesItems,
+  visPayloadSchema,
+  fieldObject,
+  annotationsItems,
+} from './vis_schema';
 import { PANEL_TYPES } from './panel_types';
 import { TimeseriesUIRestrictions } from './ui_restrictions';
 
+export type AnnotationItemsSchema = TypeOf<typeof annotationsItems>;
 export type SeriesItemsSchema = TypeOf<typeof seriesItems>;
 export type MetricsItemsSchema = TypeOf<typeof metricsItems>;
 export type PanelSchema = TypeOf<typeof panel>;
 export type VisPayload = TypeOf<typeof visPayloadSchema>;
 export type FieldObject = TypeOf<typeof fieldObject>;
 
-interface PanelData {
+export interface PanelData {
   id: string;
   label: string;
   data: Array<[number, number]>;
@@ -48,4 +56,9 @@ export interface SanitizedFieldType {
   name: string;
   type: string;
   label?: string;
+}
+
+export enum PALETTES {
+  GRADIENT = 'gradient',
+  RAINBOW = 'rainbow',
 }

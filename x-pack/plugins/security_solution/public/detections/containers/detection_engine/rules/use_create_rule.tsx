@@ -16,28 +16,31 @@ import { transformOutput } from './transforms';
 
 interface CreateRuleReturn {
   isLoading: boolean;
-  isSaved: boolean;
+  ruleId: string | null;
 }
 
 export type ReturnCreateRule = [CreateRuleReturn, Dispatch<CreateRulesSchema | null>];
 
 export const useCreateRule = (): ReturnCreateRule => {
   const [rule, setRule] = useState<CreateRulesSchema | null>(null);
-  const [isSaved, setIsSaved] = useState(false);
+  const [ruleId, setRuleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
 
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
-    setIsSaved(false);
+    setRuleId(null);
     const saveRule = async () => {
       if (rule != null) {
         try {
           setIsLoading(true);
-          await createRule({ rule: transformOutput(rule), signal: abortCtrl.signal });
+          const createRuleResponse = await createRule({
+            rule: transformOutput(rule),
+            signal: abortCtrl.signal,
+          });
           if (isSubscribed) {
-            setIsSaved(true);
+            setRuleId(createRuleResponse.id);
           }
         } catch (error) {
           if (isSubscribed) {
@@ -57,5 +60,5 @@ export const useCreateRule = (): ReturnCreateRule => {
     };
   }, [rule, dispatchToaster]);
 
-  return [{ isLoading, isSaved }, setRule];
+  return [{ isLoading, ruleId }, setRule];
 };

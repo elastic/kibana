@@ -1,0 +1,6 @@
+{
+  "id": "codeCoverageTestPlugin",
+  "version": "kibana",
+  "server": true,
+  "ui": false
+}

@@ -7,6 +7,7 @@
  */
 
 export * from './calculate_auto_time_expression';
+export { getNumberHistogramIntervalByDatatableColumn } from './get_number_histogram_interval';
 export * from './date_interval_utils';
 export * from './get_format_with_aggs';
 export * from './ipv4_address';

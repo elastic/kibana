@@ -30,7 +30,7 @@ export interface SaveModalDashboardProps {
   documentInfo: SaveModalDocumentInfo;
   objectType: string;
   onClose: () => void;
-  onSave: (props: OnSaveProps & { dashboardId: string | null }) => void;
+  onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
 
@@ -40,17 +40,16 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const initialCopyOnSave = !Boolean(documentId);
 
   const { capabilities } = pluginServices.getHooks();
-  const {
-    canAccessDashboards,
-    canCreateNewDashboards,
-    canEditDashboards,
-  } = capabilities.useService();
+  const { canAccessDashboards, canCreateNewDashboards } = capabilities.useService();
 
-  const disableDashboardOptions =
-    !canAccessDashboards() || (!canCreateNewDashboards && !canEditDashboards);
+  // Disable the dashboard options if the user can't access dashboards or if they're read-only
+  const disableDashboardOptions = !canAccessDashboards() || !canCreateNewDashboards();
 
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>(
     documentId || disableDashboardOptions ? null : 'existing'
+  );
+  const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(
+    !initialCopyOnSave || disableDashboardOptions
   );
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
@@ -66,12 +65,13 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
           onChange={(option) => {
             setDashboardOption(option);
           }}
-          {...{ copyOnSave, documentId, dashboardOption }}
+          {...{ copyOnSave, documentId, dashboardOption, setAddToLibrary, isAddToLibrarySelected }}
         />
       )
     : null;
 
   const onCopyOnSaveChange = (newCopyOnSave: boolean) => {
+    setAddToLibrary(true);
     setDashboardOption(null);
     setCopyOnSave(newCopyOnSave);
   };
@@ -89,7 +89,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
       }
     }
 
-    props.onSave({ ...onSaveProps, dashboardId });
+    props.onSave({ ...onSaveProps, dashboardId, addToLibrary: isAddToLibrarySelected });
   };
 
   const saveLibraryLabel =
@@ -117,7 +117,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
       onSave={onModalSave}
       title={documentInfo.title}
       showCopyOnSave={documentId ? true : false}
-      options={dashboardOption === null ? tagOptions : undefined} // Show tags when not adding to dashboard
+      options={isAddToLibrarySelected ? tagOptions : undefined} // Show tags when not adding to dashboard
       description={documentInfo.description}
       showDescription={true}
       {...{

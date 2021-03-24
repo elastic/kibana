@@ -20,13 +20,13 @@ interface Arguments {
   formatParams?: string;
 }
 
-type ExpressionValueVisDimension = ExpressionValueBoxed<
+export type ExpressionValueVisDimension = ExpressionValueBoxed<
   'vis_dimension',
   {
     accessor: number | DatatableColumn;
     format: {
       id?: string;
-      params: unknown;
+      params: Record<string, any>;
     };
   }
 >;

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -16,11 +16,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('cases');
+      await esArchiver.load('cases/migrations/7.10.0');
     });
 
     after(async () => {
-      await esArchiver.unload('cases');
+      await esArchiver.unload('cases/migrations/7.10.0');
     });
 
     it('7.11.0 migrates cases comments', async () => {

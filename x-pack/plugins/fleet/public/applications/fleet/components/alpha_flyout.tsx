@@ -61,7 +61,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
                   </EuiLink>
                 ),
                 forumLink: (
-                  <EuiLink href="https://ela.st/ingest-manager-forum" external target="_blank">
+                  <EuiLink href="https://ela.st/fleet-forum" external target="_blank">
                     <FormattedMessage
                       id="xpack.fleet.alphaMessaging.forumLink"
                       defaultMessage="Discuss forum"

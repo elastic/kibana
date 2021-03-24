@@ -1752,6 +1752,12 @@ export const ComponentStrings = {
         description:
           'This column in the table contains the date/time the workpad was last updated.',
       }),
+    getTableActionsColumnTitle: () =>
+      i18n.translate('xpack.canvas.workpadLoader.table.actionsColumnTitle', {
+        defaultMessage: 'Actions',
+        description:
+          'This column in the table contains the actions that can be taken on a workpad.',
+      }),
   },
   WorkpadManager: {
     getModalTitle: () =>

@@ -87,6 +87,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
+  const selectedJobsRunning = jobsWithTimeRange.some(
+    (job) => jobIds.includes(job.id) && job.isRunning === true
+  );
 
   const explorerAppState = useObservable(explorerService.appState$);
   const explorerState = useObservable(explorerService.state$);
@@ -261,6 +264,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           severity: tableSeverity.val,
           stoppedPartitions,
           invalidTimeRangeError,
+          selectedJobsRunning,
         }}
       />
     </div>

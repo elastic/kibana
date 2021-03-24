@@ -194,6 +194,7 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
                 }
                 euiFieldProps={{
                   'data-test-subj': 'snapshotPolicyCombobox',
+                  fullWidth: false,
                   options: policies,
                   singleSelection: { asPlainText: true },
                   isLoading,

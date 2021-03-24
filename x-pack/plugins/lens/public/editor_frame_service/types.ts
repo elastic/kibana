@@ -8,3 +8,9 @@
 import { Datatable } from 'src/plugins/expressions';
 
 export type TableInspectorAdapter = Record<string, Datatable>;
+
+export interface ErrorMessage {
+  shortMessage: string;
+  longMessage: string;
+  type?: 'fixable' | 'critical';
+}

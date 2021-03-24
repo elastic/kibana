@@ -30,9 +30,6 @@ export interface BrushTriggerEvent {
 
 type AllSeriesAccessors = Array<[accessor: Accessor | AccessorFn, value: string | number]>;
 
-// TODO: replace when exported from elastic/charts
-const DEFAULT_SINGLE_PANEL_SM_VALUE = '__ECH_DEFAULT_SINGLE_PANEL_SM_VALUE__';
-
 /**
  * returns accessor value from string or function accessor
  * @param datum
@@ -97,11 +94,11 @@ function getSplitChartValue({
   | string
   | number
   | undefined {
-  if (smHorizontalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE) {
+  if (smHorizontalAccessorValue !== undefined) {
     return smHorizontalAccessorValue;
   }
 
-  if (smVerticalAccessorValue !== DEFAULT_SINGLE_PANEL_SM_VALUE) {
+  if (smVerticalAccessorValue !== undefined) {
     return smVerticalAccessorValue;
   }
 

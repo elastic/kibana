@@ -110,7 +110,7 @@ export const SearchPanel: FC<Props> = ({
           closePopover={() => setErrorMessage(undefined)}
           input={
             <QueryStringInput
-              bubbleSubmitEvent={true}
+              bubbleSubmitEvent={false}
               query={searchInput}
               indexPatterns={[indexPattern]}
               onChange={searchChangeHandler}

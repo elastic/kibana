@@ -15,7 +15,7 @@ import { IndexPatternsContract } from '../../common/index_patterns/index_pattern
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { ISessionsClient, ISessionService } from './session';
 
-export { ISearchStartSearchSource };
+export { ISearchStartSearchSource, SearchUsageCollector };
 
 export interface SearchEnhancements {
   searchInterceptor: ISearchInterceptor;

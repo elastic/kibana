@@ -105,7 +105,8 @@ const createStartContractMock = () => {
             loggersConfiguredCount: 0,
           },
           savedObjects: {
-            maxImportExportSizeBytes: 10000,
+            customIndex: false,
+            maxImportExportSize: 10000,
             maxImportPayloadBytes: 26214400,
           },
         },

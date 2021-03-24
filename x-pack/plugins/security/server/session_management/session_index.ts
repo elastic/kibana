@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
+
 import type { AuthenticationProvider } from '../../common/model';
 import type { ConfigType } from '../config';
 
@@ -15,6 +16,18 @@ export interface SessionIndexOptions {
   readonly config: Pick<ConfigType, 'session' | 'authc'>;
   readonly logger: Logger;
 }
+
+/**
+ * Filter provided for the `SessionIndex.invalidate` method that determines which session index
+ * values should be invalidated (removed from the index). It can have three possible types:
+ *   - `all` means that all existing active and inactive sessions should be invalidated.
+ *   - `sid` means that only session with the specified SID should be invalidated.
+ *   - `query` means that only sessions that match specified query should be invalidated.
+ */
+export type InvalidateSessionsFilter =
+  | { match: 'all' }
+  | { match: 'sid'; sid: string }
+  | { match: 'query'; query: { provider: { type: string; name?: string }; usernameHash?: string } };
 
 /**
  * Version of the current session index template.
@@ -236,19 +249,57 @@ export class SessionIndex {
   }
 
   /**
-   * Clears session value with the specified ID.
-   * @param sid Session ID to clear.
+   * Clears session value(s) determined by the specified filter.
+   * @param filter Filter that narrows down the list of the session values that should be cleared.
    */
-  async clear(sid: string) {
+  async invalidate(filter: InvalidateSessionsFilter) {
+    if (filter.match === 'sid') {
+      try {
+        // We don't specify primary term and sequence number as delete should always take precedence
+        // over any updates that could happen in the meantime.
+        const { statusCode } = await this.options.elasticsearchClient.delete(
+          { id: filter.sid, index: this.indexName, refresh: 'wait_for' },
+          { ignore: [404] }
+        );
+
+        // 404 means the session with such SID wasn't found and hence nothing was removed.
+        return statusCode !== 404 ? 1 : 0;
+      } catch (err) {
+        this.options.logger.error(`Failed to clear session value: ${err.message}`);
+        throw err;
+      }
+    }
+
+    // If filter is specified we should clear only session values that are matched by the filter.
+    // Otherwise all session values should be cleared.
+    let deleteQuery;
+    if (filter.match === 'query') {
+      deleteQuery = {
+        bool: {
+          must: [
+            { term: { 'provider.type': filter.query.provider.type } },
+            ...(filter.query.provider.name
+              ? [{ term: { 'provider.name': filter.query.provider.name } }]
+              : []),
+            ...(filter.query.usernameHash
+              ? [{ term: { usernameHash: filter.query.usernameHash } }]
+              : []),
+          ],
+        },
+      };
+    } else {
+      deleteQuery = { match_all: {} };
+    }
+
     try {
-      // We don't specify primary term and sequence number as delete should always take precedence
-      // over any updates that could happen in the meantime.
-      await this.options.elasticsearchClient.delete(
-        { id: sid, index: this.indexName, refresh: 'wait_for' },
-        { ignore: [404] }
-      );
+      const { body: response } = await this.options.elasticsearchClient.deleteByQuery({
+        index: this.indexName,
+        refresh: true,
+        body: { query: deleteQuery },
+      });
+      return response.deleted as number;
     } catch (err) {
-      this.options.logger.error(`Failed to clear session value: ${err.message}`);
+      this.options.logger.error(`Failed to clear session value(s): ${err.message}`);
       throw err;
     }
   }

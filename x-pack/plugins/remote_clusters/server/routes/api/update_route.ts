@@ -100,7 +100,7 @@ export const register = (deps: RouteDependencies): void => {
       if (isEsError(error)) {
         return response.customError({ statusCode: error.statusCode, body: error });
       }
-      return response.internalError({ body: error });
+      throw error;
     }
   };
 

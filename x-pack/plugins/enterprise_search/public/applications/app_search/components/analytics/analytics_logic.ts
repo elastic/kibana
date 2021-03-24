@@ -8,9 +8,9 @@
 import { kea, MakeLogicType } from 'kea';
 import queryString from 'query-string';
 
-import { KibanaLogic } from '../../../shared/kibana';
-import { HttpLogic } from '../../../shared/http';
 import { flashAPIErrors } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_START_DATE, DEFAULT_END_DATE } from './constants';

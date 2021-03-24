@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Enumeration of Kernel Modules",
   "query": "event.category:process and event.type:(start or process_started) and process.args:(kmod and list and sudo or sudo and (depmod or lsmod or modinfo))",
   "risk_score": 47,
@@ -42,6 +42,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 6
 }

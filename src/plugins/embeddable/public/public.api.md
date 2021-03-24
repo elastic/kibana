@@ -590,7 +590,7 @@ export class EmbeddableStateTransfer {
     // Warning: (ae-forgotten-export) The symbol "ApplicationStart" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "PublicAppInfo" needs to be exported by the entry point index.d.ts
     constructor(navigateToApp: ApplicationStart['navigateToApp'], currentAppId$: ApplicationStart['currentAppId$'], appList?: ReadonlyMap<string, PublicAppInfo> | undefined, customStorage?: Storage);
-    clearEditorState(appId: string): void;
+    clearEditorState(appId?: string): void;
     getAppNameFromId: (appId: string) => string | undefined;
     getIncomingEditorState(appId: string, removeAfterFetch?: boolean): EmbeddableEditorState | undefined;
     getIncomingEmbeddablePackage(appId: string, removeAfterFetch?: boolean): EmbeddablePackageState | undefined;

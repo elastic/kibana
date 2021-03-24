@@ -7,9 +7,10 @@
 
 import React, { useState } from 'react';
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { MAX_TABLE_ROW_ICONS } from '../../../constants';
-
 import { ContentSource } from '../../../types';
 
 import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
@@ -27,9 +28,13 @@ export const GroupSources: React.FC<GroupSourcesProps> = ({ groupSources }) => {
 
   return (
     <>
-      {visibleSources.map((source, index) => (
-        <SourceIcon {...source} wrapped key={index} />
-      ))}
+      <EuiFlexGroup gutterSize="s">
+        {visibleSources.map((source, index) => (
+          <EuiFlexItem key={index}>
+            <SourceIcon {...source} size="l" />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
       {hiddenSources.length > 0 && (
         <GroupRowSourcesDropdown
           isPopoverOpen={popoverOpen}

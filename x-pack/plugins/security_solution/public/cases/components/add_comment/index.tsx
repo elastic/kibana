@@ -9,7 +9,7 @@ import { EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
 
-import { CommentType } from '../../../../../case/common/api';
+import { CommentType } from '../../../../../cases/common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
@@ -39,11 +39,15 @@ interface AddCommentProps {
   onCommentSaving?: () => void;
   onCommentPosted: (newCase: Case) => void;
   showLoading?: boolean;
+  subCaseId?: string;
 }
 
 export const AddComment = React.memo(
   forwardRef<AddCommentRefObject, AddCommentProps>(
-    ({ caseId, disabled, showLoading = true, onCommentPosted, onCommentSaving }, ref) => {
+    (
+      { caseId, disabled, onCommentPosted, onCommentSaving, showLoading = true, subCaseId },
+      ref
+    ) => {
       const { isLoading, postComment } = usePostComment();
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -80,10 +84,15 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment(caseId, { ...data, type: CommentType.user }, onCommentPosted);
+          postComment({
+            caseId,
+            data: { ...data, type: CommentType.user },
+            updateCase: onCommentPosted,
+            subCaseId,
+          });
           reset();
         }
-      }, [onCommentPosted, onCommentSaving, postComment, reset, submit, caseId]);
+      }, [caseId, onCommentPosted, onCommentSaving, postComment, reset, submit, subCaseId]);
 
       return (
         <span id="add-comment-permLink">

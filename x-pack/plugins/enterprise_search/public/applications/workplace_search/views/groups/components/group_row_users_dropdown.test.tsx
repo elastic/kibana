@@ -9,12 +9,13 @@ import { setMockActions, setMockValues } from '../../../../__mocks__';
 import { users } from '../../../__mocks__/users.mock';
 
 import React from 'react';
+
 import { shallow, mount } from 'enzyme';
 
 import { EuiLoadingContent, EuiButtonEmpty } from '@elastic/eui';
 
-import { GroupRowUsersDropdown } from './group_row_users_dropdown';
 import { FilterableUsersPopover } from './filterable_users_popover';
+import { GroupRowUsersDropdown } from './group_row_users_dropdown';
 
 const fetchGroupUsers = jest.fn();
 const onButtonClick = jest.fn();
