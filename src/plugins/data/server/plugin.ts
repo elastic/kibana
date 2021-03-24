@@ -82,10 +82,7 @@ export class DataServerPlugin
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
-    this.indexPatterns.setup(core, {
-      expressions,
-      logger: this.logger.get('indexPatterns'),
-    });
+    this.indexPatterns.setup(core, { expressions });
 
     core.uiSettings.register(getUiSettings());
 
