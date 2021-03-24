@@ -20,6 +20,7 @@ interface CreateTestConfigOptions {
   enableActionsProxy: boolean;
   rejectUnauthorized?: boolean;
   publicBaseUrl?: boolean;
+  preconfiguredAlertHistoryEsIndex?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -47,6 +48,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     disabledPlugins = [],
     ssl = false,
     rejectUnauthorized = true,
+    preconfiguredAlertHistoryEsIndex = false,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -107,6 +109,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...actionsProxyUrl,
 
           '--xpack.eventLog.logEntries=true',
+          `--xpack.actions.preconfiguredAlertHistoryEsIndex=${preconfiguredAlertHistoryEsIndex}`,
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {
               actionTypeId: '.slack',

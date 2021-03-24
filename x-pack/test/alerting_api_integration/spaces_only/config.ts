@@ -13,4 +13,5 @@ export default createTestConfig('spaces_only', {
   license: 'trial',
   enableActionsProxy: false,
   rejectUnauthorized: false,
+  preconfiguredAlertHistoryEsIndex: true,
 });

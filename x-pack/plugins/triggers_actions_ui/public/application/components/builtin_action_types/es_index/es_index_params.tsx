@@ -179,8 +179,6 @@ export const IndexParamsFields = ({
         documentToIndex === null
           ? '{}' // need this to trigger validation
           : documentToIndex
-          ? documentToIndex
-          : undefined
       }
       label={documentsFieldLabel}
       aria-label={i18n.translate(

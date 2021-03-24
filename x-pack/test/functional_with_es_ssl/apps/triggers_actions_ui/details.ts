@@ -371,15 +371,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
         const action = await createActionManualCleanup({
-          name: `webhook-${testRunUuid}-${0}`,
-          connector_type_id: '.webhook',
+          name: `index-${testRunUuid}-${0}`,
+          connector_type_id: '.index',
           config: {
-            url: 'https://test',
+            index: `index-${testRunUuid}-${0}`,
           },
-          secrets: {
-            user: 'user',
-            password: 'pass',
-          },
+          secrets: {},
         });
 
         await pageObjects.common.navigateToApp('triggersActions');
@@ -389,12 +386,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             {
               group: 'default',
               id: action.id,
-              params: { body: ' {{context.message}}' },
+              params: { level: 'info', message: ' {{context.message}}' },
             },
             {
               group: 'other',
               id: action.id,
-              params: { body: ' {{context.message}}' },
+              params: { level: 'info', message: ' {{context.message}}' },
             },
           ],
         });
@@ -433,9 +430,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('createActionConnectorButton-0');
         await testSubjects.existOrFail('connectorAddModal');
         await testSubjects.setValue('nameInput', 'new connector');
-        await testSubjects.setValue('webhookUrlText', 'https://another');
-        await testSubjects.setValue('webhookUserInput', 'user');
-        await testSubjects.setValue('webhookPasswordInput', 'pass');
+        await retry.try(async () => {
+          // At times we find the driver controlling the ComboBox in tests
+          // can select the wrong item, this ensures we always select the correct index
+          await comboBox.set('connectorIndexesComboBox', 'test-index');
+          expect(
+            await comboBox.isOptionSelected(
+              await testSubjects.find('connectorIndexesComboBox'),
+              'test-index'
+            )
+          ).to.be(true);
+        });
         await testSubjects.click('connectorAddModal > saveActionButtonModal');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 

@@ -35,7 +35,7 @@ describe('Actions Plugin', () => {
         enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
-        preconfiguredAlertHistoryEsIndex: true,
+        preconfiguredAlertHistoryEsIndex: false,
         preconfigured: {},
         proxyRejectUnauthorizedCertificates: true,
         rejectUnauthorized: true,
@@ -190,7 +190,7 @@ describe('Actions Plugin', () => {
         enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
-        preconfiguredAlertHistoryEsIndex: true,
+        preconfiguredAlertHistoryEsIndex: false,
         preconfigured: {
           preconfiguredServerLog: {
             actionTypeId: '.server-log',

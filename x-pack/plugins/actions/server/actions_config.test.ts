@@ -16,7 +16,7 @@ const defaultActionsConfig: ActionsConfig = {
   enabled: false,
   allowedHosts: [],
   enabledActionTypes: [],
-  preconfiguredAlertHistoryEsIndex: true,
+  preconfiguredAlertHistoryEsIndex: false,
   preconfigured: {},
   proxyRejectUnauthorizedCertificates: true,
   rejectUnauthorized: true,
