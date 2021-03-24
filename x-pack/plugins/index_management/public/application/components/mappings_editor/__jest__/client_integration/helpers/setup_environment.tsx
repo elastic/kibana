@@ -83,6 +83,10 @@ const defaultProps = {
   docLinks: {
     DOC_LINK_VERSION: 'master',
     ELASTIC_WEBSITE_URL: 'https://jest.elastic.co',
+    links: {
+      runtimeFields: { mapping: 'https://jestTest.elastic.co/to-be-defined.html' },
+      scriptedFields: { painlessLangSpec: 'https://jestTest.elastic.co/to-be-defined.html' },
+    },
   },
 };
 

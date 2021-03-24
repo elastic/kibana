@@ -7,9 +7,11 @@
 
 import { DocLinksStart } from 'src/core/public';
 
-export const getLinks = (docLinks: DocLinksStart) => {
+export const getLinks = ({ links }: DocLinksStart) => {
+  const runtimePainless = `${links.runtimeFields.mapping}`;
+  const painlessSyntax = `${links.scriptedFields.painlessLangSpec}`;
   return {
-    runtimePainless: docLinks.links.runtimeFields.mapping,
-    painlessSyntax: docLinks.links.scriptedFields.painlessLangSpec,
+    runtimePainless,
+    painlessSyntax,
   };
 };
