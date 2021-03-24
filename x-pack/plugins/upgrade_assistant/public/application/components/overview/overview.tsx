@@ -17,13 +17,17 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
 import { LatestMinorBanner } from '../latest_minor_banner';
 import { ESDeprecationStats } from './es_stats';
+import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.pageTitle', {
@@ -32,11 +36,29 @@ const i18nTexts = {
   pageDescription: (nextMajor: string) =>
     i18n.translate('xpack.upgradeAssistant.pageDescription', {
       defaultMessage:
-        'This assistant helps you prepare your cluster and indices for Elasticsearch {nextMajor}. For other issues that need your attention, see the Elasticsearch logs.',
+        'The Upgrade Assistant identifies deprecated settings in your cluster and helps you resolve issues before you upgrade to Elastic {nextMajor}.',
       values: {
         nextMajor,
       },
     }),
+  deprecationLoggingTitle: i18n.translate('xpack.upgradeAssistant.deprecationLoggingTitle', {
+    defaultMessage: 'Review deprecation logs',
+  }),
+  deprecationLoggingDescription: (href: string) => (
+    <FormattedMessage
+      id="xpack.upgradeAssistant.deprecationLoggingDescription"
+      defaultMessage="For other issues that need your attention, review the deprecation logs. You may need to enable deprecation logging. {learnMore}"
+      values={{
+        learnMore: (
+          <EuiLink href={href} target="_blank">
+            {i18n.translate('xpack.upgradeAssistant.deprecationLoggingDescription.learnMoreLink', {
+              defaultMessage: 'Learn more.',
+            })}
+          </EuiLink>
+        ),
+      }}
+    />
+  ),
   docLink: i18n.translate('xpack.upgradeAssistant.documentationLinkText', {
     defaultMessage: 'Upgrade Assistant docs',
   }),
@@ -50,7 +72,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
   // TODO
   // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
-  const { kibanaVersionInfo, breadcrumbs } = useAppContext();
+  const { kibanaVersionInfo, breadcrumbs, docLinks } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
   // useEffect(() => {
@@ -95,6 +117,18 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
             <EuiText data-test-subj="overviewDetail" grow={false}>
               <p>{i18nTexts.pageDescription(`${nextMajor}.x`)}</p>
             </EuiText>
+
+            <EuiSpacer />
+
+            <EuiCallOut title={i18nTexts.deprecationLoggingTitle} iconType="pin">
+              <p>
+                {i18nTexts.deprecationLoggingDescription(
+                  docLinks.links.elasticsearch.deprecationLogging
+                )}
+              </p>
+
+              <DeprecationLoggingToggle />
+            </EuiCallOut>
 
             <EuiSpacer />
 

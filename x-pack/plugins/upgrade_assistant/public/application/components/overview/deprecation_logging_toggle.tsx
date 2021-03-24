@@ -50,21 +50,14 @@ export const DeprecationLoggingToggle: React.FunctionComponent = () => {
           defaultMessage: 'Could not load logging state',
         }
       );
-    } else if (isEnabled) {
-      return i18n.translate(
-        'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
-        {
-          defaultMessage: 'On',
-        }
-      );
-    } else {
-      return i18n.translate(
-        'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.disabledLabel',
-        {
-          defaultMessage: 'Off',
-        }
-      );
     }
+
+    return i18n.translate(
+      'xpack.upgradeAssistant.overviewTab.steps.deprecationLogsStep.enableDeprecationLoggingToggleSwitch.enabledLabel',
+      {
+        defaultMessage: 'Enable deprecation logging',
+      }
+    );
   };
 
   const toggleLogging = async () => {
