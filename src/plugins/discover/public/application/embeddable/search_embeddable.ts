@@ -168,7 +168,7 @@ export class SearchEmbeddable
       throw new Error('Search scope not defined');
     }
     this.searchInstance = this.$compile(
-      this.services.uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
+      this.services.uiSettings.get('doc_table:legacy') ? searchTemplate : searchTemplateGrid
     )(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
@@ -225,6 +225,8 @@ export class SearchEmbeddable
     searchScope.setSortOrder = (sort) => {
       this.updateInput({ sort });
     };
+
+    searchScope.isLoading = true;
 
     const useNewFieldsApi = !getServices().uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
     searchScope.useNewFieldsApi = useNewFieldsApi;
@@ -336,6 +338,9 @@ export class SearchEmbeddable
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
     });
+    this.searchScope.$apply(() => {
+      this.searchScope!.isLoading = true;
+    });
     this.updateOutput({ loading: true, error: undefined });
 
     try {
@@ -353,9 +358,13 @@ export class SearchEmbeddable
       this.searchScope.$apply(() => {
         this.searchScope!.hits = resp.hits.hits;
         this.searchScope!.totalHitCount = resp.hits.total;
+        this.searchScope!.isLoading = false;
       });
     } catch (error) {
       this.updateOutput({ loading: false, error });
+      this.searchScope.$apply(() => {
+        this.searchScope!.isLoading = false;
+      });
     }
   };
 
