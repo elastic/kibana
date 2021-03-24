@@ -13,7 +13,7 @@
       "common/**/*",
       "public/**/*",
       "server/**/*",
-      "../../typings/**/*"
+      "../../../typings/**/*"
     ],
     "references": [
       { "path": "../../../src/core/tsconfig.json" },
@@ -21,6 +21,7 @@
       { "path": "../global_search/tsconfig.json"},
       { "path": "../saved_objects_tagging/tsconfig.json"},
       { "path": "../../../src/plugins/data/tsconfig.json"},
+      { "path": "../../../src/plugins/index_pattern_field_editor/tsconfig.json"},
       { "path": "../../../src/plugins/charts/tsconfig.json"},
       { "path": "../../../src/plugins/expressions/tsconfig.json"},
       { "path": "../../../src/plugins/navigation/tsconfig.json" },

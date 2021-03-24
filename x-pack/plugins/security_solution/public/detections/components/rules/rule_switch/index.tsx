@@ -109,7 +109,7 @@ export const RuleSwitchComponent = ({
 
   const showLoader = useMemo((): boolean => {
     if (myIsLoading !== isLoading) {
-      return isLoading ?? false;
+      return isLoading || myIsLoading;
     }
 
     return myIsLoading;

@@ -34,13 +34,12 @@ export class AlertingSecurity {
         enabled: isSecurityEnabled = false,
         ssl: { http: { enabled: isTLSEnabled = false } = {} } = {},
       } = {},
-    }: XPackUsageSecurity = await context.core.elasticsearch.legacy.client.callAsInternalUser(
-      'transport.request',
-      {
+    } = (
+      await context.core.elasticsearch.client.asInternalUser.transport.request({
         method: 'GET',
         path: '/_xpack/usage',
-      }
-    );
+      })
+    ).body as XPackUsageSecurity;
 
     return {
       isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
