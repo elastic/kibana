@@ -47,7 +47,7 @@ describe('ContentSection', () => {
       />
     );
 
-    expect(wrapper.find(EuiSpacer).first().prop('size')).toEqual('s');
+    expect(wrapper.find(EuiSpacer).first().prop('size')).toEqual('l');
     expect(wrapper.find(EuiSpacer)).toHaveLength(2);
     expect(wrapper.find('.header')).toHaveLength(1);
   });
