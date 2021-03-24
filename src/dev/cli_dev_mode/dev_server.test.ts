@@ -120,6 +120,9 @@ describe('#run$', () => {
   it('starts the dev server with the right options', () => {
     run(new DevServer(defaultOptions)).unsubscribe();
 
+    // ensure that FORCE_COLOR is in the env for consistency in snapshot
+    process.env.FORCE_COLOR = 'true';
+
     expect(execa.node.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -133,7 +136,6 @@ describe('#run$', () => {
             "env": Object {
               "<inheritted process.env>": true,
               "ELASTIC_APM_SERVICE_NAME": "kibana",
-              "FORCE_COLOR": "true",
               "isDevCliChild": "true",
             },
             "nodeOptions": Array [
