@@ -240,10 +240,6 @@ in the current index pattern is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover-aggs-terms-size]]`discover:aggs:terms:size`::
-The number terms that are visualized when clicking the *Visualize* button in the
-field drop down. The default is `20`.
-
 [[discover-samplesize]]`discover:sampleSize`::
 The number of rows to show in the *Discover* table.
 
@@ -461,7 +457,7 @@ Enables the legacy charts library for aggregation-based area, line, and bar char
 
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
-Maps values to specific colors in *Visualize* charts and *TSVB*. This setting does not apply to *Lens*.
+Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
 The opacity of the chart items that are dimmed when highlighting another element
