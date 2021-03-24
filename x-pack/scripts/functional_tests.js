@@ -40,6 +40,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/plugin_api_integration/config.ts'),
   require.resolve('../test/security_api_integration/saml.config.ts'),
   require.resolve('../test/security_api_integration/session_idle.config.ts'),
+  require.resolve('../test/security_api_integration/session_invalidate.config.ts'),
   require.resolve('../test/security_api_integration/session_lifespan.config.ts'),
   require.resolve('../test/security_api_integration/login_selector.config.ts'),
   require.resolve('../test/security_api_integration/audit.config.ts'),
