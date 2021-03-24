@@ -32,6 +32,8 @@ export function getKibanaContext({
 }) {
   return getKibanaContextFn(async () => {
     const [core] = await getStartServices();
-    return { savedObjectsClient: (core.savedObjects.client as unknown) as SavedObjectsClientCommon };
+    return {
+      savedObjectsClient: (core.savedObjects.client as unknown) as SavedObjectsClientCommon,
+    };
   });
 }
