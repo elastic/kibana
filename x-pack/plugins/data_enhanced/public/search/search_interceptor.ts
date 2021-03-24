@@ -20,7 +20,6 @@ import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '..
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
 
-export const CLIENT_CACHE_EXPIRATION = 30000;
 const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
 
