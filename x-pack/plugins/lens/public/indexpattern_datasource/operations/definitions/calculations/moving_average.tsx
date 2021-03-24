@@ -89,6 +89,7 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
+      filter: previousColumn?.filter,
       params: {
         window: 5,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -119,6 +120,7 @@ export const movingAverageOperation: OperationDefinition<
     )?.join(', ');
   },
   timeScalingMode: 'optional',
+  filterable: true,
 };
 
 function MovingAverageParamEditor({

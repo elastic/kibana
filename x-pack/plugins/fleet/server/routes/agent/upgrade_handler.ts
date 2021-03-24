@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
 
 import type { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
-import { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
+import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
@@ -92,21 +92,14 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 
   try {
-    if (Array.isArray(agents)) {
-      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
-        agentIds: agents,
-        sourceUri,
-        version,
-        force,
-      });
-    } else {
-      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
-        kuery: agents,
-        sourceUri,
-        version,
-        force,
-      });
-    }
+    const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+    const upgradeOptions = {
+      ...agentOptions,
+      sourceUri,
+      version,
+      force,
+    };
+    await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
 
     const body: PostBulkAgentUpgradeResponse = {};
     return response.ok({ body });
