@@ -15,7 +15,6 @@ import type { PackagePolicy } from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
-import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 import { outputService } from './output';
 import {
@@ -30,10 +29,7 @@ import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
-import {
-  ensurePreconfiguredPackagesAndPolicies,
-  addPackageToAgentPolicy,
-} from './policy_preconfig';
+import { addPackageToAgentPolicy } from './policy_preconfig';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -155,20 +151,6 @@ async function createSetupSideEffects(
   }
 
   await ensureAgentActionPolicyChangeExists(soClient);
-
-  const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
-    appContextService.getConfig() ?? {};
-
-  const policies = policiesOrUndefined ?? [];
-  const packages = packagesOrUndefined ?? [];
-
-  await ensurePreconfiguredPackagesAndPolicies(
-    soClient,
-    esClient,
-    policies,
-    packages,
-    defaultOutput
-  );
 
   return { isIntialized: true };
 }
