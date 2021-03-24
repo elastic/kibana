@@ -97,7 +97,7 @@ export const thresholdExecutor = async ({
       type: ruleParams.type,
       filters: ruleParams.filters ? ruleParams.filters.concat(bucketFilters) : bucketFilters,
       language: ruleParams.language,
-      query: ruleParams.language,
+      query: ruleParams.query,
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
