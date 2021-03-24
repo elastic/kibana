@@ -33,8 +33,8 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     });
 
     loadTestFile(require.resolve('./async_search'));
-    loadTestFile(require.resolve('./send_to_background'));
-    loadTestFile(require.resolve('./send_to_background_relative_time'));
+    loadTestFile(require.resolve('./save_search_session'));
+    loadTestFile(require.resolve('./save_search_session_relative_time'));
     loadTestFile(require.resolve('./search_sessions_tour'));
     loadTestFile(require.resolve('./sessions_in_space'));
   });
