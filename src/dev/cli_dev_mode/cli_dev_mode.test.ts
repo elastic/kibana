@@ -7,16 +7,16 @@
  */
 
 import Path from 'path';
-
+import * as Rx from 'rxjs';
 import {
   REPO_ROOT,
   createAbsolutePathSerializer,
   createAnyInstanceSerializer,
 } from '@kbn/dev-utils';
-import * as Rx from 'rxjs';
 
 import { TestLog } from './log';
-import { CliDevMode } from './cli_dev_mode';
+import { CliDevMode, SomeCliArgs } from './cli_dev_mode';
+import type { CliDevConfig } from './config';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 expect.addSnapshotSerializer(createAnyInstanceSerializer(Rx.Observable, 'Rx.Observable'));
@@ -31,19 +31,15 @@ const { Optimizer } = jest.requireMock('./optimizer');
 jest.mock('./dev_server');
 const { DevServer } = jest.requireMock('./dev_server');
 
+jest.mock('./base_path_proxy_server');
+const { BasePathProxyServer } = jest.requireMock('./base_path_proxy_server');
+
 jest.mock('./get_server_watch_paths', () => ({
   getServerWatchPaths: jest.fn(() => ({
     watchPaths: ['<mock watch paths>'],
     ignorePaths: ['<mock ignore paths>'],
   })),
 }));
-
-beforeEach(() => {
-  process.argv = ['node', './script', 'foo', 'bar', 'baz'];
-  jest.clearAllMocks();
-});
-
-const log = new TestLog();
 
 const mockBasePathProxy = {
   targetPort: 9999,
@@ -52,26 +48,53 @@ const mockBasePathProxy = {
   stop: jest.fn(),
 };
 
-const defaultOptions = {
+let log: TestLog;
+
+beforeEach(() => {
+  process.argv = ['node', './script', 'foo', 'bar', 'baz'];
+  log = new TestLog();
+  BasePathProxyServer.mockImplementation(() => mockBasePathProxy);
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+  mockBasePathProxy.start.mockReset();
+  mockBasePathProxy.stop.mockReset();
+});
+
+const createCliArgs = (parts: Partial<SomeCliArgs> = {}): SomeCliArgs => ({
+  basePath: false,
   cache: true,
   disableOptimizer: false,
   dist: true,
   oss: true,
-  pluginPaths: [],
-  pluginScanDirs: [Path.resolve(REPO_ROOT, 'src/plugins')],
-  quiet: false,
-  silent: false,
   runExamples: false,
   watch: true,
-  log,
-};
+  silent: false,
+  quiet: false,
+  ...parts,
+});
 
-afterEach(() => {
-  log.messages.length = 0;
+const createDevConfig = (parts: Partial<CliDevConfig> = {}): CliDevConfig => ({
+  plugins: {
+    pluginSearchPaths: [Path.resolve(REPO_ROOT, 'src/plugins')],
+    additionalPluginPaths: [],
+  },
+  dev: {
+    basePathProxyTargetPort: 9000,
+  },
+  http: {} as any,
+  ...parts,
+});
+
+const createOptions = ({ cliArgs = {} }: { cliArgs?: Partial<SomeCliArgs> } = {}) => ({
+  cliArgs: createCliArgs(cliArgs),
+  config: createDevConfig(),
+  log,
 });
 
 it('passes correct args to sub-classes', () => {
-  new CliDevMode(defaultOptions);
+  new CliDevMode(createOptions());
 
   expect(DevServer.mock.calls).toMatchInlineSnapshot(`
     Array [
@@ -102,6 +125,9 @@ it('passes correct args to sub-classes', () => {
           "enabled": true,
           "oss": true,
           "pluginPaths": Array [],
+          "pluginScanDirs": Array [
+            <absolute path>/src/plugins,
+          ],
           "quiet": false,
           "repoRoot": <absolute path>,
           "runExamples": false,
@@ -128,33 +154,38 @@ it('passes correct args to sub-classes', () => {
       ],
     ]
   `);
+
+  expect(BasePathProxyServer).not.toHaveBeenCalled();
+
   expect(log.messages).toMatchInlineSnapshot(`Array []`);
 });
 
 it('disables the optimizer', () => {
-  new CliDevMode({
-    ...defaultOptions,
-    disableOptimizer: true,
-  });
+  new CliDevMode(createOptions({ cliArgs: { disableOptimizer: true } }));
 
   expect(Optimizer.mock.calls[0][0]).toHaveProperty('enabled', false);
 });
 
 it('disables the watcher', () => {
-  new CliDevMode({
-    ...defaultOptions,
-    watch: false,
-  });
+  new CliDevMode(createOptions({ cliArgs: { watch: false } }));
 
   expect(Optimizer.mock.calls[0][0]).toHaveProperty('watch', false);
   expect(Watcher.mock.calls[0][0]).toHaveProperty('enabled', false);
 });
 
-it('overrides the basePath of the server when basePathProxy is defined', () => {
-  new CliDevMode({
-    ...defaultOptions,
-    basePathProxy: mockBasePathProxy as any,
-  });
+it('enable the basePath proxy', () => {
+  new CliDevMode(createOptions({ cliArgs: { basePath: true } }));
+
+  expect(BasePathProxyServer).toHaveBeenCalledTimes(1);
+  expect(BasePathProxyServer.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      <TestLog>,
+      Object {},
+      Object {
+        "basePathProxyTargetPort": 9000,
+      },
+    ]
+  `);
 
   expect(DevServer.mock.calls[0][0].argv).toMatchInlineSnapshot(`
     Array [
@@ -221,9 +252,7 @@ describe('#start()/#stop()', () => {
   });
 
   it('logs a warning if basePathProxy is not passed', () => {
-    new CliDevMode({
-      ...defaultOptions,
-    }).start();
+    new CliDevMode(createOptions()).start();
 
     expect(log.messages).toMatchInlineSnapshot(`
       Array [
@@ -253,16 +282,9 @@ describe('#start()/#stop()', () => {
   });
 
   it('calls start on BasePathProxy if enabled', () => {
-    const basePathProxy: any = {
-      start: jest.fn(),
-    };
+    new CliDevMode(createOptions({ cliArgs: { basePath: true } })).start();
 
-    new CliDevMode({
-      ...defaultOptions,
-      basePathProxy,
-    }).start();
-
-    expect(basePathProxy.start.mock.calls).toMatchInlineSnapshot(`
+    expect(mockBasePathProxy.start.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
@@ -275,7 +297,7 @@ describe('#start()/#stop()', () => {
   });
 
   it('subscribes to Optimizer#run$, Watcher#run$, and DevServer#run$', () => {
-    new CliDevMode(defaultOptions).start();
+    new CliDevMode(createOptions()).start();
 
     expect(optimizerRun$.observers).toHaveLength(1);
     expect(watcherRun$.observers).toHaveLength(1);
@@ -283,10 +305,7 @@ describe('#start()/#stop()', () => {
   });
 
   it('logs an error and exits the process if Optimizer#run$ errors', () => {
-    new CliDevMode({
-      ...defaultOptions,
-      basePathProxy: mockBasePathProxy as any,
-    }).start();
+    new CliDevMode(createOptions({ cliArgs: { basePath: true } })).start();
 
     expect(processExitMock).not.toHaveBeenCalled();
     optimizerRun$.error({ stack: 'Error: foo bar' });
@@ -311,10 +330,7 @@ describe('#start()/#stop()', () => {
   });
 
   it('logs an error and exits the process if Watcher#run$ errors', () => {
-    new CliDevMode({
-      ...defaultOptions,
-      basePathProxy: mockBasePathProxy as any,
-    }).start();
+    new CliDevMode(createOptions({ cliArgs: { basePath: true } })).start();
 
     expect(processExitMock).not.toHaveBeenCalled();
     watcherRun$.error({ stack: 'Error: foo bar' });
@@ -339,10 +355,7 @@ describe('#start()/#stop()', () => {
   });
 
   it('logs an error and exits the process if DevServer#run$ errors', () => {
-    new CliDevMode({
-      ...defaultOptions,
-      basePathProxy: mockBasePathProxy as any,
-    }).start();
+    new CliDevMode(createOptions({ cliArgs: { basePath: true } })).start();
 
     expect(processExitMock).not.toHaveBeenCalled();
     devServerRun$.error({ stack: 'Error: foo bar' });
@@ -368,10 +381,7 @@ describe('#start()/#stop()', () => {
 
   it('throws if start() has already been called', () => {
     expect(() => {
-      const devMode = new CliDevMode({
-        ...defaultOptions,
-        basePathProxy: mockBasePathProxy as any,
-      });
+      const devMode = new CliDevMode(createOptions({ cliArgs: { basePath: true } }));
 
       devMode.start();
       devMode.start();
@@ -379,10 +389,7 @@ describe('#start()/#stop()', () => {
   });
 
   it('unsubscribes from all observables and stops basePathProxy when stopped', () => {
-    const devMode = new CliDevMode({
-      ...defaultOptions,
-      basePathProxy: mockBasePathProxy as any,
-    });
+    const devMode = new CliDevMode(createOptions({ cliArgs: { basePath: true } }));
 
     devMode.start();
     devMode.stop();
