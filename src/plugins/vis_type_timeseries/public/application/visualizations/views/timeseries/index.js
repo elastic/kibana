@@ -99,7 +99,7 @@ export const TimeSeries = ({
     if (!x) {
       return;
     }
-    // console.dir(series);
+    console.dir(series);
     const table = {
       type: 'datatable',
       rows: series[0].data,
