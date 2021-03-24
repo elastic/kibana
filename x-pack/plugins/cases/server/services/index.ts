@@ -34,7 +34,12 @@ import {
   caseTypeField,
   CasesFindRequest,
 } from '../../common/api';
-import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
+import {
+  combineFilters,
+  defaultSortField,
+  groupTotalAlertsByID,
+  SavedObjectFindOptionsKueryNode,
+} from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
 import {
   flattenCaseSavedObject,
@@ -95,7 +100,7 @@ interface FindSubCaseCommentsArgs {
 }
 
 interface FindCasesArgs extends ClientArgs {
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface FindSubCasesByIDArgs extends FindCasesArgs {
@@ -104,7 +109,7 @@ interface FindSubCasesByIDArgs extends FindCasesArgs {
 
 interface FindSubCasesStatusStats {
   client: SavedObjectsClientContract;
-  options: SavedObjectFindOptions;
+  options: SavedObjectFindOptionsKueryNode;
   ids: string[];
 }
 
@@ -195,7 +200,7 @@ interface CasesMapWithPageInfo {
   perPage: number;
 }
 
-type FindCaseOptions = CasesFindRequest & SavedObjectFindOptions;
+type FindCaseOptions = CasesFindRequest & SavedObjectFindOptionsKueryNode;
 
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
@@ -244,18 +249,18 @@ export interface CaseServiceSetup {
   }): Promise<CaseCommentStats>;
   findSubCasesGroupByCase(args: {
     client: SavedObjectsClientContract;
-    options?: SavedObjectFindOptions;
+    options?: SavedObjectFindOptionsKueryNode;
     ids: string[];
   }): Promise<SubCasesMapWithPageInfo>;
   findCaseStatusStats(args: {
     client: SavedObjectsClientContract;
-    caseOptions: SavedObjectFindOptions;
-    subCaseOptions?: SavedObjectFindOptions;
+    caseOptions: SavedObjectFindOptionsKueryNode;
+    subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<number>;
   findCasesGroupedByID(args: {
     client: SavedObjectsClientContract;
-    caseOptions: SavedObjectFindOptions;
-    subCaseOptions?: SavedObjectFindOptions;
+    caseOptions: SavedObjectFindOptionsKueryNode;
+    subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<CasesMapWithPageInfo>;
 }
 
@@ -275,7 +280,7 @@ export class CaseService implements CaseServiceSetup {
   }: {
     client: SavedObjectsClientContract;
     caseOptions: FindCaseOptions;
-    subCaseOptions?: SavedObjectFindOptions;
+    subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<CasesMapWithPageInfo> {
     const cases = await this.findCases({
       client,
@@ -358,8 +363,8 @@ export class CaseService implements CaseServiceSetup {
     subCaseOptions,
   }: {
     client: SavedObjectsClientContract;
-    caseOptions: SavedObjectFindOptions;
-    subCaseOptions?: SavedObjectFindOptions;
+    caseOptions: SavedObjectFindOptionsKueryNode;
+    subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<number> {
     const casesStats = await this.findCases({
       client,
@@ -515,7 +520,7 @@ export class CaseService implements CaseServiceSetup {
     ids,
   }: {
     client: SavedObjectsClientContract;
-    options?: SavedObjectFindOptions;
+    options?: SavedObjectFindOptionsKueryNode;
     ids: string[];
   }): Promise<SubCasesMapWithPageInfo> {
     const getCaseID = (subCase: SavedObjectsFindResult<SubCaseAttributes>): string | undefined => {

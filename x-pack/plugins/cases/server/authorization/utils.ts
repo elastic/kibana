@@ -6,25 +6,24 @@
  */
 
 import { remove, uniq } from 'lodash';
+import { nodeBuilder } from '../../../../../src/plugins/data/common';
+import { KueryNode } from '../../../../../src/plugins/data/server';
 
-export const getClassFilter = (savedObjectType: string, classNames: string[]): string => {
-  const firstQueryItem =
-    classNames.length > 0 ? `${savedObjectType}.attributes.class: ${classNames[0]}` : '';
-
-  const reducesQuery = classNames.slice(1).reduce<string>((query, className) => {
-    ensureFieldIsSafeForQuery('class', className);
-    return `${query} OR ${savedObjectType}.attributes.class: ${className}`;
-  }, firstQueryItem);
-
-  return `(${reducesQuery})`;
+export const getClassFilter = (savedObjectType: string, classNames: string[]): KueryNode => {
+  return nodeBuilder.or(
+    classNames.reduce<KueryNode[]>((query, className) => {
+      ensureFieldIsSafeForQuery('class', className);
+      query.push(nodeBuilder.is(`${savedObjectType}.attributes.class`, className));
+      return query;
+    }, [])
+  );
 };
 
 export const combineFilterWithAuthorizationFilter = (
-  filter: string,
-  authorizationFilter: string
+  filter: KueryNode,
+  authorizationFilter: KueryNode
 ) => {
-  const suffix = `AND ${authorizationFilter}`;
-  return filter.startsWith('(') ? `${filter} ${suffix}` : `(${filter}) ${suffix}`;
+  return nodeBuilder.and([filter, authorizationFilter]);
 };
 
 export const ensureFieldIsSafeForQuery = (field: string, value: string): boolean => {
