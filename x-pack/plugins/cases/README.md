@@ -1,3 +1,4 @@
+Case management in Kibana
 
 [![Issues][issues-shield]][issues-url]
 [![Pull Requests][pr-shield]][pr-url] 
