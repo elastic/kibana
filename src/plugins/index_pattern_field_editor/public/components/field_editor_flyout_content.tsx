@@ -211,7 +211,7 @@ const FieldEditorFlyoutContentComponent = ({
 
   const modal = isModalVisible ? (
     <EuiConfirmModal
-      title={`Confirm changes to ${field?.name}`}
+      title={`Confirm changes to '${field?.name}'`}
       data-test-subj="runtimeFieldSaveConfirmModal"
       cancelButtonText={i18nTexts.cancelButtonText}
       confirmButtonText={i18nTexts.confirmButtonText}
@@ -249,7 +249,7 @@ const FieldEditorFlyoutContentComponent = ({
             {field ? (
               <FormattedMessage
                 id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                defaultMessage="Edit {fieldName} field"
+                defaultMessage="Edit field '{fieldName}'"
                 values={{
                   fieldName: field.name,
                 }}
