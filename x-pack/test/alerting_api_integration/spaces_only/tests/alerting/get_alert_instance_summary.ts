@@ -70,7 +70,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         throttle: '1m',
         enabled: true,
         error_messages: [],
-        instances: {},
+        alerts: {},
       });
     });
 
@@ -103,7 +103,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         throttle: '1m',
         enabled: true,
         error_messages: [],
-        instances: {},
+        alerts: {},
       });
     });
 

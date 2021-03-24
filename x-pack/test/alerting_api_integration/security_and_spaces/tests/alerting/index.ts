@@ -10,7 +10,7 @@ import { setupSpacesAndUsers, tearDown } from '..';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
-  describe.only('Alerts', () => {
+  describe('Alerts', () => {
     describe('legacy alerts', () => {
       before(async () => {
         await setupSpacesAndUsers(getService);
