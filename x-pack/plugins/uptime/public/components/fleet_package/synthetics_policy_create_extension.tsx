@@ -54,6 +54,7 @@ export const SyntheticsPolicyCreateExtension = memo<PackagePolicyCreateExtension
       <CustomFields
         defaultValues={defaultValues}
         onChange={handleInputChange}
+        typeEditable
         validate={validate[config[ConfigKeys.MONITOR_TYPE]]}
       />
     );

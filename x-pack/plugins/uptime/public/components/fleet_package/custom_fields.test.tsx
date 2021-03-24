@@ -65,13 +65,24 @@ const defaultValidation = centralValidation[DataStream.HTTP];
 
 describe('<CustomFields />', () => {
   const onChange = jest.fn();
-  const WrappedComponent = ({ defaultValues = defaultConfig, validate = defaultValidation }) => {
-    return <CustomFields defaultValues={defaultValues} onChange={onChange} validate={validate} />;
+  const WrappedComponent = ({
+    defaultValues = defaultConfig,
+    validate = defaultValidation,
+    typeEditable = false,
+  }) => {
+    return (
+      <CustomFields
+        defaultValues={defaultValues}
+        onChange={onChange}
+        validate={validate}
+        typeEditable={typeEditable}
+      />
+    );
   };
 
   it('renders CustomFields', async () => {
     const { getByText, getByLabelText, queryByLabelText } = render(<WrappedComponent />);
-    const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
+    const monitorType = queryByLabelText('Monitor Type') as HTMLInputElement;
     const url = getByLabelText('URL') as HTMLInputElement;
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
@@ -81,8 +92,7 @@ describe('<CustomFields />', () => {
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
     // const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
-    expect(monitorType).toBeInTheDocument();
-    expect(monitorType.value).toEqual(defaultConfig[ConfigKeys.MONITOR_TYPE]);
+    expect(monitorType).not.toBeInTheDocument();
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
@@ -155,8 +165,12 @@ describe('<CustomFields />', () => {
   });
 
   it('handles switching monitor type', () => {
-    const { getByText, getByLabelText, queryByLabelText } = render(<WrappedComponent />);
+    const { getByText, getByLabelText, queryByLabelText } = render(
+      <WrappedComponent typeEditable />
+    );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
+    expect(monitorType).toBeInTheDocument();
+    expect(monitorType.value).toEqual(defaultConfig[ConfigKeys.MONITOR_TYPE]);
     fireEvent.change(monitorType, { target: { value: DataStream.TCP } });
 
     // expect tcp fields to be in the DOM
