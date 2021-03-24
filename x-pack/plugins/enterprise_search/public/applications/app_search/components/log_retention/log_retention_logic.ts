@@ -70,7 +70,7 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
   }),
   listeners: ({ actions, values }) => ({
     fetchLogRetention: async (_, breakpoint) => {
-      await breakpoint(250); // Prevents duplicate calls to the API (e.g., when a tooltip & callout are on the same page)
+      await breakpoint(100); // Prevents duplicate calls to the API (e.g., when a tooltip & callout are on the same page)
 
       try {
         const { http } = HttpLogic.values;
