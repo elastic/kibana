@@ -641,18 +641,19 @@ export class DataVisualizer {
         cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
           cardinality: { script: datafeedConfig?.script_fields[field].script },
         };
-      } else if (datafeedConfig?.runtime_mappings?.hasOwnProperty(field)) {
-        cardinalityField = {
-          cardinality: { field },
-        };
-        runtimeMappings.runtime_mappings = {
-          ...runtimeMappings.runtime_mappings,
-          [field]: datafeedConfig.runtime_mappings[field],
-        };
       } else {
         cardinalityField = {
           cardinality: { field },
         };
+
+        // runtimeMappings.runtime_mappings = {
+        //   ...runtimeMappings.runtime_mappings,
+        //   [field]: datafeedConfig.runtime_mappings[field],
+        // };
+
+        if (datafeedConfig !== undefined && isPopulatedObject(datafeedConfig?.runtime_mappings)) {
+          runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
+        }
       }
       aggs[`${safeFieldName}_cardinality`] = cardinalityField;
     });
