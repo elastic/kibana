@@ -236,6 +236,17 @@ export type MachineLearningJobId = t.TypeOf<typeof machine_learning_job_id>;
 export const machineLearningJobIdOrUndefined = t.union([machine_learning_job_id, t.undefined]);
 export type MachineLearningJobIdOrUndefined = t.TypeOf<typeof machineLearningJobIdOrUndefined>;
 
+export const machine_learning_job_id_normalized = t.array(t.string);
+export type MachineLearningJobIdNormalized = t.TypeOf<typeof machine_learning_job_id_normalized>;
+
+export const machineLearningJobIdNormalizedOrUndefined = t.union([
+  machine_learning_job_id_normalized,
+  t.undefined,
+]);
+export type MachineLearningJobIdNormalizedOrUndefined = t.TypeOf<
+  typeof machineLearningJobIdNormalizedOrUndefined
+>;
+
 /**
  * Note that this is a non-exact io-ts type as we allow extra meta information
  * to be added to the meta object
