@@ -11,6 +11,10 @@ import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import {
+  MockIndexPattern,
+  MockIndexPatternsKibanaContextProvider,
+} from '../../../hooks/use_kibana_index_patterns.mock';
+import {
   LogIndicesConfigurationFormState,
   useLogIndicesConfigurationFormState,
 } from './indices_configuration_form_state';
@@ -19,20 +23,30 @@ import { IndicesConfigurationPanel } from './indices_configuration_panel';
 export default {
   title: 'infra/logsSettings/indicesConfiguration',
   decorators: [
-    (wrappedStory) => (
+    (wrappedStory, { args }) => (
       <I18nProvider>
         <EuiThemeProvider>
-          <EuiPage restrictWidth>
-            <EuiPageBody>
-              <EuiPageContent>{wrappedStory()}</EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
+          <MockIndexPatternsKibanaContextProvider
+            asyncDelay={5}
+            mockIndexPatterns={args.indexPatterns}
+          >
+            <EuiPage restrictWidth>
+              <EuiPageBody>
+                <EuiPageContent>{wrappedStory()}</EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </MockIndexPatternsKibanaContextProvider>
         </EuiThemeProvider>
       </I18nProvider>
     ),
   ],
   argTypes: {
     logIndices: {
+      control: {
+        type: 'object',
+      },
+    },
+    indexPatterns: {
       control: {
         type: 'object',
       },
@@ -72,6 +86,16 @@ const defaultArgs = {
   name: 'My log source configuration',
   tiebreakerField: '_doc',
   timestampField: '@timestamp',
+  indexPatterns: [
+    {
+      id: 'INDEX_PATTERN_A',
+      title: 'pattern-a-*',
+    },
+    {
+      id: 'INDEX_PATTERN_B',
+      title: 'pattern-b-*',
+    },
+  ],
 };
 
 export const IndexNameWithDefaultFields = IndicesConfigurationPanelTemplate.bind({});

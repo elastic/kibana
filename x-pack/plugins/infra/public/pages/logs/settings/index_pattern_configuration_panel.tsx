@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FormElementProps, getFormRowProps } from './form_elements';
-import { IndexPatternSelector } from './index_pattern_selector';
+import { IndexPatternDescriptor, IndexPatternSelector } from './index_pattern_selector';
 import { LogIndexPatternReference } from './types';
 
 export const IndexPatternConfigurationPanel: React.FC<{
-  availableIndexPatterns: IndexPattern[];
   isLoading: boolean;
   isReadOnly: boolean;
   indexPatternFormElementProps: FormElementProps<LogIndexPatternReference>;
-}> = ({ availableIndexPatterns, isLoading, isReadOnly, indexPatternFormElementProps }) => (
+}> = ({ isLoading, isReadOnly, indexPatternFormElementProps }) => (
   <>
     <EuiTitle size="s">
       <h3>
@@ -55,11 +53,7 @@ export const IndexPatternConfigurationPanel: React.FC<{
         }
         {...getFormRowProps(indexPatternFormElementProps)}
       >
-        <IndexPatternSelector
-          availableIndexPatterns={availableIndexPatterns}
-          isLoading={isLoading}
-          isReadOnly={isReadOnly}
-        />
+        <IndexPatternSelector isLoading={isLoading} isReadOnly={isReadOnly} />
       </EuiFormRow>
     </EuiDescribedFormGroup>
   </>

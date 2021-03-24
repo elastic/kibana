@@ -7,19 +7,36 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import React, { useEffect, useMemo } from 'react';
+import { useKibanaIndexPatternTitles } from '../../../hooks/use_kibana_index_patterns';
 
 export const IndexPatternSelector: React.FC<{
-  availableIndexPatterns: IndexPattern[];
   isLoading: boolean;
   isReadOnly: boolean;
 }> = ({ isLoading, isReadOnly }) => {
-  const availableOptions: EuiComboBoxOptionOption[] = useMemo(() => [], []);
+  const {
+    indexPatternTitles: availableIndexPatterns,
+    latestIndexPatternTitlesRequest,
+    fetchIndexPatternTitles,
+  } = useKibanaIndexPatternTitles();
+
+  useEffect(() => {
+    fetchIndexPatternTitles();
+  }, [fetchIndexPatternTitles]);
+
+  const availableOptions = useMemo<EuiComboBoxOptionOption[]>(
+    () =>
+      availableIndexPatterns.map(({ id, title }) => ({
+        key: id,
+        label: title,
+        value: id,
+      })),
+    [availableIndexPatterns]
+  );
 
   return (
     <EuiComboBox
-      isLoading={isLoading}
+      isLoading={isLoading || latestIndexPatternTitlesRequest.state === 'pending'}
       isDisabled={isReadOnly}
       options={availableOptions}
       placeholder={indexPatternSelectorPlaceholder}

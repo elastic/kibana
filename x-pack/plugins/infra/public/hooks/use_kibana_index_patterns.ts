@@ -5,16 +5,35 @@
  * 2.0.
  */
 
+import { useState } from 'react';
+import { useTrackedPromise } from '../utils/use_tracked_promise';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-export const useKibanaIndexPatterns = () => {
+interface IndexPatternDescriptor {
+  id: string;
+  title: string;
+}
+
+export const useKibanaIndexPatternTitles = () => {
   const {
     services: {
       data: { indexPatterns },
     },
   } = useKibanaContextForPlugin();
 
+  const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternDescriptor[]>([]);
+
+  const [indexPatternTitlesRequest, fetchIndexPatternTitles] = useTrackedPromise(
+    {
+      createPromise: () => indexPatterns.getIdsWithTitle(),
+      onResolve: setIndexPatternTitles,
+    },
+    [indexPatterns]
+  );
+
   return {
-    allIndexPatterns: indexPatterns.getCache(),
+    fetchIndexPatternTitles,
+    indexPatternTitles,
+    latestIndexPatternTitlesRequest: indexPatternTitlesRequest,
   };
 };
