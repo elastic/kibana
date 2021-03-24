@@ -786,7 +786,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 147
+              "lineNumber": 151
             },
             "signature": [
               {
@@ -806,7 +806,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 148
+              "lineNumber": 152
             }
           },
           {
@@ -817,7 +817,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 149
+              "lineNumber": 153
             }
           },
           {
@@ -828,13 +828,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-              "lineNumber": 150
+              "lineNumber": 154
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-          "lineNumber": 146
+          "lineNumber": 150
         },
         "initialIsOpen": false
       },
@@ -1178,7 +1178,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-              "lineNumber": 78
+              "lineNumber": 83
             },
             "signature": [
               {
@@ -1193,7 +1193,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-          "lineNumber": 52
+          "lineNumber": 57
         },
         "initialIsOpen": false
       }
@@ -1266,7 +1266,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-          "lineNumber": 48
+          "lineNumber": 53
         },
         "signature": [
           "Dictionary<{ order: 'asc' | 'desc'; }>"
@@ -1297,10 +1297,12 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-          "lineNumber": 38
+          "lineNumber": 43
         },
         "signature": [
-          "(__0: { rowIndex: number; columnId: string; setCellProps: any; }) => any"
+          "(__0: { rowIndex: number; columnId: string; setCellProps: (props: ",
+          "CommonProps",
+          " & React.HTMLAttributes<HTMLDivElement>) => void; }) => any"
         ],
         "initialIsOpen": false
       }
@@ -3455,7 +3457,14 @@
               "lineNumber": 28
             },
             "signature": [
-              "IndicesOptions | undefined"
+              {
+                "pluginId": "ml",
+                "scope": "common",
+                "docId": "kibMlPluginApi",
+                "section": "def-common.IndicesOptions",
+                "text": "IndicesOptions"
+              },
+              " | undefined"
             ]
           }
         ],
@@ -3802,6 +3811,76 @@
         "source": {
           "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job_stats.ts",
           "lineNumber": 65
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.IndicesOptions",
+        "type": "Interface",
+        "label": "IndicesOptions",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.IndicesOptions.expand_wildcards",
+            "type": "CompoundType",
+            "label": "expand_wildcards",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 49
+            },
+            "signature": [
+              "\"all\" | \"none\" | \"hidden\" | \"open\" | \"closed\" | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IndicesOptions.ignore_unavailable",
+            "type": "CompoundType",
+            "label": "ignore_unavailable",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 50
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IndicesOptions.allow_no_indices",
+            "type": "CompoundType",
+            "label": "allow_no_indices",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 51
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IndicesOptions.ignore_throttled",
+            "type": "CompoundType",
+            "label": "ignore_throttled",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+              "lineNumber": 52
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+          "lineNumber": 48
         },
         "initialIsOpen": false
       },
@@ -5424,7 +5503,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/ml/server/plugin.ts",
-        "lineNumber": 64
+        "lineNumber": 63
       },
       "signature": [
         "JobServiceProvider",
@@ -5448,7 +5527,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/ml/server/plugin.ts",
-        "lineNumber": 65
+        "lineNumber": 64
       },
       "signature": [
         "void"
@@ -5498,11 +5577,17 @@
         "type": "Function",
         "children": [
           {
-            "type": "Any",
+            "type": "CompoundType",
             "label": "error",
-            "isRequired": true,
+            "isRequired": false,
             "signature": [
-              "any"
+              {
+                "pluginId": "ml",
+                "scope": "common",
+                "docId": "kibMlPluginApi",
+                "section": "def-common.ErrorType",
+                "text": "ErrorType"
+              }
             ],
             "description": [],
             "source": {
@@ -5512,7 +5597,9 @@
           }
         ],
         "signature": [
-          "(error: any) => string"
+          "(error: ",
+          "ErrorType",
+          ") => string"
         ],
         "description": [],
         "label": "extractErrorMessage",
