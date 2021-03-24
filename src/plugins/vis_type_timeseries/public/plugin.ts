@@ -28,9 +28,6 @@ import {
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
 import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
-import { UiActionsStart } from '../../ui_actions/public';
-import { PANEL_BADGE_TRIGGER } from '../../embeddable/public';
-import { lastValueModeAction } from './actions/last_value_mode_action';
 
 /** @internal */
 export interface MetricsPluginSetupDependencies {
@@ -43,7 +40,6 @@ export interface MetricsPluginSetupDependencies {
 /** @internal */
 export interface MetricsPluginStartDependencies {
   data: DataPublicPluginStart;
-  uiActions: UiActionsStart;
 }
 
 /** @internal */
@@ -70,12 +66,11 @@ export class MetricsPlugin implements Plugin<void, void> {
     visualizations.createBaseVisualization(metricsVisDefinition);
   }
 
-  public start(core: CoreStart, { data, uiActions }: MetricsPluginStartDependencies) {
+  public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {
     setSavedObjectsClient(core.savedObjects);
     setI18n(core.i18n);
     setFieldFormats(data.fieldFormats);
     setDataStart(data);
     setCoreStart(core);
-    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, lastValueModeAction);
   }
 }
