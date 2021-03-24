@@ -22,6 +22,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiCallOut,
+  EuiComboBox,
 } from '@elastic/eui';
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -158,6 +159,32 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     },
     [addError, onCancel]
   );
+
+  const OSOptions = [
+    {
+      label: 'windows',
+    },
+    {
+      label: 'macos',
+    },
+    {
+      label: 'linux',
+    },
+  ];
+
+  const [selectedOS, setSelectedOS] = useState([OSOptions[0]]);
+
+  const handleOSSelectionChange = useCallback(
+    (selectedOptions: string[]): void => {
+      setSelectedOS(selectedOptions);
+    },
+    [setSelectedOS]
+  );
+
+  // const onChange = (selectedOptions) => {
+  //   // We should only get back either 0 or 1 options.
+  //   setSelected(selectedOptions);
+  // };
 
   const onSuccess = useCallback(
     (updated: number, conflicts: number): void => {
@@ -398,6 +425,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
+              <>
+                <EuiComboBox
+                  placeholder="Select an OS"
+                  singleSelection={{ asPlainText: true }}
+                  options={OSOptions}
+                  selectedOptions={selectedOS}
+                  onChange={handleOSSelectionChange}
+                  isClearable={false}
+                />
+              </>
               <ExceptionBuilderComponent
                 exceptionListItems={initialExceptionItems}
                 listType={exceptionListType}
