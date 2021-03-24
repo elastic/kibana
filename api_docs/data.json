@@ -1101,7 +1101,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 58
+              "lineNumber": 65
             },
             "signature": [
               {
@@ -1121,7 +1121,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 59
+              "lineNumber": 66
             },
             "signature": [
               {
@@ -1142,7 +1142,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 62
+              "lineNumber": 69
             },
             "signature": [
               {
@@ -1180,7 +1180,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 65
+                  "lineNumber": 72
                 }
               },
               {
@@ -1217,7 +1217,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 66
+                  "lineNumber": 73
                 }
               },
               {
@@ -1236,7 +1236,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 67
+                  "lineNumber": 74
                 }
               }
             ],
@@ -1244,7 +1244,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 64
+              "lineNumber": 71
             }
           },
           {
@@ -1280,7 +1280,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 79
+                  "lineNumber": 86
                 }
               }
             ],
@@ -1288,7 +1288,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 79
+              "lineNumber": 86
             }
           },
           {
@@ -1317,7 +1317,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 97
+                  "lineNumber": 104
                 }
               }
             ],
@@ -1325,7 +1325,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 97
+              "lineNumber": 104
             }
           },
           {
@@ -1366,7 +1366,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 111
+                  "lineNumber": 118
                 }
               },
               {
@@ -1379,7 +1379,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 112
+                  "lineNumber": 119
                 }
               }
             ],
@@ -1429,7 +1429,7 @@
             "label": "createAggConfig",
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 110
+              "lineNumber": 117
             },
             "tags": [],
             "returnComment": []
@@ -1472,7 +1472,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 153
+                  "lineNumber": 160
                 }
               }
             ],
@@ -1480,7 +1480,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 153
+              "lineNumber": 160
             }
           },
           {
@@ -1502,7 +1502,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 165
+                  "lineNumber": 172
                 }
               }
             ],
@@ -1510,7 +1510,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 165
+              "lineNumber": 172
             }
           },
           {
@@ -1534,7 +1534,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 229
+              "lineNumber": 241
             }
           },
           {
@@ -1563,7 +1563,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 233
+                  "lineNumber": 245
                 }
               }
             ],
@@ -1571,7 +1571,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 233
+              "lineNumber": 245
             }
           },
           {
@@ -1601,7 +1601,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 237
+                  "lineNumber": 249
                 }
               }
             ],
@@ -1609,7 +1609,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 237
+              "lineNumber": 249
             }
           },
           {
@@ -1639,7 +1639,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 241
+                  "lineNumber": 253
                 }
               }
             ],
@@ -1647,7 +1647,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 241
+              "lineNumber": 253
             }
           },
           {
@@ -1677,7 +1677,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 245
+                  "lineNumber": 257
                 }
               }
             ],
@@ -1685,7 +1685,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 245
+              "lineNumber": 257
             }
           },
           {
@@ -1715,7 +1715,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 249
+                  "lineNumber": 261
                 }
               }
             ],
@@ -1723,7 +1723,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 249
+              "lineNumber": 261
             }
           },
           {
@@ -1753,7 +1753,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 253
+                  "lineNumber": 265
                 }
               }
             ],
@@ -1761,7 +1761,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 253
+              "lineNumber": 265
             }
           },
           {
@@ -1785,7 +1785,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 257
+              "lineNumber": 269
             }
           },
           {
@@ -1815,7 +1815,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 271
+                  "lineNumber": 283
                 }
               }
             ],
@@ -1823,7 +1823,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 271
+              "lineNumber": 283
             }
           },
           {
@@ -1851,7 +1851,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 286
+              "lineNumber": 298
             }
           },
           {
@@ -1885,7 +1885,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 300
+                  "lineNumber": 312
                 }
               }
             ],
@@ -1895,7 +1895,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 300
+              "lineNumber": 312
             }
           },
           {
@@ -1941,7 +1941,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 309
+                  "lineNumber": 321
                 }
               },
               {
@@ -1961,7 +1961,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-                  "lineNumber": 309
+                  "lineNumber": 321
                 }
               }
             ],
@@ -1969,13 +1969,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-              "lineNumber": 309
+              "lineNumber": 321
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
-          "lineNumber": 57
+          "lineNumber": 64
         },
         "initialIsOpen": false
       },
@@ -5492,7 +5492,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 464
+                  "lineNumber": 465
                 }
               }
             ],
@@ -5513,7 +5513,7 @@
             "label": "get",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 464
+              "lineNumber": 465
             },
             "tags": [],
             "returnComment": []
@@ -5561,7 +5561,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 483
+                  "lineNumber": 484
                 }
               },
               {
@@ -5574,7 +5574,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 483
+                  "lineNumber": 484
                 }
               }
             ],
@@ -5584,7 +5584,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 483
+              "lineNumber": 484
             }
           },
           {
@@ -5630,7 +5630,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 508
+                  "lineNumber": 509
                 }
               },
               {
@@ -5645,7 +5645,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 508
+                  "lineNumber": 509
                 }
               },
               {
@@ -5660,7 +5660,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 508
+                  "lineNumber": 509
                 }
               }
             ],
@@ -5668,7 +5668,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 508
+              "lineNumber": 509
             }
           },
           {
@@ -5714,7 +5714,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 521
+                  "lineNumber": 522
                 }
               },
               {
@@ -5729,7 +5729,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 521
+                  "lineNumber": 522
                 }
               }
             ],
@@ -5737,7 +5737,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 521
+              "lineNumber": 522
             }
           },
           {
@@ -5775,7 +5775,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 547
+                  "lineNumber": 548
                 }
               },
               {
@@ -5788,7 +5788,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 549
                 }
               },
               {
@@ -5801,7 +5801,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 550
                 }
               }
             ],
@@ -5809,7 +5809,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 546
+              "lineNumber": 547
             }
           },
           {
@@ -5835,7 +5835,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 632
+                  "lineNumber": 633
                 }
               }
             ],
@@ -5843,7 +5843,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 632
+              "lineNumber": 633
             }
           }
         ],
@@ -11547,7 +11547,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 14
+          "lineNumber": 15
         },
         "signature": [
           "{ filters?: Filter[] | undefined; query?: Query | Query[] | undefined; timeRange?: TimeRange | undefined; }"
@@ -11608,7 +11608,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 23
+          "lineNumber": 26
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -11639,7 +11639,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 20
+          "lineNumber": 21
         },
         "signature": [
           "{ type: \"kibana_context\"; } & ExecutionContextSearch"
@@ -11880,7 +11880,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-          "lineNumber": 638
+          "lineNumber": 639
         },
         "signature": [
           "{ get: (id: string) => Promise<IndexPattern>; delete: (indexPatternId: string) => Promise<{}>; create: (spec: IndexPatternSpec, skipFetchFields?: boolean) => Promise<IndexPattern>; ensureDefaultIndexPattern: EnsureDefaultIndexPattern; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; find: (search: string, size?: number) => Promise<IndexPattern[]>; getIdsWithTitle: (refresh?: boolean) => Promise<{ id: string; title: string; }[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>; getDefault: () => Promise<IndexPattern | null>; setDefault: (id: string, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>; getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>; refreshFields: (indexPattern: IndexPattern) => Promise<void>; fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>; savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec; createAndSave: (spec: IndexPatternSpec, override?: boolean, skipFetchFields?: boolean) => Promise<IndexPattern>; createSavedObject: (indexPattern: IndexPattern, override?: boolean) => Promise<IndexPattern>; updateSavedObject: (indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"
@@ -11960,7 +11960,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 27
+          "lineNumber": 32
         },
         "signature": [
           "{ type: \"kibana_context\"; } & ExecutionContextSearch"
@@ -12164,7 +12164,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 56
+              "lineNumber": 57
             },
             "signature": [
               "(props: ",
@@ -12180,13 +12180,35 @@
           },
           {
             "tags": [],
+            "id": "def-public.esFilters.FilterItem",
+            "type": "Function",
+            "label": "FilterItem",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/public/index.ts",
+              "lineNumber": 58
+            },
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataUiPluginApi",
+                "section": "def-public.FilterItemProps",
+                "text": "FilterItemProps"
+              },
+              ") => JSX.Element"
+            ]
+          },
+          {
+            "tags": [],
             "id": "def-public.esFilters.FILTERS",
             "type": "Object",
             "label": "FILTERS",
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 58
+              "lineNumber": 60
             },
             "signature": [
               "typeof ",
@@ -12207,7 +12229,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 59
+              "lineNumber": 61
             },
             "signature": [
               "typeof ",
@@ -12228,7 +12250,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 61
+              "lineNumber": 63
             },
             "signature": [
               "(isPinned: boolean, index?: string | undefined) => ",
@@ -12249,7 +12271,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 62
+              "lineNumber": 64
             },
             "signature": [
               "(field: ",
@@ -12286,7 +12308,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 63
+              "lineNumber": 65
             },
             "signature": [
               "(field: ",
@@ -12323,7 +12345,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 64
+              "lineNumber": 66
             },
             "signature": [
               "(field: ",
@@ -12360,7 +12382,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 65
+              "lineNumber": 67
             },
             "signature": [
               "(query: any, index: string, alias: string) => ",
@@ -12381,7 +12403,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 66
+              "lineNumber": 68
             },
             "signature": [
               "(field: ",
@@ -12426,7 +12448,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 68
+              "lineNumber": 70
             },
             "signature": [
               "(filter: any) => filter is ",
@@ -12447,7 +12469,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 69
+              "lineNumber": 71
             },
             "signature": [
               "(filter: any) => filter is ",
@@ -12468,7 +12490,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 70
+              "lineNumber": 72
             },
             "signature": [
               "(filter: any) => filter is ",
@@ -12489,7 +12511,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 71
+              "lineNumber": 73
             },
             "signature": [
               "(filter: any) => filter is ",
@@ -12510,7 +12532,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 72
+              "lineNumber": 74
             },
             "signature": [
               "(filter: any) => filter is ",
@@ -12531,7 +12553,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 73
+              "lineNumber": 75
             },
             "signature": [
               "(filter: any) => filter is ",
@@ -12552,7 +12574,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 74
+              "lineNumber": 76
             },
             "signature": [
               "(filter: any) => filter is ",
@@ -12573,7 +12595,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 75
+              "lineNumber": 77
             },
             "signature": [
               "(filter: ",
@@ -12595,7 +12617,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 77
+              "lineNumber": 79
             },
             "signature": [
               "(filter: ",
@@ -12625,7 +12647,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 78
+              "lineNumber": 80
             },
             "signature": [
               "(filter: ",
@@ -12654,7 +12676,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 79
+              "lineNumber": 81
             },
             "signature": [
               "(filter: ",
@@ -12676,7 +12698,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 80
+              "lineNumber": 82
             },
             "signature": [
               "(filter: ",
@@ -12698,7 +12720,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 81
+              "lineNumber": 83
             },
             "signature": [
               "typeof ",
@@ -12719,7 +12741,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 83
+              "lineNumber": 85
             },
             "signature": [
               "(first: ",
@@ -12772,7 +12794,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 84
+              "lineNumber": 86
             },
             "signature": [
               {
@@ -12792,7 +12814,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 85
+              "lineNumber": 87
             },
             "signature": [
               "typeof ",
@@ -12813,7 +12835,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 86
+              "lineNumber": 88
             },
             "signature": [
               "(newFilters?: ",
@@ -12843,7 +12865,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 88
+              "lineNumber": 90
             },
             "signature": [
               "typeof ",
@@ -12864,7 +12886,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 89
+              "lineNumber": 91
             },
             "signature": [
               "typeof ",
@@ -12885,7 +12907,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 90
+              "lineNumber": 92
             },
             "signature": [
               "(filters: ",
@@ -12915,7 +12937,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 91
+              "lineNumber": 93
             },
             "signature": [
               "typeof ",
@@ -12936,7 +12958,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 92
+              "lineNumber": 94
             },
             "signature": [
               "typeof ",
@@ -12954,7 +12976,7 @@
         "label": "esFilters",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 55
+          "lineNumber": 56
         },
         "initialIsOpen": false
       },
@@ -12971,7 +12993,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 122
+              "lineNumber": 124
             },
             "signature": [
               {
@@ -12991,7 +13013,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 123
+              "lineNumber": 125
             },
             "signature": [
               "(expression: any, parseOptions?: Partial<",
@@ -13020,7 +13042,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 124
+              "lineNumber": 126
             },
             "signature": [
               "(node: ",
@@ -13054,7 +13076,7 @@
         "label": "esKuery",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 121
+          "lineNumber": 123
         },
         "initialIsOpen": false
       },
@@ -13071,7 +13093,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 128
+              "lineNumber": 130
             },
             "signature": [
               "typeof ",
@@ -13092,7 +13114,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 129
+              "lineNumber": 131
             },
             "signature": [
               "typeof ",
@@ -13113,7 +13135,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 130
+              "lineNumber": 132
             },
             "signature": [
               "(filters: ",
@@ -13159,7 +13181,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 131
+              "lineNumber": 133
             },
             "signature": [
               "typeof ",
@@ -13180,7 +13202,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 132
+              "lineNumber": 134
             },
             "signature": [
               "typeof ",
@@ -13198,7 +13220,7 @@
         "label": "esQuery",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 127
+          "lineNumber": 129
         },
         "initialIsOpen": false
       },
@@ -13215,7 +13237,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 212
+              "lineNumber": 214
             },
             "signature": [
               "typeof ",
@@ -13236,7 +13258,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 213
+              "lineNumber": 215
             }
           }
         ],
@@ -13244,7 +13266,7 @@
         "label": "exporters",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 211
+          "lineNumber": 213
         },
         "initialIsOpen": false
       },
@@ -13261,7 +13283,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 169
+              "lineNumber": 171
             },
             "signature": [
               "typeof ",
@@ -13282,7 +13304,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 170
+              "lineNumber": 172
             },
             "signature": [
               "typeof ",
@@ -13303,7 +13325,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 172
+              "lineNumber": 174
             },
             "signature": [
               "{ range: string; regex: string; text: string; background: string; }"
@@ -13317,7 +13339,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 173
+              "lineNumber": 175
             },
             "signature": [
               {
@@ -13337,7 +13359,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 174
+              "lineNumber": 176
             },
             "signature": [
               {
@@ -13357,7 +13379,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 175
+              "lineNumber": 177
             },
             "signature": [
               "typeof ",
@@ -13378,7 +13400,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 177
+              "lineNumber": 179
             },
             "signature": [
               "typeof ",
@@ -13399,7 +13421,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 178
+              "lineNumber": 180
             },
             "signature": [
               "typeof ",
@@ -13420,7 +13442,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 179
+              "lineNumber": 181
             },
             "signature": [
               "typeof ",
@@ -13441,7 +13463,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 180
+              "lineNumber": 182
             },
             "signature": [
               "typeof ",
@@ -13462,7 +13484,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 181
+              "lineNumber": 183
             },
             "signature": [
               "typeof ",
@@ -13483,7 +13505,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 182
+              "lineNumber": 184
             },
             "signature": [
               "typeof ",
@@ -13504,7 +13526,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 183
+              "lineNumber": 185
             },
             "signature": [
               "typeof ",
@@ -13525,7 +13547,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 184
+              "lineNumber": 186
             },
             "signature": [
               "typeof ",
@@ -13546,7 +13568,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 185
+              "lineNumber": 187
             },
             "signature": [
               "typeof ",
@@ -13567,7 +13589,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 186
+              "lineNumber": 188
             },
             "signature": [
               "typeof ",
@@ -13588,7 +13610,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 187
+              "lineNumber": 189
             },
             "signature": [
               "typeof ",
@@ -13609,7 +13631,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 188
+              "lineNumber": 190
             },
             "signature": [
               "typeof ",
@@ -13630,7 +13652,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 189
+              "lineNumber": 191
             },
             "signature": [
               "typeof ",
@@ -13651,7 +13673,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 190
+              "lineNumber": 192
             },
             "signature": [
               "typeof ",
@@ -13672,7 +13694,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 191
+              "lineNumber": 193
             },
             "signature": [
               "typeof ",
@@ -13693,7 +13715,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 192
+              "lineNumber": 194
             },
             "signature": [
               "typeof ",
@@ -13711,7 +13733,7 @@
         "label": "fieldFormats",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 168
+          "lineNumber": 170
         },
         "initialIsOpen": false
       },
@@ -13728,7 +13750,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 237
+              "lineNumber": 239
             }
           },
           {
@@ -13739,7 +13761,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 238
+              "lineNumber": 240
             }
           },
           {
@@ -13750,7 +13772,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 239
+              "lineNumber": 241
             },
             "signature": [
               "string[]"
@@ -13764,7 +13786,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 240
+              "lineNumber": 242
             },
             "signature": [
               "string[]"
@@ -13778,7 +13800,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 241
+              "lineNumber": 243
             },
             "signature": [
               "(indexPattern: ",
@@ -13800,7 +13822,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 242
+              "lineNumber": 244
             },
             "signature": [
               "typeof ",
@@ -13821,7 +13843,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 243
+              "lineNumber": 245
             },
             "signature": [
               "typeof ",
@@ -13842,7 +13864,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 244
+              "lineNumber": 246
             },
             "signature": [
               "typeof ",
@@ -13863,7 +13885,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 245
+              "lineNumber": 247
             },
             "signature": [
               "typeof ",
@@ -13884,7 +13906,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 246
+              "lineNumber": 248
             },
             "signature": [
               "typeof ",
@@ -13902,7 +13924,7 @@
         "label": "indexPatterns",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 236
+          "lineNumber": 238
         },
         "initialIsOpen": false
       },
@@ -13924,7 +13946,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 403
+                  "lineNumber": 405
                 },
                 "signature": [
                   "typeof ",
@@ -13945,7 +13967,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 404
+                  "lineNumber": 406
                 },
                 "signature": [
                   "typeof ",
@@ -13966,7 +13988,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 405
+                  "lineNumber": 407
                 },
                 "signature": [
                   "({ display: string; val: string; enabled(agg: ",
@@ -13988,7 +14010,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 406
+                  "lineNumber": 408
                 },
                 "signature": [
                   "typeof ",
@@ -14009,7 +14031,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 407
+                  "lineNumber": 409
                 },
                 "signature": [
                   "typeof ",
@@ -14030,7 +14052,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 408
+                  "lineNumber": 410
                 },
                 "signature": [
                   "typeof ",
@@ -14051,7 +14073,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 409
+                  "lineNumber": 411
                 },
                 "signature": [
                   "typeof ",
@@ -14072,7 +14094,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 410
+                  "lineNumber": 412
                 },
                 "signature": [
                   "(agg: ",
@@ -14094,7 +14116,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 411
+                  "lineNumber": 413
                 },
                 "signature": [
                   "(agg: ",
@@ -14116,7 +14138,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 412
+                  "lineNumber": 414
                 },
                 "signature": [
                   "(...types: string[]) => (agg: ",
@@ -14138,7 +14160,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 413
+                  "lineNumber": 415
                 },
                 "signature": [
                   "typeof ",
@@ -14159,7 +14181,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 414
+                  "lineNumber": 416
                 },
                 "signature": [
                   "typeof ",
@@ -14180,7 +14202,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 415
+                  "lineNumber": 417
                 }
               },
               {
@@ -14191,7 +14213,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 416
+                  "lineNumber": 418
                 },
                 "signature": [
                   "typeof ",
@@ -14212,7 +14234,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 417
+                  "lineNumber": 419
                 },
                 "signature": [
                   "typeof ",
@@ -14233,7 +14255,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 418
+                  "lineNumber": 420
                 },
                 "signature": [
                   "typeof ",
@@ -14254,7 +14276,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 419
+                  "lineNumber": 421
                 }
               },
               {
@@ -14265,7 +14287,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 420
+                  "lineNumber": 422
                 },
                 "signature": [
                   "string[]"
@@ -14279,7 +14301,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 421
+                  "lineNumber": 423
                 },
                 "signature": [
                   "typeof ",
@@ -14300,7 +14322,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 422
+                  "lineNumber": 424
                 },
                 "signature": [
                   "({ bound: number; interval: moment.Duration; boundLabel: string; intervalLabel: string; } | { bound: moment.Duration; interval: moment.Duration; boundLabel: string; intervalLabel: string; })[]"
@@ -14314,7 +14336,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/index.ts",
-                  "lineNumber": 423
+                  "lineNumber": 425
                 },
                 "signature": [
                   "(column: ",
@@ -14333,7 +14355,7 @@
             "label": "aggs",
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 402
+              "lineNumber": 404
             }
           },
           {
@@ -14344,7 +14366,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 425
+              "lineNumber": 427
             },
             "signature": [
               "typeof ",
@@ -14365,7 +14387,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 426
+              "lineNumber": 428
             },
             "signature": [
               "typeof ",
@@ -14386,7 +14408,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 427
+              "lineNumber": 429
             },
             "signature": [
               "typeof ",
@@ -14407,7 +14429,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/public/index.ts",
-              "lineNumber": 428
+              "lineNumber": 430
             },
             "signature": [
               "typeof ",
@@ -14425,7 +14447,7 @@
         "label": "search",
         "source": {
           "path": "src/plugins/data/public/index.ts",
-          "lineNumber": 401
+          "lineNumber": 403
         },
         "initialIsOpen": false
       },
@@ -15168,7 +15190,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/plugin.ts",
-                  "lineNumber": 104
+                  "lineNumber": 107
                 }
               }
             ],
@@ -15176,7 +15198,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 104
+              "lineNumber": 107
             }
           },
           {
@@ -15192,7 +15214,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 118
+              "lineNumber": 121
             }
           }
         ],
@@ -17070,7 +17092,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 464
+                  "lineNumber": 465
                 }
               }
             ],
@@ -17091,7 +17113,7 @@
             "label": "get",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 464
+              "lineNumber": 465
             },
             "tags": [],
             "returnComment": []
@@ -17139,7 +17161,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 483
+                  "lineNumber": 484
                 }
               },
               {
@@ -17152,7 +17174,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 483
+                  "lineNumber": 484
                 }
               }
             ],
@@ -17162,7 +17184,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 483
+              "lineNumber": 484
             }
           },
           {
@@ -17208,7 +17230,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 508
+                  "lineNumber": 509
                 }
               },
               {
@@ -17223,7 +17245,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 508
+                  "lineNumber": 509
                 }
               },
               {
@@ -17238,7 +17260,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 508
+                  "lineNumber": 509
                 }
               }
             ],
@@ -17246,7 +17268,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 508
+              "lineNumber": 509
             }
           },
           {
@@ -17292,7 +17314,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 521
+                  "lineNumber": 522
                 }
               },
               {
@@ -17307,7 +17329,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 521
+                  "lineNumber": 522
                 }
               }
             ],
@@ -17315,7 +17337,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 521
+              "lineNumber": 522
             }
           },
           {
@@ -17353,7 +17375,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 547
+                  "lineNumber": 548
                 }
               },
               {
@@ -17366,7 +17388,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 549
                 }
               },
               {
@@ -17379,7 +17401,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 550
                 }
               }
             ],
@@ -17387,7 +17409,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 546
+              "lineNumber": 547
             }
           },
           {
@@ -17413,7 +17435,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 632
+                  "lineNumber": 633
                 }
               }
             ],
@@ -17421,7 +17443,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 632
+              "lineNumber": 633
             }
           }
         ],
@@ -18131,7 +18153,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 464
+                  "lineNumber": 465
                 }
               }
             ],
@@ -18152,7 +18174,7 @@
             "label": "get",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 464
+              "lineNumber": 465
             },
             "tags": [],
             "returnComment": []
@@ -18200,7 +18222,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 483
+                  "lineNumber": 484
                 }
               },
               {
@@ -18213,7 +18235,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 483
+                  "lineNumber": 484
                 }
               }
             ],
@@ -18223,7 +18245,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 483
+              "lineNumber": 484
             }
           },
           {
@@ -18269,7 +18291,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 508
+                  "lineNumber": 509
                 }
               },
               {
@@ -18284,7 +18306,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 508
+                  "lineNumber": 509
                 }
               },
               {
@@ -18299,7 +18321,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 508
+                  "lineNumber": 509
                 }
               }
             ],
@@ -18307,7 +18329,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 508
+              "lineNumber": 509
             }
           },
           {
@@ -18353,7 +18375,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 521
+                  "lineNumber": 522
                 }
               },
               {
@@ -18368,7 +18390,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 521
+                  "lineNumber": 522
                 }
               }
             ],
@@ -18376,7 +18398,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 521
+              "lineNumber": 522
             }
           },
           {
@@ -18414,7 +18436,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 547
+                  "lineNumber": 548
                 }
               },
               {
@@ -18427,7 +18449,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 549
                 }
               },
               {
@@ -18440,7 +18462,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 550
                 }
               }
             ],
@@ -18448,7 +18470,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 546
+              "lineNumber": 547
             }
           },
           {
@@ -18474,7 +18496,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 632
+                  "lineNumber": 633
                 }
               }
             ],
@@ -18482,7 +18504,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 632
+              "lineNumber": 633
             }
           }
         ],
@@ -20459,7 +20481,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 14
+          "lineNumber": 15
         },
         "signature": [
           "{ filters?: Filter[] | undefined; query?: Query | Query[] | undefined; timeRange?: TimeRange | undefined; }"
@@ -20505,7 +20527,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 23
+          "lineNumber": 26
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -20536,7 +20558,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 20
+          "lineNumber": 21
         },
         "signature": [
           "{ type: \"kibana_context\"; } & ExecutionContextSearch"
@@ -20728,7 +20750,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
-          "lineNumber": 27
+          "lineNumber": 32
         },
         "signature": [
           "{ type: \"kibana_context\"; } & ExecutionContextSearch"
@@ -22660,7 +22682,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/filters/build_filters.ts",
-              "lineNumber": 40
+              "lineNumber": 42
             }
           },
           {
@@ -22673,7 +22695,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/filters/build_filters.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             }
           },
           {
@@ -22686,7 +22708,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/filters/build_filters.ts",
-              "lineNumber": 42
+              "lineNumber": 44
             }
           },
           {
@@ -22699,7 +22721,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/filters/build_filters.ts",
-              "lineNumber": 43
+              "lineNumber": 45
             }
           },
           {
@@ -22712,7 +22734,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/filters/build_filters.ts",
-              "lineNumber": 44
+              "lineNumber": 46
             }
           },
           {
@@ -22731,7 +22753,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/es_query/filters/build_filters.ts",
-              "lineNumber": 45
+              "lineNumber": 47
             }
           }
         ],
@@ -22739,7 +22761,7 @@
         "returnComment": [],
         "source": {
           "path": "src/plugins/data/common/es_query/filters/build_filters.ts",
-          "lineNumber": 39
+          "lineNumber": 41
         },
         "initialIsOpen": false
       },
@@ -23068,7 +23090,7 @@
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          ") => ",
+          " | undefined) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -23189,9 +23211,9 @@
             }
           },
           {
-            "type": "Enum",
+            "type": "CompoundType",
             "label": "store",
-            "isRequired": true,
+            "isRequired": false,
             "signature": [
               {
                 "pluginId": "data",
@@ -23199,7 +23221,8 @@
                 "docId": "kibDataPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
-              }
+              },
+              " | undefined"
             ],
             "description": [],
             "source": {
