@@ -9,17 +9,17 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { InfraSources } from '../../lib/sources';
 
 // NOTE: TEMPORARY: This will become a subset of the new resolved KIP compatible log source configuration.
-interface LogRateFields {
+export interface LogQueryFields {
   indexPattern: string;
   timestamp: string;
 }
 
 // NOTE: TEMPORARY: This will become a subset of the new resolved KIP compatible log source configuration.
-export const createGetLogRateFields = (sources: InfraSources) => {
+export const createGetLogQueryFields = (sources: InfraSources) => {
   return async (
     sourceId: string,
     savedObjectsClient: SavedObjectsClientContract
-  ): Promise<LogRateFields> => {
+  ): Promise<LogQueryFields> => {
     const source = await sources.getSourceConfiguration(savedObjectsClient, sourceId);
 
     return {
@@ -29,4 +29,4 @@ export const createGetLogRateFields = (sources: InfraSources) => {
   };
 };
 
-export type GetLogRateFields = ReturnType<typeof createGetLogRateFields>;
+export type GetLogQueryFields = ReturnType<typeof createGetLogQueryFields>;

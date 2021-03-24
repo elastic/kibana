@@ -20,7 +20,7 @@ import { getNodes } from './lib/get_nodes';
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initSnapshotRoute = (libs: InfraBackendLibs) => {
-  const { framework, getLogRateFields } = libs;
+  const { framework } = libs;
 
   framework.registerRoute(
     {
@@ -41,64 +41,15 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         snapshotRequest.sourceId
       );
 
+      const logQueryFields = await libs.getLogQueryFields(
+        snapshotRequest.sourceId,
+        requestContext.core.savedObjects.client
+      );
+
       UsageCollector.countNode(snapshotRequest.nodeType);
       const client = createSearchClient(requestContext, framework);
 
-      let snapshotResponse;
-
-      if (snapshotRequest.metrics.find((metric) => metric.type === 'logRate')) {
-        const logRateSourceOverrides = await getLogRateFields(
-          snapshotRequest.sourceId,
-          requestContext.core.savedObjects.client
-        );
-        // *Only* the log rate metric has been requested
-        if (snapshotRequest.metrics.length === 1) {
-          snapshotResponse = await getNodes(
-            client,
-            snapshotRequest,
-            source,
-            logRateSourceOverrides
-          );
-        } else {
-          // A scenario whereby a single host might be shipping metrics and logs.
-          const metricsWithoutLogsMetrics = snapshotRequest.metrics.filter(
-            (metric) => metric.type !== 'logRate'
-          );
-          const snapshotResponseWithoutLogsMetrics = await getNodes(
-            client,
-            { ...snapshotRequest, metrics: metricsWithoutLogsMetrics },
-            source
-          );
-          const logRateSnapshotResponse = await getNodes(
-            client,
-            { ...snapshotRequest, metrics: [{ type: 'logRate' }] },
-            source,
-            logRateSourceOverrides
-          );
-          // Merge nodes where possible - e.g. a single host is shipping metrics and logs
-          const mergedNodes = snapshotResponseWithoutLogsMetrics.nodes.map((node) => {
-            const logRateNode = logRateSnapshotResponse.nodes.find(
-              (_logRateNode) => node.name === _logRateNode.name
-            );
-            if (logRateNode) {
-              // Remove this from the "leftovers"
-              logRateSnapshotResponse.nodes.filter((_node) => _node.name !== logRateNode.name);
-            }
-            return logRateNode
-              ? {
-                  ...node,
-                  metrics: [...node.metrics, ...logRateNode.metrics],
-                }
-              : node;
-          });
-          snapshotResponse = {
-            ...snapshotResponseWithoutLogsMetrics,
-            nodes: [...mergedNodes, ...logRateSnapshotResponse.nodes],
-          };
-        }
-      } else {
-        snapshotResponse = await getNodes(client, snapshotRequest, source);
-      }
+      const snapshotResponse = await getNodes(client, snapshotRequest, source, logQueryFields);
 
       return response.ok({
         body: SnapshotNodeResponseRT.encode(snapshotResponse),

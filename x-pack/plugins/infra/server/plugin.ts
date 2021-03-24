@@ -30,7 +30,7 @@ import { InfraSourceStatus } from './lib/source_status';
 import { LogEntriesService } from './services/log_entries';
 import { InfraPluginRequestHandlerContext } from './types';
 import { UsageCollector } from './usage/usage_collector';
-import { createGetLogRateFields } from './services/log_rate/get_log_rate_fields';
+import { createGetLogQueryFields } from './services/log_queries/get_log_query_fields';
 
 export const config = {
   schema: schema.object({
@@ -124,7 +124,7 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
       sources,
       sourceStatus,
       ...domainLibs,
-      getLogRateFields: createGetLogRateFields(sources),
+      getLogQueryFields: createGetLogQueryFields(sources),
     };
 
     plugins.features.registerKibanaFeature(METRICS_FEATURE);
