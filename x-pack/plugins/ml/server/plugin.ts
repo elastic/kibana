@@ -34,7 +34,6 @@ import { dataFrameAnalyticsRoutes } from './routes/data_frame_analytics';
 import { dataRecognizer } from './routes/modules';
 import { dataVisualizerRoutes } from './routes/data_visualizer';
 import { fieldsService } from './routes/fields_service';
-import { fileDataVisualizerRoutes } from './routes/file_data_visualizer';
 import { filtersRoutes } from './routes/filters';
 import { indicesRoutes } from './routes/indices';
 import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
@@ -67,7 +66,6 @@ export type MlPluginStart = void;
 export class MlServerPlugin
   implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup, PluginsStart> {
   private log: Logger;
-  private version: string;
   private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
@@ -79,7 +77,6 @@ export class MlServerPlugin
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
-    this.version = ctx.env.packageInfo.branch;
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
   }
@@ -174,7 +171,6 @@ export class MlServerPlugin
     dataRecognizer(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
-    fileDataVisualizerRoutes(routeInit);
     filtersRoutes(routeInit);
     indicesRoutes(routeInit);
     jobAuditMessagesRoutes(routeInit);
@@ -182,7 +178,7 @@ export class MlServerPlugin
     jobServiceRoutes(routeInit);
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
-    jobValidationRoutes(routeInit, this.version);
+    jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,
       resolveMlCapabilities,

@@ -476,7 +476,8 @@
                     "docId": "kibVisualizationsPluginApi",
                     "section": "def-public.SerializedVis",
                     "text": "SerializedVis"
-                  }
+                  },
+                  "<TVisParams>"
                 ],
                 "description": [],
                 "source": {
@@ -505,7 +506,15 @@
                 "section": "def-public.SerializedVis",
                 "text": "SerializedVis"
               },
-              ", \"type\" | \"id\" | \"description\" | \"title\" | \"params\" | \"uiState\"> & Pick<{ data: Partial<",
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              ">, \"type\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\"> & Pick<{ data: Partial<",
               {
                 "pluginId": "visualizations",
                 "scope": "public",
@@ -521,7 +530,7 @@
                 "section": "def-public.SerializedVisData",
                 "text": "SerializedVisData"
               },
-              ">; }, never>, \"type\" | \"id\" | \"data\" | \"description\" | \"title\" | \"params\" | \"uiState\">) => Promise<void>"
+              ">; }, never>, \"type\" | \"data\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\">) => Promise<void>"
             ],
             "description": [],
             "children": [
@@ -538,7 +547,15 @@
                     "section": "def-public.SerializedVis",
                     "text": "SerializedVis"
                   },
-                  ", \"type\" | \"id\" | \"description\" | \"title\" | \"params\" | \"uiState\"> & Pick<{ data: Partial<",
+                  "<",
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.VisParams",
+                    "text": "VisParams"
+                  },
+                  ">, \"type\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\"> & Pick<{ data: Partial<",
                   {
                     "pluginId": "visualizations",
                     "scope": "public",
@@ -554,7 +571,7 @@
                     "section": "def-public.SerializedVisData",
                     "text": "SerializedVisData"
                   },
-                  ">; }, never>, \"type\" | \"id\" | \"data\" | \"description\" | \"title\" | \"params\" | \"uiState\">"
+                  ">; }, never>, \"type\" | \"data\" | \"description\" | \"title\" | \"id\" | \"params\" | \"uiState\">"
                 ],
                 "description": [],
                 "source": {
@@ -583,15 +600,7 @@
                 "section": "def-public.Vis",
                 "text": "Vis"
               },
-              "<",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.VisParams",
-                "text": "VisParams"
-              },
-              ">"
+              "<TVisParams>"
             ],
             "description": [],
             "children": [],
@@ -614,7 +623,16 @@
                 "docId": "kibVisualizationsPluginApi",
                 "section": "def-public.SerializedVis",
                 "text": "SerializedVis"
-              }
+              },
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              ">"
             ],
             "description": [],
             "children": [],
@@ -1393,6 +1411,16 @@
         "id": "def-public.SerializedVis",
         "type": "Interface",
         "label": "SerializedVis",
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.SerializedVis",
+            "text": "SerializedVis"
+          },
+          "<T>"
+        ],
         "description": [],
         "tags": [],
         "children": [
@@ -1449,7 +1477,7 @@
           {
             "tags": [],
             "id": "def-public.SerializedVis.params",
-            "type": "Object",
+            "type": "Uncategorized",
             "label": "params",
             "description": [],
             "source": {
@@ -1457,13 +1485,7 @@
               "lineNumber": 47
             },
             "signature": [
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.VisParams",
-                "text": "VisParams"
-              }
+              "T"
             ]
           },
           {
@@ -2922,7 +2944,15 @@
                 "section": "def-public.SerializedVis",
                 "text": "SerializedVis"
               },
-              " | undefined"
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              "> | undefined"
             ]
           },
           {
@@ -3213,7 +3243,15 @@
             "section": "def-public.SerializedVis",
             "text": "SerializedVis"
           },
-          " | undefined; }, parent?: ",
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.VisParams",
+            "text": "VisParams"
+          },
+          "> | undefined; }, parent?: ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -3228,14 +3266,6 @@
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.ContainerInput",
             "text": "ContainerInput"
-          },
-          "<{}>, ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ContainerOutput",
-            "text": "ContainerOutput"
           }
         ],
         "initialIsOpen": false
@@ -3433,7 +3463,15 @@
               "section": "def-public.SerializedVis",
               "text": "SerializedVis"
             },
-            ") => Promise<",
+            "<",
+            {
+              "pluginId": "visualizations",
+              "scope": "common",
+              "docId": "kibVisualizationsPluginApi",
+              "section": "def-common.VisParams",
+              "text": "VisParams"
+            },
+            ">) => Promise<",
             {
               "pluginId": "visualizations",
               "scope": "public",
@@ -3478,7 +3516,16 @@
               "docId": "kibVisualizationsPluginApi",
               "section": "def-public.SerializedVis",
               "text": "SerializedVis"
-            }
+            },
+            "<",
+            {
+              "pluginId": "visualizations",
+              "scope": "common",
+              "docId": "kibVisualizationsPluginApi",
+              "section": "def-common.VisParams",
+              "text": "VisParams"
+            },
+            ">"
           ]
         },
         {
@@ -3500,7 +3547,15 @@
               "section": "def-public.SerializedVis",
               "text": "SerializedVis"
             },
-            ") => ",
+            "<",
+            {
+              "pluginId": "visualizations",
+              "scope": "common",
+              "docId": "kibVisualizationsPluginApi",
+              "section": "def-common.VisParams",
+              "text": "VisParams"
+            },
+            ">) => ",
             {
               "pluginId": "visualizations",
               "scope": "public",

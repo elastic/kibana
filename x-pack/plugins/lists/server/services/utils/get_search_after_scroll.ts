@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
 import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
 import { Scroll } from '../lists/types';
@@ -16,7 +17,7 @@ import { getSourceWithTieBreaker } from './get_source_with_tie_breaker';
 import { TieBreaker, getSearchAfterWithTieBreaker } from './get_search_after_with_tie_breaker';
 
 interface GetSearchAfterOptions {
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   filter: Filter;
   hops: number;
   hopSize: number;
@@ -27,7 +28,7 @@ interface GetSearchAfterOptions {
 }
 
 export const getSearchAfterScroll = async <T>({
-  callCluster,
+  esClient,
   filter,
   hopSize,
   hops,
@@ -39,14 +40,14 @@ export const getSearchAfterScroll = async <T>({
   const query = getQueryFilter({ filter });
   let newSearchAfter = searchAfter;
   for (let i = 0; i < hops; ++i) {
-    const response = await callCluster<TieBreaker<T>>('search', {
+    const { body: response } = await esClient.search<SearchResponse<TieBreaker<T>>>({
       body: {
         _source: getSourceWithTieBreaker({ sortField }),
         query,
         search_after: newSearchAfter,
         sort: getSortWithTieBreaker({ sortField, sortOrder }),
       },
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       index,
       size: hopSize,
     });

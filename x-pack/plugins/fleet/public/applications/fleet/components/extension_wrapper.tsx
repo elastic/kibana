@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, Suspense } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, Suspense } from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 
 import { Loading } from './loading';

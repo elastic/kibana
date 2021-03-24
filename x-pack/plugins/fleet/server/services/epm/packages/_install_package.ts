@@ -12,7 +12,6 @@ import type { InstallablePackage, InstallSource, PackageAssetReference } from '.
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { ElasticsearchAssetType } from '../../../types';
 import type { AssetReference, Installation, InstallType } from '../../../types';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { installTemplates } from '../elasticsearch/template/install';
 import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
@@ -81,11 +80,11 @@ export async function _installPackage({
       });
     }
 
-    // kick off `installIndexPatterns` & `installKibanaAssets` as early as possible because they're the longest running operations
+    // kick off `installKibanaAssets` as early as possible because they're the longest running operations
     // we don't `await` here because we don't want to delay starting the many other `install*` functions
     // however, without an `await` or a `.catch` we haven't defined how to handle a promise rejection
     // we define it many lines and potentially seconds of wall clock time later in
-    // `await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);`
+    // `await installKibanaAssetsPromise`
     // if we encounter an error before we there, we'll have an "unhandled rejection" which causes its own problems
     // the program will log something like this _and exit/crash_
     //   Unhandled Promise rejection detected:
@@ -96,13 +95,6 @@ export async function _installPackage({
     // add a `.catch` to prevent the "unhandled rejection" case
     // in that `.catch`, set something that indicates a failure
     // check for that failure later and act accordingly (throw, ignore, return)
-    let installIndexPatternError;
-    const installIndexPatternPromise = installIndexPatterns(
-      savedObjectsClient,
-      pkgName,
-      pkgVersion,
-      installSource
-    ).catch((reason) => (installIndexPatternError = reason));
     const kibanaAssets = await getKibanaAssets(paths);
     if (installedPkg)
       await deleteKibanaSavedObjectsAssets(
@@ -184,9 +176,8 @@ export async function _installPackage({
     }));
 
     // make sure the assets are installed (or didn't error)
-    if (installIndexPatternError) throw installIndexPatternError;
     if (installKibanaAssetsError) throw installKibanaAssetsError;
-    await Promise.all([installKibanaAssetsPromise, installIndexPatternPromise]);
+    await installKibanaAssetsPromise;
 
     const packageAssetResults = await saveArchiveEntries({
       savedObjectsClient,

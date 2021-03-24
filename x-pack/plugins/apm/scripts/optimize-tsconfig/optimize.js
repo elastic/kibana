@@ -18,51 +18,41 @@ const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const unlink = promisify(fs.unlink);
 
-const {
-  xpackRoot,
-  kibanaRoot,
-  tsconfigTpl,
-  filesToIgnore,
-} = require('./paths');
+const { kibanaRoot, tsconfigTpl, filesToIgnore } = require('./paths');
 const { unoptimizeTsConfig } = require('./unoptimize');
 
-function prepareParentTsConfigs() {
-  return Promise.all(
-    [
-      path.resolve(xpackRoot, 'tsconfig.json'),
-      path.resolve(kibanaRoot, 'tsconfig.base.json'),
-      path.resolve(kibanaRoot, 'tsconfig.json'),
-    ].map(async (filename) => {
-      const config = json5.parse(await readFile(filename, 'utf-8'));
+async function prepareBaseTsConfig() {
+  const baseConfigFilename = path.resolve(kibanaRoot, 'tsconfig.base.json');
+  const config = json5.parse(await readFile(baseConfigFilename, 'utf-8'));
 
-      await writeFile(
-        filename,
-        JSON.stringify(
-          {
-            ...omit(config, 'references'),
-            compilerOptions: {
-              ...config.compilerOptions,
-              incremental: false,
-            },
-            include: [],
-          },
-          null,
-          2
-        ),
-        { encoding: 'utf-8' }
-      );
-    })
+  await writeFile(
+    baseConfigFilename,
+    JSON.stringify(
+      {
+        ...omit(config, 'references'),
+        compilerOptions: {
+          ...config.compilerOptions,
+          incremental: false,
+        },
+        include: [],
+      },
+      null,
+      2
+    ),
+    { encoding: 'utf-8' }
   );
 }
 
-async function addApmFilesToXpackTsConfig() {
+async function addApmFilesToRootTsConfig() {
   const template = json5.parse(await readFile(tsconfigTpl, 'utf-8'));
-  const xpackTsConfig = path.join(xpackRoot, 'tsconfig.json');
-  const config = json5.parse(await readFile(xpackTsConfig, 'utf-8'));
+  const rootTsConfigFilename = path.join(kibanaRoot, 'tsconfig.json');
+  const rootTsConfig = json5.parse(
+    await readFile(rootTsConfigFilename, 'utf-8')
+  );
 
   await writeFile(
-    xpackTsConfig,
-    JSON.stringify({ ...config, ...template }, null, 2),
+    rootTsConfigFilename,
+    JSON.stringify({ ...rootTsConfig, ...template, references: [] }, null, 2),
     { encoding: 'utf-8' }
   );
 }
@@ -80,9 +70,9 @@ async function deleteApmTsConfig() {
 async function optimizeTsConfig() {
   await unoptimizeTsConfig();
 
-  await prepareParentTsConfigs();
+  await prepareBaseTsConfig();
 
-  await addApmFilesToXpackTsConfig();
+  await addApmFilesToRootTsConfig();
 
   await deleteApmTsConfig();
 

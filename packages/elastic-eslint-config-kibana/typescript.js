@@ -4,7 +4,7 @@
 // as this package was moved from typescript-eslint-parser to @typescript-eslint/parser
 
 const semver = require('semver');
-const PKG = require('../../package.json');
+const { kibanaPackageJson: PKG } = require('@kbn/dev-utils');
 
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
 
