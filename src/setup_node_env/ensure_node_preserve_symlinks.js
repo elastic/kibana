@@ -40,6 +40,7 @@
         if (String(execArgv[inspectFlagIndex + 1]).match(/^[0-9]+$/)) {
           // --inspect port
           inspectPortCounter = Number.parseInt(execArgv[inspectFlagIndex + 1], 10) + 1;
+          execArgv.slice(inspectFlagIndex + 1, 1);
         }
       }
 
