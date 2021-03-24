@@ -199,7 +199,7 @@ describe('EnterpriseSearchRequestHandler', () => {
       });
     });
 
-    it('works if resposne contains no json data', async () => {
+    it('works if response contains no json data', async () => {
       EnterpriseSearchAPI.mockReturn();
 
       const requestHandler = enterpriseSearchRequestHandler.createRequest({ path: '/api/prep' });
