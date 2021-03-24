@@ -37,6 +37,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
       await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connectors`).expect(200, [
         {
+          id: 'preconfigured-alert-history-es-index',
+          name: 'Alert History ES Index',
+          connector_type_id: '.index',
+          is_preconfigured: true,
+          referenced_by_count: 0,
+        },
+        {
           id: createdAction.id,
           is_preconfigured: false,
           name: 'My action',
@@ -145,6 +152,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
         await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`).expect(200, [
+          {
+            id: 'preconfigured-alert-history-es-index',
+            name: 'Alert History ES Index',
+            actionTypeId: '.index',
+            isPreconfigured: true,
+            referencedByCount: 0,
+          },
           {
             id: createdAction.id,
             isPreconfigured: false,

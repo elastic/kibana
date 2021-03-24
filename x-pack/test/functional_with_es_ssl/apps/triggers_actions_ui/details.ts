@@ -371,12 +371,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
         const action = await createActionManualCleanup({
-          name: `index-${testRunUuid}-${0}`,
-          connector_type_id: '.index',
+          name: `webhook-${testRunUuid}-${0}`,
+          connector_type_id: '.webhook',
           config: {
-            index: `index-${testRunUuid}-${0}`,
+            url: 'https://test',
           },
-          secrets: {},
+          secrets: {
+            user: 'user',
+            password: 'pass',
+          },
         });
 
         await pageObjects.common.navigateToApp('triggersActions');
@@ -386,12 +389,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             {
               group: 'default',
               id: action.id,
-              params: { level: 'info', message: ' {{context.message}}' },
+              params: { body: ' {{context.message}}' },
             },
             {
               group: 'other',
               id: action.id,
-              params: { level: 'info', message: ' {{context.message}}' },
+              params: { body: ' {{context.message}}' },
             },
           ],
         });
@@ -430,17 +433,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('createActionConnectorButton-0');
         await testSubjects.existOrFail('connectorAddModal');
         await testSubjects.setValue('nameInput', 'new connector');
-        await retry.try(async () => {
-          // At times we find the driver controlling the ComboBox in tests
-          // can select the wrong item, this ensures we always select the correct index
-          await comboBox.set('connectorIndexesComboBox', 'test-index');
-          expect(
-            await comboBox.isOptionSelected(
-              await testSubjects.find('connectorIndexesComboBox'),
-              'test-index'
-            )
-          ).to.be(true);
-        });
+        await testSubjects.setValue('webhookUrlText', 'https://another');
+        await testSubjects.setValue('webhookUserInput', 'user');
+        await testSubjects.setValue('webhookPasswordInput', 'pass');
         await testSubjects.click('connectorAddModal > saveActionButtonModal');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 

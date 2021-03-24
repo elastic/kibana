@@ -62,6 +62,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql([
                 {
+                  id: 'preconfigured-alert-history-es-index',
+                  name: 'Alert History ES Index',
+                  connector_type_id: '.index',
+                  is_preconfigured: true,
+                  referenced_by_count: 0,
+                },
+                {
                   id: createdAction.id,
                   is_preconfigured: false,
                   name: 'My action',
