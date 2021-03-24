@@ -7,7 +7,7 @@
 
 import './_explorer_chart_label.scss';
 import PropTypes from 'prop-types';
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 
 import { EuiIconTip } from '@elastic/eui';
 
@@ -39,6 +39,12 @@ export function ExplorerChartLabel({
       <React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>
     );
 
+  const applyFilter = useCallback(
+    ({ influencerFieldName, influencerFieldValue, action }) =>
+      onSelectEntity(influencerFieldName, influencerFieldValue, action),
+    [onSelectEntity]
+  );
+
   const entityFieldBadges = entityFields.map((entity) => {
     const key = `${infoTooltip.chartFunction}-${entity.fieldName}-${entity.fieldType}-${entity.fieldValue}`;
     return (
@@ -46,12 +52,7 @@ export function ExplorerChartLabel({
         <ExplorerChartLabelBadge entity={entity} />
         {onSelectEntity !== undefined && (
           <EntityFilter
-            onFilter={({ operation }) =>
-              onSelectEntity({
-                ...entity,
-                operation,
-              })
-            }
+            onFilter={applyFilter}
             influencerFieldName={entity.fieldName}
             influencerFieldValue={entity.fieldValue}
           />

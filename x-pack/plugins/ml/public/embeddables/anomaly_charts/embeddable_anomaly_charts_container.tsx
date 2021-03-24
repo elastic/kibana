@@ -17,7 +17,7 @@ import type {
   AnomalyChartsEmbeddableOutput,
   AnomalyChartsEmbeddableServices,
 } from '..';
-import type { EntityField } from '../../../common/util/anomaly_utils';
+import type { EntityField, EntityFieldOperation } from '../../../common/util/anomaly_utils';
 
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
@@ -121,7 +121,16 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     );
   }
 
-  const addEntityFieldFilter = (entity: EntityField) => {
+  const addEntityFieldFilter = (
+    fieldName: string,
+    fieldValue: string,
+    operation: EntityFieldOperation
+  ) => {
+    const entity: EntityField = {
+      fieldName,
+      fieldValue,
+      operation,
+    };
     const uniqueSelectedEntities = [entity];
     setSelectedEntities(uniqueSelectedEntities);
     uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({

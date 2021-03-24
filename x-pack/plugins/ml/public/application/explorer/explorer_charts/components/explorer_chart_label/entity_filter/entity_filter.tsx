@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
   ENTITY_FIELD_OPERATIONS,
-  EntityFieldOperations,
+  EntityFieldOperation,
 } from '../../../../../../../common/util/anomaly_utils';
 import './entity_filter.scss';
 
@@ -18,7 +18,7 @@ interface EntityFilterProps {
   onFilter: (params: {
     influencerFieldName: string;
     influencerFieldValue: string;
-    operation: EntityFieldOperations;
+    action: EntityFieldOperation;
   }) => void;
   influencerFieldName: string;
   influencerFieldValue: string;
@@ -46,7 +46,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
             onFilter({
               influencerFieldName,
               influencerFieldValue,
-              operation: ENTITY_FIELD_OPERATIONS.ADD,
+              action: ENTITY_FIELD_OPERATIONS.ADD,
             })
           }
           iconType="plusInCircle"
@@ -72,7 +72,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
             onFilter({
               influencerFieldName,
               influencerFieldValue,
-              operation: ENTITY_FIELD_OPERATIONS.REMOVE,
+              action: ENTITY_FIELD_OPERATIONS.REMOVE,
             })
           }
           iconType="minusInCircle"

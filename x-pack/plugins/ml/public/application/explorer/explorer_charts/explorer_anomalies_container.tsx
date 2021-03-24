@@ -18,7 +18,7 @@ import {
 import type { UrlGeneratorContract } from '../../../../../../../src/plugins/share/public';
 import type { TimeBuckets } from '../../util/time_buckets';
 import type { TimefilterContract } from '../../../../../../../src/plugins/data/public';
-import type { EntityField } from '../../../../common/util/anomaly_utils';
+import type { EntityFieldOperation } from '../../../../common/util/anomaly_utils';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
 
 interface ExplorerAnomaliesContainerProps {
@@ -30,7 +30,7 @@ interface ExplorerAnomaliesContainerProps {
   mlUrlGenerator: UrlGeneratorContract<'ML_APP_URL_GENERATOR'>;
   timeBuckets: TimeBuckets;
   timefilter: TimefilterContract;
-  onSelectEntity: (entity: EntityField) => void;
+  onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
 }
 export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = ({
   id,
