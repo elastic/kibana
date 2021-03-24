@@ -319,6 +319,20 @@ const waitForTask = (
         description: body.task.description,
       });
     })
+    .catch((e) => {
+      if (
+        e.body?.error?.type === 'timeout_exception' ||
+        e.body?.error?.type === 'receive_timeout_transport_exception'
+      ) {
+        return Either.left({
+          type: 'retryable_es_client_error' as const,
+          message: `[${e.body.error.type}]  ${e.body.error.reason}`,
+          error: e,
+        });
+      } else {
+        throw e;
+      }
+    })
     .catch(catchRetryableEsClientErrors);
 };
 
