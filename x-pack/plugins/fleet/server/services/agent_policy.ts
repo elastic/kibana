@@ -699,8 +699,8 @@ class AgentPolicyService {
     };
 
     // Only add permissions if output.type is "elasticsearch"
-    fullAgentPolicy.outputPermissions = Object.keys(fullAgentPolicy.outputs).reduce<
-      NonNullable<FullAgentPolicy['outputPermissions']>
+    fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
+      NonNullable<FullAgentPolicy['output_permissions']>
     >((permissions, outputName) => {
       const output = fullAgentPolicy.outputs[outputName];
       if (output && output.type === 'elasticsearch') {
