@@ -215,6 +215,7 @@ const loadExplorerDataProvider = (
           // show the view-by loading indicator
           // and pass on the data we already fetched.
           tap(explorerService.setViewBySwimlaneLoading),
+          tap(explorerService.setChartsDataLoading),
           mergeMap(
             ({
               anomalyChartRecords,
@@ -278,6 +279,7 @@ const loadExplorerDataProvider = (
                     influencers: influencers as any,
                     loading: false,
                     viewBySwimlaneDataLoading: false,
+                    anomalyChartsDataLoading: false,
                     overallSwimlaneData: overallState,
                     viewBySwimlaneData: viewBySwimlaneState as any,
                     tableData,

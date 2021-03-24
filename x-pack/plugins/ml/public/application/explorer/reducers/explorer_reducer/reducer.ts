@@ -49,6 +49,14 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       nextState = jobSelectionChange(state, payload);
       break;
 
+    case EXPLORER_ACTION.SET_CHARTS_DATA_LOADING:
+      nextState = {
+        ...state,
+        anomalyChartsDataLoading: true,
+        chartsData: getDefaultChartsData(),
+      };
+      break;
+
     case EXPLORER_ACTION.SET_CHARTS:
       nextState = {
         ...state,
