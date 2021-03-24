@@ -23,6 +23,7 @@ import type {
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
   EncryptedSavedObjectsPluginStart,
@@ -101,12 +102,14 @@ export interface FleetSetupDeps {
 }
 
 export interface FleetStartDeps {
+  data: DataPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   security?: SecurityPluginStart;
 }
 
 export interface FleetAppContext {
   elasticsearch: ElasticsearchServiceStart;
+  data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginStart;
@@ -207,6 +210,10 @@ export class FleetPlugin
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
 
+    const config = await this.config$.pipe(first()).toPromise();
+
+    appContextService.fleetServerEnabled = config.agents.fleetServerEnabled;
+
     registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
@@ -245,8 +252,6 @@ export class FleetPlugin
     }
 
     const router = core.http.createRouter();
-
-    const config = await this.config$.pipe(first()).toPromise();
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
@@ -295,6 +300,7 @@ export class FleetPlugin
   public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
     await appContextService.start({
       elasticsearch: core.elasticsearch,
+      data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: plugins.security,

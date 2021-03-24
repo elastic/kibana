@@ -174,13 +174,12 @@ export const useMetricsK8sAnomaliesResults = ({
   const [getMetricsK8sAnomaliesRequest, getMetricsK8sAnomalies] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
-      createPromise: async (metric: Metric) => {
+      createPromise: async (metric?: Metric, query?: string) => {
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
           paginationOptions,
           paginationCursor,
-          filteredDatasets: queryFilteredDatasets,
         } = reducerState;
         return await callGetMetricsK8sAnomaliesAPI(
           {
@@ -189,12 +188,12 @@ export const useMetricsK8sAnomaliesResults = ({
             startTime: queryStartTime,
             endTime: queryEndTime,
             metric,
+            query,
             sort: sortOptions,
             pagination: {
               ...paginationOptions,
               cursor: paginationCursor,
             },
-            datasets: queryFilteredDatasets,
           },
           services.http.fetch
         );
@@ -305,10 +304,10 @@ interface RequestArgs {
   anomalyThreshold: number;
   startTime: number;
   endTime: number;
-  metric: Metric;
+  metric?: Metric;
+  query?: string;
   sort: Sort;
   pagination: Pagination;
-  datasets?: string[];
 }
 
 export const callGetMetricsK8sAnomaliesAPI = async (
@@ -321,9 +320,9 @@ export const callGetMetricsK8sAnomaliesAPI = async (
     startTime,
     endTime,
     metric,
+    query,
     sort,
     pagination,
-    datasets,
   } = requestArgs;
   const response = await fetch(INFA_ML_GET_METRICS_K8S_ANOMALIES_PATH, {
     method: 'POST',
@@ -337,9 +336,9 @@ export const callGetMetricsK8sAnomaliesAPI = async (
             endTime,
           },
           metric,
+          query,
           sort,
           pagination,
-          datasets,
         },
       })
     ),
