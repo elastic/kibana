@@ -78,8 +78,9 @@ report, such as PDF page dimensions, or special layout types (print layout,
 etc).
 
 ## Interface
-The `setupDeps.screenshotMode` object has a single purpose: tell the app if it
-should render in an optimized way for screenshot capture:
+The `setupDeps.screenshotMode` object has a single purpose: tell a low-level
+plugin if the page is rendering in screenshot capture mode. The plugin decides 
+what to do with that information.
 
 ```
 interface IScreenshotModeServiceSetup {
