@@ -103,6 +103,13 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
       await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/actions/connectors`).expect(200, [
         {
+          id: 'preconfigured-alert-history-es-index',
+          name: 'Alert History ES Index',
+          connector_type_id: '.index',
+          is_preconfigured: true,
+          referenced_by_count: 0,
+        },
+        {
           id: 'preconfigured-es-index-action',
           is_preconfigured: true,
           connector_type_id: '.index',
