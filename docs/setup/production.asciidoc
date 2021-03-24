@@ -148,7 +148,7 @@ bin/kibana -c config/instance2.yml
 [float]
 [[accessing-load-balanced-kibana]]
 === Accessing multiple load-balanced {kib} clusters
-To be able to access multiple load-balanced Kibana clusters from the same browser, the setting `xpack.security.cookieName` must be set in the configuration to avoid having conflicts between cookies from the different Kibana instances.
+To be able to access multiple load-balanced {kib} clusters from the same browser, the setting `xpack.security.cookieName` must be set in the configuration to avoid having conflicts between cookies from the different {kib} instances.
 
 In each cluster, Kibana instances should have the same `cookieName` value in order to achieve seamless high availability and keep the session active in case of failure from the currently used instance.
 
