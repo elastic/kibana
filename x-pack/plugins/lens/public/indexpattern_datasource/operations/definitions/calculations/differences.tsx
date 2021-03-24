@@ -43,7 +43,7 @@ export const derivativeOperation: OperationDefinition<
   DerivativeIndexPatternColumn,
   'fullReference'
 > = {
-  type: 'differences',
+  type: OPERATION_NAME,
   priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.derivative', {
     defaultMessage: 'Differences',
