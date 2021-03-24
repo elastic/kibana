@@ -33,6 +33,7 @@ import {
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -587,6 +588,28 @@ describe('migration actions', () => {
                 }
               `);
     });
+    it('resolves left retryable_es_client_error when the task does not finish within the timeout', async () => {
+      const res = (await reindex(
+        client,
+        'existing_index_with_docs',
+        'existing_index_with_write_block',
+        Option.none,
+        true
+      )()) as Either.Right<ReindexResponse>;
+
+      const task = waitForReindexTask(client, res.right.taskId, '0s');
+
+      await expect(task()).resolves.toMatchObject({
+        _tag: 'Left',
+        left: {
+          error: expect.any(ResponseError),
+          message: expect.stringMatching(
+            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          ),
+          type: 'retryable_es_client_error',
+        },
+      });
+    });
   });
 
   describe('verifyReindex', () => {
@@ -701,6 +724,25 @@ describe('migration actions', () => {
                         [Error: pickupUpdatedMappings task failed with the following error:
                         {"type":"index_not_found_exception","reason":"no such index [no_such_index]","resource.type":"index_or_alias","resource.id":"no_such_index","index_uuid":"_na_","index":"no_such_index"}]
                     `);
+    });
+    it('resolves with a retryable error when the operation does not complete within the timeout', async () => {
+      const res = (await pickupUpdatedMappings(
+        client,
+        'existing_index_with_docs'
+      )()) as Either.Right<UpdateByQueryResponse>;
+
+      const task = waitForPickupUpdatedMappingsTask(client, res.right.taskId, '0s');
+
+      await expect(task()).resolves.toMatchObject({
+        _tag: 'Left',
+        left: {
+          error: expect.any(ResponseError),
+          message: expect.stringMatching(
+            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          ),
+          type: 'retryable_es_client_error',
+        },
+      });
     });
     it('resolves right when successful', async () => {
       const res = (await pickupUpdatedMappings(

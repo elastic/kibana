@@ -326,7 +326,7 @@ const waitForTask = (
       ) {
         return Either.left({
           type: 'retryable_es_client_error' as const,
-          message: `[${e.body.error.type}]  ${e.body.error.reason}`,
+          message: `[${e.body.error.type}] ${e.body.error.reason}`,
           error: e,
         });
       } else {
