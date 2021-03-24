@@ -6,11 +6,11 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { ChartTypesProps } from './xy_chart_types';
+import type { XYChartTypesProps } from './xy_chart_types';
 
 const ChartTypesComponent = lazy(() => import('./xy_chart_types'));
 
-export const XYChartTypes = (props: ChartTypesProps) => {
+export const XYChartTypes = (props: XYChartTypesProps) => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <ChartTypesComponent {...props} />
