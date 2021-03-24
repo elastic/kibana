@@ -14,8 +14,6 @@ import { trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
-export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';
-export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
 export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN';
 export const SET_READ_ONLY = 'SET_READ_ONLY';
@@ -48,16 +46,6 @@ export function openMapSettings() {
     dispatch(setSelectedLayer(null));
     dispatch(trackMapSettings());
     dispatch(updateFlyout(FLYOUT_STATE.MAP_SETTINGS_PANEL));
-  };
-}
-export function closeSetView() {
-  return {
-    type: CLOSE_SET_VIEW,
-  };
-}
-export function openSetView() {
-  return {
-    type: OPEN_SET_VIEW,
   };
 }
 export function setIsLayerTOCOpen(isLayerTOCOpen: boolean) {
