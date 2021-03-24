@@ -28,6 +28,7 @@ import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/pub
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
 import { getFieldByNameFactory } from './pure_helpers';
+import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find'>;
@@ -50,6 +51,12 @@ export async function loadIndexPatterns({
   }
 
   const indexPatterns = await Promise.all(missingIds.map((id) => indexPatternsService.get(id)));
+
+  if (memoizedGetAvailableOperationsByMetadata.cache.clear) {
+    // clear operations meta data cache because index pattern reference may change
+    memoizedGetAvailableOperationsByMetadata.cache.clear();
+  }
+
   const indexPatternsObject = indexPatterns.reduce(
     (acc, indexPattern) => {
       const newFields = indexPattern.fields
