@@ -51,13 +51,29 @@ describe('siblingBuckets(req, panel, series)', () => {
 
   test('calls next when finished', async () => {
     const next = jest.fn();
-    await siblingBuckets(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+    await siblingBuckets(
+      req,
+      panel,
+      series,
+      {},
+      {},
+      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      uiSettings
+    )(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns sibling aggs', async () => {
     const next = (doc) => doc;
-    const doc = await siblingBuckets(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+    const doc = await siblingBuckets(
+      req,
+      panel,
+      series,
+      {},
+      {},
+      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      uiSettings
+    )(next)({});
 
     expect(doc).toEqual({
       aggs: {

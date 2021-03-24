@@ -19,7 +19,7 @@ import type { CachedIndexPatternFetcher } from './lib/search_strategies/lib/cach
 export type VisTypeTimeseriesRequestHandlerContext = DataRequestHandlerContext;
 export type VisTypeTimeseriesRouter = IRouter<VisTypeTimeseriesRequestHandlerContext>;
 export type VisTypeTimeseriesVisDataRequest = KibanaRequest<{}, {}, VisPayload>;
-export type VisTypeTimeseriesFieldsRequest = KibanaRequest<{}, { index: string }, {}>;
+export type VisTypeTimeseriesFieldsRequest = KibanaRequest<{}, { index: string }, any>;
 export type VisTypeTimeseriesRequest =
   | VisTypeTimeseriesFieldsRequest
   | VisTypeTimeseriesVisDataRequest;

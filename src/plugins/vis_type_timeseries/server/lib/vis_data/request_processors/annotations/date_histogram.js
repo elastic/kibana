@@ -32,7 +32,7 @@ export function dateHistogram(
       barTargetUiSettings
     );
     const { from, to } = getTimerange(req);
-    const timezone = capabilities.searchTimezone;
+    const { timezone } = capabilities;
 
     overwrite(doc, `aggs.${annotation.id}.date_histogram`, {
       field: timeField,

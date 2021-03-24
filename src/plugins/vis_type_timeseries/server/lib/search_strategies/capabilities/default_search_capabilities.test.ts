@@ -7,20 +7,19 @@
  */
 
 import { DefaultSearchCapabilities } from './default_search_capabilities';
-import { VisTypeTimeseriesRequest } from '../../../types';
 
 describe('DefaultSearchCapabilities', () => {
   let defaultSearchCapabilities: DefaultSearchCapabilities;
-  let req: VisTypeTimeseriesRequest;
 
   beforeEach(() => {
-    req = {} as VisTypeTimeseriesRequest;
-    defaultSearchCapabilities = new DefaultSearchCapabilities(req);
+    defaultSearchCapabilities = new DefaultSearchCapabilities({
+      timezone: 'UTC',
+      maxBucketsLimit: 2000,
+    });
   });
 
   test('should init default search capabilities', () => {
-    expect(defaultSearchCapabilities.request).toBe(req);
-    expect(defaultSearchCapabilities.fieldsCapabilities).toEqual({});
+    expect(defaultSearchCapabilities.timezone).toBe('UTC');
   });
 
   test('should return defaultTimeInterval', () => {
@@ -33,18 +32,6 @@ describe('DefaultSearchCapabilities', () => {
       whiteListedGroupByFields: { '*': true },
       whiteListedTimerangeModes: { '*': true },
     });
-  });
-
-  test('should return Search Timezone', () => {
-    defaultSearchCapabilities.request = ({
-      body: {
-        timerange: {
-          timezone: 'UTC',
-        },
-      },
-    } as unknown) as VisTypeTimeseriesRequest;
-
-    expect(defaultSearchCapabilities.searchTimezone).toEqual('UTC');
   });
 
   test('should return a valid time interval', () => {

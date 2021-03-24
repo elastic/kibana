@@ -17,6 +17,7 @@ import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
+import { MAX_BUCKETS_SETTING } from '../../../../common/constants';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 const isIndexPatternContainsWildcard = (indexPattern: string) => indexPattern.includes('*');
@@ -62,6 +63,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     ) {
       const rollupData = await this.getRollupData(requestContext, indexPatternString);
       const rollupIndices = getRollupIndices(rollupData);
+      const uiSettings = requestContext.core.uiSettings.client;
 
       isViable = rollupIndices.length === 1;
 
@@ -69,7 +71,13 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
         const [rollupIndex] = rollupIndices;
         const fieldsCapabilities = getCapabilitiesForRollupIndices(rollupData);
 
-        capabilities = new RollupSearchCapabilities(req, fieldsCapabilities, rollupIndex);
+        capabilities = new RollupSearchCapabilities(
+          {
+            maxBucketsLimit: await uiSettings.get(MAX_BUCKETS_SETTING),
+          },
+          fieldsCapabilities,
+          rollupIndex
+        );
       }
     }
 

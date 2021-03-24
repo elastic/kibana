@@ -46,14 +46,30 @@ describe('positiveRate(req, panel, series)', () => {
 
   test('calls next when finished', async () => {
     const next = jest.fn();
-    await positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+    await positiveRate(
+      req,
+      panel,
+      series,
+      {},
+      {},
+      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      uiSettings
+    )(next)({});
 
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns positive rate aggs', async () => {
     const next = (doc) => doc;
-    const doc = await positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+    const doc = await positiveRate(
+      req,
+      panel,
+      series,
+      {},
+      {},
+      { maxBucketsLimit: 2000, getValidTimeInterval: jest.fn(() => '1d') },
+      uiSettings
+    )(next)({});
 
     expect(doc).toEqual({
       aggs: {

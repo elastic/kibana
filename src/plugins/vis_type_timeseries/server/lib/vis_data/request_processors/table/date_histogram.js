@@ -32,7 +32,7 @@ export function dateHistogram(req, panel, esQueryConfig, indexPattern, capabilit
         barTargetUiSettings
       );
       const { from, to } = getTimerange(req);
-      const timezone = capabilities.searchTimezone;
+      const { timezone } = capabilities;
 
       panel.series.forEach((column) => {
         const aggRoot = calculateAggRoot(doc, column);

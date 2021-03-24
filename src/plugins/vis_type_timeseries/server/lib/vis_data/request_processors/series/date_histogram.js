@@ -27,11 +27,7 @@ export function dateHistogram(
     const maxBarsUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
-    const { timeField, interval, maxBars } = getIntervalAndTimefield(
-      panel,
-      series,
-      indexPatternObject
-    );
+    const { timeField, interval, maxBars } = getIntervalAndTimefield(panel, series, indexPattern);
     const { bucketSize, intervalString } = getBucketSize(
       req,
       interval,
@@ -41,7 +37,7 @@ export function dateHistogram(
 
     const getDateHistogramForLastBucketMode = () => {
       const { from, to } = offsetTime(req, series.offset_time);
-      const timezone = capabilities.searchTimezone;
+      const { timezone } = capabilities;
 
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,

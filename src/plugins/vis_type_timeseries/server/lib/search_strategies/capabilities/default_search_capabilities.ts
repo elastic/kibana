@@ -13,23 +13,20 @@ import {
   getSuitableUnit,
 } from '../../vis_data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
-import { VisTypeTimeseriesRequest, VisTypeTimeseriesVisDataRequest } from '../../../types';
 
-const isVisDataRequest = (
-  request: VisTypeTimeseriesRequest
-): request is VisTypeTimeseriesVisDataRequest => {
-  return !!(request as VisTypeTimeseriesVisDataRequest).body;
-};
-
-const getTimezoneFromRequest = (request: VisTypeTimeseriesRequest) => {
-  if (isVisDataRequest(request)) return request.body.timerange.timezone;
-};
+export interface SearchCapabilitiesOptions {
+  timezone?: string;
+  maxBucketsLimit: number;
+}
 
 export class DefaultSearchCapabilities {
-  constructor(
-    public request: VisTypeTimeseriesRequest,
-    public fieldsCapabilities: Record<string, any> = {}
-  ) {}
+  public timezone: SearchCapabilitiesOptions['timezone'];
+  public maxBucketsLimit: SearchCapabilitiesOptions['maxBucketsLimit'];
+
+  constructor(options: SearchCapabilitiesOptions) {
+    this.timezone = options.timezone;
+    this.maxBucketsLimit = options.maxBucketsLimit;
+  }
 
   public get defaultTimeInterval() {
     return null;
@@ -53,10 +50,6 @@ export class DefaultSearchCapabilities {
       [RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS]: this.whiteListedGroupByFields,
       [RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES]: this.whiteListedTimerangeModes,
     };
-  }
-
-  public get searchTimezone() {
-    return getTimezoneFromRequest(this.request);
   }
 
   createUiRestriction(restrictionsObject?: Record<string, any>) {

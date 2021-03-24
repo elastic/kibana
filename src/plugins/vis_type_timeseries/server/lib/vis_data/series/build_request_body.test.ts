@@ -72,7 +72,7 @@ describe('buildRequestBody(req)', () => {
     const series = panel.series[0];
     const getValidTimeInterval = jest.fn(() => '10s');
     const capabilities = {
-      searchTimezone: 'UTC',
+      timezone: 'UTC',
       getValidTimeInterval,
     };
     const config = {
