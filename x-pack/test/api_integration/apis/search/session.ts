@@ -307,7 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
       const sessionId = `my-session-${Math.random()}`;
 
       // run search
-      const searchRes1 = await supertest
+      const searchRes = await supertest
         .post(`/internal/search/ese`)
         .set('kbn-xsrf', 'foo')
         .send({
@@ -325,7 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const { id: id1 } = searchRes1.body;
+      const { id } = searchRes.body;
 
       // persist session
       await supertest
@@ -340,25 +340,6 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      // run search
-      const searchRes2 = await supertest
-        .post(`/internal/search/ese`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          sessionId,
-          params: {
-            body: {
-              query: {
-                match_all: {},
-              },
-            },
-            wait_for_completion_timeout: '1ms',
-          },
-        })
-        .expect(200);
-
-      const { id: id2 } = searchRes2.body;
-
       await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
         const resp = await supertest
           .get(`/internal/session/${sessionId}`)
@@ -371,8 +352,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(created).not.to.be(undefined);
 
         const idMappings = Object.values(idMapping).map((value: any) => value.id);
-        expect(idMappings).to.contain(id1);
-        expect(idMappings).to.contain(id2);
+        expect(idMappings).to.contain(id);
         return true;
       });
 
