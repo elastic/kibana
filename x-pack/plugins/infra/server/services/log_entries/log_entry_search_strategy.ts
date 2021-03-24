@@ -122,5 +122,5 @@ const createLogEntryFromHit = (hit: LogEntryHit) => ({
   id: hit._id,
   index: hit._index,
   cursor: getLogEntryCursorFromHit(hit),
-  fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
+  fields: Object.entries(hit.fields ?? {}).map(([field, value]) => ({ field, value })),
 });
