@@ -23,7 +23,7 @@ export const SampleEngineCreationCta: React.FC = () => {
   const { createSampleEngine } = useActions(SampleEngineCreationCtaLogic);
 
   return (
-    <EuiPanel data-test-subj="SampleEngineCreationCta">
+    <EuiPanel>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="s">
@@ -34,11 +34,7 @@ export const SampleEngineCreationCta: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="SampleEngineCreationCtaButton"
-            onClick={createSampleEngine}
-            isLoading={isLoading}
-          >
+          <EuiButton onClick={createSampleEngine} isLoading={isLoading}>
             {SAMPLE_ENGINE_CREATION_CTA_BUTTON_LABEL}
           </EuiButton>
         </EuiFlexItem>

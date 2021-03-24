@@ -6,9 +6,11 @@
  */
 
 import '../../../__mocks__/enterprise_search_url.mock';
-import { mountWithIntl, setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__';
 
 import React from 'react';
+
+import { shallow } from 'enzyme';
 
 import { EuiButton } from '@elastic/eui';
 
@@ -31,22 +33,22 @@ describe('SampleEngineCTA', () => {
     });
 
     it('calls createSampleEngine on click', () => {
-      const wrapper = mountWithIntl(<SampleEngineCreationCta />);
+      const wrapper = shallow(<SampleEngineCreationCta />);
       const ctaButton = wrapper.find(EuiButton);
 
       expect(ctaButton.props().onClick).toEqual(MOCK_ACTIONS.createSampleEngine);
     });
 
-    it('by default enabled', () => {
-      const wrapper = mountWithIntl(<SampleEngineCreationCta />);
+    it('is enabled by default', () => {
+      const wrapper = shallow(<SampleEngineCreationCta />);
       const ctaButton = wrapper.find(EuiButton);
 
       expect(ctaButton.props().isLoading).toEqual(false);
     });
 
-    it('disabled while loading', () => {
+    it('is disabled while loading', () => {
       setMockValues({ ...MOCK_VALUES, isLoading: true });
-      const wrapper = mountWithIntl(<SampleEngineCreationCta />);
+      const wrapper = shallow(<SampleEngineCreationCta />);
       const ctaButton = wrapper.find(EuiButton);
 
       expect(ctaButton.props().isLoading).toEqual(true);
