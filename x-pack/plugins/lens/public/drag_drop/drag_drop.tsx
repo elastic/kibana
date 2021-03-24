@@ -386,7 +386,7 @@ const DragInner = memo(function DragInner({
           data-test-subj="lnsDragDrop-keyboardHandler"
           onBlur={() => {
             if (activeDraggingProps) {
-              // dragEnd();
+              dragEnd();
             }
           }}
           onKeyDown={(e: KeyboardEvent<HTMLButtonElement>) => {
