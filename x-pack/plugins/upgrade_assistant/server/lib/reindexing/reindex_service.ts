@@ -363,7 +363,10 @@ export const reindexServiceFactory = (
 
     return actions.updateReindexOp(reindexOp, {
       lastCompletedStep: ReindexStep.reindexStarted,
-      reindexTaskId: startReindexResponse.task,
+      reindexTaskId:
+        startReindexResponse.task === undefined
+          ? startReindexResponse.task
+          : String(startReindexResponse.task),
       reindexTaskPercComplete: 0,
       reindexOptions: {
         ...(reindexOptions ?? {}),

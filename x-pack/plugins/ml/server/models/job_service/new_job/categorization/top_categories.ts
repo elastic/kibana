@@ -117,7 +117,6 @@ export function topCategoriesProvider(mlClient: MlClient) {
                     job_id: jobId,
                   },
                 },
-                // @ts-expect-error
                 categoryFilter,
               ],
             },

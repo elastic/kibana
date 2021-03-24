@@ -372,7 +372,6 @@ export class TaskStore {
       });
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
-        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.updated as optional
         updated,
         version_conflicts,
         max_docs
@@ -405,7 +404,8 @@ export function correctVersionConflictsForContinuation(
   updated: estypes.ReindexResponse['updated'],
   versionConflicts: estypes.ReindexResponse['version_conflicts'],
   maxDocs?: number
-) {
+): number {
+  // @ts-expect-error estypes.ReindexResponse['updated'] and estypes.ReindexResponse['version_conflicts'] can be undefined
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 

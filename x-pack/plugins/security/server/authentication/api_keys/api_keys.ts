@@ -213,9 +213,9 @@ export class APIKeys {
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
-      // @ts-expect-error @elastic/elasticsearch response type for `grantApiKey` isn't defined.
       result = (
         await this.clusterClient.asInternalUser.security.grantApiKey({
+          // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors
           body: params,
         })
       ).body;

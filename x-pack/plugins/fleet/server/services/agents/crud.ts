@@ -122,7 +122,6 @@ export async function getAgentsByKuery(
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
-    // @ts-expect-error @elastic/elasticsearch SearchRequest.sort defined as string[]
     sort: `${sortField}:${sortOrder}`,
     track_total_hits: true,
     body,

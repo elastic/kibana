@@ -65,14 +65,14 @@ export const enhancedEsSearchStrategyProvider = (
             ...(await getDefaultAsyncSubmitParams(uiSettingsClient, config, options)),
             ...request.params,
           };
-      const promise = id
-        ? client.get({ ...params, id })
-        : // @ts-expect-error @lastic/elasticsearch docvalue_fields in SearchRequest and SearchRequest['body'] has incompatible types
-          client.submit(params);
+      const promise = id ? client.get({ ...params, id }) : client.submit(params);
       const { body } = await shimAbortSignal(promise, options.abortSignal);
       const response = shimHitsTotal(body.response, options);
-      // @ts-expect-error @elastic/elasticsearch AsyncSearchGetResponse currently missing all properties
-      return toAsyncKibanaSearchResponse({ ...body, response });
+
+      return toAsyncKibanaSearchResponse(
+        // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
+        { ...body, response }
+      );
     };
 
     const cancel = async () => {

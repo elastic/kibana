@@ -17,14 +17,12 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           [application]: {
             all: {
-              // @ts-expect-error @elastic/elasticsearch PrivilegesActions doesn't declare application and name properties.
               application,
               name: 'all',
               actions: ['action:*'],
               metadata: {},
             },
             read: {
-              // @ts-expect-error @elastic/elasticsearch PrivilegesActions doesn't declare application and name properties.
               application,
               name: 'read',
               actions: ['action:readAction1', 'action:readAction2'],
@@ -49,14 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           [application]: {
             read: {
-              // @ts-expect-error @elastic/elasticsearch PrivilegesActions doesn't declare application and name properties.
               application,
               name: 'read',
               actions: ['action:readAction1', 'action:readAction4'],
               metadata: {},
             },
             other: {
-              // @ts-expect-error @elastic/elasticsearch PrivilegesActions doesn't declare application and name properties.
               application,
               name: 'other',
               actions: ['action:otherAction1'],

@@ -907,7 +907,6 @@ describe('reindexService', () => {
       });
 
       it('starts reindex, saves taskId, and updates lastCompletedStep', async () => {
-        // @ts-expect-error not full interface
         clusterClient.asCurrentUser.reindex.mockResolvedValueOnce(asApiResponse({ task: 'xyz' }));
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
