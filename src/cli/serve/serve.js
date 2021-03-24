@@ -13,9 +13,11 @@ import { resolve } from 'path';
 import url from 'url';
 
 import { getConfigPath } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
-import { fromRoot } from '../../core/server/utils';
 import { readKeystore } from '../keystore/read_keystore';
+
+const fromRoot = (p) => resolve(REPO_ROOT, p);
 
 function canRequire(path) {
   try {
