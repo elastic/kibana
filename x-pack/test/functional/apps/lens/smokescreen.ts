@@ -160,6 +160,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionLabel('Test of label');
       await PageObjects.lens.editDimensionFormat('Percent');
       await PageObjects.lens.editDimensionColor('#ff0000');
+      await PageObjects.lens.openVisualOptions();
+
+      await PageObjects.lens.useCurvedLines();
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
@@ -232,7 +235,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await PageObjects.lens.toggleToolbarPopover('lnsValuesButton');
+      await PageObjects.lens.openVisualOptions();
       await testSubjects.click('lnsXY_valueLabels_inside');
 
       await PageObjects.lens.waitForVisualization();
