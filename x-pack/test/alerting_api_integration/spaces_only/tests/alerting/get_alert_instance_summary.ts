@@ -166,7 +166,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       );
 
       expect(response.status).to.eql(200);
-      expect(response.body.instances).to.eql({
+      expect(response.body.alerts).to.eql({
         '1': {
           status: 'OK',
           muted: true,
@@ -222,7 +222,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/_alert_summary`
       );
 
-      const actualInstances = response.body.instances;
+      const actualInstances = response.body.alerts;
       const expectedInstances = {
         instanceA: {
           status: 'Active',
