@@ -91,7 +91,7 @@ export const getNodes = async (
       };
     }
   } else {
-    nodes = await transformAndQueryData(client, snapshotRequest, source, logQueryFields);
+    nodes = await transformAndQueryData(client, snapshotRequest, source);
   }
 
   return nodes;
