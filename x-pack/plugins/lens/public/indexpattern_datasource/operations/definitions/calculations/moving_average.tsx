@@ -174,7 +174,11 @@ const MovingAveragePopup = () => {
     <HelpPopover
       anchorPosition="upCenter"
       button={
-        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+        >
           {i18n.translate('xpack.lens.indexPattern.movingAverage.helpText', {
             defaultMessage: 'How it works',
           })}
