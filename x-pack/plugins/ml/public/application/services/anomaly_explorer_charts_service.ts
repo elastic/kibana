@@ -29,7 +29,6 @@ import { CHART_TYPE, ChartType } from '../explorer/explorer_constants';
 import type { ChartRecord } from '../explorer/explorer_utils';
 import { RecordsForCriteria, ScheduledEventsByBucket } from './results_service/result_service_rx';
 import { isPopulatedObject } from '../../../common/util/object_utils';
-import type { ExplorerService } from '../explorer/explorer_dashboard_service';
 import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 import {
   ExplorerChartsData,
@@ -382,7 +381,6 @@ export class AnomalyExplorerChartsService {
   }
 
   public async getAnomalyData(
-    explorerService: ExplorerService | undefined,
     combinedJobRecords: Record<string, CombinedJob>,
     chartsContainerWidth: number,
     anomalyRecords: ChartRecord[] | undefined,
@@ -490,9 +488,6 @@ export class AnomalyExplorerChartsService {
       data.errorMessages = errorMessages;
     }
 
-    if (explorerService) {
-      explorerService.setCharts({ ...data });
-    }
     if (seriesConfigs.length === 0) {
       return data;
     }
@@ -851,9 +846,6 @@ export class AnomalyExplorerChartsService {
         if (mapData.length) {
           // push map data in if it's available
           data.seriesToPlot.push(...mapData);
-        }
-        if (explorerService) {
-          explorerService.setCharts({ ...data });
         }
         return Promise.resolve(data);
       })

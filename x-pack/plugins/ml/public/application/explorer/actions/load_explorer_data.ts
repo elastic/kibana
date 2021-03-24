@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 
 import { forkJoin, of, Observable, Subject, from } from 'rxjs';
-import { mergeMap, switchMap, tap } from 'rxjs/operators';
+import { mergeMap, switchMap, tap, map } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
 import { explorerService } from '../explorer_dashboard_service';
@@ -37,6 +37,7 @@ import { TimefilterContract } from '../../../../../../../src/plugins/data/public
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import { ExplorerChartsData } from '../explorer_charts/explorer_charts_container_service';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -218,41 +219,28 @@ const loadExplorerDataProvider = (
           // show the view-by loading indicator
           // and pass on the data we already fetched.
           tap(explorerService.setViewBySwimlaneLoading),
-          // Trigger a side-effect to update the charts.
-          tap(({ anomalyChartRecords, topFieldValues }) => {
-            if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
-              memoizedAnomalyDataChange(
-                lastRefresh,
-                explorerService,
-                combinedJobRecords,
-                swimlaneContainerWidth,
-                anomalyChartRecords,
-                timerange.earliestMs,
-                timerange.latestMs,
-                timefilter,
-                tableSeverity
-              );
-            } else {
-              memoizedAnomalyDataChange(
-                lastRefresh,
-                explorerService,
-                combinedJobRecords,
-                swimlaneContainerWidth,
-                [],
-                timerange.earliestMs,
-                timerange.latestMs,
-                timefilter,
-                tableSeverity
-              );
-            }
-          }),
-          // Load view-by swimlane data and filtered top influencers.
-          // mergeMap is used to have access to the already fetched data and act on it in arg #1.
-          // In arg #2 of mergeMap we combine the data and pass it on in the action format
-          // which can be consumed by explorerReducer() later on.
           mergeMap(
-            ({ anomalyChartRecords, influencers, overallState, topFieldValues }) =>
+            ({
+              anomalyChartRecords,
+              influencers,
+              overallState,
+              topFieldValues,
+              annotationsData,
+              tableData,
+            }) =>
               forkJoin({
+                anomalyChartsData: memoizedAnomalyDataChange(
+                  lastRefresh,
+                  combinedJobRecords,
+                  swimlaneContainerWidth,
+                  selectedCells !== undefined && Array.isArray(anomalyChartRecords)
+                    ? anomalyChartRecords
+                    : [],
+                  timerange.earliestMs,
+                  timerange.latestMs,
+                  timefilter,
+                  tableSeverity
+                ),
                 influencers:
                   (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
                   anomalyChartRecords !== undefined &&
@@ -284,24 +272,25 @@ const loadExplorerDataProvider = (
                   swimlaneContainerWidth,
                   influencersFilterQuery
                 ),
-              }),
-            (
-              { annotationsData, overallState, tableData },
-              { influencers, viewBySwimlaneState }
-            ): Partial<ExplorerState> => {
-              return {
-                annotations: annotationsData,
-                influencers: influencers as any,
-                loading: false,
-                viewBySwimlaneDataLoading: false,
-                overallSwimlaneData: overallState,
-                viewBySwimlaneData: viewBySwimlaneState as any,
-                tableData,
-                swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
-                  ? viewBySwimlaneState.cardinality
-                  : undefined,
-              };
-            }
+              }).pipe(
+                tap(({ anomalyChartsData }) => {
+                  explorerService.setCharts(anomalyChartsData as ExplorerChartsData);
+                }),
+                map(({ viewBySwimlaneState }) => {
+                  return {
+                    annotations: annotationsData,
+                    influencers: influencers as any,
+                    loading: false,
+                    viewBySwimlaneDataLoading: false,
+                    overallSwimlaneData: overallState,
+                    viewBySwimlaneData: viewBySwimlaneState as any,
+                    tableData,
+                    swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
+                      ? viewBySwimlaneState.cardinality
+                      : undefined,
+                  };
+                })
+              )
           )
         );
       })
