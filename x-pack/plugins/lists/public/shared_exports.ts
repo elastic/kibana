@@ -38,4 +38,4 @@ export {
   UseExceptionListItemsSuccess,
   UseExceptionListsSuccess,
 } from './exceptions/types';
-export { ExceptionBuilderComponent } from './exceptions/components/builder';
+export * as ExceptionBuilder from './exceptions/components/builder/index';

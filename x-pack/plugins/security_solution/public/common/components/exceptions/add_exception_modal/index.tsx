@@ -33,7 +33,7 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ExceptionListType,
-  ExceptionBuilderComponent,
+  ExceptionBuilder,
 } from '../../../../../public/shared_imports';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
@@ -398,7 +398,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              <ExceptionBuilderComponent
+              <ExceptionBuilder.ExceptionBuilderComponent
                 allowLargeValueLists={
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
                 }

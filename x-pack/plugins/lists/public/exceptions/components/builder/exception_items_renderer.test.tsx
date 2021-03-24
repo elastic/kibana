@@ -21,7 +21,7 @@ import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_mat
 import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
 import { getEmptyValue } from '../../../common/empty_value';
 
-import { ExceptionBuilderComponent } from './';
+import { ExceptionBuilderComponent } from './exception_items_renderer';
 
 const mockTheme = getMockTheme({
   eui: {
