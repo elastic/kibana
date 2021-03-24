@@ -8,35 +8,46 @@
 import React from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { I18nStart, ScopedHistory } from 'src/core/public';
-import { AppContextProvider, ContextValue } from './app_context';
-import { PageContent } from './components/page_content';
+import { AppContextProvider, ContextValue, useAppContext } from './app_context';
+import { ComingSoonPrompt } from './components/coming_soon_prompt';
+import { UpgradeAssistantTabs } from './components/tabs';
+import { Overview } from './components/overview';
 
 export interface AppDependencies extends ContextValue {
   i18n: I18nStart;
   history: ScopedHistory;
 }
 
-export const App = ({ history }: { history: ScopedHistory }) => {
+const App: React.FunctionComponent = () => {
+  const { isReadOnlyMode } = useAppContext();
+
+  // Read-only mode will be enabled up until the last minor before the next major release
+  if (isReadOnlyMode) {
+    return <ComingSoonPrompt />;
+  }
+
   return (
-    <Router history={history}>
-      <AppWithoutRouter />
-    </Router>
+    <Switch>
+      <Route exact path="/overview" component={Overview} />
+      <Route exact path="/es_deprecations/:tabName" component={UpgradeAssistantTabs} />
+      <Redirect from={`/`} to={`/overview`} />
+    </Switch>
   );
 };
 
-// Export this so we can test it with a different router.
-export const AppWithoutRouter = () => (
-  <Switch>
-    <Route exact path="/:tabName" component={PageContent} />
-    <Redirect from={`/`} to={`/overview`} />
-  </Switch>
-);
+export const AppWithRouter = ({ history }: { history: ScopedHistory }) => {
+  return (
+    <Router history={history}>
+      <App />
+    </Router>
+  );
+};
 
 export const RootComponent = ({ i18n, history, ...contextValue }: AppDependencies) => {
   return (
     <i18n.Context>
       <AppContextProvider value={contextValue}>
-        <App history={history} />
+        <AppWithRouter history={history} />
       </AppContextProvider>
     </i18n.Context>
   );

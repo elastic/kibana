@@ -35,13 +35,12 @@ export interface CheckupTabProps extends UpgradeAssistantTabProps {
  * nodes, or indices checkups.
  */
 export const DeprecationTab: FunctionComponent<CheckupTabProps> = ({
-  alertBanner,
   checkupLabel,
   deprecations,
   loadingError,
   isLoading,
   refreshCheckupData,
-  setSelectedTabIndex,
+  navigateToOverviewPage,
   showBackupWarning = false,
 }) => {
   const [currentFilter, setCurrentFilter] = useState<LevelFilterOption>(LevelFilterOption.all);
@@ -108,13 +107,6 @@ export const DeprecationTab: FunctionComponent<CheckupTabProps> = ({
 
       <EuiSpacer />
 
-      {alertBanner && (
-        <>
-          {alertBanner}
-          <EuiSpacer />
-        </>
-      )}
-
       {showBackupWarning && (
         <>
           <EuiCallOut
@@ -133,11 +125,7 @@ export const DeprecationTab: FunctionComponent<CheckupTabProps> = ({
                 defaultMessage="Back up your data using the {snapshotRestoreDocsButton}."
                 values={{
                   snapshotRestoreDocsButton: (
-                    <EuiLink
-                      href={`${esDocBasePath}/snapshot-restore.html`}
-                      target="_blank"
-                      external
-                    >
+                    <EuiLink href={`${esDocBasePath}/snapshot-restore.html`} target="_blank">
                       <FormattedMessage
                         id="xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.snapshotRestoreDocsButtonLabel"
                         defaultMessage="snapshot and restore APIs"
@@ -201,10 +189,10 @@ export const DeprecationTab: FunctionComponent<CheckupTabProps> = ({
                       defaultMessage="Check the {overviewTabButton} for next steps."
                       values={{
                         overviewTabButton: (
-                          <EuiLink onClick={() => setSelectedTabIndex(0)}>
+                          <EuiLink onClick={navigateToOverviewPage}>
                             <FormattedMessage
                               id="xpack.upgradeAssistant.checkupTab.noIssues.nextStepsDetail.overviewTabButtonLabel"
-                              defaultMessage="Overview tab"
+                              defaultMessage="Overview page"
                             />
                           </EuiLink>
                         ),

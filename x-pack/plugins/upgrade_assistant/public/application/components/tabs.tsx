@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
-  EuiEmptyPrompt,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiButtonEmpty,
+  EuiPageBody,
+  EuiPageHeader,
   EuiTabbedContent,
   EuiTabbedContentTab,
+  EuiPageContent,
+  EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
-import { LatestMinorBanner } from './latest_minor_banner';
 import { DeprecationTab } from './es_deprecations';
-import { OverviewTab } from './overview';
-import { TelemetryState, UpgradeAssistantTabProps, Tabs } from './types';
+import { UpgradeAssistantTabProps, Tabs } from './types';
 import { useAppContext } from '../app_context';
 
 interface MatchParams {
@@ -35,32 +34,25 @@ export const UpgradeAssistantTabs = withRouter(
     },
     history,
   }: RouteComponentProps<MatchParams>) => {
-    const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-    const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
+    // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
     const { api } = useAppContext();
 
     const { data: checkupData, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
+
+    const onTabClick = (selectedTab: EuiTabbedContentTab) => {
+      history.push(`/es_deprecations/${selectedTab.id}`);
+    };
 
     const tabs = useMemo(() => {
       const commonTabProps: UpgradeAssistantTabProps = {
         loadingError: error,
         isLoading,
         refreshCheckupData: resendRequest,
-        setSelectedTabIndex,
-        // Remove this in last minor of the current major (e.g., 7.15)
-        alertBanner: <LatestMinorBanner />,
+        navigateToOverviewPage: () => history.push('/overview'),
       };
 
       return [
-        {
-          id: 'overview',
-          'data-test-subj': 'upgradeAssistantOverviewTab',
-          name: i18n.translate('xpack.upgradeAssistant.overviewTab.overviewTabTitle', {
-            defaultMessage: 'Overview',
-          }),
-          content: <OverviewTab checkupData={checkupData} {...commonTabProps} />,
-        },
         {
           id: 'cluster',
           'data-test-subj': 'upgradeAssistantClusterTab',
@@ -97,93 +89,53 @@ export const UpgradeAssistantTabs = withRouter(
           ),
         },
       ];
-    }, [checkupData, error, isLoading, resendRequest]);
+    }, [checkupData, error, history, isLoading, resendRequest]);
 
-    useEffect(() => {
-      if (isLoading === false) {
-        setTelemetryState(TelemetryState.Running);
+    // useEffect(() => {
+    //   if (isLoading === false) {
+    //     setTelemetryState(TelemetryState.Running);
 
-        async function sendTelemetryData() {
-          await api.sendTelemetryData({
-            [tabName]: true,
-          });
-          setTelemetryState(TelemetryState.Complete);
-        }
+    //     async function sendTelemetryData() {
+    //       await api.sendTelemetryData({
+    //         [tabName]: true,
+    //       });
+    //       setTelemetryState(TelemetryState.Complete);
+    //     }
 
-        sendTelemetryData();
-      }
-    }, [api, selectedTabIndex, tabName, isLoading]);
-
-    const onTabClick = (selectedTab: EuiTabbedContentTab) => {
-      history.push(`/${selectedTab.id}`);
-    };
-
-    if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === false) {
-      return (
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <EuiEmptyPrompt
-              iconType="logoElasticsearch"
-              data-test-subj="partiallyUpgradedPrompt"
-              title={
-                <h2>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingTitle"
-                    defaultMessage="Your cluster is upgrading"
-                  />
-                </h2>
-              }
-              body={
-                <p>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradingDescription"
-                    defaultMessage="One or more Elasticsearch nodes have a newer version of
-                      Elasticsearch than Kibana. Once all your nodes are upgraded, upgrade Kibana."
-                  />
-                </p>
-              }
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      );
-    } else if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === true) {
-      return (
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <EuiEmptyPrompt
-              iconType="logoElasticsearch"
-              data-test-subj="upgradedPrompt"
-              title={
-                <h2>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteTitle"
-                    defaultMessage="Your cluster has been upgraded"
-                  />
-                </h2>
-              }
-              body={
-                <p>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.tabs.upgradingInterstitial.upgradeCompleteDescription"
-                    defaultMessage="All Elasticsearch nodes have been upgraded. You may now upgrade Kibana."
-                  />
-                </p>
-              }
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      );
-    }
+    //     sendTelemetryData();
+    //   }
+    // }, [api, selectedTabIndex, tabName, isLoading]);
 
     return (
-      <EuiTabbedContent
-        data-test-subj={
-          telemetryState === TelemetryState.Running ? 'upgradeAssistantTelemetryRunning' : undefined
-        }
-        tabs={tabs}
-        onTabClick={onTabClick}
-        selectedTab={tabs.find((tab) => tab.id === tabName)}
-      />
+      <EuiPageBody>
+        <EuiPageContent>
+          <EuiPageHeader
+            pageTitle="Elasticsearch"
+            rightSideItems={[
+              <EuiButtonEmpty
+                // TODO add doc link
+                href={'#'}
+                target="_blank"
+                iconType="help"
+                data-test-subj="documentationLink"
+              >
+                Documentation
+              </EuiButtonEmpty>,
+            ]}
+          />
+
+          <EuiPageContentBody>
+            <EuiTabbedContent
+              // data-test-subj={
+              //   telemetryState === TelemetryState.Running ? 'upgradeAssistantTelemetryRunning' : undefined
+              // }
+              tabs={tabs}
+              onTabClick={onTabClick}
+              selectedTab={tabs.find((tab) => tab.id === tabName)}
+            />
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
     );
   }
 );

@@ -8,67 +8,105 @@
 import React, { FunctionComponent } from 'react';
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPageContent,
   EuiPageContentBody,
-  EuiSpacer,
   EuiText,
+  EuiPageHeader,
+  EuiPageBody,
+  EuiButtonEmpty,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
+import { RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
-import { LoadingErrorBanner } from '../error_banner';
-import { UpgradeAssistantTabProps } from '../types';
-import { Steps } from './steps';
+import { LatestMinorBanner } from '../latest_minor_banner';
+import { ESDeprecationStats } from './es_stats';
 
-export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) => {
+const i18nTexts = {
+  pageTitle: i18n.translate('xpack.upgradeAssistant.pageTitle', {
+    defaultMessage: 'Upgrade Assistant',
+  }),
+  pageDescription: (nextMajor: string) =>
+    i18n.translate('xpack.upgradeAssistant.pageDescription', {
+      defaultMessage:
+        'This assistant helps you prepare your cluster and indices for Elasticsearch {nextMajor} For other issues that need your attention, see the Elasticsearch logs.',
+      values: {
+        nextMajor,
+      },
+    }),
+  docLink: i18n.translate('xpack.upgradeAssistant.documentationLinkText', {
+    defaultMessage: 'Upgrade Assistant docs',
+  }),
+};
+
+interface Props {
+  history: RouteComponentProps['history'];
+}
+
+export const Overview: FunctionComponent<Props> = ({ history }) => {
+  // TODO
+  // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
+
   const { kibanaVersionInfo } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
+  // useEffect(() => {
+  //   if (isLoading === false) {
+  //     setTelemetryState(TelemetryState.Running);
+
+  //     async function sendTelemetryData() {
+  //       await api.sendTelemetryData({
+  //         overview: true,
+  //       });
+  //       setTelemetryState(TelemetryState.Complete);
+  //     }
+
+  //     sendTelemetryData();
+  //   }
+  // }, [api, isLoading]);
+
   return (
-    <>
-      <EuiSpacer />
-
-      <EuiText data-test-subj="upgradeAssistantOverviewTabDetail" grow={false}>
-        <p>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.overviewTab.tabDetail"
-            defaultMessage="This assistant helps you prepare your cluster and indices for Elasticsearch
-           {nextEsVersion} For other issues that need your attention, see the Elasticsearch logs."
-            values={{
-              nextEsVersion: `${nextMajor}.x`,
-            }}
-          />
-        </p>
-      </EuiText>
-
-      <EuiSpacer />
-
-      {props.alertBanner && (
-        <>
-          {props.alertBanner}
-
-          <EuiSpacer />
-        </>
-      )}
-
+    <EuiPageBody>
       <EuiPageContent>
+        <EuiPageHeader
+          pageTitle={i18nTexts.pageTitle}
+          rightSideItems={[
+            <EuiButtonEmpty
+              // TODO add doc link
+              href={'#'}
+              target="_blank"
+              iconType="help"
+              data-test-subj="documentationLink"
+            >
+              {i18nTexts.docLink}
+            </EuiButtonEmpty>,
+          ]}
+        />
+
         <EuiPageContentBody>
-          {props.isLoading && (
-            <EuiFlexGroup justifyContent="center">
+          <>
+            <EuiText data-test-subj="overviewDetail" grow={false}>
+              <p>{i18nTexts.pageDescription(`${nextMajor}.x`)}</p>
+            </EuiText>
+
+            <EuiSpacer />
+
+            {/* Remove this in last minor of the current major (e.g., 7.15) */}
+            <LatestMinorBanner />
+
+            <EuiSpacer size="xl" />
+
+            <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner />
+                <ESDeprecationStats history={history} />
               </EuiFlexItem>
             </EuiFlexGroup>
-          )}
-
-          {props.checkupData && <Steps {...props} />}
-
-          {props.loadingError && <LoadingErrorBanner loadingError={props.loadingError} />}
+          </>
         </EuiPageContentBody>
       </EuiPageContent>
-    </>
+    </EuiPageBody>
   );
 };

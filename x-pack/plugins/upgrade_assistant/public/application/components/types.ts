@@ -17,7 +17,7 @@ export interface UpgradeAssistantTabProps {
   refreshCheckupData: () => void;
   loadingError: ResponseError | null;
   isLoading: boolean;
-  setSelectedTabIndex: (tabIndex: number) => void;
+  navigateToOverviewPage: () => void;
 }
 
 // eslint-disable-next-line react/prefer-stateless-function
