@@ -102,6 +102,8 @@ class ScreenshotModeServiceSetup implements IScreenshotModeServiceSetup {
 }
 ```
 
+There can be a URL parameter which triggers screenshot mode to be enabled, for easier testing.
+
 This works because the headless browser that opens the page can inject custom
 headers into the request. Teams can test how their app renders when loaded with
 this header using a new configuration setting, or a web debugging proxy, or
