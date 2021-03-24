@@ -496,6 +496,15 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
     };
   }, []);
 
+  const refreshFieldList = useCallback(async () => {
+    const newlyMappedIndexPattern = await loadIndexPatterns({
+      indexPatternsService: data.indexPatterns,
+      cache: {},
+      patterns: [currentIndexPattern.id],
+    });
+    onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+  }, [data, currentIndexPattern, onUpdateIndexPattern]);
+
   const editField = useMemo(
     () =>
       editPermission
@@ -509,18 +518,39 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               fieldName,
               onSave: async () => {
                 trackUiEvent(`save_field_${uiAction}`);
-
-                const newlyMappedIndexPattern = await loadIndexPatterns({
-                  indexPatternsService: data.indexPatterns,
-                  cache: {},
-                  patterns: [currentIndexPattern.id],
-                });
-                onUpdateIndexPattern(newlyMappedIndexPattern[currentIndexPattern.id]);
+                await refreshFieldList();
               },
             });
           }
         : undefined,
-    [data, indexPatternFieldEditor, currentIndexPattern, editPermission, onUpdateIndexPattern]
+    [data, indexPatternFieldEditor, currentIndexPattern, editPermission, refreshFieldList]
+  );
+
+  const removeField = useMemo(
+    () =>
+      editPermission
+        ? async (fieldName: string) => {
+            trackUiEvent('open_field_delete_modal');
+            const indexPatternInstance = await data.indexPatterns.get(currentIndexPattern.id);
+            closeFieldEditor.current = indexPatternFieldEditor.openDeleteModal({
+              ctx: {
+                indexPattern: indexPatternInstance,
+              },
+              fieldName,
+              onDelete: async () => {
+                trackUiEvent('delete_field');
+                await refreshFieldList();
+              },
+            });
+          }
+        : undefined,
+    [
+      currentIndexPattern.id,
+      data.indexPatterns,
+      editPermission,
+      indexPatternFieldEditor,
+      refreshFieldList,
+    ]
   );
 
   const addField = useMemo(
@@ -766,6 +796,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             dropOntoWorkspace={dropOntoWorkspace}
             hasSuggestionForField={hasSuggestionForField}
             editField={editField}
+            removeField={removeField}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
