@@ -24,6 +24,7 @@ import {
   HorizontalAlignment,
   ElementClickListener,
   BrushEndListener,
+  CurveType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -180,7 +181,8 @@ export const xyChart: ExpressionFunctionDefinition<
       multi: true,
     },
     curveType: {
-      types: ['number'],
+      types: ['string'],
+      options: ['LINEAR', 'CURVE_MONOTONE_X'],
       help: i18n.translate('xpack.lens.xyChart.curveType.help', {
         defaultMessage: 'Define how curve type is rendered for a line chart',
       }),
@@ -793,7 +795,7 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={getFitOptions(fittingFunction)}
-                  curve={curveType}
+                  curve={CurveType[curveType || 'LINEAR']}
                 />
               );
             case 'bar':
@@ -822,7 +824,7 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
-                  curve={curveType}
+                  curve={CurveType[curveType || 'LINEAR']}
                 />
               );
             case 'area':
@@ -831,7 +833,7 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={getFitOptions(fittingFunction)}
-                  curve={curveType}
+                  curve={CurveType[curveType || 'LINEAR']}
                 />
               );
             default:

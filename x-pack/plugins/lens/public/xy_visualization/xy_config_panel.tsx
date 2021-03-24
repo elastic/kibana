@@ -38,7 +38,7 @@ import { getAxesConfiguration } from './axes_configuration';
 import { PalettePicker } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getSortedAccessors } from './to_expression';
-import { VisualOptionsPopover } from '../shared_components/visual_options_popover/visual_options_popover';
+import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;

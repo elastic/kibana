@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ToolbarPopover } from '../toolbar_popover';
+import { ToolbarPopover } from '../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
-import { XYState } from '../..';
-import { hasHistogramSeries } from '../../xy_visualization/state_helpers';
-import { ValidLayer } from '../../xy_visualization/types';
-import { TooltipWrapper } from '../../xy_visualization/tooltip_wrapper';
+import { XYState } from '../types';
+import { hasHistogramSeries } from '../state_helpers';
+import { ValidLayer } from '../types';
+import { TooltipWrapper } from '../tooltip_wrapper';
 import { FramePublicAPI } from '../../types';
 
 function getValueLabelDisableReason({

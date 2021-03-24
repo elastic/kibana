@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CurveType } from '@elastic/charts';
 import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { XYCurveType } from '../types';
 
 export interface LineCurveOptionProps {
   /**
    * Currently selected value
    */
-  value?: CurveType;
+  value?: XYCurveType;
   /**
    * Callback on display option change
    */
-  onChange: (id: CurveType) => void;
+  onChange: (id: XYCurveType) => void;
   isCurveTypeEnabled?: boolean;
 }
 
@@ -38,13 +38,13 @@ export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
         <EuiSwitch
           showLabel={false}
           label="Curved"
-          checked={value === CurveType.CURVE_MONOTONE_X}
+          checked={value === 'CURVE_MONOTONE_X'}
           compressed={true}
           onChange={(e) => {
             if (e.target.checked) {
-              onChange(CurveType.CURVE_MONOTONE_X);
+              onChange('CURVE_MONOTONE_X');
             } else {
-              onChange(CurveType.LINEAR);
+              onChange('LINEAR');
             }
           }}
           data-test-subj="lnsCurveStyleToggle"

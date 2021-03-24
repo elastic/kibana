@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CurveType, Position } from '@elastic/charts';
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { ArgumentType, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
@@ -413,8 +413,10 @@ export interface XYArgs {
   };
   tickLabelsVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
   gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
-  curveType?: CurveType;
+  curveType?: XYCurveType;
 }
+
+export type XYCurveType = 'LINEAR' | 'CURVE_MONOTONE_X';
 
 // Persisted parts of the state
 export interface XYState {
@@ -429,7 +431,7 @@ export interface XYState {
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
-  curveType?: CurveType;
+  curveType?: XYCurveType;
 }
 
 export type State = XYState;

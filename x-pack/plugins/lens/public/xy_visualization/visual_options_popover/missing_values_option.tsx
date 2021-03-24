@@ -8,11 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, EuiIconTip, EuiSuperSelect, EuiText } from '@elastic/eui';
-import {
-  FittingFunction,
-  fittingFunctionDefinitions,
-} from '../../xy_visualization/fitting_functions';
-import { ValueLabelConfig } from '../..';
+import { FittingFunction, fittingFunctionDefinitions } from '../fitting_functions';
+import { ValueLabelConfig } from '../types';
 
 export interface MissingValuesOptionProps {
   valueLabels?: ValueLabelConfig;
@@ -59,7 +56,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
 
   return (
     <>
-      {isValueLabelsEnabled ? (
+      {isValueLabelsEnabled && (
         <EuiFormRow
           display="columnCompressed"
           label={
@@ -88,8 +85,8 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
             }}
           />
         </EuiFormRow>
-      ) : null}
-      {isFittingEnabled ? (
+      )}
+      {isFittingEnabled && (
         <EuiFormRow
           display="columnCompressed"
           label={
@@ -135,7 +132,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
             hasDividers
           />
         </EuiFormRow>
-      ) : null}
+      )}
     </>
   );
 };
