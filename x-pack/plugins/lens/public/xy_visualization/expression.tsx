@@ -508,7 +508,7 @@ export function XYChart({
     if (!xAxisColumn || !isHistogramViz) {
       return;
     }
-
+    console.dir(data);
     const table = data.tables[filteredLayers[0].layerId];
 
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === filteredLayers[0].xAccessor);

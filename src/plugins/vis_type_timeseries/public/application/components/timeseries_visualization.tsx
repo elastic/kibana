@@ -18,7 +18,8 @@ import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
 import { TimeseriesVisParams } from '../../types';
 import { getDataStart } from '../../services';
-import { TimeseriesVisData } from '../../../common/types';
+import { TimeseriesVisData, PanelData } from '../../../common/types';
+import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
 
 interface TimeseriesVisualizationProps {
   className?: string;
@@ -42,34 +43,17 @@ function TimeseriesVisualization({
   palettesService,
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
-    async (gte: string, lte: string, table: any) => {
+    async (gte: string, lte: string, series: PanelData[]) => {
       const indexPattern = await getDataStart().indexPatterns.find(
         model.index_pattern ?? model.default_index_pattern
       );
-      const columns = table.columns.map((column) => {
-        const field = indexPattern[0].getFieldByName(column.name);
-        const cleanedColumn = {
-          id: column.id,
-          name: column.name,
-          meta: {
-            type: field?.spec.type || 'number',
-            field: column.name,
-            index: model.index_pattern ?? model.default_index_pattern,
-            source: 'esaggs',
-            sourceParams: {
-              enabled: true,
-              indexPatternId: indexPattern[0]?.id,
-              type: 'date_histogram',
-            },
-          },
-        };
-        return cleanedColumn;
-      });
-      const newTable = { ...table, columns };
+      const tables = convertSeriesToDataTable(model, series, indexPattern);
+      const table = tables[model.series[0].id];
+
       const range: [number, number] = [parseInt(gte, 10), parseInt(lte, 10)];
       const event = {
         data: {
-          table: newTable,
+          table,
           column: 0,
           range,
           timeFieldName: model.time_field ?? model.default_timefield,
@@ -77,24 +61,8 @@ function TimeseriesVisualization({
         name: 'brush',
       };
       handlers.event(event);
-      // handlers.event({
-      //   name: 'brush',
-      //   data: {
-      //     timeFieldName: '*',
-      //     filters: [
-      //       {
-      //         range: {
-      //           '*': {
-      //             gte,
-      //             lte,
-      //           },
-      //         },
-      //       },
-      //     ],
-      //   },
-      // });
     },
-    [handlers]
+    [handlers, model]
   );
 
   const handleUiState = useCallback(

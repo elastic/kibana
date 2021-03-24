@@ -29,6 +29,9 @@ export interface PanelData {
   id: string;
   label: string;
   data: Array<[number, number]>;
+  seriesId: string;
+  splitByLabel: string;
+  isSplitByTerms: boolean;
 }
 
 // series data is not fully typed yet
