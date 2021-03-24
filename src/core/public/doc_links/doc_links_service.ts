@@ -108,7 +108,9 @@ export class DocLinksService {
           sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
           top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
         },
-        runtimeFields: `${ELASTICSEARCH_DOCS}runtime.html`,
+        runtimeFields: {
+          mapping: `${ELASTICSEARCH_DOCS}runtime-mapping-fields.html`,
+        },
         scriptedFields: {
           scriptFields: `${ELASTICSEARCH_DOCS}search-request-script-fields.html`,
           scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html`,
@@ -379,7 +381,9 @@ export interface DocLinksStart {
       readonly sum: string;
       readonly top_hits: string;
     };
-    readonly runtimeFields: string;
+    readonly runtimeFields: {
+      readonly mapping: string;
+    };
     readonly scriptedFields: {
       readonly scriptFields: string;
       readonly scriptAggs: string;
