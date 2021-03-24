@@ -10,7 +10,7 @@ import Path from 'path';
 import Url from 'url';
 
 import { RunWithCommands, createFlagError, Flags } from '@kbn/dev-utils';
-import { KbnClient } from '@kbn/test';
+import { KbnClient } from './kbn_client';
 
 import { readConfigFile } from './functional_test_runner';
 
