@@ -177,7 +177,9 @@ describe('LogRetentionLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('saveLogRetention', () => {
       beforeEach(() => {
         mount();
@@ -264,6 +266,37 @@ describe('LogRetentionLogic', () => {
           LogRetentionOptions.Analytics
         );
       });
+
+      it('will call saveLogRetention if NOT already enabled', () => {
+        mount({
+          logRetention: {
+            [LogRetentionOptions.Analytics]: {
+              enabled: false,
+            },
+          },
+        });
+        jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
+
+        LogRetentionLogic.actions.toggleLogRetention(LogRetentionOptions.Analytics);
+
+        expect(LogRetentionLogic.actions.saveLogRetention).toHaveBeenCalledWith(
+          LogRetentionOptions.Analytics,
+          true
+        );
+      });
+
+      it('will do nothing if logRetention option is not yet set', () => {
+        mount({
+          logRetention: {},
+        });
+        jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
+        jest.spyOn(LogRetentionLogic.actions, 'setOpenedModal');
+
+        LogRetentionLogic.actions.toggleLogRetention(LogRetentionOptions.API);
+
+        expect(LogRetentionLogic.actions.saveLogRetention).not.toHaveBeenCalled();
+        expect(LogRetentionLogic.actions.setOpenedModal).not.toHaveBeenCalled();
+      });
     });
 
     describe('fetchLogRetention', () => {
@@ -305,37 +338,6 @@ describe('LogRetentionLogic', () => {
 
         expect(http.get).not.toHaveBeenCalled();
       });
-    });
-
-    it('will call saveLogRetention if NOT already enabled', () => {
-      mount({
-        logRetention: {
-          [LogRetentionOptions.Analytics]: {
-            enabled: false,
-          },
-        },
-      });
-      jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
-
-      LogRetentionLogic.actions.toggleLogRetention(LogRetentionOptions.Analytics);
-
-      expect(LogRetentionLogic.actions.saveLogRetention).toHaveBeenCalledWith(
-        LogRetentionOptions.Analytics,
-        true
-      );
-    });
-
-    it('will do nothing if logRetention option is not yet set', () => {
-      mount({
-        logRetention: {},
-      });
-      jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
-      jest.spyOn(LogRetentionLogic.actions, 'setOpenedModal');
-
-      LogRetentionLogic.actions.toggleLogRetention(LogRetentionOptions.API);
-
-      expect(LogRetentionLogic.actions.saveLogRetention).not.toHaveBeenCalled();
-      expect(LogRetentionLogic.actions.setOpenedModal).not.toHaveBeenCalled();
     });
   });
 });
