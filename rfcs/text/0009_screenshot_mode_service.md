@@ -34,15 +34,6 @@ other plugins (UI code) to make choices when the page is rendering for a screens
 More background on how Reporting currently works, including the lifecycle of
 creating a PNG report, is here: https://github.com/elastic/kibana/issues/59396
 
-# Basic example
-
-When Kibana loads initially, there is a Newsfeed plugin in the UI that
-checks internally cached records to see if it must fetch the Elastic News
-Service for newer items. When the Screenshot Mode Service is implemented, the
-Newsfeed component has a source of information to check on whether or not it
-should load in the Kibana UI. If it can avoid loading, it avoids an unnecessary
-HTTP round trip, which weigh heavily on performance.
-
 # Motivation
 
 The Reporting team wants all applications to support a customized URLs, such as
@@ -104,6 +95,15 @@ into the request. Teams should be able to test how their app renders when
 loaded with this header. They could use a web debugging proxy, or perhaps the
 new service should support a URL parameter which triggers screenshot mode to be
 enabled, for easier testing.
+
+# Basic example
+
+When Kibana loads initially, there is a Newsfeed plugin in the UI that
+checks internally cached records to see if it must fetch the Elastic News
+Service for newer items. When the Screenshot Mode Service is implemented, the
+Newsfeed component has a source of information to check on whether or not it
+should load in the Kibana UI. If it can avoid loading, it avoids an unnecessary
+HTTP round trip, which weigh heavily on performance.
 
 # Alternatives
 
