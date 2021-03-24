@@ -6,29 +6,26 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test/jest';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
 import { EuiSwitch } from '@elastic/eui';
 import { LineCurveOption } from './line_curve_option';
-import { CurveType } from '@elastic/charts';
 
 describe('Line curve option', () => {
   it('should show currently selected line curve option', () => {
-    const component = shallow(
-      <LineCurveOption onChange={jest.fn()} value={CurveType.CURVE_MONOTONE_X} />
-    );
+    const component = shallow(<LineCurveOption onChange={jest.fn()} value={'CURVE_MONOTONE_X'} />);
 
     expect(component.find(EuiSwitch).prop('checked')).toEqual(true);
   });
 
-  it('should show currently curving diabled', () => {
-    const component = shallow(<LineCurveOption onChange={jest.fn()} value={CurveType.LINEAR} />);
+  it('should show currently curving disabled', () => {
+    const component = shallow(<LineCurveOption onChange={jest.fn()} value={'LINEAR'} />);
 
     expect(component.find(EuiSwitch).prop('checked')).toEqual(false);
   });
 
   it('should show curving option when enabled', () => {
     const component = mount(
-      <LineCurveOption onChange={jest.fn()} value={CurveType.LINEAR} isCurveTypeEnabled={true} />
+      <LineCurveOption onChange={jest.fn()} value={'LINEAR'} isCurveTypeEnabled={true} />
     );
 
     expect(component.exists('[data-test-subj="lnsCurveStyleToggle"]')).toEqual(true);
@@ -36,7 +33,7 @@ describe('Line curve option', () => {
 
   it('should hide curve option when disabled', () => {
     const component = mount(
-      <LineCurveOption onChange={jest.fn()} value={CurveType.LINEAR} isCurveTypeEnabled={false} />
+      <LineCurveOption onChange={jest.fn()} value={'LINEAR'} isCurveTypeEnabled={false} />
     );
 
     expect(component.exists('[data-test-subj="lnsCurveStyleToggle"]')).toEqual(false);
