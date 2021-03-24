@@ -1858,9 +1858,13 @@ export class SavedObjectsRepository {
     const {
       body,
       statusCode,
-    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(esOptions, {
-      ignore: [404],
-    });
+    } = await this.client.openPointInTime<SavedObjectsOpenPointInTimeResponse>(
+      // @ts-expect-error @elastic/elasticsearch OpenPointInTimeRequest.index expected to accept string[]
+      esOptions,
+      {
+        ignore: [404],
+      }
+    );
     if (statusCode === 404) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError();
     }
@@ -1916,7 +1920,6 @@ export class SavedObjectsRepository {
       body: { id },
     });
 
-    // @ts-expect-error no typings in @elastic/elaticsearch
     return body;
   }
 

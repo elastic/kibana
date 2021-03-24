@@ -377,7 +377,7 @@ async function reindex(
     await new Promise((r) => setTimeout(r, pollInterval));
 
     const { body } = await client.tasks.get({
-      task_id: task,
+      task_id: String(task),
     });
 
     // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't contain `error` property

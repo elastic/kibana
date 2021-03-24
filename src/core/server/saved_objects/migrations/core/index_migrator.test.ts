@@ -441,7 +441,6 @@ function withIndex(
     })
   );
   client.reindex.mockReturnValue(
-    // @ts-expect-error
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       task: 'zeid',
       _shards: { successful: 1, total: 1 },

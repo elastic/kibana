@@ -365,7 +365,6 @@ const mockV2MigrationOptions = () => {
     elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
   );
   options.client.reindex.mockReturnValue(
-    // @ts-expect-error
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       taskId: 'reindex_task_id',
     } as estypes.ReindexResponse)

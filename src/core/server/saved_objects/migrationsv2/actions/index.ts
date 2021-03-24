@@ -362,7 +362,7 @@ export const pickupUpdatedMappings = (
       wait_for_completion: false,
     })
     .then(({ body: { task: taskId } }) => {
-      return Either.right({ taskId: taskId! });
+      return Either.right({ taskId: String(taskId!) });
     })
     .catch(catchRetryableEsClientErrors);
 };
@@ -418,7 +418,7 @@ export const reindex = (
       wait_for_completion: false,
     })
     .then(({ body: { task: taskId } }) => {
-      return Either.right({ taskId });
+      return Either.right({ taskId: String(taskId) });
     })
     .catch(catchRetryableEsClientErrors);
 };
