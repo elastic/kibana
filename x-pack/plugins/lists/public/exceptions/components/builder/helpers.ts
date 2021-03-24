@@ -93,6 +93,7 @@ export const filterExceptionItems = (
       if (exceptionListItemSchema.is(item)) {
         return [...acc, item];
       } else if (createExceptionListItemSchema.is(item)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { meta: _, ...rest } = item;
         const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
         return [...acc, itemSansMetaId];
