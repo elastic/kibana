@@ -2625,6 +2625,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/crypto@link:packages/kbn-crypto":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dev-utils@link:packages/kbn-dev-utils":
   version "0.0.0"
   uid ""

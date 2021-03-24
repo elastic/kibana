@@ -7,9 +7,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { constants as cryptoConstants } from 'crypto';
 import { readFileSync } from 'fs';
-import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 
 const protocolMap = new Map<string, number>([
   ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],

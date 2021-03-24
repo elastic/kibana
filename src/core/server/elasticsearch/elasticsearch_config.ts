@@ -7,10 +7,10 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
-import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 import { ServiceConfigDescriptor } from '../internal_types';
 import { getReservedHeaders } from './default_headers';
 
