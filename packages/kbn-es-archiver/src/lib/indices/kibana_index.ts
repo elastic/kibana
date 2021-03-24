@@ -74,15 +74,17 @@ async function fetchKibanaIndices(client: Client) {
       headers: ES_CLIENT_HEADERS,
     }
   );
-  const isKibanaIndex = (index: string) =>
-    /^\.kibana(:?_\d*)?$/.test(index) ||
-    /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index);
+
+  const isKibanaIndex = (index: string | undefined) =>
+    typeof index === 'string' &&
+    (/^\.kibana(:?_\d*)?$/.test(index) ||
+      /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index));
 
   if (!Array.isArray(resp.body)) {
     throw new Error(`expected response to be an array ${inspect(resp.body)}`);
   }
 
-  return resp.body.map((x: { index: string }) => x.index).filter(isKibanaIndex);
+  return resp.body.map((x) => x.index).filter(isKibanaIndex);
 }
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));

@@ -66,7 +66,6 @@ export function createCreateIndexStream({
 
         await client.indices.create(
           {
-            method: 'PUT',
             index,
             body: {
               settings,
