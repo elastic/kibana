@@ -33,8 +33,8 @@ function canRequire(path) {
 const DEV_MODE_PATH = resolve(__dirname, '../../dev/cli_dev_mode');
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
-const getBootstrapScript = () => {
-  if (DEV_MODE_SUPPORTED && process.env.isDevCliChild !== 'true') {
+const getBootstrapScript = (isDev) => {
+  if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
     const { bootstrapDevMode } = require('../../dev/cli_dev_mode');
     return bootstrapDevMode;
   } else {
@@ -240,7 +240,7 @@ export default function (program) {
       cache: !!opts.cache,
       dist: !!opts.dist,
     };
-    const bootstrapScript = getBootstrapScript();
+    const bootstrapScript = getBootstrapScript(cliArgs.dev);
 
     await bootstrapScript({
       configs,
