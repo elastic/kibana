@@ -4,22 +4,20 @@
 
 # Summary
 
-Applications should be aware when their UI is rendered for purposes of
-capturing a screenshot. This ability would improve the quality of the Kibana
-Reporting feature for a few reasons:
- - Fewer objects in the headless browser memory since interactive code doesn't run
- - Fewer Reporting bugs in releases since App teams have more ownership and
-   control over the reportability of their UI
-
 Currently, the applications that support screenshot reports are:
  - Dashboard
  - Visualize Editor
  - Canvas
 
+Kibana UI code should be aware when the page is rendering for the purpose of
+capturing a screenshot. This ability would improve the quality of the Kibana
+Reporting feature for a few reasons:
+ - Fewer objects in the headless browser memory since interactive code doesn't run
+ - Fewer API requests made by the headless browser for features that don't apply in a non-interactive context
+
 **Screenshot mode service**
 
-Applications in Kibana should be aware of when their rendering is for a human
-user using the page interactively, and when it's not. At a high level, the application
+At a high level, the application
 can support that awareness through a customized URL for screenshot reports. Canvas
 demonstrates a great implementation of this today. However, Canvas has dependencies
 on other UI plugins, and can not control how they render or what type of network requests
@@ -28,11 +26,6 @@ a way to control themselves when the page is rendering for taking a screenshot.
 
 This RFC proposes a Screenshot Mode Service as a low-level plugin that allows
 other plugins (UI code) to make choices when the page is rendering for a screenshot.
-
-In most cases, the information coming from this service would help the UI code
-decide what should **not** be loaded: for example, the NewsFeed component and
-Telemetry code should not load itself when the page is rendering for
-screenshots.
 
 More background on how Reporting currently works, including the lifecycle of
 creating a PNG report, is here: https://github.com/elastic/kibana/issues/59396
@@ -48,34 +41,23 @@ HTTP round trip, which weigh heavily on performance.
 
 # Motivation
 
-Kibana Reporting is a commercial feature in Elastic and is highly capable of
-loading the application pages and converting them into a screenshot for PNG or
-PDF export. However, the way it works has downsides with performance,
-maintainability, and expanding it as a tool that can power higher-level
-features. The solution to those downsides is to have Kibana pages themselves
-become more capable at presenting themselves for screenshot capture reports.
-With the Screenshot Mode Service available, Reporting could drop the
-task that it currently has which hurt performance: wasted rendering that is
-replaced with custom styles that make the page "reportable."
+The Reporting-enabled applications should use the recommended practice of
+having a customized URL for Reporting, where UI features like navigation and
+auto-complete disabled. The customized reporting URLs can solve any rendering
+issue in a PDF or PNG, without needing extra CSS to be injected into the page.
 
-The technical advantage of having such as service also leads to making Kibana
-application pages "printable", in the sense that sending the page to a printer
-for a hard copy results in something more meaningful and specialized for paper
-than today's Kibana can guarantee. This isn't a big concern for Kibana since
-there isn't the expectation to improve printing Kibana, but that technical
-direction is appropriate for improving PDF report generation.
+However, many low-level plugins have been added to the UI over time. These run
+on every page and an application can not turn them off. Reporting performance
+is negatively affected by this type of code.
 
 # Detailed design
 
-The Screenshot Mode Service is a callable API available as dependency for
-Kibana applications.
+The plugin is low-level as it has no dependencies of its own, so other
+low-level plugins can depend on it.
 
-A method of the API tells the Application whether or not it should render
-itself to optimize for non-interactivity.
-
-In a future phase, the API might also tell the application more about the
-report, such as PDF page dimensions, or special layout types (print layout,
-etc).
+The Screenshot Mode Service is an entirely new plugin that has an API method
+that returns a Boolean.  The return value tells the plugin whether or not it
+should render itself to optimize for non-interactivity.
 
 ## Interface
 The `setupDeps.screenshotMode` object has a single purpose: tell a low-level
