@@ -34,6 +34,7 @@ export function SeriesChartTypes({
       onChange={onChange}
       value={seriesType}
       excludeChartTypes={['bar_percentage_stacked']}
+      label={'Chart types'}
     />
   );
 }
