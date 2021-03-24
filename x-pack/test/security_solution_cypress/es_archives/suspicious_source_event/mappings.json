@@ -10,7 +10,7 @@
       "siem-read-alias": {
       }
     },
-    "index": "threat-data-001",
+    "index": "suspicious-source-event-001",
     "mappings": {
       "properties": {
         "@timestamp": {

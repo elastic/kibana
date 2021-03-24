@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { JSON_VIEW_TAB } from '../screens/alerts_details';
+import { JSON_CONTENT, JSON_VIEW_TAB } from '../screens/alerts_details';
 
 export const openJsonView = () => {
   cy.get(JSON_VIEW_TAB).click();
+};
+
+export const scrollJsonViewToBottom = () => {
+  cy.get(JSON_CONTENT).click({ force: true });
+  cy.get(JSON_CONTENT).type('{pagedown}{pagedown}{pagedown}');
 };

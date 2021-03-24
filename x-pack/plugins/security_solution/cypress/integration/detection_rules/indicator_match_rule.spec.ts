@@ -6,7 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { indexPatterns, newThreatIndicatorRule } from '../../objects/rule';
+import { expectedExportedRule, indexPatterns, newThreatIndicatorRule } from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -16,7 +16,7 @@ import {
   ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
-import { JSON_CONTENT } from '../../screens/alerts_details';
+import { JSON_CONTENT, JSON_LINES } from '../../screens/alerts_details';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
@@ -61,7 +61,7 @@ import {
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
-import { openJsonView } from '../../tasks/alerts_details';
+import { openJsonView, scrollJsonViewToBottom } from '../../tasks/alerts_details';
 import {
   changeRowsPerPageTo300,
   duplicateFirstRule,
@@ -118,11 +118,11 @@ describe('indicator match', () => {
     before(() => {
       cleanKibana();
       esArchiverLoad('threat_indicator');
-      esArchiverLoad('threat_data');
+      esArchiverLoad('suspicious_source_event');
     });
     after(() => {
       esArchiverUnload('threat_indicator');
-      esArchiverUnload('threat_data');
+      esArchiverUnload('suspicious_source_event');
     });
 
     describe('Creating new indicator match rules', () => {
@@ -220,7 +220,7 @@ describe('indicator match', () => {
 
         it('Does NOT show invalidation text when there is a valid "index field" and a valid "indicator index field"', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMapping,
+            indexField: newThreatIndicatorRule.indicatorMappingField,
             indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
           });
           getDefineContinueButton().click();
@@ -239,7 +239,7 @@ describe('indicator match', () => {
 
         it('Shows invalidation text when there is a valid "index field" and an invalid "indicator index field"', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMapping,
+            indexField: newThreatIndicatorRule.indicatorMappingField,
             indicatorIndexField: 'non-existent-value',
             validColumns: 'indexField',
           });
@@ -249,7 +249,7 @@ describe('indicator match', () => {
 
         it('Deletes the first row when you have two rows. Both rows valid rows of "index fields" and valid "indicator index fields". The second row should become the first row', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMapping,
+            indexField: newThreatIndicatorRule.indicatorMappingField,
             indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
           });
           getIndicatorAndButton().click();
@@ -271,14 +271,14 @@ describe('indicator match', () => {
 
         it('Deletes the first row when you have two rows. Both rows have valid "index fields" and invalid "indicator index fields". The second row should become the first row', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMapping,
+            indexField: newThreatIndicatorRule.indicatorMappingField,
             indicatorIndexField: 'non-existent-value',
             validColumns: 'indexField',
           });
           getIndicatorAndButton().click();
           fillIndicatorMatchRow({
             rowNumber: 2,
-            indexField: newThreatIndicatorRule.indicatorMapping,
+            indexField: newThreatIndicatorRule.indicatorMappingField,
             indicatorIndexField: 'second-non-existent-value',
             validColumns: 'indexField',
           });
@@ -309,7 +309,7 @@ describe('indicator match', () => {
 
         it('Deletes the first row of data but not the UI elements and the text defaults back to the placeholder of Search', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMapping,
+            indexField: newThreatIndicatorRule.indicatorMappingField,
             indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
           });
           getIndicatorDeleteButton().click();
@@ -321,7 +321,7 @@ describe('indicator match', () => {
 
         it('Deletes the second row when you have three rows. The first row is valid data, the second row is invalid data, and the third row is valid data. Third row should shift up correctly', () => {
           fillIndicatorMatchRow({
-            indexField: newThreatIndicatorRule.indicatorMapping,
+            indexField: newThreatIndicatorRule.indicatorMappingField,
             indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
           });
           getIndicatorAndButton().click();
@@ -334,16 +334,22 @@ describe('indicator match', () => {
           getIndicatorAndButton().click();
           fillIndicatorMatchRow({
             rowNumber: 3,
-            indexField: newThreatIndicatorRule.indicatorMapping,
+            indexField: newThreatIndicatorRule.indicatorMappingField,
             indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
           });
           getIndicatorDeleteButton(2).click();
-          getIndicatorIndexComboField(1).should('text', newThreatIndicatorRule.indicatorMapping);
+          getIndicatorIndexComboField(1).should(
+            'text',
+            newThreatIndicatorRule.indicatorMappingField
+          );
           getIndicatorMappingComboField(1).should(
             'text',
             newThreatIndicatorRule.indicatorIndexField
           );
-          getIndicatorIndexComboField(2).should('text', newThreatIndicatorRule.indicatorMapping);
+          getIndicatorIndexComboField(2).should(
+            'text',
+            newThreatIndicatorRule.indicatorMappingField
+          );
           getIndicatorMappingComboField(2).should(
             'text',
             newThreatIndicatorRule.indicatorIndexField
@@ -361,11 +367,14 @@ describe('indicator match', () => {
           getIndicatorOrButton().click();
           fillIndicatorMatchRow({
             rowNumber: 2,
-            indexField: newThreatIndicatorRule.indicatorMapping,
+            indexField: newThreatIndicatorRule.indicatorMappingField,
             indicatorIndexField: newThreatIndicatorRule.indicatorIndexField,
           });
           getIndicatorDeleteButton().click();
-          getIndicatorIndexComboField().should('text', newThreatIndicatorRule.indicatorMapping);
+          getIndicatorIndexComboField().should(
+            'text',
+            newThreatIndicatorRule.indicatorMappingField
+          );
           getIndicatorMappingComboField().should(
             'text',
             newThreatIndicatorRule.indicatorIndexField
@@ -445,7 +454,7 @@ describe('indicator match', () => {
           );
           getDetails(INDICATOR_MAPPING).should(
             'have.text',
-            `${newThreatIndicatorRule.indicatorMapping} MATCHES ${newThreatIndicatorRule.indicatorIndexField}`
+            `${newThreatIndicatorRule.indicatorMappingField} MATCHES ${newThreatIndicatorRule.indicatorIndexField}`
           );
           getDetails(INDICATOR_INDEX_QUERY).should('have.text', '*:*');
         });
@@ -476,11 +485,41 @@ describe('indicator match', () => {
     });
 
     describe('Enrichment', () => {
+      const fieldSearch = 'threat.indicator.matched';
+      const fields = [
+        'threat.indicator.matched.atomic',
+        'threat.indicator.matched.type',
+        'threat.indicator.matched.field',
+      ];
+      const expectedFieldsText = [
+        newThreatIndicatorRule.atomic,
+        newThreatIndicatorRule.type,
+        newThreatIndicatorRule.indicatorMappingField,
+      ];
+
+      const expectedEnrichment = [
+        { line: 31, text: '  "threat": {' },
+        {
+          line: 32,
+          text:
+            '    "indicator": "{\\"first_seen\\":\\"2021-03-10T08:02:14.000Z\\",\\"file\\":{\\"size\\":80280,\\"pe\\":{},\\"type\\":\\"elf\\",\\"hash\\":{\\"sha256\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"tlsh\\":\\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\\",\\"ssdeep\\":\\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\\",\\"md5\\":\\"9b6c3518a91d23ed77504b5416bfb5b3\\"}},\\"type\\":\\"file\\",\\"matched\\":{\\"atomic\\":\\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\\",\\"field\\":\\"myhash.mysha256\\",\\"id\\":\\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\\",\\"index\\":\\"filebeat-7.12.0-2021.03.10-000001\\",\\"type\\":\\"file\\"}}"',
+        },
+        { line: 33, text: '  }' },
+      ];
+
       before(() => {
+        cleanKibana();
+        esArchiverLoad('threat_indicator');
+        esArchiverLoad('suspicious_source_event');
         loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
         goToManageAlertsDetectionRules();
         createCustomIndicatorRule(newThreatIndicatorRule);
         reload();
+      });
+
+      after(() => {
+        esArchiverUnload('threat_indicator');
+        esArchiverUnload('suspicious_source_event');
       });
 
       beforeEach(() => {
@@ -490,18 +529,6 @@ describe('indicator match', () => {
       });
 
       it('Displays matches on the timeline', () => {
-        const fieldSearch = 'threat.indicator.matched';
-        const fields = [
-          'threat.indicator.matched.atomic',
-          'threat.indicator.matched.type',
-          'threat.indicator.matched.field',
-        ];
-        const expectedFieldsText = [
-          newThreatIndicatorRule.atomic,
-          newThreatIndicatorRule.type,
-          newThreatIndicatorRule.indicatorMapping,
-        ];
-
         addsFieldsToTimeline(fieldSearch, fields);
 
         fields.forEach((field, index) => {
@@ -510,14 +537,15 @@ describe('indicator match', () => {
       });
 
       it('Displays enrichment on the JSON view', () => {
-        const expectedEnrichment = `"threat": {
-          "indicator": "{\"first_seen\":\"2021-03-10T08:02:14.000Z\",\"file\":{\"size\":80280,\"pe\":{},\"type\":\"elf\",\"hash\":{\"sha256\":\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\",\"tlsh\":\"6D7312E017B517CC1371A8353BED205E9128223972AE35302E97528DF957703BAB2DBE\",\"ssdeep\":\"1536:87vbq1lGAXSEYQjbChaAU2yU23M51DjZgSQAvcYkFtZTjzBht5:8D+CAXFYQChaAUk5ljnQssL\",\"md5\":\"9b6c3518a91d23ed77504b5416bfb5b3\"}},\"type\":\"file\",\"matched\":{\"atomic\":\"a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3\",\"field\":\"myhash.mysha256\",\"id\":\"84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f\",\"index\":\"filebeat-7.12.0-2021.03.10-000001\",\"type\":\"file\"}}"
-        }`;
-
         expandFirstAlert();
         openJsonView();
+        scrollJsonViewToBottom();
 
-        cy.get(JSON_CONTENT).contains(expectedEnrichment);
+        cy.get(JSON_LINES).then((elements) => {
+          expectedEnrichment.forEach((enrichment) => {
+            cy.wrap(elements).eq(enrichment.line).should('have.text', enrichment.text);
+          });
+        });
       });
     });
 

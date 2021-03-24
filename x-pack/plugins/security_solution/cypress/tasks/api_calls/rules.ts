@@ -45,7 +45,7 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
         {
           entries: [
             {
-              field: rule.indicatorMapping,
+              field: rule.indicatorMappingField,
               type: 'mapping',
               value: rule.indicatorIndexField,
             },
