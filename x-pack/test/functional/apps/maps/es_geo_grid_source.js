@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'maps']);
+  const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
   const security = getService('security');
@@ -95,7 +95,6 @@ export default function ({ getPageObjects, getService }) {
           //todo this verifies the extent-filtering behavior (not really the correct application of geotile_grid-precision), and should ideally be moved to its own section
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
           const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-          await PageObjects.common.sleep(30000);
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
             expectedNumPartialFeatures
           );
