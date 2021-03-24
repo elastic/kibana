@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { merge, Subject, Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, tap } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
@@ -440,11 +440,16 @@ function discoverController($route, $scope, Promise) {
 
   const init = _.once(() => {
     $scope.updateDataSource().then(async () => {
+      let autoRefreshDoneCb;
       const fetch$ = merge(
         refetch$,
         filterManager.getFetches$(),
         timefilter.getFetch$(),
-        timefilter.getAutoRefreshFetch$(),
+        timefilter.getAutoRefreshFetch$().pipe(
+          tap((done) => {
+            autoRefreshDoneCb = done;
+          })
+        ),
         data.query.queryString.getUpdates$(),
         searchSessionManager.newSearchSessionIdFromURL$
       ).pipe(debounceTime(100));
@@ -454,7 +459,16 @@ function discoverController($route, $scope, Promise) {
           $scope,
           fetch$,
           {
-            next: $scope.fetch,
+            next: async () => {
+              try {
+                await $scope.fetch();
+              } finally {
+                // notify auto refresh service that
+                // the last fetch is completed so it starts the next auto refresh loop
+                autoRefreshDoneCb?.();
+                autoRefreshDoneCb = undefined;
+              }
+            },
           },
           (error) => addFatalError(core.fatalErrors, error)
         )
@@ -530,7 +544,7 @@ function discoverController($route, $scope, Promise) {
     });
   });
 
-  $scope.opts.fetch = $scope.fetch = function () {
+  $scope.opts.fetch = $scope.fetch = async function () {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
     $scope.fetchCounter++;
@@ -538,7 +552,6 @@ function discoverController($route, $scope, Promise) {
     $scope.minimumVisibleRows = 50;
     if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
       $scope.resultState = 'none';
-      return;
     }
 
     // Abort any in-progress requests before fetching again
@@ -547,7 +560,7 @@ function discoverController($route, $scope, Promise) {
 
     const searchSessionId = searchSessionManager.getNextSearchSessionId();
 
-    $scope
+    await $scope
       .updateDataSource()
       .then(setupVisualization)
       .then(function () {

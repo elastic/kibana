@@ -362,8 +362,8 @@ export class VisualizeEmbeddable
     }
   }
 
-  public reload = () => {
-    this.handleVisUpdate();
+  public reload = async () => {
+    await this.handleVisUpdate();
   };
 
   private async updateHandler() {
@@ -390,13 +390,13 @@ export class VisualizeEmbeddable
     });
 
     if (this.handler && !abortController.signal.aborted) {
-      this.handler.update(this.expression, expressionParams);
+      await this.handler.update(this.expression, expressionParams);
     }
   }
 
   private handleVisUpdate = async () => {
     this.handleChanges();
-    this.updateHandler();
+    await this.updateHandler();
   };
 
   private uiStateChangeHandler = () => {

@@ -14,6 +14,7 @@ import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { finalize, switchMap, tap } from 'rxjs/operators';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
@@ -37,6 +38,7 @@ import {
   Query,
   SavedQuery,
   syncQueryStateWithUrl,
+  waitUntilNextSessionCompletes$,
 } from '../../../../../src/plugins/data/public';
 import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
@@ -193,14 +195,19 @@ export function App({
 
     const autoRefreshSubscription = data.query.timefilter.timefilter
       .getAutoRefreshFetch$()
-      .subscribe({
-        next: () => {
+      .pipe(
+        tap(() => {
           setState((s) => ({
             ...s,
             searchSessionId: data.search.session.start(),
           }));
-        },
-      });
+        }),
+        switchMap((done) =>
+          // best way in lens to estimate that all panels are updated is to rely on search session service state
+          waitUntilNextSessionCompletes$(data.search.session).pipe(finalize(done))
+        )
+      )
+      .subscribe();
 
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,

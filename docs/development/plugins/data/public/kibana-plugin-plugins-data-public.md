@@ -47,6 +47,7 @@
 |  [getSearchParamsFromRequest(searchRequest, dependencies)](./kibana-plugin-plugins-data-public.getsearchparamsfromrequest.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-public.gettime.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-public.plugin.md) |  |
+|  [waitUntilNextSessionCompletes$(sessionService, { waitForIdle })](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletes_.md) | Creates an observable that emits when next search session completes. This utility is helpful to use in the application to delay some tasks until next session completes. |
 
 ## Interfaces
 
@@ -92,6 +93,7 @@
 |  [SearchInterceptorDeps](./kibana-plugin-plugins-data-public.searchinterceptordeps.md) |  |
 |  [SearchSessionInfoProvider](./kibana-plugin-plugins-data-public.searchsessioninfoprovider.md) | Provide info about current search session to be stored in the Search Session saved object |
 |  [SearchSourceFields](./kibana-plugin-plugins-data-public.searchsourcefields.md) | search source fields |
+|  [WaitUntilNextSessionCompletesOptions](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletesoptions.md) | Options for [waitUntilNextSessionCompletes$()](./kibana-plugin-plugins-data-public.waituntilnextsessioncompletes_.md) |
 
 ## Variables
 
@@ -141,6 +143,7 @@
 |  [AggParam](./kibana-plugin-plugins-data-public.aggparam.md) |  |
 |  [AggsStart](./kibana-plugin-plugins-data-public.aggsstart.md) | AggsStart represents the actual external contract as AggsCommonStart is only used internally. The difference is that AggsStart includes the typings for the registry with initialized agg types. |
 |  [AutocompleteStart](./kibana-plugin-plugins-data-public.autocompletestart.md) | \* |
+|  [AutoRefreshDoneFn](./kibana-plugin-plugins-data-public.autorefreshdonefn.md) |  |
 |  [CustomFilter](./kibana-plugin-plugins-data-public.customfilter.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esaggsexpressionfunctiondefinition.md) |  |
 |  [EsdslExpressionFunctionDefinition](./kibana-plugin-plugins-data-public.esdslexpressionfunctiondefinition.md) |  |
