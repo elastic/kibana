@@ -108,14 +108,21 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       const actualSelection = await this.getHighlighted(testSubj);
       expect(actualSelection.data).to.eql(
         expectedData,
-        `Expected swim lane  to be ${
-          expectedData ? `${expectedData.x.join(',')} and ${expectedData.y.join(',')}` : 'null'
+        `Expected swim lane to have ${
+          expectedData
+            ? `selected X-axis values ${expectedData.x.join(
+                ','
+              )} and Y-axis values ${expectedData.y.join(',')}`
+            : 'no data selected'
         }, got ${
           actualSelection.data
             ? `${actualSelection.data.x.join(',')} and ${actualSelection.data.y.join(',')}`
             : 'null'
         }`
       );
+      if (expectedArea) {
+        expect(actualSelection.area).to.eql(expectedArea);
+      }
     },
 
     /**
