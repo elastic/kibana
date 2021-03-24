@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createSHA256Hash } from '../utils';
+import { createSHA256Hash } from '@kbn/crypto';
 import { config } from './config';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));

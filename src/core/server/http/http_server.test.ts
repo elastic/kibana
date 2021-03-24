@@ -73,7 +73,7 @@ beforeEach(() => {
       enabled: true,
       certificate,
       cipherSuites: ['TLS_AES_256_GCM_SHA384'],
-      getSecureOptions: () => 0,
+      secureOptions: 0,
       key,
       redirectHttpFromPort: config.port + 1,
     },
