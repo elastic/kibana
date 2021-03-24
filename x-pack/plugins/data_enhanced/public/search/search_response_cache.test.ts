@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { interval, of, ReplaySubject } from 'rxjs';
+import { interval, of, ReplaySubject, throwError } from 'rxjs';
 import { switchMap, take } from 'rxjs/operators';
 import { IKibanaSearchResponse } from 'src/plugins/data/public';
 import { SearchResponseCache } from './search_response_cache';
@@ -48,7 +48,11 @@ describe('', () => {
     return interval(100).pipe(
       take(responses.length),
       switchMap((value: number, i: number) => {
-        return of(responses[i]);
+        if (responses[i].rawResponse.throw === true) {
+          return throwError('nooo');
+        } else {
+          return of(responses[i]);
+        }
       })
     );
   }
@@ -67,6 +71,62 @@ describe('', () => {
 
       expect(cache.get('123')).toBeUndefined();
       expect(cache.get('234')).toBeUndefined();
+    });
+
+    test('evicts searches that threw an exception', async () => {
+      const res$ = getSearchObservable$();
+      const err$ = getSearchObservable$([
+        {
+          isPartial: true,
+          isRunning: true,
+          rawResponse: {
+            t: 'a'.repeat(1000),
+          },
+        },
+        {
+          isPartial: true,
+          isRunning: true,
+          rawResponse: {
+            throw: true,
+          },
+        },
+      ]);
+      cache.set('123', err$);
+      cache.set('234', res$);
+
+      const errHandler = jest.fn();
+      await err$.toPromise().catch(errHandler);
+      await res$.toPromise().catch(errHandler);
+
+      expect(errHandler).toBeCalledTimes(1);
+      expect(cache.get('123')).toBeUndefined();
+      expect(cache.get('234')).not.toBeUndefined();
+    });
+
+    test('evicts searches that returned an error response', async () => {
+      const err$ = getSearchObservable$([
+        {
+          isPartial: true,
+          isRunning: true,
+          rawResponse: {
+            t: 1,
+          },
+        },
+        {
+          isPartial: true,
+          isRunning: false,
+          rawResponse: {
+            t: 2,
+          },
+        },
+      ]);
+      cache.set('123', err$);
+
+      const errHandler = jest.fn();
+      await err$.toPromise().catch(errHandler);
+
+      expect(errHandler).toBeCalledTimes(0);
+      expect(cache.get('123')).toBeUndefined();
     });
 
     test('evicts oldest item if has too many cached items', async () => {

@@ -6,7 +6,7 @@
  */
 
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
-import { IKibanaSearchResponse } from '../../../../../src/plugins/data/public';
+import { IKibanaSearchResponse, isErrorResponse } from '../../../../../src/plugins/data/public';
 
 interface ResponseCacheItem {
   response: ReplaySubject<IKibanaSearchResponse<any>>;
@@ -71,16 +71,21 @@ export class SearchResponseCache {
         next: (r) => {
           const newSize = JSON.stringify(r).length;
 
-          if (this.byteToMb(newSize) < this.maxCacheSizeMB) {
+          if (this.byteToMb(newSize) < this.maxCacheSizeMB && !isErrorResponse(r)) {
             this.setItem(key, {
               ...item,
               size: newSize,
             });
             this.shrink();
           } else {
-            // Single item is too large to be cached, evict and ignore
+            // Single item is too large to be cached, or an error response returned.
+            // Evict and ignore.
             this.deleteItem(key);
           }
+        },
+        error: () => {
+          // Evict item on error
+          this.deleteItem(key);
         },
       })
     );

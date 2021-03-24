@@ -80,13 +80,7 @@ export function App({
     dashboardFeatureFlag,
   } = useKibana<LensAppServices>().services;
 
-  const startSession = useCallback(
-    () =>
-      data.search.session.start({
-        cacheOnClient: true,
-      }),
-    [data]
-  );
+  const startSession = useCallback(() => data.search.session.start(), [data]);
 
   const [state, setState] = useState<LensAppState>(() => {
     return {

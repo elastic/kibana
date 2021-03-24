@@ -75,9 +75,7 @@ export function useTimeRange(
     if (nowDiff > timeRangeLength * TIME_LAG_PERCENTAGE_LIMIT) {
       setState((s) => ({
         ...s,
-        searchSessionId: data.search.session.start({
-          cacheOnClient: true,
-        }),
+        searchSessionId: data.search.session.start(),
       }));
     }
   }, [data.nowProvider, data.search.session, timefilter, lastKnownDoc, setState]);
