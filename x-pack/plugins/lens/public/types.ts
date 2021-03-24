@@ -185,10 +185,22 @@ export interface Datasource<T = unknown, P = unknown> {
   getLayers: (state: T) => string[];
   removeColumn: (props: { prevState: T; layerId: string; columnId: string }) => T;
 
-  renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
-  renderDimensionTrigger: (domElement: Element, props: DatasourceDimensionTriggerProps<T>) => void;
-  renderDimensionEditor: (domElement: Element, props: DatasourceDimensionEditorProps<T>) => void;
-  renderLayerPanel: (domElement: Element, props: DatasourceLayerPanelProps<T>) => void;
+  renderDataPanel: (
+    domElement: Element,
+    props: DatasourceDataPanelProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  renderDimensionTrigger: (
+    domElement: Element,
+    props: DatasourceDimensionTriggerProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  renderDimensionEditor: (
+    domElement: Element,
+    props: DatasourceDimensionEditorProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
+  renderLayerPanel: (
+    domElement: Element,
+    props: DatasourceLayerPanelProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
   getDropProps: (
     props: DatasourceDimensionDropProps<T> & {
       groupId: string;
@@ -585,12 +597,18 @@ export interface Visualization<T = unknown> {
    * Popover contents that open when the user clicks the contextMenuIcon. This can be used
    * for extra configurability, such as for styling the legend or axis
    */
-  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerWidgetProps<T>) => void;
+  renderLayerContextMenu?: (
+    domElement: Element,
+    props: VisualizationLayerWidgetProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
   /**
    * Toolbar rendered above the visualization. This is meant to be used to provide chart-level
    * settings for the visualization.
    */
-  renderToolbar?: (domElement: Element, props: VisualizationToolbarProps<T>) => void;
+  renderToolbar?: (
+    domElement: Element,
+    props: VisualizationToolbarProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
   /**
    * Visualizations can provide a custom icon which will open a layer-specific popover
    * If no icon is provided, gear icon is default
@@ -620,7 +638,7 @@ export interface Visualization<T = unknown> {
   renderDimensionEditor?: (
     domElement: Element,
     props: VisualizationDimensionEditorProps<T>
-  ) => void;
+  ) => ((cleanupElement: Element) => void) | void;
 
   /**
    * The frame will call this function on all visualizations at different times. The
