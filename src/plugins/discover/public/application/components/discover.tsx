@@ -48,6 +48,8 @@ const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const DataGridMemoized = React.memo(DiscoverGrid);
 const TopNavMemoized = React.memo(DiscoverTopNav);
+const TimechartHeaderMemoized = React.memo(TimechartHeader);
+const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
 
 export function Discover({
   fetch,
@@ -82,11 +84,13 @@ export function Discover({
   const { trackUiMetric, capabilities, indexPatterns, chrome, docLinks } = services;
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
-  const bucketInterval =
-    bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
+  const bucketInterval = useMemo(() => {
+    const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
+    return bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
+  }, [opts.chartAggConfigs]);
+
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
@@ -300,7 +304,7 @@ export function Discover({
                         </EuiFlexItem>
                         {!hideChart && (
                           <EuiFlexItem className="dscResultCount__actions">
-                            <TimechartHeader
+                            <TimechartHeaderMemoized
                               data={opts.data}
                               dateFormat={opts.config.get('dateFormat')}
                               options={search.aggs.intervalOptions}
@@ -348,7 +352,7 @@ export function Discover({
                               className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
                               data-test-subj="discoverChart"
                             >
-                              <DiscoverHistogram
+                              <DiscoverHistogramMemoized
                                 chartData={histogramData}
                                 timefilterUpdateHandler={timefilterUpdateHandler}
                               />
