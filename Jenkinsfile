@@ -22,7 +22,7 @@ kibanaPipeline(timeoutMinutes: 300) {
 }
 
 def testPackage(packageType) {
-  workers.ci(ramDisk: false, name: "package-${packageType}", size: 's') {
+  workers.ci(ramDisk: false, name: "package-${packageType}", size: 's-ubuntu') {
     runbld("test/scripts/jenkins_xpack_package_${packageType}.sh", "Execute package testing for ${packageType}")
   }
 }
