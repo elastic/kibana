@@ -32,11 +32,15 @@ export const migratePackagePolicyToV7130: SavedObjectMigrationFn<PackagePolicy, 
   packagePolicyDoc,
   migrationContext
 ) => {
+  let updatedPackagePolicyDoc = packagePolicyDoc;
+
   // Endpoint specific migrations
-  // FIXME:PT remove `-OFF` from below once ready to be released
-  if (packagePolicyDoc.attributes.package?.name === 'endpoint-OFF') {
-    return migrateEndpointPackagePolicyToV7130(packagePolicyDoc, migrationContext);
+  if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
+    updatedPackagePolicyDoc = migrateEndpointPackagePolicyToV7130(
+      packagePolicyDoc,
+      migrationContext
+    );
   }
 
-  return packagePolicyDoc;
+  return updatedPackagePolicyDoc;
 };
