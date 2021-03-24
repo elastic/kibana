@@ -43,6 +43,7 @@ const defaultOptions: Options = {
   dist: true,
   oss: true,
   pluginPaths: ['/some/dir'],
+  pluginScanDirs: ['/some-scan-path'],
   quiet: true,
   silent: true,
   repoRoot: '/app',
@@ -83,6 +84,7 @@ it('uses options to create valid OptimizerConfig', () => {
     runExamples: false,
     oss: false,
     pluginPaths: [],
+    pluginScanDirs: [],
     repoRoot: '/foo/bar',
     watch: false,
   });
@@ -99,6 +101,9 @@ it('uses options to create valid OptimizerConfig', () => {
           "pluginPaths": Array [
             "/some/dir",
           ],
+          "pluginScanDirs": Array [
+            "/some-scan-path",
+          ],
           "repoRoot": "/app",
           "watch": true,
         },
@@ -111,6 +116,7 @@ it('uses options to create valid OptimizerConfig', () => {
           "includeCoreBundle": true,
           "oss": false,
           "pluginPaths": Array [],
+          "pluginScanDirs": Array [],
           "repoRoot": "/foo/bar",
           "watch": false,
         },
