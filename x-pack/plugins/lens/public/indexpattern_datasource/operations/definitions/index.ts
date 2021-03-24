@@ -443,5 +443,4 @@ export const operationDefinitionMap: Record<
 export const renameOperationsMapping: Record<string, GenericOperationDefinition['type']> = {
   avg: 'average',
   cardinality: 'unique_count',
-  derivative: 'differences',
 };
