@@ -11,6 +11,7 @@ export {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './editor_frame_service/embeddable/embeddable_component';
+export { XYChartTypes } from './shared_components/chart_types';
 export type {
   XYState,
   AxesSettingsConfig,
