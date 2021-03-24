@@ -10,7 +10,16 @@ import Path from 'path';
 
 import { REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
-import { map, mapTo, filter, take, tap, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import {
+  map,
+  mapTo,
+  filter,
+  take,
+  tap,
+  distinctUntilChanged,
+  switchMap,
+  concatMap,
+} from 'rxjs/operators';
 
 import { CliArgs } from '../../core/server/config';
 import { LegacyConfig } from '../../core/server/legacy';
@@ -24,7 +33,11 @@ import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_p
 import { getServerWatchPaths } from './get_server_watch_paths';
 
 // timeout where the server is allowed to exit gracefully
-const GRACEFUL_TIMEOUT = 5000;
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+const GRACEFUL_TIMEOUT = 5 * SECOND;
+const RESTART_BUFFER_INTERVAL = 10 * MINUTE;
+const RESTART_BUFFER_MAX_SIZE = 10_000;
 
 export type SomeCliArgs = Pick<
   CliArgs,
@@ -167,29 +180,10 @@ export class CliDevMode {
     this.subscription = new Rx.Subscription();
     this.startTime = Date.now();
 
-    this.subscription.add(
-      this.getStarted$()
-        .pipe(
-          switchMap(async (success) => {
-            const reporter = CiStatsReporter.fromEnv(this.log.toolingLog);
-            await reporter.timings({
-              timings: [
-                {
-                  group: 'yarn start',
-                  id: 'started',
-                  ms: Date.now() - this.startTime!,
-                  meta: { success },
-                },
-              ],
-            });
-          })
-        )
-        .subscribe({
-          error: (error) => {
-            this.log.bad(`[ci-stats/timings] unable to record startup time:`, error.stack);
-          },
-        })
-    );
+    const reporter = CiStatsReporter.fromEnv(this.log.toolingLog);
+    if (reporter.isEnabled()) {
+      this.subscription.add(this.reportTimings(reporter));
+    }
 
     if (basePathProxy) {
       const serverReady$ = new Rx.BehaviorSubject(false);
@@ -243,6 +237,68 @@ export class CliDevMode {
     this.subscription.add(this.optimizer.run$.subscribe(this.observer('@kbn/optimizer')));
     this.subscription.add(this.watcher.run$.subscribe(this.observer('watcher')));
     this.subscription.add(this.devServer.run$.subscribe(this.observer('dev server')));
+  }
+
+  private reportTimings(reporter: CiStatsReporter) {
+    const sub = new Rx.Subscription();
+
+    sub.add(
+      this.getStarted$()
+        .pipe(
+          concatMap(async (success) => {
+            await reporter.timings({
+              timings: [
+                {
+                  group: 'yarn start',
+                  id: 'started',
+                  ms: Date.now() - this.startTime!,
+                  meta: { success },
+                },
+              ],
+            });
+          })
+        )
+        .subscribe({
+          error: (error) => {
+            this.log.bad(`[ci-stats/timings] unable to record startup time:`, error.stack);
+          },
+        })
+    );
+
+    sub.add(
+      this.devServer
+        .getRestartInfo$({
+          interval: RESTART_BUFFER_INTERVAL,
+          maxBufferSize: RESTART_BUFFER_MAX_SIZE,
+        })
+        .pipe(
+          concatMap(async ({ count, ms }, i) => {
+            await reporter.timings({
+              timings: [
+                {
+                  group: 'yarn start',
+                  id: 'dev server restart',
+                  ms,
+                  meta: {
+                    count,
+                    sequence: i + 1,
+                  },
+                },
+              ],
+            });
+          })
+        )
+        .subscribe({
+          error: (error) => {
+            this.log.bad(
+              `[ci-stats/timings] unable to record dev server restart time:`,
+              error.stack
+            );
+          },
+        })
+    );
+
+    return sub;
   }
 
   /**

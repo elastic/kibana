@@ -15,6 +15,8 @@ import { extendedEnvSerializer } from './test_helpers';
 import { DevServer, Options } from './dev_server';
 import { TestLog } from './log';
 
+jest.useFakeTimers('modern');
+
 class MockProc extends EventEmitter {
   public readonly signalsSent: string[] = [];
 
@@ -89,6 +91,17 @@ const run = (server: DevServer) => {
   });
   subscriptions.push(subscription);
   return subscription;
+};
+
+const collect = <T>(stream: Rx.Observable<T>) => {
+  const events: T[] = [];
+  const subscription = stream.subscribe({
+    next(item) {
+      events.push(item);
+    },
+  });
+  subscriptions.push(subscription);
+  return events;
 };
 
 afterEach(() => {
@@ -305,7 +318,210 @@ describe('#run$', () => {
     expect(currentProc.signalsSent).toEqual([]);
     sigint$.next();
     expect(currentProc.signalsSent).toEqual(['SIGINT']);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    jest.advanceTimersByTime(100);
     expect(currentProc.signalsSent).toEqual(['SIGINT', 'SIGKILL']);
+  });
+});
+
+describe('#getPhase$', () => {
+  it('emits "starting" when run$ is subscribed then emits "fatal exit" when server exits with code > 0, then starting once watcher fires and "listening" when the server is ready', () => {
+    const server = new DevServer(defaultOptions);
+    const events = collect(server.getPhase$());
+
+    expect(events).toEqual([]);
+    run(server);
+    expect(events).toEqual(['starting']);
+    events.length = 0;
+
+    isProc(currentProc);
+    currentProc.mockExit(2);
+    expect(events).toEqual(['fatal exit']);
+    events.length = 0;
+
+    restart$.next();
+    expect(events).toEqual(['starting']);
+    events.length = 0;
+
+    currentProc.mockListening();
+    expect(events).toEqual(['listening']);
+  });
+});
+
+describe('#getRestartInfo$()', () => {
+  it('sends an event based on interval', () => {
+    const server = new DevServer(defaultOptions);
+    const events = collect(
+      server.getRestartInfo$({
+        interval: 1000,
+        maxBufferSize: 10,
+      })
+    );
+
+    expect(events).toEqual([]);
+    run(server);
+    isProc(currentProc);
+
+    jest.advanceTimersByTime(100);
+    currentProc.mockListening();
+
+    restart$.next();
+    jest.advanceTimersByTime(200);
+    currentProc.mockListening();
+
+    jest.advanceTimersByTime(800);
+    expect(events).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "count": 2,
+          "ms": 150,
+        },
+      ]
+    `);
+  });
+
+  it('sends an event if buffer overflows', () => {
+    const server = new DevServer(defaultOptions);
+    const phaseEvents = collect(server.getPhase$());
+    const events = collect(
+      server.getRestartInfo$({
+        interval: 1000,
+        maxBufferSize: 5,
+      })
+    );
+
+    expect(events).toEqual([]);
+    run(server);
+    isProc(currentProc);
+
+    jest.advanceTimersByTime(100);
+    currentProc.mockListening();
+    restart$.next();
+    jest.advanceTimersByTime(100);
+    currentProc.mockListening();
+    restart$.next();
+    restart$.next();
+
+    expect(phaseEvents).toMatchInlineSnapshot(`
+      Array [
+        "starting",
+        "listening",
+        "starting",
+        "listening",
+        "starting",
+        "starting",
+      ]
+    `);
+    expect(events).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "count": 2,
+          "ms": 100,
+        },
+      ]
+    `);
+  });
+
+  it('does not send event if server does not restart before interval', () => {
+    const server = new DevServer(defaultOptions);
+    const events = collect(
+      server.getRestartInfo$({
+        interval: 1000,
+        maxBufferSize: 100,
+      })
+    );
+    run(server);
+
+    isProc(currentProc);
+    currentProc.mockListening();
+    jest.advanceTimersByTime(1000);
+    expect(events).toHaveLength(1);
+    events.length = 0;
+
+    jest.advanceTimersByTime(1000);
+    expect(events).toEqual([]);
+  });
+
+  it('ignores starts that are not immediately followed by listening', () => {
+    const server = new DevServer(defaultOptions);
+    const phases = collect(server.getPhase$());
+    const events = collect(
+      server.getRestartInfo$({
+        interval: 1000,
+        maxBufferSize: 100,
+      })
+    );
+
+    run(server);
+    isProc(currentProc);
+
+    restart$.next();
+    currentProc.mockExit(1);
+    restart$.next();
+    restart$.next();
+    restart$.next();
+    currentProc.mockExit(1);
+    restart$.next();
+    jest.advanceTimersByTime(1000);
+
+    expect(phases).toMatchInlineSnapshot(`
+      Array [
+        "starting",
+        "starting",
+        "fatal exit",
+        "starting",
+        "starting",
+        "starting",
+        "fatal exit",
+        "starting",
+      ]
+    `);
+    expect(events).toMatchInlineSnapshot(`Array []`);
+  });
+
+  it('ignores listening events at the top of a buffer', () => {
+    const server = new DevServer(defaultOptions);
+    const phases = collect(server.getPhase$());
+    const events = collect(
+      server.getRestartInfo$({
+        interval: 1000,
+        maxBufferSize: 3,
+      })
+    );
+
+    run(server);
+    isProc(currentProc);
+
+    jest.advanceTimersByTime(10);
+    currentProc.mockListening();
+    restart$.next();
+
+    // ends with "started", meaning the buffer won't start with "started"
+    expect(phases).toMatchInlineSnapshot(`
+      Array [
+        "starting",
+        "listening",
+        "starting",
+      ]
+    `);
+    phases.length = 0;
+    expect(events).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "count": 1,
+          "ms": 10,
+        },
+      ]
+    `);
+    events.length = 0;
+
+    jest.advanceTimersByTime(10);
+    currentProc.mockListening();
+    jest.advanceTimersByTime(1000);
+    expect(phases).toMatchInlineSnapshot(`
+      Array [
+        "listening",
+      ]
+    `);
+    expect(events).toMatchInlineSnapshot(`Array []`);
   });
 });

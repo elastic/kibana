@@ -18,6 +18,8 @@ import {
   switchMap,
   takeUntil,
   ignoreElements,
+  bufferTime,
+  concatMap,
 } from 'rxjs/operators';
 import { observeLines } from '@kbn/dev-utils';
 
@@ -71,6 +73,56 @@ export class DevServer {
 
   getPhase$() {
     return this.phase$.asObservable();
+  }
+
+  /**
+   * returns an observable of objects describing server start times.
+   */
+  getRestartInfo$(options: { interval: number; maxBufferSize: number }) {
+    return this.phase$.pipe(
+      // attach the time a phase change occurred
+      map((phase) => ({ phase, time: Date.now() })),
+      // buffer events by time or max buffer size, whichever comes first
+      bufferTime(options.interval, undefined, options.maxBufferSize),
+      // sum up transition time between contiguous "starting" and "listening" events
+      concatMap((events) => {
+        let totalMs = 0;
+        let count = 0;
+
+        let startingTime: number | undefined;
+        for (const event of events) {
+          switch (event.phase) {
+            case 'starting':
+              startingTime = event.time;
+              continue;
+            case 'fatal exit':
+              startingTime = undefined;
+              continue;
+            case 'listening':
+              if (typeof startingTime === 'number') {
+                totalMs += event.time - startingTime;
+                count += 1;
+              }
+              continue;
+            default:
+              this.log.bad(`unexpected dev server phase [${event.phase}]`);
+              break;
+          }
+        }
+
+        // if there weren't any restarts identified in the time period then don't report anything
+        if (count === 0) {
+          return [];
+        }
+
+        return [
+          {
+            count,
+            ms: Math.round(totalMs / count),
+          },
+        ];
+      })
+    );
   }
 
   /**
