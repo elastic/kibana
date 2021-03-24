@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BoostType } from './types';
+import { Boost, BoostType } from './types';
 import {
   filterIfTerm,
   normalizeBoostValues,
   removeBoostStateProps,
   parseBoostCenter,
+  removeEmptyValueBoosts,
 } from './utils';
 
 describe('filterIfTerm', () => {
@@ -42,6 +43,7 @@ describe('removeBoostStateProps', () => {
             type: BoostType.Value,
             factor: 5,
             newBoost: true,
+            value: [''],
           },
         ],
       },
@@ -58,6 +60,7 @@ describe('removeBoostStateProps', () => {
           {
             type: BoostType.Value,
             factor: 5,
+            value: [''],
           },
         ],
       },
@@ -150,5 +153,33 @@ describe('normalizeBoostValues', () => {
       ],
       sp_def: [{ type: BoostType.Functional, factor: 5 }],
     });
+  });
+});
+
+describe('removeEmptyValueBoosts', () => {
+  const boosts: Record<string, Boost[]> = {
+    bar: [
+      { factor: 9.5, type: BoostType.Proximity },
+      { type: BoostType.Functional, factor: 5 },
+    ],
+    foo: [
+      { factor: 9.5, type: BoostType.Value, value: ['1'] },
+      { factor: 9.5, type: BoostType.Value, value: ['1', '', '   '] },
+      { factor: 9.5, type: BoostType.Value, value: [] },
+      { factor: 9.5, type: BoostType.Value, value: ['', '1'] },
+    ],
+    baz: [{ factor: 9.5, type: BoostType.Value, value: [''] }],
+  };
+
+  expect(removeEmptyValueBoosts(boosts)).toEqual({
+    bar: [
+      { factor: 9.5, type: BoostType.Proximity },
+      { type: BoostType.Functional, factor: 5 },
+    ],
+    foo: [
+      { factor: 9.5, type: BoostType.Value, value: ['1'] },
+      { factor: 9.5, type: BoostType.Value, value: ['1'] },
+      { factor: 9.5, type: BoostType.Value, value: ['1'] },
+    ],
   });
 });

@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FieldResultSetting } from './types';
 
+export const DEFAULT_SNIPPET_SIZE = 100;
+
 export const RESULT_SETTINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.resultSettings.title',
   { defaultMessage: 'Result Settings' }

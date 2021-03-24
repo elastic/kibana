@@ -226,6 +226,7 @@ QuotedString
 
 QuotedCharacter
   = EscapedWhitespace
+  / EscapedUnicodeSequence
   / '\\' char:[\\"] { return char; }
   / !Cursor char:[^"] { return char; }
 
@@ -253,6 +254,7 @@ UnquotedLiteral
 UnquotedCharacter
   = EscapedWhitespace
   / EscapedSpecialCharacter
+  / EscapedUnicodeSequence
   / EscapedKeyword
   / Wildcard
   / !SpecialCharacter !Keyword !Cursor char:. { return char; }
@@ -291,6 +293,17 @@ Keyword
 SpecialCharacter
   = [\\():<>"*{}]
 
+EscapedUnicodeSequence
+ = '\\' sequence:UnicodeSequence { return sequence; }
+
+UnicodeSequence
+  = "u" digits:$(HexDigit HexDigit HexDigit HexDigit) {
+      return String.fromCharCode(parseInt(digits, 16));
+    }
+
+HexDigit
+  = [0-9a-f]i
+
 RangeOperator
   = '<=' { return 'lte'; }
   / '>=' { return 'gte'; }
@@ -298,7 +311,7 @@ RangeOperator
   / '>' { return 'gt'; }
 
 Space "whitespace"
-  = [\ \t\r\n]
+  = [\ \t\r\n\u00A0]
 
 Cursor
   = &{ return parseCursor; } '@kuery-cursor@' { return cursorSymbol; }
