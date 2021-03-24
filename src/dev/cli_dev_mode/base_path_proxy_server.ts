@@ -62,7 +62,7 @@ export class BasePathProxyServer {
     return this.httpConfig.port;
   }
 
-  public async start(options: Readonly<BasePathProxyServerOptions>) {
+  public async start(options: BasePathProxyServerOptions) {
     this.log.good('starting basepath proxy server');
 
     const serverOptions = getServerOptions(this.httpConfig);
