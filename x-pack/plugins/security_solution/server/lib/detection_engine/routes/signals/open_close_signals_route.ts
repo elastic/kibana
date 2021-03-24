@@ -30,7 +30,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
     },
     async (context, request, response) => {
       const { conflicts, signal_ids: signalIds, query, status } = request.body;
-      const clusterClient = context.core.elasticsearch.legacy.client;
+      const clusterClient = context.core.elasticsearch.client;
       const siemClient = context.securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
@@ -55,10 +55,10 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
         };
       }
       try {
-        const result = await clusterClient.callAsCurrentUser('updateByQuery', {
+        const result = await clusterClient.asCurrentUser.updateByQuery({
           index: siemClient.getSignalsIndex(),
           conflicts: conflicts ?? 'abort',
-          refresh: 'wait_for',
+          // refresh: 'wait_for',
           body: {
             script: {
               source: `ctx._source.signal.status = '${status}'`,
@@ -66,7 +66,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
             },
             query: queryObject,
           },
-          ignoreUnavailable: true,
+          // ignoreUnavailable: true,
         });
         return response.ok({ body: result });
       } catch (err) {
