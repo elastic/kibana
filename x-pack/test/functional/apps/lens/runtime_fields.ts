@@ -50,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editField();
       await fieldEditor.setName('runtimefield2');
       await fieldEditor.save();
+      await fieldEditor.confirmSave();
       await PageObjects.lens.searchField('runtime');
       await PageObjects.lens.waitForField('runtimefield2');
       await PageObjects.lens.dragFieldToDimensionTrigger(

@@ -68,7 +68,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
     const { find } = setup({ ...defaultProps, field });
 
-    expect(find('flyoutTitle').text()).toBe(`Edit foo field`);
+    expect(find('flyoutTitle').text()).toBe(`Edit foo`);
     expect(find('nameField.input').props().value).toBe(field.name);
     expect(find('typeField').props().value).toBe(field.type);
     expect(find('scriptField').props().value).toBe(field.script.source);

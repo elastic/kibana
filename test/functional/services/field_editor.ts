@@ -38,6 +38,11 @@ export function FieldEditorProvider({ getService }: FtrProviderContext) {
         await testSubjects.missingOrFail('fieldSaveButton', { timeout: 2000 });
       });
     }
+
+    public async confirmSave() {
+      testSubjects.setValue('saveModalConfirmText', 'confirm');
+      testSubjects.click('confirmModalConfirmButton');
+    }
   }
 
   return new FieldEditor();

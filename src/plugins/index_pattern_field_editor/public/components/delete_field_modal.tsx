@@ -103,7 +103,11 @@ export function DeleteFieldModal({ fieldsToDelete, closeModal, confirmDelete }: 
       )}
       <>
         <p>{i18nTexts.typeConfirm}</p>
-        <EuiFieldText value={confirmContent} onChange={(e) => setConfirmContent(e.target.value)} />
+        <EuiFieldText
+          value={confirmContent}
+          onChange={(e) => setConfirmContent(e.target.value)}
+          data-test-subj="deleteModalConfirmText"
+        />
       </>
     </EuiConfirmModal>
   );

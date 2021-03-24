@@ -228,7 +228,11 @@ const FieldEditorFlyoutContentComponent = ({
       <>
         <p>{i18nTexts.warningChangingFields}</p>
         <p>{i18nTexts.typeConfirm}</p>
-        <EuiFieldText value={confirmContent} onChange={(e) => setConfirmContent(e.target.value)} />
+        <EuiFieldText
+          value={confirmContent}
+          onChange={(e) => setConfirmContent(e.target.value)}
+          data-test-subj="saveModalConfirmText"
+        />
       </>
     </EuiConfirmModal>
   ) : null;
