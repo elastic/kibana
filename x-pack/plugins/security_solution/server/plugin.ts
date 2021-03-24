@@ -59,7 +59,7 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
-import { ArtifactClient, ManifestManager } from './endpoint/services';
+import { ArtifactClient, EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadArtifactRoute } from './endpoint/routes/artifacts';
@@ -77,6 +77,7 @@ import {
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -162,18 +163,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings);
-    initUsageCollectors({
-      core,
-      kibanaIndex: globalConfig.kibana.index,
-      ml: plugins.ml,
-      usageCollection: plugins.usageCollection,
-    });
-
     const endpointContext: EndpointAppContext = {
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(config),
     };
+
+    initUsageCollectors({
+      core,
+      endpointAppContext: endpointContext,
+      kibanaIndex: globalConfig.kibana.index,
+      ml: plugins.ml,
+      usageCollection: plugins.usageCollection,
+    });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
@@ -343,16 +345,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
       const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
-      const artifactClient = new ArtifactClient(savedObjectsClient);
+      const artifactClient = (new EndpointArtifactClient(
+        plugins.fleet.createArtifactsClient('endpoint')
+      ) as unknown) as ArtifactClient;
 
-      manifestManager = new ManifestManager({
-        savedObjectsClient,
-        artifactClient,
-        exceptionListClient,
-        packagePolicyService: plugins.fleet.packagePolicyService,
-        logger: this.logger,
-        cache: this.artifactsCache,
-      });
+      manifestManager = new ManifestManager(
+        {
+          savedObjectsClient,
+          artifactClient,
+          exceptionListClient,
+          packagePolicyService: plugins.fleet.packagePolicyService,
+          logger: this.logger,
+          cache: this.artifactsCache,
+        },
+        parseExperimentalConfigValue(this.config.enableExperimental).fleetServerEnabled
+      );
 
       if (this.manifestTask) {
         this.manifestTask.start({

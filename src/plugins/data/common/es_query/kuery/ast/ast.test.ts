@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  fromKueryExpression,
-  fromLiteralExpression,
-  toElasticsearchQuery,
-  doesKueryExpressionHaveLuceneSyntaxError,
-} from './ast';
+import { fromKueryExpression, fromLiteralExpression, toElasticsearchQuery } from './ast';
 import { nodeTypes } from '../node_types';
 import { fields } from '../../../index_patterns/mocks';
 import { IIndexPattern } from '../../../index_patterns';
@@ -57,6 +52,15 @@ describe('kuery AST API', () => {
         nodeTypes.function.buildNode('is', null, 'bar'),
       ]);
       const actual = fromKueryExpression('foo and bar');
+      expect(actual).toEqual(expected);
+    });
+
+    test('nbsp should be recognised as whitespace', () => {
+      const expected = nodeTypes.function.buildNode('and', [
+        nodeTypes.function.buildNode('is', null, 'foo'),
+        nodeTypes.function.buildNode('is', null, 'bar'),
+      ]);
+      const actual = fromKueryExpression('foo and\u00A0bar');
       expect(actual).toEqual(expected);
     });
 
@@ -320,6 +324,12 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    test('should allow escaping of unicode sequences with a backslash', () => {
+      const expected = nodeTypes.literal.buildNode('\\u00A0');
+      const actual = fromLiteralExpression('\\\\u00A0');
+      expect(actual).toEqual(expected);
+    });
+
     test('should support double quoted strings that do not need escapes except for quotes', () => {
       const expected = nodeTypes.literal.buildNode('\\():<>"*');
       const actual = fromLiteralExpression('"\\():<>\\"*"');
@@ -329,6 +339,12 @@ describe('kuery AST API', () => {
     test('should support escaped backslashes inside quoted strings', () => {
       const expected = nodeTypes.literal.buildNode('\\');
       const actual = fromLiteralExpression('"\\\\"');
+      expect(actual).toEqual(expected);
+    });
+
+    test('should support escaped unicode sequences inside quoted strings', () => {
+      const expected = nodeTypes.literal.buildNode('\\u00A0');
+      const actual = fromLiteralExpression('"\\\\u00A0"');
       expect(actual).toEqual(expected);
     });
 
@@ -374,83 +390,6 @@ describe('kuery AST API', () => {
       const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config);
       const result = toElasticsearchQuery(node, indexPattern, config);
       expect(result).toEqual(expected);
-    });
-  });
-
-  describe('doesKueryExpressionHaveLuceneSyntaxError', () => {
-    test('should return true for Lucene ranges', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('bar: [1 TO 10]');
-      expect(result).toEqual(true);
-    });
-
-    test('should return false for KQL ranges', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('bar < 1');
-      expect(result).toEqual(false);
-    });
-
-    test('should return true for Lucene exists', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('_exists_: bar');
-      expect(result).toEqual(true);
-    });
-
-    test('should return false for KQL exists', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('bar:*');
-      expect(result).toEqual(false);
-    });
-
-    test('should return true for Lucene wildcards', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('bar: ba?');
-      expect(result).toEqual(true);
-    });
-
-    test('should return false for KQL wildcards', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('bar: ba*');
-      expect(result).toEqual(false);
-    });
-
-    test('should return true for Lucene regex', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('bar: /ba.*/');
-      expect(result).toEqual(true);
-    });
-
-    test('should return true for Lucene fuzziness', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('bar: ba~');
-      expect(result).toEqual(true);
-    });
-
-    test('should return true for Lucene proximity', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('bar: "ba"~2');
-      expect(result).toEqual(true);
-    });
-
-    test('should return true for Lucene boosting', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('bar: ba^2');
-      expect(result).toEqual(true);
-    });
-
-    test('should return true for Lucene + operator', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('+foo: bar');
-      expect(result).toEqual(true);
-    });
-
-    test('should return true for Lucene - operators', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('-foo: bar');
-      expect(result).toEqual(true);
-    });
-
-    test('should return true for Lucene && operators', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('foo: bar && baz: qux');
-      expect(result).toEqual(true);
-    });
-
-    test('should return true for Lucene || operators', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('foo: bar || baz: qux');
-      expect(result).toEqual(true);
-    });
-
-    test('should return true for mixed KQL/Lucene queries', () => {
-      const result = doesKueryExpressionHaveLuceneSyntaxError('foo: bar and (baz: qux || bag)');
-      expect(result).toEqual(true);
     });
   });
 });

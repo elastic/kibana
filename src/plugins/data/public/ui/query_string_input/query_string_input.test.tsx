@@ -21,13 +21,14 @@ import { render } from '@testing-library/react';
 import { EuiTextArea, EuiIcon } from '@elastic/eui';
 
 import { QueryLanguageSwitcher } from './language_switcher';
-import { QueryStringInput } from './';
-import type QueryStringInputUI from './query_string_input';
+import QueryStringInputUI from './query_string_input';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { stubIndexPatternWithFields } from '../../stubs';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider, withKibana } from 'src/plugins/kibana_react/public';
+
+jest.useFakeTimers();
 
 const startMock = coreMock.createStart();
 
@@ -62,17 +63,19 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-function wrapQueryStringInputInContext(testProps: any, storage?: any) {
-  const defaultOptions = {
-    screenTitle: 'Another Screen',
-    intl: null as any,
-  };
+const QueryStringInput = withKibana(QueryStringInputUI);
 
+function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   const services = {
     ...startMock,
     data: dataPluginMock.createStartContract(),
     appName: testProps.appName || 'test',
     storage: storage || createMockStorage(),
+  };
+
+  const defaultOptions = {
+    screenTitle: 'Another Screen',
+    intl: null as any,
   };
 
   return (
@@ -84,15 +87,12 @@ function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   );
 }
 
-// FAILING: https://github.com/elastic/kibana/issues/85715
-// FAILING: https://github.com/elastic/kibana/issues/89603
-// FAILING: https://github.com/elastic/kibana/issues/89641
-describe.skip('QueryStringInput', () => {
+describe('QueryStringInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it.skip('Should render the given query', async () => {
+  it('Should render the given query', async () => {
     const { getByText } = render(
       wrapQueryStringInputInContext({
         query: kqlQuery,
@@ -228,7 +228,7 @@ describe.skip('QueryStringInput', () => {
     expect(mockCallback).toHaveBeenCalledWith();
   });
 
-  it('Should fire onChangeQueryInputFocus callback on input blur', () => {
+  it('Should fire onChangeQueryInputFocus after a delay', () => {
     const mockCallback = jest.fn();
 
     const component = mount(
@@ -243,8 +243,91 @@ describe.skip('QueryStringInput', () => {
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('blur');
 
+    jest.advanceTimersByTime(10);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(100);
+
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(false);
+  });
+
+  it('Should not fire onChangeQueryInputFocus if input is focused back', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onChangeQueryInputFocus: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    jest.advanceTimersByTime(5);
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    inputWrapper.simulate('focus');
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith(true);
+
+    jest.advanceTimersByTime(100);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+  });
+
+  it('Should call onSubmit after a delay when submitOnBlur is on and blurs input', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+        submitOnBlur: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    jest.advanceTimersByTime(10);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(100);
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith(kqlQuery);
+  });
+
+  it("Shouldn't call onSubmit on blur by default", () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    jest.advanceTimersByTime(10);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(100);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
   });
 
   it('Should use PersistedLog for recent search suggestions', async () => {
@@ -282,5 +365,27 @@ describe.skip('QueryStringInput', () => {
       })
     );
     expect(mockFetchIndexPatterns.mock.calls[0][1]).toStrictEqual(patternStrings);
+  });
+
+  it('Should convert non-breaking spaces into regular spaces', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onChange: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+    const input = instance.inputRef;
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    input!.value = 'foo\u00A0bar';
+    inputWrapper.simulate('change');
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith({ query: 'foo bar', language: 'kuery' });
   });
 });

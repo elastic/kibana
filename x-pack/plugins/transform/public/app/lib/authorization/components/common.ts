@@ -58,7 +58,9 @@ export const hasPrivilegeFactory = (privileges: Privileges | undefined | null) =
 
 // create the text for button's tooltips if the user
 // doesn't have the permission to press that button
-export function createCapabilityFailureMessage(capability: keyof Capabilities) {
+export function createCapabilityFailureMessage(
+  capability: keyof Capabilities | 'noTransformNodes'
+) {
   let message = '';
 
   switch (capability) {
@@ -78,6 +80,12 @@ export function createCapabilityFailureMessage(capability: keyof Capabilities) {
     case 'canDeleteTransform':
       message = i18n.translate('xpack.transform.capability.noPermission.deleteTransformTooltip', {
         defaultMessage: 'You do not have permission to delete transforms.',
+      });
+      break;
+
+    case 'noTransformNodes':
+      message = i18n.translate('xpack.transform.capability.noPermission.noTransformNodesTooltip', {
+        defaultMessage: 'There are no transform nodes available.',
       });
       break;
   }
