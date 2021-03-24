@@ -23,6 +23,7 @@ import {
   EuiText,
   EuiConfirmModal,
   EuiFieldText,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import { DocLinksStart, CoreStart } from 'src/core/public';
@@ -65,7 +66,7 @@ const geti18nTexts = (field?: Field) => {
     typeConfirm: i18n.translate(
       'indexPatternFieldEditor.saveRuntimeField.confirmModal.typeConfirm',
       {
-        defaultMessage: "Type 'confirm' to continue:",
+        defaultMessage: "Type 'CHANGE' to continue:",
       }
     ),
   };
@@ -210,12 +211,11 @@ const FieldEditorFlyoutContentComponent = ({
 
   const modal = isModalVisible ? (
     <EuiConfirmModal
-      title={'Confirm save'}
+      title={`Confirm changes to '${field?.name}'`}
       data-test-subj="runtimeFieldSaveConfirmModal"
       cancelButtonText={i18nTexts.cancelButtonText}
-      buttonColor="danger"
       confirmButtonText={i18nTexts.confirmButtonText}
-      confirmButtonDisabled={confirmContent?.toLowerCase() !== 'confirm'}
+      confirmButtonDisabled={confirmContent?.toUpperCase() !== 'CHANGE'}
       onCancel={() => {
         setIsModalVisible(false);
         setConfirmContent('');
@@ -225,52 +225,53 @@ const FieldEditorFlyoutContentComponent = ({
         onSave(data);
       }}
     >
-      <>
-        <p>{i18nTexts.warningChangingFields}</p>
-        <p>{i18nTexts.typeConfirm}</p>
+      <EuiCallOut
+        color="warning"
+        title={i18nTexts.warningChangingFields}
+        iconType="alert"
+        size="s"
+      />
+      <EuiSpacer />
+      <EuiFormRow label={i18nTexts.typeConfirm}>
         <EuiFieldText
           value={confirmContent}
           onChange={(e) => setConfirmContent(e.target.value)}
           data-test-subj="saveModalConfirmText"
         />
-      </>
+      </EuiFormRow>
     </EuiConfirmModal>
   ) : null;
   return (
     <>
       <EuiFlyoutHeader>
-        <EuiTitle size="m" data-test-subj="flyoutTitle">
-          {field ? (
-            <EuiText>
+        <EuiTitle data-test-subj="flyoutTitle">
+          <h2>
+            {field ? (
               <FormattedMessage
                 id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
-                defaultMessage="Edit {fieldName}"
+                defaultMessage="Edit field '{fieldName}'"
                 values={{
-                  fieldName: (
-                    <h2 id="fieldEditorTitle" style={{ display: 'inline' }}>
-                      {field.name}
-                    </h2>
-                  ),
+                  fieldName: field.name,
                 }}
               />
-            </EuiText>
-          ) : (
-            <h2>
+            ) : (
               <FormattedMessage
                 id="indexPatternFieldEditor.editor.flyoutDefaultTitle"
                 defaultMessage="Create field"
               />
-            </h2>
-          )}
+            )}
+          </h2>
         </EuiTitle>
-        <EuiText>
-          <FormattedMessage
-            id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
-            defaultMessage="Index pattern: {patternName}"
-            values={{
-              patternName: <i>{indexPattern.title}</i>,
-            }}
-          />
+        <EuiText color="subdued">
+          <p>
+            <FormattedMessage
+              id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
+              defaultMessage="Index pattern: {patternName}"
+              values={{
+                patternName: <i>{indexPattern.title}</i>,
+              }}
+            />
+          </p>
         </EuiText>
       </EuiFlyoutHeader>
 
