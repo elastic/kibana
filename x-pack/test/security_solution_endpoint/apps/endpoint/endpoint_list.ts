@@ -268,7 +268,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ],
           [
             'cadmann-4.example.com',
-            'Error',
+            'Unhealthy',
             'Default',
             'Failure',
             'windows 10.0',
@@ -279,7 +279,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ],
           [
             'thurlow-9.example.com',
-            'Error',
+            'Unhealthy',
             'Default',
             'Success',
             'windows 10.0',

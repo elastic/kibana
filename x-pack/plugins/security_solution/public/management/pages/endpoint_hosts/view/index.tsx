@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, memo, useState } from 'react';
+import React, { useMemo, useCallback, memo, useState, useContext } from 'react';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiText,
   EuiLink,
-  EuiHealth,
   EuiBadge,
   EuiToolTip,
   EuiSelectableProps,
@@ -34,13 +33,14 @@ import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
 import { EuiContextMenuItemProps } from '@elastic/eui/src/components/context_menu/context_menu_item';
 import { NavigateToAppOptions } from 'kibana/public';
+import { ThemeContext } from 'styled-components';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
 import {
   HOST_STATUS_TO_BADGE_COLOR,
-  POLICY_STATUS_TO_HEALTH_COLOR,
+  POLICY_STATUS_TO_BADGE_COLOR,
   POLICY_STATUS_TO_TEXT,
 } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -76,6 +76,7 @@ const EndpointListNavLink = memo<{
   dataTestSubj: string;
 }>(({ name, href, route, dataTestSubj }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
+  const theme = useContext(ThemeContext);
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
@@ -84,6 +85,7 @@ const EndpointListNavLink = memo<{
       className="eui-textTruncate"
       href={href}
       onClick={clickHandler}
+      style={{ color: theme.eui.euiColorInk }}
     >
       {name}
     </EuiLink>
@@ -376,8 +378,8 @@ export const EndpointList = () => {
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <EuiHealth
-              color={POLICY_STATUS_TO_HEALTH_COLOR[policy.status]}
+            <EuiBadge
+              color={POLICY_STATUS_TO_BADGE_COLOR[policy.status]}
               className="eui-textTruncate"
               data-test-subj="rowPolicyStatus"
             >
@@ -387,7 +389,7 @@ export const EndpointList = () => {
                 route={toRoutePath}
                 dataTestSubj="policyStatusCellLink"
               />
-            </EuiHealth>
+            </EuiBadge>
           );
         },
       },

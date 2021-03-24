@@ -23,10 +23,10 @@ export const HOST_STATUS_TO_BADGE_COLOR = Object.freeze<
 export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
   { [key in keyof typeof HostPolicyResponseActionStatus]: string }
 >({
-  success: 'success',
+  success: 'secondary',
   warning: 'warning',
   failure: 'danger',
-  unsupported: 'subdued',
+  unsupported: 'default',
 });
 
 export const POLICY_STATUS_TO_BADGE_COLOR = Object.freeze<

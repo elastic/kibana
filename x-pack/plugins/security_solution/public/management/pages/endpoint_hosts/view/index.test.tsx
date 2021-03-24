@@ -25,7 +25,7 @@ import {
   MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
+import { POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -364,13 +364,6 @@ describe('when on the list page', () => {
 
         policyStatuses.forEach((status, index) => {
           expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
-          expect(
-            status.querySelector(
-              `[data-euiicon-type][color=${
-                POLICY_STATUS_TO_HEALTH_COLOR[generatedPolicyStatuses[index]]
-              }]`
-            )
-          ).not.toBeNull();
         });
       });
 
