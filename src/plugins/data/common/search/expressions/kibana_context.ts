@@ -101,7 +101,13 @@ export const getKibanaContextFn = (
           type: 'search',
           id: state.savedSearchId[0] as string,
         });
-        state.savedSearchId[0] = refName;
+        return {
+          state: {
+            ...state,
+            savedSearchId: [refName],
+          },
+          references,
+        };
       }
       return { state, references };
     },

@@ -67,12 +67,17 @@ export const getIndexPatternLoadMeta = (): Omit<
         id: state.id[0] as string,
       },
     ];
-    state.id[0] = refName;
-    return { state, references };
+    return {
+      state: {
+        ...state,
+        id: [refName],
+      },
+      references,
+    };
   },
 
   inject(state, references) {
-    const reference = references.find(({ name }) => name === 'indexPatternLoad.id');
+    const reference = references.find((ref) => ref.name === 'indexPatternLoad.id');
     if (reference) {
       state.id[0] = reference.id;
     }

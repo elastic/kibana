@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/server';
 import { getKibanaContextFn } from '../../../common/search/expressions';
 import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
@@ -34,13 +33,7 @@ export function getKibanaContext({
   return getKibanaContextFn(async (getKibanaRequest) => {
     const request = getKibanaRequest && getKibanaRequest();
     if (!request) {
-      throw new Error(
-        i18n.translate('data.search.kibana_context.error.kibanaRequest', {
-          defaultMessage:
-            'A KibanaRequest is required to execute this search on the server. ' +
-            'Please provide a request object to the expression execution params.',
-        })
-      );
+      throw new Error('KIBANA_CONTEXT_KIBANA_REQUEST_MISSING');
     }
 
     const [{ savedObjects }] = await getStartServices();
