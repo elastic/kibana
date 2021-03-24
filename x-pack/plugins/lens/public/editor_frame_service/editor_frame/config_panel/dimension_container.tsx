@@ -30,7 +30,7 @@ export function DimensionContainer({
 }: {
   isOpen: boolean;
   handleClose: () => void;
-  panel: React.ReactElement;
+  panel: React.ReactElement | null;
   groupLabel: string;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);

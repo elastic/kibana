@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { render } from 'react-dom';
 import { NativeRenderer } from './native_renderer';
 import { act } from 'react-dom/test-utils';
@@ -150,5 +150,53 @@ describe('native_renderer', () => {
     );
     const containerElement: Element = mountpoint.firstElementChild!;
     expect(containerElement.nodeName).toBe('SPAN');
+  });
+
+  it('should properly unmount a react element that is mounted inside the renderer', () => {
+    let isUnmounted = false;
+
+    function TestComponent() {
+      useEffect(() => {
+        return () => {
+          isUnmounted = true;
+        };
+      }, []);
+      return <>Hello</>;
+    }
+
+    renderAndTriggerHooks(
+      <NativeRenderer
+        render={(element) => {
+          // This render function mimics the most common usage inside Lens
+          render(<TestComponent />, element);
+        }}
+        nativeProps={{}}
+      />,
+      mountpoint
+    );
+
+    // Replaces the component at the mountpoint with nothing
+    renderAndTriggerHooks(<>Empty</>, mountpoint);
+
+    expect(isUnmounted).toBe(true);
+  });
+
+  it('should call the unmount function provided for non-react elements', () => {
+    const unmountCallback = jest.fn();
+
+    renderAndTriggerHooks(
+      <NativeRenderer
+        render={(element, props) => {
+          return unmountCallback;
+        }}
+        nativeProps={{}}
+      />,
+      mountpoint
+    );
+
+    // Replaces the component at the mountpoint with nothing
+    renderAndTriggerHooks(<>Empty</>, mountpoint);
+
+    expect(unmountCallback).toHaveBeenCalled();
   });
 });

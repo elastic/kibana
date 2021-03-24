@@ -63,6 +63,7 @@ import './formula.scss';
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
 });
+
 export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'formula';
   params: {
@@ -203,7 +204,6 @@ function FormulaEditor({
   updateLayer,
   currentColumn,
   columnId,
-  http,
   indexPattern,
   operationDefinitionMap,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
@@ -212,19 +212,33 @@ function FormulaEditor({
   const editorModel = React.useRef<monaco.editor.ITextModel>(
     monaco.editor.createModel(text ?? '', LANGUAGE_ID)
   );
-  const overflowDiv = React.useRef<HTMLElement>();
+  const overflowDiv1 = React.useRef<HTMLElement>();
+  const overflowDiv2 = React.useRef<HTMLElement>();
+
+  // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
+  // requires a second render to work, so we are using an if statement to guarantee it happens
+  // on first render
+  if (!overflowDiv1?.current) {
+    const node1 = (overflowDiv1.current = document.createElement('div'));
+    node1.setAttribute('data-test-subj', 'lnsFormulaWidget');
+    // Monaco CSS is targeted on the monaco-editor class
+    node1.classList.add('lnsFormulaOverflow', 'monaco-editor');
+    document.body.appendChild(node1);
+
+    const node2 = (overflowDiv2.current = document.createElement('div'));
+    node2.setAttribute('data-test-subj', 'lnsFormulaWidget');
+    // Monaco CSS is targeted on the monaco-editor class
+    node2.classList.add('lnsFormulaOverflow', 'monaco-editor');
+    document.body.appendChild(node2);
+  }
+
+  // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
-    const node = (overflowDiv.current = document.createElement('div'));
-    node.setAttribute('data-test-subj', 'lnsFormulaWidget');
-    // Add the monaco-editor class because the monaco css depends on it to target
-    // children
-    node.classList.add('lnsFormulaOverflow', 'monaco-editor');
-    document.body.appendChild(overflowDiv.current);
     const model = editorModel.current;
     return () => {
-      // Clean up the manually-created model
       model.dispose();
-      node.parentNode?.removeChild(node);
+      overflowDiv1.current?.parentNode?.removeChild(overflowDiv1.current);
+      overflowDiv2.current?.parentNode?.removeChild(overflowDiv2.current);
     };
   }, []);
 
@@ -396,17 +410,23 @@ function FormulaEditor({
   };
 
   useEffect(() => {
-    // Because the monaco model is owned by Lens, we need to manually attach handlers
-    monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
+    // Because the monaco model is owned by Lens, we need to manually attach and remove handlers
+    const { dispose: dispose1 } = monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
       triggerCharacters: ['.', ',', '(', '='],
       provideCompletionItems,
     });
-    monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {
+    const { dispose: dispose2 } = monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {
       signatureHelpTriggerCharacters: ['(', ',', '='],
       provideSignatureHelp,
     });
+    return () => {
+      dispose1();
+      dispose2();
+    };
   }, [provideCompletionItems, provideSignatureHelp]);
 
+  // The Monaco editor will lazily load Monaco, which takes a render cycle to trigger. This can cause differences
+  // in the behavior of Monaco when it's first loaded and then reloaded.
   return (
     <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--shaded">
       <CodeEditor
@@ -416,7 +436,7 @@ function FormulaEditor({
         options={{
           ...codeEditorOptions.options,
           // Shared model and overflow node
-          overflowWidgetsDomNode: overflowDiv?.current ?? undefined,
+          overflowWidgetsDomNode: overflowDiv1.current,
           model: editorModel.current,
         }}
       />
@@ -476,11 +496,11 @@ function FormulaEditor({
                 <CodeEditor
                   {...codeEditorOptions}
                   height={280}
-                  width={300}
+                  width={400}
                   options={{
                     ...codeEditorOptions.options,
                     // Shared model and overflow node
-                    overflowWidgetsDomNode: overflowDiv?.current ?? undefined,
+                    overflowWidgetsDomNode: overflowDiv2.current,
                     model: editorModel?.current,
                   }}
                 />

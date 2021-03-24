@@ -457,18 +457,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
         ) : null}
 
         {shouldDisplayExtraOptions && ParamEditor && (
-          <>
-            <ParamEditor
-              layer={state.layers[layerId]}
-              updateLayer={setStateWrapper}
-              columnId={columnId}
-              currentColumn={state.layers[layerId].columns[columnId]}
-              dateRange={dateRange}
-              indexPattern={currentIndexPattern}
-              operationDefinitionMap={operationDefinitionMap}
-              {...services}
-            />
-          </>
+          <ParamEditor
+            layer={state.layers[layerId]}
+            updateLayer={setStateWrapper}
+            columnId={columnId}
+            currentColumn={state.layers[layerId].columns[columnId]}
+            dateRange={dateRange}
+            indexPattern={currentIndexPattern}
+            operationDefinitionMap={operationDefinitionMap}
+            {...services}
+          />
         )}
 
         {selectedColumn && shouldDisplayExtraOptions && (

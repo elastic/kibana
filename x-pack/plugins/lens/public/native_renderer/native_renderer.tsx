@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { HTMLAttributes } from 'react';
+import React, { HTMLAttributes, useEffect, useRef } from 'react';
+import { unmountComponentAtNode } from 'react-dom';
 
 export interface NativeRendererProps<T> extends HTMLAttributes<HTMLDivElement> {
   render: (domElement: Element, props: T) => void;
@@ -19,11 +20,32 @@ export interface NativeRendererProps<T> extends HTMLAttributes<HTMLDivElement> {
  * By default the mountpoint element will be a div, this can be changed with the
  * `tag` prop.
  *
+ * If the rendered component tree was using React, we need to clean it up manually,
+ * otherwise the unmount event never happens. A future addition is for non-React components
+ * to get cleaned up, which could be added in the future.
+ *
  * @param props
  */
 export function NativeRenderer<T>({ render, nativeProps, tag, ...rest }: NativeRendererProps<T>) {
+  const elementRef = useRef<Element>();
+  const cleanupRef = useRef<((cleanupElement: Element) => void) | void>();
+  useEffect(() => {
+    return () => {
+      if (elementRef.current) {
+        if (cleanupRef.current) {
+          cleanupRef.current(elementRef.current);
+        }
+        unmountComponentAtNode(elementRef.current);
+      }
+    };
+  }, []);
   return React.createElement(tag || 'div', {
     ...rest,
-    ref: (el) => el && render(el, nativeProps),
+    ref: (el) => {
+      if (el) {
+        elementRef.current = el;
+        cleanupRef.current = render(el, nativeProps);
+      }
+    },
   });
 }
