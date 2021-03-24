@@ -7,7 +7,7 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
-import { ICorsConfig, IHttpConfig, ISslConfig } from '@kbn/http-tools';
+import { ICorsConfig, IHttpConfig, ISslConfig, SslConfig, sslSchema } from '@kbn/http-tools';
 
 export const httpConfigSchema = schema.object(
   {
@@ -35,7 +35,7 @@ export const httpConfigSchema = schema.object(
         defaultValue: ['*'],
       }),
     }),
-    // TODO: SSL
+    ssl: sslSchema,
   },
   { unknowns: 'ignore' }
 );
@@ -60,9 +60,6 @@ export class HttpConfig implements IHttpConfig {
     this.keepaliveTimeout = rawConfig.keepaliveTimeout;
     this.socketTimeout = rawConfig.socketTimeout;
     this.cors = rawConfig.cors;
-    // TODO: SSL
-    this.ssl = {
-      enabled: false,
-    };
+    this.ssl = new SslConfig(rawConfig.ssl);
   }
 }

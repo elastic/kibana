@@ -12,3 +12,4 @@ export { defaultValidationErrorHandler } from './default_validation_error_handle
 export { getListenerOptions } from './get_listener_options';
 export { getServerOptions } from './get_server_options';
 export { getRequestId } from './get_request_id';
+export { sslSchema, SslConfig } from './ssl';
