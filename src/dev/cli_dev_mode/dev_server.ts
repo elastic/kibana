@@ -26,8 +26,6 @@ import { usingServerProcess } from './using_server_process';
 import { Watcher } from './watcher';
 import { Log } from './log';
 
-type Phase = 'starting' | 'fatal exit' | 'listening';
-
 export interface Options {
   log: Log;
   watcher: Watcher;
@@ -48,7 +46,7 @@ export class DevServer {
   private readonly sigint$: Rx.Observable<void>;
   private readonly sigterm$: Rx.Observable<void>;
   private readonly ready$ = new Rx.BehaviorSubject(false);
-  private readonly phase$ = new Rx.ReplaySubject<Phase>(1);
+  private readonly phase$ = new Rx.ReplaySubject<'starting' | 'fatal exit' | 'listening'>(1);
 
   private readonly script: string;
   private readonly argv: string[];
@@ -81,16 +79,13 @@ export class DevServer {
    */
   getRestartTime$() {
     return this.phase$.pipe(
-      scan<
-        Phase,
-        undefined | { phase: 'starting'; at: number } | { phase: 'listening'; took: number }
-      >((acc, phase) => {
+      scan((acc: undefined | { phase: string; time: number }, phase) => {
         if (phase === 'starting') {
-          return { phase, at: Date.now() };
+          return { phase, time: Date.now() };
         }
 
         if (phase === 'listening' && acc?.phase === 'starting') {
-          return { phase, took: Date.now() - acc.at };
+          return { phase, time: Date.now() - acc.time };
         }
 
         return undefined;
@@ -100,7 +95,7 @@ export class DevServer {
           return [];
         }
 
-        return [{ ms: desc.took }];
+        return [{ ms: desc.time }];
       })
     );
   }
