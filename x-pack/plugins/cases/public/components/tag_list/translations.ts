@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+import { i18n } from '@kbn/i18n';
+
+export * from '../../common/translations';
+
+export const EDIT_TAGS_ARIA = i18n.translate('xpack.cases.caseView.editTagsLinkAria', {
+  defaultMessage: 'click to edit tags',
+});

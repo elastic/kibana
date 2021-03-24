@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+export interface RegistryEcs {
+  hive?: string[];
+  key?: string[];
+  path?: string[];
+  value?: string[];
+}

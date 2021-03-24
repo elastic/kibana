@@ -5,6 +5,14 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+import { FormSchema, FIELD_TYPES } from '../../common/shared_imports';
+
+export interface FormProps {
+  connectorId: string;
+}
+
+export const schema: FormSchema<FormProps> = {
+  connectorId: {
+    type: FIELD_TYPES.SUPER_SELECT,
+  },
+};

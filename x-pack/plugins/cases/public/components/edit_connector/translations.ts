@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+import { i18n } from '@kbn/i18n';
+
+export * from '../../common/translations';
+
+export const EDIT_CONNECTOR_ARIA = i18n.translate(
+  'xpack.cases.editConnector.editConnectorLinkAria',
+  {
+    defaultMessage: 'click to edit connector',
+  }
+);

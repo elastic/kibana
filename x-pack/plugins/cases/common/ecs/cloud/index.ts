@@ -5,6 +5,17 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+export interface CloudEcs {
+  instance?: CloudInstanceEcs;
+  machine?: CloudMachineEcs;
+  provider?: string[];
+  region?: string[];
+}
+
+export interface CloudMachineEcs {
+  type?: string[];
+}
+
+export interface CloudInstanceEcs {
+  id?: string[];
+}

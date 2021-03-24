@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+export interface AgentEcs {
+  type?: string[];
+}

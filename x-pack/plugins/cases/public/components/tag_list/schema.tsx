@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+import { FormSchema } from '../../common/shared_imports';
+import { schemaTags } from '../create/schema';
+
+export const schema: FormSchema = {
+  tags: schemaTags,
+};

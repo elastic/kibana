@@ -5,6 +5,16 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+export interface DnsEcs {
+  question?: DnsQuestionEcs;
+
+  resolved_ip?: string[];
+
+  response_code?: string[];
+}
+
+export interface DnsQuestionEcs {
+  name?: string[];
+
+  type?: string[];
+}

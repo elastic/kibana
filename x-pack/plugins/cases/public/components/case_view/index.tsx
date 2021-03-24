@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+// import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import {
@@ -17,12 +17,10 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes, CaseType } from '../../../../../cases/common';
+import { CaseStatuses, CaseAttributes, CaseType, Ecs } from '../../../common';
 import { Case, CaseConnector } from '../../containers/types';
-import { getCaseDetailsUrl, getCaseUrl, useFormatUrl } from '../../../common/components/link_to';
-import { gutterTimeline } from '../../../common/lib/helpers';
-import { HeaderPage } from '../../../common/components/header_page';
-import { EditableTitle } from '../../../common/components/header_page/editable_title';
+import { HeaderPage } from '../header_page';
+import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
 import { useGetCase } from '../../containers/use_get_case';
 import { UserActionTree } from '../user_action_tree';
@@ -31,29 +29,38 @@ import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
 import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { CaseActionBar } from '../case_action_bar';
-import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePushToService } from '../use_push_to_service';
 import { EditConnector } from '../edit_connector';
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { SecurityPageName } from '../../../app/types';
 import {
   getConnectorById,
   normalizeActionConnector,
   getNoneConnector,
 } from '../configure_cases/utils';
-import { DetailsPanel } from '../../../timelines/components/side_panel';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { TimelineId } from '../../../../common/types/timeline';
-import { timelineActions } from '../../../timelines/store/timeline';
 import { StatusActionButton } from '../status/button';
-
 import * as i18n from './translations';
 
-interface Props {
+// TODO: All below imports depend on Timeline or SecuritySolution in some form or another
+// import { SpyRoute } from '../../../common/utils/route/spy_routes';
+
+const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
+export interface CaseViewProps {
+  allCasesHref: string;
+  backToAllCasesOnClick: (ev: MouseEvent) => void;
+  caseDetailsHref: string;
   caseId: string;
+  configureCasesHref: string;
+  getCaseDetailHrefWithCommentId: (commentId: string) => string;
+  getRuleDetailsHref: (ruleId: string | null | undefined) => string;
+  onComponentInitialized?: () => void;
+  onConfigureCasesNavClick: (ev: React.MouseEvent) => void;
+  onRuleDetailsClick: (ruleId: string | null | undefined) => void;
+  renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
+  renderTimelineDetailsPanel?: () => JSX.Element;
+  showAlertDetails: (alertId: string, index: string) => void;
   subCaseId?: string;
+  useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
   userCanCrud: boolean;
 }
 
@@ -80,18 +87,34 @@ const MyEuiHorizontalRule = styled(EuiHorizontalRule)`
   }
 `;
 
-export interface CaseProps extends Props {
+export interface CaseComponentProps extends CaseViewProps {
   fetchCase: () => void;
   caseData: Case;
   updateCase: (newCase: Case) => void;
 }
 
-export const CaseComponent = React.memo<CaseProps>(
-  ({ caseId, caseData, fetchCase, subCaseId, updateCase, userCanCrud }) => {
-    const dispatch = useDispatch();
-    const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
-    const allCasesLink = getCaseUrl(search);
-    const caseDetailsLink = formatUrl(getCaseDetailsUrl({ id: caseId }), { absolute: true });
+export const CaseComponent = React.memo<CaseComponentProps>(
+  ({
+    allCasesHref,
+    backToAllCasesOnClick,
+    caseData,
+    caseDetailsHref,
+    caseId,
+    configureCasesHref,
+    fetchCase,
+    getCaseDetailHrefWithCommentId,
+    getRuleDetailsHref,
+    onComponentInitialized,
+    onConfigureCasesNavClick,
+    onRuleDetailsClick,
+    renderInvestigateInTimelineActionComponent,
+    renderTimelineDetailsPanel,
+    showAlertDetails,
+    subCaseId,
+    updateCase,
+    useFetchAlertData,
+    userCanCrud,
+  }) => {
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
 
@@ -108,12 +131,6 @@ export const CaseComponent = React.memo<CaseProps>(
       caseId,
       subCaseId,
     });
-
-    /**
-     * For the future developer: useSourcererScope is security solution dependent.
-     * You can use useSignalIndex as an alternative.
-     */
-    const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.detections);
 
     // Update Fields
     const onUpdateField = useCallback(
@@ -234,6 +251,7 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const { pushButton, pushCallouts } = usePushToService({
+      configureCasesHref,
       connector: {
         ...caseData.connector,
         name: isEmpty(connectorName) ? caseData.connector.name : connectorName,
@@ -242,6 +260,7 @@ export const CaseComponent = React.memo<CaseProps>(
       caseId: caseData.id,
       caseStatus: caseData.status,
       connectors,
+      onConfigureCasesNavClick,
       updateCase: handleUpdateCase,
       userCanCrud,
       isValidConnector: isLoadingConnectors ? true : isValidConnector,
@@ -287,14 +306,15 @@ export const CaseComponent = React.memo<CaseProps>(
       fetchCase();
     }, [caseData.connector.id, caseId, fetchCase, fetchCaseUserActions, subCaseId]);
 
-    const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
+    // TODO: Handle spyRoute (pass as a prop or allow component to have children??)
+    // const spyState = useMemo(() => ({ caseTitle: caseData.title }), [caseData.title]);
 
     const emailContent = useMemo(
       () => ({
         subject: i18n.EMAIL_SUBJECT(caseData.title),
-        body: i18n.EMAIL_BODY(caseDetailsLink),
+        body: i18n.EMAIL_BODY(caseDetailsHref),
       }),
-      [caseDetailsLink, caseData.title]
+      [caseDetailsHref, caseData.title]
     );
 
     useEffect(() => {
@@ -305,46 +325,30 @@ export const CaseComponent = React.memo<CaseProps>(
 
     const backOptions = useMemo(
       () => ({
-        href: allCasesLink,
+        href: allCasesHref,
         text: i18n.BACK_TO_ALL,
         dataTestSubj: 'backToCases',
-        pageId: SecurityPageName.case,
+        onClick: backToAllCasesOnClick,
       }),
-      [allCasesLink]
+      [allCasesHref, backToAllCasesOnClick]
     );
 
-    const showAlert = useCallback(
+    const onShowAlertDetails = useCallback(
       (alertId: string, index: string) => {
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            panelView: 'eventDetail',
-            timelineId: TimelineId.casePage,
-            params: {
-              eventId: alertId,
-              indexName: index,
-            },
-          })
-        );
+        showAlertDetails(alertId, index);
       },
-      [dispatch]
+      [showAlertDetails]
     );
 
     // useEffect used for component's initialization
     useEffect(() => {
       if (init.current) {
         init.current = false;
-        // We need to create a timeline to show the details view
-        dispatch(
-          timelineActions.createTimeline({
-            id: TimelineId.casePage,
-            columns: [],
-            indexNames: [],
-            expandedDetail: {},
-            show: false,
-          })
-        );
+        if (onComponentInitialized) {
+          onComponentInitialized();
+        }
       }
-    }, [dispatch]);
+    }, [onComponentInitialized]);
 
     return (
       <>
@@ -352,7 +356,6 @@ export const CaseComponent = React.memo<CaseProps>(
           <HeaderPage
             backOptions={backOptions}
             data-test-subj="case-view-title"
-            hideSourcerer={true}
             titleNode={
               <EditableTitle
                 disabled={!userCanCrud}
@@ -384,6 +387,9 @@ export const CaseComponent = React.memo<CaseProps>(
                 {!initLoadingData && (
                   <>
                     <UserActionTree
+                      getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+                      getRuleDetailsHref={getRuleDetailsHref}
+                      onRuleDetailsClick={onRuleDetailsClick}
                       caseServices={caseServices}
                       caseUserActions={caseUserActions}
                       connectors={connectors}
@@ -396,9 +402,13 @@ export const CaseComponent = React.memo<CaseProps>(
                       )}
                       isLoadingDescription={isLoading && updateKey === 'description'}
                       isLoadingUserActions={isLoadingUserActions}
-                      onShowAlertDetails={showAlert}
+                      onShowAlertDetails={onShowAlertDetails}
                       onUpdateField={onUpdateField}
+                      renderInvestigateInTimelineActionComponent={
+                        renderInvestigateInTimelineActionComponent
+                      }
                       updateCase={updateCase}
+                      useFetchAlertData={useFetchAlertData}
                       userCanCrud={userCanCrud}
                     />
                     {(caseData.type !== CaseType.collection || hasDataToPush) && (
@@ -466,46 +476,77 @@ export const CaseComponent = React.memo<CaseProps>(
             </EuiFlexGroup>
           </MyWrapper>
         </WhitePageWrapper>
-        <DetailsPanel
-          browserFields={browserFields}
-          docValueFields={docValueFields}
-          isFlyoutView
-          timelineId={TimelineId.casePage}
-        />
-        <SpyRoute state={spyState} pageName={SecurityPageName.case} />
+        {renderTimelineDetailsPanel ? renderTimelineDetailsPanel() : null}
+        {/* TODO: Determine spyroute changes */}
+        {/* <SpyRoute state={spyState} pageName={SecurityPageName.case} /> */}
       </>
     );
   }
 );
 
-export const CaseView = React.memo(({ caseId, subCaseId, userCanCrud }: Props) => {
-  const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
+export const CaseView = React.memo(
+  ({
+    allCasesHref,
+    backToAllCasesOnClick,
+    caseDetailsHref,
+    caseId,
+    configureCasesHref,
+    getCaseDetailHrefWithCommentId,
+    getRuleDetailsHref,
+    onComponentInitialized,
+    onConfigureCasesNavClick,
+    onRuleDetailsClick,
+    renderInvestigateInTimelineActionComponent,
+    renderTimelineDetailsPanel,
+    showAlertDetails,
+    subCaseId,
+    useFetchAlertData,
+    userCanCrud,
+  }: CaseViewProps) => {
+    const { data, isLoading, isError, fetchCase, updateCase } = useGetCase(caseId, subCaseId);
+    if (isError) {
+      return null;
+    }
+    if (isLoading) {
+      return (
+        <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
+          </EuiFlexItem>
+        </MyEuiFlexGroup>
+      );
+    }
 
-  if (isError) {
-    return null;
-  }
-  if (isLoading) {
     return (
-      <MyEuiFlexGroup gutterSize="none" justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner data-test-subj="case-view-loading" size="xl" />
-        </EuiFlexItem>
-      </MyEuiFlexGroup>
+      data && (
+        <CaseComponent
+          allCasesHref={allCasesHref}
+          backToAllCasesOnClick={backToAllCasesOnClick}
+          caseData={data}
+          caseDetailsHref={caseDetailsHref}
+          caseId={caseId}
+          configureCasesHref={configureCasesHref}
+          fetchCase={fetchCase}
+          getCaseDetailHrefWithCommentId={getCaseDetailHrefWithCommentId}
+          getRuleDetailsHref={getRuleDetailsHref}
+          onComponentInitialized={onComponentInitialized}
+          onConfigureCasesNavClick={onConfigureCasesNavClick}
+          onRuleDetailsClick={onRuleDetailsClick}
+          renderInvestigateInTimelineActionComponent={renderInvestigateInTimelineActionComponent}
+          renderTimelineDetailsPanel={renderTimelineDetailsPanel}
+          showAlertDetails={showAlertDetails}
+          subCaseId={subCaseId}
+          updateCase={updateCase}
+          useFetchAlertData={useFetchAlertData}
+          userCanCrud={userCanCrud}
+        />
+      )
     );
   }
-  return (
-    data && (
-      <CaseComponent
-        caseId={caseId}
-        subCaseId={subCaseId}
-        fetchCase={fetchCase}
-        caseData={data}
-        updateCase={updateCase}
-        userCanCrud={userCanCrud}
-      />
-    )
-  );
-});
+);
 
 CaseComponent.displayName = 'CaseComponent';
 CaseView.displayName = 'CaseView';
+
+// eslint-disable-next-line import/no-default-export
+export { CaseView as default };

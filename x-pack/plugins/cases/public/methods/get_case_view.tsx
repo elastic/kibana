@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
-import { AllCasesProps } from './components/all_cases';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { CaseViewProps } from '../components/case_view';
 
-export const getAllCasesLazy = (props: AllCasesProps) => {
-  const AllCasesLazy = lazy(() => import('./components/all_cases'));
+export const getCaseViewLazy = (props: CaseViewProps) => {
+  const CaseViewLazy = lazy(() => import('../components/case_view'));
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <AllCasesLazy {...props} />
+      <CaseViewLazy {...props} />
     </Suspense>
   );
 };

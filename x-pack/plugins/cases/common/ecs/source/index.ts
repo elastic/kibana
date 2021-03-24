@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+import { GeoEcs } from '../geo';
+
+export interface SourceEcs {
+  bytes?: number[];
+  ip?: string[];
+  port?: number[];
+  domain?: string[];
+  geo?: GeoEcs;
+  packets?: number[];
+}

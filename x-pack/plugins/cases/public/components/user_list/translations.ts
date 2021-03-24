@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+import { i18n } from '@kbn/i18n';
+
+export const SEND_EMAIL_ARIA = (user: string) =>
+  i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
+    values: { user },
+    defaultMessage: 'click to send an email to {user}',
+  });

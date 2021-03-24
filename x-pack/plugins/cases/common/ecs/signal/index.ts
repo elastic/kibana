@@ -5,6 +5,14 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+import { RuleEcs } from '../rule';
+
+export interface SignalEcs {
+  rule?: RuleEcs;
+  original_time?: string[];
+  status?: string[];
+  group?: {
+    id?: string[];
+  };
+  threshold_result?: unknown;
+}

@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+export * from '../../common/translations';

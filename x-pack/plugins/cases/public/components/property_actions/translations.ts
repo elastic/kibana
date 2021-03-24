@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+import { i18n } from '@kbn/i18n';
+
+export const ACTIONS_ARIA = i18n.translate('xpack.cases.caseView.editActionsLinkAria', {
+  defaultMessage: 'click to see all actions',
+});

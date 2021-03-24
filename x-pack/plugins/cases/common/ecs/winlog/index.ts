@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+export interface WinlogEcs {
+  event_id?: number[];
+}

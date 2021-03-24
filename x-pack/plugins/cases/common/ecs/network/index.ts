@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+export interface NetworkEcs {
+  bytes?: number[];
+  community_id?: string[];
+  direction?: string[];
+  packets?: number[];
+  protocol?: string[];
+  transport?: string[];
+}

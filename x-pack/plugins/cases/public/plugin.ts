@@ -10,6 +10,7 @@ import { CasesUiStart, SetupPlugins, StartPlugins } from './types';
 import { getCreateCaseLazy } from './methods/get_create_case';
 import { getAllCasesLazy } from './methods/get_all_cases';
 import { getConfigureCasesLazy } from './methods/get_configure_cases';
+import { getCaseViewLazy } from './methods/get_case_view';
 import { KibanaServices } from './common/lib/kibana';
 
 /**
@@ -34,6 +35,14 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
        */
       getAllCases: (props) => {
         return getAllCasesLazy(props);
+      },
+      /**
+       * Get the case view component
+       * @param props CaseViewProps
+       * @return {ReactElement<CaseViewProps>}
+       */
+      getCaseView: (props) => {
+        return getCaseViewLazy(props);
       },
       /**
        * Get the create case form

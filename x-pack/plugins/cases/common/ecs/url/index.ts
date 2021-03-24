@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-export * from './constants';
-export * from './api';
-export * from './ecs';
+export interface UrlEcs {
+  domain?: string[];
+
+  original?: string[];
+
+  username?: string[];
+
+  password?: string[];
+}
