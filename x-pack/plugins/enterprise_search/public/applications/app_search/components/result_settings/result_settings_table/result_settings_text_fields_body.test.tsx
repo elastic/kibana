@@ -43,10 +43,10 @@ describe('ResultSettingsTextFieldsBody', () => {
     toggleRawForField: jest.fn(),
     updateRawSizeForField: jest.fn(),
     clearRawSizeForField: jest.fn(),
-    // toggleSnippetForField: jest.fn(),
-    // updateSnippetSizeForField: jest.fn(),
-    // clearSnippetSizeForField: jest.fn(),
-    // toggleSnippetFallbackForField: jest.fn(),
+    toggleSnippetForField: jest.fn(),
+    updateSnippetSizeForField: jest.fn(),
+    clearSnippetSizeForField: jest.fn(),
+    toggleSnippetFallbackForField: jest.fn(),
   };
 
   beforeEach(() => {
@@ -56,7 +56,8 @@ describe('ResultSettingsTextFieldsBody', () => {
   });
 
   const getTableRows = (wrapper: ShallowWrapper) => wrapper.find(EuiTableRow);
-  const getFirstTableRow = (wrapper: ShallowWrapper) => getTableRows(wrapper).at(0);
+  const getBarTableRow = (wrapper: ShallowWrapper) => getTableRows(wrapper).at(0);
+  const getFooTableRow = (wrapper: ShallowWrapper) => getTableRows(wrapper).at(1);
 
   it('renders a table row for each field, sorted by field name', () => {
     const wrapper = shallow(<ResultSettingsTextFieldsBody />);
@@ -77,7 +78,7 @@ describe('ResultSettingsTextFieldsBody', () => {
   describe('the "raw" checkbox within each table row', () => {
     const getRawCheckbox = () => {
       const wrapper = shallow(<ResultSettingsTextFieldsBody />);
-      const tableRow = getFirstTableRow(wrapper);
+      const tableRow = getBarTableRow(wrapper);
       return tableRow.find('[data-test-subj="ResultSettingRawCheckBox"]');
     };
 
@@ -93,83 +94,48 @@ describe('ResultSettingsTextFieldsBody', () => {
     });
   });
 
-  describe('the "max size" text field for "raw" values within each table row', () => {
-    const setMockSettings = (settings: object) => {
-      setMockValues({
-        ...values,
-        textResultFields: {
-          ...values.textResultFields,
-          bar: settings,
-        },
-      });
-    };
-
-    const getMaxSizeTextField = () => {
+  describe('the "snippet" checkbox within each table row', () => {
+    const getSnippetCheckbox = () => {
       const wrapper = shallow(<ResultSettingsTextFieldsBody />);
-      const tableRow = getFirstTableRow(wrapper);
-      return tableRow.find('[data-test-subj="ResultSettingRawMaxSize"]');
+      const tableRow = getFooTableRow(wrapper);
+      return tableRow.find('[data-test-subj="ResultSettingSnippetTextBox"]');
     };
 
-    it("is rendered with it's value set from state", () => {
-      const rawTextField = getMaxSizeTextField();
-      expect(rawTextField.prop('value')).toEqual(values.textResultFields.bar.rawSize);
+    it("is rendered with it's checked property set from state", () => {
+      const snippetCheckbox = getSnippetCheckbox();
+      expect(snippetCheckbox.prop('checked')).toEqual(values.textResultFields.foo.snippet);
     });
 
-    it('is has no value if no max size is set in state', () => {
-      setMockSettings({
-        raw: true,
-        // no rawSize value is set here
-        snippet: false,
-        snippetFallback: false,
-      });
-      const rawTextField = getMaxSizeTextField();
-      expect(rawTextField.prop('value')).toEqual('');
+    it("calls 'toggleRawForField' when it is clicked by a user", () => {
+      const snippetCheckbox = getSnippetCheckbox();
+      snippetCheckbox.simulate('change');
+      expect(actions.toggleSnippetForField).toHaveBeenCalledWith('foo');
+    });
+  });
+
+  describe('the "fallback" checkbox within each table row', () => {
+    const getFallbackCheckbox = () => {
+      const wrapper = shallow(<ResultSettingsTextFieldsBody />);
+      const tableRow = getFooTableRow(wrapper);
+      return tableRow.find('[data-test-subj="ResultSettingFallbackTextBox"]');
+    };
+
+    it("is rendered with it's checked property set from state", () => {
+      const fallbackCheckbox = getFallbackCheckbox();
+      expect(fallbackCheckbox.prop('checked')).toEqual(values.textResultFields.foo.snippetFallback);
     });
 
-    it('is disabled if the raw checkbox is unchecked', () => {
-      setMockSettings({
-        raw: false, // This is false, so the raw checkbox is unchecked
-        snippet: false,
-        snippetFallback: false,
-      });
-      const rawTextField = getMaxSizeTextField();
-      expect(rawTextField.prop('disabled')).toEqual(true);
+    it('is disabled if snippets are disabled for this field', () => {
+      const wrapper = shallow(<ResultSettingsTextFieldsBody />);
+      const tableRow = getBarTableRow(wrapper);
+      const fallbackCheckbox = tableRow.find('[data-test-subj="ResultSettingFallbackTextBox"]');
+      expect(fallbackCheckbox.prop('disabled')).toEqual(true);
     });
 
-    it('will update the raw size in state when it is changed', () => {
-      const rawTextField = getMaxSizeTextField();
-      rawTextField.simulate('change', { target: { value: '21' } });
-      expect(actions.updateRawSizeForField).toHaveBeenCalledWith('bar', 21);
-    });
-
-    it('will clear the raw size in state when it is changed to a value other than a number', () => {
-      const rawTextField = getMaxSizeTextField();
-      rawTextField.simulate('change', { target: { value: '' } });
-      expect(actions.clearRawSizeForField).toHaveBeenCalledWith('bar');
-    });
-
-    it('will update the raw size in state on blur', () => {
-      const rawTextField = getMaxSizeTextField();
-      rawTextField.simulate('blur', { target: { value: '21' } });
-      expect(actions.updateRawSizeForField).toHaveBeenCalledWith('bar', 21);
-    });
-
-    it('will set the raw size in state on blur to the minimum possible value if it is changed to a value other than a number', () => {
-      const rawTextField = getMaxSizeTextField();
-      rawTextField.simulate('blur', { target: { value: '' } });
-      expect(actions.updateRawSizeForField).toHaveBeenCalledWith('bar', 20);
-    });
-
-    it('will set the raw size in state on blur to the minimum possible value if it is changed to a number lower than the minimum', () => {
-      const rawTextField = getMaxSizeTextField();
-      rawTextField.simulate('blur', { target: { value: '1' } });
-      expect(actions.updateRawSizeForField).toHaveBeenCalledWith('bar', 20);
-    });
-
-    it('will set the raw size in state on blur to the maximum possible value if it is changed to a number higher than the maximum', () => {
-      const rawTextField = getMaxSizeTextField();
-      rawTextField.simulate('blur', { target: { value: '2000' } });
-      expect(actions.updateRawSizeForField).toHaveBeenCalledWith('bar', 1000);
+    it("calls 'toggleSnippetFallbackForField' when it is clicked by a user", () => {
+      const fallbackCheckbox = getFallbackCheckbox();
+      fallbackCheckbox.simulate('change');
+      expect(actions.toggleSnippetFallbackForField).toHaveBeenCalledWith('foo');
     });
   });
 });

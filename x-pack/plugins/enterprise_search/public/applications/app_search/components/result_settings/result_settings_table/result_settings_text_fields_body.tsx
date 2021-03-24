@@ -15,26 +15,12 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiCheckbox,
-  EuiFieldNumber,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-import { SIZE_FIELD_MINIMUM, SIZE_FIELD_MAXIMUM } from '../constants';
 import { ResultSettingsLogic } from '../result_settings_logic';
 import { FieldResultSetting } from '../types';
 
-const updateOrClearSizeForField = (
-  fieldName: string,
-  fieldValue: number,
-  updateAction: (fieldName: string, size: number) => void,
-  clearAction: (fieldName: string) => void
-) => {
-  if (typeof fieldValue === 'number' && !isNaN(fieldValue)) {
-    updateAction(fieldName, fieldValue);
-  } else {
-    clearAction(fieldName);
-  }
-};
+import { ResultSettingsFieldNumber } from './result_settings_field_number';
 
 export const ResultSettingsTextFieldsBody: React.FC = () => {
   const { textResultFields } = useValues(ResultSettingsLogic);
@@ -42,10 +28,10 @@ export const ResultSettingsTextFieldsBody: React.FC = () => {
     toggleRawForField,
     updateRawSizeForField,
     clearRawSizeForField,
-    // toggleSnippetForField,
-    // updateSnippetSizeForField,
-    // clearSnippetSizeForField,
-    // toggleSnippetFallbackForField,
+    toggleSnippetForField,
+    updateSnippetSizeForField,
+    clearSnippetSizeForField,
+    toggleSnippetFallbackForField,
   } = useActions(ResultSettingsLogic);
 
   const resultSettingsArray: Array<[string, Partial<FieldResultSetting>]> = useMemo(() => {
@@ -69,97 +55,52 @@ export const ResultSettingsTextFieldsBody: React.FC = () => {
               data-test-subj="ResultSettingRawCheckBox"
               id={`${fieldName}-raw}`}
               checked={!!fieldSettings.raw}
-              onChange={(_) => {
+              onChange={() => {
                 toggleRawForField(fieldName);
               }}
             />
           </EuiTableRowCellCheckbox>
           <EuiTableRowCell align="center">
-            <EuiFieldNumber
-              data-test-subj="ResultSettingRawMaxSize"
-              value={typeof fieldSettings.rawSize === 'number' ? fieldSettings.rawSize : ''}
-              placeholder={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.resultSettings.rawSize.textFieldPlaceholder',
-                { defaultMessage: 'No limit' }
-              )}
-              disabled={!fieldSettings.raw}
-              min={SIZE_FIELD_MINIMUM}
-              max={SIZE_FIELD_MAXIMUM}
-              onChange={(e) => {
-                const fieldValue = parseInt(e.target.value, 10);
-                updateOrClearSizeForField(
-                  fieldName,
-                  fieldValue,
-                  updateRawSizeForField,
-                  clearRawSizeForField
-                );
-              }}
-              onBlur={(e) => {
-                const value = parseInt(e.target.value, 10);
-                const fieldValue = Math.min(
-                  SIZE_FIELD_MAXIMUM,
-                  Math.max(SIZE_FIELD_MINIMUM, isNaN(value) ? 0 : value)
-                );
-                updateOrClearSizeForField(
-                  fieldName,
-                  fieldValue,
-                  updateRawSizeForField,
-                  clearRawSizeForField
-                );
-              }}
-              size={4}
+            <ResultSettingsFieldNumber
+              fieldName={fieldName}
+              fieldEnabledProperty="raw"
+              fieldSizeProperty="rawSize"
+              fieldSettings={fieldSettings}
+              updateAction={updateRawSizeForField}
+              clearAction={clearRawSizeForField}
             />
           </EuiTableRowCell>
-          {/* <EuiTableRowCellCheckbox>
+          <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              data-test-subj="ResultSettingSnippetTextBox"
               id={`${fieldName}-snippet}`}
               checked={!!fieldSettings.snippet}
-              onChange={(_) => {
+              onChange={() => {
                 toggleSnippetForField(fieldName);
               }}
             />
           </EuiTableRowCellCheckbox>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              data-test-subj="ResultSettingFallbackTextBox"
               id={`${fieldName}-snippetFallback}`}
               checked={fieldSettings.snippetFallback}
               disabled={!fieldSettings.snippet}
-              onChange={(_) => {
+              onChange={() => {
                 toggleSnippetFallbackForField(fieldName);
               }}
             />
           </EuiTableRowCellCheckbox>
           <EuiTableRowCell align="center">
-            <EuiFieldNumber
-              value={typeof fieldSettings.snippetSize === 'number' ? fieldSettings.snippetSize : ''}
-              disabled={!fieldSettings.snippet}
-              placeholder="100"
-              min={SIZE_FIELD_MINIMUM}
-              max={SIZE_FIELD_MAXIMUM}
-              onChange={(e) => {
-                const fieldValue = parseInt(e.target.value, 10);
-                updateOrClearSizeForField(
-                  fieldName,
-                  fieldValue,
-                  updateSnippetSizeForField,
-                  clearSnippetSizeForField
-                );
-              }}
-              onBlur={(e) => {
-                const fieldValue = Math.min(
-                  SIZE_FIELD_MAXIMUM,
-                  Math.max(SIZE_FIELD_MINIMUM, parseInt(e.target.value, 10))
-                );
-                updateOrClearSizeForField(
-                  fieldName,
-                  fieldValue,
-                  updateSnippetSizeForField,
-                  clearSnippetSizeForField
-                );
-              }}
-              size={4}
+            <ResultSettingsFieldNumber
+              fieldName={fieldName}
+              fieldEnabledProperty="snippet"
+              fieldSizeProperty="snippetSize"
+              fieldSettings={fieldSettings}
+              updateAction={updateSnippetSizeForField}
+              clearAction={clearSnippetSizeForField}
             />
-          </EuiTableRowCell> */}
+          </EuiTableRowCell>
         </EuiTableRow>
       ))}
     </EuiTableBody>

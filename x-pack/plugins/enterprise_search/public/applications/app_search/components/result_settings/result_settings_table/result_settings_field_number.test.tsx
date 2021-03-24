@@ -1,0 +1,108 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+
+import { shallow } from 'enzyme';
+
+import { EuiFieldNumber } from '@elastic/eui';
+
+import { ResultSettingsFieldNumber } from './result_settings_field_number';
+
+describe('ResultSettingsFieldNumber', () => {
+  const fieldSettings = {
+    raw: true,
+    rawSize: 29,
+    snippet: true,
+    snippetFallback: true,
+    snippetSize: 15,
+  };
+
+  const props = {
+    fieldSettings,
+    fieldName: 'foo',
+    fieldEnabledProperty: 'raw',
+    fieldSizeProperty: 'rawSize',
+    updateAction: jest.fn(),
+    clearAction: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("is rendered with it's value set from [fieldSizeProperty] in fieldSettings", () => {
+    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(29);
+  });
+
+  it('is has no value if [fieldSizeProperty] in fieldSettings has no value', () => {
+    const wrapper = shallow(
+      <ResultSettingsFieldNumber
+        {...{
+          ...props,
+          fieldSettings: {
+            raw: true,
+            snippet: false,
+          },
+        }}
+      />
+    );
+    expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual('');
+  });
+
+  it('is disabled if the [fieldEnabledProperty] in fieldSettings is false', () => {
+    const wrapper = shallow(
+      <ResultSettingsFieldNumber
+        {...{
+          ...props,
+          fieldSettings: {
+            raw: false,
+            snippet: true,
+          },
+        }}
+      />
+    );
+    expect(wrapper.find(EuiFieldNumber).prop('disabled')).toEqual(true);
+  });
+
+  it('will call updateAction when the value is changed', () => {
+    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    wrapper.simulate('change', { target: { value: '21' } });
+    expect(props.updateAction).toHaveBeenCalledWith('foo', 21);
+  });
+
+  it('will call clearAction when the value is changed', () => {
+    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    wrapper.simulate('change', { target: { value: '' } });
+    expect(props.clearAction).toHaveBeenCalledWith('foo');
+  });
+
+  it('will call updateAction on blur', () => {
+    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    wrapper.simulate('blur', { target: { value: '21' } });
+    expect(props.updateAction).toHaveBeenCalledWith('foo', 21);
+  });
+
+  it('will call updateAction on blur using the minimum possible value if the current value is something other than a number', () => {
+    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    wrapper.simulate('blur', { target: { value: '' } });
+    expect(props.updateAction).toHaveBeenCalledWith('foo', 20);
+  });
+
+  it('will call updateAction on blur using the minimum possible value if the value is something lower than the minimum', () => {
+    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    wrapper.simulate('blur', { target: { value: 5 } });
+    expect(props.updateAction).toHaveBeenCalledWith('foo', 20);
+  });
+
+  it('will call updateAction on blur using the maximum possible value if the value is something above than the maximum', () => {
+    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    wrapper.simulate('blur', { target: { value: 2000 } });
+    expect(props.updateAction).toHaveBeenCalledWith('foo', 1000);
+  });
+});
