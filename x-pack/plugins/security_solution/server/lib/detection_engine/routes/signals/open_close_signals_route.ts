@@ -58,7 +58,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
         const result = await clusterClient.asCurrentUser.updateByQuery({
           index: siemClient.getSignalsIndex(),
           conflicts: conflicts ?? 'abort',
-          // refresh: 'wait_for',
+          refresh: true,
           body: {
             script: {
               source: `ctx._source.signal.status = '${status}'`,
@@ -66,7 +66,7 @@ export const setSignalsStatusRoute = (router: SecuritySolutionPluginRouter) => {
             },
             query: queryObject,
           },
-          // ignoreUnavailable: true,
+          ignore_unavailable: true,
         });
         return response.ok({ body: result });
       } catch (err) {
