@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DELETE } from '../../../../../shared/constants';
+import { DELETE_BUTTON_LABEL } from '../../../../../shared/constants';
 
 interface Props {
   queryValue: string;
@@ -43,7 +43,7 @@ export const CurationQuery: React.FC<Props> = ({
         color="danger"
         onClick={onDelete}
         isDisabled={disableDelete}
-        aria-label={DELETE}
+        aria-label={DELETE_BUTTON_LABEL}
         data-test-subj="deleteCurationQueryButton"
       />
     </EuiFlexItem>

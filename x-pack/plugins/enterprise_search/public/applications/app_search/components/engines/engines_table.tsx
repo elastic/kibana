@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n/react';
 
-import { MANAGE, DELETE } from '../../../shared/constants';
+import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../shared/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
@@ -146,7 +146,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
     }),
     actions: [
       {
-        name: MANAGE,
+        name: MANAGE_BUTTON_LABEL,
         description: i18n.translate(
           'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage.buttonDescription',
           {
@@ -161,7 +161,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         },
       },
       {
-        name: DELETE,
+        name: DELETE_BUTTON_LABEL,
         description: i18n.translate(
           'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonDescription',
           {

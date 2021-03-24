@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SAVE, CANCEL } from '../../../../shared/constants';
+import { SAVE_BUTTON_LABEL, CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 
 import { EngineLogic } from '../../engine';
 
@@ -126,7 +126,7 @@ export const CustomizationModal: React.FC<Props> = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>{CANCEL}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
         <EuiButton
           fill
           onClick={() => {
@@ -136,7 +136,7 @@ export const CustomizationModal: React.FC<Props> = ({
             });
           }}
         >
-          {SAVE}
+          {SAVE_BUTTON_LABEL}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

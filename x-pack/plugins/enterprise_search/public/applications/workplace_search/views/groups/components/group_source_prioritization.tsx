@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SAVE } from '../../../../shared/constants';
+import { SAVE_BUTTON_LABEL } from '../../../../shared/constants';
 import { Loading } from '../../../../shared/loading';
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
@@ -91,7 +91,7 @@ export const GroupSourcePrioritization: React.FC = () => {
       fill
       onClick={saveGroupSourcePrioritization}
     >
-      {SAVE}
+      {SAVE_BUTTON_LABEL}
     </EuiButton>
   );
   const handleSliderChange = (

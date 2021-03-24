@@ -7,34 +7,40 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MANAGE = i18n.translate('xpack.enterpriseSearch.actions.manage', {
-  defaultMessage: 'Manage',
-});
+export const MANAGE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.actions.manageButtonLabel',
+  { defaultMessage: 'Manage' }
+);
 
-export const EDIT = i18n.translate('xpack.enterpriseSearch.actions.edit', {
+export const EDIT_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.editButtonLabel', {
   defaultMessage: 'Edit',
 });
 
-export const DELETE = i18n.translate('xpack.enterpriseSearch.actions.delete', {
-  defaultMessage: 'Delete',
-});
+export const DELETE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.actions.deleteButtonLabel',
+  { defaultMessage: 'Delete' }
+);
 
-export const UPDATE = i18n.translate('xpack.enterpriseSearch.actions.update', {
-  defaultMessage: 'Update',
-});
+export const UPDATE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.actions.updateButtonLabel',
+  { defaultMessage: 'Update' }
+);
 
-export const SAVE = i18n.translate('xpack.enterpriseSearch.actions.save', {
+export const SAVE_BUTTON_LABEL = i18n.translate('xpack.enterpriseSearch.actions.saveButtonLabel', {
   defaultMessage: 'Save',
 });
 
-export const CANCEL = i18n.translate('xpack.enterpriseSearch.actions.cancel', {
-  defaultMessage: 'Cancel',
-});
+export const CANCEL_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.actions.cancelButtonLabel',
+  { defaultMessage: 'Cancel' }
+);
 
-export const CONTINUE = i18n.translate('xpack.enterpriseSearch.actions.continue', {
-  defaultMessage: 'Continue',
-});
+export const CONTINUE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.actions.continueButtonLabel',
+  { defaultMessage: 'Continue' }
+);
 
-export const CLOSE = i18n.translate('xpack.enterpriseSearch.actions.close', {
-  defaultMessage: 'Close',
-});
+export const CLOSE_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.actions.closeButtonLabel',
+  { defaultMessage: 'Close' }
+);

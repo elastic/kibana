@@ -30,7 +30,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { CANCEL } from '../../../../shared/constants';
+import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
 import { DOCS_PREFIX } from '../../../routes';
 import { EngineLogic } from '../../engine';
@@ -134,7 +134,7 @@ export const FlyoutFooter: React.FC = () => {
 
   return (
     <EuiFlyoutFooter>
-      <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL}</EuiButtonEmpty>
+      <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
     </EuiFlyoutFooter>
   );
 };

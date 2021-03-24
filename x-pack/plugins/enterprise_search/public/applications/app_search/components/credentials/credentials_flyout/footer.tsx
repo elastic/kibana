@@ -17,7 +17,11 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
-import { CLOSE, SAVE, UPDATE } from '../../../../shared/constants';
+import {
+  CLOSE_BUTTON_LABEL,
+  SAVE_BUTTON_LABEL,
+  UPDATE_BUTTON_LABEL,
+} from '../../../../shared/constants';
 
 import { CredentialsLogic } from '../credentials_logic';
 
@@ -30,7 +34,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty iconType="cross" onClick={hideCredentialsForm}>
-            {CLOSE}
+            {CLOSE_BUTTON_LABEL}
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -41,7 +45,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
             iconType="check"
             data-test-subj="APIKeyActionButton"
           >
-            {activeApiTokenExists ? UPDATE : SAVE}
+            {activeApiTokenExists ? UPDATE_BUTTON_LABEL : SAVE_BUTTON_LABEL}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CANCEL } from '../../../../shared/constants';
+import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 
 interface GenericConfirmationModalProps {
   description: ReactNode;
@@ -79,7 +79,7 @@ export const GenericConfirmationModal: React.FC<GenericConfirmationModalProps> =
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty data-test-subj="GenericConfirmationModalCancel" onClick={onClose}>
-          {CANCEL}
+          {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
         <EuiButton
           data-test-subj="GenericConfirmationModalSave"

@@ -16,8 +16,8 @@ export const UNIVERSAL_LANGUAGE = i18n.translate(
   }
 );
 
-export const RESTORE_DEFAULTS = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.actions.restoreDefaults',
+export const RESTORE_DEFAULTS_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.actions.restoreDefaultsButonLabel',
   {
     defaultMessage: 'Restore defaults',
   }

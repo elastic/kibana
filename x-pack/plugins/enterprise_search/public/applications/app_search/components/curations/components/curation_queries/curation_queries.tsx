@@ -12,7 +12,7 @@ import { useValues, useActions } from 'kea';
 import { EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CONTINUE } from '../../../../../shared/constants';
+import { CONTINUE_BUTTON_LABEL } from '../../../../../shared/constants';
 
 import { Curation } from '../../types';
 
@@ -30,7 +30,7 @@ interface Props {
 export const CurationQueries: React.FC<Props> = ({
   queries: initialQueries,
   onSubmit,
-  submitButtonText = CONTINUE,
+  submitButtonText = CONTINUE_BUTTON_LABEL,
 }) => {
   const logic = CurationQueriesLogic({ queries: initialQueries });
   const { queries, hasEmptyQueries, hasOnlyOneQuery } = useValues(logic);

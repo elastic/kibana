@@ -17,7 +17,7 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_c
 import { BreadcrumbTrail } from '../../../../shared/kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../../../../shared/loading';
 
-import { RESTORE_DEFAULTS } from '../../../constants';
+import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../../constants';
 import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
 
 import { CurationLogic } from './curation_logic';
@@ -53,7 +53,7 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
               if (window.confirm(RESTORE_CONFIRMATION)) resetCuration();
             }}
           >
-            {RESTORE_DEFAULTS}
+            {RESTORE_DEFAULTS_BUTTON_LABEL}
           </EuiButton>,
         ]}
         responsive={false}
