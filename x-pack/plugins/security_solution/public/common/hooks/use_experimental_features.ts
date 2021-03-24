@@ -7,16 +7,10 @@
 
 import { useSelector } from 'react-redux';
 import { State } from '../../common/store';
-import { Immutable } from '../../../common/endpoint/types';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
-const getExperimentalFeatures = (
-  state: Immutable<ExperimentalFeatures> | undefined,
-  feature: keyof ExperimentalFeatures
-): boolean => (state ? state[feature] : false);
-
 export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean => {
-  return useSelector((state: State) =>
-    getExperimentalFeatures(state.app.enableExperimental, feature)
+  return useSelector(({ app: { enableExperimental } }: State) =>
+    enableExperimental ? enableExperimental[feature] : false
   );
 };
