@@ -260,7 +260,7 @@ We were able to connect 2,200 running agents and run a [single job with 1,800 pa
 
 2,200 agents was the maximum that we were able to test because of quotas on our GCP account that could not easily be increased.
 
-TODO test a large number of parallel jobs as well?
+TODO test a large number of parallel jobs as well? Use API to trigger 200 builds with 10 steps each?
 
 #### Stable
 
@@ -844,7 +844,9 @@ Though we have control over the agents running our jobs at Elastic, and thus all
 
 #### Customization
 
-TODO
+The only way to customize information added to build pages is through custom plugins. [Creating and maintaining plugins for Jenkins](https://www.jenkins.io/doc/developer/plugin-development/) is a fairly significant investment, and we do not currently have a good way to manage plugins for Jenkins instances at Elastic. It's a pretty involved process that, at the moment, has to be done by another team.
+
+Given that, we feel we would be able to build a higher-quality experience in less time by creating custom applications separate from Jenkins, which we have actually [done in the past](https://ci.kibana.dev/es-snapshots).
 
 #### Core functionality is first-party
 
@@ -852,7 +854,7 @@ Jenkins is very modular, and almost all Jenkins functionality is provided by plu
 
 It's difficult to understand which plugins are required to support which base features. For example, Pipelines support is provided by a group of many plugins, and many of them have outdated names ([Pipeline: Nodes and Processes](https://github.com/jenkinsci/workflow-durable-task-step-plugin) is actually a plugin called `workflow-durable-task-step-plugin`).
 
-Many plugins are maintained by CloudBees employees, but it can be very difficult to determine which ones are, without knowing the names of CloudBees employees. All Jenkins community/third-party plugins live under the `jenkinsci` organization in GitHub.
+Many plugins are maintained by CloudBees employees, but it can be very difficult to determine which ones are, without knowing the names of CloudBees employees. All Jenkins community/third-party plugins reside under the `jenkinsci` organization in GitHub, which makes finding "official" ones difficult.
 
 TODO
 
@@ -885,11 +887,15 @@ Also, even with self-hosted runners, there is a 1,000 API request per hour hard 
 
 # Adoption strategy
 
+TODO
+
 If we implement this proposal, how will existing Kibana developers adopt it? Is
 this a breaking change? Can we write a codemod? Should we coordinate with
 other projects or libraries?
 
 # How we teach this
+
+TODO
 
 What names and terminology work best for these concepts and why? How is this
 idea best presented? As a continuation of existing Kibana patterns?
@@ -901,6 +907,8 @@ at any level?
 How should this feature be taught to existing Kibana developers?
 
 # Unresolved questions
+
+TODO
 
 Optional, but suggested for first drafts. What parts of the design are still
 TBD?
