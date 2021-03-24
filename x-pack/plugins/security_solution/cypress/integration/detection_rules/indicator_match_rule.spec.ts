@@ -6,7 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import { expectedExportedRule, indexPatterns, newThreatIndicatorRule } from '../../objects/rule';
+import { indexPatterns, newThreatIndicatorRule } from '../../objects/rule';
 
 import {
   ALERT_RULE_METHOD,
@@ -16,7 +16,7 @@ import {
   ALERT_RULE_VERSION,
   NUMBER_OF_ALERTS,
 } from '../../screens/alerts';
-import { JSON_CONTENT, JSON_LINES } from '../../screens/alerts_details';
+import { JSON_LINES } from '../../screens/alerts_details';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
