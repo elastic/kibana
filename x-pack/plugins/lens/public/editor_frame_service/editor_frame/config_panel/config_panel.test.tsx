@@ -121,9 +121,11 @@ describe('ConfigPanel', () => {
 
   describe('focus behavior when adding or removing layers', () => {
     it('should focus the only layer when resetting the layer', () => {
-      const component = mountWithIntl(<LayerPanels {...getDefaultProps()} />, {
-        attachTo: container,
-      });
+      const component = mountWithIntl(
+        <LayerPanels {...getDefaultProps()} />,
+        // @ts-expect-error
+        { attachTo: container }
+      );
       const firstLayerFocusable = component
         .find(LayerPanel)
         .first()
@@ -144,7 +146,11 @@ describe('ConfigPanel', () => {
         first: mockDatasource.publicAPIMock,
         second: mockDatasource.publicAPIMock,
       };
-      const component = mountWithIntl(<LayerPanels {...defaultProps} />, { attachTo: container });
+      const component = mountWithIntl(
+        <LayerPanels {...defaultProps} />,
+        // @ts-expect-error
+        { attachTo: container }
+      );
       const secondLayerFocusable = component
         .find(LayerPanel)
         .at(1)
@@ -165,7 +171,11 @@ describe('ConfigPanel', () => {
         first: mockDatasource.publicAPIMock,
         second: mockDatasource.publicAPIMock,
       };
-      const component = mountWithIntl(<LayerPanels {...defaultProps} />, { attachTo: container });
+      const component = mountWithIntl(
+        <LayerPanels {...defaultProps} />,
+        // @ts-expect-error
+        { attachTo: container }
+      );
       const firstLayerFocusable = component
         .find(LayerPanel)
         .first()
@@ -187,9 +197,11 @@ describe('ConfigPanel', () => {
         }
       });
 
-      const component = mountWithIntl(<LayerPanels {...getDefaultProps()} dispatch={dispatch} />, {
-        attachTo: container,
-      });
+      const component = mountWithIntl(
+        <LayerPanels {...getDefaultProps()} dispatch={dispatch} />,
+        // @ts-expect-error
+        { attachTo: container }
+      );
       act(() => {
         component.find('[data-test-subj="lnsLayerAddButton"]').first().simulate('click');
       });
