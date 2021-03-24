@@ -616,14 +616,14 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       return mapboxStyle;
     }
 
-    async getResponse(requestName) {
+    async getResponse(requestName: string) {
       await inspector.open();
       const response = await this._getResponse(requestName);
       await inspector.close();
       return response;
     }
 
-    async _getResponse(requestName) {
+    async _getResponse(requestName: string) {
       if (requestName) {
         await testSubjects.click('inspectorRequestChooser');
         await testSubjects.click(`inspectorRequestChooser${requestName}`);
@@ -634,7 +634,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       return JSON.parse(responseBody);
     }
 
-    async getResponseFromDashboardPanel(panelTitle, requestName) {
+    async getResponseFromDashboardPanel(panelTitle: string, requestName: string) {
       await dashboardPanelActions.openInspectorByTitle(panelTitle);
       const response = await this._getResponse(requestName);
       await inspector.close();
