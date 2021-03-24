@@ -616,7 +616,7 @@ export class DataVisualizer {
     earliestMs?: number,
     latestMs?: number,
     datafeedConfig?: Datafeed,
-    runtimeFields?: RuntimeMappings
+    runtimeMappings?: RuntimeMappings
   ) {
     const index = indexPatternTitle;
     const size = 0;
@@ -628,8 +628,8 @@ export class DataVisualizer {
     const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
 
     // Combine runtime mappings from the index pattern as well as the datafeed
-    const runtimeMappings: RuntimeMappings = {
-      ...(isPopulatedObject(runtimeFields) ? runtimeFields : {}),
+    const combinedRuntimeMappings: RuntimeMappings = {
+      ...(isPopulatedObject(runtimeMappings) ? runtimeMappings : {}),
       ...(datafeedConfig !== undefined && isPopulatedObject(datafeedConfig.runtime_mappings)
         ? datafeedConfig.runtime_mappings
         : {}),
@@ -661,7 +661,9 @@ export class DataVisualizer {
         },
       },
       ...(isPopulatedObject(aggs) ? { aggs: buildSamplerAggregation(aggs, samplerShardSize) } : {}),
-      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(combinedRuntimeMappings)
+        ? { runtime_mappings: combinedRuntimeMappings }
+        : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
