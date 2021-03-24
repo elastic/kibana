@@ -470,12 +470,13 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     },
     saveSourceParams: async ({ search }) => {
       const { http } = HttpLogic.values;
-      const { isOrganization } = AppLogic.values;
       const { navigateToUrl } = KibanaLogic.values;
       const { setAddedSource } = SourcesLogic.actions;
       const params = (parseQueryParams(search) as unknown) as OauthParams;
       const query = { ...params, kibana_host: kibanaHost };
       const route = '/api/workplace_search/sources/create';
+      const state = JSON.parse(params.state);
+      const isOrganization = state.context !== 'account';
 
       try {
         const response = await http.get(route, { query });
