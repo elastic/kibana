@@ -16,6 +16,7 @@ export const dataAnalyticsJobConfigSchema = schema.object({
   source: schema.object({
     index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
     query: schema.maybe(schema.any()),
+    runtime_mappings: schema.maybe(schema.any()),
     _source: schema.maybe(
       schema.object({
         /** Fields to include in results */

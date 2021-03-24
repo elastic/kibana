@@ -75,7 +75,10 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     const prettySourceConfig = removeRuntimeMappings
       ? ''
       : JSON.stringify(parsedRuntimeMappings, null, 2);
-    setFormState({ runtimeMappings: parsedRuntimeMappings, runtimeMappingsUpdated: true });
+    setFormState({
+      runtimeMappings: parsedRuntimeMappings,
+      runtimeMappingsUpdated: true,
+    });
     setAdvancedEditorRuntimeMappings(prettySourceConfig);
     setAdvancedEditorRuntimeMappingsLastApplied(prettySourceConfig);
     setIsRuntimeMappingsEditorApplyButtonEnabled(false);

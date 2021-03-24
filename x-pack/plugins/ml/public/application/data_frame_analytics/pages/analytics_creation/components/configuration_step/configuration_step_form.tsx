@@ -57,6 +57,8 @@ import { Query } from '../../../../../../../../../../src/plugins/data/common/que
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';
 
+const runtimeMappingKey = 'runtime_mapping';
+
 function getIndexDataQuery(savedSearchQuery: SavedSearchQuery, jobConfigQuery: any) {
   // Return `undefined` if savedSearchQuery itself is `undefined`, meaning it hasn't been initialized yet.
   if (savedSearchQuery === undefined) {
@@ -313,40 +315,37 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   }, [jobType]);
 
   useEffect(() => {
-    if (runtimeMappings) {
-      const runtimeDepVarOptions: EuiComboBoxOptionOption[] = [];
-      // add to depVarOptions if it's the type supported
-      Object.keys(runtimeMappings).forEach((id) => {
-        const field = runtimeMappings[id];
-        // @ts-ignore TODO: fix types here
-        if (shouldAddAsDepVarOption(id, field.type, jobType)) {
-          runtimeDepVarOptions.push({
-            label: id,
-            key: 'runtime_mapping',
-          });
+    if (runtimeMappingsUpdated) {
+      let resetDepVar = false;
+      const updatedOptions = dependentVariableOptions.filter((option) => {
+        if (option.label === dependentVariable && option.key?.includes(runtimeMappingKey)) {
+          resetDepVar = true;
         }
+        return !option.key?.includes(runtimeMappingKey);
       });
 
-      if (runtimeDepVarOptions.length > 0) {
-        setDependentVariableOptions([...dependentVariableOptions, ...runtimeDepVarOptions]);
-      }
-    } else if (runtimeMappingsUpdated === true && runtimeMappings === undefined) {
-      // Removed runtimeFields so remove from depVar options
-      const updatedDepVarOptions: EuiComboBoxOptionOption[] = [];
-      let resetDepVar = false;
-      dependentVariableOptions.forEach((option) => {
-        if (option.key === undefined) {
-          updatedDepVarOptions.push(option);
-        } else {
-          if (option.label === dependentVariable) {
-            resetDepVar = true;
+      if (runtimeMappings === undefined && runtimeMappingsUpdated === true) {
+        // Removed all runtimeFields so remove from depVar options
+        setDependentVariableOptions(updatedOptions);
+      } else if (runtimeMappings) {
+        // add to depVarOptions if it's the type supported
+        Object.keys(runtimeMappings).forEach((id) => {
+          const field = runtimeMappings[id];
+          // @ts-ignore TODO: fix types here
+          if (shouldAddAsDepVarOption(id, field.type, jobType)) {
+            updatedOptions.push({
+              label: id,
+              key: `runtime_mapping_${id}`,
+            });
           }
-        }
-      });
-      setDependentVariableOptions(updatedDepVarOptions);
+        });
+        setDependentVariableOptions(updatedOptions);
+      }
+
       if (resetDepVar) {
         setFormState({
           dependentVariable: '',
+          includes: includes.filter((field) => field !== dependentVariable),
         });
       }
     }
@@ -366,14 +365,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     return () => {
       debouncedGetExplainData.cancel();
     };
-  }, [
-    jobType,
-    dependentVariable,
-    trainingPercent,
-    JSON.stringify(includes),
-    jobConfigQueryString,
-    JSON.stringify(runtimeMappings),
-  ]);
+  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]); // JSON.stringify(runtimeMappings),
 
   const unsupportedRuntimeFields = useMemo(
     () =>

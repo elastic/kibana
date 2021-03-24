@@ -35,11 +35,15 @@ import { getRuntimeFieldsMapping } from '../../../../components/data_grid/common
 
 type IndexSearchResponse = estypes.SearchResponse;
 
-function getRuntimeFieldColumns(runtimeMappings: any) {
+interface MLEuiDataGridColumn extends EuiDataGridColumn {
+  isRuntimeFieldColumn?: boolean;
+}
+
+function getRuntimeFieldColumns(runtimeMappings: Record<string, any>) {
   return Object.keys(runtimeMappings).map((id) => {
     const field = runtimeMappings[id];
     const schema = getDataGridSchemaFromKibanaFieldType(field);
-    return { id, schema, isExpandable: schema !== 'boolean' };
+    return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: true };
   });
 }
 
@@ -53,11 +57,11 @@ export const useIndexData = (
     indexPattern,
   ]);
 
-  const [columns, setColumns] = useState<EuiDataGridColumn[]>([
+  const [columns, setColumns] = useState<MLEuiDataGridColumn[]>([
     ...indexPatternFields.map((id) => {
       const field = indexPattern.fields.getByName(id);
       const schema = getDataGridSchemaFromKibanaFieldType(field);
-      return { id, schema, isExpandable: schema !== 'boolean' };
+      return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: false };
     }),
   ]);
 
@@ -104,14 +108,17 @@ export const useIndexData = (
     try {
       const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
       const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
-      if (runtimeMappings) {
-        setColumns([...columns, ...getRuntimeFieldColumns(runtimeMappings)]);
+
+      if (runtimeMappings !== undefined) {
+        // remove old runtime field from columns
+        const updatedColumns = columns.filter((col) => col.isRuntimeFieldColumn === false);
+        setColumns([...updatedColumns, ...getRuntimeFieldColumns(runtimeMappings)]);
       } else {
         setColumns([
           ...indexPatternFields.map((id) => {
             const field = indexPattern.fields.getByName(id);
             const schema = getDataGridSchemaFromKibanaFieldType(field);
-            return { id, schema, isExpandable: schema !== 'boolean' };
+            return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: false };
           }),
         ]);
       }
