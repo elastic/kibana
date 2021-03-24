@@ -22,7 +22,7 @@ export const timelionSheetSavedObjectType: SavedObjectsType = {
     getInAppUrl(obj) {
       return {
         path: `/app/timelion#/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'visualize.show',
+        uiCapabilitiesPath: 'timelion.show',
       };
     },
   },
