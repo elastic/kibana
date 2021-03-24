@@ -91,7 +91,7 @@ describe('Epic Timeline', () => {
         description: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
         },
         eventIdToNoteIds: {},
@@ -241,7 +241,7 @@ describe('Epic Timeline', () => {
         description: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
         },
         eventType: 'all',

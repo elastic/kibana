@@ -21,7 +21,7 @@ import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerts/common';
+import { Alert } from '../../../../../../alerting/common';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -45,7 +45,7 @@ export const createRulesRoute = (
       }
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const clusterClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution?.getAppClient();
 
@@ -78,7 +78,7 @@ export const createRulesRoute = (
         throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
 
         const indexExists = await getIndexExists(
-          clusterClient.callAsCurrentUser,
+          esClient.asCurrentUser,
           internalRule.params.outputIndex
         );
         if (!indexExists) {

@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "lucene",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "max_signals": 33,
   "name": "Setuid / Setgid Bit Set via chmod",
   "query": "event.category:process AND event.type:(start OR process_started) AND process.name:chmod AND process.args:(\"+s\" OR \"u+s\" OR /4[0-9]{3}/ OR g+s OR /2[0-9]{3}/)",

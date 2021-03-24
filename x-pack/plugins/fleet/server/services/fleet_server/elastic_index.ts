@@ -8,8 +8,10 @@
 import type { ElasticsearchClient } from 'kibana/server';
 import hash from 'object-hash';
 
-import { FLEET_SERVER_INDICES, FLEET_SERVER_INDICES_VERSION } from '../../../common';
+import type { FLEET_SERVER_INDICES } from '../../../common';
+import { FLEET_SERVER_INDICES_VERSION } from '../../../common';
 import { appContextService } from '../app_context';
+
 import ESFleetAgentIndex from './elasticsearch/fleet_agents.json';
 import ESFleetPoliciesIndex from './elasticsearch/fleet_policies.json';
 import ESFleetPoliciesLeaderIndex from './elasticsearch/fleet_policies_leader.json';

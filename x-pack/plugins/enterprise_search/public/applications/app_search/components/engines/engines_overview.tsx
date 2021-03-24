@@ -25,10 +25,9 @@ import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 
-import { EngineIcon } from './assets/engine_icon';
-import { MetaEngineIcon } from './assets/meta_engine_icon';
 import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
 import {
   CREATE_AN_ENGINE_BUTTON_LABEL,
@@ -56,9 +55,13 @@ export const EnginesOverview: React.FC = () => {
     metaEnginesLoading,
   } = useValues(EnginesLogic);
 
-  const { loadEngines, loadMetaEngines, onEnginesPagination, onMetaEnginesPagination } = useActions(
-    EnginesLogic
-  );
+  const {
+    deleteEngine,
+    loadEngines,
+    loadMetaEngines,
+    onEnginesPagination,
+    onMetaEnginesPagination,
+  } = useActions(EnginesLogic);
 
   useEffect(() => {
     loadEngines();
@@ -107,6 +110,7 @@ export const EnginesOverview: React.FC = () => {
               hidePerPageOptions: true,
             }}
             onChange={handlePageChange(onEnginesPagination)}
+            onDeleteEngine={deleteEngine}
           />
         </EuiPageContentBody>
 
@@ -156,6 +160,7 @@ export const EnginesOverview: React.FC = () => {
                   />
                 }
                 onChange={handlePageChange(onMetaEnginesPagination)}
+                onDeleteEngine={deleteEngine}
               />
             </EuiPageContentBody>
           </>

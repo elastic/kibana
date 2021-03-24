@@ -20,14 +20,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CodeEditor, KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { getHttp, getUiSettings } from '../kibana_services';
-import { ImportResponse } from '../../common';
+import { ImportResults } from '../importer';
 
 const services = {
   uiSettings: getUiSettings(),
 };
 
 interface Props {
-  importResp?: ImportResponse;
+  importResults?: ImportResults;
   indexPatternResp?: object;
 }
 
@@ -90,7 +90,7 @@ export class ImportCompleteView extends Component<Props, {}> {
   }
 
   _getStatusMsg() {
-    if (!this.props.importResp || !this.props.importResp.success) {
+    if (!this.props.importResults || !this.props.importResults.success) {
       return i18n.translate('xpack.fileUpload.uploadFailureMsg', {
         defaultMessage: 'File upload failed.',
       });
@@ -99,15 +99,15 @@ export class ImportCompleteView extends Component<Props, {}> {
     const successMsg = i18n.translate('xpack.fileUpload.uploadSuccessMsg', {
       defaultMessage: 'File upload complete: indexed {numFeatures} features.',
       values: {
-        numFeatures: this.props.importResp.docCount,
+        numFeatures: this.props.importResults.docCount,
       },
     });
 
-    const failedFeaturesMsg = this.props.importResp.failures.length
+    const failedFeaturesMsg = this.props.importResults.failures?.length
       ? i18n.translate('xpack.fileUpload.failedFeaturesMsg', {
           defaultMessage: 'Unable to index {numFailures} features.',
           values: {
-            numFailures: this.props.importResp.failures.length,
+            numFailures: this.props.importResults.failures.length,
           },
         })
       : '';
@@ -122,7 +122,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           <p>{this._getStatusMsg()}</p>
         </EuiText>
         {this._renderCodeEditor(
-          this.props.importResp,
+          this.props.importResults,
           i18n.translate('xpack.fileUpload.jsonImport.indexingResponse', {
             defaultMessage: 'Import response',
           }),

@@ -19,6 +19,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const browser = getService('browser');
 
   const PageObjects = getPageObjects([
+    'common',
     'header',
     'timePicker',
     'common',
@@ -169,6 +170,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector('lnsWorkspace')
       );
       await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Drags field to workspace
+     *
+     * @param field  - the desired field for the dimension
+     * */
+    async clickField(field: string) {
+      await testSubjects.click(`lnsFieldListPanelField-${field}`);
+    },
+
+    async editField() {
+      await retry.try(async () => {
+        await testSubjects.click('lnsFieldListPanelEdit');
+        await testSubjects.missingOrFail('lnsFieldListPanelEdit');
+      });
+    },
+
+    async searchField(name: string) {
+      await testSubjects.setValue('lnsIndexPatternFieldSearch', name);
+    },
+
+    async waitForField(field: string) {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
+      });
     },
 
     /**
@@ -349,6 +376,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title: string,
       saveAsNew?: boolean,
       redirectToOrigin?: boolean,
+      saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
       dashboardId?: string
     ) {
@@ -360,6 +388,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
+        saveToLibrary,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -752,6 +781,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const fieldAncestor = await input.findByXpath('./../../..');
       const focusedElementText = await fieldAncestor.getVisibleText();
       expect(focusedElementText).to.eql(name);
+    },
+
+    async waitForVisualization() {
+      async function getRenderingCount() {
+        const visualizationContainer = await testSubjects.find('lnsVisualizationContainer');
+        const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
+        return Number(renderingCount);
+      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('rendering count to stabilize', async () => {
+        const firstCount = await getRenderingCount();
+
+        await PageObjects.common.sleep(1000);
+
+        const secondCount = await getRenderingCount();
+
+        return firstCount === secondCount;
+      });
+    },
+
+    async clickAddField() {
+      await testSubjects.click('lnsIndexPatternActions');
+      await testSubjects.existOrFail('indexPattern-add-field');
+      await testSubjects.click('indexPattern-add-field');
     },
   });
 }

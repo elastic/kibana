@@ -6,7 +6,10 @@
  */
 
 import type { SavedObjectMigrationFn } from 'kibana/server';
+
 import type { Agent, AgentPolicy } from '../../types';
+
+export { migratePackagePolicyToV7120 } from './security_solution/to_v7_12_0';
 
 export const migrateAgentToV7120: SavedObjectMigrationFn<Agent & { shared_id?: string }, Agent> = (
   agentDoc

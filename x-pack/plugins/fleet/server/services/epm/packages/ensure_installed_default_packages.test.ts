@@ -5,23 +5,27 @@
  * 2.0.
  */
 
+import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+
 import { ElasticsearchAssetType, KibanaSavedObjectType } from '../../../types';
 import type { Installation } from '../../../types';
-import type { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 
 jest.mock('./install');
 jest.mock('./bulk_install_packages');
 jest.mock('./get');
 
-import { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 const { ensureInstalledDefaultPackages } = jest.requireActual('./install');
 const { isBulkInstallError: actualIsBulkInstallError } = jest.requireActual(
   './bulk_install_packages'
 );
-import { getInstallation } from './get';
+// eslint-disable-next-line import/order
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+
 import { appContextService } from '../../app_context';
 import { createAppContextStartContractMock } from '../../../mocks';
+
+import { getInstallation } from './get';
+import { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 
 // if we add this assertion, TS will type check the return value
 // and the editor will also know about .mockImplementation, .mock.calls, etc
@@ -73,9 +77,8 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: mockInstallation.attributes.name,
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed' },
+          version: '',
           statusCode: 200,
         },
       ];
@@ -92,16 +95,14 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: 'success one',
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed' },
+          version: '',
           statusCode: 200,
         },
         {
           name: 'success two',
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed' },
+          version: '',
           statusCode: 200,
         },
         {
@@ -110,9 +111,8 @@ describe('ensureInstalledDefaultPackages', () => {
         },
         {
           name: 'success three',
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed' },
+          version: '',
           statusCode: 200,
         },
         {
@@ -134,9 +134,8 @@ describe('ensureInstalledDefaultPackages', () => {
       return [
         {
           name: 'undefined package',
-          assets: [],
-          newVersion: '',
-          oldVersion: '',
+          result: { assets: [], status: 'installed' },
+          version: '',
           statusCode: 200,
         },
       ];

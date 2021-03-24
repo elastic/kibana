@@ -27,9 +27,9 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../../alerts/server';
+} from '../../../../../../alerting/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
+import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
@@ -148,7 +148,7 @@ export interface BooleanFilter {
 }
 
 export interface GetThreatListOptions {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   query: string;
   language: ThreatLanguageOrUndefined;
   index: string[];
@@ -164,7 +164,7 @@ export interface GetThreatListOptions {
 }
 
 export interface ThreatListCountOptions {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   query: string;
   language: ThreatLanguageOrUndefined;
   threatFilters: PartialFilter[];

@@ -11,9 +11,10 @@ import { createQueryFilterClauses } from '../../../../../common/utils/build_quer
 
 export const buildResultsQuery = ({
   actionId,
+  agentId,
   filterQuery,
+  // sort,
   pagination: { activePage, querySize },
-  sort,
 }: ResultsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -22,6 +23,15 @@ export const buildResultsQuery = ({
         action_id: actionId,
       },
     },
+    ...(agentId
+      ? [
+          {
+            match_phrase: {
+              'agent.id': agentId,
+            },
+          },
+        ]
+      : []),
   ];
 
   const dslQuery = {
@@ -33,7 +43,14 @@ export const buildResultsQuery = ({
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,
-      fields: ['agent.*', 'osquery.*'],
+      fields: agentId ? ['osquery.*'] : ['agent.*', 'osquery.*'],
+      // sort: [
+      //   {
+      //     [sort.field]: {
+      //       order: [sort.direction],
+      //     },
+      //   },
+      // ],
     },
   };
 

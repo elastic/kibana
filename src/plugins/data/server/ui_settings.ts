@@ -355,6 +355,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   "date_nanos": { "id": "date_nanos", "params": {}, "es": true },
   "number": { "id": "number", "params": {} },
   "boolean": { "id": "boolean", "params": {} },
+  "histogram": { "id": "histogram", "params": {} },
   "_source": { "id": "_source", "params": {} },
   "_default_": { "id": "string", "params": {} }
 }`,
@@ -389,6 +390,10 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           id: schema.string(),
           params: schema.object({}),
         }),
+        histogram: schema.object({
+          id: schema.string(),
+          params: schema.object({}),
+        }),
         _source: schema.object({
           id: schema.string(),
           params: schema.object({}),
@@ -412,7 +417,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.numberFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.format.numberFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -434,7 +439,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.percentFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.format.percentFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -456,7 +461,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.bytesFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.format.bytesFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -478,7 +483,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.currencyFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate('data.advancedSettings.format.currencyFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -504,7 +509,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'data.advancedSettings.format.formattingLocaleText',
         values: {
           numeralLanguageLink:
-            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/kibana/current/numeral.html" target="_blank" rel="noopener">' +
             i18n.translate(
               'data.advancedSettings.format.formattingLocale.numeralLanguageLinkText',
               {

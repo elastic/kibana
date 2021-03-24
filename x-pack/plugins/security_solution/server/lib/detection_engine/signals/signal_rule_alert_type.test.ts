@@ -14,7 +14,7 @@ import {
   getEqlResult,
 } from '../routes/__mocks__/request_responses';
 import { signalRulesAlertType } from './signal_rule_alert_type';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { ruleStatusServiceFactory } from './rule_status_service';
 import { getListsClient, getExceptions, sortExceptionItems, checkPrivileges } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
@@ -30,6 +30,8 @@ import { getExceptionListClientMock } from '../../../../../lists/server/services
 import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import { getEntryListMock } from '../../../../../lists/common/schemas/types/entry_list.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');
@@ -107,7 +109,7 @@ describe('rules_notification_alert_type', () => {
       find: jest.fn(),
       goingToRun: jest.fn(),
       error: jest.fn(),
-      warning: jest.fn(),
+      partialFailure: jest.fn(),
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getListsClient as jest.Mock).mockReturnValue({
@@ -140,11 +142,13 @@ describe('rules_notification_alert_type', () => {
         ),
       };
     });
-    alertServices.callCluster.mockResolvedValue({
-      hits: {
-        total: { value: 10 },
-      },
-    });
+    alertServices.scopedClusterClient.asCurrentUser.transport.request.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          total: { value: 10 },
+        },
+      })
+    );
     const value: Partial<ApiResponse> = {
       statusCode: 200,
       body: {
@@ -160,7 +164,9 @@ describe('rules_notification_alert_type', () => {
         },
       },
     };
-    alertServices.scopedClusterClient.fieldCaps.mockResolvedValue(value as ApiResponse);
+    alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
+      value as ApiResponse
+    );
     const ruleAlert = getResult();
     alertServices.savedObjectsClient.get.mockResolvedValue({
       id: 'id',
@@ -211,8 +217,8 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*', 'anotherindex*'];
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'Missing required read privileges on the following indices: ["some*"]'
       );
     });
@@ -223,8 +229,8 @@ describe('rules_notification_alert_type', () => {
       ]);
       payload = getPayload(getThresholdResult(), alertServices);
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
       );
     });
@@ -235,8 +241,8 @@ describe('rules_notification_alert_type', () => {
       ]);
       payload = getPayload(getEqlResult(), alertServices);
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
       );
     });
@@ -258,8 +264,8 @@ describe('rules_notification_alert_type', () => {
       });
       payload.params.index = ['some*', 'myfa*'];
       await alert.executor(payload);
-      expect(ruleStatusService.warning).toHaveBeenCalled();
-      expect(ruleStatusService.warning.mock.calls[0][0]).toContain(
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'This rule may not have the required read privileges to the following indices: ["myfa*","some*"]'
       );
     });
@@ -665,7 +671,9 @@ describe('rules_notification_alert_type', () => {
     });
 
     it('and call ruleStatusService with the default message', async () => {
-      (searchAfterAndBulkCreate as jest.Mock).mockRejectedValue({});
+      (searchAfterAndBulkCreate as jest.Mock).mockRejectedValue(
+        elasticsearchClientMock.createErrorTransportRequestPromise({})
+      );
       await alert.executor(payload);
       expect(logger.error).toHaveBeenCalled();
       expect(logger.error.mock.calls[0][0]).toContain('An error occurred during rule execution');

@@ -6,12 +6,14 @@
  */
 
 import { httpServerMock } from 'src/core/server/mocks';
+
 import type { PostIngestSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
-import { FleetSetupHandler } from './handlers';
 import { appContextService } from '../../services/app_context';
 import { setupIngestManager } from '../../services/setup';
+
+import { FleetSetupHandler } from './handlers';
 
 jest.mock('../../services/setup', () => {
   return {

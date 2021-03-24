@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, RequestHandler } from 'src/core/server';
+
 import { APP_API_ROUTES } from '../../constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse } from '../../../common';

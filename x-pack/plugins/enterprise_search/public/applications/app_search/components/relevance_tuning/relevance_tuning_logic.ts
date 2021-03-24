@@ -8,7 +8,11 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
-import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  setSuccessMessage,
+  flashAPIErrors,
+  clearFlashMessages,
+} from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts } from '../../../shared/types';
 
@@ -20,20 +24,15 @@ import {
   RESET_CONFIRMATION_MESSAGE,
   DELETE_SUCCESS_MESSAGE,
   DELETE_CONFIRMATION_MESSAGE,
+  BOOST_TYPE_TO_EMPTY_BOOST,
 } from './constants';
-import {
-  BaseBoost,
-  Boost,
-  BoostFunction,
-  BoostOperation,
-  BoostType,
-  SearchSettings,
-} from './types';
+import { Boost, BoostFunction, BoostOperation, BoostType, SearchSettings } from './types';
 import {
   filterIfTerm,
   parseBoostCenter,
   removeBoostStateProps,
   normalizeBoostValues,
+  removeEmptyValueBoosts,
 } from './utils';
 
 interface RelevanceTuningProps {
@@ -87,12 +86,12 @@ interface RelevanceTuningActions {
   updateBoostSelectOption(
     name: string,
     boostIndex: number,
-    optionType: keyof BaseBoost,
+    optionType: keyof Pick<Boost, 'operation' | 'function'>,
     value: BoostOperation | BoostFunction
   ): {
     name: string;
     boostIndex: number;
-    optionType: keyof BaseBoost;
+    optionType: keyof Pick<Boost, 'operation' | 'function'>;
     value: string;
   };
   updateSearchValue(query: string): string;
@@ -279,18 +278,21 @@ export const RelevanceTuningLogic = kea<
 
       actions.setResultsLoading(true);
 
+      const filteredBoosts = removeEmptyValueBoosts(boosts);
+
       try {
         const response = await http.post(url, {
           query: {
             query,
           },
           body: JSON.stringify({
-            boosts: isEmpty(boosts) ? undefined : boosts,
+            boosts: isEmpty(filteredBoosts) ? undefined : filteredBoosts,
             search_fields: isEmpty(searchFields) ? undefined : searchFields,
           }),
         });
 
         actions.setSearchResults(response.results);
+        clearFlashMessages();
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -376,7 +378,7 @@ export const RelevanceTuningLogic = kea<
     addBoost: ({ name, type }) => {
       const { searchSettings } = values;
       const { boosts } = searchSettings;
-      const emptyBoost = { type, factor: 1, newBoost: true };
+      const emptyBoost = BOOST_TYPE_TO_EMPTY_BOOST[type];
       let boostArray;
 
       if (Array.isArray(boosts[name])) {
