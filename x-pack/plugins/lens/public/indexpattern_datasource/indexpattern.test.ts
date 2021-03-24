@@ -546,7 +546,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 isBucketed: false,
                 sourceField: 'bytes',
-                operationType: 'avg',
+                operationType: 'average',
                 timeScale: 'h',
               },
               col3: {
