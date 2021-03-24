@@ -10,19 +10,23 @@ Currently, the applications that support screenshot reports are:
  - Canvas
 
 Kibana UI code should be aware when the page is rendering for the purpose of
-capturing a screenshot. This ability would improve the quality of the Kibana
-Reporting feature for a few reasons:
+capturing a screenshot. There should be a service to interact with low-level
+code for providing that awareness. Reporting would interact with this service
+to improve the quality of the Kibana Reporting feature for a few reasons:
+
  - Fewer objects in the headless browser memory since interactive code doesn't run
  - Fewer API requests made by the headless browser for features that don't apply in a non-interactive context
 
 **Screenshot mode service**
 
-At a high level, the application
-can support that awareness through a customized URL for screenshot reports. Canvas
-demonstrates a great implementation of this today. However, Canvas has dependencies
-on other UI plugins, and can not control how they render or what type of network requests
-they send. Those plugins, and lower-level plugins that run on every page, do not have
-a way to control themselves when the page is rendering for taking a screenshot.
+The Reporting-enabled applications should use the recommended practice of
+having a customized URL for Reporting. The customized URL renders without UI
+features like navigation, auto-complete, and anything else that wouldn't make
+sense for non-interactive pages.
+
+However, applications are one piece of the UI code in a browser, and they have
+dependencies on other UI plugins. Apps can't control plugins and other things
+that Kibana loads in the browser.
 
 This RFC proposes a Screenshot Mode Service as a low-level plugin that allows
 other plugins (UI code) to make choices when the page is rendering for a screenshot.
@@ -32,7 +36,7 @@ creating a PNG report, is here: https://github.com/elastic/kibana/issues/59396
 
 # Basic example
 
-When Kibana loads initially, there is a Newsfeed component in the UI that
+When Kibana loads initially, there is a Newsfeed plugin in the UI that
 checks internally cached records to see if it must fetch the Elastic News
 Service for newer items. When the Screenshot Mode Service is implemented, the
 Newsfeed component has a source of information to check on whether or not it
@@ -41,28 +45,38 @@ HTTP round trip, which weigh heavily on performance.
 
 # Motivation
 
-The Reporting-enabled applications should use the recommended practice of
-having a customized URL for Reporting, where UI features like navigation and
-auto-complete disabled. The customized reporting URLs can solve any rendering
-issue in a PDF or PNG, without needing extra CSS to be injected into the page.
+The Reporting team wants all applications to support a customized URLs, such as
+Canvas does with its `#/export/workpad/pdf/{workpadId}` UI route. The
+customized URL is where an app can solve any rendering issue in a PDF or PNG,
+without needing extra CSS to be injected into the page.
 
 However, many low-level plugins have been added to the UI over time. These run
 on every page and an application can not turn them off. Reporting performance
-is negatively affected by this type of code.
+is negatively affected by this type of code. When the Reporting team analyzes
+customer logs to figure out why a job timed out, we sometimes see requests for
+the newsfeed API and telemetry API: services that aren't needed during a
+reporting job.
+
+In 7.12.0, using the customized `/export/workpad/pdf` in Canvas, the Sample
+Data Flights workpad loads 163 requests. Most of thees requests don't come from
+the app itself but from the application container code that Canvas can't turn
+off.
 
 # Detailed design
+
+The Screenshot Mode Service is an entirely new plugin that has an API method
+that returns a Boolean. The return value tells the plugin whether or not it
+should render itself to optimize for non-interactivity.
 
 The plugin is low-level as it has no dependencies of its own, so other
 low-level plugins can depend on it.
 
-The Screenshot Mode Service is an entirely new plugin that has an API method
-that returns a Boolean.  The return value tells the plugin whether or not it
-should render itself to optimize for non-interactivity.
-
 ## Interface
-The `setupDeps.screenshotMode` object has a single purpose: tell a low-level
-plugin if the page is rendering in screenshot capture mode. The plugin decides 
-what to do with that information.
+A plugin would depend on `screenshotMode` in kibana.json. That provides
+`screenshotMode` as a plugin object. The plugin's purpose is to know when the
+page is rendered for screenshot capture, and to interact with plugins through
+an API. It allows plugins to decides what to do with the screenshot mode
+information.
 
 ```
 interface IScreenshotModeServiceSetup {
@@ -70,8 +84,9 @@ interface IScreenshotModeServiceSetup {
 }
 ```
 
-Internally, this object is constructed from a class that refers to information
-sent via a custom proprietary header:
+The plugin knows the screenshot mode from request headers: this interface is
+constructed from a class that refers to information sent via a custom
+proprietary header:
 
 ```
 interface HeaderData {
@@ -84,12 +99,11 @@ class ScreenshotModeServiceSetup implements IScreenshotModeServiceSetup {
 }
 ```
 
-There can be a URL parameter which triggers screenshot mode to be enabled, for easier testing.
-
-This works because the headless browser that opens the page can inject custom
-headers into the request. Teams can test how their app renders when loaded with
-this header using a new configuration setting, or a web debugging proxy, or
-some other tool that is TBD.
+The Reporting headless browser that opens the page can inject custom headers
+into the request. Teams should be able to test how their app renders when
+loaded with this header. They could use a web debugging proxy, or perhaps the
+new service should support a URL parameter which triggers screenshot mode to be
+enabled, for easier testing.
 
 # Alternatives
 
