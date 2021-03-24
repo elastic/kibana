@@ -89,6 +89,7 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
+      filter: previousColumn?.filter,
       params: {
         window: 5,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -119,6 +120,7 @@ export const movingAverageOperation: OperationDefinition<
     )?.join(', ');
   },
   timeScalingMode: 'optional',
+  filterable: true,
 };
 
 function MovingAverageParamEditor({
@@ -174,7 +176,11 @@ const MovingAveragePopup = () => {
     <HelpPopover
       anchorPosition="upCenter"
       button={
-        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+        >
           {i18n.translate('xpack.lens.indexPattern.movingAverage.helpText', {
             defaultMessage: 'How it works',
           })}
