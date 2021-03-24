@@ -14,9 +14,7 @@ export const createClusterDataCheck = () => {
   return async function doesClusterHaveUserData(esClient: ElasticsearchClient, log: Logger) {
     if (!clusterHasUserData) {
       try {
-        const indices = await esClient.cat.indices<
-          Array<{ index: string; ['docs.count']: string }>
-        >({
+        const indices = await esClient.cat.indices({
           format: 'json',
           h: ['index', 'docs.count'],
         });
