@@ -348,6 +348,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
       const taskManager = plugins.taskManager;
+      const fleetServerEnabled = parseExperimentalConfigValue(this.config.enableExperimental)
+        .fleetServerEnabled;
       const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = (new EndpointArtifactClient(
         plugins.fleet.createArtifactsClient('endpoint')
@@ -362,11 +364,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           logger,
           cache: this.artifactsCache,
         },
-        parseExperimentalConfigValue(this.config.enableExperimental).fleetServerEnabled
+        fleetServerEnabled
       );
 
       // Migrate artifacts to fleet and then start the minifest task after that is done
-      migrateArtifactsToFleet(savedObjectsClient, artifactClient, logger).finally(() => {
+      migrateArtifactsToFleet(
+        savedObjectsClient,
+        artifactClient,
+        logger,
+        fleetServerEnabled
+      ).finally(() => {
         if (this.manifestTask) {
           this.manifestTask.start({
             taskManager,
