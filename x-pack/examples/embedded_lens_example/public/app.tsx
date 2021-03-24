@@ -160,10 +160,7 @@ export const App = (props: {
                       onClick={() => {
                         props.plugins.lens.navigateToPrefilledEditor({
                           id: '',
-                          timeRange: {
-                            from: 'now-5d',
-                            to: 'now',
-                          },
+                          timeRange: time,
                           attributes: getLensAttributes(props.defaultIndexPattern!, color),
                         });
                         // eslint-disable-next-line no-bitwise

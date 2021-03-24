@@ -110,6 +110,7 @@ export class Embeddable
   private isInitialized = false;
   private activeData: Partial<DefaultInspectorAdapters> | undefined;
   private errors: ErrorMessage[] | undefined;
+  private inputReloadSubscriptions: Subscription[];
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -140,65 +141,76 @@ export class Embeddable
 
     const input$ = this.getInput$();
 
+    this.inputReloadSubscriptions = [];
+
     // Lens embeddable does not re-render when embeddable input changes in
     // general, to improve performance. This line makes sure the Lens embeddable
     // re-renders when anything in ".dynamicActions" (e.g. drilldowns) changes.
-    input$
-      .pipe(
-        map((input) => input.enhancements?.dynamicActions),
-        distinctUntilChanged((a, b) => isEqual(a, b)),
-        skip(1)
-      )
-      .subscribe((input) => {
-        this.reload();
-      });
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          map((input) => input.enhancements?.dynamicActions),
+          distinctUntilChanged((a, b) => isEqual(a, b)),
+          skip(1)
+        )
+        .subscribe((input) => {
+          this.reload();
+        })
+    );
 
     // Lens embeddable does not re-render when embeddable input changes in
     // general, to improve performance. This line makes sure the Lens embeddable
     // re-renders when dashboard view mode switches between "view/edit". This is
     // needed to see the changes to ".dynamicActions" (e.g. drilldowns) when
     // dashboard's mode is toggled.
-    input$
-      .pipe(
-        map((input) => input.viewMode),
-        distinctUntilChanged(),
-        skip(1)
-      )
-      .subscribe((input) => {
-        this.reload();
-      });
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          map((input) => input.viewMode),
+          distinctUntilChanged(),
+          skip(1)
+        )
+        .subscribe((input) => {
+          this.reload();
+        })
+    );
 
     // Re-initialize the visualization if either the attributes or the saved object id changes
-    input$
-      .pipe(
-        distinctUntilChanged((a, b) =>
-          isEqual(
-            ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-            ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
-          )
-        ),
-        skip(1)
-      )
-      .subscribe(async (input) => {
-        await this.initializeSavedVis(input);
-        this.reload();
-      });
+
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          distinctUntilChanged((a, b) =>
+            isEqual(
+              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
+              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
+            )
+          ),
+          skip(1)
+        )
+        .subscribe(async (input) => {
+          await this.initializeSavedVis(input);
+          this.reload();
+        })
+    );
 
     // Update search context and reload on changes related to search
-    this.getUpdated$()
-      .pipe(map(() => this.getInput()))
-      .pipe(
-        distinctUntilChanged((a, b) =>
-          isEqual(
-            [a.filters, a.query, a.timeRange, a.searchSessionId],
-            [b.filters, b.query, b.timeRange, b.searchSessionId]
-          )
-        ),
-        skip(1)
-      )
-      .subscribe(async (input) => {
-        this.onContainerStateChanged(input);
-      });
+    this.inputReloadSubscriptions.push(
+      this.getUpdated$()
+        .pipe(map(() => this.getInput()))
+        .pipe(
+          distinctUntilChanged((a, b) =>
+            isEqual(
+              [a.filters, a.query, a.timeRange, a.searchSessionId],
+              [b.filters, b.query, b.timeRange, b.searchSessionId]
+            )
+          ),
+          skip(1)
+        )
+        .subscribe(async (input) => {
+          this.onContainerStateChanged(input);
+        })
+    );
   }
 
   public supportedTriggers() {
@@ -229,7 +241,7 @@ export class Embeddable
       this.onFatalError(e);
       return false;
     });
-    if (!attributes) {
+    if (!attributes || this.input === null) {
       return;
     }
     this.savedVis = {
@@ -400,7 +412,7 @@ export class Embeddable
   };
 
   async reload() {
-    if (!this.savedVis || !this.isInitialized) {
+    if (!this.savedVis || !this.isInitialized || this.input === null) {
       return;
     }
     this.handleContainerStateChanged(this.input);
@@ -469,6 +481,13 @@ export class Embeddable
 
   destroy() {
     super.destroy();
+    if (this.inputReloadSubscriptions.length > 0) {
+      this.inputReloadSubscriptions.forEach((reloadSub) => {
+        reloadSub.unsubscribe();
+      });
+      // @ts-expect-error
+      this.input = null;
+    }
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
     }
