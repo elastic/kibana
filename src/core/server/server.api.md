@@ -296,7 +296,7 @@ export class BasePath {
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
 //
 // @internal (undocumented)
-export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }: BootstrapArgs): Promise<void>;
+export function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs): Promise<void>;
 
 // @public
 export interface Capabilities {
@@ -342,7 +342,7 @@ export const config: {
             pingTimeout: Type<import("moment").Duration>;
             logQueries: Type<boolean>;
             ssl: import("@kbn/config-schema").ObjectType<{
-                verificationMode: Type<"none" | "certificate" | "full">;
+                verificationMode: Type<"certificate" | "none" | "full">;
                 certificateAuthorities: Type<string | string[] | undefined>;
                 certificate: Type<string | undefined>;
                 key: Type<string | undefined>;
@@ -1258,10 +1258,10 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Buffer | Error | Stream | {
+    custom: <T extends string | Record<string, any> | Error | Buffer | {
         message: string | Error;
         attributes?: Record<string, any> | undefined;
-    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    } | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
     badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
