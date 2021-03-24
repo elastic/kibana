@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { act } from '@testing-library/react';
 import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '../../../../types';
 
@@ -98,7 +99,7 @@ describe('IndexParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="preconfiguredDocumentToIndex"]').length > 0).toBeTruthy();
   });
 
-  test('all params fields are rendered correctly for preconfigured alert history connector when params are defined', () => {
+  test('all params fields are rendered correctly for preconfigured alert history connector when params are defined', async () => {
     const actionParams = {
       documents: undefined,
       indexOverride: 'alert-history-not-the-default',
@@ -119,5 +120,15 @@ describe('IndexParamsFields renders', () => {
       'not-the-default'
     );
     expect(wrapper.find('[data-test-subj="preconfiguredDocumentToIndex"]').length > 0).toBeTruthy();
+
+    wrapper.find('EuiLink[data-test-subj="resetDefaultIndex"]').simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="preconfiguredIndexToUse"]').first().prop('value')).toBe(
+      'default'
+    );
   });
 });

@@ -53,8 +53,11 @@ You can configure the following settings in the `kibana.yml` file.
   +
   Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
+| `xpack.actions.preconfiguredAlertHistoryEsIndex`
+  | Enables a preconfigured alert history {es} <<index-action-type, Index>> connector. Defaults to `false`.
+
 | `xpack.actions.preconfigured`
-  | Specifies preconfigured action IDs and configs. Defaults to {}.
+  | Specifies preconfigured connector IDs and configs. Defaults to {}.
 
 | `xpack.actions.proxyUrl` {ess-icon}
   | Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.

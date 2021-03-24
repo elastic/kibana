@@ -95,6 +95,7 @@ export const IndexParamsFields = ({
     indexOverride && indexOverride !== AlertHistoryDefaultIndexName ? (
       <EuiText size="xs">
         <EuiLink
+          data-test-subj="resetDefaultIndex"
           onClick={() => {
             editAction('indexOverride', AlertHistoryDefaultIndexName, index);
             setAlertHistoryIndexSuffix(defaultAlertHistoryIndexSuffix);
@@ -124,13 +125,25 @@ export const IndexParamsFields = ({
           }
         )}
         labelAppend={resetDefaultIndex}
-        helpText={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndexHelpText',
-          {
-            defaultMessage: 'Documents will be indexed into "{alertHistoryIndex}"',
-            values: { alertHistoryIndex: `${ALERT_HISTORY_PREFIX}${alertHistoryIndexSuffix}` },
-          }
-        )}
+        helpText={
+          <>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndexHelpText"
+              defaultMessage={`Documents will be indexed into the "{alertHistoryIndex}" index`}
+              values={{ alertHistoryIndex: `${ALERT_HISTORY_PREFIX}${alertHistoryIndexSuffix}` }}
+            />
+            <EuiSpacer size="xs" />
+            <EuiLink
+              href={docLinks.links.alerting.preconfiguredAlertHistoryConnector}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndexDocLink"
+                defaultMessage="Learn more about the preconfigured alert history connector."
+              />
+            </EuiLink>
+          </>
+        }
       >
         <EuiFieldText
           fullWidth

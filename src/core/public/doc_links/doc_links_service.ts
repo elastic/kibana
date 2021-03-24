@@ -206,6 +206,7 @@ export class DocLinksService {
           indexThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/rule-type-index-threshold.html`,
           pagerDutyAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pagerduty-action-type.html`,
           preconfiguredConnectors: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pre-configured-connectors.html`,
+          preconfiguredAlertHistoryConnector: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pre-configured-connectors.html#preconfigured-connector-alert-history`,
           serviceNowAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/servicenow-action-type.html#configuring-servicenow`,
           setupPrerequisites: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-getting-started.html#alerting-setup-prerequisites`,
           slackAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/slack-action-type.html#configuring-slack`,

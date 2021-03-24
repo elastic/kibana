@@ -64,3 +64,22 @@ Clicking a preconfigured connector shows the description, but not the configurat
 
 [role="screenshot"]
 image::images/pre-configured-connectors-view-screen.png[Pre-configured connector view details]
+
+[float]
+[[preconfigured-connector-alert-history]]
+==== Alert History Preconfigured Connector
+
+{kib} offers a preconfigured <<index-action-type, Index>> connector to facilitate indexing active alert data into {es}.
+
+To use this connector, set the <<action-settings, `xpack.actions.preconfiguredAlertHistoryEsIndex`>> configuration to `true`. 
+
+```js
+  xpack.actions.preconfiguredAlertHistoryEsIndex: true
+```
+
+When creating a new rule, add an <<index-action-type, Index action>> and select the `Alert History ES Index (preconfigured)` connector.
+
+[role="screenshot"]
+image::images/pre-configured-alert-history-connector.png[Select pre-configured alert history connectors]
+
+With this connector, documents are indexed using a pre-configured schema that captures all of the rule and alert information that is available as <<defining-alerts-actions-variables, action variables>>. By default, these documents will be indexed into the `alert-history-default` index, but you may specify a different index if desired. Note that all index names must start with `alert-history-` in order to take advantage of the pre-configured Alert History index template.
