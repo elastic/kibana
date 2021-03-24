@@ -231,7 +231,6 @@ export const getDateHistogramBucketAgg = ({
         write: () => {},
         serialize(val, agg) {
           if (!agg) return undefined;
-          updateTimeBuckets(agg, calculateBounds);
           const { useNormalizedEsInterval } = agg.params;
           const interval = agg.buckets.getInterval(useNormalizedEsInterval);
           return interval.expression;
