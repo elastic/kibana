@@ -1,9 +1,9 @@
 [role="xpack"]
 [[session-management-api]]
-== {kib} user session management APIs
+== User session management APIs
 
-The following <<xpack-security-session-management, {kib} user session>> management APIs are available:
+The following <<xpack-security-session-management, user session>> management APIs are available:
 
-* <<session-management-api-invalidate, Invalidate user sessions API>> to invalidate {kib} user sessions
+* <<session-management-api-invalidate, Invalidate user sessions API>> to invalidate user sessions
 
 include::session-management/invalidate.asciidoc[]

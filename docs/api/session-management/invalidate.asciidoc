@@ -4,12 +4,12 @@
 <titleabbrev>Invalidate user sessions</titleabbrev>
 ++++
 
-experimental[] Invalidates {kib} user sessions that match provided query.
+experimental[] Invalidates user sessions that match provided query.
 
 [[session-management-api-invalidate-prereqs]]
 ==== Prerequisite
 
-To use the invalidate sessions API, you must be a `superuser`.
+To use the invalidate user sessions API, you must be a `superuser`.
 
 [[session-management-api-invalidate-request]]
 ==== Request
