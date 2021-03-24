@@ -33,10 +33,15 @@ import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from './components/effected_policy_select/test_utils';
 import { resolvePathVariables } from '../service/utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
+
+// TODO: remove this mock when feature flag is removed
+jest.mock('../../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
@@ -477,6 +482,7 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should have list of policies populated', async () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       const resetEnv = forceHTMLElementOffsetWidth();
       const { getByTestId } = await renderAndClickAddButton();
       expect(getByTestId('policy-abc123'));
