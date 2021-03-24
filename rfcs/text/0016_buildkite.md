@@ -39,6 +39,7 @@
       - [Secrets handling](#secrets-handling-1)
       - [Support or Documentation](#support-or-documentation-1)
       - [Scheduled Builds](#scheduled-builds-1)
+      - [Container support](#container-support-1)
     - [Desired](#desired-1)
       - [Customization](#customization-1)
       - [Core functionality is first-party](#core-functionality-is-first-party-1)
@@ -75,6 +76,7 @@
       - [Secrets handling](#secrets-handling-2)
       - [Support or Documentation](#support-or-documentation-2)
       - [Scheduled Builds](#scheduled-builds-2)
+      - [Container support](#container-support-2)
     - [Desired](#desired-2)
       - [Customization](#customization-2)
       - [Core functionality is first-party](#core-functionality-is-first-party-2)
@@ -93,24 +95,26 @@ Implement a CI system for Kibana teams that is highly scalable, is stable, surfa
 
 This table provides an overview of the conclusions made throughout the rest of this document. A lot of this is subjective, but we've tried to take an honest look at each system and feature, based on a large amount of research on and/or experience with each system, our requirements, and our preferences as a team. Your team would likely come to different conclusions based on your preferences and requirements.
 
+<!-- eslint-disable max-len -->
+
 |                                      | Jenkins | Buildkite | GitHub Actions | CircleCI |
 | ------------------------------------ | ------- | --------- | -------------- | -------- |
 | Scalable                             | No      | Yes       | No             | Yes      |
 | Stable                               | No      | Yes       | No             | Yes      |
-| Surfaces information intuitively     | No      | Yes       | No             | TODO     |
+| Surfaces information intuitively     | No      | Yes       | No             | Yes      |
 | Pipelines                            | Yes     | Yes       | Yes            | Yes      |
-| Advanced Pipeline logic              | Yes     | Yes       | TODO           | TODO     |
-| Cloud-friendly pricing model         | Yes     | Yes       | TODO           | No       |
-| Public access                        | Yes     | Yes       | Yes            | TODO     |
-| Secrets handling                     | Yes     | No        | Yes            | TODO     |
-| Support or Documentation             | No      | Yes       | TODO           | TODO     |
-| Scheduled Builds                     | Yes     | Yes       | TODO           | TODO     |
-| Container support                    | TODO    | TODO      | TODO           | TODO     |
+| Advanced Pipeline logic              | Yes     | Yes       | Partial        | Partial  |
+| Cloud-friendly pricing model         | Yes     | Yes       | Yes            | No       |
+| Public access                        | Yes     | Yes       | Yes            | Partial  |
+| Secrets handling                     | Yes     | No        | Yes            | Partial  |
+| Support or Documentation             | No      | Yes       | Yes            | Partial  |
+| Scheduled Builds                     | Yes     | Yes       | Yes            | Yes      |
+| Container support                    | Partial | Yes       | Yes            | Yes      |
 |                                      |         |           |                |          |
-| Customization                        | No      | Yes       | No             | TODO     |
-| Core functionality is first-party    | No      | Mostly    | TODO           | TODO     |
-| First-class support for test results | Buggy   | No        | No             | TODO     |
-| GitHub Integration                   | Yes     | Limited   | Yes            | TODO     |
+| Customization                        | No      | Yes       | No             | No       |
+| Core functionality is first-party    | No      | Mostly    | Mostly         | TODO     |
+| First-class support for test results | Buggy   | No        | No             | Yes      |
+| GitHub Integration                   | Yes     | Limited   | Yes            | Yes      |
 | Local testing / reproduction?        | TODO    | TODO      | TODO           | TODO     |
 
 TODO link the conclusions to each section?
@@ -200,9 +204,13 @@ We have certain pipelines (ES Snapshots) that run once daily, and `master` CI cu
 
 #### Container support
 
-TODO
+We have the desire to use containers to create fast, clean environments for CI stages that can also be used locally. We think that we can utilize [modern layer-caching options](https://github.com/moby/buildkit#cache), both local and remote, to optimize bootstrapping various CI stages, doing retries, etc.
 
-Required or Desired?
+For self-hosted options, containers will allow us to utilize longer-running instances (with cached layers, git repos, etc) without worrying about polluting the build environment between builds.
+
+If we use containers for CI stages, when a test fails, developers can pull the image and reproduce the failure in the same environment that was used in CI.
+
+So, we need a solution that at least allows us to build and run our own containers. The more features that exist for managing this, the easier it will be.
 
 ### Desired
 
@@ -406,6 +414,35 @@ Besides this, [Enterprise](https://buildkite.com/enterprise) customers get 24/7 
 #### Scheduled Builds
 
 [Buildkite has scheduled build](https://buildkite.com/docs/pipelines/scheduled-builds) support with a cron-like syntax. Schedules are defined separately from the pipeline yaml, and can be managed via the UI, API, or terraform.
+
+#### Container support
+
+Since we will manage our own agents with Buildkite, we have full control over the container management tools we install and use. In particular, this means that we can easily use modern container tooling, such as Docker with Buildkit, and we can pre-cache layers or other data in our agent images.
+
+[Buildkite maintains](https://buildkite.com/docs/tutorials/docker-containerized-builds) two officially-supported plugins for making it easier to create pipelines using containers: [one for Docker](https://github.com/buildkite-plugins/docker-buildkite-plugin) and [one for Docker Compose](https://github.com/buildkite-plugins/docker-compose-buildkite-plugin).
+
+The Docker plugin is essentially a wrapper around `docker run` that makes it easier to define steps that run in containers, while settings various flags. It also provides some logging, and provides mechanisms for automatically propagating environment variables or mounting the workspace into the container.
+
+A simple, working example for running Jest tests using a container is below. The `Dockerfile` contains all dependencies for CI, and runs `yarn kbn bootstrap` so that it contains a full environment, ready to run tasks.
+
+```yaml
+steps:
+  - command: |
+      export DOCKER_BUILDKIT=1 && \
+      docker build -t gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT -f .ci/Dockerfile . --progress plain && \
+      docker push gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT
+  - wait
+  - command: node scripts/jest --ci --verbose --maxWorkers=6
+    label: 'Jest'
+    artifact_paths: target/junit/**/*.xml
+    plugins:
+      - docker#v3.8.0:
+          image: 'gcr.io/elastic-kibana-184716/buildkite/ci/base:$BUILDKITE_COMMIT'
+          propagate-environment: true
+          mount-checkout: false
+    parallelism: 2
+    timeout_in_minutes: 120
+```
 
 ### Desired
 
@@ -644,6 +681,8 @@ We will need to maintain images used to create GCP instances for our Buildkite a
 
 We could likely maintain a single linux-based image to cover all of our current CI needs. However, in the future, if we need to maintain many images across different operating systems and architectures, this is likely to become the most complex part of the CI system that we would need to maintain. Every operating system and architecture we need to support adds another group of required images, with unique dependencies and configuration automation.
 
+Another thing to note: Just because we need to run something on a specific OS or architecture, it doesn't necessarily mean we need to maintain an agent image for it. For example, we might use something like Vagrant to create a separate VM, using the default, cloud-provided images, that we run something on (e.g. for testing system packages), rather than running it on the same machine as the agent. In this case, we would potentially only be managing a small number of images, or even a single image.
+
 For our testing, we have a single GCP image, built using Packer, with the Buildkite agent installed and all of our dependencies.
 
 Summary of Responsibilities
@@ -796,6 +835,12 @@ CloudBees offers paid support, but we're not familiar with it at this time.
 
 Jenkins supports scheduled builds via a Cron-like syntax, and can spread scheduled jobs out. For example, if many jobs are scheduled to run every day at midnight, a syntax is available that will automatically spread the triggered jobs evenly out across the midnight hour.
 
+#### Container support
+
+Jenkins has support for using Docker to [run containers for specific stages in a Pipeline](https://www.jenkins.io/doc/book/pipeline/docker/). It is effectively a wrapper around `docker run`. There are few conveniences, and figuring out how to do things like mount the workspace into the container is left up to the user. There are also gotchas that are not well-documented, such as the fact that the user running inside the container will be automatically changed using `-u`, which can cause issues.
+
+Though we have control over the agents running our jobs at Elastic, and thus all of the container-related tooling, it is not currently easy for the Operations team to manage our container tooling. We are mostly dependent on another team to do this for us.
+
 ### Desired
 
 #### Customization
@@ -823,6 +868,13 @@ TODO
 ## Other solutions
 
 ### CircleCI
+
+CircleCI is a mature, widely-used option that is scalable and fulfills a lot of our requirements. We felt that we could create a good CI experience with this solution, but it had several disadvantages for us compared to Buildkite:
+
+- The pricing model for self-hosted runners felt punishing for breaking CI into smaller tasks
+- Public access to build pages is gated behind a login, and gives CircleCI access to your private repos by default
+- There are no customization options for adding information to build pages
+- Options for advanced pipeline logic are limited compared to other solutions
 
 ### GitHub Actions
 
