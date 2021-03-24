@@ -12,13 +12,14 @@ import {
   systemPalette,
   PaletteOutput,
   CustomPaletteState,
+  CustomPaletteArguments,
 } from './palette';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
 describe('palette', () => {
   const fn = functionWrapper(palette()) as (
     context: null,
-    args?: { color?: string[]; gradient?: boolean; reverse?: boolean }
+    args?: Partial<CustomPaletteArguments>
   ) => PaletteOutput<CustomPaletteState>;
 
   it('results a palette', () => {

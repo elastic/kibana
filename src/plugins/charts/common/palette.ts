@@ -15,9 +15,9 @@ export interface CustomPaletteArguments {
   gradient: boolean;
   reverse?: boolean;
   stop?: number[];
-  range: 'auto' | 'number' | 'percent';
-  rangeMin: number;
-  rangeMax: number;
+  range?: 'auto' | 'number' | 'percent';
+  rangeMin?: number;
+  rangeMax?: number;
 }
 
 export interface CustomPaletteState {
@@ -25,8 +25,8 @@ export interface CustomPaletteState {
   gradient: boolean;
   stops: number[];
   range: 'auto' | 'number' | 'percent';
-  rangeMin: number;
-  rangeMax: number;
+  rangeMin?: number;
+  rangeMax?: number;
 }
 
 export interface SystemPaletteArguments {
@@ -146,7 +146,7 @@ export function palette(): ExpressionFunctionDefinition<
         params: {
           colors: reverse ? colors.reverse() : colors,
           stops: reverse ? stops.reverse() : stops,
-          range,
+          range: range ?? 'auto',
           rangeMin,
           rangeMax,
           gradient,
