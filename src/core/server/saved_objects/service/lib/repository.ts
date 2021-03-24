@@ -853,10 +853,10 @@ export class SavedObjectsRepository {
       total: body.hits.total,
       saved_objects: body.hits.hits.map(
         (hit: estypes.Hit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
-          // @ts-expect-error @elastic/elasticsearch decalred Id as string | number
+          // @ts-expect-error @elastic/elasticsearch declared Id as string | number
           ...this._rawToSavedObject(hit),
           score: hit._score!,
-          // @ts-expect-error @elastic/elasticsearch decalred sort as string | number
+          // @ts-expect-error @elastic/elasticsearch declared sort as string | number
           sort: hit.sort,
         })
       ),
