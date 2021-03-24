@@ -15,5 +15,9 @@
   },
   "include": [
     "./src/**/*.ts"
+  ],
+  "exclude": [
+    "**/mocks/**/*",
+    "**/**/*.test.ts"
   ]
 }

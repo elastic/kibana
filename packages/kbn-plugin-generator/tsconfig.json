@@ -17,6 +17,7 @@
     "src/**/*"
   ],
   "exclude": [
-    "src/template/*"
-  ]
+    "src/template/*",
+    "**/integration_tests/**/*"
+  ],
 }

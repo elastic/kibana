@@ -18,5 +18,10 @@
     "src/**/*.tsx",
     "types/intl_format_cache.d.ts",
     "types/intl_relativeformat.d.ts"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*",
+    "**/**/*.test.tsx",
+    "**/**/*.test.ts"
   ]
 }

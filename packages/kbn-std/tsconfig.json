@@ -16,5 +16,9 @@
   },
   "include": [
     "./src/**/*.ts"
+  ],
+  "exclude": [
+    "**/__fixture__/**/*",
+    "**/**/*.test.ts"
   ]
 }

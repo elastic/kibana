@@ -17,6 +17,8 @@
     "src/**/*"
   ],
   "exclude": [
-    "**/__fixtures__/**/*"
+    "**/__fixtures__/**/*",
+    "**/tests/**/*",
+    "**/**/*.test.ts",
   ]
 }

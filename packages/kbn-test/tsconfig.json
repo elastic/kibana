@@ -20,6 +20,9 @@
     "index.d.ts"
   ],
   "exclude": [
-    "types/ftr_globals/**/*"
+    "types/ftr_globals/**/*",
+    "**/integration_tests/**/*",
+    "**/__fixtures__/**/*",
+    "**/**/*.test.ts"
   ]
 }
