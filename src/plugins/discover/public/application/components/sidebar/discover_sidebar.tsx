@@ -36,7 +36,7 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 /**
  * Default number of available fields displayed and added on scroll
  */
-const PAGINATION_SIZE = 20;
+const PAGINATION_SIZE = 50;
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
