@@ -124,7 +124,7 @@ describe('EnginesOverview', () => {
         expect(actions.loadMetaEngines).toHaveBeenCalled();
       });
 
-      describe('when the user can manage/creation engines', () => {
+      describe('when the user can manage/create engines', () => {
         it('renders a create engine button which takes users to the create meta engine page', () => {
           setMockValues({
             ...valuesWithEngines,
