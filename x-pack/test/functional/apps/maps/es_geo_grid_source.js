@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const PageObjects = getPageObjects(['common', 'maps']);
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
   const security = getService('security');
@@ -95,6 +95,7 @@ export default function ({ getPageObjects, getService }) {
           //todo this verifies the extent-filtering behavior (not really the correct application of geotile_grid-precision), and should ideally be moved to its own section
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
           const mapboxStyle = await PageObjects.maps.getMapboxStyle();
+          await PageObjects.common.sleep(30000);
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
             expectedNumPartialFeatures
           );
@@ -141,12 +142,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
-          await inspector.open();
-          await inspector.openInspectorRequestsView();
-          const requestStats = await inspector.getTableData();
-          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-          await inspector.close();
-          expect(hits).to.equal('1');
+          const response = await PageObjects.maps.getResponse();
+          expect(response.aggregations.gridSplit.buckets.length).to.equal(1);
         });
       });
 
@@ -156,18 +153,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          await inspector.open();
-          await inspector.openInspectorRequestsView();
-          const requestStats = await inspector.getTableData();
-          const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-          expect(totalHits).to.equal('6');
-          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
-          expect(hits).to.equal('0'); // aggregation requests do not return any documents
-          const indexPatternName = PageObjects.maps.getInspectorStatRowHit(
-            requestStats,
-            'Index pattern'
-          );
-          expect(indexPatternName).to.equal('logstash-*');
+          const response = await PageObjects.maps.getResponse();
+          expect(response.aggregations.gridSplit.buckets.length).to.equal(4);
         });
 
         it('should not contain any elasticsearch request after layer is deleted', async () => {
@@ -218,12 +205,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
-          await inspector.open();
-          await inspector.openInspectorRequestsView();
-          const requestStats = await inspector.getTableData();
-          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-          await inspector.close();
-          expect(hits).to.equal('1');
+          const response = await PageObjects.maps.getResponse();
+          expect(response.aggregations.gridSplit.buckets.length).to.equal(1);
         });
       });
 
@@ -233,18 +216,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          await inspector.open();
-          await inspector.openInspectorRequestsView();
-          const requestStats = await inspector.getTableData();
-          const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-          expect(totalHits).to.equal('6');
-          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
-          expect(hits).to.equal('0'); // aggregation requests do not return any documents
-          const indexPatternName = PageObjects.maps.getInspectorStatRowHit(
-            requestStats,
-            'Index pattern'
-          );
-          expect(indexPatternName).to.equal('logstash-*');
+          const response = await PageObjects.maps.getResponse();
+          expect(response.aggregations.gridSplit.buckets.length).to.equal(4);
         });
 
         it('should not contain any elasticsearch request after layer is deleted', async () => {
@@ -272,18 +245,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          await inspector.open();
-          await inspector.openInspectorRequestsView();
-          const requestStats = await inspector.getTableData();
-          const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-          expect(totalHits).to.equal('4'); //4 geometries result in 13 cells due to way they overlap geotile_grid cells
-          const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
-          expect(hits).to.equal('0'); // aggregation requests do not return any documents
-          const indexPatternName = PageObjects.maps.getInspectorStatRowHit(
-            requestStats,
-            'Index pattern'
-          );
-          expect(indexPatternName).to.equal('geo_shapes*');
+          const response = await PageObjects.maps.getResponse();
+          expect(response.aggregations.gridSplit.buckets.length).to.equal(13);
         });
       });
     });
