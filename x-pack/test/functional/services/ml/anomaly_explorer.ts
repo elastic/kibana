@@ -132,8 +132,8 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       const actualChartsCount = (
         await chartsContainer.findAllByClassName('ml-explorer-chart-container')
       ).length;
-      expect(expectedChartsCount).to.eql(
-        actualChartsCount,
+      expect(actualChartsCount).to.eql(
+        expectedChartsCount,
         `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
       );
     },
