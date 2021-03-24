@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -21,7 +21,9 @@ import {
   EuiForm,
   EuiFormRow,
   EuiComboBox,
+  EuiCode,
   EuiCodeEditor,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
@@ -33,14 +35,21 @@ import {
   useGetSettings,
   useInput,
   sendPutSettings,
-} from '../hooks';
-import { useGetOutputs, sendPutOutput } from '../hooks/use_request/outputs';
-import { isDiffPathProtocol } from '../../../../common/';
+} from '../../hooks';
+import { useGetOutputs, sendPutOutput } from '../../hooks/use_request/outputs';
+import { isDiffPathProtocol } from '../../../../../common/';
+
+import { SettingsConfirmModal } from './confirm_modal';
+import type { SettingsConfirmModalProps } from './confirm_modal';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
 
 interface Props {
   onClose: () => void;
+}
+
+function isSameArrayValue(arrayA: string[] = [], arrayB: string[] = []) {
+  return arrayA.length === arrayB.length && arrayA.every((val, index) => val === arrayB[index]);
 }
 
 function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
@@ -117,18 +126,24 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
       ];
     }
   });
+
+  const validate = useCallback(() => {
+    if (
+      !kibanaUrlsInput.validate() ||
+      !fleetServerUrlsInput.validate() ||
+      !elasticsearchUrlInput.validate() ||
+      !additionalYamlConfigInput.validate()
+    ) {
+      return false;
+    }
+
+    return true;
+  }, [kibanaUrlsInput, fleetServerUrlsInput, elasticsearchUrlInput, additionalYamlConfigInput]);
+
   return {
     isLoading,
-    onSubmit: async () => {
-      if (
-        !kibanaUrlsInput.validate() ||
-        !fleetServerUrlsInput.validate() ||
-        !elasticsearchUrlInput.validate() ||
-        !additionalYamlConfigInput.validate()
-      ) {
-        return;
-      }
-
+    validate,
+    submit: async () => {
       try {
         setIsloading(true);
         if (!outputId) {
@@ -176,28 +191,92 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   const settings = settingsRequest?.data?.item;
   const outputsRequest = useGetOutputs();
   const output = outputsRequest.data?.items?.[0];
-  const { inputs, onSubmit, isLoading } = useSettingsForm(output?.id, onClose);
+  const { inputs, submit, validate, isLoading } = useSettingsForm(output?.id, onClose);
+
+  const [isConfirmModalVisible, setConfirmModalVisible] = React.useState(false);
+
+  const onSubmit = useCallback(() => {
+    if (validate()) {
+      setConfirmModalVisible(true);
+    }
+  }, [validate, setConfirmModalVisible]);
+
+  const onConfirm = useCallback(() => {
+    submit();
+  }, [submit]);
+
+  const onConfirmModalClose = useCallback(() => {
+    setConfirmModalVisible(false);
+  }, [setConfirmModalVisible]);
 
   useEffect(() => {
     if (output) {
       inputs.elasticsearchUrl.setValue(output.hosts || []);
-      inputs.additionalYamlConfig.setValue(
-        output.config_yaml ||
-          `# YAML settings here will be added to the Elasticsearch output section of each policy`
-      );
+      inputs.additionalYamlConfig.setValue(output.config_yaml || '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [output]);
 
   useEffect(() => {
     if (settings) {
-      inputs.kibanaUrls.setValue(settings.kibana_urls);
-      inputs.fleetServerUrls.setValue(settings.fleet_server_urls);
+      inputs.kibanaUrls.setValue([...settings.kibana_urls]);
+      inputs.fleetServerUrls.setValue([...settings.fleet_server_urls]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
-  const body = (
+  const isUpdated = React.useMemo(() => {
+    if (!settings || !output) {
+      return false;
+    }
+    return (
+      !isSameArrayValue(settings.kibana_urls, inputs.kibanaUrls.value) ||
+      !isSameArrayValue(settings.fleet_server_urls, inputs.fleetServerUrls.value) ||
+      !isSameArrayValue(output.hosts, inputs.elasticsearchUrl.value) ||
+      (output.config_yaml || '') !== inputs.additionalYamlConfig.value
+    );
+  }, [settings, inputs, output]);
+
+  const changes = React.useMemo(() => {
+    if (!settings || !output || !isConfirmModalVisible) {
+      return [];
+    }
+
+    const tmpChanges: SettingsConfirmModalProps['changes'] = [];
+    if (!isSameArrayValue(output.hosts, inputs.elasticsearchUrl.value)) {
+      tmpChanges.push(
+        {
+          type: 'elasticsearch',
+          direction: 'removed',
+          urls: output.hosts || [],
+        },
+        {
+          type: 'elasticsearch',
+          direction: 'added',
+          urls: inputs.elasticsearchUrl.value,
+        }
+      );
+    }
+
+    if (!isSameArrayValue(settings.fleet_server_urls, inputs.fleetServerUrls.value)) {
+      tmpChanges.push(
+        {
+          type: 'fleet_server',
+          direction: 'removed',
+          urls: settings.fleet_server_urls,
+        },
+        {
+          type: 'fleet_server',
+          direction: 'added',
+          urls: inputs.fleetServerUrls.value,
+        }
+      );
+    }
+
+    return tmpChanges;
+  }, [settings, inputs, output, isConfirmModalVisible]);
+
+  const body = settings && (
     <EuiForm>
       <EuiTitle size="s">
         <h3>
@@ -211,7 +290,10 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.fleet.settings.globalOutputDescription"
-          defaultMessage="Specify where to send data. These settings are applied to all Elastic Agent policies."
+          defaultMessage="These settings are applied globally to the {outputs} section of all agent policies and will affect all enrolled agents if changed."
+          values={{
+            outputs: <EuiCode>outputs</EuiCode>,
+          }}
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -221,10 +303,26 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         label={i18n.translate('xpack.fleet.settings.fleetServerUrlsLabel', {
           defaultMessage: 'Fleet Server URL',
         })}
-        helpText={i18n.translate('xpack.fleet.settings.fleetServerUrlsHelpTect', {
-          defaultMessage:
-            'Specify the Fleet Server URLs agents will use to comunicate with Fleet. If multiple URLs exist, Fleet will use the first provided URL for enrollment.',
-        })}
+        helpText={
+          <FormattedMessage
+            id="xpack.fleet.settings.fleetServerUrlsHelpTect"
+            defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet will show the first provided URL for enrollment purposes. For more information, see the {link}.'"
+            values={{
+              link: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/fleet/current/index.html"
+                  target="_blank"
+                  external
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.settings.userGuideLink"
+                    defaultMessage="Fleet User Guide"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
         {...inputs.fleetServerUrls.formRowProps}
       >
         <EuiComboBox fullWidth noSuggestions {...inputs.fleetServerUrls.props} />
@@ -258,7 +356,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiFormRow
         {...inputs.additionalYamlConfig.formRowProps}
         label={i18n.translate('xpack.fleet.settings.additionalYamlConfig', {
-          defaultMessage: 'Elasticsearch output configuration',
+          defaultMessage: 'Elasticsearch output configuration (YAML)',
         })}
         fullWidth
       >
@@ -266,6 +364,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           width="100%"
           mode="yaml"
           theme="textmate"
+          placeholder="# YAML settings here will be added to the Elasticsearch output section of each policy"
           setOptions={{
             minLines: 10,
             maxLines: 30,
@@ -280,38 +379,54 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   );
 
   return (
-    <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
-      <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerSettingsFlyoutTitle">
-        <EuiTitle size="m">
-          <h2 id="IngestManagerSettingsFlyoutTitle">
-            <FormattedMessage
-              id="xpack.fleet.settings.flyoutTitle"
-              defaultMessage="Fleet settings"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>{body}</EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} flush="left">
+    <>
+      {isConfirmModalVisible && (
+        <SettingsConfirmModal
+          changes={changes}
+          onConfirm={onConfirm}
+          onClose={onConfirmModalClose}
+          isLoading={isLoading}
+        />
+      )}
+      <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
+        <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerSettingsFlyoutTitle">
+          <EuiTitle size="m">
+            <h2 id="IngestManagerSettingsFlyoutTitle">
               <FormattedMessage
-                id="xpack.fleet.settings.cancelButtonLabel"
-                defaultMessage="Cancel"
+                id="xpack.fleet.settings.flyoutTitle"
+                defaultMessage="Fleet settings"
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSubmit} iconType="save" isLoading={isLoading}>
-              <FormattedMessage
-                id="xpack.fleet.settings.saveButtonLabel"
-                defaultMessage="Save settings"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>{body}</EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} flush="left">
+                <FormattedMessage
+                  id="xpack.fleet.settings.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                disabled={!isUpdated}
+                onClick={onSubmit}
+                isLoading={isLoading}
+                color="primary"
+                fill
+              >
+                <FormattedMessage
+                  id="xpack.fleet.settings.saveButtonLabel"
+                  defaultMessage="Save and apply settings"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </>
   );
 };
