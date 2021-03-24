@@ -267,12 +267,9 @@ export class CliDevMode {
 
     sub.add(
       this.devServer
-        .getRestartInfo$({
-          interval: RESTART_BUFFER_INTERVAL,
-          maxBufferSize: RESTART_BUFFER_MAX_SIZE,
-        })
+        .getRestartTime$()
         .pipe(
-          concatMap(async ({ count, ms }, i) => {
+          concatMap(async ({ ms }, i) => {
             await reporter.timings({
               timings: [
                 {
@@ -280,7 +277,6 @@ export class CliDevMode {
                   id: 'dev server restart',
                   ms,
                   meta: {
-                    count,
                     sequence: i + 1,
                   },
                 },

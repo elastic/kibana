@@ -16,16 +16,17 @@ import {
   share,
   mergeMap,
   switchMap,
+  scan,
   takeUntil,
   ignoreElements,
-  bufferTime,
-  concatMap,
 } from 'rxjs/operators';
 import { observeLines } from '@kbn/dev-utils';
 
 import { usingServerProcess } from './using_server_process';
 import { Watcher } from './watcher';
 import { Log } from './log';
+
+type Phase = 'starting' | 'fatal exit' | 'listening';
 
 export interface Options {
   log: Log;
@@ -47,7 +48,7 @@ export class DevServer {
   private readonly sigint$: Rx.Observable<void>;
   private readonly sigterm$: Rx.Observable<void>;
   private readonly ready$ = new Rx.BehaviorSubject(false);
-  private readonly phase$ = new Rx.ReplaySubject<'starting' | 'fatal exit' | 'listening'>(1);
+  private readonly phase$ = new Rx.ReplaySubject<Phase>(1);
 
   private readonly script: string;
   private readonly argv: string[];
@@ -76,51 +77,30 @@ export class DevServer {
   }
 
   /**
-   * returns an observable of objects describing server start times.
+   * returns an observable of objects describing server start time.
    */
-  getRestartInfo$(options: { interval: number; maxBufferSize: number }) {
+  getRestartTime$() {
     return this.phase$.pipe(
-      // attach the time a phase change occurred
-      map((phase) => ({ phase, time: Date.now() })),
-      // buffer events by time or max buffer size, whichever comes first
-      bufferTime(options.interval, undefined, options.maxBufferSize),
-      // sum up transition time between contiguous "starting" and "listening" events
-      concatMap((events) => {
-        let totalMs = 0;
-        let count = 0;
-
-        let startingTime: number | undefined;
-        for (const event of events) {
-          switch (event.phase) {
-            case 'starting':
-              startingTime = event.time;
-              continue;
-            case 'fatal exit':
-              startingTime = undefined;
-              continue;
-            case 'listening':
-              if (typeof startingTime === 'number') {
-                totalMs += event.time - startingTime;
-                count += 1;
-              }
-              continue;
-            default:
-              this.log.bad(`unexpected dev server phase [${event.phase}]`);
-              break;
-          }
+      scan<
+        Phase,
+        undefined | { phase: 'starting'; at: number } | { phase: 'listening'; took: number }
+      >((acc, phase) => {
+        if (phase === 'starting') {
+          return { phase, at: Date.now() };
         }
 
-        // if there weren't any restarts identified in the time period then don't report anything
-        if (count === 0) {
+        if (phase === 'listening' && acc?.phase === 'starting') {
+          return { phase, took: Date.now() - acc.at };
+        }
+
+        return undefined;
+      }, undefined),
+      mergeMap((desc) => {
+        if (desc?.phase !== 'listening') {
           return [];
         }
 
-        return [
-          {
-            count,
-            ms: Math.round(totalMs / count),
-          },
-        ];
+        return [{ ms: desc.took }];
       })
     );
   }
