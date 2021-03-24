@@ -26,75 +26,67 @@ describe('SampleEngineCreationCtaLogic', () => {
     isLoading: false,
   };
 
-  it('has expected default values', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
     mount();
+  });
+
+  it('has expected default values', () => {
     expect(SampleEngineCreationCtaLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
-    it('setIsLoading sets isLoading', () => {
-      jest.clearAllMocks();
-      mount();
+    it('onSampleEngineCreationFailure sets isLoading to false', () => {
+      mount({ isLoading: true });
 
-      SampleEngineCreationCtaLogic.actions.setIsLoading(true);
+      SampleEngineCreationCtaLogic.actions.onSampleEngineCreationFailure();
 
-      expect(SampleEngineCreationCtaLogic.values.isLoading).toEqual(true);
+      expect(SampleEngineCreationCtaLogic.values.isLoading).toEqual(false);
     });
   });
 
   describe('listeners', () => {
     describe('createSampleEngine', () => {
-      beforeAll(() => {
-        mount();
-      });
-
-      afterAll(() => {
-        jest.clearAllMocks();
-      });
-
       it('POSTS to /api/app_search/engines', () => {
         const body = JSON.stringify({
           seed_sample_engine: true,
         });
         SampleEngineCreationCtaLogic.actions.createSampleEngine();
+
         expect(http.post).toHaveBeenCalledWith('/api/app_search/onboarding_complete', { body });
       });
 
       it('calls onSampleEngineCreationSuccess on valid submission', async () => {
         jest.spyOn(SampleEngineCreationCtaLogic.actions, 'onSampleEngineCreationSuccess');
         http.post.mockReturnValueOnce(Promise.resolve({}));
+
         SampleEngineCreationCtaLogic.actions.createSampleEngine();
         await nextTick();
+
         expect(
           SampleEngineCreationCtaLogic.actions.onSampleEngineCreationSuccess
         ).toHaveBeenCalledTimes(1);
       });
 
-      it('calls flashAPIErrors on API Error', async () => {
+      it('calls onSampleEngineCreationFailure and flashAPIErrors on API Error', async () => {
+        jest.spyOn(SampleEngineCreationCtaLogic.actions, 'onSampleEngineCreationFailure');
         http.post.mockReturnValueOnce(Promise.reject());
+
         SampleEngineCreationCtaLogic.actions.createSampleEngine();
         await nextTick();
+
         expect(flashAPIErrors).toHaveBeenCalledTimes(1);
+        expect(
+          SampleEngineCreationCtaLogic.actions.onSampleEngineCreationFailure
+        ).toHaveBeenCalledTimes(1);
       });
     });
 
-    describe('onSampleEngineCreationSuccess', () => {
-      beforeAll(() => {
-        mount();
-        SampleEngineCreationCtaLogic.actions.onSampleEngineCreationSuccess();
-      });
+    it('onSampleEngineCreationSuccess should set a success message and navigate the user to the engine page', () => {
+      SampleEngineCreationCtaLogic.actions.onSampleEngineCreationSuccess();
 
-      afterAll(() => {
-        jest.clearAllMocks();
-      });
-
-      it('should set a success message', () => {
-        expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created engine.');
-      });
-
-      it('should navigate the user to the engine page', () => {
-        expect(navigateToUrl).toHaveBeenCalledWith('/engines/national-parks-demo');
-      });
+      expect(setQueuedSuccessMessage).toHaveBeenCalledWith('Successfully created engine.');
+      expect(navigateToUrl).toHaveBeenCalledWith('/engines/national-parks-demo');
     });
   });
 });

@@ -18,6 +18,7 @@ import { ENGINE_CREATION_SUCCESS_MESSAGE } from '../engine_creation/constants';
 interface SampleEngineCreationCtaActions {
   createSampleEngine(): void;
   onSampleEngineCreationSuccess(): void;
+  onSampleEngineCreationFailure(): void;
   setIsLoading(isLoading: boolean): { isLoading: boolean };
 }
 
@@ -32,14 +33,15 @@ export const SampleEngineCreationCtaLogic = kea<
   actions: {
     createSampleEngine: true,
     onSampleEngineCreationSuccess: true,
-    setIsLoading: (isLoading) => ({ isLoading }),
+    onSampleEngineCreationFailure: true,
   },
   reducers: {
     isLoading: [
       false,
       {
         createSampleEngine: () => true,
-        setIsLoading: (_, { isLoading }) => isLoading,
+        onSampleEngineCreationSuccess: () => false,
+        onSampleEngineCreationFailure: () => false,
       },
     ],
   },
@@ -55,7 +57,7 @@ export const SampleEngineCreationCtaLogic = kea<
         });
         actions.onSampleEngineCreationSuccess();
       } catch (e) {
-        actions.setIsLoading(false);
+        actions.onSampleEngineCreationFailure();
         flashAPIErrors(e);
       }
     },
