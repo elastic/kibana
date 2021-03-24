@@ -58,7 +58,6 @@ export function initCaseApi(deps: RouteDeps) {
   initPushCaseApi(deps);
   initGetAllCaseUserActionsApi(deps);
 
-  // sub-cases-disabled: remove once sub cases feature is enabled
   if (ENABLE_SUB_CASES) {
     // Sub cases
     initGetAllSubCaseUserActionsApi(deps);

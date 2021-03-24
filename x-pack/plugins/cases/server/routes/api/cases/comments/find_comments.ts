@@ -44,12 +44,10 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
-        const query = {
-          ...pipe(
-            FindQueryParamsRt.decode(request.query),
-            fold(throwErrors(Boom.badRequest), identity)
-          ),
-        };
+        const query = pipe(
+          FindQueryParamsRt.decode(request.query),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
 
         if (!ENABLE_SUB_CASES && query.subCaseId !== undefined) {
           throw Boom.badRequest(

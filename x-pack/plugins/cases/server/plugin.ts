@@ -54,16 +54,15 @@ export class CasePlugin {
   private connectorMappingsService?: ConnectorMappingsServiceSetup;
   private userActionService?: CaseUserActionServiceSetup;
   private alertsService?: AlertService;
-  private config?: ConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get();
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    this.config = createConfig(this.initializerContext);
+    const config = createConfig(this.initializerContext);
 
-    if (!this.config.enabled) {
+    if (!config.enabled) {
       return;
     }
 
