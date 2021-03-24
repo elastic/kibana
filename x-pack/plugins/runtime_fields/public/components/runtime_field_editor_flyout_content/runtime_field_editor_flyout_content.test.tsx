@@ -25,8 +25,8 @@ const docLinks: DocLinksStart = {
   DOC_LINK_VERSION: 'jest',
   links: {
     runtimeFields: { mapping: 'https://jestTest.elastic.co/to-be-defined.html' },
-    scriptedFields: { painlessLangSpec: 'https://jestTest.elastic.co/to-be-defined.html' },
-  },
+    scriptedFields: {} as any,
+  } as any,
 };
 
 const noop = () => {};
