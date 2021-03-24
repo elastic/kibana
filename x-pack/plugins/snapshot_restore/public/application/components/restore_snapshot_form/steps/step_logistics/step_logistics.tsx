@@ -572,7 +572,17 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <FormattedMessage
               id="xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription"
               defaultMessage="Restores templates that don’t currently exist in the cluster and overrides
-              templates with the same name. Also restores persistent settings and all system indices."
+              templates with the same name. Also restores persistent settings and all system indices. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotApi}>
+                    {i18n.translate(
+                      'xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDocLink',
+                      { defaultMessage: 'Learn more.' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
             />
 
             {/* Only display callout if include_global_state is enabled and the snapshot was created by ES 7.12+

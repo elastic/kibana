@@ -6,43 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { FunctionComponent } from 'react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
-
-import { useCore } from '../../../../app_context';
+import { EuiCallOut } from '@elastic/eui';
 
 export const SystemIndicesOverwrittenCallOut: FunctionComponent = () => {
-  const { docLinks } = useCore();
-
   return (
     <EuiCallOut
       data-test-subj="systemIndicesInfoCallOut"
       title={i18n.translate(
         'xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.title',
         {
-          defaultMessage: 'System indices will be overwritten',
+          defaultMessage:
+            'When this snapshot is restored, system indices will be overwritten with data from the snapshot.',
         }
       )}
       iconType="pin"
       size="s"
       aria-live="polite"
       aria-atomic="true"
-    >
-      <FormattedMessage
-        id="xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.description"
-        defaultMessage="When this snapshot is restored, system indices will be overwritten with data from the snapshot. {learnMoreLink}"
-        values={{
-          learnMoreLink: (
-            <EuiLink target="_blank" href={docLinks.links.snapshotRestore.restoreSnapshotApi}>
-              {i18n.translate(
-                'xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.learnMoreLink',
-                { defaultMessage: 'Learn more' }
-              )}
-            </EuiLink>
-          ),
-        }}
-      />
-    </EuiCallOut>
+    />
   );
 };
