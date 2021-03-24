@@ -864,7 +864,7 @@ export class AnomalyExplorerChartsService {
   }
 
   public processRecordsForDisplay(
-    jobRecords: Record<string, CombinedJob>,
+    combinedJobRecords: Record<string, CombinedJob>,
     anomalyRecords: RecordForInfluencer[]
   ): { records: ChartRecord[]; errors: Record<string, Set<string>> | undefined } {
     // Aggregate the anomaly data by detector, and entity (by/over/partition).
@@ -879,7 +879,7 @@ export class AnomalyExplorerChartsService {
       // Check if we can plot a chart for this record, depending on whether the source data
       // is chartable, and if model plot is enabled for the job.
 
-      const job = jobRecords[record.job_id];
+      const job = combinedJobRecords[record.job_id];
 
       // if we already know this job has datafeed aggregations we cannot support
       // no need to do more checks

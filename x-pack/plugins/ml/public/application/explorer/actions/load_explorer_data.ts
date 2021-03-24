@@ -9,7 +9,7 @@ import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 
-import { forkJoin, of, Observable, Subject } from 'rxjs';
+import { forkJoin, of, Observable, Subject, from } from 'rxjs';
 import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
@@ -36,7 +36,6 @@ import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
 import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
 import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
-import { mlJobService } from '../../services/job_service';
 import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 
 // Memoize the data fetching methods.
@@ -133,172 +132,179 @@ const loadExplorerDataProvider = (
       viewByPerPage,
     } = config;
 
-    const combinedJobRecords: Record<string, CombinedJob> = selectedJobs.reduce((acc, job) => {
-      return { ...acc, [job.id]: mlJobService.getJob(job.id) };
-    }, {});
+    return from(anomalyExplorerService.getCombinedJobs(selectedJobs.map((j) => j.id))).pipe(
+      switchMap((jobs) => {
+        const combinedJobRecords: Record<string, CombinedJob> = jobs.reduce((acc, job) => {
+          return { ...acc, [job.job_id]: job };
+        }, {});
 
-    const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
-    const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
+        const selectionInfluencers = getSelectionInfluencers(
+          selectedCells,
+          viewBySwimlaneFieldName
+        );
+        const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
 
-    const bounds = timefilter.getBounds();
+        const bounds = timefilter.getBounds();
 
-    const timerange = getSelectionTimeRange(
-      selectedCells,
-      swimlaneBucketInterval.asSeconds(),
-      bounds
-    );
+        const timerange = getSelectionTimeRange(
+          selectedCells,
+          swimlaneBucketInterval.asSeconds(),
+          bounds
+        );
 
-    const dateFormatTz = getDateFormatTz();
+        const dateFormatTz = getDateFormatTz();
 
-    // First get the data where we have all necessary args at hand using forkJoin:
-    // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
-    return forkJoin({
-      annotationsData: memoizedLoadAnnotationsTableData(
-        lastRefresh,
-        selectedCells,
-        selectedJobs,
-        swimlaneBucketInterval.asSeconds(),
-        bounds
-      ),
-      anomalyChartRecords: memoizedLoadDataForCharts(
-        lastRefresh,
-        mlResultsService,
-        jobIds,
-        timerange.earliestMs,
-        timerange.latestMs,
-        selectionInfluencers,
-        selectedCells,
-        influencersFilterQuery
-      ),
-      influencers:
-        selectionInfluencers.length === 0
-          ? memoizedLoadTopInfluencers(
-              lastRefresh,
-              mlResultsService,
-              jobIds,
-              timerange.earliestMs,
-              timerange.latestMs,
-              [],
-              noInfluencersConfigured,
-              influencersFilterQuery
-            )
-          : Promise.resolve({}),
-      overallState: memoizedLoadOverallData(lastRefresh, selectedJobs, swimlaneContainerWidth),
-      tableData: memoizedLoadAnomaliesTableData(
-        lastRefresh,
-        selectedCells,
-        selectedJobs,
-        dateFormatTz,
-        swimlaneBucketInterval.asSeconds(),
-        bounds,
-        viewBySwimlaneFieldName,
-        tableInterval,
-        tableSeverity,
-        influencersFilterQuery
-      ),
-      topFieldValues:
-        selectedCells !== undefined && selectedCells.showTopFieldValues === true
-          ? anomalyTimelineService.loadViewByTopFieldValuesForSelectedTime(
-              timerange.earliestMs,
-              timerange.latestMs,
-              selectedJobs,
-              viewBySwimlaneFieldName,
-              swimlaneLimit,
-              viewByPerPage,
-              viewByFromPage,
-              swimlaneContainerWidth
-            )
-          : Promise.resolve([]),
-    }).pipe(
-      // Trigger a side-effect action to reset view-by swimlane,
-      // show the view-by loading indicator
-      // and pass on the data we already fetched.
-      tap(explorerService.setViewBySwimlaneLoading),
-      // Trigger a side-effect to update the charts.
-      tap(({ anomalyChartRecords, topFieldValues }) => {
-        if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
-          memoizedAnomalyDataChange(
+        // First get the data where we have all necessary args at hand using forkJoin:
+        // annotationsData, anomalyChartRecords, influencers, overallState, tableData, topFieldValues
+        return forkJoin({
+          annotationsData: memoizedLoadAnnotationsTableData(
             lastRefresh,
-            explorerService,
-            combinedJobRecords,
-            swimlaneContainerWidth,
-            anomalyChartRecords,
+            selectedCells,
+            selectedJobs,
+            swimlaneBucketInterval.asSeconds(),
+            bounds
+          ),
+          anomalyChartRecords: memoizedLoadDataForCharts(
+            lastRefresh,
+            mlResultsService,
+            jobIds,
             timerange.earliestMs,
             timerange.latestMs,
-            timefilter,
-            tableSeverity
-          );
-        } else {
-          memoizedAnomalyDataChange(
+            selectionInfluencers,
+            selectedCells,
+            influencersFilterQuery
+          ),
+          influencers:
+            selectionInfluencers.length === 0
+              ? memoizedLoadTopInfluencers(
+                  lastRefresh,
+                  mlResultsService,
+                  jobIds,
+                  timerange.earliestMs,
+                  timerange.latestMs,
+                  [],
+                  noInfluencersConfigured,
+                  influencersFilterQuery
+                )
+              : Promise.resolve({}),
+          overallState: memoizedLoadOverallData(lastRefresh, selectedJobs, swimlaneContainerWidth),
+          tableData: memoizedLoadAnomaliesTableData(
             lastRefresh,
-            explorerService,
-            combinedJobRecords,
-            swimlaneContainerWidth,
-            [],
-            timerange.earliestMs,
-            timerange.latestMs,
-            timefilter,
-            tableSeverity
-          );
-        }
-      }),
-      // Load view-by swimlane data and filtered top influencers.
-      // mergeMap is used to have access to the already fetched data and act on it in arg #1.
-      // In arg #2 of mergeMap we combine the data and pass it on in the action format
-      // which can be consumed by explorerReducer() later on.
-      mergeMap(
-        ({ anomalyChartRecords, influencers, overallState, topFieldValues }) =>
-          forkJoin({
-            influencers:
-              (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
-              anomalyChartRecords !== undefined &&
-              anomalyChartRecords.length > 0
-                ? memoizedLoadFilteredTopInfluencers(
-                    lastRefresh,
-                    mlResultsService,
-                    jobIds,
-                    timerange.earliestMs,
-                    timerange.latestMs,
-                    anomalyChartRecords,
-                    selectionInfluencers,
-                    noInfluencersConfigured,
-                    influencersFilterQuery
-                  )
-                : Promise.resolve(influencers),
-            viewBySwimlaneState: memoizedLoadViewBySwimlane(
-              lastRefresh,
-              topFieldValues,
-              {
-                earliest: overallState.earliest,
-                latest: overallState.latest,
-              },
-              selectedJobs,
-              viewBySwimlaneFieldName,
-              ANOMALY_SWIM_LANE_HARD_LIMIT,
-              viewByPerPage,
-              viewByFromPage,
-              swimlaneContainerWidth,
-              influencersFilterQuery
-            ),
+            selectedCells,
+            selectedJobs,
+            dateFormatTz,
+            swimlaneBucketInterval.asSeconds(),
+            bounds,
+            viewBySwimlaneFieldName,
+            tableInterval,
+            tableSeverity,
+            influencersFilterQuery
+          ),
+          topFieldValues:
+            selectedCells !== undefined && selectedCells.showTopFieldValues === true
+              ? anomalyTimelineService.loadViewByTopFieldValuesForSelectedTime(
+                  timerange.earliestMs,
+                  timerange.latestMs,
+                  selectedJobs,
+                  viewBySwimlaneFieldName,
+                  swimlaneLimit,
+                  viewByPerPage,
+                  viewByFromPage,
+                  swimlaneContainerWidth
+                )
+              : Promise.resolve([]),
+        }).pipe(
+          // Trigger a side-effect action to reset view-by swimlane,
+          // show the view-by loading indicator
+          // and pass on the data we already fetched.
+          tap(explorerService.setViewBySwimlaneLoading),
+          // Trigger a side-effect to update the charts.
+          tap(({ anomalyChartRecords, topFieldValues }) => {
+            if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
+              memoizedAnomalyDataChange(
+                lastRefresh,
+                explorerService,
+                combinedJobRecords,
+                swimlaneContainerWidth,
+                anomalyChartRecords,
+                timerange.earliestMs,
+                timerange.latestMs,
+                timefilter,
+                tableSeverity
+              );
+            } else {
+              memoizedAnomalyDataChange(
+                lastRefresh,
+                explorerService,
+                combinedJobRecords,
+                swimlaneContainerWidth,
+                [],
+                timerange.earliestMs,
+                timerange.latestMs,
+                timefilter,
+                tableSeverity
+              );
+            }
           }),
-        (
-          { annotationsData, overallState, tableData },
-          { influencers, viewBySwimlaneState }
-        ): Partial<ExplorerState> => {
-          return {
-            annotations: annotationsData,
-            influencers: influencers as any,
-            loading: false,
-            viewBySwimlaneDataLoading: false,
-            overallSwimlaneData: overallState,
-            viewBySwimlaneData: viewBySwimlaneState as any,
-            tableData,
-            swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
-              ? viewBySwimlaneState.cardinality
-              : undefined,
-          };
-        }
-      )
+          // Load view-by swimlane data and filtered top influencers.
+          // mergeMap is used to have access to the already fetched data and act on it in arg #1.
+          // In arg #2 of mergeMap we combine the data and pass it on in the action format
+          // which can be consumed by explorerReducer() later on.
+          mergeMap(
+            ({ anomalyChartRecords, influencers, overallState, topFieldValues }) =>
+              forkJoin({
+                influencers:
+                  (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
+                  anomalyChartRecords !== undefined &&
+                  anomalyChartRecords.length > 0
+                    ? memoizedLoadFilteredTopInfluencers(
+                        lastRefresh,
+                        mlResultsService,
+                        jobIds,
+                        timerange.earliestMs,
+                        timerange.latestMs,
+                        anomalyChartRecords,
+                        selectionInfluencers,
+                        noInfluencersConfigured,
+                        influencersFilterQuery
+                      )
+                    : Promise.resolve(influencers),
+                viewBySwimlaneState: memoizedLoadViewBySwimlane(
+                  lastRefresh,
+                  topFieldValues,
+                  {
+                    earliest: overallState.earliest,
+                    latest: overallState.latest,
+                  },
+                  selectedJobs,
+                  viewBySwimlaneFieldName,
+                  ANOMALY_SWIM_LANE_HARD_LIMIT,
+                  viewByPerPage,
+                  viewByFromPage,
+                  swimlaneContainerWidth,
+                  influencersFilterQuery
+                ),
+              }),
+            (
+              { annotationsData, overallState, tableData },
+              { influencers, viewBySwimlaneState }
+            ): Partial<ExplorerState> => {
+              return {
+                annotations: annotationsData,
+                influencers: influencers as any,
+                loading: false,
+                viewBySwimlaneDataLoading: false,
+                overallSwimlaneData: overallState,
+                viewBySwimlaneData: viewBySwimlaneState as any,
+                tableData,
+                swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
+                  ? viewBySwimlaneState.cardinality
+                  : undefined,
+              };
+            }
+          )
+        );
+      })
     );
   };
 };
