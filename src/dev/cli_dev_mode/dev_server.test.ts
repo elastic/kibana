@@ -121,7 +121,7 @@ describe('#run$', () => {
     run(new DevServer(defaultOptions)).unsubscribe();
 
     // ensure that FORCE_COLOR is in the env for consistency in snapshot
-    process.env.FORCE_COLOR = 'true';
+    process.env.FORCE_COLOR = process.env.FORCE_COLOR || 'true';
 
     expect(execa.node.mock.calls).toMatchInlineSnapshot(`
       Array [
