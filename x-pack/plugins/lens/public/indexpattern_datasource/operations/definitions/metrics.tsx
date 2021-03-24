@@ -98,6 +98,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         isBucketed: false,
         scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
+        filter: previousColumn?.filter,
         params: getFormatFromPreviousColumn(previousColumn),
       } as T),
     onFieldChange: (oldColumn, field) => {
@@ -117,6 +118,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
       getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    filterable: true,
   } as OperationDefinition<T, 'field'>;
 }
 

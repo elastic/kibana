@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import { memoize } from 'lodash';
 import { OperationMetadata } from '../../types';
 import {
   operationDefinitionMap,
@@ -194,3 +194,5 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
 
   return Object.values(operationByMetadata);
 }
+
+export const memoizedGetAvailableOperationsByMetadata = memoize(getAvailableOperationsByMetadata);
