@@ -85,6 +85,7 @@ export class DataServerPlugin
     this.indexPatterns.setup(core, {
       expressions,
       logger: this.logger.get('indexPatterns'),
+      usageCollection,
     });
 
     core.uiSettings.register(getUiSettings());

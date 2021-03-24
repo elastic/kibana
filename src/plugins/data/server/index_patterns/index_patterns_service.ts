@@ -15,6 +15,7 @@ import {
   ElasticsearchClient,
 } from 'kibana/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { DataPluginStartDependencies, DataPluginStart } from '../plugin';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
@@ -26,6 +27,7 @@ import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
 import { DataRequestHandlerContext } from '../types';
+import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
@@ -37,6 +39,7 @@ export interface IndexPatternsServiceStart {
 export interface IndexPatternsServiceSetupDeps {
   expressions: ExpressionsServerSetup;
   logger: Logger;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface IndexPatternsServiceStartDeps {
@@ -47,7 +50,7 @@ export interface IndexPatternsServiceStartDeps {
 export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { logger, expressions }: IndexPatternsServiceSetupDeps
+    { logger, expressions, usageCollection }: IndexPatternsServiceSetupDeps
   ) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
@@ -71,6 +74,7 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
     registerRoutes(core.http, core.getStartServices);
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
+    registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
   }
 
   public start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps) {
