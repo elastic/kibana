@@ -92,7 +92,6 @@ export class SecurityPlugin
 
     this.authc = this.authenticationService.setup({
       application: core.application,
-      fatalErrors: core.fatalErrors,
       config: this.config,
       getStartServices: core.getStartServices,
       http: core.http,

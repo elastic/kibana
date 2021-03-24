@@ -11,6 +11,7 @@ import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 import { KibanaRequest } from '../../../../../src/core/server';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
@@ -201,6 +202,7 @@ export class Authenticator {
     const providerCommonOptions = {
       client: this.options.clusterClient,
       basePath: this.options.basePath,
+      getRequestOriginalURL: this.getRequestOriginalURL.bind(this),
       tokens: new Tokens({
         client: this.options.clusterClient.asInternalUser,
         logger: this.options.loggers.get('tokens'),
@@ -323,6 +325,14 @@ export class Authenticator {
           attempt.redirectURL
         );
       }
+    }
+
+    // If there was an attempt to log in, but it couldn't be handled, we should invalidate existing
+    // session. Otherwise users may be confused and think that the existing session is tied to this
+    // failed login attempt.
+    if (existingSessionValue) {
+      this.logger.warn(`Could not handle the login attempt. Existing session will be invalidated.`);
+      await this.invalidateSessionValue(request);
     }
 
     return AuthenticationResult.notHandled();
@@ -450,6 +460,26 @@ export class Authenticator {
     );
 
     this.options.featureUsageService.recordPreAccessAgreementUsage();
+  }
+
+  getRequestOriginalURL(
+    request: KibanaRequest,
+    additionalQueryStringParameters?: Array<[string, string]>
+  ) {
+    const originalURLSearchParams = [
+      ...[...request.url.searchParams.entries()].filter(
+        ([key]) =>
+          key !== AUTH_URL_HASH_QUERY_STRING_PARAMETER &&
+          key !== AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER
+      ),
+      ...(additionalQueryStringParameters ?? []),
+    ];
+
+    return `${this.options.basePath.get(request)}${request.url.pathname}${
+      originalURLSearchParams.length > 0
+        ? `?${new URLSearchParams(originalURLSearchParams).toString()}`
+        : ''
+    }`;
   }
 
   /**

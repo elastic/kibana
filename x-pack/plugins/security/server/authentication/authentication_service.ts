@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   HttpServiceSetup,
@@ -18,6 +19,7 @@ import type {
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
+import { shouldProviderUseLoginForm } from '../../common/model';
 import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -29,12 +31,11 @@ import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { API_ROUTES_SUPPORTING_REDIRECTS, canRedirectRequest } from './can_redirect_request';
 import type { DeauthenticationResult } from './deauthentication_result';
-import { renderUnauthorizedPage } from './unauthorized_page';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
+  config: ConfigType;
   license: SecurityLicense;
-  buildNumber: number;
 }
 
 interface AuthenticationServiceStartParams {
@@ -69,8 +70,21 @@ export class AuthenticationService {
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ http, license, buildNumber }: AuthenticationServiceSetupParams) {
+  setup({ config, http, license }: AuthenticationServiceSetupParams) {
     this.license = license;
+
+    // If we cannot automatically authenticate users we should redirect them straight to the login
+    // page if possible, so that they can try other methods to log in. If not possible, we should
+    // redirect to a dedicated `Unauthorized` page from which users can explicitly trigger a new
+    // login attempt. There are two cases when we can redirect to the login page:
+    // 1. Login selector is enabled
+    // 2. Login selector is disabled, but the provider with the lowest `order` uses login form
+    const unauthorizedURL = http.basePath.prepend(
+      config.authc.selector.enabled ||
+        shouldProviderUseLoginForm(config.authc.sortedProviders[0].type)
+        ? '/login'
+        : '/security/unauthorized'
+    );
 
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
@@ -148,24 +162,36 @@ export class AuthenticationService {
         return toolkit.next();
       }
 
-      const basePath = http.basePath.get(request);
+      if (!this.authenticator) {
+        // Core doesn't allow returning error here.
+        this.logger.error('Authentication sub-system is not fully initialized yet.');
+        return toolkit.next();
+      }
 
-      // We only want to preserve paths for non-API requests.
-      const logoutUrl = http.basePath.prepend(
-        API_ROUTES_SUPPORTING_REDIRECTS.includes(request.route.path)
-          ? '/api/security/logout'
-          : `/api/security/logout?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-              `${basePath}${request.url.pathname}${request.url.search}`
-            )}`
-      );
+      // If users can eventually re-login we want to redirect them directly to the page they tried
+      // to access initially, but we only want to do that for non-API routes. API routes that support
+      // redirects are solely used to support various authentication flows that wouldn't make any
+      // sense after successful authentication through login page.
+      const urlToRedirectToAfterLogin = !API_ROUTES_SUPPORTING_REDIRECTS.includes(
+        request.route.path
+      )
+        ? `${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+            this.authenticator.getRequestOriginalURL(request)
+          )}`
+        : '';
 
       return toolkit.render({
-        body: renderUnauthorizedPage({ logoutUrl, basePath, buildNumber }),
+        body: `
+          <html lang=${i18n.getLocale()}>
+            <head>
+              <title>Unauthorized</title>
+              <link rel="icon" href="data:," />
+              <meta http-equiv="refresh" content="0;url=${unauthorizedURL}?${urlToRedirectToAfterLogin}&msg=UNAUTHORIZED" />
+            </head>
+          </html>`,
         headers: { 'Content-Security-Policy': http.csp.header },
       });
     });
-
-    this.logger.debug('Successfully registered core `onPreResponse` handler.');
   }
 
   start({

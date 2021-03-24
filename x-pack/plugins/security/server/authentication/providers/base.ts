@@ -27,6 +27,10 @@ import type { Tokens } from '../tokens';
 export interface AuthenticationProviderOptions {
   name: string;
   basePath: HttpServiceSetup['basePath'];
+  getRequestOriginalURL: (
+    request: KibanaRequest,
+    additionalQueryStringParameters?: Array<[string, string]>
+  ) => string;
   client: IClusterClient;
   logger: Logger;
   tokens: PublicMethodsOf<Tokens>;

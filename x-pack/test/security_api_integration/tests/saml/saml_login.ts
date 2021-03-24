@@ -112,20 +112,16 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(handshakeResponse.headers['set-cookie']).to.be(undefined);
         expect(handshakeResponse.headers.location).to.be(
-          '/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml'
+          '/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2Bthree%26auth_provider_hint%3Dsaml'
         );
       });
 
       it('should properly set cookie and redirect user to IdP', async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'saml',
-            providerName: 'saml',
-            currentURL: `https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml#/workpad`,
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
@@ -136,21 +132,20 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(handshakeResponse.body.location, true /* parseQueryString */);
+        const redirectURL = url.parse(
+          handshakeResponse.headers.location,
+          true /* parseQueryString */
+        );
         expect(redirectURL.href!.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
         expect(redirectURL.query.SAMLRequest).to.not.be.empty();
       });
 
       it('should not allow access to the API with the handshake cookie', async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'saml',
-            providerName: 'saml',
-            currentURL: `https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml#/workpad`,
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
         await supertest
@@ -176,18 +171,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'saml',
-            providerName: 'saml',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
         handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        samlRequestId = await getSAMLRequestId(handshakeResponse.body.location);
+        samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
       });
 
       it('should fail if SAML response is not complemented with handshake cookie', async () => {
@@ -208,7 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // User should be redirected to the URL that initiated handshake.
         expect(samlAuthenticationResponse.headers.location).to.be(
-          '/abc/xyz/handshake?one=two%20three#/workpad'
+          '/abc/xyz/handshake?one=two+three#/workpad'
         );
 
         const cookies = samlAuthenticationResponse.headers['set-cookie'];
@@ -315,18 +305,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'saml',
-            providerName: 'saml',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        const samlRequestId = await getSAMLRequestId(handshakeResponse.body.location);
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         idpSessionIndex = String(randomness.naturalNumber());
         const samlAuthenticationResponse = await supertest
@@ -459,18 +444,13 @@ export default function ({ getService }: FtrProviderContext) {
         this.timeout(40000);
 
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'saml',
-            providerName: 'saml',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        const samlRequestId = await getSAMLRequestId(handshakeResponse.body.location);
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
@@ -559,18 +539,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'saml',
-            providerName: 'saml',
-            currentURL:
-              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml#/workpad',
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        const samlRequestId = await getSAMLRequestId(handshakeResponse.body.location);
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')
@@ -609,21 +584,16 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.maxAge).to.be(0);
 
         expect(handshakeResponse.headers.location).to.be(
-          '/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml'
+          '/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2Bthree%26auth_provider_hint%3Dsaml'
         );
       });
 
       it('should properly set cookie and redirect user to IdP', async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .set('Cookie', sessionCookie.cookieString())
-          .send({
-            providerType: 'saml',
-            providerName: 'saml',
-            currentURL: `https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml#/workpad`,
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
@@ -634,7 +604,10 @@ export default function ({ getService }: FtrProviderContext) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        const redirectURL = url.parse(handshakeResponse.body.location, true /* parseQueryString */);
+        const redirectURL = url.parse(
+          handshakeResponse.headers.location,
+          true /* parseQueryString */
+        );
         expect(redirectURL.href!.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
         expect(redirectURL.query.SAMLRequest).to.not.be.empty();
       });
@@ -680,17 +653,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .post('/internal/security/login')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            providerType: 'saml',
-            providerName: 'saml',
-            currentURL: `https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=saml&providerName=saml#/workpad`,
-          })
-          .expect(200);
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
 
         const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        const samlRequestId = await getSAMLRequestId(handshakeResponse.body.location);
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
           .post('/api/security/saml/callback')

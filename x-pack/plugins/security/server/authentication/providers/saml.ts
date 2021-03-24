@@ -9,9 +9,14 @@ import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from 'src/core/server';
 
-import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
+import {
+  AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
+  AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+  NEXT_URL_QUERY_STRING_PARAMETER,
+} from '../../../common/constants';
 import { isInternalURL } from '../../../common/is_internal_url';
 import type { AuthenticationInfo } from '../../elasticsearch';
+import { getDetailedErrorMessage } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -570,7 +575,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       });
     } catch (err) {
       this.logger.debug(`Failed to initiate SAML handshake: ${err.message}`);
-      return AuthenticationResult.failed(err);
+      return AuthenticationResult.failed(Boom.unauthorized(getDetailedErrorMessage(err)));
     }
   }
 
@@ -633,18 +638,22 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    */
   private captureRedirectURL(request: KibanaRequest) {
-    const searchParams = new URLSearchParams([
-      [
-        NEXT_URL_QUERY_STRING_PARAMETER,
-        `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`,
-      ],
-      ['providerType', this.type],
-      ['providerName', this.options.name],
-    ]);
+    const originalURLHash = request.url.searchParams.get(AUTH_URL_HASH_QUERY_STRING_PARAMETER);
+    if (originalURLHash != null) {
+      return this.authenticateViaHandshake(
+        request,
+        `${this.options.getRequestOriginalURL(request)}${originalURLHash}`
+      );
+    }
+
     return AuthenticationResult.redirectTo(
       `${
         this.options.basePath.serverBasePath
-      }/internal/security/capture-url?${searchParams.toString()}`,
+      }/internal/security/capture-url?${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+        this.options.getRequestOriginalURL(request, [
+          [AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, this.options.name],
+        ])
+      )}`,
       // Here we indicate that current session, if any, should be invalidated. It is a no-op for the
       // initial handshake, but is essential when both access and refresh tokens are expired.
       { state: null }

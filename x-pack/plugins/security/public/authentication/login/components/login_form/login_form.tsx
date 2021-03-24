@@ -40,7 +40,7 @@ interface Props {
   http: HttpStart;
   notifications: NotificationsStart;
   selector: LoginSelector;
-  infoMessage?: string;
+  message?: { type: MessageType.Danger | MessageType.Info; content: string };
   loginAssistanceMessage: string;
   loginHelp?: string;
   authProviderHint?: string;
@@ -66,7 +66,7 @@ enum LoadingStateType {
   AutoLogin,
 }
 
-enum MessageType {
+export enum MessageType {
   None,
   Info,
   Danger,
@@ -106,9 +106,7 @@ export class LoginForm extends Component<Props, State> {
       loadingState: { type: LoadingStateType.None },
       username: '',
       password: '',
-      message: this.props.infoMessage
-        ? { type: MessageType.Info, content: this.props.infoMessage }
-        : { type: MessageType.None },
+      message: this.props.message || { type: MessageType.None },
       mode,
       previousMode: mode,
     };

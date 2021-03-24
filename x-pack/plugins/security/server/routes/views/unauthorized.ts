@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import type { RouteDefinitionParams } from '../';
 
 /**
- * Defines routes required for the Capture URL view.
+ * Defines routes required for the Unauthorized view.
  */
-export function defineCaptureURLRoutes({ httpResources }: RouteDefinitionParams) {
+export function defineUnauthorizedRoutes({ httpResources }: RouteDefinitionParams) {
   httpResources.register(
     {
-      path: '/internal/security/capture-url',
-      validate: { query: schema.object({ next: schema.maybe(schema.string()) }) },
+      path: '/security/unauthorized',
+      validate: false,
       options: { authRequired: false },
     },
     (context, request, response) => response.renderAnonymousCoreApp()
