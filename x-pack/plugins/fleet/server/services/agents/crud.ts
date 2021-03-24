@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import type { SearchResponse, MGetResponse, GetResponse } from 'elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
+import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
 import type { ESSearchResponse } from '../../../../../../typings/elasticsearch';
-import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
@@ -69,22 +69,23 @@ export type GetAgentsOptions =
     };
 
 export async function getAgents(esClient: ElasticsearchClient, options: GetAgentsOptions) {
-  let initialResults = [];
-
+  let agents: Agent[] = [];
   if ('agentIds' in options) {
-    initialResults = await getAgentsById(esClient, options.agentIds);
+    agents = await getAgentsById(esClient, options.agentIds);
   } else if ('kuery' in options) {
-    initialResults = (
+    agents = (
       await getAllAgentsByKuery(esClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
       })
     ).agents;
   } else {
-    throw new IngestManagerError('Cannot get agents');
+    throw new IngestManagerError(
+      'Either options.agentIds or options.kuery are required to get agents'
+    );
   }
 
-  return initialResults;
+  return agents;
 }
 
 export async function getAgentsByKuery(
@@ -188,7 +189,7 @@ export async function countInactiveAgents(
 export async function getAgentById(esClient: ElasticsearchClient, agentId: string) {
   const agentNotFoundError = new AgentNotFoundError(`Agent ${agentId} not found`);
   try {
-    const agentHit = await esClient.get<GetResponse<FleetServerAgent>>({
+    const agentHit = await esClient.get<ESAgentDocumentResult>({
       index: AGENTS_INDEX,
       id: agentId,
     });
@@ -207,10 +208,17 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
   }
 }
 
-async function getAgentDocuments(
+export function isAgentDocument(
+  maybeDocument: any
+): maybeDocument is GetResponse<FleetServerAgent> {
+  return '_id' in maybeDocument && '_source' in maybeDocument;
+}
+
+export type ESAgentDocumentResult = GetResponse<FleetServerAgent>;
+export async function getAgentDocuments(
   esClient: ElasticsearchClient,
   agentIds: string[]
-): Promise<Array<GetResponse<FleetServerAgent>>> {
+): Promise<ESAgentDocumentResult[]> {
   const res = await esClient.mget<MGetResponse<FleetServerAgent>>({
     index: AGENTS_INDEX,
     body: { docs: agentIds.map((_id) => ({ _id })) },
@@ -221,14 +229,16 @@ async function getAgentDocuments(
 
 export async function getAgentsById(
   esClient: ElasticsearchClient,
-  agentIds: string[],
-  options: { includeMissing?: boolean } = { includeMissing: false }
+  agentIds: string[]
 ): Promise<Agent[]> {
   const allDocs = await getAgentDocuments(esClient, agentIds);
-  const agentDocs = options.includeMissing
-    ? allDocs
-    : allDocs.filter((res) => res._id && res._source);
-  const agents = agentDocs.map((doc) => searchHitToAgent(doc));
+  const agents = allDocs.reduce<Agent[]>((results, doc) => {
+    if (isAgentDocument(doc)) {
+      results.push(searchHitToAgent(doc));
+    }
+
+    return results;
+  }, []);
 
   return agents;
 }
@@ -276,7 +286,7 @@ export async function bulkUpdateAgents(
     agentId: string;
     data: Partial<AgentSOAttributes>;
   }>
-) {
+): Promise<{ items: BulkActionResult[] }> {
   if (updateData.length === 0) {
     return { items: [] };
   }
