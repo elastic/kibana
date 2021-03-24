@@ -48,7 +48,7 @@ describe('AppLogic', () => {
     expect(AppLogic.values).toEqual(DEFAULT_VALUES);
   });
 
-  describe('initializeAppData()', () => {
+  describe('initializeAppData', () => {
     it('sets values based on passed props', () => {
       AppLogic.actions.initializeAppData(DEFAULT_INITIAL_APP_DATA);
 
@@ -66,11 +66,20 @@ describe('AppLogic', () => {
     });
   });
 
-  describe('setContext()', () => {
+  describe('setContext', () => {
     it('sets context', () => {
       AppLogic.actions.setContext(true);
 
       expect(AppLogic.values.isOrganization).toEqual(true);
+    });
+  });
+
+  describe('setSourceRestriction', () => {
+    it('sets property', () => {
+      mount(DEFAULT_INITIAL_APP_DATA);
+      AppLogic.actions.setSourceRestriction(true);
+
+      expect(AppLogic.values.account.canCreatePersonalSources).toEqual(true);
     });
   });
 });
