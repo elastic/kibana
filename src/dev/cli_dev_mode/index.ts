@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { CliDevMode, CliDevModeOptions, SomeCliArgs } from './cli_dev_mode';
-export { Log, CliLog, TestLog } from './log';
 export { bootstrapDevMode } from './bootstrap';
