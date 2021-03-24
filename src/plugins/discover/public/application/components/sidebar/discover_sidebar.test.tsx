@@ -48,6 +48,9 @@ const mockServices = ({
       }
     },
   },
+  indexPatternFieldEditor: {
+    openEditor: jest.fn(),
+  },
 } as unknown) as DiscoverServices;
 
 jest.mock('../../../kibana_services', () => ({

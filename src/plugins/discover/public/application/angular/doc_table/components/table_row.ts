@@ -49,6 +49,7 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       onAddColumn: '=?',
       onRemoveColumn: '=?',
       useNewFieldsApi: '<',
+      shouldRerender: '<',
     },
     link: ($scope: LazyScope, $el: JQuery) => {
       $el.after('<tr data-test-subj="docTableDetailsRow" class="kbnDocTableDetails__row">');
@@ -91,6 +92,10 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       };
 
       $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight', '[]columns'], () => {
+        createSummaryRow($scope.row);
+      });
+
+      $scope.$watch('shouldRerender', () => {
         createSummaryRow($scope.row);
       });
 

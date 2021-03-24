@@ -625,6 +625,10 @@ function discoverController($route, $scope, Promise) {
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
 
+  $scope.refreshAppState = async () => {
+    $scope.state = { ...appStateContainer.getState() };
+  };
+
   function logInspectorRequest({ searchSessionId = null } = { searchSessionId: null }) {
     inspectorAdapters.requests.reset();
     const title = i18n.translate('discover.inspectorRequestDataTitle', {

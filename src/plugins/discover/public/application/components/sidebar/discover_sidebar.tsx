@@ -7,7 +7,7 @@
  */
 
 import './discover_sidebar.scss';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -18,6 +18,10 @@ import {
   EuiSpacer,
   EuiNotificationBadge,
   EuiPageSideBar,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { isEqual, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -64,13 +68,29 @@ export function DiscoverSidebar({
   useNewFieldsApi = false,
   useFlyout = false,
   unmappedFieldsConfig,
+  onEditRuntimeField,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
-
+  const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
+  const { indexPatternFieldEditor, core } = services;
+  const indexPatternFieldEditPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits]);
+
+  const closeFieldEditor = useRef<() => void | undefined>();
+  useEffect(() => {
+    const cleanup = () => {
+      if (closeFieldEditor.current) {
+        closeFieldEditor.current();
+      }
+    };
+    return () => {
+      // Make sure to close the editor when unmounting
+      cleanup();
+    };
+  }, []);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -149,6 +169,28 @@ export function DiscoverSidebar({
     return null;
   }
 
+  const editField = (fieldName: string) => {
+    if (!indexPatternFieldEditPermission) {
+      return;
+    }
+    indexPatternFieldEditor.openEditor({
+      ctx: {
+        indexPattern: selectedIndexPattern,
+      },
+      fieldName,
+      onSave: async () => {
+        const editedFieldIsSelected = selectedFields.map((field) => field.name).includes(fieldName);
+        const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+        if (editedFieldIsSelected) {
+          onEditRuntimeField();
+        }
+        setFields(newFields);
+      },
+    });
+  };
+
+  const addField = () => {};
+
   const filterChanged = isEqual(fieldFilter, getDefaultFieldFilter());
 
   if (useFlyout) {
@@ -187,14 +229,78 @@ export function DiscoverSidebar({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <DiscoverIndexPattern
-            config={config}
-            selectedIndexPattern={selectedIndexPattern}
-            indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-            indexPatterns={indexPatterns}
-            state={state}
-            setAppState={setAppState}
-          />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <DiscoverIndexPattern
+                config={config}
+                selectedIndexPattern={selectedIndexPattern}
+                indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+                indexPatterns={indexPatterns}
+                state={state}
+                setAppState={setAppState}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                panelPaddingSize="s"
+                isOpen={isAddIndexPatternFieldPopoverOpen}
+                closePopover={() => {
+                  setIsAddIndexPatternFieldPopoverOpen(false);
+                }}
+                ownFocus
+                data-test-subj="lnsIndexPatternActions-popover"
+                button={
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="boxesHorizontal"
+                    data-test-subj="discoverIndexPatternActions"
+                    aria-label={i18n.translate(
+                      'discover.fieldChooser.indexPatterns.actionsPopoverLabel',
+                      {
+                        defaultMessage: 'Index pattern settings',
+                      }
+                    )}
+                    onClick={() => {
+                      setIsAddIndexPatternFieldPopoverOpen(!isAddIndexPatternFieldPopoverOpen);
+                    }}
+                  />
+                }
+              >
+                <EuiContextMenuPanel
+                  size="s"
+                  items={[
+                    <EuiContextMenuItem
+                      key="add"
+                      icon="indexOpen"
+                      data-test-subj="indexPattern-add-field"
+                      onClick={() => {
+                        setIsAddIndexPatternFieldPopoverOpen(false);
+                        addField();
+                      }}
+                    >
+                      {i18n.translate('discover.fieldChooser.indexPatterns.addFieldButton', {
+                        defaultMessage: 'Add field to index pattern',
+                      })}
+                    </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      key="manage"
+                      icon="indexSettings"
+                      onClick={() => {
+                        setIsAddIndexPatternFieldPopoverOpen(false);
+                        core.application.navigateToApp('management', {
+                          path: `/kibana/indexPatterns/patterns/${selectedIndexPattern.id}`,
+                        });
+                      }}
+                    >
+                      {i18n.translate('xpack.lens.indexPatterns.manageFieldButton', {
+                        defaultMessage: 'Manage index pattern fields',
+                      })}
+                    </EuiContextMenuItem>,
+                  ]}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <form>
@@ -257,6 +363,7 @@ export function DiscoverSidebar({
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
+                                editField={indexPatternFieldEditPermission ? editField : undefined}
                               />
                             </li>
                           );
@@ -318,6 +425,7 @@ export function DiscoverSidebar({
                                 getDetails={getDetailsByField}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
+                                editField={editField}
                               />
                             </li>
                           );
@@ -347,6 +455,7 @@ export function DiscoverSidebar({
                             getDetails={getDetailsByField}
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
+                            editField={editField}
                           />
                         </li>
                       );

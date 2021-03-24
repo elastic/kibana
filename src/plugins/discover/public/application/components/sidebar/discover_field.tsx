@@ -16,6 +16,8 @@ import {
   EuiToolTip,
   EuiTitle,
   EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -69,6 +71,8 @@ export interface DiscoverFieldProps {
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 
   multiFields?: Array<{ field: IndexPatternField; isSelected: boolean }>;
+
+  editField?: (fieldName: string) => void;
 }
 
 export function DiscoverField({
@@ -82,6 +86,7 @@ export function DiscoverField({
   selected,
   trackUiMetric,
   multiFields,
+  editField,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -282,6 +287,29 @@ export function DiscoverField({
     );
   };
 
+  const displayNameGrow = editField ? 9 : 10;
+  const popoverTitle = (
+    <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
+      <EuiFlexGroup>
+        <EuiFlexItem grow={displayNameGrow}>{field.displayName}</EuiFlexItem>
+        {editField && (
+          <EuiFlexItem grow={1}>
+            <EuiButtonIcon
+              onClick={() => {
+                editField(field.name);
+              }}
+              iconType="pencil"
+              data-test-subj="discoverFieldListPanelEdit"
+              aria-label={i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
+                defaultMessage: 'Edit index pattern field',
+              })}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiPopoverTitle>
+  );
+
   return (
     <EuiPopover
       display="block"
@@ -305,9 +333,7 @@ export function DiscoverField({
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >
-      <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
-        {field.displayName}
-      </EuiPopoverTitle>
+      {popoverTitle}
       <EuiTitle size="xxxs">
         <h5>
           {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {

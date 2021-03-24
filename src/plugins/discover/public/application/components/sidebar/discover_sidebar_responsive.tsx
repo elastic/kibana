@@ -121,6 +121,8 @@ export interface DiscoverSidebarResponsiveProps {
      */
     showUnmappedFields: boolean;
   };
+
+  onEditRuntimeField: () => void;
 }
 
 /**

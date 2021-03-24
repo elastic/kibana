@@ -66,6 +66,7 @@ export function Discover({
   state,
   timeRange,
   unmappedFieldsConfig,
+  refreshAppState,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
@@ -113,6 +114,8 @@ export function Discover({
       }),
     [capabilities, config, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
   );
+
+  const [shouldRerender, setShouldRerender] = useState<boolean>(false);
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
@@ -190,6 +193,14 @@ export function Discover({
     [opts, state]
   );
 
+  const onEditRuntimeField = () => {
+    if (refreshAppState) {
+      refreshAppState();
+    }
+    // needed to trigger refresh of table cells
+    setShouldRerender(!shouldRerender);
+  };
+
   const columns = useMemo(() => {
     if (!state.columns) {
       return [];
@@ -232,6 +243,7 @@ export function Discover({
                 trackUiMetric={trackUiMetric}
                 unmappedFieldsConfig={unmappedFieldsConfig}
                 useNewFieldsApi={useNewFieldsApi}
+                onEditRuntimeField={onEditRuntimeField}
               />
             </EuiFlexItem>
             <EuiHideFor sizes={['xs', 's']}>
@@ -384,6 +396,7 @@ export function Discover({
                             onSort={onSort}
                             sampleSize={opts.sampleSize}
                             useNewFieldsApi={useNewFieldsApi}
+                            shouldRerender={shouldRerender}
                           />
                         )}
                         {!isLegacy && rows && rows.length && (
