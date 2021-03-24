@@ -296,6 +296,10 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_lens',
             type: 'lens',
           },
+          {
+            id: 'sample_ml_module',
+            type: 'ml-module',
+          },
         ],
         installed_es: [
           {

@@ -394,6 +394,11 @@ const expectAssetsInstalled = ({
       id: 'sample_lens',
     });
     expect(resLens.id).equal('sample_lens');
+    const resMlModule = await kibanaServer.savedObjects.get({
+      type: 'ml-module',
+      id: 'sample_ml_module',
+    });
+    expect(resMlModule.id).equal('sample_ml_module');
     const resIndexPattern = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'test-*',
@@ -458,6 +463,10 @@ const expectAssetsInstalled = ({
         {
           id: 'sample_lens',
           type: 'lens',
+        },
+        {
+          id: 'sample_ml_module',
+          type: 'ml-module',
         },
         {
           id: 'sample_search',
