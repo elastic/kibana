@@ -1378,9 +1378,10 @@
   version "0.0.0"
   uid ""
 
-"@elastic/elasticsearch@github:elastic/elasticsearch-js#3c5e4b06f0329fd19665d50578e68848683e01b7":
-  version "8.0.0-SNAPSHOT.9f33e3c7"
-  resolved "https://codeload.github.com/elastic/elasticsearch-js/tar.gz/3c5e4b06f0329fd19665d50578e68848683e01b7"
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.4":
+  version "8.0.0-canary.4"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.4.tgz#6f1a592974941baae347eb8c66a2006848349717"
+  integrity sha512-UexFloloyvGOhvMc1ePRHCy89sjQL6rPTTZkXAB/GcC8rCvA3mgSnIY2+Ylvctdv9o4l+M4Bkw8azICulyhwMg==
   dependencies:
     debug "^4.3.1"
     hpagent "^0.1.1"
