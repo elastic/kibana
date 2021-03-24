@@ -135,6 +135,7 @@ This RFC is focused on the option of using a system other than Jenkins, and mana
 #### Stable
 
 - Every minute of downtime can affect 100s of developers.
+- The Kibana Operations team can't have an on-call rotation, so we need to minimize our responsibilities around stability/uptime.
 - For systems provided as a service, they should not have frequent outages. This is a bit hard to define. 1-2 hours of downtime, twice a month, during peak working hours, is extremely disruptive. 10 minutes of downtime once or twice a week can also be very disruptive, as builds might need to be re-triggered, etc.
 - For self-hosted solutions, they should be reasonably easy to keep online and have a solution for high-availability. At a minimum, most upgrades should not require waiting for all currently running jobs to finish before deploying.
 - Failures are ideally handled gracefully. For example, agents may continue running tasks correctly, once the primary service becomes available again.
