@@ -20,8 +20,8 @@ That ID can be used to "resolve" back to the long URL and redirect the user to
 the desired page.
 
 ```ts
-// It does not have a plugin API, you can only use it through HTTP request:
-http.post()
+// It does not have a plugin API, you can only use it through an HTTP request.
+const shortUrl = await http.post('/api/shorten_url', { url: '/some/long/kibana/url/.../very?long=true#q=(rison:approved)' });
 ```
 
 The other is the *URL Generator Service*: it simply receives an object of
