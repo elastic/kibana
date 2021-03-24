@@ -197,13 +197,13 @@ export function MachineLearningNavigationProvider({
 
     /**
      * Assert the active URL.
-     * @param expectedUrl - URL component excluding host
+     * @param expectedUrlPart - URL component excluding host
      */
-    async assertCurrentURL(expectedUrl: string) {
+    async assertCurrentURLContains(expectedUrlPart: string) {
       const currentUrl = await browser.getCurrentUrl();
       expect(currentUrl).to.include.string(
-        expectedUrl,
-        `Expected the current URL to be ${expectedUrl}, got ${currentUrl}`
+        expectedUrlPart,
+        `Expected the current URL to include ${expectedUrlPart}, got ${currentUrl}`
       );
     },
   };
