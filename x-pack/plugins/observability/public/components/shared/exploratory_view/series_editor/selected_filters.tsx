@@ -6,8 +6,8 @@
  */
 
 import React, { Fragment, useMemo } from 'react';
-import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
 import { FilterLabel } from '../components/filter_label';
 import { DataSeries, UrlFilter } from '../types';
 import { useIndexPatternContext } from '../../../../hooks/use_default_index_pattern';
@@ -19,7 +19,7 @@ interface Props {
   series: DataSeries;
   isNew?: boolean;
 }
-export const SelectedFilters = ({ seriesId, isNew, series: dataSeries }: Props) => {
+export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) {
   const { series } = useUrlStorage(seriesId);
 
   const { reportDefinitions = {} } = series;
@@ -71,4 +71,4 @@ export const SelectedFilters = ({ seriesId, isNew, series: dataSeries }: Props) 
       </EuiFlexGroup>
     </EuiFlexItem>
   ) : null;
-};
+}

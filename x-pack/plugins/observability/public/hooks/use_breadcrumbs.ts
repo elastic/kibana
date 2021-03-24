@@ -9,9 +9,9 @@ import { ChromeBreadcrumb } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { MouseEvent, useEffect } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { stringify } from 'query-string';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { useQueryParams } from './use_query_params';
-import { stringify } from 'query-string';
 
 const EMPTY_QUERY = '?';
 

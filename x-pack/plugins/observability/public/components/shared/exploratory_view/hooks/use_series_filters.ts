@@ -52,7 +52,7 @@ export const useSeriesFilters = ({ seriesId }: Props) => {
     } else {
       setSeries(seriesId, {
         ...series,
-        filters: [currFilter, ...filters.filter((ft) => ft.field != field)],
+        filters: [currFilter, ...filters.filter((ft) => ft.field !== field)],
       });
     }
   };
@@ -87,7 +87,7 @@ export const useSeriesFilters = ({ seriesId }: Props) => {
   };
 
   const setFilter = ({ field, value, negate }: UpdateFilter) => {
-    let currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
+    const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
 
     if (!currFilter) {
       addFilter({ field, value, negate });

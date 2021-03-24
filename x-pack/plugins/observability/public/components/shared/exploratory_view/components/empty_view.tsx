@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { EuiImage } from '@elastic/eui';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import styled from 'styled-components';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
-export const EmptyView = () => {
+export function EmptyView() {
   const { core } = usePluginContext();
 
   return (
@@ -21,7 +21,7 @@ export const EmptyView = () => {
       />
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   text-align: center;

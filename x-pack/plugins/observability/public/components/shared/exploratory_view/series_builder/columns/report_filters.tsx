@@ -14,7 +14,7 @@ import { ReportViewTypeId } from '../../types';
 interface Props {
   reportType: ReportViewTypeId;
 }
-export const ReportFilters = ({ reportType }: Props) => {
+export function ReportFilters({ reportType }: Props) {
   const dataSeries = getDefaultConfigs({
     reportType: reportType!,
     seriesId: NEW_SERIES_KEY,
@@ -28,4 +28,4 @@ export const ReportFilters = ({ reportType }: Props) => {
       isNew={true}
     />
   );
-};
+}

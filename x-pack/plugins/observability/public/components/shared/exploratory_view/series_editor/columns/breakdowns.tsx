@@ -7,9 +7,9 @@
 
 import React, { useEffect } from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FieldLabels } from '../../configurations/constants';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
-import { i18n } from '@kbn/i18n';
 
 interface Props {
   seriesId: string;

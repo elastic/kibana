@@ -6,14 +6,14 @@
  */
 
 import React, { useContext } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
+import { ThemeContext } from 'styled-components';
 import { ExploratoryView } from './exploratory_view';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { i18n } from '@kbn/i18n';
 import { IndexPatternContextProvider } from '../../../hooks/use_default_index_pattern';
-import { useHistory } from 'react-router-dom';
-import { ThemeContext } from 'styled-components';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -22,7 +22,7 @@ import { UrlStorageContextProvider } from './hooks/use_url_strorage';
 import { useInitExploratoryView } from './hooks/use_init_exploratory_view';
 import { WithHeaderLayout } from '../../app/layout/with_header';
 
-export const ExploratoryViewPage = () => {
+export function ExploratoryViewPage() {
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.overview.exploratoryView', {
@@ -59,4 +59,4 @@ export const ExploratoryViewPage = () => {
       </IndexPatternContextProvider>
     </WithHeaderLayout>
   );
-};
+}

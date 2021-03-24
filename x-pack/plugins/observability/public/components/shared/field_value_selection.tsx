@@ -13,10 +13,10 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
 } from '@elastic/eui';
+import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 import { useValuesList } from '../../hooks/use_values_list';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 
 interface Option {
   id: string;
@@ -37,7 +37,7 @@ interface Props {
   button?: JSX.Element;
 }
 
-export const FieldValueSelection = ({
+export function FieldValueSelection({
   sourceField,
   indexPattern,
   value,
@@ -48,7 +48,7 @@ export const FieldValueSelection = ({
   forceOpen,
   anchorPosition,
   onChange: onSelectionChange,
-}: Props) => {
+}: Props) {
   const [query, setQuery] = useState('');
   const { values, loading } = useValuesList({ indexPattern, query, sourceField, filters, time });
 
@@ -134,4 +134,4 @@ export const FieldValueSelection = ({
       </EuiSelectable>
     </EuiPopover>
   );
-};
+}

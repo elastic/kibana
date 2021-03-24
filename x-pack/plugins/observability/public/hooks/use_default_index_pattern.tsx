@@ -21,12 +21,13 @@ export const IndexPatternContext = createContext<Partial<IIndexPatternContext>>(
 
 interface ProviderProps {
   indexPattern: IIndexPattern;
+  children: JSX.Element;
 }
 
-export const IndexPatternContextProvider: React.FC<ProviderProps> = ({
+export function IndexPatternContextProvider({
   children,
   indexPattern: initialIndexPattern,
-}) => {
+}: ProviderProps) {
   const [indexPattern, setIndexPattern] = useState(initialIndexPattern);
 
   useEffect(() => {
@@ -51,7 +52,7 @@ export const IndexPatternContextProvider: React.FC<ProviderProps> = ({
   }, [indexPattern]);
 
   return <IndexPatternContext.Provider value={value}>{children}</IndexPatternContext.Provider>;
-};
+}
 
 export const useIndexPatternContext = () => {
   return useContext((IndexPatternContext as unknown) as Context<IIndexPatternContext>);

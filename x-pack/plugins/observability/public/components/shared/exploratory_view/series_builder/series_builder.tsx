@@ -82,19 +82,6 @@ export function SeriesBuilder() {
   ];
 
   const addSeries = () => {
-    // const getFiltersFromDefs = (): UrlFilter[] => {
-    //   return Object.entries(reportDefinitions).map(([field, value]) => ({
-    //     field,
-    //     values: [value],
-    //   }));
-    //
-    //   // let's filter out custom fields
-    //   return rdfFilters.filter(({ field }) => {
-    //     const rdf = dataViewConfig.reportDefinitions.find(({ field: fd }) => field === fd);
-    //     return !rdf?.custom;
-    //   });
-    // };
-
     if (reportType) {
       const newSeriesId = `${
         reportDefinitions?.['service.name'] ||
@@ -105,7 +92,7 @@ export function SeriesBuilder() {
       const newSeriesN = {
         reportType,
         time: { from: 'now-30m', to: 'now' },
-        filters: filters,
+        filters,
         reportDefinitions,
       } as SeriesUrl;
 

@@ -10,7 +10,7 @@ import { Breakdowns } from '../../series_editor/columns/breakdowns';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 
-export const ReportBreakdowns = () => {
+export function ReportBreakdowns() {
   const {
     series: { reportType },
   } = useUrlStorage(NEW_SERIES_KEY);
@@ -20,4 +20,4 @@ export const ReportBreakdowns = () => {
     seriesId: NEW_SERIES_KEY,
   });
   return <Breakdowns breakdowns={dataSeries.breakdowns ?? []} seriesId={NEW_SERIES_KEY} />;
-};
+}
