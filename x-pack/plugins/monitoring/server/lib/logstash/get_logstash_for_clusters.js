@@ -44,7 +44,7 @@ export function getLogstashForClusters(req, lsIndexPattern, clusters) {
   const config = req.server.config();
 
   return Bluebird.map(clusters, (cluster) => {
-    const clusterUuid = cluster.cluster_uuid;
+    const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
     const params = {
       index: lsIndexPattern,
       size: 0,

@@ -7,7 +7,7 @@
 
 export default function ({ loadTestFile }) {
   describe('cluster', () => {
-    loadTestFile(require.resolve('./list'));
+    loadTestFile(require.resolve('./list_mb'));
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./overview_mb'));
   });

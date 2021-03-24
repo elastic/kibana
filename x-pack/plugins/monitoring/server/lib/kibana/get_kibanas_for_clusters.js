@@ -32,7 +32,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
   const end = req.payload.timeRange.max;
 
   return Bluebird.map(clusters, (cluster) => {
-    const clusterUuid = cluster.cluster_uuid;
+    const clusterUuid = get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid);
     const metric = KibanaClusterMetric.getMetricFields();
     const params = {
       index: kbnIndexPattern,
