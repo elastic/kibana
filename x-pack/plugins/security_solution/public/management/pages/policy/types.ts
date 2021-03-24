@@ -120,6 +120,12 @@ export type RansomwareProtectionOSes = KeysByValueCriteria<
   { ransomware: ProtectionFields }
 >;
 
+export type PolicyProtection =
+  | keyof Pick<UIPolicyConfig['windows'], 'malware' | 'ransomware'>
+  | keyof Pick<UIPolicyConfig['mac'], 'malware'>;
+
+export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
+
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];
 }
