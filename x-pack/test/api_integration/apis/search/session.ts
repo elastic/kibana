@@ -303,7 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should complete session when searches complete', async () => {
+    it.skip('should complete session when searches complete', async () => {
       const sessionId = `my-session-${Math.random()}`;
 
       // run search
