@@ -25,6 +25,7 @@ import { EngineCreation } from './components/engine_creation';
 import { EnginesOverview } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
 import { MetaEngineCreation } from './components/meta_engine_creation';
+import { RoleMappingsRouter } from './components/role_mappings';
 import { SetupGuide } from './components/setup_guide';
 
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
@@ -88,6 +89,20 @@ describe('AppSearchConfigured', () => {
   });
 
   describe('ability checks', () => {
+    describe('canViewRoleMappings', () => {
+      it('renders RoleMappings when canViewRoleMappings is true', () => {
+        setMockValues({ myRole: { canViewRoleMappings: true } });
+        rerender(wrapper);
+        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(1);
+      });
+
+      it('does not render RoleMappings when user canViewRoleMappings is false', () => {
+        setMockValues({ myRole: { canManageEngines: false } });
+        rerender(wrapper);
+        expect(wrapper.find(RoleMappingsRouter)).toHaveLength(0);
+      });
+    });
+
     describe('canManageEngines', () => {
       it('renders EngineCreation when user canManageEngines is true', () => {
         setMockValues({ myRole: { canManageEngines: true } });
@@ -155,8 +170,6 @@ describe('AppSearchNav', () => {
     setMockValues({ myRole: { canViewRoleMappings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as#/role-mappings'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/role_mappings');
   });
 });

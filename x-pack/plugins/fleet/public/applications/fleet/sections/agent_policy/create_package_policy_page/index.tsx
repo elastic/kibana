@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback, ReactEventHandler } from 'react';
+import type { ReactEventHandler } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -19,10 +20,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import { ApplicationStart } from 'kibana/public';
+import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import type { ApplicationStart } from 'kibana/public';
 
-import {
+import type {
   AgentPolicy,
   PackageInfo,
   NewPackagePolicy,
@@ -41,17 +42,14 @@ import { ConfirmDeployAgentPolicyModal } from '../components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { useUIExtension } from '../../../hooks/use_ui_extension';
 import { ExtensionWrapper } from '../../../components/extension_wrapper';
-import { PackagePolicyEditExtensionComponentProps } from '../../../types';
+import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { PLUGIN_ID } from '../../../../../../common/constants';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 import { CreatePackagePolicyPageLayout } from './components';
-import { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
-import {
-  PackagePolicyValidationResults,
-  validatePackagePolicy,
-  validationHasErrors,
-} from './services';
+import type { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
+import type { PackagePolicyValidationResults } from './services';
+import { validatePackagePolicy, validationHasErrors } from './services';
 import { StepSelectPackage } from './step_select_package';
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';

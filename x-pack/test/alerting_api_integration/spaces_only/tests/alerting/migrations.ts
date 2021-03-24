@@ -101,5 +101,79 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       expect(response.body.notifyWhen).to.eql('onActiveAlert');
     });
+
+    it('7.11.2 migrates alerts with case actions, case fields are nested in an incident object', async () => {
+      const response = await supertest.get(
+        `${getUrlPrefix(``)}/api/alerts/alert/99f3e6d7-b7bb-477d-ac28-92ee22726969`
+      );
+
+      expect(response.status).to.eql(200);
+      expect(response.body.actions).to.eql([
+        {
+          id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
+          actionTypeId: '.servicenow',
+          group: 'threshold met',
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              incident: {
+                severity: '2',
+                impact: '2',
+                urgency: '2',
+                short_description: 'SN short desc',
+                description: 'SN desc',
+              },
+              comments: [{ commentId: '1', comment: 'sn comment' }],
+            },
+          },
+        },
+        {
+          id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
+          actionTypeId: '.jira',
+          group: 'threshold met',
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              incident: {
+                summary: 'Jira summary',
+                issueType: '10001',
+                description: 'Jira description',
+                priority: 'Highest',
+                parent: 'CASES-78',
+                labels: ['test'],
+              },
+              comments: [
+                {
+                  commentId: '1',
+                  comment: 'jira comment',
+                },
+              ],
+            },
+          },
+        },
+        {
+          id: '66a8ab7a-35cf-445e-ade3-215a029c6969',
+          actionTypeId: '.resilient',
+          group: 'threshold met',
+          params: {
+            subAction: 'pushToService',
+            subActionParams: {
+              incident: {
+                incidentTypes: ['17', '21'],
+                severityCode: '5',
+                name: 'IBM name',
+                description: 'IBM description',
+              },
+              comments: [
+                {
+                  commentId: 'alert-comment',
+                  comment: 'IBM comment',
+                },
+              ],
+            },
+          },
+        },
+      ]);
+    });
   });
 }

@@ -6,17 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { Framework } from '../../../plugin';
+import {
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
 import { DefaultSearchStrategy } from './default_search_strategy';
-import type { ReqFacade } from './abstract_search_strategy';
-import type { VisPayload } from '../../../../common/types';
 
 describe('DefaultSearchStrategy', () => {
+  const framework = {} as Framework;
+  const requestContext = {} as VisTypeTimeseriesRequestHandlerContext;
   let defaultSearchStrategy: DefaultSearchStrategy;
-  let req: ReqFacade<VisPayload>;
+  let req: VisTypeTimeseriesVisDataRequest;
 
   beforeEach(() => {
-    req = {} as ReqFacade<VisPayload>;
-    defaultSearchStrategy = new DefaultSearchStrategy();
+    req = {} as VisTypeTimeseriesVisDataRequest;
+    defaultSearchStrategy = new DefaultSearchStrategy(framework);
   });
 
   test('should init an DefaultSearchStrategy instance', () => {
@@ -26,7 +31,7 @@ describe('DefaultSearchStrategy', () => {
   });
 
   test('should check a strategy for viability', async () => {
-    const value = await defaultSearchStrategy.checkForViability(req);
+    const value = await defaultSearchStrategy.checkForViability(requestContext, req);
 
     expect(value.isViable).toBe(true);
     expect(value.capabilities).toEqual({
