@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious DLL Loaded for Persistence or Privilege Escalation",
   "query": "library where dll.name :\n  (\n  \"wlbsctrl.dll\",\n  \"wbemcomn.dll\",\n  \"WptsExtensions.dll\",\n  \"Tsmsisrv.dll\",\n  \"TSVIPSrv.dll\",\n  \"Msfte.dll\",\n  \"wow64log.dll\",\n  \"WindowsCoreDeviceInfo.dll\",\n  \"Ualapi.dll\",\n  \"wlanhlp.dll\",\n  \"phoneinfo.dll\",\n  \"EdgeGdi.dll\",\n  \"cdpsgshims.dll\",\n  \"windowsperformancerecordercontrol.dll\",\n  \"diagtrack_win.dll\"\n  ) and \nnot (dll.code_signature.subject_name : \"Microsoft Windows\" and dll.code_signature.status : \"trusted\")\n",
   "references": [

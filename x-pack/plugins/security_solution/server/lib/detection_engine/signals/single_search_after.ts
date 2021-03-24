@@ -10,7 +10,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
@@ -72,8 +72,9 @@ export const singleSearchAfter = async ({
     });
 
     const start = performance.now();
-    const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
-      'search',
+    const {
+      body: nextSearchAfterResult,
+    } = await services.scopedClusterClient.asCurrentUser.search<SignalSearchResponse>(
       searchAfterQuery
     );
     const end = performance.now();

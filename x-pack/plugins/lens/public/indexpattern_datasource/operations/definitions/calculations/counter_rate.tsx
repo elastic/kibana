@@ -17,6 +17,7 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
+import { getFormatFromPreviousColumn } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -81,13 +82,8 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
-      params:
-        previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
-          ? { format: previousColumn.params.format }
-          : undefined,
+      filter: previousColumn?.filter,
+      params: getFormatFromPreviousColumn(previousColumn),
     };
   },
   isTransferable: (column, newIndexPattern) => {
@@ -111,4 +107,5 @@ export const counterRateOperation: OperationDefinition<
     )?.join(', ');
   },
   timeScalingMode: 'mandatory',
+  filterable: true,
 };

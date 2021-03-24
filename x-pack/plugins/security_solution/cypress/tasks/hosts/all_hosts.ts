@@ -6,7 +6,7 @@
  */
 
 import { ALL_HOSTS_TABLE, HOSTS_NAMES_DRAGGABLE, HOSTS_NAMES } from '../../screens/hosts/all_hosts';
-import { TIMELINE_ADD_FIELD_BUTTON, TIMELINE_DATA_PROVIDERS_EMPTY } from '../../screens/timeline';
+import { TIMELINE_DATA_PROVIDERS, TIMELINE_DATA_PROVIDERS_EMPTY } from '../../screens/timeline';
 
 import { drag, dragWithoutDrop, drop } from '../../tasks/common';
 
@@ -14,7 +14,7 @@ export const dragAndDropFirstHostToTimeline = () => {
   cy.get(HOSTS_NAMES_DRAGGABLE)
     .first()
     .then((firstHost) => drag(firstHost));
-  cy.get(TIMELINE_ADD_FIELD_BUTTON)
+  cy.get(TIMELINE_DATA_PROVIDERS)
     .filter(':visible')
     .then((dataProvidersDropArea) => drop(dataProvidersDropArea));
 };
@@ -27,6 +27,23 @@ export const dragFirstHostToEmptyTimelineDataProviders = () => {
   cy.get(TIMELINE_DATA_PROVIDERS_EMPTY)
     .filter(':visible')
     .then((dataProvidersDropArea) => dragWithoutDrop(dataProvidersDropArea));
+};
+
+export const unDragFirstHostToEmptyTimelineDataProviders = () => {
+  cy.get(HOSTS_NAMES_DRAGGABLE)
+    .first()
+    .then((host) => {
+      cy.wrap(host)
+        .trigger('mousemove', {
+          button: 0,
+          clientX: host[0].getBoundingClientRect().left,
+          clientY: host[0].getBoundingClientRect().top,
+          force: true,
+        })
+        .wait(300)
+        .trigger('mouseup', { force: true })
+        .wait(300);
+    });
 };
 
 export const dragFirstHostToTimeline = () => {

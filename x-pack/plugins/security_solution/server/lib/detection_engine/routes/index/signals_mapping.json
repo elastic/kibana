@@ -391,6 +391,9 @@
           },
           "threshold_result": {
             "properties": {
+              "from": {
+                "type": "date"
+              },
               "terms": {
                 "properties": {
                   "field": {

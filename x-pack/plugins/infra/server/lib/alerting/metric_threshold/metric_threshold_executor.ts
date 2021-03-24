@@ -8,7 +8,7 @@
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { RecoveredActionGroup } from '../../../../../alerts/common';
+import { RecoveredActionGroup } from '../../../../../alerting/common';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
@@ -44,7 +44,7 @@ export const createMetricThresholdExecutor = (
     );
     const config = source.configuration;
     const alertResults = await evaluateAlert(
-      services.callCluster,
+      services.scopedClusterClient.asCurrentUser,
       params as EvaluatedAlertParams,
       config
     );

@@ -18,7 +18,10 @@ import type {
   ISearchStrategy,
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
-import { LogSourceColumnConfiguration } from '../../../common/http_api/log_sources';
+import {
+  LogSourceColumnConfiguration,
+  logSourceFieldColumnConfigurationRT,
+} from '../../../common/http_api/log_sources';
 import {
   getLogEntryCursorFromHit,
   LogColumn,
@@ -103,7 +106,10 @@ export const logEntriesSearchStrategyProvider = ({
                       params.size + 1,
                       configuration.fields.timestamp,
                       configuration.fields.tiebreaker,
-                      messageFormattingRules.requiredFields,
+                      getRequiredFields(
+                        params.columns ?? configuration.logColumns,
+                        messageFormattingRules
+                      ),
                       params.query,
                       params.highlightPhrase
                     ),
@@ -125,7 +131,12 @@ export const logEntriesSearchStrategyProvider = ({
 
             const entries = rawResponse.hits.hits
               .slice(0, request.params.size)
-              .map(getLogEntryFromHit(configuration.logColumns, messageFormattingRules));
+              .map(
+                getLogEntryFromHit(
+                  request.params.columns ?? configuration.logColumns,
+                  messageFormattingRules
+                )
+              );
 
             const sortDirection = getSortDirection(pickRequestCursor(request.params));
 
@@ -192,13 +203,13 @@ const getLogEntryFromHit = (
         } else if ('messageColumn' in column) {
           return {
             columnId: column.messageColumn.id,
-            message: messageFormattingRules.format(hit.fields, hit.highlight || {}),
+            message: messageFormattingRules.format(hit.fields ?? {}, hit.highlight || {}),
           };
         } else {
           return {
             columnId: column.fieldColumn.id,
             field: column.fieldColumn.field,
-            value: hit.fields[column.fieldColumn.field] ?? [],
+            value: hit.fields?.[column.fieldColumn.field] ?? [],
             highlights: hit.highlight?.[column.fieldColumn.field] ?? [],
           };
         }
@@ -222,9 +233,9 @@ const pickRequestCursor = (
 
 const getContextFromHit = (hit: LogEntryHit): LogEntryContext => {
   // Get all context fields, then test for the presence and type of the ones that go together
-  const containerId = hit.fields['container.id']?.[0];
-  const hostName = hit.fields['host.name']?.[0];
-  const logFilePath = hit.fields['log.file.path']?.[0];
+  const containerId = hit.fields?.['container.id']?.[0];
+  const hostName = hit.fields?.['host.name']?.[0];
+  const logFilePath = hit.fields?.['log.file.path']?.[0];
 
   if (typeof containerId === 'string') {
     return { 'container.id': containerId };
@@ -244,3 +255,23 @@ function getResponseCursors(entries: LogEntry[]) {
 
   return { topCursor, bottomCursor };
 }
+
+const VIEW_IN_CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
+
+const getRequiredFields = (
+  columns: LogSourceColumnConfiguration[],
+  messageFormattingRules: CompiledLogMessageFormattingRule
+): string[] => {
+  const fieldsFromColumns = columns.reduce<string[]>((accumulatedFields, logColumn) => {
+    if (logSourceFieldColumnConfigurationRT.is(logColumn)) {
+      return [...accumulatedFields, logColumn.fieldColumn.field];
+    }
+    return accumulatedFields;
+  }, []);
+
+  const fieldsFromFormattingRules = messageFormattingRules.requiredFields;
+
+  return Array.from(
+    new Set([...fieldsFromColumns, ...fieldsFromFormattingRules, ...VIEW_IN_CONTEXT_FIELDS])
+  );
+};

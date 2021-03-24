@@ -27,14 +27,14 @@ export const drag = (subject: JQuery<HTMLElement>) => {
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(3000)
+    .wait(300)
     .trigger('mousemove', {
       button: primaryButton,
       clientX: subjectLocation.left + dndSloppyClickDetectionThreshold,
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(3000);
+    .wait(300);
 };
 
 /** Drags the subject being dragged on the specified drop target, but does not drop it  */
@@ -148,3 +148,5 @@ export const cleanKibana = () => {
 
   esArchiverResetKibana();
 };
+
+export const scrollToBottom = () => cy.scrollTo('bottom');

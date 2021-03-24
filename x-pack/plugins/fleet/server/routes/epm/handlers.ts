@@ -23,7 +23,7 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
 } from '../../../common';
-import {
+import type {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,
   GetFileRequestSchema,
@@ -40,12 +40,10 @@ import {
   getPackages,
   getFile,
   getPackageInfo,
-  handleInstallPackageFailure,
   isBulkInstallError,
   installPackage,
   removeInstallation,
   getLimitedPackages,
-  getInstallationObject,
   getInstallation,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
@@ -226,34 +224,22 @@ export const installPackageFromRegistryHandler: RequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { pkgkey } = request.params;
-  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   try {
     const res = await installPackage({
       installSource: 'registry',
       savedObjectsClient,
       pkgkey,
-      callCluster,
+      esClient,
       force: request.body?.force,
     });
     const body: InstallPackageResponse = {
-      response: res,
+      response: res.assets,
     };
     return response.ok({ body });
   } catch (e) {
-    const defaultResult = await defaultIngestErrorHandler({ error: e, response });
-    await handleInstallPackageFailure({
-      savedObjectsClient,
-      error: e,
-      pkgName,
-      pkgVersion,
-      installedPkg,
-      callCluster,
-    });
-
-    return defaultResult;
+    return await defaultIngestErrorHandler({ error: e, response });
   }
 };
 
@@ -278,11 +264,11 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
-    callCluster,
-    packagesToUpgrade: request.body.packages,
+    esClient,
+    packagesToInstall: request.body.packages,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -303,19 +289,19 @@ export const installPackageByUploadHandler: RequestHandler<
     });
   }
   const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   try {
     const res = await installPackage({
       installSource: 'upload',
       savedObjectsClient,
-      callCluster,
+      esClient,
       archiveBuffer,
       contentType,
     });
     const body: InstallPackageResponse = {
-      response: res,
+      response: res.assets,
     };
     return response.ok({ body });
   } catch (error) {
@@ -329,8 +315,8 @@ export const deletePackageHandler: RequestHandler<
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-    const res = await removeInstallation({ savedObjectsClient, pkgkey, callCluster });
+    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const res = await removeInstallation({ savedObjectsClient, pkgkey, esClient });
     const body: DeletePackageResponse = {
       response: res,
     };

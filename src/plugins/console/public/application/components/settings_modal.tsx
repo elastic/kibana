@@ -32,7 +32,7 @@ export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
   onClose: () => void;
-  refreshAutocompleteSettings: (selectedSettings: any) => void;
+  refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
   settings: DevToolsSettings;
 }
 
@@ -233,7 +233,7 @@ export function DevToolsSettingsModal(props: Props) {
               return rest;
             })}
             idToSelectedMap={checkboxIdToSelectedMap}
-            onChange={(e: any) => {
+            onChange={(e: unknown) => {
               onAutocompleteChange(e as AutocompleteOptions);
             }}
           />

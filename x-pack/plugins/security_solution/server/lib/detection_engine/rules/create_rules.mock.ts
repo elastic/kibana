@@ -6,7 +6,7 @@
  */
 
 import { CreateRulesOptions } from './types';
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 
 export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],

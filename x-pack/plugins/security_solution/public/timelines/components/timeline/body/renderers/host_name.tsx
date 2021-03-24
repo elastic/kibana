@@ -20,6 +20,8 @@ import { TruncatableText } from '../../../../../common/components/truncatable_te
 import { StatefulEventContext } from '../events/stateful_event_context';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { timelineActions } from '../../../../store/timeline';
+import { SecurityPageName } from '../../../../../../common/constants';
+import { useFormatUrl, getHostDetailsUrl } from '../../../../../common/components/link_to';
 
 interface Props {
   contextId: string;
@@ -33,10 +35,13 @@ const HostNameComponent: React.FC<Props> = ({ fieldName, contextId, eventId, val
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
 
+  const { formatUrl } = useFormatUrl(SecurityPageName.hosts);
+  const isInTimelineContext = hostName && eventContext?.tabType && eventContext?.timelineID;
+
   const openHostDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
-      if (hostName && eventContext?.tabType && eventContext?.timelineID) {
+      if (eventContext && isInTimelineContext) {
         const { timelineID, tabType } = eventContext;
         const updatedExpandedDetail: TimelineExpandedDetailType = {
           panelView: 'hostDetail',
@@ -58,7 +63,7 @@ const HostNameComponent: React.FC<Props> = ({ fieldName, contextId, eventId, val
         }
       }
     },
-    [dispatch, eventContext, hostName]
+    [dispatch, eventContext, isInTimelineContext, hostName]
   );
 
   return isString(value) && hostName.length > 0 ? (
@@ -68,7 +73,13 @@ const HostNameComponent: React.FC<Props> = ({ fieldName, contextId, eventId, val
       tooltipContent={hostName}
       value={hostName}
     >
-      <LinkAnchor href="#" data-test-subj="host-details-button" onClick={openHostDetailsSidePanel}>
+      <LinkAnchor
+        href={formatUrl(getHostDetailsUrl(encodeURIComponent(hostName)))}
+        data-test-subj="host-details-button"
+        // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
+        // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the Host Details page
+        onClick={isInTimelineContext ? openHostDetailsSidePanel : undefined}
+      >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
       </LinkAnchor>
     </DefaultDraggable>

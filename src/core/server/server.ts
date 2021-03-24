@@ -221,7 +221,7 @@ export class Server {
     });
 
     this.registerCoreContext(coreSetup);
-    this.coreApp.setup(coreSetup);
+    this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction?.end();
     return coreSetup;
@@ -269,7 +269,6 @@ export class Server {
       plugins: mapToObject(pluginsStart.contracts),
     });
 
-    this.status.start();
     await this.http.start();
 
     startTransaction?.end();

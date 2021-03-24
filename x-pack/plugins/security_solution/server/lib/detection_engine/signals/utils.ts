@@ -22,7 +22,7 @@ import {
   AlertInstanceState,
   AlertServices,
   parseDuration,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
@@ -84,7 +84,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   } else if (
     indexesWithReadPrivileges.length === 0 &&
@@ -96,7 +96,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return false;
@@ -124,7 +124,7 @@ export const hasTimestampFields = async (
         : ''
     }`;
     logger.error(buildRuleMessage(errorString.trimEnd()));
-    await ruleStatusService.warning(errorString.trimEnd());
+    await ruleStatusService.partialFailure(errorString.trimEnd());
     return true;
   } else if (
     !wroteStatus &&
@@ -145,7 +145,7 @@ export const hasTimestampFields = async (
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return wroteStatus;
@@ -155,18 +155,20 @@ export const checkPrivileges = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
-  services.callCluster('transport.request', {
-    path: '/_security/user/_has_privileges',
-    method: 'POST',
-    body: {
-      index: [
-        {
-          names: indices ?? [],
-          privileges: ['read'],
-        },
-      ],
-    },
-  });
+  (
+    await services.scopedClusterClient.asCurrentUser.transport.request({
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        index: [
+          {
+            names: indices ?? [],
+            privileges: ['read'],
+          },
+        ],
+      },
+    })
+  ).body as Privilege;
 
 export const getNumCatchupIntervals = ({
   gap,
@@ -205,7 +207,11 @@ export const getListsClient = ({
     throw new Error('lists plugin unavailable during rule execution');
   }
 
-  const listClient = lists.getListClient(services.callCluster, spaceId, updatedByUser ?? 'elastic');
+  const listClient = lists.getListClient(
+    services.scopedClusterClient.asCurrentUser,
+    spaceId,
+    updatedByUser ?? 'elastic'
+  );
   const exceptionsClient = lists.getExceptionListClient(
     savedObjectClient,
     updatedByUser ?? 'elastic'
@@ -475,7 +481,7 @@ export const getRuleRangeTuples = ({
     gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
     0
   );
-  return { tuples, remainingGap: moment.duration(remainingGapMilliseconds) };
+  return { tuples: tuples.reverse(), remainingGap: moment.duration(remainingGapMilliseconds) };
 };
 
 /**
@@ -792,4 +798,22 @@ export const getThresholdAggregationParts = (
       };
     }
   }
+};
+
+export const getThresholdTermsHash = (
+  terms: Array<{
+    field: string;
+    value: string;
+  }>
+): string => {
+  return createHash('sha256')
+    .update(
+      terms
+        .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
+        .map((field) => {
+          return field.value;
+        })
+        .join(',')
+    )
+    .digest('hex');
 };

@@ -20,6 +20,7 @@ import { useUrlParams } from '../../../../context/url_params_context/use_url_par
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
 
@@ -31,6 +32,7 @@ const INITIAL_STATE = {
   transactionGroups: [],
   isAggregationAccurate: true,
   requestId: '',
+  transactionGroupsTotalItems: 0,
 };
 
 type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
@@ -54,11 +56,26 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   });
 
   const { pageIndex, sort } = tableOptions;
+  const { direction, field } = sort;
 
   const { transactionType } = useApmServiceContext();
   const {
-    urlParams: { environment, kuery, start, end, latencyAggregationType },
+    urlParams: {
+      start,
+      end,
+      latencyAggregationType,
+      comparisonType,
+      comparisonEnabled,
+      environment,
+      kuery,
+    },
   } = useUrlParams();
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -80,12 +97,23 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
           },
         },
       }).then((response) => {
+        const currentPageTransactionGroups = orderBy(
+          response.transactionGroups,
+          field,
+          direction
+        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+
         return {
-          requestId: uuid(),
           ...response,
+          // Everytime the primary statistics is refetched, updates the requestId making the comparison API to be refetched.
+          requestId: uuid(),
+          transactionGroupsTotalItems: response.transactionGroups.length,
+          transactionGroups: currentPageTransactionGroups,
         };
       });
     },
+    // comparisonType is listed as dependency even thought it is not used. This is needed to trigger the comparison api when it is changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,
@@ -94,19 +122,14 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
       end,
       transactionType,
       latencyAggregationType,
+      pageIndex,
+      direction,
+      field,
+      comparisonType,
     ]
   );
 
-  const { transactionGroups, requestId } = data;
-  const currentPageTransactionGroups = orderBy(
-    transactionGroups,
-    sort.field,
-    sort.direction
-  ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
-
-  const transactionNames = JSON.stringify(
-    currentPageTransactionGroups.map(({ name }) => name).sort()
-  );
+  const { transactionGroups, requestId, transactionGroupsTotalItems } = data;
 
   const {
     data: transactionGroupComparisonStatistics,
@@ -114,7 +137,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   } = useFetcher(
     (callApmApi) => {
       if (
-        currentPageTransactionGroups.length &&
+        transactionGroupsTotalItems &&
         start &&
         end &&
         transactionType &&
@@ -133,15 +156,19 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
               numBuckets: 20,
               transactionType,
               latencyAggregationType,
-              transactionNames,
+              transactionNames: JSON.stringify(
+                transactionGroups.map(({ name }) => name).sort()
+              ),
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
       }
     },
-    // only fetches statistics when requestId changes or transaction names changes
+    // only fetches comparison statistics when requestId is invalidated by primary statistics api call
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId, transactionNames],
+    [requestId],
     { preservePreviousData: false }
   );
 
@@ -149,6 +176,7 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
     serviceName,
     latencyAggregationType,
     transactionGroupComparisonStatistics,
+    comparisonEnabled,
   });
 
   const isLoading =
@@ -158,15 +186,8 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
   const pagination = {
     pageIndex,
     pageSize: PAGE_SIZE,
-    totalItemCount: transactionGroups.length,
+    totalItemCount: transactionGroupsTotalItems,
     hidePerPageOptions: true,
-  };
-
-  const sorting = {
-    sort: {
-      field: sort.field,
-      direction: sort.direction,
-    },
   };
 
   return (
@@ -204,14 +225,14 @@ export function ServiceOverviewTransactionsTable({ serviceName }: Props) {
         <EuiFlexItem>
           <TableFetchWrapper status={status}>
             <ServiceOverviewTableContainer
-              isEmptyAndLoading={transactionGroups.length === 0 && isLoading}
+              isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
             >
               <EuiBasicTable
                 loading={isLoading}
-                items={currentPageTransactionGroups}
+                items={transactionGroups}
                 columns={columns}
                 pagination={pagination}
-                sorting={sorting}
+                sorting={{ sort: { field, direction } }}
                 onChange={(newTableOptions: {
                   page?: {
                     index: number;

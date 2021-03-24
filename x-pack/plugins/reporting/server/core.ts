@@ -11,7 +11,9 @@ import { first, map, take } from 'rxjs/operators';
 import {
   BasePath,
   ElasticsearchServiceSetup,
+  IClusterClient,
   KibanaRequest,
+  PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
@@ -21,13 +23,16 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
+import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
-import { ESQueueInstance } from './lib/create_queue';
 import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/screenshots';
 import { ReportingStore } from './lib/store';
+import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter } from './types';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -37,14 +42,17 @@ export interface ReportingInternalSetup {
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface ReportingInternalStart {
   browserDriverFactory: HeadlessChromiumDriverFactory;
-  esqueue: ESQueueInstance;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
+  esClient: IClusterClient;
+  data: DataPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export class ReportingCore {
@@ -53,9 +61,17 @@ export class ReportingCore {
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps and config each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private exportTypesRegistry = getExportTypesRegistry();
+  private executeTask: ExecuteReportTask;
+  private monitorTask: MonitorReportsTask;
   private config?: ReportingConfig;
+  private executing: Set<string>;
 
-  constructor(private logger: LevelLogger) {}
+  constructor(private logger: LevelLogger, context: PluginInitializerContext<ReportingConfigType>) {
+    const config = context.config.get<ReportingConfigType>();
+    this.executeTask = new ExecuteReportTask(this, config, this.logger);
+    this.monitorTask = new MonitorReportsTask(this, config, this.logger);
+    this.executing = new Set();
+  }
 
   /*
    * Register setupDeps
@@ -63,14 +79,25 @@ export class ReportingCore {
   public pluginSetup(setupDeps: ReportingInternalSetup) {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
+
+    const { executeTask, monitorTask } = this;
+    setupDeps.taskManager.registerTaskDefinitions({
+      [executeTask.TYPE]: executeTask.getTaskDefinition(),
+      [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
+    });
   }
 
   /*
    * Register startDeps
    */
-  public pluginStart(startDeps: ReportingInternalStart) {
+  public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
+
+    const { taskManager } = startDeps;
+    const { executeTask, monitorTask } = this;
+    // enable this instance to generate reports and to monitor for pending reports
+    await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
   }
 
   /*
@@ -151,8 +178,12 @@ export class ReportingCore {
     return this.exportTypesRegistry;
   }
 
-  public async getEsqueue() {
-    return (await this.getPluginStartDeps()).esqueue;
+  public async scheduleTask(report: ReportTaskParams) {
+    return await this.executeTask.scheduleTask(report);
+  }
+
+  public async getStore() {
+    return (await this.getPluginStartDeps()).store;
   }
 
   public async getLicenseInfo() {
@@ -181,6 +212,7 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
+  // NOTE: Uses the Legacy API
   public getElasticsearchService() {
     return this.getPluginSetupDeps().elasticsearch;
   }
@@ -238,5 +270,27 @@ export class ReportingCore {
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
+  }
+
+  public async getDataService() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.data;
+  }
+
+  public async getEsClient() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.esClient;
+  }
+
+  public trackReport(reportId: string) {
+    this.executing.add(reportId);
+  }
+
+  public untrackReport(reportId: string) {
+    this.executing.delete(reportId);
+  }
+
+  public countConcurrentReports(): number {
+    return this.executing.size;
   }
 }

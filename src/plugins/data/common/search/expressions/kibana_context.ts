@@ -10,13 +10,16 @@ import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
 import { Adapters } from 'src/plugins/inspector/common';
+import { unboxExpressionValue } from '../../../../expressions/common';
 import { Query, uniqFilters } from '../../query';
-import { ExecutionContextSearch, KibanaContext } from './kibana_context_type';
+import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
+import { KibanaQueryOutput } from './kibana_context_type';
+import { KibanaTimerangeOutput } from './timerange';
 
 interface Arguments {
-  q?: string | null;
-  filters?: string | null;
-  timeRange?: string | null;
+  q?: KibanaQueryOutput | null;
+  filters?: KibanaFilter[] | null;
+  timeRange?: KibanaTimerangeOutput | null;
   savedSearchId?: string | null;
 }
 
@@ -46,7 +49,7 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   }),
   args: {
     q: {
-      types: ['string', 'null'],
+      types: ['kibana_query', 'null'],
       aliases: ['query', '_'],
       default: null,
       help: i18n.translate('data.search.functions.kibana_context.q.help', {
@@ -54,14 +57,14 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       }),
     },
     filters: {
-      types: ['string', 'null'],
-      default: '"[]"',
+      types: ['kibana_filter', 'null'],
+      multi: true,
       help: i18n.translate('data.search.functions.kibana_context.filters.help', {
         defaultMessage: 'Specify Kibana generic filters',
       }),
     },
     timeRange: {
-      types: ['string', 'null'],
+      types: ['timerange', 'null'],
       default: null,
       help: i18n.translate('data.search.functions.kibana_context.timeRange.help', {
         defaultMessage: 'Specify Kibana time range filter',
@@ -77,9 +80,9 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   },
 
   async fn(input, args, { getSavedObject }) {
-    const timeRange = getParsedValue(args.timeRange, input?.timeRange);
-    let queries = mergeQueries(input?.query, getParsedValue(args?.q, []));
-    let filters = [...(input?.filters || []), ...getParsedValue(args?.filters, [])];
+    const timeRange = args.timeRange || input?.timeRange;
+    let queries = mergeQueries(input?.query, args?.q || []);
+    let filters = [...(input?.filters || []), ...(args?.filters?.map(unboxExpressionValue) || [])];
 
     if (args.savedSearchId) {
       if (typeof getSavedObject !== 'function') {

@@ -5,6 +5,157 @@
     "functions": [],
     "interfaces": [
       {
+        "id": "def-public.AnalysisResult",
+        "type": "Interface",
+        "label": "AnalysisResult",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.AnalysisResult.results",
+            "type": "Object",
+            "label": "results",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 21
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.FindFileStructureResponse",
+                "text": "FindFileStructureResponse"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.AnalysisResult.overrides",
+            "type": "CompoundType",
+            "label": "overrides",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.FormattedOverrides",
+                "text": "FormattedOverrides"
+              },
+              " | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 20
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.CreateDocsResponse",
+        "type": "Interface",
+        "label": "CreateDocsResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.success",
+            "type": "boolean",
+            "label": "success",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 31
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.remainder",
+            "type": "number",
+            "label": "remainder",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 32
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.docs",
+            "type": "Array",
+            "label": "docs",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 33
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.CreateDocsResponse.error",
+            "type": "Any",
+            "label": "error",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 34
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 30
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Doc",
+        "type": "Interface",
+        "label": "Doc",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Doc.message",
+            "type": "string",
+            "label": "message",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 93
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 92
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.FileUploadComponentProps",
         "type": "Interface",
         "label": "FileUploadComponentProps",
@@ -19,8 +170,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L14"
+              "lineNumber": 14
             }
           },
           {
@@ -31,8 +181,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L15"
+              "lineNumber": 15
             },
             "signature": [
               "(geojsonFile: GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties>, name: string, previewCoverage: number) => void"
@@ -46,8 +195,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L16"
+              "lineNumber": 16
             },
             "signature": [
               "() => void"
@@ -61,8 +209,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L17"
+              "lineNumber": 17
             },
             "signature": [
               "(indexReady: boolean) => void"
@@ -76,8 +223,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L18"
+              "lineNumber": 18
             },
             "signature": [
               "(results: { indexDataResp: ",
@@ -107,8 +253,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L22"
+              "lineNumber": 22
             },
             "signature": [
               "() => void"
@@ -117,131 +262,315 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
-          "lineNumber": 13,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/lazy_load_bundle/index.ts#L13"
+          "lineNumber": 13
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.ImportResponse",
+        "id": "def-public.FindFileStructureResponse",
         "type": "Interface",
-        "label": "ImportResponse",
+        "label": "FindFileStructureResponse",
         "description": [],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.ImportResponse.success",
+            "id": "def-public.FindFileStructureResponse.charset",
+            "type": "string",
+            "label": "charset",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 26
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.has_header_row",
             "type": "boolean",
-            "label": "success",
+            "label": "has_header_row",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L9"
+              "lineNumber": 27
             }
           },
           {
             "tags": [],
-            "id": "def-public.ImportResponse.id",
-            "type": "string",
-            "label": "id",
+            "id": "def-public.FindFileStructureResponse.has_byte_order_marker",
+            "type": "boolean",
+            "label": "has_byte_order_marker",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L10"
+              "lineNumber": 28
             }
           },
           {
             "tags": [],
-            "id": "def-public.ImportResponse.index",
+            "id": "def-public.FindFileStructureResponse.format",
             "type": "string",
-            "label": "index",
+            "label": "format",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L11"
+              "lineNumber": 29
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.field_stats",
+            "type": "Object",
+            "label": "field_stats",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 30
             },
             "signature": [
-              "string | undefined"
+              "{ [fieldName: string]: { count: number; cardinality: number; top_hits: { count: number; value: any; }[]; mean_value?: number | undefined; median_value?: number | undefined; max_value?: number | undefined; min_value?: number | undefined; earliest?: string | undefined; latest?: string | undefined; }; }"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.ImportResponse.pipelineId",
+            "id": "def-public.FindFileStructureResponse.sample_start",
             "type": "string",
-            "label": "pipelineId",
+            "label": "sample_start",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L12"
-            },
-            "signature": [
-              "string | undefined"
-            ]
+              "lineNumber": 43
+            }
           },
           {
             "tags": [],
-            "id": "def-public.ImportResponse.docCount",
+            "id": "def-public.FindFileStructureResponse.num_messages_analyzed",
             "type": "number",
-            "label": "docCount",
+            "label": "num_messages_analyzed",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L13"
+              "lineNumber": 44
             }
           },
           {
             "tags": [],
-            "id": "def-public.ImportResponse.failures",
-            "type": "Array",
-            "label": "failures",
+            "id": "def-public.FindFileStructureResponse.mappings",
+            "type": "Object",
+            "label": "mappings",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L14"
+              "lineNumber": 45
             },
             "signature": [
+              "{ properties: { [fieldName: string]: { type: ",
               {
-                "pluginId": "fileUpload",
+                "pluginId": "data",
                 "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.ImportFailure",
-                "text": "ImportFailure"
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
               },
-              "[]"
+              ".STRING | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".TEXT | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".KEYWORD | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".BOOLEAN | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              }
             ]
           },
           {
             "tags": [],
-            "id": "def-public.ImportResponse.error",
-            "type": "Any",
-            "label": "error",
+            "id": "def-public.FindFileStructureResponse.quote",
+            "type": "string",
+            "label": "quote",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L15"
+              "lineNumber": 58
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.delimiter",
+            "type": "string",
+            "label": "delimiter",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 59
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.need_client_timezone",
+            "type": "boolean",
+            "label": "need_client_timezone",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 60
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.num_lines_analyzed",
+            "type": "number",
+            "label": "num_lines_analyzed",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 61
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.column_names",
+            "type": "Array",
+            "label": "column_names",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 62
             },
             "signature": [
-              "any"
+              "string[] | undefined"
             ]
           },
           {
             "tags": [],
-            "id": "def-public.ImportResponse.ingestError",
-            "type": "CompoundType",
-            "label": "ingestError",
+            "id": "def-public.FindFileStructureResponse.explanation",
+            "type": "Array",
+            "label": "explanation",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L16"
+              "lineNumber": 63
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.grok_pattern",
+            "type": "string",
+            "label": "grok_pattern",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 64
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.multiline_start_pattern",
+            "type": "string",
+            "label": "multiline_start_pattern",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 65
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.exclude_lines_pattern",
+            "type": "string",
+            "label": "exclude_lines_pattern",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 66
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.java_timestamp_formats",
+            "type": "Array",
+            "label": "java_timestamp_formats",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 67
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.joda_timestamp_formats",
+            "type": "Array",
+            "label": "joda_timestamp_formats",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 68
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.timestamp_field",
+            "type": "string",
+            "label": "timestamp_field",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 69
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.FindFileStructureResponse.should_trim_fields",
+            "type": "CompoundType",
+            "label": "should_trim_fields",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 70
             },
             "signature": [
               "boolean | undefined"
@@ -250,594 +579,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L8"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImportFailure",
-        "type": "Interface",
-        "label": "ImportFailure",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ImportFailure.item",
-            "type": "number",
-            "label": "item",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L20"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportFailure.reason",
-            "type": "string",
-            "label": "reason",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L21"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportFailure.doc",
-            "type": "CompoundType",
-            "label": "doc",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L22"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.ImportDoc",
-                "text": "ImportDoc"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L19"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Doc",
-        "type": "Interface",
-        "label": "Doc",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Doc.message",
-            "type": "string",
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L26"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L25"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Settings",
-        "type": "Interface",
-        "label": "Settings",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Settings.pipeline",
-            "type": "string",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L32"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Settings.index",
-            "type": "string",
-            "label": "index",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L33"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.Settings.body",
-            "type": "Array",
-            "label": "body",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L34"
-            },
-            "signature": [
-              "any[]"
-            ]
-          },
-          {
-            "id": "def-public.Settings.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L35"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L31"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.Mappings",
-        "type": "Interface",
-        "label": "Mappings",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.Mappings._meta",
-            "type": "Object",
-            "label": "_meta",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L39"
-            },
-            "signature": [
-              "{ created_by: string; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.Mappings.properties",
-            "type": "Object",
-            "label": "properties",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L42"
-            },
-            "signature": [
-              "{ [key: string]: any; }"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 38,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L38"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.IngestPipelineWrapper",
-        "type": "Interface",
-        "label": "IngestPipelineWrapper",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.IngestPipelineWrapper.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L48"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.IngestPipelineWrapper.pipeline",
-            "type": "Object",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L49"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.IngestPipeline",
-                "text": "IngestPipeline"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L47"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.IngestPipeline",
-        "type": "Interface",
-        "label": "IngestPipeline",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.IngestPipeline.description",
-            "type": "string",
-            "label": "description",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L53"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.IngestPipeline.processors",
-            "type": "Array",
-            "label": "processors",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L54"
-            },
-            "signature": [
-              "any[]"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L52"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImportConfig",
-        "type": "Interface",
-        "label": "ImportConfig",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ImportConfig.settings",
-            "type": "Object",
-            "label": "settings",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L11"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.Settings",
-                "text": "Settings"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportConfig.mappings",
-            "type": "Object",
-            "label": "mappings",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L12"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.Mappings",
-                "text": "Mappings"
-              }
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportConfig.pipeline",
-            "type": "Object",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L13"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.IngestPipeline",
-                "text": "IngestPipeline"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L10"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImportResults",
-        "type": "Interface",
-        "label": "ImportResults",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ImportResults.success",
-            "type": "boolean",
-            "label": "success",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 17,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L17"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResults.failures",
-            "type": "Array",
-            "label": "failures",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 18,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L18"
-            },
-            "signature": [
-              "any[] | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResults.docCount",
-            "type": "number",
-            "label": "docCount",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 19,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L19"
-            },
-            "signature": [
-              "number | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportResults.error",
-            "type": "Any",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L20"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 16,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L16"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.CreateDocsResponse",
-        "type": "Interface",
-        "label": "CreateDocsResponse",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.success",
-            "type": "boolean",
-            "label": "success",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L24"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.remainder",
-            "type": "number",
-            "label": "remainder",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L25"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.docs",
-            "type": "Array",
-            "label": "docs",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L26"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.ImportDoc",
-                "text": "ImportDoc"
-              },
-              "[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.CreateDocsResponse.error",
-            "type": "Any",
-            "label": "error",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 27,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L27"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 23,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L23"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImportFactoryOptions",
-        "type": "Interface",
-        "label": "ImportFactoryOptions",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.ImportFactoryOptions.excludeLinesPattern",
-            "type": "string",
-            "label": "excludeLinesPattern",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L31"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportFactoryOptions.multilineStartPattern",
-            "type": "string",
-            "label": "multilineStartPattern",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L32"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-public.ImportFactoryOptions.importConfig",
-            "type": "Object",
-            "label": "importConfig",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L33"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "public",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-public.ImportConfig",
-                "text": "ImportConfig"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L30"
+          "lineNumber": 25
         },
         "initialIsOpen": false
       },
@@ -867,8 +609,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 37,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L37"
+                  "lineNumber": 44
                 }
               }
             ],
@@ -876,8 +617,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 37,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L37"
+              "lineNumber": 44
             }
           },
           {
@@ -931,8 +671,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 39,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L39"
+                  "lineNumber": 46
                 }
               },
               {
@@ -951,8 +690,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 40,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L40"
+                  "lineNumber": 47
                 }
               },
               {
@@ -971,8 +709,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 41,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L41"
+                  "lineNumber": 48
                 }
               },
               {
@@ -991,8 +728,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 42,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L42"
+                  "lineNumber": 49
                 }
               }
             ],
@@ -1000,8 +736,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L38"
+              "lineNumber": 45
             }
           },
           {
@@ -1009,7 +744,7 @@
             "type": "Function",
             "label": "import",
             "signature": [
-              "(id: string, index: string, pipelineId: string, setImportProgress: (progress: number) => void) => Promise<",
+              "(id: string, index: string, pipelineId: string | undefined, setImportProgress: (progress: number) => void) => Promise<",
               {
                 "pluginId": "fileUpload",
                 "scope": "public",
@@ -1031,8 +766,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 45,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L45"
+                  "lineNumber": 52
                 }
               },
               {
@@ -1045,22 +779,20 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 46,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L46"
+                  "lineNumber": 53
                 }
               },
               {
                 "type": "string",
                 "label": "pipelineId",
-                "isRequired": true,
+                "isRequired": false,
                 "signature": [
-                  "string"
+                  "string | undefined"
                 ],
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 47,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L47"
+                  "lineNumber": 54
                 }
               },
               {
@@ -1073,8 +805,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-                  "lineNumber": 48,
-                  "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L48"
+                  "lineNumber": 55
                 }
               }
             ],
@@ -1082,15 +813,624 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L44"
+              "lineNumber": 51
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/public/importer/types.ts",
-          "lineNumber": 36,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/importer/types.ts#L36"
+          "lineNumber": 43
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportConfig",
+        "type": "Interface",
+        "label": "ImportConfig",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportConfig.settings",
+            "type": "Object",
+            "label": "settings",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 18
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.Settings",
+                "text": "Settings"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportConfig.mappings",
+            "type": "Object",
+            "label": "mappings",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 19
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.Mappings",
+                "text": "Mappings"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportConfig.pipeline",
+            "type": "Object",
+            "label": "pipeline",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 20
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 17
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportFactoryOptions",
+        "type": "Interface",
+        "label": "ImportFactoryOptions",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportFactoryOptions.excludeLinesPattern",
+            "type": "string",
+            "label": "excludeLinesPattern",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 38
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportFactoryOptions.multilineStartPattern",
+            "type": "string",
+            "label": "multilineStartPattern",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 39
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportFactoryOptions.importConfig",
+            "type": "Object",
+            "label": "importConfig",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 40
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "public",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-public.ImportConfig",
+                "text": "ImportConfig"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 37
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportFailure",
+        "type": "Interface",
+        "label": "ImportFailure",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportFailure.item",
+            "type": "number",
+            "label": "item",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 87
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportFailure.reason",
+            "type": "string",
+            "label": "reason",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 88
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportFailure.doc",
+            "type": "CompoundType",
+            "label": "doc",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 89
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 86
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportResponse",
+        "type": "Interface",
+        "label": "ImportResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.success",
+            "type": "boolean",
+            "label": "success",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 76
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 77
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.index",
+            "type": "string",
+            "label": "index",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 78
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.pipelineId",
+            "type": "string",
+            "label": "pipelineId",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 79
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.docCount",
+            "type": "number",
+            "label": "docCount",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 80
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.failures",
+            "type": "Array",
+            "label": "failures",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 81
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportFailure",
+                "text": "ImportFailure"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.error",
+            "type": "Any",
+            "label": "error",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 82
+            },
+            "signature": [
+              "any"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResponse.ingestError",
+            "type": "CompoundType",
+            "label": "ingestError",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 83
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 75
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImportResults",
+        "type": "Interface",
+        "label": "ImportResults",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImportResults.success",
+            "type": "boolean",
+            "label": "success",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 24
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResults.failures",
+            "type": "Array",
+            "label": "failures",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 25
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportFailure",
+                "text": "ImportFailure"
+              },
+              "[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResults.docCount",
+            "type": "number",
+            "label": "docCount",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 26
+            },
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ImportResults.error",
+            "type": "Any",
+            "label": "error",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+              "lineNumber": 27
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/public/importer/types.ts",
+          "lineNumber": 23
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.IngestPipeline",
+        "type": "Interface",
+        "label": "IngestPipeline",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.IngestPipeline.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 120
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.IngestPipeline.processors",
+            "type": "Array",
+            "label": "processors",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 121
+            },
+            "signature": [
+              "any[]"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 119
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.IngestPipelineWrapper",
+        "type": "Interface",
+        "label": "IngestPipelineWrapper",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.IngestPipelineWrapper.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 115
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.IngestPipelineWrapper.pipeline",
+            "type": "Object",
+            "label": "pipeline",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 116
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 114
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.InputOverrides",
+        "type": "Interface",
+        "label": "InputOverrides",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-public.InputOverrides.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 11
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 10
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Mappings",
+        "type": "Interface",
+        "label": "Mappings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Mappings._meta",
+            "type": "Object",
+            "label": "_meta",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 106
+            },
+            "signature": [
+              "{ created_by: string; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Mappings.properties",
+            "type": "Object",
+            "label": "properties",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 109
+            },
+            "signature": [
+              "{ [key: string]: any; }"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 105
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.Settings",
+        "type": "Interface",
+        "label": "Settings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.Settings.pipeline",
+            "type": "string",
+            "label": "pipeline",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 99
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.Settings.index",
+            "type": "string",
+            "label": "index",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 100
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.Settings.body",
+            "type": "Array",
+            "label": "body",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 101
+            },
+            "signature": [
+              "any[]"
+            ]
+          },
+          {
+            "id": "def-public.Settings.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 102
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 98
         },
         "initialIsOpen": false
       }
@@ -1099,75 +1439,13 @@
     "misc": [
       {
         "tags": [],
-        "id": "def-public.UI_SETTING_MAX_FILE_SIZE",
-        "type": "string",
-        "label": "UI_SETTING_MAX_FILE_SIZE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L8"
-        },
-        "signature": [
-          "\"fileUpload:maxFileSize\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.MB",
-        "type": "number",
-        "label": "MB",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L10"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.MAX_FILE_SIZE",
-        "type": "string",
-        "label": "MAX_FILE_SIZE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L11"
-        },
-        "signature": [
-          "\"100MB\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.MAX_FILE_SIZE_BYTES",
-        "type": "number",
-        "label": "MAX_FILE_SIZE_BYTES",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L12"
-        },
-        "signature": [
-          "104857600"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
         "id": "def-public.ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "type": "number",
         "label": "ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L14"
+          "lineNumber": 14
         },
         "signature": [
           "1073741274"
@@ -1182,8 +1460,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L15"
+          "lineNumber": 15
         },
         "signature": [
           "\"0,0.[0] b\""
@@ -1191,18 +1468,17 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.FormattedOverrides",
+        "type": "Type",
+        "label": "FormattedOverrides",
         "tags": [],
-        "id": "def-public.INDEX_META_DATA_CREATED_BY",
-        "type": "string",
-        "label": "INDEX_META_DATA_CREATED_BY",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L19"
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 14
         },
         "signature": [
-          "\"ml-file-data-visualizer\""
+          "InputOverrides & { column_names: string[]; has_header_row: boolean; should_trim_fields: boolean; }"
         ],
         "initialIsOpen": false
       },
@@ -1214,8 +1490,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L29"
+          "lineNumber": 96
         },
         "signature": [
           "string | object | ",
@@ -1226,6 +1501,93 @@
             "section": "def-common.Doc",
             "text": "Doc"
           }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.INDEX_META_DATA_CREATED_BY",
+        "type": "string",
+        "label": "INDEX_META_DATA_CREATED_BY",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 19
+        },
+        "signature": [
+          "\"ml-file-data-visualizer\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.InputData",
+        "type": "Type",
+        "label": "InputData",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 73
+        },
+        "signature": [
+          "any[]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.MAX_FILE_SIZE",
+        "type": "string",
+        "label": "MAX_FILE_SIZE",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"100MB\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.MAX_FILE_SIZE_BYTES",
+        "type": "number",
+        "label": "MAX_FILE_SIZE_BYTES",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 12
+        },
+        "signature": [
+          "104857600"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.MB",
+        "type": "number",
+        "label": "MB",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 10
+        },
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.UI_SETTING_MAX_FILE_SIZE",
+        "type": "string",
+        "label": "UI_SETTING_MAX_FILE_SIZE",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 8
+        },
+        "signature": [
+          "\"fileUpload:maxFileSize\""
         ],
         "initialIsOpen": false
       }
@@ -1239,8 +1601,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/file_upload/public/plugin.ts",
-        "lineNumber": 21,
-        "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/public/plugin.ts#L21"
+        "lineNumber": 21
       },
       "signature": [
         "FileUploadStartApi"
@@ -1262,6 +1623,459 @@
     "functions": [],
     "interfaces": [
       {
+        "id": "def-common.AnalysisResult",
+        "type": "Interface",
+        "label": "AnalysisResult",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.AnalysisResult.results",
+            "type": "Object",
+            "label": "results",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 21
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.FindFileStructureResponse",
+                "text": "FindFileStructureResponse"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.AnalysisResult.overrides",
+            "type": "CompoundType",
+            "label": "overrides",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 22
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.FormattedOverrides",
+                "text": "FormattedOverrides"
+              },
+              " | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 20
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Doc",
+        "type": "Interface",
+        "label": "Doc",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.Doc.message",
+            "type": "string",
+            "label": "message",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 93
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 92
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.FindFileStructureResponse",
+        "type": "Interface",
+        "label": "FindFileStructureResponse",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.charset",
+            "type": "string",
+            "label": "charset",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 26
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.has_header_row",
+            "type": "boolean",
+            "label": "has_header_row",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 27
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.has_byte_order_marker",
+            "type": "boolean",
+            "label": "has_byte_order_marker",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 28
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.format",
+            "type": "string",
+            "label": "format",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 29
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.field_stats",
+            "type": "Object",
+            "label": "field_stats",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 30
+            },
+            "signature": [
+              "{ [fieldName: string]: { count: number; cardinality: number; top_hits: { count: number; value: any; }[]; mean_value?: number | undefined; median_value?: number | undefined; max_value?: number | undefined; min_value?: number | undefined; earliest?: string | undefined; latest?: string | undefined; }; }"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.sample_start",
+            "type": "string",
+            "label": "sample_start",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 43
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.num_messages_analyzed",
+            "type": "number",
+            "label": "num_messages_analyzed",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 44
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.mappings",
+            "type": "Object",
+            "label": "mappings",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 45
+            },
+            "signature": [
+              "{ properties: { [fieldName: string]: { type: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".STRING | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".TEXT | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".KEYWORD | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".BOOLEAN | ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.quote",
+            "type": "string",
+            "label": "quote",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 58
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.delimiter",
+            "type": "string",
+            "label": "delimiter",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 59
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.need_client_timezone",
+            "type": "boolean",
+            "label": "need_client_timezone",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 60
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.num_lines_analyzed",
+            "type": "number",
+            "label": "num_lines_analyzed",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 61
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.column_names",
+            "type": "Array",
+            "label": "column_names",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 62
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.explanation",
+            "type": "Array",
+            "label": "explanation",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 63
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.grok_pattern",
+            "type": "string",
+            "label": "grok_pattern",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 64
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.multiline_start_pattern",
+            "type": "string",
+            "label": "multiline_start_pattern",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 65
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.exclude_lines_pattern",
+            "type": "string",
+            "label": "exclude_lines_pattern",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 66
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.java_timestamp_formats",
+            "type": "Array",
+            "label": "java_timestamp_formats",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 67
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.joda_timestamp_formats",
+            "type": "Array",
+            "label": "joda_timestamp_formats",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 68
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.timestamp_field",
+            "type": "string",
+            "label": "timestamp_field",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 69
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.FindFileStructureResponse.should_trim_fields",
+            "type": "CompoundType",
+            "label": "should_trim_fields",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 70
+            },
+            "signature": [
+              "boolean | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 25
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.ImportFailure",
+        "type": "Interface",
+        "label": "ImportFailure",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.ImportFailure.item",
+            "type": "number",
+            "label": "item",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 87
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ImportFailure.reason",
+            "type": "string",
+            "label": "reason",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 88
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.ImportFailure.doc",
+            "type": "CompoundType",
+            "label": "doc",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 89
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.ImportDoc",
+                "text": "ImportDoc"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 86
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.ImportResponse",
         "type": "Interface",
         "label": "ImportResponse",
@@ -1276,8 +2090,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 9,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L9"
+              "lineNumber": 76
             }
           },
           {
@@ -1288,8 +2101,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 10,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L10"
+              "lineNumber": 77
             }
           },
           {
@@ -1300,8 +2112,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 11,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L11"
+              "lineNumber": 78
             },
             "signature": [
               "string | undefined"
@@ -1315,8 +2126,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L12"
+              "lineNumber": 79
             },
             "signature": [
               "string | undefined"
@@ -1330,8 +2140,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 13,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L13"
+              "lineNumber": 80
             }
           },
           {
@@ -1342,8 +2151,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 14,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L14"
+              "lineNumber": 81
             },
             "signature": [
               {
@@ -1364,8 +2172,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 15,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L15"
+              "lineNumber": 82
             },
             "signature": [
               "any"
@@ -1379,8 +2186,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 16,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L16"
+              "lineNumber": 83
             },
             "signature": [
               "boolean | undefined"
@@ -1389,260 +2195,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L8"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.ImportFailure",
-        "type": "Interface",
-        "label": "ImportFailure",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.ImportFailure.item",
-            "type": "number",
-            "label": "item",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 20,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L20"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.ImportFailure.reason",
-            "type": "string",
-            "label": "reason",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L21"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.ImportFailure.doc",
-            "type": "CompoundType",
-            "label": "doc",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L22"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.ImportDoc",
-                "text": "ImportDoc"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L19"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.Doc",
-        "type": "Interface",
-        "label": "Doc",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.Doc.message",
-            "type": "string",
-            "label": "message",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L26"
-            }
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 25,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L25"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.Settings",
-        "type": "Interface",
-        "label": "Settings",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.Settings.pipeline",
-            "type": "string",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 32,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L32"
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Settings.index",
-            "type": "string",
-            "label": "index",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 33,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L33"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.Settings.body",
-            "type": "Array",
-            "label": "body",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 34,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L34"
-            },
-            "signature": [
-              "any[]"
-            ]
-          },
-          {
-            "id": "def-common.Settings.Unnamed",
-            "type": "Any",
-            "label": "Unnamed",
-            "tags": [],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L35"
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L31"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.Mappings",
-        "type": "Interface",
-        "label": "Mappings",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.Mappings._meta",
-            "type": "Object",
-            "label": "_meta",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 39,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L39"
-            },
-            "signature": [
-              "{ created_by: string; } | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.Mappings.properties",
-            "type": "Object",
-            "label": "properties",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L42"
-            },
-            "signature": [
-              "{ [key: string]: any; }"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 38,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L38"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.IngestPipelineWrapper",
-        "type": "Interface",
-        "label": "IngestPipelineWrapper",
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.IngestPipelineWrapper.id",
-            "type": "string",
-            "label": "id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 48,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L48"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.IngestPipelineWrapper.pipeline",
-            "type": "Object",
-            "label": "pipeline",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 49,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L49"
-            },
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.IngestPipeline",
-                "text": "IngestPipeline"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 47,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L47"
+          "lineNumber": 75
         },
         "initialIsOpen": false
       },
@@ -1661,8 +2214,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 53,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L53"
+              "lineNumber": 120
             }
           },
           {
@@ -1673,8 +2225,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L54"
+              "lineNumber": 121
             },
             "signature": [
               "any[]"
@@ -1683,8 +2234,189 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 52,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L52"
+          "lineNumber": 119
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.IngestPipelineWrapper",
+        "type": "Interface",
+        "label": "IngestPipelineWrapper",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.IngestPipelineWrapper.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 115
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.IngestPipelineWrapper.pipeline",
+            "type": "Object",
+            "label": "pipeline",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 116
+            },
+            "signature": [
+              {
+                "pluginId": "fileUpload",
+                "scope": "common",
+                "docId": "kibFileUploadPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 114
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.InputOverrides",
+        "type": "Interface",
+        "label": "InputOverrides",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-common.InputOverrides.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 11
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 10
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Mappings",
+        "type": "Interface",
+        "label": "Mappings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.Mappings._meta",
+            "type": "Object",
+            "label": "_meta",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 106
+            },
+            "signature": [
+              "{ created_by: string; } | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.Mappings.properties",
+            "type": "Object",
+            "label": "properties",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 109
+            },
+            "signature": [
+              "{ [key: string]: any; }"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 105
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.Settings",
+        "type": "Interface",
+        "label": "Settings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.Settings.pipeline",
+            "type": "string",
+            "label": "pipeline",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 99
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.Settings.index",
+            "type": "string",
+            "label": "index",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 100
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.Settings.body",
+            "type": "Array",
+            "label": "body",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 101
+            },
+            "signature": [
+              "any[]"
+            ]
+          },
+          {
+            "id": "def-common.Settings.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/file_upload/common/types.ts",
+              "lineNumber": 102
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 98
         },
         "initialIsOpen": false
       }
@@ -1693,75 +2425,13 @@
     "misc": [
       {
         "tags": [],
-        "id": "def-common.UI_SETTING_MAX_FILE_SIZE",
-        "type": "string",
-        "label": "UI_SETTING_MAX_FILE_SIZE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 8,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L8"
-        },
-        "signature": [
-          "\"fileUpload:maxFileSize\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.MB",
-        "type": "number",
-        "label": "MB",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 10,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L10"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.MAX_FILE_SIZE",
-        "type": "string",
-        "label": "MAX_FILE_SIZE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L11"
-        },
-        "signature": [
-          "\"100MB\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.MAX_FILE_SIZE_BYTES",
-        "type": "number",
-        "label": "MAX_FILE_SIZE_BYTES",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 12,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L12"
-        },
-        "signature": [
-          "104857600"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
         "id": "def-common.ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "type": "number",
         "label": "ABSOLUTE_MAX_FILE_SIZE_BYTES",
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 14,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L14"
+          "lineNumber": 14
         },
         "signature": [
           "1073741274"
@@ -1776,8 +2446,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L15"
+          "lineNumber": 15
         },
         "signature": [
           "\"0,0.[0] b\""
@@ -1785,18 +2454,17 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-common.FormattedOverrides",
+        "type": "Type",
+        "label": "FormattedOverrides",
         "tags": [],
-        "id": "def-common.INDEX_META_DATA_CREATED_BY",
-        "type": "string",
-        "label": "INDEX_META_DATA_CREATED_BY",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/file_upload/common/constants.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/constants.ts#L19"
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 14
         },
         "signature": [
-          "\"ml-file-data-visualizer\""
+          "InputOverrides & { column_names: string[]; has_header_row: boolean; should_trim_fields: boolean; }"
         ],
         "initialIsOpen": false
       },
@@ -1808,8 +2476,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 29,
-          "link": "https://github.com/elastic/kibana/tree/masterx-pack/plugins/file_upload/common/types.ts#L29"
+          "lineNumber": 96
         },
         "signature": [
           "string | object | ",
@@ -1820,6 +2487,93 @@
             "section": "def-common.Doc",
             "text": "Doc"
           }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.INDEX_META_DATA_CREATED_BY",
+        "type": "string",
+        "label": "INDEX_META_DATA_CREATED_BY",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 19
+        },
+        "signature": [
+          "\"ml-file-data-visualizer\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.InputData",
+        "type": "Type",
+        "label": "InputData",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/types.ts",
+          "lineNumber": 73
+        },
+        "signature": [
+          "any[]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.MAX_FILE_SIZE",
+        "type": "string",
+        "label": "MAX_FILE_SIZE",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"100MB\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.MAX_FILE_SIZE_BYTES",
+        "type": "number",
+        "label": "MAX_FILE_SIZE_BYTES",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 12
+        },
+        "signature": [
+          "104857600"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.MB",
+        "type": "number",
+        "label": "MB",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 10
+        },
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.UI_SETTING_MAX_FILE_SIZE",
+        "type": "string",
+        "label": "UI_SETTING_MAX_FILE_SIZE",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/file_upload/common/constants.ts",
+          "lineNumber": 8
+        },
+        "signature": [
+          "\"fileUpload:maxFileSize\""
         ],
         "initialIsOpen": false
       }
