@@ -165,7 +165,7 @@ export const DragDrop = (props: BaseProps) => {
       }
     : undefined;
 
-  if (draggable && !dropTypes) {
+  if (draggable && (!dropTypes || !dropTypes.length)) {
     const dragProps = {
       ...props,
       activeDraggingProps,
@@ -195,7 +195,7 @@ export const DragDrop = (props: BaseProps) => {
       // If the configuration has provided a droppable flag, but this particular item is not
       // droppable, then it should be less prominent. Ignores items that are both
       // draggable and drop targets
-      !!(!dropTypes && dragging && value.id !== dragging.id),
+      !!((!dropTypes || !dropTypes.length) && dragging && value.id !== dragging.id),
   };
   if (
     reorderableGroup &&
@@ -455,7 +455,6 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
 
   const [isInZone, setIsInZone] = useState(false);
   const mainTargetRef = useRef<HTMLDivElement>(null);
-  const extraDropsRef = useRef<HTMLDivElement>(null);
 
   useShallowCompareEffect(() => {
     if (dropTypes && onDrop && keyboardMode) {
@@ -517,7 +516,9 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     // An optimization to prevent a bunch of React churn.
     if (!isActiveDropTarget) {
       setActiveDropTarget({ ...value, dropType: modifiedDropType, onDrop });
-      setA11yMessage(announce.selectedTarget(dragging.humanData, value.humanData, modifiedDropType));
+      setA11yMessage(
+        announce.selectedTarget(dragging.humanData, value.humanData, modifiedDropType)
+      );
     }
   };
 
@@ -586,6 +587,21 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
 
   const mainTargetProps = getProps(dropTypes && dropTypes[0]);
 
+  const extraDropStyles = useMemo(() => {
+    const extraDrops = dropTypes && dropTypes.length && dropTypes.slice(1);
+    if (!extraDrops || !extraDrops.length) {
+      return;
+    }
+
+    const height = extraDrops.length * 40;
+    const minHeight = height - (mainTargetRef.current?.clientHeight || 40);
+    const clipPath = `polygon(100% 0px, 100% ${height - minHeight}px, 0 100%, 0 0)`;
+    return {
+      clipPath,
+      height,
+    };
+  }, [dropTypes]);
+
   return (
     <div
       data-test-subj="lnsDragDropContainer"
@@ -606,23 +622,11 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
         <>
           <div
             className="lnsDragDrop__diamondPath"
-            style={(() => {
-              const height = extraDropsRef.current?.clientHeight || 40;
-              const minHeight = height - (mainTargetRef.current?.clientHeight || 40);
-
-              const clipPath = `polygon(100% ${minHeight * 0.5}px, 100% ${
-                height - minHeight * 0.5
-              }px, 0 100%, 0 0)`;
-              return {
-                height,
-                clipPath,
-              };
-            })()}
+            style={extraDropStyles}
             onDragEnter={dragEnter}
           />
           <EuiFlexGroup
-            gutterSize="s"
-            ref={extraDropsRef}
+            gutterSize="none"
             direction="column"
             data-test-subj="lnsDragDropExtraDrops"
             className={
@@ -634,7 +638,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
             {dropTypes.slice(1).map((dropType) => {
               const dropChildren = getCustomDropTarget?.(dropType);
               return dropChildren ? (
-                <EuiFlexItem key={dropType} className="lnsDragDrop__container">
+                <EuiFlexItem key={dropType} className="lnsDragDrop__extraDropWrapper">
                   <SingleDropInner {...getProps(dropType, dropChildren)}>
                     {dropChildren}
                   </SingleDropInner>

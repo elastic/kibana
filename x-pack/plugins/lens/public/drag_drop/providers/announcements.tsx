@@ -85,7 +85,7 @@ const reorderCopy = {
   dropped: ({ label, groupLabel, position: prevPosition }: HumanData, { position }: HumanData) =>
     i18n.translate('xpack.lens.dragDrop.announce.dropped.reordered', {
       defaultMessage:
-        'Reordered {label} in {groupLabel} group from position {prevPosition} to positon {position}',
+        'Reordered {label} in {groupLabel} group from position {prevPosition} to position {position}',
       values: {
         label,
         groupLabel,
@@ -106,7 +106,7 @@ export const announcements: CustomAnnouncementsType = {
       { label: dropLabel, groupLabel, position, nextLabel }: HumanData
     ) =>
       i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceIncompatible', {
-        defaultMessage: `Convert {label} to {nextLabel} and replace {dropLabel} in {groupLabel} group at position {position} v`,
+        defaultMessage: `Convert {label} to {nextLabel} and replace {dropLabel} in {groupLabel} group at position {position}. Press space or enter to replace`,
         values: {
           label,
           nextLabel,

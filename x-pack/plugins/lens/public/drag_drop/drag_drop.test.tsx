@@ -552,11 +552,7 @@ describe('DragDrop', () => {
     });
 
     test('extra drop targets appear when dragging over and disappear when activeDropTarget changes', () => {
-      component
-        .find('[data-test-subj="lnsDragDropContainer"]')
-        .first()
-        .simulate('dragenter')
-        .simulate('dragenter');
+      component.find('[data-test-subj="lnsDragDropContainer"]').first().simulate('dragenter');
 
       // customDropTargets are visible
       expect(component.find('[data-test-subj="lnsDragDropContainer"]').prop('className')).toEqual(
@@ -670,8 +666,8 @@ describe('DragDrop', () => {
         .simulate('dragstart', { dataTransfer });
 
       const extraDrop = component.find('SingleDropInner').at(1);
-      extraDrop.simulate('dragover', { altKey: true })
-      extraDrop.simulate('dragover', { shiftKey: true })
+      extraDrop.simulate('dragover', { altKey: true });
+      extraDrop.simulate('dragover', { shiftKey: true });
       extraDrop.simulate('dragover');
       expect(
         setActiveDropTarget.mock.calls.every((call) => call[0].dropType === 'duplicate_compatible')
@@ -690,7 +686,7 @@ describe('DragDrop', () => {
         },
         {
           draggable: true,
-          dragType: 'move' as 'copy' | 'move',
+          dragType: 'move' as const,
 
           value: {
             id: '2',
@@ -703,7 +699,7 @@ describe('DragDrop', () => {
         },
         {
           draggable: true,
-          dragType: 'move' as 'copy' | 'move',
+          dragType: 'move' as const,
           value: {
             id: '3',
             humanData: { label: 'label3', position: 1, groupLabel: 'Y' },
@@ -953,6 +949,7 @@ describe('DragDrop', () => {
       });
     });
   });
+
   describe('Reordering', () => {
     const onDrop = jest.fn();
     const items = [
@@ -1136,7 +1133,7 @@ describe('DragDrop', () => {
       });
 
       expect(setA11yMessage).toBeCalledWith(
-        'Reordered Label1 in X group from position 1 to positon 3'
+        'Reordered Label1 in X group from position 1 to position 3'
       );
       expect(preventDefault).toBeCalled();
       expect(stopPropagation).toBeCalled();

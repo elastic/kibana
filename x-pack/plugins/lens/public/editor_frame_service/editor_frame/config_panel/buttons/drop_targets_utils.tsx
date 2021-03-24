@@ -7,7 +7,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiIcon, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DropType } from '../../../../types';
 
@@ -18,30 +18,46 @@ const getExtraDrop = ({
   type: 'swap' | 'duplicate';
   isIncompatible?: boolean;
 }) => {
-  const iconProps =
-    type === 'duplicate'
-      ? { type: 'copy' }
-      : { type: 'expand', style: { transform: 'rotate(-45deg)' } };
   return (
     <EuiFlexGroup
       gutterSize="s"
-      justifyContent="center"
+      justifyContent="spaceBetween"
       alignItems="center"
       className={classNames('lnsDragDrop__extraDrop', {
         'lnsDragDrop-incompatibleExtraDrop': isIncompatible,
       })}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon size="m" {...iconProps} />
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon size="m" type={type === 'duplicate' ? 'copy' : 'merge'} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} data-test-subj={`lnsDragDrop-${type}`}>
+            <EuiText size="s">
+              {type === 'duplicate'
+                ? i18n.translate('xpack.lens.dragDrop.duplicate', {
+                    defaultMessage: 'Duplicate',
+                  })
+                : i18n.translate('xpack.lens.dragDrop.swap', {
+                    defaultMessage: 'Swap',
+                  })}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} data-test-subj={`lnsDragDrop-${type}`}>
-        {type === 'duplicate'
-          ? i18n.translate('xpack.lens.dragDrop.duplicate', {
-              defaultMessage: 'Duplicate',
-            })
-          : i18n.translate('xpack.lens.dragDrop.swap', {
-              defaultMessage: 'Swap',
-            })}
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">
+          <code>
+            {' '}
+            {type === 'duplicate'
+              ? i18n.translate('xpack.lens.dragDrop.alt', {
+                  defaultMessage: 'Alt',
+                })
+              : i18n.translate('xpack.lens.dragDrop.shift', {
+                  defaultMessage: 'Shift',
+                })}
+          </code>
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
