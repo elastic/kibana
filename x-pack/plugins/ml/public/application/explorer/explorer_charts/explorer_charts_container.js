@@ -40,14 +40,6 @@ const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucke
     'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
 });
 
-const textTooManyBucketsWithoutTimelineSelection = i18n.translate(
-  'xpack.ml.explorer.charts.dashboardTooManyBucketsDescription',
-  {
-    defaultMessage:
-      'This selection contains too many buckets to be displayed. You should shorten the time range of the view.',
-  }
-);
-
 const textViewButton = i18n.translate(
   'xpack.ml.explorer.charts.openInSingleMetricViewerButtonLabel',
   {
@@ -79,7 +71,7 @@ function ExplorerChartContainer({
   timefilter,
   onSelectEntity,
   recentlyAccessed,
-  noTimelineSelectionMsg,
+  tooManyBucketsCalloutMsg,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
 
@@ -153,11 +145,7 @@ function ExplorerChartContainer({
             {tooManyBuckets && (
               <span className="ml-explorer-chart-icon">
                 <EuiIconTip
-                  content={
-                    noTimelineSelectionMsg
-                      ? textTooManyBucketsWithoutTimelineSelection
-                      : textTooManyBuckets
-                  }
+                  content={tooManyBucketsCalloutMsg ?? textTooManyBuckets}
                   position="top"
                   size="s"
                   type="alert"
@@ -248,7 +236,7 @@ export const ExplorerChartsContainerUI = ({
   timeBuckets,
   timefilter,
   onSelectEntity,
-  noTimelineSelectionMsg,
+  tooManyBucketsCalloutMsg,
 }) => {
   const {
     services: {
@@ -307,7 +295,7 @@ export const ExplorerChartsContainerUI = ({
                 timefilter={timefilter}
                 onSelectEntity={onSelectEntity}
                 recentlyAccessed={recentlyAccessed}
-                noTimelineSelectionMsg={noTimelineSelectionMsg}
+                tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
               />
             </EuiFlexItem>
           ))}

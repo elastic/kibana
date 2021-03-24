@@ -32,6 +32,15 @@ interface ExplorerAnomaliesContainerProps {
   timefilter: TimefilterContract;
   onSelectEntity: (fieldName: string, fieldValue: string, operation: EntityFieldOperation) => void;
 }
+
+const tooManyBucketsCalloutMsg = i18n.translate(
+  'xpack.ml.explorer.charts.dashboardTooManyBucketsDescription',
+  {
+    defaultMessage:
+      'This selection contains too many buckets to be displayed. You should shorten the time range of the view.',
+  }
+);
+
 export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = ({
   id,
   chartsData,
@@ -86,7 +95,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
               timeBuckets,
               timefilter,
               onSelectEntity,
-              noTimelineSelectionMsg: true,
+              tooManyBucketsCalloutMsg,
             }}
           />
         )}
