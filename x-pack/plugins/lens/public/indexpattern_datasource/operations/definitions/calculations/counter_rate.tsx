@@ -82,6 +82,7 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
+      filter: previousColumn?.filter,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },
@@ -106,4 +107,5 @@ export const counterRateOperation: OperationDefinition<
     )?.join(', ');
   },
   timeScalingMode: 'mandatory',
+  filterable: true,
 };

@@ -30,7 +30,7 @@ export interface SaveModalDashboardProps {
   documentInfo: SaveModalDocumentInfo;
   objectType: string;
   onClose: () => void;
-  onSave: (props: OnSaveProps & { dashboardId: string | null }) => void;
+  onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
   tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
 }
 
@@ -52,6 +52,9 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>(
     documentId || disableDashboardOptions ? null : 'existing'
   );
+  const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(
+    !initialCopyOnSave || disableDashboardOptions
+  );
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
   );
@@ -67,12 +70,13 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
             setDashboardOption(option);
           }}
           canSaveVisualizations={canSaveVisualizations()}
-          {...{ copyOnSave, documentId, dashboardOption }}
+          {...{ copyOnSave, documentId, dashboardOption, setAddToLibrary, isAddToLibrarySelected }}
         />
       )
     : null;
 
   const onCopyOnSaveChange = (newCopyOnSave: boolean) => {
+    setAddToLibrary(true);
     setDashboardOption(null);
     setCopyOnSave(newCopyOnSave);
   };
@@ -90,7 +94,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
       }
     }
 
-    props.onSave({ ...onSaveProps, dashboardId });
+    props.onSave({ ...onSaveProps, dashboardId, addToLibrary: isAddToLibrarySelected });
   };
 
   const saveLibraryLabel =
@@ -118,7 +122,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
       onSave={onModalSave}
       title={documentInfo.title}
       showCopyOnSave={documentId ? true : false}
-      options={dashboardOption === null ? tagOptions : undefined} // Show tags when not adding to dashboard
+      options={isAddToLibrarySelected ? tagOptions : undefined} // Show tags when not adding to dashboard
       description={documentInfo.description}
       showDescription={true}
       {...{

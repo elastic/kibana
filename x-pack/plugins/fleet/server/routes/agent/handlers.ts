@@ -44,8 +44,7 @@ export const getAgentHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
-    const agent = await AgentService.getAgent(esClient, request.params.agentId);
-
+    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
     const body: GetOneAgentResponse = {
       item: {
         ...agent,
@@ -134,8 +133,7 @@ export const updateAgentHandler: RequestHandler<
     await AgentService.updateAgent(esClient, request.params.agentId, {
       user_provided_metadata: request.body.user_provided_metadata,
     });
-    const agent = await AgentService.getAgent(esClient, request.params.agentId);
-
+    const agent = await AgentService.getAgentById(esClient, request.params.agentId);
     const body = {
       item: {
         ...agent,
@@ -245,7 +243,7 @@ export const getAgentsHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   try {
-    const { agents, total, page, perPage } = await AgentService.listAgents(esClient, {
+    const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -310,25 +308,26 @@ export const postBulkAgentsReassignHandler: RequestHandler<
 
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asInternalUser;
+  const agentOptions = Array.isArray(request.body.agents)
+    ? { agentIds: request.body.agents }
+    : { kuery: request.body.agents };
+
   try {
     const results = await AgentService.reassignAgents(
       soClient,
       esClient,
-      Array.isArray(request.body.agents)
-        ? { agentIds: request.body.agents }
-        : { kuery: request.body.agents },
+      agentOptions,
       request.body.policy_id
     );
 
-    const body: PostBulkAgentReassignResponse = results.items.reduce((acc, so) => {
-      return {
-        ...acc,
-        [so.id]: {
-          success: !so.error,
-          error: so.error || undefined,
-        },
+    const body = results.items.reduce<PostBulkAgentReassignResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error?.message,
       };
+      return acc;
     }, {});
+
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

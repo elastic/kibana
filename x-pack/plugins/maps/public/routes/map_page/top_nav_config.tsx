@@ -145,7 +145,11 @@ export function getTopNavConfig({
 
         const saveModalProps = {
           onSave: async (
-            props: OnSaveProps & { returnToOrigin?: boolean; dashboardId?: string | null }
+            props: OnSaveProps & {
+              returnToOrigin?: boolean;
+              dashboardId?: string | null;
+              addToLibrary?: boolean;
+            }
           ) => {
             try {
               await checkForDuplicateTitle(
@@ -172,7 +176,7 @@ export function getTopNavConfig({
             await savedMap.save({
               ...props,
               newTags: selectedTags,
-              saveByReference: !props.dashboardId,
+              saveByReference: Boolean(props.addToLibrary),
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
             return { id: 'id' };

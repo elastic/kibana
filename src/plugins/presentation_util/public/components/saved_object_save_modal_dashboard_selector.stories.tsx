@@ -50,6 +50,7 @@ export function Example({
   canSaveVisualizations: boolean;
 } & StorybookParams) {
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>('existing');
+  const [isAddToLibrarySelected, setAddToLibrary] = useState(false);
 
   return (
     <SaveModalDashboardSelector
@@ -59,6 +60,8 @@ export function Example({
       copyOnSave={copyOnSave}
       canSaveVisualizations={canSaveVisualizations}
       documentId={hasDocumentId ? 'abc' : undefined}
+      isAddToLibrarySelected={isAddToLibrarySelected}
+      setAddToLibrary={setAddToLibrary}
     />
   );
 }

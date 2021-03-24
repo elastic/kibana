@@ -88,7 +88,7 @@ export const SaveModal = (props: Props) => {
       savedObjectsTagging={savedObjectsTagging}
       initialTags={tagsIds}
       onSave={(saveProps) => {
-        const saveToLibrary = saveProps.dashboardId === null;
+        const saveToLibrary = Boolean(saveProps.addToLibrary);
         onSave(saveProps, { saveToLibrary });
       }}
       onClose={onClose}

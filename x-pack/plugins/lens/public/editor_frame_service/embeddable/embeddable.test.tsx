@@ -554,7 +554,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: ({ get: jest.fn() } as unknown) as IndexPatternsContract,
         capabilities: {
           visualizeSave: true,
           dashboardSave: true,
