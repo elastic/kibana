@@ -44,28 +44,32 @@ export const IndexParamsFields = ({
     ''
   );
 
-  const [documentToIndex, setDocumentToIndex] = useState<string | undefined>(undefined);
+  const getDocumentToIndex = (doc: Array<Record<string, any>> | undefined) =>
+    doc && doc.length > 0 ? ((doc[0] as unknown) as string) : undefined;
+
+  const [documentToIndex, setDocumentToIndex] = useState<string | undefined>(
+    getDocumentToIndex(documents)
+  );
   const [alertHistoryIndexSuffix, setAlertHistoryIndexSuffix] = useState<string>(
-    defaultAlertHistoryIndexSuffix
+    indexOverride ? indexOverride.replace(ALERT_HISTORY_PREFIX, '') : defaultAlertHistoryIndexSuffix
   );
   const [usePreconfiguredSchema, setUsePreconfiguredSchema] = useState<boolean>(false);
 
   useEffect(() => {
-    if (documents && documents.length > 0) {
-      setDocumentToIndex((documents[0] as unknown) as string);
-    } else {
-      setDocumentToIndex(undefined);
-    }
+    setDocumentToIndex(getDocumentToIndex(documents));
   }, [documents]);
 
   useEffect(() => {
     if (actionConnector?.id === AlertHistoryEsIndexConnectorId) {
       setUsePreconfiguredSchema(true);
+      editAction('documents', [JSON.stringify(AlertHistoryDocumentSchema)], index);
       setDocumentToIndex(JSON.stringify(AlertHistoryDocumentSchema));
     } else {
-      setDocumentToIndex(undefined);
       setUsePreconfiguredSchema(false);
+      editAction('documents', undefined, index);
+      setDocumentToIndex(undefined);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector?.id]);
 
   const onDocumentsChange = (updatedDocuments: string) => {
@@ -130,6 +134,7 @@ export const IndexParamsFields = ({
       >
         <EuiFieldText
           fullWidth
+          data-test-subj="preconfiguredIndexToUse"
           prepend={ALERT_HISTORY_PREFIX}
           value={alertHistoryIndexSuffix}
           onChange={(e) => {
