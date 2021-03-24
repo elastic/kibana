@@ -717,7 +717,7 @@
               "lineNumber": 20
             },
             "signature": [
-              "Partial<Record<\"color\" | \"id\" | \"description\" | \"name\", string | undefined>>"
+              "Partial<Record<\"color\" | \"description\" | \"id\" | \"name\", string | undefined>>"
             ]
           }
         ],

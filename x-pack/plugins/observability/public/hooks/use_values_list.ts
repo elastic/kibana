@@ -7,7 +7,7 @@
 
 import { IIndexPattern } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { ObservabilityClientPluginsStart } from '../plugin';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { useFetcher } from './use_fetcher';
 import { ESFilter } from '../../../../../typings/elasticsearch';
 
@@ -28,7 +28,7 @@ export const useValuesList = ({
 }: Props): { values: string[]; loading: boolean } => {
   const {
     services: { data },
-  } = useKibana<ObservabilityClientPluginsStart>();
+  } = useKibana<{ data: DataPublicPluginStart }>();
 
   const { data: values, status } = useFetcher(() => {
     if (!sourceField || !indexPattern) {
