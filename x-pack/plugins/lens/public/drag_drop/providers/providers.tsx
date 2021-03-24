@@ -135,11 +135,31 @@ export function nextValidDropTarget(
     return;
   }
 
-  const filteredTargets = Object.entries(dropTargetsByOrder).filter(
-    ([, dropTarget]) => dropTarget && filterElements(dropTarget)
+  const filteredTargets: Array<[string, DropIdentifier | undefined]> = Object.entries(
+    dropTargetsByOrder
+  ).filter(([, dropTarget]) => {
+    return dropTarget && filterElements(dropTarget);
+  });
+
+  // filter out secondary targets
+  const uniqueIdTargets = filteredTargets.reduce(
+    (
+      acc: Array<[string, DropIdentifier | undefined]>,
+      current: [string, DropIdentifier | undefined]
+    ) => {
+      const [, currentDropTarget] = current;
+      if (!currentDropTarget) {
+        return acc;
+      }
+      if (acc.find(([, target]) => target?.id === currentDropTarget.id)) {
+        return acc;
+      }
+      return [...acc, current];
+    },
+    []
   );
 
-  const nextDropTargets = [...filteredTargets, draggingOrder].sort(([orderA], [orderB]) => {
+  const nextDropTargets = [...uniqueIdTargets, draggingOrder].sort(([orderA], [orderB]) => {
     const parsedOrderA = orderA.split(',').map((v) => Number(v));
     const parsedOrderB = orderB.split(',').map((v) => Number(v));
 
@@ -148,8 +168,7 @@ export function nextValidDropTarget(
   });
 
   let currentActiveDropIndex = nextDropTargets.findIndex(
-    ([_, dropTarget]) =>
-      dropTarget?.id === activeDropTarget?.id && dropTarget?.dropType === activeDropTarget?.dropType
+    ([_, dropTarget]) => dropTarget?.id === activeDropTarget?.id
   );
 
   if (currentActiveDropIndex === -1) {

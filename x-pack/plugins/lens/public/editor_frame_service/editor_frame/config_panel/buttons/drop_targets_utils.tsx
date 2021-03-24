@@ -50,8 +50,8 @@ const getExtraDrop = ({
           <code>
             {' '}
             {type === 'duplicate'
-              ? i18n.translate('xpack.lens.dragDrop.alt', {
-                  defaultMessage: 'Alt',
+              ? i18n.translate('xpack.lens.dragDrop.altOption', {
+                  defaultMessage: 'Alt/Option',
                 })
               : i18n.translate('xpack.lens.dragDrop.shift', {
                   defaultMessage: 'Shift',

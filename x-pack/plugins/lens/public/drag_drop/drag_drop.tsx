@@ -235,7 +235,6 @@ const DragInner = memo(function DragInner({
   const keyboardMode = activeDraggingProps?.keyboardMode;
   const activeDropTarget = activeDraggingProps?.activeDropTarget;
   const dropTargetsByOrder = activeDraggingProps?.dropTargetsByOrder;
-  const [shouldFocusMain, setShouldFocusMain] = useState(false);
 
   const setTarget = useCallback(
     (target?: DropIdentifier) => {
@@ -249,42 +248,41 @@ const DragInner = memo(function DragInner({
     [setActiveDropTarget, setA11yMessage, value.humanData]
   );
 
-  const modifierHandlers = useMemo(() => {
-    const dropTargetsForActiveId =
-      dropTargetsByOrder &&
-      Object.values(dropTargetsByOrder).filter(
-        (dropTarget) => dropTarget?.id === activeDropTarget?.id
-      );
-    const isMainTarget =
-      activeDropTarget?.id && dropTargetsForActiveId?.[0]?.dropType === activeDropTarget?.dropType;
-
-    const setTargetOfIndex = (index: number) => {
+  const setTargetOfIndex = useCallback(
+    (id: string, index: number) => {
+      const dropTargetsForActiveId =
+        dropTargetsByOrder &&
+        Object.values(dropTargetsByOrder).filter((dropTarget) => dropTarget?.id === id);
       if (dropTargetsForActiveId?.[index]) {
         const nextTarget = dropTargetsForActiveId[index];
         setTarget(nextTarget);
-        return true;
+      } else {
+        setTarget(dropTargetsForActiveId?.[0]);
       }
-    };
+    },
+    [dropTargetsByOrder, setTarget]
+  );
+  const modifierHandlers = useMemo(() => {
     const onKeyUp = (e: KeyboardEvent<HTMLButtonElement>) => {
-      if ((e.key === 'Shift' || e.key === 'Alt') && shouldFocusMain) {
-        const isTargetSet = setTargetOfIndex(0);
-        if (isTargetSet) setShouldFocusMain(false);
+      if ((e.key === 'Shift' || e.key === 'Alt') && activeDropTarget?.id) {
+        if (e.altKey) {
+          setTargetOfIndex(activeDropTarget.id, 1);
+        } else if (e.shiftKey) {
+          setTargetOfIndex(activeDropTarget.id, 2);
+        } else {
+          setTargetOfIndex(activeDropTarget.id, 0);
+        }
       }
     };
     const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
-      if (isMainTarget) {
-        if (e.key === 'Alt') {
-          const isTargetSet = setTargetOfIndex(1);
-          if (isTargetSet) setShouldFocusMain(true);
-        }
-        if (e.key === 'Shift') {
-          const isTargetSet = setTargetOfIndex(2);
-          if (isTargetSet) setShouldFocusMain(true);
-        }
+      if (e.key === 'Alt' && activeDropTarget?.id) {
+        setTargetOfIndex(activeDropTarget.id, 1);
+      } else if (e.key === 'Shift' && activeDropTarget?.id) {
+        setTargetOfIndex(activeDropTarget.id, 2);
       }
     };
     return { onKeyDown, onKeyUp };
-  }, [shouldFocusMain, setShouldFocusMain, dropTargetsByOrder, activeDropTarget, setTarget]);
+  }, [activeDropTarget, setTargetOfIndex]);
 
   const dragStart = (
     e: DroppableEvent | KeyboardEvent<HTMLButtonElement>,
@@ -339,7 +337,7 @@ const DragInner = memo(function DragInner({
     }
   };
 
-  const setNextTarget = (reversed = false) => {
+  const setNextTarget = (e: KeyboardEvent<HTMLButtonElement>, reversed = false) => {
     const nextTarget = nextValidDropTarget(
       dropTargetsByOrder,
       activeDropTarget,
@@ -347,7 +345,14 @@ const DragInner = memo(function DragInner({
       (el) => el?.dropType !== 'reorder',
       reversed
     );
-    setTarget(nextTarget);
+
+    if (e.altKey && nextTarget?.id) {
+      setTargetOfIndex(nextTarget.id, 1);
+    } else if (e.shiftKey && nextTarget?.id) {
+      setTargetOfIndex(nextTarget.id, 2);
+    } else {
+      setTarget(nextTarget);
+    }
   };
 
   const dropToActiveDropTarget = () => {
@@ -381,7 +386,7 @@ const DragInner = memo(function DragInner({
           data-test-subj="lnsDragDrop-keyboardHandler"
           onBlur={() => {
             if (activeDraggingProps) {
-              dragEnd();
+              // dragEnd();
             }
           }}
           onKeyDown={(e: KeyboardEvent<HTMLButtonElement>) => {
@@ -408,7 +413,7 @@ const DragInner = memo(function DragInner({
             }
             if (keyboardMode) {
               if (keys.ARROW_LEFT === key || keys.ARROW_RIGHT === key) {
-                setNextTarget(!!(keys.ARROW_LEFT === key));
+                setNextTarget(e, !!(keys.ARROW_LEFT === key));
               }
               modifierHandlers.onKeyDown(e);
             }
@@ -457,7 +462,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
   const mainTargetRef = useRef<HTMLDivElement>(null);
 
   useShallowCompareEffect(() => {
-    if (dropTypes && onDrop && keyboardMode) {
+    if (dropTypes && dropTypes?.[0] && onDrop && keyboardMode) {
       dropTypes.forEach((dropType, index) => {
         registerDropTarget([...order, index], { ...value, onDrop, dropType });
       });
