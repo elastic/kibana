@@ -10,8 +10,8 @@ import { Router, Switch, Route, Redirect } from 'react-router-dom';
 import { I18nStart, ScopedHistory } from 'src/core/public';
 import { AppContextProvider, ContextValue, useAppContext } from './app_context';
 import { ComingSoonPrompt } from './components/coming_soon_prompt';
-import { UpgradeAssistantTabs } from './components/tabs';
-import { Overview } from './components/overview';
+import { EsDeprecationsContent } from './components/es_deprecations';
+import { DeprecationsOverview } from './components/overview';
 
 export interface AppDependencies extends ContextValue {
   i18n: I18nStart;
@@ -28,9 +28,9 @@ const App: React.FunctionComponent = () => {
 
   return (
     <Switch>
-      <Route exact path="/overview" component={Overview} />
-      <Route exact path="/es_deprecations/:tabName" component={UpgradeAssistantTabs} />
-      <Redirect from={`/`} to={`/overview`} />
+      <Route exact path="/overview" component={DeprecationsOverview} />
+      <Route exact path="/es_deprecations/:tabName" component={EsDeprecationsContent} />
+      <Redirect from="/" to="/overview" />
     </Switch>
   );
 };

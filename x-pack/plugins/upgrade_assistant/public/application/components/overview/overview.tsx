@@ -46,7 +46,7 @@ interface Props {
   history: RouteComponentProps['history'];
 }
 
-export const Overview: FunctionComponent<Props> = ({ history }) => {
+export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
   // TODO
   // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 

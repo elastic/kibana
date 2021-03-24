@@ -48,4 +48,4 @@ export enum TelemetryState {
   Complete,
 }
 
-export type Tabs = 'overview' | 'cluster' | 'indices';
+export type EsTabs = 'cluster' | 'indices';

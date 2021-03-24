@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiPageBody,
   EuiPageHeader,
@@ -19,15 +20,50 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationTab } from './es_deprecations';
-import { UpgradeAssistantTabProps, Tabs } from './types';
-import { useAppContext } from '../app_context';
+import { DeprecationTabContent } from './deprecation_tab_content';
+import { UpgradeAssistantTabProps, EsTabs } from '../types';
+import { useAppContext } from '../../app_context';
+
+const i18nTexts = {
+  pageTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageTitle', {
+    defaultMessage: 'Elasticsearch',
+  }),
+  pageDescription: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageDescription', {
+    defaultMessage:
+      'Some Elasticsearch issues may require your attention. Resolve them before upgrading.',
+  }),
+  docLinkText: i18n.translate('xpack.upgradeAssistant.esDeprecations.docLinkText', {
+    defaultMessage: 'Documentation',
+  }),
+  backupDataButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.backupDataButtonLabel',
+    {
+      defaultMessage: 'Back up your data',
+    }
+  ),
+  clusterTab: {
+    tabName: i18n.translate('xpack.upgradeAssistant.esDeprecations.clusterTabLabel', {
+      defaultMessage: 'Cluster',
+    }),
+    deprecationType: i18n.translate('xpack.upgradeAssistant.esDeprecations.clusterLabel', {
+      defaultMessage: 'cluster',
+    }),
+  },
+  indicesTab: {
+    tabName: i18n.translate('xpack.upgradeAssistant.esDeprecations.indicesTabLabel', {
+      defaultMessage: 'Indices',
+    }),
+    deprecationType: i18n.translate('xpack.upgradeAssistant.esDeprecations.indexLabel', {
+      defaultMessage: 'index',
+    }),
+  },
+};
 
 interface MatchParams {
-  tabName: Tabs;
+  tabName: EsTabs;
 }
 
-export const UpgradeAssistantTabs = withRouter(
+export const EsDeprecationsContent = withRouter(
   ({
     match: {
       params: { tabName },
@@ -56,16 +92,12 @@ export const UpgradeAssistantTabs = withRouter(
         {
           id: 'cluster',
           'data-test-subj': 'upgradeAssistantClusterTab',
-          name: i18n.translate('xpack.upgradeAssistant.checkupTab.clusterTabLabel', {
-            defaultMessage: 'Cluster',
-          }),
+          name: i18nTexts.clusterTab.tabName,
           content: (
-            <DeprecationTab
+            <DeprecationTabContent
               key="cluster"
               deprecations={checkupData ? checkupData.cluster : undefined}
-              checkupLabel={i18n.translate('xpack.upgradeAssistant.tabs.checkupTab.clusterLabel', {
-                defaultMessage: 'cluster',
-              })}
+              checkupLabel={i18nTexts.clusterTab.deprecationType}
               {...commonTabProps}
             />
           ),
@@ -73,17 +105,12 @@ export const UpgradeAssistantTabs = withRouter(
         {
           id: 'indices',
           'data-test-subj': 'upgradeAssistantIndicesTab',
-          name: i18n.translate('xpack.upgradeAssistant.checkupTab.indicesTabLabel', {
-            defaultMessage: 'Indices',
-          }),
+          name: i18nTexts.indicesTab.tabName,
           content: (
-            <DeprecationTab
+            <DeprecationTabContent
               key="indices"
               deprecations={checkupData ? checkupData.indices : undefined}
-              checkupLabel={i18n.translate('xpack.upgradeAssistant.checkupTab.indexLabel', {
-                defaultMessage: 'index',
-              })}
-              showBackupWarning
+              checkupLabel={i18nTexts.indicesTab.deprecationType}
               {...commonTabProps}
             />
           ),
@@ -110,7 +137,8 @@ export const UpgradeAssistantTabs = withRouter(
       <EuiPageBody>
         <EuiPageContent>
           <EuiPageHeader
-            pageTitle="Elasticsearch"
+            pageTitle={i18nTexts.pageTitle}
+            description={i18nTexts.pageDescription}
             rightSideItems={[
               <EuiButtonEmpty
                 // TODO add doc link
@@ -119,10 +147,15 @@ export const UpgradeAssistantTabs = withRouter(
                 iconType="help"
                 data-test-subj="documentationLink"
               >
-                Documentation
+                {i18nTexts.docLinkText}
               </EuiButtonEmpty>,
             ]}
-          />
+          >
+            {/* TODO Add link to Snapshot + Restore */}
+            <EuiButton fill href="#" iconType="popout" iconSide="right">
+              {i18nTexts.backupDataButtonLabel}
+            </EuiButton>
+          </EuiPageHeader>
 
           <EuiPageContentBody>
             <EuiTabbedContent
