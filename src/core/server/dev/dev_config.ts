@@ -6,26 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const config = {
   path: 'dev',
-  schema: schema.object({
-    basePathProxyTarget: schema.number({
-      defaultValue: 5603,
-    }),
-  }),
+  // dev configuration is validated by the dev cli.
+  // we only need to register the `dev` schema to avoid failing core's config validation
+  schema: schema.object({}, { unknowns: 'ignore' }),
 };
-
-export type DevConfigType = TypeOf<typeof config.schema>;
-
-export class DevConfig {
-  public basePathProxyTargetPort: number;
-
-  /**
-   * @internal
-   */
-  constructor(rawConfig: DevConfigType) {
-    this.basePathProxyTargetPort = rawConfig.basePathProxyTarget;
-  }
-}
