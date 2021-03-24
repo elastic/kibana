@@ -19,7 +19,7 @@ import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
 
-const OPERATION_NAME = 'differences';
+export const OPERATION_NAME = 'differences';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.derivativeOf', {
