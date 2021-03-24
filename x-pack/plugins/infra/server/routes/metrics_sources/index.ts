@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createValidationFunction } from '../../../common/runtime_types';
@@ -14,7 +13,7 @@ import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
 import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
 import {
-  metricsSourceConfigurationPropertiesRT,
+  partialMetricsSourceConfigurationPropertiesRT,
   metricsSourceConfigurationResponseRT,
   MetricsSourceStatus,
 } from '../../../common/metrics_sources';
@@ -64,9 +63,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         params: schema.object({
           sourceId: schema.string(),
         }),
-        body: createValidationFunction(
-          rt.partial({ ...metricsSourceConfigurationPropertiesRT.type.props })
-        ),
+        body: createValidationFunction(partialMetricsSourceConfigurationPropertiesRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {

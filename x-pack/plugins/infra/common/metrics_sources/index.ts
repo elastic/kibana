@@ -29,7 +29,17 @@ export const metricsSourceConfigurationPropertiesRT = rt.strict({
 export type MetricsSourceConfigurationProperties = rt.TypeOf<
   typeof metricsSourceConfigurationPropertiesRT
 >;
-export type PartialMetricsSourceConfigurationProperties = DeepPartial<MetricsSourceConfigurationProperties>;
+
+export const partialMetricsSourceConfigurationPropertiesRT = rt.partial({
+  ...metricsSourceConfigurationPropertiesRT.type.props,
+  fields: rt.partial({
+    ...metricsSourceConfigurationPropertiesRT.type.props.fields.type.props,
+  }),
+});
+
+export type PartialMetricsSourceConfigurationProperties = rt.TypeOf<
+  typeof partialMetricsSourceConfigurationPropertiesRT
+>;
 
 const metricsSourceConfigurationOriginRT = rt.keyof({
   fallback: null,
