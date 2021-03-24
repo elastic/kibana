@@ -34,8 +34,19 @@ export interface AutoCompleteContext {
   rangeToReplace?: Range;
   autoCompleteType?: null | string;
   editor?: CoreEditor;
+
+  /**
+   * The tokenized user input that prompted the current autocomplete at the cursor. This can be out of sync with
+   * the input that is currently being displayed in the editor.
+   */
   createdWithToken?: Token | null;
+
+  /**
+   * The tokenized user input that is currently being displayed at the cursor in the editor when the user accepted
+   * the autocomplete suggestion.
+   */
   updatedForToken?: Token | null;
+
   addTemplate?: unknown;
   prefixToAdd?: string;
   suffixToAdd?: string;
