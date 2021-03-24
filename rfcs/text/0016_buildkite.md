@@ -95,8 +95,6 @@ Implement a CI system for Kibana teams that is highly scalable, is stable, surfa
 
 This table provides an overview of the conclusions made throughout the rest of this document. A lot of this is subjective, but we've tried to take an honest look at each system and feature, based on a large amount of research on and/or experience with each system, our requirements, and our preferences as a team. Your team would likely come to different conclusions based on your preferences and requirements.
 
-<!-- eslint-disable max-len -->
-
 |                                      | Jenkins | Buildkite | GitHub Actions | CircleCI | TeamCity |
 | ------------------------------------ | ------- | --------- | -------------- | -------- | -------- |
 | Scalable                             | No      | Yes       | No             | Yes      | No       |
