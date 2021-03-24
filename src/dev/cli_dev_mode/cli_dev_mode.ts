@@ -33,11 +33,7 @@ import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_p
 import { getServerWatchPaths } from './get_server_watch_paths';
 
 // timeout where the server is allowed to exit gracefully
-const SECOND = 1000;
-const MINUTE = 60 * SECOND;
-const GRACEFUL_TIMEOUT = 5 * SECOND;
-const RESTART_BUFFER_INTERVAL = 10 * MINUTE;
-const RESTART_BUFFER_MAX_SIZE = 10_000;
+const GRACEFUL_TIMEOUT = 5000;
 
 export type SomeCliArgs = Pick<
   CliArgs,
