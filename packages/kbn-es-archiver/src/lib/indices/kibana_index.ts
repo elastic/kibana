@@ -75,7 +75,7 @@ async function fetchKibanaIndices(client: Client) {
     }
   );
 
-  const isKibanaIndex = (index: string | undefined) =>
+  const isKibanaIndex = (index: string | undefined): index is string =>
     typeof index === 'string' &&
     (/^\.kibana(:?_\d*)?$/.test(index) ||
       /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index));
