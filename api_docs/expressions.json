@@ -21953,6 +21953,41 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-common.createMockContext",
+        "type": "Function",
+        "children": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableState",
+          ">"
+        ],
+        "description": [],
+        "label": "createMockContext",
+        "source": {
+          "path": "src/plugins/expressions/common/util/test_utils.ts",
+          "lineNumber": 11
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.format",
         "type": "Function",
         "label": "format",
@@ -22464,6 +22499,52 @@
         },
         "tags": [],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.unboxExpressionValue",
+        "type": "Function",
+        "label": "unboxExpressionValue",
+        "signature": [
+          "({\n  type,\n  ...value\n}: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueBoxed",
+            "text": "ExpressionValueBoxed"
+          },
+          "<string, T>) => T"
+        ],
+        "description": [],
+        "children": [
+          {
+            "type": "CompoundType",
+            "label": "{\n  type,\n  ...value\n}",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueBoxed",
+                "text": "ExpressionValueBoxed"
+              },
+              "<string, T>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/expressions/common/expression_types/unbox_expression_value.ts",
+              "lineNumber": 11
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/expressions/common/expression_types/unbox_expression_value.ts",
+          "lineNumber": 11
+        },
         "initialIsOpen": false
       }
     ],
