@@ -366,11 +366,14 @@ describe('When using the Trusted App Form', () => {
 
     it('should validate multiple errors in form', () => {
       const andButton = getConditionBuilderAndButton();
+
       reactTestingLibrary.act(() => {
         fireEvent.click(andButton, { button: 1 });
       });
+      rerenderWithLatestTrustedApp();
 
       setTextFieldValue(getConditionValue(getCondition()), 'someHASH');
+      rerenderWithLatestTrustedApp();
       expect(renderResult.getByText('[1] Invalid hash value'));
       expect(renderResult.getByText('[2] Field entry must have a value'));
     });

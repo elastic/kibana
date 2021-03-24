@@ -25,7 +25,7 @@ import {
   NewTrustedApp,
   OperatingSystem,
 } from '../../../../../../common/endpoint/types';
-import { isValidHash } from '../../../../../../common/endpoint/validation/trusted_apps';
+import { isValidHash } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
