@@ -8,6 +8,8 @@
 import { SchemaTypes } from '../../../shared/types';
 
 import {
+  areFieldsAtDefaultSettings,
+  areFieldsEmpty,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   clearAllServerFields,
@@ -170,5 +172,70 @@ describe('splitResultFields', () => {
       },
       textResultFields: { foo: { raw: true, rawSize: 5, snippet: false, snippetFallback: false } },
     });
+  });
+});
+
+describe('areFieldsEmpty', () => {
+  it('should return true if all fields are empty objects', () => {
+    expect(
+      areFieldsEmpty({
+        foo: {},
+        bar: {},
+      })
+    ).toBe(true);
+  });
+  it('should return false otherwise', () => {
+    expect(
+      areFieldsEmpty({
+        foo: {
+          raw: true,
+          rawSize: 5,
+          snippet: false,
+          snippetFallback: false,
+        },
+        bar: {
+          raw: true,
+          rawSize: 5,
+          snippet: false,
+          snippetFallback: false,
+        },
+      })
+    ).toBe(false);
+  });
+});
+
+describe('areFieldsAtDefaultSettings', () => {
+  it('will return true if all settings for all fields are at their defaults', () => {
+    expect(
+      areFieldsAtDefaultSettings({
+        foo: {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        },
+        bar: {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        },
+      })
+    ).toEqual(true);
+  });
+
+  it('will return false otherwise', () => {
+    expect(
+      areFieldsAtDefaultSettings({
+        foo: {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        },
+        bar: {
+          raw: false,
+          snippet: true,
+          snippetFallback: true,
+        },
+      })
+    ).toEqual(false);
   });
 });
