@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DataSeries } from '../../types';
-import { ChartTypes } from './chart_types';
+import { SeriesChartTypes } from './chart_types';
 import { MetricSelection } from './metric_selection';
 
 interface Props {
@@ -19,7 +19,7 @@ export function ActionsCol({ series }: Props) {
   return (
     <EuiFlexGroup direction="row" gutterSize="s" justifyContent="center">
       <EuiFlexItem grow={false}>
-        <ChartTypes seriesId={series.id} defaultChartType={series.seriesTypes[0]} />
+        <SeriesChartTypes seriesId={series.id} defaultChartType={series.seriesTypes[0]} />
       </EuiFlexItem>
       {series.metricType && (
         <EuiFlexItem grow={false}>
