@@ -13,6 +13,7 @@ import {
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
 import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
+import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -30,6 +31,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
+
+    core.uiSettings.register(uiSettings);
 
     if (config.annotations.enabled) {
       annotationsApiPromise = bootstrapAnnotations({

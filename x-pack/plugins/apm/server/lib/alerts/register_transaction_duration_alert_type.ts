@@ -123,7 +123,7 @@ export function registerTransactionDurationAlertType({
       };
 
       const response = await alertingEsClient(
-        services.callCluster,
+        services.scopedClusterClient,
         searchParams
       );
 

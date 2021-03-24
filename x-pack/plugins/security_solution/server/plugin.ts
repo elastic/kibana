@@ -77,6 +77,7 @@ import {
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -348,14 +349,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         plugins.fleet.createArtifactsClient('endpoint')
       ) as unknown) as ArtifactClient;
 
-      manifestManager = new ManifestManager({
-        savedObjectsClient,
-        artifactClient,
-        exceptionListClient,
-        packagePolicyService: plugins.fleet.packagePolicyService,
-        logger: this.logger,
-        cache: this.artifactsCache,
-      });
+      manifestManager = new ManifestManager(
+        {
+          savedObjectsClient,
+          artifactClient,
+          exceptionListClient,
+          packagePolicyService: plugins.fleet.packagePolicyService,
+          logger: this.logger,
+          cache: this.artifactsCache,
+        },
+        parseExperimentalConfigValue(this.config.enableExperimental).fleetServerEnabled
+      );
 
       if (this.manifestTask) {
         this.manifestTask.start({
