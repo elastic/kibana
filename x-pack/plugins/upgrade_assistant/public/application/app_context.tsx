@@ -8,6 +8,7 @@
 import { DocLinksStart, HttpSetup, NotificationsStart } from 'src/core/public';
 import React, { createContext, useContext } from 'react';
 import { ApiService } from './lib/api';
+import { BreadcrumbService } from './lib/breadcrumbs';
 
 export interface KibanaVersionContext {
   currentMajor: number;
@@ -23,6 +24,7 @@ export interface ContextValue {
   notifications: NotificationsStart;
   isReadOnlyMode: boolean;
   api: ApiService;
+  breadcrumbs: BreadcrumbService;
 }
 
 export const AppContext = createContext<ContextValue>({} as any);

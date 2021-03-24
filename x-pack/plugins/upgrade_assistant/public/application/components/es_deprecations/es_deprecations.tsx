@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
@@ -72,7 +72,7 @@ export const EsDeprecationsContent = withRouter(
   }: RouteComponentProps<MatchParams>) => {
     // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
-    const { api } = useAppContext();
+    const { api, breadcrumbs } = useAppContext();
 
     const { data: checkupData, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
 
@@ -132,6 +132,10 @@ export const EsDeprecationsContent = withRouter(
     //     sendTelemetryData();
     //   }
     // }, [api, selectedTabIndex, tabName, isLoading]);
+
+    useEffect(() => {
+      breadcrumbs.setBreadcrumbs('esDeprecations');
+    }, [breadcrumbs]);
 
     return (
       <EuiPageBody>

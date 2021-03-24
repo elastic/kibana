@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 
 import {
   EuiPageContent,
@@ -32,7 +32,7 @@ const i18nTexts = {
   pageDescription: (nextMajor: string) =>
     i18n.translate('xpack.upgradeAssistant.pageDescription', {
       defaultMessage:
-        'This assistant helps you prepare your cluster and indices for Elasticsearch {nextMajor} For other issues that need your attention, see the Elasticsearch logs.',
+        'This assistant helps you prepare your cluster and indices for Elasticsearch {nextMajor}. For other issues that need your attention, see the Elasticsearch logs.',
       values: {
         nextMajor,
       },
@@ -50,7 +50,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
   // TODO
   // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
-  const { kibanaVersionInfo } = useAppContext();
+  const { kibanaVersionInfo, breadcrumbs } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
   // useEffect(() => {
@@ -67,6 +67,10 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
   //     sendTelemetryData();
   //   }
   // }, [api, isLoading]);
+
+  useEffect(() => {
+    breadcrumbs.setBreadcrumbs('overview');
+  }, [breadcrumbs]);
 
   return (
     <EuiPageBody>

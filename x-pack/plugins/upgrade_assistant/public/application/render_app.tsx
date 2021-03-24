@@ -9,10 +9,12 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { AppDependencies, RootComponent } from './app';
 import { ApiService } from './lib/api';
+import { BreadcrumbService } from './lib/breadcrumbs';
 
 interface BootDependencies extends AppDependencies {
   element: HTMLElement;
   api: ApiService;
+  breadcrumbs: BreadcrumbService;
 }
 
 export const renderApp = (deps: BootDependencies) => {
