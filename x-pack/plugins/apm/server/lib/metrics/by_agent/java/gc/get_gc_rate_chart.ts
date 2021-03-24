@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import { METRIC_JAVA_GC_COUNT } from '../../../../../../common/elasticsearch_fieldnames';
+import { euiColorVis0 } from '../../../../../../common/viz_colors';
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
 import { ChartBase } from '../../../types';
@@ -18,7 +18,7 @@ const series = {
     title: i18n.translate('xpack.apm.agentMetrics.java.gcRate', {
       defaultMessage: 'GC rate',
     }),
-    color: euiThemeVars.euiColorVis0,
+    color: euiColorVis0,
   },
 };
 

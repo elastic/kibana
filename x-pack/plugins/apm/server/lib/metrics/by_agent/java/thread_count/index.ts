@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_JAVA_THREAD_COUNT,
   AGENT_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
+import {
+  euiColorVis0,
+  euiColorVis1,
+} from '../../../../../../common/viz_colors';
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
@@ -21,13 +24,13 @@ const series = {
     title: i18n.translate('xpack.apm.agentMetrics.java.threadCount', {
       defaultMessage: 'Avg. count',
     }),
-    color: euiThemeVars.euiColorVis0,
+    color: euiColorVis0,
   },
   threadCountMax: {
     title: i18n.translate('xpack.apm.agentMetrics.java.threadCountMax', {
       defaultMessage: 'Max count',
     }),
-    color: euiThemeVars.euiColorVis1,
+    color: euiColorVis1,
   },
 };
 

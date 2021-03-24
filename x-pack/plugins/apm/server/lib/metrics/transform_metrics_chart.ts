@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { getVizColorForIndex } from '../../../common/viz_colors';
 import { GenericMetricsRequest } from './fetch_and_transform_metrics';
@@ -34,9 +33,7 @@ export function transformDataToMetricsChart(
         title: chartBase.series[seriesKey].title,
         key: seriesKey,
         type: chartBase.type,
-        color:
-          chartBase.series[seriesKey].color ||
-          getVizColorForIndex(i, euiThemeVars),
+        color: chartBase.series[seriesKey].color || getVizColorForIndex(i),
         overallValue,
         data:
           timeseriesData?.buckets.map((bucket) => {

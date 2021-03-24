@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT,
 } from '../../../../../../common/elasticsearch_fieldnames';
+import {
+  euiColorVis0,
+  euiColorVis1,
+  euiColorVis5,
+  euiColorVis7,
+} from '../../../../../../common/viz_colors';
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
@@ -21,25 +26,25 @@ const series = {
     title: i18n.translate('xpack.apm.chart.cpuSeries.systemMaxLabel', {
       defaultMessage: 'System max',
     }),
-    color: euiThemeVars.euiColorVis1,
+    color: euiColorVis1,
   },
   systemCPUAverage: {
     title: i18n.translate('xpack.apm.chart.cpuSeries.systemAverageLabel', {
       defaultMessage: 'System average',
     }),
-    color: euiThemeVars.euiColorVis0,
+    color: euiColorVis0,
   },
   processCPUMax: {
     title: i18n.translate('xpack.apm.chart.cpuSeries.processMaxLabel', {
       defaultMessage: 'Process max',
     }),
-    color: euiThemeVars.euiColorVis7,
+    color: euiColorVis7,
   },
   processCPUAverage: {
     title: i18n.translate('xpack.apm.chart.cpuSeries.processAverageLabel', {
       defaultMessage: 'Process average',
     }),
-    color: euiThemeVars.euiColorVis5,
+    color: euiColorVis5,
   },
 };
 
