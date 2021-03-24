@@ -177,19 +177,18 @@
   height: 100%;
   background: $euiColorLightestShade;
   padding: $euiSizeXS;
-  border-radius: 0;
+  border-radius: $euiSizeXS;
   &:first-child {
+    border-radius: 0;
     border-top-left-radius: $euiSizeXS;
     border-top-right-radius: $euiSizeXS;
     .lnsDragDrop__extraDrop {
       border-top-left-radius: $euiSizeXS;
       border-top-right-radius: $euiSizeXS;
     }
-    .lnsDragDrop__extraDrop:not(.lnsDragDrop-isActiveDropTarget) {
-      border-bottom-color: transparent;
-    }
   }
   &:last-child {
+    border-radius: 0;
     border-bottom-left-radius: $euiSizeXS;
     border-bottom-right-radius: $euiSizeXS;
     .lnsDragDrop__extraDrop {
@@ -197,6 +196,11 @@
       border-bottom-right-radius: $euiSizeXS;
     }
   }
+}
+
+// collapse borders
+.lnsDragDrop__extraDropWrapper + .lnsDragDrop__extraDropWrapper {
+  margin-top: -1px;
 }
 
 .lnsDragDrop__extraDrop {
