@@ -68,3 +68,8 @@ export interface SanitizedFieldType {
   type: string;
   label?: string;
 }
+
+export enum PALETTES {
+  GRADIENT = 'gradient',
+  RAINBOW = 'rainbow',
+}
