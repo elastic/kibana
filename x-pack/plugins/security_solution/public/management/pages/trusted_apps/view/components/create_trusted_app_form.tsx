@@ -503,19 +503,20 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
           />
         </EuiFormRow>
 
-        <EuiHorizontalRule />
-
         {isTrustedAppsByPolicyEnabled ? (
-          <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
-            <EffectedPolicySelect
-              isGlobal={isGlobalEffectScope(trustedApp.effectScope)}
-              selected={selectedPolicies.selected}
-              options={policies.options}
-              onChange={handlePolicySelectChange}
-              isLoading={policies?.isLoading}
-              data-test-subj={getTestId('effectedPolicies')}
-            />
-          </EuiFormRow>
+          <>
+            <EuiHorizontalRule />
+            <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
+              <EffectedPolicySelect
+                isGlobal={isGlobalEffectScope(trustedApp.effectScope)}
+                selected={selectedPolicies.selected}
+                options={policies.options}
+                onChange={handlePolicySelectChange}
+                isLoading={policies?.isLoading}
+                data-test-subj={getTestId('effectedPolicies')}
+              />
+            </EuiFormRow>
+          </>
         ) : null}
       </EuiForm>
     );
