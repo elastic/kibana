@@ -34,14 +34,6 @@ export function DetectionsPageProvider({ getService, getPageObjects }: FtrProvid
       await this.navigateToDetectionsPage('rules/create');
     }
 
-    async addEqlQuery(query: string): Promise<void> {
-      await testSubjects.setValue(
-        'detectionEngineStepDefineRuleEqlQueryBar > eqlQueryBarTextInput',
-        query,
-        topOffset
-      );
-    }
-
     async replaceIndexPattern(): Promise<void> {
       const buttons = await find.allByCssSelector('[data-test-subj="comboBoxInput"] button');
       await buttons.map(async (button: WebElementWrapper) => await button.click());
