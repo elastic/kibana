@@ -6,7 +6,7 @@
  */
 
 import '../../../../__mocks__/kea.mock';
-import { mockTelemetryActions } from '../../../../__mocks__';
+import { setMockValues, mockTelemetryActions } from '../../../../__mocks__';
 
 import React from 'react';
 
@@ -17,30 +17,47 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { EmptyState } from './';
 
 describe('EmptyState', () => {
-  it('renders', () => {
-    const wrapper = shallow(<EmptyState />);
+  describe('when the user can manage/create engines', () => {
+    let wrapper: ShallowWrapper;
 
-    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
+    beforeAll(() => {
+      setMockValues({ myRole: { canManageEngines: true } });
+      wrapper = shallow(<EmptyState />);
+    });
+
+    it('renders a prompt to create an engine', () => {
+      expect(wrapper.find('[data-test-subj="AdminEmptyEnginesPrompt"]')).toHaveLength(1);
+    });
+
+    describe('create engine button', () => {
+      let prompt: ShallowWrapper;
+      let button: ShallowWrapper;
+
+      beforeAll(() => {
+        prompt = wrapper.find(EuiEmptyPrompt).dive();
+        button = prompt.find('[data-test-subj="EmptyStateCreateFirstEngineCta"]');
+      });
+
+      it('sends telemetry on create first engine click', () => {
+        button.simulate('click');
+        expect(mockTelemetryActions.sendAppSearchTelemetry).toHaveBeenCalled();
+      });
+
+      it('sends a user to engine creation', () => {
+        expect(button.prop('to')).toEqual('/engine_creation');
+      });
+    });
   });
 
-  describe('CTA Button', () => {
-    let wrapper: ShallowWrapper;
-    let prompt: ShallowWrapper;
-    let button: ShallowWrapper;
-
-    beforeEach(() => {
-      wrapper = shallow(<EmptyState />);
-      prompt = wrapper.find(EuiEmptyPrompt).dive();
-      button = prompt.find('[data-test-subj="EmptyStateCreateFirstEngineCta"]');
+  describe('when the user cannot manage/create engines', () => {
+    beforeAll(() => {
+      setMockValues({ myRole: { canManageEngines: false } });
     });
 
-    it('sends telemetry on create first engine click', () => {
-      button.simulate('click');
-      expect(mockTelemetryActions.sendAppSearchTelemetry).toHaveBeenCalled();
-    });
+    it('renders a prompt to contact the App Search admin', () => {
+      const wrapper = shallow(<EmptyState />);
 
-    it('sends a user to engine creation', () => {
-      expect(button.prop('to')).toEqual('/engine_creation');
+      expect(wrapper.find('[data-test-subj="NonAdminEmptyEnginesPrompt"]')).toHaveLength(1);
     });
   });
 });
