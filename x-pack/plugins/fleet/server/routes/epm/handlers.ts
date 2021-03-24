@@ -40,12 +40,10 @@ import {
   getPackages,
   getFile,
   getPackageInfo,
-  handleInstallPackageFailure,
   isBulkInstallError,
   installPackage,
   removeInstallation,
   getLimitedPackages,
-  getInstallationObject,
   getInstallation,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
@@ -228,15 +226,7 @@ export const installPackageFromRegistryHandler: RequestHandler<
   const savedObjectsClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { pkgkey } = request.params;
-
-  let pkgName: string | undefined;
-  let pkgVersion: string | undefined;
-
   try {
-    const parsedPkgKey = splitPkgKey(pkgkey);
-    pkgName = parsedPkgKey.pkgName;
-    pkgVersion = parsedPkgKey.pkgVersion;
-
     const res = await installPackage({
       installSource: 'registry',
       savedObjectsClient,
@@ -245,24 +235,11 @@ export const installPackageFromRegistryHandler: RequestHandler<
       force: request.body?.force,
     });
     const body: InstallPackageResponse = {
-      response: res,
+      response: res.assets,
     };
     return response.ok({ body });
   } catch (e) {
-    const defaultResult = await defaultIngestErrorHandler({ error: e, response });
-    if (pkgName && pkgVersion) {
-      const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-      await handleInstallPackageFailure({
-        savedObjectsClient,
-        error: e,
-        pkgName,
-        pkgVersion,
-        installedPkg,
-        esClient,
-      });
-    }
-
-    return defaultResult;
+    return await defaultIngestErrorHandler({ error: e, response });
   }
 };
 
@@ -291,7 +268,7 @@ export const bulkInstallPackagesFromRegistryHandler: RequestHandler<
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
-    packagesToUpgrade: request.body.packages,
+    packagesToInstall: request.body.packages,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -324,7 +301,7 @@ export const installPackageByUploadHandler: RequestHandler<
       contentType,
     });
     const body: InstallPackageResponse = {
-      response: res,
+      response: res.assets,
     };
     return response.ok({ body });
   } catch (error) {

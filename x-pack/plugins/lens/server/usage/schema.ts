@@ -34,15 +34,92 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   xy_change_layer_display: { type: 'long' },
   xy_layer_removed: { type: 'long' },
   xy_layer_added: { type: 'long' },
-  indexpattern_dimension_operation_terms: { type: 'long' },
-  indexpattern_dimension_operation_date_histogram: { type: 'long' },
-  indexpattern_dimension_operation_avg: { type: 'long' },
-  indexpattern_dimension_operation_min: { type: 'long' },
-  indexpattern_dimension_operation_max: { type: 'long' },
-  indexpattern_dimension_operation_sum: { type: 'long' },
-  indexpattern_dimension_operation_count: { type: 'long' },
-  indexpattern_dimension_operation_cardinality: { type: 'long' },
-  indexpattern_dimension_operation_filters: { type: 'long' },
+  indexpattern_dimension_operation_terms: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the top values function was selected',
+    },
+  },
+  indexpattern_dimension_operation_date_histogram: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the date histogram function was selected',
+    },
+  },
+  indexpattern_dimension_operation_avg: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the average function was selected',
+    },
+  },
+  indexpattern_dimension_operation_min: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the min function was selected',
+    },
+  },
+  indexpattern_dimension_operation_max: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the max function was selected',
+    },
+  },
+  indexpattern_dimension_operation_sum: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the sum function was selected',
+    },
+  },
+  indexpattern_dimension_operation_count: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the count function was selected',
+    },
+  },
+  indexpattern_dimension_operation_cardinality: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the cardinality function was selected',
+    },
+  },
+  indexpattern_dimension_operation_filters: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the filters function was selected',
+    },
+  },
+  indexpattern_dimension_operation_range: {
+    type: 'long',
+    _meta: { description: 'Number of times the range function was selected' },
+  },
+  indexpattern_dimension_operation_median: {
+    type: 'long',
+    _meta: { description: 'Number of times the median function was selected' },
+  },
+  indexpattern_dimension_operation_percentile: {
+    type: 'long',
+    _meta: { description: 'Number of times the percentile function was selected' },
+  },
+  indexpattern_dimension_operation_last_value: {
+    type: 'long',
+    _meta: { description: 'Number of times the last value function was selected' },
+  },
+  indexpattern_dimension_operation_cumulative_sum: {
+    type: 'long',
+    _meta: { description: 'Number of times the cumulative sum function was selected' },
+  },
+  indexpattern_dimension_operation_counter_rate: {
+    type: 'long',
+    _meta: { description: 'Number of times the counter rate function was selected' },
+  },
+  indexpattern_dimension_operation_derivative: {
+    type: 'long',
+    _meta: { description: 'Number of times the derivative function was selected' },
+  },
+  indexpattern_dimension_operation_moving_average: {
+    type: 'long',
+    _meta: { description: 'Number of times the moving average function was selected' },
+  },
 };
 
 const suggestionEventsSchema: MakeSchemaFrom<LensUsage['suggestion_events_30_days']> = {
