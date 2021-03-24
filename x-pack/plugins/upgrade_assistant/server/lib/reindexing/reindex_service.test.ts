@@ -885,7 +885,7 @@ describe('reindexService', () => {
         // Original index should have been set back to allow reads.
         expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
           index: 'myIndex',
-          body: { index: { blocks: { write: true } } },
+          body: { index: { blocks: { write: false } } },
         });
       });
     });
