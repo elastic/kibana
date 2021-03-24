@@ -21,6 +21,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { registerDataHandler } from './data_handler';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { LensPublicStart } from '../../lens/public';
+import { ObservabilityPluginSetupDeps } from '../target/types/public/plugin';
 
 export interface ObservabilityPluginSetup {
   dashboard: { register: typeof registerDataHandler };
@@ -52,7 +53,10 @@ export class Plugin
 
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup<ObservabilityClientPluginsStart>, plugins: ObservabilityPluginSetupDeps) {
+  public setup(
+    core: CoreSetup<ObservabilityClientPluginsStart>,
+    plugins: ObservabilityPluginSetupDeps
+  ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logo-observability';
     const mount = async (params: AppMountParameters<unknown>) => {

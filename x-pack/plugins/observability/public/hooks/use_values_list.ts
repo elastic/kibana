@@ -53,7 +53,7 @@ export const useValuesList = ({
           ]
         : filters,
     });
-  }, [sourceField, query, time]);
+  }, [sourceField, query, time, data.autocomplete, indexPattern, filters]);
 
   return { values: values as string[], loading: status === 'loading' || status === 'pending' };
 };
