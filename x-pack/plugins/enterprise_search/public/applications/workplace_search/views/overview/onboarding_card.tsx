@@ -49,7 +49,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
     });
 
   const completeButton = actionPath ? (
-    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill={true}>
+    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill>
       {actionTitle}
     </EuiButtonTo>
   ) : (
@@ -57,7 +57,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
   );
 
   const incompleteButton = actionPath ? (
-    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill={true}>
+    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill>
       {actionTitle}
     </EuiButtonTo>
   ) : (
