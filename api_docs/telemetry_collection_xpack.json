@@ -43,13 +43,24 @@
           },
           {
             "tags": [],
+            "id": "def-server.ESLicense.hkey",
+            "type": "string",
+            "label": "hkey",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
+              "lineNumber": 14
+            }
+          },
+          {
+            "tags": [],
             "id": "def-server.ESLicense.type",
             "type": "string",
             "label": "type",
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 14
+              "lineNumber": 15
             }
           },
           {
@@ -60,7 +71,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 15
+              "lineNumber": 16
             }
           },
           {
@@ -71,7 +82,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 16
+              "lineNumber": 17
             }
           },
           {
@@ -82,18 +93,18 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 17
+              "lineNumber": 18
             }
           },
           {
             "tags": [],
-            "id": "def-server.ESLicense.expirty_date_in_millis",
+            "id": "def-server.ESLicense.expiry_date_in_millis",
             "type": "number",
-            "label": "expirty_date_in_millis",
+            "label": "expiry_date_in_millis",
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 18
+              "lineNumber": 19
             }
           },
           {
@@ -104,7 +115,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 19
+              "lineNumber": 20
             }
           },
           {
@@ -115,7 +126,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 20
+              "lineNumber": 21
             }
           },
           {
@@ -126,7 +137,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 21
+              "lineNumber": 22
             }
           },
           {
@@ -137,7 +148,18 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
-              "lineNumber": 22
+              "lineNumber": 23
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-server.ESLicense.max_resource_units",
+            "type": "number",
+            "label": "max_resource_units",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
+              "lineNumber": 24
             }
           }
         ],
