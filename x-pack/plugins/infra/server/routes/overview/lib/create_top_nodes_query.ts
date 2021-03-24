@@ -72,12 +72,12 @@ export const createTopNodesQuery = (options: TopNodesRequest, source: InfraSourc
           },
           rx: {
             sum: {
-              field: 'host.network.ingress.bytes',
+              field: 'host.network.in.bytes',
             },
           },
           tx: {
             sum: {
-              field: 'host.network.egress.bytes',
+              field: 'host.network.out.bytes',
             },
           },
           timeseries: {
