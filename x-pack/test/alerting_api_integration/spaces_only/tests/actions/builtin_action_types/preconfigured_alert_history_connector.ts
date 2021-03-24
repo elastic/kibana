@@ -164,11 +164,3 @@ export default function preconfiguredAlertHistoryConnectorTests({
     await new Promise((resolve) => setTimeout(resolve, millis));
   }
 }
-
-// async function getTestIndexItems(es: any, indexName: string = ES_TEST_INDEX_NAME) {
-//   const result = await es.search({
-//     index: indexName,
-//   });
-
-//   return result.hits.hits;
-// }
