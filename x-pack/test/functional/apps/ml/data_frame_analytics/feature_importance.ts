@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   // FLAKY: https://github.com/elastic/kibana/issues/93188
-  describe.skip('total feature importance panel and decision path popover', function () {
+  describe('total feature importance panel and decision path popover', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;

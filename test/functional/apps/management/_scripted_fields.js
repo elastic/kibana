@@ -346,7 +346,7 @@ export default function ({ getService, getPageObjects }) {
 
       //add a test to sort boolean
       //existing bug: https://github.com/elastic/kibana/issues/75519 hence the issue is skipped.
-      it.skip('should sort scripted field value in Discover', async function () {
+      it('should sort scripted field value in Discover', async function () {
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         // after the first click on the scripted field, it becomes secondary sort after time.
         // click on the timestamp twice to make it be the secondary sort key.
@@ -424,7 +424,7 @@ export default function ({ getService, getPageObjects }) {
 
       //add a test to sort date scripted field
       //https://github.com/elastic/kibana/issues/75711
-      it.skip('should sort scripted field value in Discover', async function () {
+      it('should sort scripted field value in Discover', async function () {
         await testSubjects.click(`docTableHeaderFieldSort_${scriptedPainlessFieldName2}`);
         // after the first click on the scripted field, it becomes secondary sort after time.
         // click on the timestamp twice to make it be the secondary sort key.

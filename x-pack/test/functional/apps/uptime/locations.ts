@@ -40,7 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/85208
-  describe.skip('Observer location', () => {
+  describe('Observer location', () => {
     const start = '~ 15 minutes ago';
     const end = 'now';
 

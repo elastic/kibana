@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // flaky https://github.com/elastic/kibana/issues/94889
-    it.skip('should show popover with expanded cell content by click on expand button', async () => {
+    it('should show popover with expanded cell content by click on expand button', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
       const documentCell = await dataGrid.getCellElement(1, 3);
       await documentCell.click();

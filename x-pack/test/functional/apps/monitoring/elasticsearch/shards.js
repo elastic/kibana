@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
 
   // FLAKY: https://github.com/elastic/kibana/issues/47184
-  describe.skip('Elasticsearch shard legends', () => {
+  describe('Elasticsearch shard legends', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {

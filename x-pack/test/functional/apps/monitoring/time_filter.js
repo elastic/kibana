@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/48910
-    it.skip('should send another request when clicking Refresh', async () => {
+    it('should send another request when clicking Refresh', async () => {
       await testSubjects.click('querySubmitButton');
       const isLoading = await PageObjects.header.isGlobalLoadingIndicatorVisible();
       expect(isLoading).to.be(true);
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
 
     // TODO: [cr] I'm not sure this test is any better than the above one, we might need to rely solely on unit tests
     // for this functionality
-    it.skip('should send another request when changing the time picker', async () => {
+    it('should send another request when changing the time picker', async () => {
       await PageObjects.timePicker.setAbsoluteRange(
         'Aug 15, 2016 @ 21:00:00.000',
         'Aug 16, 2016 @ 00:00:00.000'

@@ -61,21 +61,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Partition chart tests have to be skipped until
     // https://github.com/elastic/elastic-charts/issues/917 gets fixed
-    it.skip('should render pie chart', async () => {
+    it('should render pie chart', async () => {
       await PageObjects.lens.switchToVisualization('pie');
       await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });
 
-    it.skip('should render donut chart', async () => {
+    it('should render donut chart', async () => {
       await PageObjects.lens.switchToVisualization('donut');
       await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();
       assertMatchesExpectedData(data!);
     });
 
-    it.skip('should render treemap chart', async () => {
+    it('should render treemap chart', async () => {
       await PageObjects.lens.switchToVisualization('treemap');
       await PageObjects.lens.waitForVisualization();
       const data = await PageObjects.lens.getCurrentChartDebugState();

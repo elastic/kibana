@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
 
   const PageObjects = getPageObjects(['grokDebugger']);
   // FLAKY: https://github.com/elastic/kibana/issues/84440
-  describe.skip('grok debugger app', function () {
+  describe('grok debugger app', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('empty_kibana');
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('syntax highlighting', () => {
-      it.skip('applies the correct CSS classes', async () => {
+      it('applies the correct CSS classes', async () => {
         const grokPattern = '\\[(?:-|%{NUMBER:bytes:int})\\]';
 
         await grokDebugger.setPatternInput(grokPattern);

@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
 
   // FLAKY: https://github.com/elastic/kibana/issues/94545
-  describe.skip('discover data grid context tests', () => {
+  describe('discover data grid context tests', () => {
     before(async () => {
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
