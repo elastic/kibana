@@ -684,7 +684,7 @@ We could likely maintain a single linux-based image to cover all of our current 
 
 Another thing to note: Just because we need to run something on a specific OS or architecture, it doesn't necessarily mean we need to maintain an agent image for it. For example, we might use something like Vagrant to create a separate VM, using the default, cloud-provided images, that we run something on (e.g. for testing system packages), rather than running it on the same machine as the agent. In this case, we would potentially only be managing a small number of images, or even a single image.
 
-For our testing, we have a single GCP image, built using Packer, with the Buildkite agent installed and all of our dependencies.
+For our testing, we have a single GCP image, [built using Packer](https://github.com/elastic/kibana/tree/kb-bk/.buildkite/agents/packer), with the Buildkite agent installed and all of our dependencies.
 
 Summary of Responsibilities
 
@@ -692,8 +692,6 @@ Summary of Responsibilities
 - Delete old images when creating new ones
 - Ability to roll back images easily and/or pin specific image versions
 - Manage dependencies, failures, updates, etc across all supported OSes and architectures, on a regular basis
-
-TODO public and link to code for current agent image
 
 ### Buildkite org-level settings management
 
