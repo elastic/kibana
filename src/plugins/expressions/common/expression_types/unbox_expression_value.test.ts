@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-export * from './create_error';
-export * from './get_by_alias';
-export * from './tables_adapter';
-export * from './expressions_inspector_adapter';
-export * from './test_utils';
+import { unboxExpressionValue } from './unbox_expression_value';
+
+describe('unboxExpressionValue()', () => {
+  it('should remove type property from a boxed value', () => {
+    const expressionValue = { type: 'something', value: 'something' };
+
+    expect(unboxExpressionValue(expressionValue)).toEqual({ value: 'something' });
+  });
+});
