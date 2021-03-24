@@ -549,6 +549,8 @@ All of these things would need to be true at the same time for a large number of
 
 #### Configuration
 
+Here's an example configuration, which would likely reside in the `master` branch of the kibana repository.
+
 ```js
 {
   gcp: {
