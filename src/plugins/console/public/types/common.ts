@@ -11,6 +11,12 @@ export interface MetricsTracker {
   load: (eventName: string) => void;
 }
 
+export interface ESRequest {
+  method: string;
+  endpoint: string;
+  data?: string;
+}
+
 export type BaseResponseType =
   | 'application/json'
   | 'text/csv'

@@ -25,6 +25,7 @@ import {
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
 import { BucketSpanEstimatorData } from '../../../../common/types/job_service';
+import { RuntimeMappings } from '../../../../common/types/fields';
 import {
   Job,
   JobStats,
@@ -690,14 +691,16 @@ export function mlApiServicesProvider(httpService: HttpService) {
       index,
       timeFieldName,
       query,
+      runtimeMappings,
       indicesOptions,
     }: {
       index: string;
       timeFieldName?: string;
       query: any;
+      runtimeMappings?: RuntimeMappings;
       indicesOptions?: IndicesOptions;
     }) {
-      const body = JSON.stringify({ index, timeFieldName, query, indicesOptions });
+      const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings, indicesOptions });
 
       return httpService.http<GetTimeFieldRangeResponse>({
         path: `${basePath()}/fields_service/time_field_range`,
