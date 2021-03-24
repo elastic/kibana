@@ -63,9 +63,9 @@ export class Plugin
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
-      const [coreStart] = await core.getStartServices();
+      const [coreStart, startPlugins] = await core.getStartServices();
 
-      return renderApp(coreStart, plugins, params);
+      return renderApp(coreStart, startPlugins, params);
     };
     const updater$ = this.appUpdater$;
 
