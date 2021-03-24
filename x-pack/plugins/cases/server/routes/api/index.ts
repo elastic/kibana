@@ -37,6 +37,7 @@ import { initGetSubCaseApi } from './cases/sub_case/get_sub_case';
 import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
 import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
 import { initDeleteSubCasesApi } from './cases/sub_case/delete_sub_cases';
+import { ENABLE_SUB_CASES } from '../../../common/constants';
 
 /**
  * Default page number when interacting with the saved objects API.
@@ -58,7 +59,7 @@ export function initCaseApi(deps: RouteDeps) {
   initGetAllCaseUserActionsApi(deps);
 
   // sub-cases-disabled: remove once sub cases feature is enabled
-  if (deps.subCasesEnabled) {
+  if (ENABLE_SUB_CASES) {
     // Sub cases
     initGetAllSubCaseUserActionsApi(deps);
     initGetSubCaseApi(deps);

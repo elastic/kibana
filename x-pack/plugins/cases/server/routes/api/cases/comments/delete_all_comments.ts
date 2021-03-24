@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { CASE_COMMENTS_URL, ENABLE_SUB_CASES } from '../../../../../common/constants';
 import { AssociationType } from '../../../../../common/api';
 
 export function initDeleteAllCommentsApi({
@@ -18,17 +18,7 @@ export function initDeleteAllCommentsApi({
   router,
   userActionService,
   logger,
-  subCasesEnabled,
 }: RouteDeps) {
-  const querySchema = subCasesEnabled
-    ? {
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
-      }
-    : {};
   router.delete(
     {
       path: CASE_COMMENTS_URL,
@@ -36,11 +26,21 @@ export function initDeleteAllCommentsApi({
         params: schema.object({
           case_id: schema.string(),
         }),
-        ...querySchema,
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
       },
     },
     async (context, request, response) => {
       try {
+        if (!ENABLE_SUB_CASES && request.query?.subCaseId !== undefined) {
+          throw Boom.badRequest(
+            'The `subCaseId` is not supported when the case connector feature is disabled'
+          );
+        }
+
         const client = context.core.savedObjects.client;
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request });

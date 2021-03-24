@@ -40,6 +40,7 @@ import {
 } from '../../services';
 import { CasesClientHandler } from '../client';
 import { createCaseError } from '../../common/error';
+import { ENABLE_SUB_CASES } from '../../../common/constants';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -68,7 +69,6 @@ interface PushParams {
   casesClient: CasesClientHandler;
   actionsClient: ActionsClient;
   logger: Logger;
-  subCasesEnabled: boolean;
 }
 
 export const push = async ({
@@ -82,7 +82,6 @@ export const push = async ({
   caseId,
   user,
   logger,
-  subCasesEnabled,
 }: PushParams): Promise<CaseResponse> => {
   /* Start of push to external service */
   let theCase: CaseResponse;
@@ -97,7 +96,7 @@ export const push = async ({
       casesClient.get({
         id: caseId,
         includeComments: true,
-        includeSubCaseComments: subCasesEnabled,
+        includeSubCaseComments: ENABLE_SUB_CASES,
       }),
       actionsClient.get({ id: connectorId }),
       casesClient.getUserActions({ caseId }),
@@ -189,7 +188,7 @@ export const push = async ({
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },
-        includeSubCaseComments: subCasesEnabled,
+        includeSubCaseComments: ENABLE_SUB_CASES,
       }),
     ]);
   } catch (e) {

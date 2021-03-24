@@ -27,6 +27,7 @@ import * as i18n from './translations';
 import { GetActionTypeParams, isCommentGeneratedAlert, separator } from '..';
 import { nullUser } from '../../common';
 import { createCaseError } from '../../common/error';
+import { ENABLE_SUB_CASES } from '../../../common/constants';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
@@ -70,6 +71,12 @@ async function executor(
   }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
+  if (!ENABLE_SUB_CASES) {
+    const msg = '[Action][Case] connector not supported';
+    logger.error(msg);
+    throw new Error(msg);
+  }
+
   const { actionId, params, services } = execOptions;
   const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;
@@ -86,9 +93,6 @@ async function executor(
     userActionService,
     alertsService,
     logger,
-    // sub-cases-enabled: force this to true because we should never be able to call execute if the feature is disabled in the first
-    // place. The plugin won't register case as a connector if subCasesEnabled is false.
-    subCasesEnabled: true,
   });
 
   if (!supportedSubActions.includes(subAction)) {

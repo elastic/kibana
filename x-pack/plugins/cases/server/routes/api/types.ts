@@ -23,8 +23,6 @@ export interface RouteDeps {
   router: CasesRouter;
   userActionService: CaseUserActionServiceSetup;
   logger: Logger;
-  // sub-cases-disabled: remove once sub cases feature is enabled
-  subCasesEnabled: boolean;
 }
 
 export enum SortFieldCase {

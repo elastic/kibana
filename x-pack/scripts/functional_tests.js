@@ -32,7 +32,6 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
   require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/case_api_integration/basic/config.ts'),
-  require.resolve('../test/case_api_no_sub_cases_integration/basic/config.ts'),
   require.resolve('../test/apm_api_integration/basic/config.ts'),
   require.resolve('../test/apm_api_integration/trial/config.ts'),
   require.resolve('../test/detection_engine_api_integration/security_and_spaces/config.ts'),

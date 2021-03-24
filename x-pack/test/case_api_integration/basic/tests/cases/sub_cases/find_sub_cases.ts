@@ -29,226 +29,234 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('find_sub_cases', () => {
-    let actionID: string;
-    before(async () => {
-      actionID = await createCaseAction(supertest);
-    });
-    after(async () => {
-      await deleteCaseAction(supertest, actionID);
-    });
-    afterEach(async () => {
-      await deleteAllCaseItems(es);
+  // ENABLE_SUB_CASES: remove this outer describe once the case connector feature is completed
+  describe('find_sub_cases disabled route', () => {
+    it('should return a 404 when attempting to access the route and the case connector feature is disabled', async () => {
+      await supertest.get(`${getSubCasesUrl('case-id')}/_find`).expect(404);
     });
 
-    it('should not find any sub cases when none exist', async () => {
-      const { body: caseResp }: { body: CaseResponse } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCollectionReq)
-        .expect(200);
-
-      const { body: findSubCases } = await supertest
-        .get(`${getSubCasesUrl(caseResp.id)}/_find`)
-        .expect(200);
-
-      expect(findSubCases).to.eql({
-        page: 1,
-        per_page: 20,
-        total: 0,
-        subCases: [],
-        count_open_cases: 0,
-        count_closed_cases: 0,
-        count_in_progress_cases: 0,
+    // ENABLE_SUB_CASES: once the case connector feature is completed unskip these tests
+    describe.skip('find_sub_cases', () => {
+      let actionID: string;
+      before(async () => {
+        actionID = await createCaseAction(supertest);
       });
-    });
-
-    it('should return a sub cases with comment stats', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-
-      const { body }: { body: SubCasesFindResponse } = await supertest
-        .get(`${getSubCasesUrl(caseInfo.id)}/_find`)
-        .expect(200);
-
-      expect(body).to.eql({
-        ...findSubCasesResp,
-        total: 1,
-        // find should not return the comments themselves only the stats
-        subCases: [{ ...caseInfo.subCases![0], comments: [], totalComment: 1, totalAlerts: 2 }],
-        count_open_cases: 1,
+      after(async () => {
+        await deleteCaseAction(supertest, actionID);
       });
-    });
-
-    it('should return multiple sub cases', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      const subCase2Resp = await createSubCase({ supertest, caseID: caseInfo.id, actionID });
-
-      const { body }: { body: SubCasesFindResponse } = await supertest
-        .get(`${getSubCasesUrl(caseInfo.id)}/_find`)
-        .expect(200);
-
-      expect(body).to.eql({
-        ...findSubCasesResp,
-        total: 2,
-        // find should not return the comments themselves only the stats
-        subCases: [
-          {
-            // there should only be 1 closed sub case
-            ...subCase2Resp.modifiedSubCases![0],
-            comments: [],
-            totalComment: 1,
-            totalAlerts: 2,
-            status: CaseStatuses.closed,
-          },
-          {
-            ...subCase2Resp.newSubCaseInfo.subCases![0],
-            comments: [],
-            totalComment: 1,
-            totalAlerts: 2,
-          },
-        ],
-        count_open_cases: 1,
-        count_closed_cases: 1,
-      });
-    });
-
-    it('should only return open when filtering for open', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      // this will result in one closed case and one open
-      await createSubCase({ supertest, caseID: caseInfo.id, actionID });
-
-      const { body }: { body: SubCasesFindResponse } = await supertest
-        .get(`${getSubCasesUrl(caseInfo.id)}/_find?status=${CaseStatuses.open}`)
-        .expect(200);
-
-      expect(body.total).to.be(1);
-      expect(body.subCases[0].status).to.be(CaseStatuses.open);
-      expect(body.count_closed_cases).to.be(1);
-      expect(body.count_open_cases).to.be(1);
-      expect(body.count_in_progress_cases).to.be(0);
-    });
-
-    it('should only return closed when filtering for closed', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      // this will result in one closed case and one open
-      await createSubCase({ supertest, caseID: caseInfo.id, actionID });
-
-      const { body }: { body: SubCasesFindResponse } = await supertest
-        .get(`${getSubCasesUrl(caseInfo.id)}/_find?status=${CaseStatuses.closed}`)
-        .expect(200);
-
-      expect(body.total).to.be(1);
-      expect(body.subCases[0].status).to.be(CaseStatuses.closed);
-      expect(body.count_closed_cases).to.be(1);
-      expect(body.count_open_cases).to.be(1);
-      expect(body.count_in_progress_cases).to.be(0);
-    });
-
-    it('should only return in progress when filtering for in progress', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      // this will result in one closed case and one open
-      const { newSubCaseInfo: secondSub } = await createSubCase({
-        supertest,
-        caseID: caseInfo.id,
-        actionID,
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
       });
 
-      await setStatus({
-        supertest,
-        cases: [
-          {
-            id: secondSub.subCases![0].id,
-            version: secondSub.subCases![0].version,
-            status: CaseStatuses['in-progress'],
-          },
-        ],
-        type: 'sub_case',
+      it('should not find any sub cases when none exist', async () => {
+        const { body: caseResp }: { body: CaseResponse } = await supertest
+          .post(CASES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(postCollectionReq)
+          .expect(200);
+
+        const { body: findSubCases } = await supertest
+          .get(`${getSubCasesUrl(caseResp.id)}/_find`)
+          .expect(200);
+
+        expect(findSubCases).to.eql({
+          page: 1,
+          per_page: 20,
+          total: 0,
+          subCases: [],
+          count_open_cases: 0,
+          count_closed_cases: 0,
+          count_in_progress_cases: 0,
+        });
       });
 
-      const { body }: { body: SubCasesFindResponse } = await supertest
-        .get(`${getSubCasesUrl(caseInfo.id)}/_find?status=${CaseStatuses['in-progress']}`)
-        .expect(200);
+      it('should return a sub cases with comment stats', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
 
-      expect(body.total).to.be(1);
-      expect(body.subCases[0].status).to.be(CaseStatuses['in-progress']);
-      expect(body.count_closed_cases).to.be(1);
-      expect(body.count_open_cases).to.be(0);
-      expect(body.count_in_progress_cases).to.be(1);
-    });
+        const { body }: { body: SubCasesFindResponse } = await supertest
+          .get(`${getSubCasesUrl(caseInfo.id)}/_find`)
+          .expect(200);
 
-    it('should sort on createdAt field in descending order', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      // this will result in one closed case and one open
-      await createSubCase({
-        supertest,
-        caseID: caseInfo.id,
-        actionID,
+        expect(body).to.eql({
+          ...findSubCasesResp,
+          total: 1,
+          // find should not return the comments themselves only the stats
+          subCases: [{ ...caseInfo.subCases![0], comments: [], totalComment: 1, totalAlerts: 2 }],
+          count_open_cases: 1,
+        });
       });
 
-      const { body }: { body: SubCasesFindResponse } = await supertest
-        .get(`${getSubCasesUrl(caseInfo.id)}/_find?sortField=createdAt&sortOrder=desc`)
-        .expect(200);
+      it('should return multiple sub cases', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        const subCase2Resp = await createSubCase({ supertest, caseID: caseInfo.id, actionID });
 
-      expect(body.total).to.be(2);
-      expect(body.subCases[0].status).to.be(CaseStatuses.open);
-      expect(body.subCases[1].status).to.be(CaseStatuses.closed);
-      expect(body.count_closed_cases).to.be(1);
-      expect(body.count_open_cases).to.be(1);
-      expect(body.count_in_progress_cases).to.be(0);
-    });
+        const { body }: { body: SubCasesFindResponse } = await supertest
+          .get(`${getSubCasesUrl(caseInfo.id)}/_find`)
+          .expect(200);
 
-    it('should sort on createdAt field in ascending order', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      // this will result in one closed case and one open
-      await createSubCase({
-        supertest,
-        caseID: caseInfo.id,
-        actionID,
+        expect(body).to.eql({
+          ...findSubCasesResp,
+          total: 2,
+          // find should not return the comments themselves only the stats
+          subCases: [
+            {
+              // there should only be 1 closed sub case
+              ...subCase2Resp.modifiedSubCases![0],
+              comments: [],
+              totalComment: 1,
+              totalAlerts: 2,
+              status: CaseStatuses.closed,
+            },
+            {
+              ...subCase2Resp.newSubCaseInfo.subCases![0],
+              comments: [],
+              totalComment: 1,
+              totalAlerts: 2,
+            },
+          ],
+          count_open_cases: 1,
+          count_closed_cases: 1,
+        });
       });
 
-      const { body }: { body: SubCasesFindResponse } = await supertest
-        .get(`${getSubCasesUrl(caseInfo.id)}/_find?sortField=createdAt&sortOrder=asc`)
-        .expect(200);
+      it('should only return open when filtering for open', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        // this will result in one closed case and one open
+        await createSubCase({ supertest, caseID: caseInfo.id, actionID });
 
-      expect(body.total).to.be(2);
-      expect(body.subCases[0].status).to.be(CaseStatuses.closed);
-      expect(body.subCases[1].status).to.be(CaseStatuses.open);
-      expect(body.count_closed_cases).to.be(1);
-      expect(body.count_open_cases).to.be(1);
-      expect(body.count_in_progress_cases).to.be(0);
-    });
+        const { body }: { body: SubCasesFindResponse } = await supertest
+          .get(`${getSubCasesUrl(caseInfo.id)}/_find?status=${CaseStatuses.open}`)
+          .expect(200);
 
-    it('should sort on updatedAt field in ascending order', async () => {
-      const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
-      // this will result in one closed case and one open
-      const { newSubCaseInfo: secondSub } = await createSubCase({
-        supertest,
-        caseID: caseInfo.id,
-        actionID,
+        expect(body.total).to.be(1);
+        expect(body.subCases[0].status).to.be(CaseStatuses.open);
+        expect(body.count_closed_cases).to.be(1);
+        expect(body.count_open_cases).to.be(1);
+        expect(body.count_in_progress_cases).to.be(0);
       });
 
-      await setStatus({
-        supertest,
-        cases: [
-          {
-            id: secondSub.subCases![0].id,
-            version: secondSub.subCases![0].version,
-            status: CaseStatuses['in-progress'],
-          },
-        ],
-        type: 'sub_case',
+      it('should only return closed when filtering for closed', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        // this will result in one closed case and one open
+        await createSubCase({ supertest, caseID: caseInfo.id, actionID });
+
+        const { body }: { body: SubCasesFindResponse } = await supertest
+          .get(`${getSubCasesUrl(caseInfo.id)}/_find?status=${CaseStatuses.closed}`)
+          .expect(200);
+
+        expect(body.total).to.be(1);
+        expect(body.subCases[0].status).to.be(CaseStatuses.closed);
+        expect(body.count_closed_cases).to.be(1);
+        expect(body.count_open_cases).to.be(1);
+        expect(body.count_in_progress_cases).to.be(0);
       });
 
-      const { body }: { body: SubCasesFindResponse } = await supertest
-        .get(`${getSubCasesUrl(caseInfo.id)}/_find?sortField=updatedAt&sortOrder=asc`)
-        .expect(200);
+      it('should only return in progress when filtering for in progress', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        // this will result in one closed case and one open
+        const { newSubCaseInfo: secondSub } = await createSubCase({
+          supertest,
+          caseID: caseInfo.id,
+          actionID,
+        });
 
-      expect(body.total).to.be(2);
-      expect(body.subCases[0].status).to.be(CaseStatuses.closed);
-      expect(body.subCases[1].status).to.be(CaseStatuses['in-progress']);
-      expect(body.count_closed_cases).to.be(1);
-      expect(body.count_open_cases).to.be(0);
-      expect(body.count_in_progress_cases).to.be(1);
+        await setStatus({
+          supertest,
+          cases: [
+            {
+              id: secondSub.subCases![0].id,
+              version: secondSub.subCases![0].version,
+              status: CaseStatuses['in-progress'],
+            },
+          ],
+          type: 'sub_case',
+        });
+
+        const { body }: { body: SubCasesFindResponse } = await supertest
+          .get(`${getSubCasesUrl(caseInfo.id)}/_find?status=${CaseStatuses['in-progress']}`)
+          .expect(200);
+
+        expect(body.total).to.be(1);
+        expect(body.subCases[0].status).to.be(CaseStatuses['in-progress']);
+        expect(body.count_closed_cases).to.be(1);
+        expect(body.count_open_cases).to.be(0);
+        expect(body.count_in_progress_cases).to.be(1);
+      });
+
+      it('should sort on createdAt field in descending order', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        // this will result in one closed case and one open
+        await createSubCase({
+          supertest,
+          caseID: caseInfo.id,
+          actionID,
+        });
+
+        const { body }: { body: SubCasesFindResponse } = await supertest
+          .get(`${getSubCasesUrl(caseInfo.id)}/_find?sortField=createdAt&sortOrder=desc`)
+          .expect(200);
+
+        expect(body.total).to.be(2);
+        expect(body.subCases[0].status).to.be(CaseStatuses.open);
+        expect(body.subCases[1].status).to.be(CaseStatuses.closed);
+        expect(body.count_closed_cases).to.be(1);
+        expect(body.count_open_cases).to.be(1);
+        expect(body.count_in_progress_cases).to.be(0);
+      });
+
+      it('should sort on createdAt field in ascending order', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        // this will result in one closed case and one open
+        await createSubCase({
+          supertest,
+          caseID: caseInfo.id,
+          actionID,
+        });
+
+        const { body }: { body: SubCasesFindResponse } = await supertest
+          .get(`${getSubCasesUrl(caseInfo.id)}/_find?sortField=createdAt&sortOrder=asc`)
+          .expect(200);
+
+        expect(body.total).to.be(2);
+        expect(body.subCases[0].status).to.be(CaseStatuses.closed);
+        expect(body.subCases[1].status).to.be(CaseStatuses.open);
+        expect(body.count_closed_cases).to.be(1);
+        expect(body.count_open_cases).to.be(1);
+        expect(body.count_in_progress_cases).to.be(0);
+      });
+
+      it('should sort on updatedAt field in ascending order', async () => {
+        const { newSubCaseInfo: caseInfo } = await createSubCase({ supertest, actionID });
+        // this will result in one closed case and one open
+        const { newSubCaseInfo: secondSub } = await createSubCase({
+          supertest,
+          caseID: caseInfo.id,
+          actionID,
+        });
+
+        await setStatus({
+          supertest,
+          cases: [
+            {
+              id: secondSub.subCases![0].id,
+              version: secondSub.subCases![0].version,
+              status: CaseStatuses['in-progress'],
+            },
+          ],
+          type: 'sub_case',
+        });
+
+        const { body }: { body: SubCasesFindResponse } = await supertest
+          .get(`${getSubCasesUrl(caseInfo.id)}/_find?sortField=updatedAt&sortOrder=asc`)
+          .expect(200);
+
+        expect(body.total).to.be(2);
+        expect(body.subCases[0].status).to.be(CaseStatuses.closed);
+        expect(body.subCases[1].status).to.be(CaseStatuses['in-progress']);
+        expect(body.count_closed_cases).to.be(1);
+        expect(body.count_open_cases).to.be(0);
+        expect(body.count_in_progress_cases).to.be(1);
+      });
     });
   });
 };

@@ -19,7 +19,7 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_obje
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { CASE_COMMENTS_URL, ENABLE_SUB_CASES } from '../../../../../common/constants';
 import { CaseServiceSetup } from '../../../../services';
 
 interface CombinedCaseParams {
@@ -64,23 +64,7 @@ async function getCommentableCase({
   }
 }
 
-export function initPatchCommentApi({
-  caseService,
-  router,
-  userActionService,
-  logger,
-  subCasesEnabled,
-}: RouteDeps) {
-  const querySchema = subCasesEnabled
-    ? {
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
-      }
-    : {};
-
+export function initPatchCommentApi({ caseService, router, userActionService, logger }: RouteDeps) {
   router.patch(
     {
       path: CASE_COMMENTS_URL,
@@ -88,12 +72,22 @@ export function initPatchCommentApi({
         params: schema.object({
           case_id: schema.string(),
         }),
-        ...querySchema,
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
         body: escapeHatch,
       },
     },
     async (context, request, response) => {
       try {
+        if (!ENABLE_SUB_CASES && request.query?.subCaseId !== undefined) {
+          throw Boom.badRequest(
+            'The `subCaseId` is not supported when the case connector feature is disabled'
+          );
+        }
+
         const client = context.core.savedObjects.client;
         const query = pipe(
           CommentPatchRequestRt.decode(request.body),

@@ -5,26 +5,17 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { AllCommentsResponseRt, CommentAttributes } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenCommentSavedObjects, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { CASE_COMMENTS_URL, ENABLE_SUB_CASES } from '../../../../../common/constants';
 import { defaultSortField } from '../../../../common';
 
-export function initGetAllCommentsApi({ caseService, router, logger, subCasesEnabled }: RouteDeps) {
-  const querySchema = subCasesEnabled
-    ? {
-        query: schema.maybe(
-          schema.object({
-            includeSubCaseComments: schema.maybe(schema.boolean()),
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
-      }
-    : {};
+export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_COMMENTS_URL,
@@ -32,13 +23,28 @@ export function initGetAllCommentsApi({ caseService, router, logger, subCasesEna
         params: schema.object({
           case_id: schema.string(),
         }),
-        ...querySchema,
+        query: schema.maybe(
+          schema.object({
+            includeSubCaseComments: schema.maybe(schema.boolean()),
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
       },
     },
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
         let comments: SavedObjectsFindResponse<CommentAttributes>;
+
+        if (
+          !ENABLE_SUB_CASES &&
+          (request.query?.subCaseId !== undefined ||
+            request.query?.includeSubCaseComments !== undefined)
+        ) {
+          throw Boom.badRequest(
+            'The `subCaseId` and `includeSubCaseComments` are not supported when the case connector feature is disabled'
+          );
+        }
 
         if (request.query?.subCaseId) {
           comments = await caseService.getAllSubCaseComments({

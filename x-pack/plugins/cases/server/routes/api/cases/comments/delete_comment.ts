@@ -12,24 +12,14 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_obje
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
+import { CASE_COMMENT_DETAILS_URL, ENABLE_SUB_CASES } from '../../../../../common/constants';
 
 export function initDeleteCommentApi({
   caseService,
   router,
   userActionService,
   logger,
-  subCasesEnabled,
 }: RouteDeps) {
-  const querySchema = subCasesEnabled
-    ? {
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
-      }
-    : {};
   router.delete(
     {
       path: CASE_COMMENT_DETAILS_URL,
@@ -38,11 +28,21 @@ export function initDeleteCommentApi({
           case_id: schema.string(),
           comment_id: schema.string(),
         }),
-        ...querySchema,
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
       },
     },
     async (context, request, response) => {
       try {
+        if (!ENABLE_SUB_CASES && request.query?.subCaseId !== undefined) {
+          throw Boom.badRequest(
+            'The `subCaseId` is not supported when the case connector feature is disabled'
+          );
+        }
+
         const client = context.core.savedObjects.client;
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request });

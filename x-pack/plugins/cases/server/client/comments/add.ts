@@ -36,7 +36,7 @@ import { CommentableCase, createAlertUpdateRequest } from '../../common';
 import { CasesClientHandler } from '..';
 import { createCaseError } from '../../common/error';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../saved_object_types';
-import { MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
+import { ENABLE_SUB_CASES, MAX_GENERATED_ALERTS_PER_SUB_CASE } from '../../../common/constants';
 
 async function getSubCase({
   caseService,
@@ -213,27 +213,25 @@ async function getCombinedCase({
   client,
   id,
   logger,
-  subCasesEnabled,
 }: {
   service: CaseServiceSetup;
   client: SavedObjectsClientContract;
   id: string;
   logger: Logger;
-  subCasesEnabled: boolean;
 }): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
     service.getCase({
       client,
       id,
     }),
-    ...(subCasesEnabled
+    ...(ENABLE_SUB_CASES
       ? [
           service.getSubCase({
             client,
             id,
           }),
         ]
-      : [Promise.reject('sub cases are disabled')]),
+      : [Promise.reject('case connector feature is disabled')]),
   ]);
 
   if (subCasePromise.status === 'fulfilled') {
@@ -275,7 +273,6 @@ interface AddCommentArgs {
   userActionService: CaseUserActionServiceSetup;
   user: User;
   logger: Logger;
-  subCasesEnabled: boolean;
 }
 
 export const addComment = async ({
@@ -287,7 +284,6 @@ export const addComment = async ({
   comment,
   user,
   logger,
-  subCasesEnabled,
 }: AddCommentArgs): Promise<CaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
@@ -295,8 +291,10 @@ export const addComment = async ({
   );
 
   if (isCommentRequestTypeGenAlert(comment)) {
-    if (!subCasesEnabled) {
-      throw Boom.badRequest('Attempting to add a generated alert when sub cases are disabled');
+    if (!ENABLE_SUB_CASES) {
+      throw Boom.badRequest(
+        'Attempting to add a generated alert when case connector feature is disabled'
+      );
     }
 
     return addGeneratedAlerts({
@@ -319,7 +317,6 @@ export const addComment = async ({
       client: savedObjectsClient,
       id: caseId,
       logger,
-      subCasesEnabled,
     });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention

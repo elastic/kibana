@@ -55,6 +55,7 @@ import { CasesClientHandler } from '..';
 import { createAlertUpdateRequest } from '../../common';
 import { UpdateAlertRequest } from '../types';
 import { createCaseError } from '../../common/error';
+import { ENABLE_SUB_CASES } from '../../../common/constants';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -336,7 +337,6 @@ interface UpdateArgs {
   casesClient: CasesClientHandler;
   cases: CasesPatchRequest;
   logger: Logger;
-  subCasesEnabled: boolean;
 }
 
 export const update = async ({
@@ -347,7 +347,6 @@ export const update = async ({
   casesClient,
   cases,
   logger,
-  subCasesEnabled,
 }: UpdateArgs): Promise<CasesResponse> => {
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
@@ -414,7 +413,7 @@ export const update = async ({
       return acc;
     }, new Map<string, SavedObject<ESCaseAttributes>>());
 
-    if (!subCasesEnabled) {
+    if (!ENABLE_SUB_CASES) {
       throwIfUpdateType(updateFilterCases);
     }
 

@@ -34,6 +34,7 @@ import {
   caseTypeField,
   CasesFindRequest,
 } from '../../common/api';
+import { ENABLE_SUB_CASES } from '../../common/constants';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
 import {
@@ -251,13 +252,11 @@ export interface CaseServiceSetup {
     client: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptions;
     subCaseOptions?: SavedObjectFindOptions;
-    subCasesEnabled: boolean;
   }): Promise<number>;
   findCasesGroupedByID(args: {
     client: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptions;
     subCaseOptions?: SavedObjectFindOptions;
-    subCasesEnabled: boolean;
   }): Promise<CasesMapWithPageInfo>;
 }
 
@@ -274,19 +273,17 @@ export class CaseService implements CaseServiceSetup {
     client,
     caseOptions,
     subCaseOptions,
-    subCasesEnabled,
   }: {
     client: SavedObjectsClientContract;
     caseOptions: FindCaseOptions;
     subCaseOptions?: SavedObjectFindOptions;
-    subCasesEnabled: boolean;
   }): Promise<CasesMapWithPageInfo> {
     const cases = await this.findCases({
       client,
       options: caseOptions,
     });
 
-    const subCasesResp = subCasesEnabled
+    const subCasesResp = ENABLE_SUB_CASES
       ? await this.findSubCasesGroupByCase({
           client,
           options: subCaseOptions,
@@ -362,12 +359,10 @@ export class CaseService implements CaseServiceSetup {
     client,
     caseOptions,
     subCaseOptions,
-    subCasesEnabled,
   }: {
     client: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptions;
     subCaseOptions?: SavedObjectFindOptions;
-    subCasesEnabled: boolean;
   }): Promise<number> {
     const casesStats = await this.findCases({
       client,
@@ -415,7 +410,7 @@ export class CaseService implements CaseServiceSetup {
 
     let subCasesTotal = 0;
 
-    if (subCasesEnabled && subCaseOptions) {
+    if (ENABLE_SUB_CASES && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
         client,
         options: subCaseOptions,

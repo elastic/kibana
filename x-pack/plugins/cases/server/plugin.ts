@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
-import { APP_ID } from '../common/constants';
+import { APP_ID, ENABLE_SUB_CASES } from '../common/constants';
 
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
@@ -109,10 +109,9 @@ export class CasePlugin {
       connectorMappingsService: this.connectorMappingsService,
       userActionService: this.userActionService,
       router,
-      subCasesEnabled: this.config.subCasesEnabled,
     });
 
-    if (this.config.subCasesEnabled) {
+    if (ENABLE_SUB_CASES) {
       core.savedObjects.registerType(subCaseSavedObjectType);
       registerConnectors({
         actionsRegisterType: plugins.actions.registerType,
@@ -144,7 +143,6 @@ export class CasePlugin {
         userActionService: this.userActionService!,
         alertsService: this.alertsService!,
         logger: this.log,
-        subCasesEnabled: this.config?.subCasesEnabled ?? false,
       });
     };
 
@@ -189,7 +187,6 @@ export class CasePlugin {
             alertsService,
             user,
             logger,
-            subCasesEnabled: this.config?.subCasesEnabled ?? false,
           });
         },
       };
