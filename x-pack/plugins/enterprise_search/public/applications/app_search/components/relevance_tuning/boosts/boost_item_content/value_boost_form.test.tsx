@@ -50,20 +50,6 @@ describe('ValueBoostForm', () => {
     expect(valueInput(wrapper, 2).prop('value')).toEqual('baz');
   });
 
-  it('renders a single empty text box if the boost has no value', () => {
-    const wrapper = shallow(
-      <ValueBoostForm
-        boost={{
-          ...boost,
-          value: undefined,
-        }}
-        index={3}
-        name="foo"
-      />
-    );
-    expect(valueInput(wrapper, 0).prop('value')).toEqual('');
-  });
-
   it('updates the corresponding value in state whenever a user changes the value in a text input', () => {
     const wrapper = shallow(<ValueBoostForm boost={boost} index={3} name="foo" />);
 
