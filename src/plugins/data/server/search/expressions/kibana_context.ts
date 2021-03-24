@@ -32,7 +32,8 @@ export function getKibanaContext({
   getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>;
 }) {
   return getKibanaContextFn(async (getKibanaRequest) => {
-    if (!getKibanaRequest || !getKibanaRequest()) {
+    const request = getKibanaRequest && getKibanaRequest();
+    if (!request) {
       throw new Error(
         i18n.translate('data.search.kibana_context.error.kibanaRequest', {
           defaultMessage:
@@ -45,7 +46,7 @@ export function getKibanaContext({
     const [{ savedObjects }] = await getStartServices();
     return {
       savedObjectsClient: (savedObjects.getScopedClient(
-        getKibanaRequest()
+        request
       ) as any) as SavedObjectsClientCommon,
     };
   });

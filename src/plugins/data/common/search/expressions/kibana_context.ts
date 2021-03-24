@@ -94,7 +94,7 @@ export const getKibanaContextFn = (
 
     extract(state) {
       const references: SavedObjectReference[] = [];
-      if (state.savedSearchId.length && typeof state.savedeSearchId[0] === 'string') {
+      if (state.savedSearchId.length && typeof state.savedSearchId[0] === 'string') {
         const refName = 'kibana_context.savedSearchId';
         references.push({
           name: refName,
