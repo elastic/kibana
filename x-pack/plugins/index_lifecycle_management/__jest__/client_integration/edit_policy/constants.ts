@@ -13,26 +13,6 @@ export const POLICY_NAME = 'my_policy';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
 
-export const DEFAULT_POLICY: PolicyFromES = {
-  version: 1,
-  modified_date: Date.now().toString(),
-  policy: {
-    name: 'my_policy',
-    phases: {
-      hot: {
-        min_age: '0ms',
-        actions: {
-          rollover: {
-            max_age: '30d',
-            max_size: '50gb',
-          },
-        },
-      },
-    },
-  },
-  name: 'my_policy',
-};
-
 export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
   version: 1,
   modified_date: Date.now().toString(),
@@ -191,6 +171,7 @@ export const POLICY_WITH_NODE_ROLE_ALLOCATION: PolicyFromES = {
         },
       },
       warm: {
+        min_age: '0ms',
         actions: {},
       },
     },

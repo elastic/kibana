@@ -18,7 +18,11 @@ import {
   TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
@@ -26,19 +30,21 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function getTransactionBreakdown({
   environment,
+  kuery,
   setup,
   serviceName,
   transactionName,
   transactionType,
 }: {
   environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   transactionName?: string;
   transactionType: string;
 }) {
   return withApmSpan('get_transaction_breakdown', async () => {
-    const { esFilter, apmEventClient, start, end, config } = setup;
+    const { apmEventClient, start, end, config } = setup;
 
     const subAggs = {
       sum_all_self_times: {
@@ -86,7 +92,16 @@ export function getTransactionBreakdown({
       { term: { [TRANSACTION_TYPE]: transactionType } },
       ...rangeQuery(start, end),
       ...environmentQuery(environment),
-      ...esFilter,
+      ...kqlQuery(kuery),
+      {
+        bool: {
+          should: [
+            { exists: { field: SPAN_SELF_TIME_SUM } },
+            { exists: { field: TRANSACTION_BREAKDOWN_COUNT } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
     ];
 
     if (transactionName) {

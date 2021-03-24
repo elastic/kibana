@@ -6,7 +6,7 @@
  */
 
 import type { AuthenticationProvider } from '../../common/model';
-import { LegacyAuditLogger } from './audit_service';
+import type { LegacyAuditLogger } from './audit_service';
 
 /**
  * @deprecated

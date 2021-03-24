@@ -18,7 +18,7 @@ interface JobSelection {
 }
 
 export interface JobSelectorControlProps {
-  jobSelection?: JobSelection;
+  jobsAndGroupIds?: string[];
   onChange: (jobSelection: JobSelection) => void;
   adJobsApiService: MlApiServices['jobs'];
   /**
@@ -28,7 +28,7 @@ export interface JobSelectorControlProps {
 }
 
 export const JobSelectorControl: FC<JobSelectorControlProps> = ({
-  jobSelection,
+  jobsAndGroupIds,
   onChange,
   adJobsApiService,
   errors,
@@ -36,6 +36,14 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const jobIds = useMemo(() => new Set(), []);
   const groupIds = useMemo(() => new Set(), []);
+
+  const selectedOptions = useMemo(
+    () =>
+      (jobsAndGroupIds ?? []).map((v) => ({
+        label: v,
+      })),
+    [jobsAndGroupIds]
+  );
 
   const fetchOptions = useCallback(async () => {
     try {
@@ -71,10 +79,10 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   }, [adJobsApiService]);
 
   const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
-    (selectedOptions) => {
+    (selectionUpdate) => {
       const selectedJobIds: JobId[] = [];
       const selectedGroupIds: string[] = [];
-      selectedOptions.forEach(({ label }: { label: string }) => {
+      selectionUpdate.forEach(({ label }: { label: string }) => {
         if (jobIds.has(label)) {
           selectedJobIds.push(label);
         } else if (groupIds.has(label)) {
@@ -92,12 +100,6 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   useEffect(() => {
     fetchOptions();
   }, []);
-
-  const selectedOptions = Object.values(jobSelection ?? {})
-    .flat()
-    .map((v) => ({
-      label: v,
-    }));
 
   return (
     <EuiFormRow

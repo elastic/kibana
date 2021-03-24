@@ -46,7 +46,6 @@ describe('TableVisualizationComponent', () => {
     );
     expect(useUiState).toHaveBeenLastCalledWith(handlers.uiState);
     expect(comp.find('.tbvChart__splitColumns').exists()).toBeFalsy();
-    expect(comp.find('.tbvChart__split').exists()).toBeTruthy();
   });
 
   it('should render split table', () => {

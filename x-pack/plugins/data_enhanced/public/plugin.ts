@@ -92,6 +92,7 @@ export class DataEnhancedPlugin
             createConnectedSearchSessionIndicator({
               sessionService: plugins.data.search.session,
               application: core.application,
+              basePath: core.http.basePath,
               timeFilter: plugins.data.query.timefilter.timefilter,
               storage: this.storage,
               disableSaveAfterSessionCompletesTimeout: moment

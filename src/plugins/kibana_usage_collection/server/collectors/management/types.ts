@@ -30,6 +30,7 @@ export interface UsageStats {
   'securitySolution:rulesTableRefresh': string;
   'apm:enableSignificantTerms': boolean;
   'apm:enableServiceOverview': boolean;
+  'observability:enableAlertingExperience': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -68,12 +69,11 @@ export interface UsageStats {
   'discover:sampleSize': number;
   defaultColumns: string[];
   'context:defaultSize': number;
-  'discover:aggs:terms:size': number;
   'context:tieBreakerFields': string[];
   'discover:sort:defaultOrder': string;
   'context:step': number;
   'accessibility:disableAnimations': boolean;
-  'ml:fileDataVisualizerMaxFileSize': string;
+  'fileUpload:maxFileSize': string;
   'ml:anomalyDetection:results:enableTimeDefaults': boolean;
   'ml:anomalyDetection:results:timeDefaults': string;
   'truncate:maxHeight': number;

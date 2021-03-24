@@ -141,13 +141,7 @@ def collectVcsInfo(title) {
 def generateReports(title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh true
-    # bootstrap from x-pack folder
-    cd x-pack
-    yarn kbn bootstrap
-    # Return to project root
-    cd ..
     . src/dev/code_coverage/shell_scripts/extract_archives.sh
-    . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
     . src/dev/code_coverage/shell_scripts/merge_functional.sh
     . src/dev/code_coverage/shell_scripts/copy_jest_report.sh
     # zip functional combined report

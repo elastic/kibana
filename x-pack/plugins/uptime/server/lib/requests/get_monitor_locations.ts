@@ -8,7 +8,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorLocations, MonitorLocation } from '../../../common/runtime_types';
 import { UNNAMED_LOCATION } from '../../../common/constants';
-import { SortOptions } from '../../../../../typings/elasticsearch';
+import { SortOptions } from '../../../../../../typings/elasticsearch';
 
 /**
  * Fetch data for the monitor page title.

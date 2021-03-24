@@ -6,6 +6,7 @@
  */
 
 import { ValuesType } from 'utility-types';
+import { Profile } from '../../../../../typings/es_schemas/ui/profile';
 import {
   ElasticsearchClient,
   KibanaRequest,
@@ -13,7 +14,7 @@ import {
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../../../typings/elasticsearch';
+} from '../../../../../../../../typings/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -43,6 +44,7 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
+  profile: Profile;
 }[T];
 
 type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<

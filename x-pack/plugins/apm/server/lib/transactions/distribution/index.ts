@@ -20,6 +20,7 @@ function getBucketSize(max: number) {
 }
 
 export async function getTransactionDistribution({
+  kuery,
   environment,
   serviceName,
   transactionName,
@@ -30,6 +31,7 @@ export async function getTransactionDistribution({
   searchAggregatedTransactions,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   transactionName: string;
   transactionType: string;
@@ -41,6 +43,7 @@ export async function getTransactionDistribution({
   return withApmSpan('get_transaction_latency_distribution', async () => {
     const distributionMax = await getDistributionMax({
       environment,
+      kuery,
       serviceName,
       transactionName,
       transactionType,
@@ -56,6 +59,7 @@ export async function getTransactionDistribution({
 
     const { buckets, noHits } = await getBuckets({
       environment,
+      kuery,
       serviceName,
       transactionName,
       transactionType,

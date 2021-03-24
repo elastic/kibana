@@ -9,22 +9,81 @@ import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/case/common/constants';
+import { Explanation, SearchResponse } from 'elasticsearch';
+import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/cases/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
   CaseConnector,
   ConnectorTypes,
   CasePostRequest,
-  CollectionWithSubCaseResponse,
+  CaseResponse,
   SubCasesFindResponse,
   CaseStatuses,
   SubCasesResponse,
   CasesResponse,
-} from '../../../../plugins/case/common/api';
+} from '../../../../plugins/cases/common/api';
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getSubCasesUrl } from '../../../../plugins/case/common/api/helpers';
-import { ContextTypeGeneratedAlertType } from '../../../../plugins/case/server/connectors';
+import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
+import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
+import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+
+interface Hit<T> {
+  _index: string;
+  _type: string;
+  _id: string;
+  _score: number;
+  _source: T;
+  _version?: number;
+  _explanation?: Explanation;
+  fields?: any;
+  highlight?: any;
+  inner_hits?: any;
+  matched_queries?: string[];
+  sort?: string[];
+}
+
+/**
+ * Query Elasticsearch for a set of signals within a set of indices
+ */
+export const getSignalsWithES = async ({
+  es,
+  indices,
+  ids,
+}: {
+  es: Client;
+  indices: string | string[];
+  ids: string | string[];
+}): Promise<Map<string, Map<string, Hit<SignalHit>>>> => {
+  const signals = await es.search<SearchResponse<SignalHit>>({
+    index: indices,
+    body: {
+      size: 10000,
+      query: {
+        bool: {
+          filter: [
+            {
+              ids: {
+                values: ids,
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  return signals.body.hits.hits.reduce((acc, hit) => {
+    let indexMap = acc.get(hit._index);
+    if (indexMap === undefined) {
+      indexMap = new Map<string, Hit<SignalHit>>([[hit._id, hit]]);
+    } else {
+      indexMap.set(hit._id, hit);
+    }
+    acc.set(hit._index, indexMap);
+    return acc;
+  }, new Map<string, Map<string, Hit<SignalHit>>>());
+};
 
 interface SetStatusCasesParams {
   id: string;
@@ -68,7 +127,7 @@ export const defaultCreateSubPost = postCollectionReq;
  * Response structure for the createSubCase and createSubCaseComment functions.
  */
 export interface CreateSubCaseResp {
-  newSubCaseInfo: CollectionWithSubCaseResponse;
+  newSubCaseInfo: CaseResponse;
   modifiedSubCases?: SubCasesResponse;
 }
 

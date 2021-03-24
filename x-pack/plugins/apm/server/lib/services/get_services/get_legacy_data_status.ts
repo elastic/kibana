@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { rangeQuery } from '../../../../server/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { OBSERVER_VERSION_MAJOR } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 // returns true if 6.x data is found
-export async function getLegacyDataStatus(setup: Setup) {
+export async function getLegacyDataStatus(setup: Setup & SetupTimeRange) {
   return withApmSpan('get_legacy_data_status', async () => {
-    const { apmEventClient } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const params = {
       terminateAfter: 1,
@@ -24,7 +25,10 @@ export async function getLegacyDataStatus(setup: Setup) {
         size: 0,
         query: {
           bool: {
-            filter: [{ range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } }],
+            filter: [
+              { range: { [OBSERVER_VERSION_MAJOR]: { lt: 7 } } },
+              ...rangeQuery(start, end),
+            ],
           },
         },
       },

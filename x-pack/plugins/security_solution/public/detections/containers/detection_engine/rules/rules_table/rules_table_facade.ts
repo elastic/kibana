@@ -18,6 +18,7 @@ export interface RulesTableFacade {
   setShowIdleModal(show: boolean): void;
   setLastRefreshDate(): void;
   setAutoRefreshOn(on: boolean): void;
+  setIsRefreshing(isRefreshing: boolean): void;
 }
 
 export const createRulesTableFacade = (dispatch: Dispatch<RulesTableAction>): RulesTableFacade => {
@@ -78,6 +79,13 @@ export const createRulesTableFacade = (dispatch: Dispatch<RulesTableAction>): Ru
       dispatch({
         type: 'setAutoRefreshOn',
         on,
+      });
+    },
+
+    setIsRefreshing: (isRefreshing: boolean) => {
+      dispatch({
+        type: 'setIsRefreshing',
+        isRefreshing,
       });
     },
   };

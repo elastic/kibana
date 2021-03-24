@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RegistryPolicyTemplate } from './epm';
+import type { RegistryPolicyTemplate } from './epm';
 
 // Based on https://github.com/elastic/package-spec/blob/master/versions/1/manifest.spec.yml#L8
 export interface PackageSpecManifest {

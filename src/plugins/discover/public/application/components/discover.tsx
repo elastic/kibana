@@ -34,7 +34,6 @@ import { SkipBottomButton } from './skip_bottom_button';
 import { esFilters, IndexPatternField, search } from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
-import { getDisplayedColumns } from '../helpers/columns';
 import { SortPairArr } from '../angular/doc_table/lib/get_sort';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { popularizeField } from '../helpers/popularize_field';
@@ -54,6 +53,7 @@ export function Discover({
   fetchCounter,
   fetchError,
   fieldCounts,
+  fetchStatus,
   histogramData,
   hits,
   indexPattern,
@@ -105,13 +105,14 @@ export function Discover({
     () =>
       getStateColumnActions({
         capabilities,
+        config,
         indexPattern,
         indexPatterns,
         setAppState,
         state,
         useNewFieldsApi,
       }),
-    [capabilities, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
+    [capabilities, config, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
   );
 
   const onOpenInspector = useCallback(() => {
@@ -390,9 +391,10 @@ export function Discover({
                           <div className="dscDiscoverGrid">
                             <DataGridMemoized
                               ariaLabelledBy="documentsAriaLabel"
-                              columns={getDisplayedColumns(state.columns, indexPattern)}
+                              columns={columns}
                               expandedDoc={expandedDoc}
                               indexPattern={indexPattern}
+                              isLoading={fetchStatus === 'loading'}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={opts.sampleSize}
@@ -411,6 +413,7 @@ export function Discover({
                               onSetColumns={onSetColumns}
                               onSort={onSort}
                               onResize={onResize}
+                              useNewFieldsApi={useNewFieldsApi}
                             />
                           </div>
                         )}

@@ -15,6 +15,7 @@ import { combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
+  tuples,
   threatMapping,
   query,
   inputIndex,
@@ -24,8 +25,6 @@ export const createThreatSignals = async ({
   savedId,
   services,
   exceptionItems,
-  gap,
-  previousStartedAt,
   listClient,
   logger,
   eventsTelemetry,
@@ -67,7 +66,7 @@ export const createThreatSignals = async ({
   };
 
   let threatListCount = await getThreatListCount({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -77,7 +76,7 @@ export const createThreatSignals = async ({
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
   let threatList = await getThreatList({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -111,6 +110,7 @@ export const createThreatSignals = async ({
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
+          tuples,
           threatEnrichment,
           threatMapping,
           query,
@@ -121,8 +121,6 @@ export const createThreatSignals = async ({
           savedId,
           services,
           exceptionItems,
-          gap,
-          previousStartedAt,
           listClient,
           logger,
           eventsTelemetry,
@@ -168,7 +166,7 @@ export const createThreatSignals = async ({
     logger.debug(buildRuleMessage(`Indicator items left to check are ${threatListCount}`));
 
     threatList = await getThreatList({
-      callCluster: services.callCluster,
+      esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
       query: threatQuery,
       language: threatLanguage,

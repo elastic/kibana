@@ -6,19 +6,13 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { AutocompleteFieldExistsComponent } from './field_value_exists';
 
 describe('AutocompleteFieldExistsComponent', () => {
   test('it renders field disabled', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-        <AutocompleteFieldExistsComponent placeholder="Placeholder text" />
-      </ThemeProvider>
-    );
+    const wrapper = mount(<AutocompleteFieldExistsComponent placeholder="Placeholder text" />);
 
     expect(
       wrapper

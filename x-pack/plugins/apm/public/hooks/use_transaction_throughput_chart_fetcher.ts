@@ -18,8 +18,7 @@ export function useTransactionThroughputChartsFetcher() {
   const { transactionType } = useApmServiceContext();
   const theme = useTheme();
   const {
-    urlParams: { environment, start, end, transactionName },
-    uiFilters,
+    urlParams: { environment, kuery, start, end, transactionName },
   } = useUrlParams();
 
   const { data, error, status } = useFetcher(
@@ -32,11 +31,11 @@ export function useTransactionThroughputChartsFetcher() {
             path: { serviceName },
             query: {
               environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters),
             },
           },
         });
@@ -44,12 +43,12 @@ export function useTransactionThroughputChartsFetcher() {
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
     ]
   );
 

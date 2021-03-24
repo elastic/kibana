@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { i18n } from '@kbn/i18n';
 import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
 
 import {
@@ -31,6 +30,8 @@ import { AreaSeriesDecorator } from './decorators/area_decorator';
 import { BarSeriesDecorator } from './decorators/bar_decorator';
 import { getStackAccessors } from './utils/stack_format';
 import { getBaseTheme, getChartClasses } from './utils/theme';
+import { emptyLabel } from '../../../../../common/empty_label';
+import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -59,8 +60,11 @@ export const TimeSeries = ({
   onBrush,
   xAxisFormatter,
   annotations,
+  syncColors,
+  palettesService,
 }) => {
   const chartRef = useRef();
+  // const [palettesRegistry, setPalettesRegistry] = useState(null);
 
   useEffect(() => {
     const updateCursor = (cursor) => {
@@ -87,10 +91,9 @@ export const TimeSeries = ({
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { legacyColors: colors, theme: themeService } = getChartsSetup();
-  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
+  const { theme: themeService } = getChartsSetup();
 
-  colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
+  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const onBrushEndListener = ({ x }) => {
     if (!x) {
@@ -99,6 +102,23 @@ export const TimeSeries = ({
     const [min, max] = x;
     onBrush(min, max);
   };
+
+  const getSeriesColor = useCallback(
+    (seriesName, seriesGroupId, seriesId) => {
+      const seriesById = series.filter((s) => s.seriesId === seriesGroupId);
+      const props = {
+        seriesById,
+        seriesName,
+        seriesId,
+        baseColor: seriesById[0].baseColor,
+        seriesPalette: seriesById[0].palette,
+        palettesRegistry: palettesService,
+        syncColors,
+      };
+      return getSplitByTermsColor(props) || null;
+    },
+    [palettesService, series, syncColors]
+  );
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
@@ -155,6 +175,7 @@ export const TimeSeries = ({
         (
           {
             id,
+            seriesId,
             label,
             labelFormatted,
             bars,
@@ -165,6 +186,7 @@ export const TimeSeries = ({
             yScaleType,
             groupId,
             color,
+            isSplitByTerms,
             stack,
             points,
             y1AccessorFormat,
@@ -177,24 +199,20 @@ export const TimeSeries = ({
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
-          // Only use color mapping if there is no color from the server
-          const finalColor = color ?? colors.mappedColors.mapping[label];
           let seriesName = label.toString();
           if (labelFormatted) {
             seriesName = labelDateFormatter(labelFormatted);
           }
+          // The colors from the paletteService should be applied only when the timeseries is split by terms
+          const splitColor = getSeriesColor(seriesName, seriesId, id);
+          const finalColor = isSplitByTerms && splitColor ? splitColor : color;
           if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={
-                  seriesName ||
-                  i18n.translate('visTypeTimeseries.emptyTextValue', {
-                    defaultMessage: '(empty)',
-                  })
-                }
+                name={seriesName || emptyLabel}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -219,12 +237,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={
-                  seriesName ||
-                  i18n.translate('visTypeTimeseries.emptyTextValue', {
-                    defaultMessage: '(empty)',
-                  })
-                }
+                name={seriesName || emptyLabel}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}

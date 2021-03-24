@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Capabilities, HttpSetup } from 'kibana/public';
+import { Capabilities, HttpSetup, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Ast } from '@kbn/interpreter/target/common';
+import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import {
   IndexPatternsContract,
   TimefilterContract,
@@ -104,5 +105,16 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       input,
       parent
     );
+  }
+
+  extract(state: EmbeddableStateWithType) {
+    let references: SavedObjectReference[] = [];
+    const typedState = (state as unknown) as LensEmbeddableInput;
+
+    if ('attributes' in typedState && typedState.attributes !== undefined) {
+      references = typedState.attributes.references;
+    }
+
+    return { state, references };
   }
 }

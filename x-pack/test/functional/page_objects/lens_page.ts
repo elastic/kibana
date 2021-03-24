@@ -19,6 +19,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const browser = getService('browser');
 
   const PageObjects = getPageObjects([
+    'common',
     'header',
     'timePicker',
     'common',
@@ -169,6 +170,47 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector('lnsWorkspace')
       );
       await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Drags field to workspace
+     *
+     * @param field  - the desired field for the dimension
+     * */
+    async clickField(field: string) {
+      await testSubjects.click(`lnsFieldListPanelField-${field}`);
+    },
+
+    async editField() {
+      await retry.try(async () => {
+        await testSubjects.click('lnsFieldListPanelEdit');
+        await testSubjects.missingOrFail('lnsFieldListPanelEdit');
+      });
+    },
+
+    async removeField() {
+      await retry.try(async () => {
+        await testSubjects.click('lnsFieldListPanelRemove');
+        await testSubjects.missingOrFail('lnsFieldListPanelRemove');
+        await testSubjects.click('confirmModalConfirmButton');
+        await testSubjects.missingOrFail('confirmModalConfirmButton');
+      });
+    },
+
+    async searchField(name: string) {
+      await testSubjects.setValue('lnsIndexPatternFieldSearch', name);
+    },
+
+    async waitForField(field: string) {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
+      });
+    },
+
+    async waitForFieldMissing(field: string) {
+      await retry.try(async () => {
+        await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
+      });
     },
 
     /**
@@ -349,6 +391,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title: string,
       saveAsNew?: boolean,
       redirectToOrigin?: boolean,
+      saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
       dashboardId?: string
     ) {
@@ -360,6 +403,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
+        saveToLibrary,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -418,19 +462,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
      * lnsDatatable or bar_stacked
      */
-    async switchToVisualization(subVisualizationId: string) {
+    async switchToVisualization(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
+      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async openChartSwitchPopover() {
-      if (await testSubjects.exists('visTypeTitle')) {
+      if (await testSubjects.exists('lnsChartSwitchList')) {
         return;
       }
       await retry.try(async () => {
         await testSubjects.click('lnsChartSwitchPopover');
-        await testSubjects.existOrFail('visTypeTitle');
+        await testSubjects.existOrFail('lnsChartSwitchList');
       });
     },
 
@@ -451,17 +496,28 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return errors?.length ?? 0;
     },
 
+    async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
+      // Because the new chart switcher is now a virtualized list, the process needs some help
+      // So either pass a search string or pick the last 3 letters from the id (3 because pie
+      // is the smallest chart name) and use them to search
+      const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
+      return await testSubjects.setValue('lnsChartSwitchSearch', queryTerm, {
+        clearWithKeyboard: true,
+      });
+    },
+
     /**
      * Checks a specific subvisualization in the chart switcher for a "data loss" indicator
      *
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
      * lnsDatatable or bar_stacked
      */
-    async hasChartSwitchWarning(subVisualizationId: string) {
+    async hasChartSwitchWarning(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
+      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
       const element = await testSubjects.find(`lnsChartSwitchPopover_${subVisualizationId}`);
-      return await find.descendantExistsByCssSelector(
-        '.euiKeyPadMenuItem__betaBadgeWrapper',
+      return await testSubjects.descendantExists(
+        `lnsChartSwitchPopoverAlert_${subVisualizationId}`,
         element
       );
     },
@@ -740,6 +796,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const fieldAncestor = await input.findByXpath('./../../..');
       const focusedElementText = await fieldAncestor.getVisibleText();
       expect(focusedElementText).to.eql(name);
+    },
+
+    async waitForVisualization() {
+      async function getRenderingCount() {
+        const visualizationContainer = await testSubjects.find('lnsVisualizationContainer');
+        const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
+        return Number(renderingCount);
+      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('rendering count to stabilize', async () => {
+        const firstCount = await getRenderingCount();
+
+        await PageObjects.common.sleep(1000);
+
+        const secondCount = await getRenderingCount();
+
+        return firstCount === secondCount;
+      });
+    },
+
+    async clickAddField() {
+      await testSubjects.click('lnsIndexPatternActions');
+      await testSubjects.existOrFail('indexPattern-add-field');
+      await testSubjects.click('indexPattern-add-field');
     },
   });
 }

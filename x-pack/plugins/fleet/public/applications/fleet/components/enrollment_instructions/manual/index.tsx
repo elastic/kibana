@@ -9,7 +9,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiText, EuiSpacer, EuiLink, EuiTitle, EuiCodeBlock } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EnrollmentAPIKey } from '../../../types';
+
+import type { EnrollmentAPIKey } from '../../../types';
 
 interface Props {
   kibanaUrl: string;

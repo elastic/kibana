@@ -34,6 +34,15 @@ Object {
               },
             },
           },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 1528113600000,
+                "lte": 1528977600000,
+              },
+            },
+          },
         ],
       },
     },
@@ -109,7 +118,6 @@ Array [
                 "environments": Object {
                   "terms": Object {
                     "field": "service.environment",
-                    "missing": "",
                   },
                 },
                 "outcomes": Object {
@@ -182,9 +190,54 @@ Array [
                 },
               },
             },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "metric",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "services": Object {
+          "aggs": Object {
+            "environments": Object {
+              "terms": Object {
+                "field": "service.environment",
+              },
+            },
+            "latest": Object {
+              "top_metrics": Object {
+                "metrics": Object {
+                  "field": "agent.name",
+                },
+                "sort": Object {
+                  "@timestamp": "desc",
+                },
+              },
+            },
+          },
+          "terms": Object {
+            "field": "service.name",
+            "size": 500,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
             Object {
-              "term": Object {
-                "service.environment": "test",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
               },
             },
           ],

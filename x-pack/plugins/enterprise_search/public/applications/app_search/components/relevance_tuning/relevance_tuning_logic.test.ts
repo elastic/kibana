@@ -6,16 +6,13 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../../__mocks__';
+import { mockEngineValues, mockEngineActions } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
-import { Boost, BoostFunction, BoostOperation, BoostType } from './types';
+import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
 import { RelevanceTuningLogic } from './';
-
-jest.mock('../engine', () => ({
-  EngineLogic: { values: { engineName: 'test-engine' } },
-}));
 
 describe('RelevanceTuningLogic', () => {
   const { mount } = new LogicMounter(RelevanceTuningLogic);
@@ -26,6 +23,7 @@ describe('RelevanceTuningLogic', () => {
         {
           type: BoostType.Value,
           factor: 5,
+          value: [],
         },
       ],
     },
@@ -64,7 +62,6 @@ describe('RelevanceTuningLogic', () => {
     query: '',
     resultsLoading: false,
     searchResults: null,
-    showSchemaConflictCallout: true,
     engineHasSchemaFields: false,
     schemaFields: [],
     schemaFieldsWithConflicts: [],
@@ -74,6 +71,9 @@ describe('RelevanceTuningLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockEngineValues.engineName = 'test-engine';
+    mockEngineValues.engine.invalidBoosts = false;
+    mockEngineValues.engine.unsearchedUnconfirmedFields = false;
   });
 
   it('has expected default values', () => {
@@ -207,20 +207,6 @@ describe('RelevanceTuningLogic', () => {
       });
     });
 
-    describe('dismissSchemaConflictCallout', () => {
-      it('should set showSchemaConflictCallout to false', () => {
-        mount({
-          showSchemaConflictCallout: true,
-        });
-        RelevanceTuningLogic.actions.dismissSchemaConflictCallout();
-
-        expect(RelevanceTuningLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          showSchemaConflictCallout: false,
-        });
-      });
-    });
-
     describe('setSearchSettingsResponse', () => {
       it('should set searchSettings state and unsavedChanges to false', () => {
         mount({
@@ -239,7 +225,7 @@ describe('RelevanceTuningLogic', () => {
 
   describe('listeners', () => {
     const { http } = mockHttpValues;
-    const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+    const { flashAPIErrors, setSuccessMessage, clearFlashMessages } = mockFlashMessageHelpers;
     let scrollToSpy: jest.SpyInstance;
     let confirmSpy: jest.SpyInstance;
 
@@ -331,7 +317,7 @@ describe('RelevanceTuningLogic', () => {
         jest.useRealTimers();
       });
 
-      it('should make an API call and set state based on the response', async () => {
+      it('should make an API call, set state based on the response, and clear flash messages', async () => {
         const searchSettingsWithNewBoostProp = {
           boosts: {
             foo: [
@@ -339,6 +325,7 @@ describe('RelevanceTuningLogic', () => {
                 type: BoostType.Value,
                 factor: 5,
                 newBoost: true, // This should be deleted before sent to the server
+                value: ['test'],
               },
             ],
           },
@@ -356,6 +343,7 @@ describe('RelevanceTuningLogic', () => {
               {
                 type: BoostType.Value,
                 factor: 5,
+                value: ['test'],
               },
             ],
           },
@@ -388,6 +376,7 @@ describe('RelevanceTuningLogic', () => {
           }
         );
         expect(RelevanceTuningLogic.actions.setSearchResults).toHaveBeenCalledWith(searchResults);
+        expect(clearFlashMessages).toHaveBeenCalled();
       });
 
       it("won't send boosts or search_fields on the API call if there are none", async () => {
@@ -496,6 +485,7 @@ describe('RelevanceTuningLogic', () => {
                 type: BoostType.Value,
                 factor: 5,
                 newBoost: true, // This should be deleted before sent to the server
+                value: [''],
               },
             ],
           },
@@ -507,6 +497,7 @@ describe('RelevanceTuningLogic', () => {
               {
                 type: BoostType.Value,
                 factor: 5,
+                value: [''],
               },
             ],
           },
@@ -544,6 +535,28 @@ describe('RelevanceTuningLogic', () => {
 
         expect(flashAPIErrors).toHaveBeenCalledWith('error');
         expect(RelevanceTuningLogic.actions.onSearchSettingsError).toHaveBeenCalled();
+      });
+
+      it('will re-fetch the current engine after settings are updated if there were invalid boosts', async () => {
+        mockEngineValues.engine.invalidBoosts = true;
+        mount({});
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
+
+        RelevanceTuningLogic.actions.updateSearchSettings();
+        await nextTick();
+
+        expect(mockEngineActions.initializeEngine).toHaveBeenCalled();
+      });
+
+      it('will re-fetch the current engine after settings are updated if there were unconfirmed search fields', async () => {
+        mockEngineValues.engine.unsearchedUnconfirmedFields = true;
+        mount({});
+        http.put.mockReturnValueOnce(Promise.resolve(searchSettings));
+
+        RelevanceTuningLogic.actions.updateSearchSettings();
+        await nextTick();
+
+        expect(mockEngineActions.initializeEngine).toHaveBeenCalled();
       });
     });
 
@@ -691,6 +704,7 @@ describe('RelevanceTuningLogic', () => {
                 {
                   factor: 2,
                   type: BoostType.Value,
+                  value: [''],
                 },
               ],
             },
@@ -707,11 +721,15 @@ describe('RelevanceTuningLogic', () => {
               {
                 factor: 2,
                 type: BoostType.Value,
+                value: [''],
               },
               {
                 factor: 1,
                 newBoost: true,
                 type: BoostType.Functional,
+                function: 'logarithmic',
+                operation: 'multiply',
+                value: undefined,
               },
             ],
           },
@@ -737,6 +755,9 @@ describe('RelevanceTuningLogic', () => {
                 factor: 1,
                 newBoost: true,
                 type: BoostType.Functional,
+                function: 'logarithmic',
+                operation: 'multiply',
+                value: undefined,
               },
             ],
           },
@@ -758,6 +779,7 @@ describe('RelevanceTuningLogic', () => {
                 {
                   factor: 2,
                   type: BoostType.Value,
+                  value: [''],
                 },
               ],
             },
@@ -1053,14 +1075,14 @@ describe('RelevanceTuningLogic', () => {
           'foo',
           1,
           'function',
-          BoostFunction.Exponential
+          FunctionalBoostFunction.Exponential
         );
 
         expect(RelevanceTuningLogic.actions.setSearchSettings).toHaveBeenCalledWith(
           searchSettingsWithBoost({
             factor: 1,
             type: BoostType.Functional,
-            function: BoostFunction.Exponential,
+            function: FunctionalBoostFunction.Exponential,
           })
         );
       });

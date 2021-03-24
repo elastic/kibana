@@ -20,7 +20,7 @@ import {
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../../server/utils/queries';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -71,12 +71,9 @@ export const getDestinationMap = ({
               },
               aggs: {
                 sample: {
-                  top_metrics: {
-                    metrics: [
-                      { field: SPAN_TYPE },
-                      { field: SPAN_SUBTYPE },
-                      { field: SPAN_ID },
-                    ] as const,
+                  top_hits: {
+                    size: 1,
+                    _source: [SPAN_TYPE, SPAN_SUBTYPE, SPAN_ID],
                     sort: {
                       '@timestamp': 'desc',
                     },
@@ -91,15 +88,15 @@ export const getDestinationMap = ({
 
     const outgoingConnections =
       response.aggregations?.connections.buckets.map((bucket) => {
-        const fieldValues = bucket.sample.top[0].metrics;
+        const sample = bucket.sample.hits.hits[0]._source;
 
         return {
           [SPAN_DESTINATION_SERVICE_RESOURCE]: String(
             bucket.key[SPAN_DESTINATION_SERVICE_RESOURCE]
           ),
-          [SPAN_ID]: (fieldValues[SPAN_ID] ?? '') as string,
-          [SPAN_TYPE]: (fieldValues[SPAN_TYPE] ?? '') as string,
-          [SPAN_SUBTYPE]: (fieldValues[SPAN_SUBTYPE] ?? '') as string,
+          [SPAN_ID]: sample.span.id,
+          [SPAN_TYPE]: sample.span.type,
+          [SPAN_SUBTYPE]: sample.span.subtype,
         };
       }) ?? [];
 

@@ -58,8 +58,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
             field.subType &&
             field.subType.nested &&
             field.subType.nested.path.includes(nestedPath))) &&
-        field.name.toLowerCase().includes(search) &&
-        field.name !== search
+        field.name.toLowerCase().includes(search)
       );
     });
     const sortedFields = sortPrefixFirst(matchingFields.sort(keywordComparator), search, 'name');

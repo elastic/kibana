@@ -16,6 +16,7 @@ export {
 } from './types';
 
 export {
+  LazyComponentFn,
   SpacesApi,
   SpacesApiUi,
   SpacesApiUiComponent,
@@ -24,6 +25,7 @@ export {
   ShareToSpaceSavedObjectTarget,
   SpaceListProps,
   LegacyUrlConflictProps,
+  SpaceAvatarProps,
 } from './api';
 
 export const plugin = () => new SpacesOssPlugin();

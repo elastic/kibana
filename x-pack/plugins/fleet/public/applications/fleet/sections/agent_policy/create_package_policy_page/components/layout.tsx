@@ -17,10 +17,11 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { WithHeaderLayout } from '../../../../layouts';
-import { AgentPolicy, PackageInfo } from '../../../../types';
+import type { AgentPolicy, PackageInfo } from '../../../../types';
 import { PackageIcon } from '../../../../components/package_icon';
-import { CreatePackagePolicyFrom } from '../types';
+import type { CreatePackagePolicyFrom } from '../types';
 
 export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
   from: CreatePackagePolicyFrom;

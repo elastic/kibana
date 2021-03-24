@@ -45,6 +45,9 @@
 .lnsDragDrop-isDropTarget {
   @include lnsDroppable;
   @include lnsDroppableActive;
+  > * {
+    pointer-events: none;
+  }
 }
 
 .lnsDragDrop-isActiveGroup {
@@ -76,11 +79,6 @@
     background-color: rgba(251, 208, 17, .25);
     border-color: $euiColorVis5;
   }
-}
-
-.lnsDragDrop__container {
-  position: relative;
-  overflow: visible !important; // sass-lint:disable-line no-important
 }
 
 .lnsDragDrop__reorderableDrop {

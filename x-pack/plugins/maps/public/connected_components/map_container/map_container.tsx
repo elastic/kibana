@@ -36,7 +36,7 @@ import { MapRefreshConfig } from '../../../common/descriptor_types';
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
 export interface Props {
-  addFilters: ((filters: Filter[]) => Promise<void>) | null;
+  addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;

@@ -36,7 +36,7 @@ type IndexSearchResponse = SearchResponse7;
 
 export const useIndexData = (
   indexPattern: IndexPattern,
-  query: any,
+  query: Record<string, any> | undefined,
   toastNotifications: CoreSetup['notifications']['toasts']
 ): UseIndexDataReturnType => {
   const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
@@ -59,6 +59,7 @@ export const useIndexData = (
     resetPagination,
     setErrorMessage,
     setRowCount,
+    setRowCountRelation,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -81,8 +82,7 @@ export const useIndexData = (
     const esSearchRequest = {
       index: indexPattern.title,
       body: {
-        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
-        query, // isDefaultQuery(query) ? matchAllQuery : query,
+        query,
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         fields: ['*'],
@@ -97,6 +97,7 @@ export const useIndexData = (
 
       const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
       setRowCount(resp.hits.total.value);
+      setRowCountRelation(resp.hits.total.relation);
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
     } catch (e) {
@@ -106,7 +107,9 @@ export const useIndexData = (
   };
 
   useEffect(() => {
-    getIndexData();
+    if (query !== undefined) {
+      getIndexData();
+    }
     // custom comparison
   }, [indexPattern.title, indexPatternFields, JSON.stringify([query, pagination, sortingColumns])]);
 
@@ -114,7 +117,7 @@ export const useIndexData = (
     indexPattern,
   ]);
 
-  const fetchColumnChartsData = async function () {
+  const fetchColumnChartsData = async function (fieldHistogramsQuery: Record<string, any>) {
     try {
       const columnChartsData = await dataLoader.loadFieldHistograms(
         columns
@@ -123,7 +126,7 @@ export const useIndexData = (
             fieldName: cT.id,
             type: getFieldType(cT.schema),
           })),
-        query
+        fieldHistogramsQuery
       );
       dataGrid.setColumnCharts(columnChartsData);
     } catch (e) {
@@ -132,8 +135,8 @@ export const useIndexData = (
   };
 
   useEffect(() => {
-    if (dataGrid.chartsVisible) {
-      fetchColumnChartsData();
+    if (dataGrid.chartsVisible && query !== undefined) {
+      fetchColumnChartsData(query);
     }
     // custom comparison
   }, [

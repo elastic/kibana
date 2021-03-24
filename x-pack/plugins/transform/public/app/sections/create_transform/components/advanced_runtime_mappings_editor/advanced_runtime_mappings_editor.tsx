@@ -13,6 +13,7 @@ import { EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { StepDefineFormHook } from '../step_define';
+import { isRuntimeMappings } from '../step_define/common/types';
 
 export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappingsEditor']> = memo(
   ({
@@ -25,7 +26,7 @@ export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappin
   }) => {
     return (
       <EuiCodeEditor
-        data-test-subj="transformAdvancedPivotEditor"
+        data-test-subj="transformAdvancedRuntimeMappingsEditor"
         style={{ border: '1px solid #e3e6ef' }}
         height="250px"
         width="100%"
@@ -43,8 +44,11 @@ export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappin
           // Try to parse the string passed on from the editor.
           // If parsing fails, the "Apply"-Button will be disabled
           try {
-            JSON.parse(convertToJson(d));
-            setRuntimeMappingsEditorApplyButtonEnabled(true);
+            // if the user deletes the json in the editor
+            // they should still be able to apply changes
+            const isEmptyStr = d === '';
+            const parsedJson = isEmptyStr ? {} : JSON.parse(convertToJson(d));
+            setRuntimeMappingsEditorApplyButtonEnabled(isEmptyStr || isRuntimeMappings(parsedJson));
           } catch (e) {
             setRuntimeMappingsEditorApplyButtonEnabled(false);
           }

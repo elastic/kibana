@@ -440,6 +440,35 @@ export const getMlResult = (): RuleAlertType => {
   };
 };
 
+export const getThresholdResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      type: 'threshold',
+      threshold: {
+        field: 'host.ip',
+        value: 5,
+      },
+    },
+  };
+};
+
+export const getEqlResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      type: 'eql',
+      query: 'process where true',
+    },
+  };
+};
+
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',

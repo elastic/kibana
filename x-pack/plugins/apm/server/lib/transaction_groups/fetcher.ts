@@ -8,7 +8,7 @@
 import { sortBy, take } from 'lodash';
 import moment from 'moment';
 import { Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -28,6 +28,7 @@ import {
 
 interface TopTransactionOptions {
   environment?: string;
+  kuery?: string;
   type: 'top_transactions';
   serviceName: string;
   transactionType: string;
@@ -37,6 +38,7 @@ interface TopTransactionOptions {
 
 interface TopTraceOptions {
   environment?: string;
+  kuery?: string;
   type: 'top_traces';
   transactionName?: string;
   searchAggregatedTransactions: boolean;

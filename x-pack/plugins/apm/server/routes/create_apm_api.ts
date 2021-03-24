@@ -31,6 +31,8 @@ import {
   serviceMetadataDetailsRoute,
   serviceMetadataIconsRoute,
   serviceInstancesRoute,
+  serviceProfilingStatisticsRoute,
+  serviceProfilingTimelineRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -134,6 +136,8 @@ const createApmApi = () => {
     .add(serviceMetadataIconsRoute)
     .add(serviceInstancesRoute)
     .add(serviceErrorGroupsComparisonStatisticsRoute)
+    .add(serviceProfilingTimelineRoute)
+    .add(serviceProfilingStatisticsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)

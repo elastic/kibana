@@ -26,7 +26,7 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
 } from '../../../common/constants';
-import { copyPersistentState } from '../../reducers/util';
+import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   AggDescriptor,
   ESTermSourceDescriptor,
@@ -400,7 +400,11 @@ export class AbstractLayer implements ILayer {
   }
 
   isLayerLoading(): boolean {
-    return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+    const areTilesLoading =
+      typeof this._descriptor.__areTilesLoaded !== 'undefined'
+        ? !this._descriptor.__areTilesLoaded
+        : false;
+    return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
   isLoadingBounds() {

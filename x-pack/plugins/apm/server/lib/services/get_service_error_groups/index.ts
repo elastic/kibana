@@ -9,7 +9,11 @@ import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
-import { environmentQuery, rangeQuery } from '../../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../../server/utils/queries';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
   ERROR_EXC_MESSAGE,
@@ -29,6 +33,7 @@ export type ServiceErrorGroupItem = ValuesType<
 
 export async function getServiceErrorGroups({
   environment,
+  kuery,
   serviceName,
   setup,
   size,
@@ -39,6 +44,7 @@ export async function getServiceErrorGroups({
   transactionType,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   size: number;
@@ -49,7 +55,7 @@ export async function getServiceErrorGroups({
   transactionType: string;
 }) {
   return withApmSpan('get_service_error_groups', async () => {
-    const { apmEventClient, start, end, esFilter } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const { intervalString } = getBucketSize({ start, end, numBuckets });
 
@@ -67,7 +73,7 @@ export async function getServiceErrorGroups({
                 { term: { [TRANSACTION_TYPE]: transactionType } },
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
-                ...esFilter,
+                ...kqlQuery(kuery),
               ],
             },
           },
@@ -150,7 +156,7 @@ export async function getServiceErrorGroups({
                   { term: { [TRANSACTION_TYPE]: transactionType } },
                   ...rangeQuery(start, end),
                   ...environmentQuery(environment),
-                  ...esFilter,
+                  ...kqlQuery(kuery),
                 ],
               },
             },

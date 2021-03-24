@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
+import { EuiIconProps } from '@elastic/eui';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
@@ -68,6 +69,12 @@ export interface SearchBarOwnProps {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
+
+  placeholder?: string;
+  isClearable?: boolean;
+  iconType?: EuiIconProps['type'];
+  nonKqlMode?: 'lucene' | 'text';
+  nonKqlModeHelpText?: string;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -399,6 +406,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           }
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          placeholder={this.props.placeholder}
+          isClearable={this.props.isClearable}
+          iconType={this.props.iconType}
+          nonKqlMode={this.props.nonKqlMode}
+          nonKqlModeHelpText={this.props.nonKqlModeHelpText}
         />
       );
     }

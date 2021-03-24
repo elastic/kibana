@@ -87,6 +87,7 @@ export const useIndexData = (
     setColumnCharts,
     setErrorMessage,
     setRowCount,
+    setRowCountRelation,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -135,6 +136,7 @@ export const useIndexData = (
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
 
     setRowCount(resp.hits.total.value);
+    setRowCountRelation(resp.hits.total.relation);
     setTableItems(docs);
     setStatus(INDEX_STATUS.LOADED);
   };
@@ -148,7 +150,8 @@ export const useIndexData = (
           fieldName: cT.id,
           type: getFieldType(cT.schema),
         })),
-      isDefaultQuery(query) ? matchAllQuery : query
+      isDefaultQuery(query) ? matchAllQuery : query,
+      combinedRuntimeMappings
     );
 
     if (!isFieldHistogramsResponseSchema(columnChartsData)) {

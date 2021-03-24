@@ -172,7 +172,7 @@ export class VegaBaseView {
     // Override URL sanitizer to prevent external data loading (if disabled)
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
-    vegaLoader.sanitize = (uri, options) => {
+    vegaLoader.sanitize = async (uri, options) => {
       if (uri.bypassToken === bypassToken) {
         // If uri has a bypass token, the uri was encoded by bypassExternalUrlCheck() above.
         // because user can only supply pure JSON data structure.
@@ -189,7 +189,11 @@ export class VegaBaseView {
           })
         );
       }
-      return originalSanitize(uri, options);
+      const result = await originalSanitize(uri, options);
+      // This will allow Vega users to load images from any domain.
+      result.crossOrigin = null;
+
+      return result;
     };
     config.loader = vegaLoader;
 

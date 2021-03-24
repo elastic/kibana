@@ -38,10 +38,12 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   stackByField: string;
   threshold?:
     | {
-        field: string | string[] | undefined;
-        value: number;
-        cardinality_field?: string | undefined;
-        cardinality_value?: number | undefined;
+        field: string[];
+        value: string;
+        cardinality?: {
+          field: string[];
+          value: string;
+        };
       }
     | undefined;
   inspect?: Maybe<Inspect>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchQuery } from 'src/core/public';
+import type { HttpFetchQuery } from 'src/core/public';
 
 export interface ListWithKuery extends HttpFetchQuery {
   page?: number;

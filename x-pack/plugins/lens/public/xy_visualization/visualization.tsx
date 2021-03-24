@@ -58,7 +58,7 @@ function getDescription(state?: State) {
     return {
       icon: LensIconChartBarHorizontal,
       label: i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-        defaultMessage: 'Mixed H. bar',
+        defaultMessage: 'Mixed bar horizontal',
       }),
     };
   }
@@ -74,7 +74,7 @@ function getDescription(state?: State) {
 
   return {
     icon: visualizationType.icon,
-    label: visualizationType.label,
+    label: visualizationType.fullLabel || visualizationType.label,
   };
 }
 
@@ -340,7 +340,7 @@ export const getXyVisualization = ({
     toExpression(state, layers, paletteService, attributes),
   toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
 
-  getErrorMessages(state) {
+  getErrorMessages(state, datasourceLayers) {
     // Data error handling below here
     const hasNoAccessors = ({ accessors }: XYLayerConfig) =>
       accessors == null || accessors.length === 0;
@@ -369,6 +369,35 @@ export const getXyVisualization = ({
         const result = validateLayersForDimension(dimension, filteredLayers, criteria);
         if (!result.valid) {
           errors.push(result.payload);
+        }
+      }
+    }
+
+    if (datasourceLayers && state) {
+      for (const layer of state.layers) {
+        const datasourceAPI = datasourceLayers[layer.layerId];
+        if (datasourceAPI) {
+          for (const accessor of layer.accessors) {
+            const operation = datasourceAPI.getOperationForColumnId(accessor);
+            if (operation && operation.dataType !== 'number') {
+              errors.push({
+                shortMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYShort', {
+                  defaultMessage: `Wrong data type for {axis}.`,
+                  values: {
+                    axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                  },
+                }),
+                longMessage: i18n.translate('xpack.lens.xyVisualization.dataTypeFailureYLong', {
+                  defaultMessage: `The dimension {label} provided for the {axis} has the wrong data type. Expected number but have {dataType}`,
+                  values: {
+                    label: operation.label,
+                    dataType: operation.dataType,
+                    axis: getAxisName('y', { isHorizontal: isHorizontalChart(state.layers) }),
+                  },
+                }),
+              });
+            }
+          }
         }
       }
     }

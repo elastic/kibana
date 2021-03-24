@@ -239,7 +239,8 @@ function discoverController($route, $scope, Promise) {
 
     if (!_.isEqual(newStatePartial, oldStatePartial)) {
       $scope.$evalAsync(async () => {
-        if (oldStatePartial.index !== newStatePartial.index) {
+        // NOTE: this is also called when navigating from discover app to context app
+        if (newStatePartial.index && oldStatePartial.index !== newStatePartial.index) {
           //in case of index pattern switch the route has currently to be reloaded, legacy
           isChangingIndexPattern = true;
           $route.reload();
@@ -699,7 +700,13 @@ function discoverController($route, $scope, Promise) {
 
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
-    if (!getTimeField() || $scope.state.hideChart) return;
+    if (!getTimeField() || $scope.state.hideChart) {
+      if ($scope.volatileSearchSource.getField('aggs')) {
+        // cleanup aggs field in case it was set before
+        $scope.volatileSearchSource.removeField('aggs');
+      }
+      return;
+    }
     const { interval: histogramInterval } = $scope.state;
 
     const visStateAggs = [
@@ -721,11 +728,6 @@ function discoverController($route, $scope, Promise) {
       $scope.indexPattern,
       visStateAggs
     );
-
-    $scope.volatileSearchSource.onRequestStart((searchSource, options) => {
-      if (!$scope.opts.chartAggConfigs) return;
-      return $scope.opts.chartAggConfigs.onSearchRequestStart(searchSource, options);
-    });
 
     $scope.volatileSearchSource.setField('aggs', function () {
       if (!$scope.opts.chartAggConfigs) return;

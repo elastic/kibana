@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import {
   EuiBasicTable,
   EuiLoadingContent,
@@ -130,6 +132,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       lastUpdated,
       showIdleModal,
       isRefreshOn,
+      isRefreshing,
     } = rulesTable.state;
 
     const {
@@ -139,10 +142,9 @@ export const RulesTables = React.memo<RulesTableProps>(
       setShowIdleModal,
       setLastRefreshDate,
       setAutoRefreshOn,
+      setIsRefreshing,
       reFetchRules,
     } = rulesTable;
-
-    const isLoadingRules = loadingRulesAction === 'load';
 
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const [, dispatchToaster] = useStateToaster();
@@ -150,6 +152,19 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
+
+    const isLoadingRules = loadingRulesAction === 'load';
+    const isLoadingAnActionOnRule = useMemo(() => {
+      if (
+        loadingRuleIds.length > 0 &&
+        (loadingRulesAction === 'disable' || loadingRulesAction === 'enable')
+      ) {
+        return false;
+      } else if (loadingRuleIds.length > 0) {
+        return true;
+      }
+      return false;
+    }, [loadingRuleIds, loadingRulesAction]);
 
     const sorting = useMemo(
       (): SortingType => ({
@@ -204,7 +219,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         pageIndex: pagination.page - 1,
         pageSize: pagination.perPage,
         totalItemCount: pagination.total,
-        pageSizeOptions: [5, 10, 20, 50, 100, 200, 300, 400, 500],
+        pageSizeOptions: [5, 10, 20, 50, 100, 200, 300, 400, 500, 600],
       }),
       [pagination]
     );
@@ -225,8 +240,9 @@ export const RulesTables = React.memo<RulesTableProps>(
           },
           { page: page.index + 1, perPage: page.size }
         );
+        setLastRefreshDate();
       },
-      [updateOptions]
+      [updateOptions, setLastRefreshDate]
     );
 
     const rulesColumns = useMemo(() => {
@@ -292,25 +308,41 @@ export const RulesTables = React.memo<RulesTableProps>(
       [loadingRuleIds, dispatch]
     );
 
-    const isLoadingAnActionOnRule = useMemo(() => {
-      if (
-        loadingRuleIds.length > 0 &&
-        (loadingRulesAction === 'disable' || loadingRulesAction === 'enable')
-      ) {
-        return false;
-      } else if (loadingRuleIds.length > 0) {
-        return true;
-      }
-      return false;
-    }, [loadingRuleIds, loadingRulesAction]);
+    const refreshTable = useCallback(
+      async (mode: 'auto' | 'manual' = 'manual'): Promise<void> => {
+        if (isLoadingAnActionOnRule) {
+          return;
+        }
 
-    const handleRefreshData = useCallback(async (): Promise<void> => {
-      if (!isLoadingAnActionOnRule) {
+        const isAutoRefresh = mode === 'auto';
+        if (isAutoRefresh) {
+          setIsRefreshing(true);
+        }
+
         await reFetchRules();
         await refetchPrePackagedRulesStatus();
         setLastRefreshDate();
-      }
-    }, [reFetchRules, isLoadingAnActionOnRule, setLastRefreshDate, refetchPrePackagedRulesStatus]);
+
+        if (isAutoRefresh) {
+          setIsRefreshing(false);
+        }
+      },
+      [
+        isLoadingAnActionOnRule,
+        setIsRefreshing,
+        reFetchRules,
+        refetchPrePackagedRulesStatus,
+        setLastRefreshDate,
+      ]
+    );
+
+    const handleAutoRefresh = useCallback(async (): Promise<void> => {
+      await refreshTable('auto');
+    }, [refreshTable]);
+
+    const handleManualRefresh = useCallback(async (): Promise<void> => {
+      await refreshTable();
+    }, [refreshTable]);
 
     const handleResetIdleTimer = useCallback((): void => {
       if (isRefreshOn) {
@@ -326,29 +358,29 @@ export const RulesTables = React.memo<RulesTableProps>(
     useEffect(() => {
       const interval = setInterval(() => {
         if (isRefreshOn) {
-          handleRefreshData();
+          handleAutoRefresh();
         }
       }, defaultAutoRefreshSetting.value);
 
       return () => {
         clearInterval(interval);
       };
-    }, [isRefreshOn, handleRefreshData, defaultAutoRefreshSetting.value]);
+    }, [isRefreshOn, handleAutoRefresh, defaultAutoRefreshSetting.value]);
 
     const handleIdleModalContinue = useCallback((): void => {
       setShowIdleModal(false);
-      handleRefreshData();
+      handleAutoRefresh();
       setAutoRefreshOn(true);
-    }, [setShowIdleModal, setAutoRefreshOn, handleRefreshData]);
+    }, [setShowIdleModal, setAutoRefreshOn, handleAutoRefresh]);
 
     const handleAutoRefreshSwitch = useCallback(
       (refreshOn: boolean) => {
         if (refreshOn) {
-          handleRefreshData();
+          handleAutoRefresh();
         }
         setAutoRefreshOn(refreshOn);
       },
-      [setAutoRefreshOn, handleRefreshData]
+      [setAutoRefreshOn, handleAutoRefresh]
     );
 
     const shouldShowRulesTable = useMemo(
@@ -401,14 +433,16 @@ export const RulesTables = React.memo<RulesTableProps>(
           data-test-subj="allRulesPanel"
         >
           <>
-            {(isLoadingRules || isLoadingRulesStatuses) && (
-              <EuiProgress
-                data-test-subj="loadingRulesInfoProgress"
-                size="xs"
-                position="absolute"
-                color="accent"
-              />
-            )}
+            {!initLoading &&
+              (loading || isLoadingRules || isLoadingAnActionOnRule) &&
+              isRefreshing && (
+                <EuiProgress
+                  data-test-subj="loadingRulesInfoProgress"
+                  size="xs"
+                  position="absolute"
+                  color="accent"
+                />
+              )}
             <HeaderSection
               split
               growLeftSplit={false}
@@ -430,9 +464,12 @@ export const RulesTables = React.memo<RulesTableProps>(
               )}
             </HeaderSection>
 
-            {isLoadingAnActionOnRule && !initLoading && (
-              <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-            )}
+            {!initLoading &&
+              (loading || isLoadingRules || isLoadingAnActionOnRule) &&
+              !isRefreshing && (
+                <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
+              )}
+
             {shouldShowPrepackagedRulesPrompt && (
               <PrePackagedRulesPrompt
                 createPrePackagedRules={handleCreatePrePackagedRules}
@@ -462,7 +499,7 @@ export const RulesTables = React.memo<RulesTableProps>(
                   paginationTotal={pagination.total ?? 0}
                   numberSelectedItems={selectedRuleIds.length}
                   onGetBatchItemsPopoverContent={getBatchItemsPopoverContent}
-                  onRefresh={handleRefreshData}
+                  onRefresh={handleManualRefresh}
                   isAutoRefreshOn={isRefreshOn}
                   onRefreshSwitch={handleAutoRefreshSwitch}
                   showBulkActions

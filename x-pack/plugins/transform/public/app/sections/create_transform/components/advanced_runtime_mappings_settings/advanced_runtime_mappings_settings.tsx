@@ -51,7 +51,8 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
   } = props.pivotConfig;
 
   const applyChanges = () => {
-    const nextConfig = JSON.parse(advancedRuntimeMappingsConfig);
+    const nextConfig =
+      advancedRuntimeMappingsConfig === '' ? {} : JSON.parse(advancedRuntimeMappingsConfig);
     const previousConfig = runtimeMappings;
 
     applyRuntimeMappingsEditorChanges();
@@ -155,6 +156,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
                     fill
                     onClick={applyChanges}
                     disabled={!isRuntimeMappingsEditorApplyButtonEnabled}
+                    data-test-subj="transformRuntimeMappingsApplyButton"
                   >
                     {i18n.translate(
                       'xpack.transform.stepDefineForm.advancedSourceEditorApplyButtonText',

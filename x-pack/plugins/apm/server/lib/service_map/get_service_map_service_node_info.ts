@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_CPU_PERCENT,
@@ -19,7 +19,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
+import { environmentQuery, rangeQuery } from '../../../server/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -56,7 +56,7 @@ export function getServiceMapServiceNodeInfo({
   searchAggregatedTransactions,
 }: Options & { serviceName: string }) {
   return withApmSpan('get_service_map_node_stats', async () => {
-    const { start, end, uiFilters } = setup;
+    const { start, end } = setup;
 
     const filter: ESFilter[] = [
       { term: { [SERVICE_NAME]: serviceName } },
@@ -66,7 +66,7 @@ export function getServiceMapServiceNodeInfo({
 
     const minutes = Math.abs((end - start) / (1000 * 60));
     const taskParams = {
-      environment: uiFilters.environment,
+      environment,
       filter,
       searchAggregatedTransactions,
       minutes,
@@ -106,11 +106,14 @@ async function getErrorStats({
   searchAggregatedTransactions: boolean;
 }) {
   return withApmSpan('get_error_rate_for_service_map_node', async () => {
+    const { start, end } = setup;
     const { noHits, average } = await getErrorRate({
       environment,
       setup,
       serviceName,
       searchAggregatedTransactions,
+      start,
+      end,
     });
 
     return { avgErrorRate: noHits ? null : average };

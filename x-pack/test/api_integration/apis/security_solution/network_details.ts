@@ -24,10 +24,11 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'true')
           .send({
             ip: '151.205.0.17',
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+            defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.details,
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 
@@ -51,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
             factoryQueryType: NetworkQueries.details,
             docValueFields: [],
             inspect: false,
+            wait_for_completion_timeout: '10s',
           })
           .expect(200);
 

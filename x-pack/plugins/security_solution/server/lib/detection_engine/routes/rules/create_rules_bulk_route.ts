@@ -24,7 +24,7 @@ import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '..
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleTypeParams } from '../../types';
-import { Alert } from '../../../../../../alerts/common';
+import { Alert } from '../../../../../../alerting/common';
 
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
@@ -43,7 +43,7 @@ export const createRulesBulkRoute = (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const alertsClient = context.alerting?.getAlertsClient();
-      const clusterClient = context.core.elasticsearch.legacy.client;
+      const esClient = context.core.elasticsearch.client;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.securitySolution?.getAppClient();
 
@@ -92,7 +92,7 @@ export const createRulesBulkRoute = (
 
               throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
               const finalIndex = internalRule.params.outputIndex;
-              const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
+              const indexExists = await getIndexExists(esClient.asCurrentUser, finalIndex);
               if (!indexExists) {
                 return createBulkErrorObject({
                   ruleId: internalRule.params.ruleId,

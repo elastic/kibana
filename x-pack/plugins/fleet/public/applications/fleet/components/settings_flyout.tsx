@@ -20,13 +20,13 @@ import {
   EuiFlyoutFooter,
   EuiForm,
   EuiFormRow,
-  EuiRadioGroup,
   EuiComboBox,
   EuiCodeEditor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText } from '@elastic/eui';
 import { safeLoad } from 'js-yaml';
+
 import {
   useComboInput,
   useStartServices,
@@ -170,73 +170,6 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
   const body = (
     <EuiForm>
-      <EuiRadioGroup
-        options={[
-          {
-            id: 'enabled',
-            label: i18n.translate('xpack.fleet.settings.autoUpgradeEnabledLabel', {
-              defaultMessage:
-                'Automatically update agent binaries to use the latest minor version.',
-            }),
-          },
-          {
-            id: 'disabled',
-            disabled: true,
-            label: i18n.translate('xpack.fleet.settings.autoUpgradeDisabledLabel', {
-              defaultMessage:
-                'Manually manage agent binary versions. Requires a Gold subscription.',
-            }),
-          },
-        ]}
-        idSelected={'enabled'}
-        onChange={(id) => {}}
-        legend={{
-          children: (
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.fleet.settings.autoUpgradeFieldLabel"
-                  defaultMessage="Elastic Agent binary version"
-                />
-              </h3>
-            </EuiTitle>
-          ),
-        }}
-      />
-      <EuiSpacer size="l" />
-      <EuiRadioGroup
-        options={[
-          {
-            id: 'enabled',
-            label: i18n.translate('xpack.fleet.settings.integrationUpgradeEnabledFieldLabel', {
-              defaultMessage:
-                'Automatically update integrations to the latest version to get the latest assets. You might need to update agent policies to use new features.',
-            }),
-          },
-          {
-            id: 'disabled',
-            disabled: true,
-            label: i18n.translate('xpack.fleet.settings.integrationUpgradeDisabledFieldLabel', {
-              defaultMessage: 'Manually manage integration versions yourself.',
-            }),
-          },
-        ]}
-        idSelected={'enabled'}
-        onChange={(id) => {}}
-        legend={{
-          children: (
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.fleet.settings.integrationUpgradeFieldLabel"
-                  defaultMessage="Integration version"
-                />
-              </h3>
-            </EuiTitle>
-          ),
-        }}
-      />
-      <EuiSpacer size="l" />
       <EuiTitle size="s">
         <h3>
           <FormattedMessage

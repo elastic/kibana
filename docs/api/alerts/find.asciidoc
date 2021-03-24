@@ -6,13 +6,26 @@
 
 Retrieve a paginated set of alerts based on condition.
 
+NOTE: As alerts change in {kib}, the results on each page of the response also
+change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
+
 [[alerts-api-find-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/alerts/_find`
 
+`GET <kibana host>:<port>/s/<space_id>/api/alerts/_find`
+
+[[alerts-api-find-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
 [[alerts-api-find-query-params]]
 ==== Query Parameters
+
+NOTE: Alert `params` are stored as a {ref}/flattened.html[flattened field type] and analyzed as keywords.
 
 `per_page`::
   (Optional, number) The number of alerts to return per page.
@@ -45,9 +58,6 @@ Retrieve a paginated set of alerts based on condition.
   (Optional, string) A <<kuery-query, KQL>> string that you filter with an attribute from your saved object.
   It should look like savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object, such as `updatedAt`,
   you will have to define your filter, for example, savedObjectType.updatedAt > 2018-12-22.
-
-NOTE: As alerts change in {kib}, the results on each page of the response also
-change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
 
 [[alerts-api-find-request-codes]]
 ==== Response code
