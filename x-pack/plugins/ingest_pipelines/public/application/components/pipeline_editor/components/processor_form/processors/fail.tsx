@@ -37,9 +37,12 @@ const fieldsConfig: FieldsConfig = {
 };
 
 export const Fail: FunctionComponent = () => {
-  return <UseField
-    data-test-subj="messageField"
-    component={Field}
-    config={fieldsConfig.message}
-    path="fields.message" />;
+  return (
+    <UseField
+      data-test-subj="messageField"
+      component={Field}
+      config={fieldsConfig.message}
+      path="fields.message"
+    />
+  );
 };

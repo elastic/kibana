@@ -11,9 +11,9 @@ import { setup, SetupResult } from './processor.helpers';
 // Default parameter values automatically added to the URI parts processor when saved
 const defaultFailParameters = {
   ignore_failure: undefined,
-  "if": undefined,
+  if: undefined,
   tag: undefined,
-  "description": undefined
+  description: undefined,
 };
 
 describe('Processor: Fail', () => {
@@ -103,7 +103,6 @@ describe('Processor: Fail', () => {
     // Add "message" value (required)
     form.setInputValue('messageField.input', 'Test Error Message');
 
-
     // Save the field with new changes
     await saveNewProcessor();
 
@@ -112,9 +111,9 @@ describe('Processor: Fail', () => {
     expect(processors[0].fail).toEqual({
       message: 'Test Error Message',
       ignore_failure: undefined,
-      "if": undefined,
+      if: undefined,
       tag: undefined,
-      "description": undefined
+      description: undefined,
     });
   });
 });
