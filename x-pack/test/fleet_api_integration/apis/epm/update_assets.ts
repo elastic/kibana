@@ -351,6 +351,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: '2e56f08b-1d06-55ed-abee-4708e1ccf0aa', type: 'epm-packages-assets' },
           { id: 'c7bf1a39-e057-58a0-afde-fb4b48751d8c', type: 'epm-packages-assets' },
           { id: '8c665f28-a439-5f43-b5fd-8fda7b576735', type: 'epm-packages-assets' },
+          { id: '139c6d86-b758-5dde-a2d0-dd6b22a10994', type: 'epm-packages-assets' },
         ],
         name: 'all_assets',
         version: '0.2.0',
