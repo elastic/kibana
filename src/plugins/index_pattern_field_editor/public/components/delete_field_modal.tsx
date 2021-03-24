@@ -12,6 +12,7 @@ import { EuiCallOut, EuiConfirmModal, EuiFieldText, EuiFormRow, EuiSpacer } from
 
 const geti18nTexts = (fieldsToDelete?: string[]) => {
   let modalTitle = '';
+  let confirmButtonText = '';
   if (fieldsToDelete) {
     const isSingle = fieldsToDelete.length === 1;
 
@@ -19,27 +20,35 @@ const geti18nTexts = (fieldsToDelete?: string[]) => {
       ? i18n.translate(
           'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteSingleTitle',
           {
-            defaultMessage: `Remove {name} field?`,
+            defaultMessage: `Remove field '{name}'`,
             values: { name: fieldsToDelete[0] },
           }
         )
       : i18n.translate(
           'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteMultipleTitle',
           {
-            defaultMessage: `Remove {count} fields?`,
+            defaultMessage: `Remove {count} fields`,
             values: { count: fieldsToDelete.length },
+          }
+        );
+    confirmButtonText = isSingle
+      ? i18n.translate(
+          'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.removeButtonLabel',
+          {
+            defaultMessage: `Remove field`,
+          }
+        )
+      : i18n.translate(
+          'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.removeMultipleButtonLabel',
+          {
+            defaultMessage: `Remove fields`,
           }
         );
   }
 
   return {
     modalTitle,
-    confirmButtonText: i18n.translate(
-      'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.removeButtonLabel',
-      {
-        defaultMessage: 'Remove',
-      }
-    ),
+    confirmButtonText,
     cancelButtonText: i18n.translate(
       'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.cancelButtonLabel',
       {
@@ -55,7 +64,7 @@ const geti18nTexts = (fieldsToDelete?: string[]) => {
     typeConfirm: i18n.translate(
       'indexPatternFieldEditor.deleteRuntimeField.confirmModal.typeConfirm',
       {
-        defaultMessage: "Type 'REMOVE' to continue",
+        defaultMessage: "Type 'REMOVE' to confirm",
       }
     ),
     warningRemovingFields: i18n.translate(
