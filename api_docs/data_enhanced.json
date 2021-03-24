@@ -531,8 +531,8 @@
               "\nID of the async search request"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 72
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 73
             }
           },
           {
@@ -544,8 +544,8 @@
               "\nSearch strategy used to submit the search request"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 76
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 77
             }
           },
           {
@@ -557,8 +557,8 @@
               "\nstatus"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 80
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 81
             }
           },
           {
@@ -570,8 +570,8 @@
               "\nAn optional error. Set if status is set to error."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 84
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 85
             },
             "signature": [
               "string | undefined"
@@ -579,8 +579,8 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-          "lineNumber": 68
+          "path": "src/plugins/data/common/search/session/types.ts",
+          "lineNumber": 69
         },
         "initialIsOpen": false
       },
@@ -598,8 +598,8 @@
             "label": "sessionId",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 12
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 13
             }
           },
           {
@@ -611,8 +611,8 @@
               "\nUser-facing session name to be displayed in session management"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 16
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 17
             },
             "signature": [
               "string | undefined"
@@ -627,8 +627,8 @@
               "\nApp that created the session. e.g 'discover'"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 20
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 21
             },
             "signature": [
               "string | undefined"
@@ -643,8 +643,8 @@
               "\nCreation time of the session"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 24
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 25
             }
           },
           {
@@ -656,8 +656,8 @@
               "\nLast touch time of the session"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 28
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 29
             }
           },
           {
@@ -669,8 +669,8 @@
               "\nExpiration time of the session. Expiration itself is managed by Elasticsearch."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 32
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 33
             }
           },
           {
@@ -682,14 +682,14 @@
               "\nstatus"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 36
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 37
             },
             "signature": [
               {
-                "pluginId": "dataEnhanced",
+                "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataEnhancedPluginApi",
+                "docId": "kibDataSearchPluginApi",
                 "section": "def-common.SearchSessionStatus",
                 "text": "SearchSessionStatus"
               }
@@ -704,8 +704,8 @@
               "\nurlGeneratorId"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 40
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 41
             },
             "signature": [
               "string | undefined"
@@ -720,8 +720,8 @@
               "\nThe application state that was used to create the session.\nShould be used, for example, to re-load an expired search session."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 45
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 46
             },
             "signature": [
               "Record<string, unknown> | undefined"
@@ -736,8 +736,8 @@
               "\nApplication state that should be used to restore the session.\nFor example, relative dates are conveted to absolute ones."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 50
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 51
             },
             "signature": [
               "Record<string, unknown> | undefined"
@@ -752,15 +752,15 @@
               "\nMapping of search request hashes to their corresponsing info (async search id, etc.)"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 54
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 55
             },
             "signature": [
               "Record<string, ",
               {
-                "pluginId": "dataEnhanced",
+                "pluginId": "data",
                 "scope": "common",
-                "docId": "kibDataEnhancedPluginApi",
+                "docId": "kibDataSearchPluginApi",
                 "section": "def-common.SearchSessionRequestInfo",
                 "text": "SearchSessionRequestInfo"
               },
@@ -776,8 +776,8 @@
               "\nThis value is true if the session was actively stored by the user. If it is false, the session may be purged by the system."
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 59
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 60
             }
           },
           {
@@ -789,8 +789,8 @@
               "\nThe realm type/name & username uniquely identifies the user who created this search session"
             ],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 63
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 64
             },
             "signature": [
               "string | undefined"
@@ -803,8 +803,8 @@
             "label": "realmName",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 64
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 65
             },
             "signature": [
               "string | undefined"
@@ -817,8 +817,8 @@
             "label": "username",
             "description": [],
             "source": {
-              "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-              "lineNumber": 65
+              "path": "src/plugins/data/common/search/session/types.ts",
+              "lineNumber": 66
             },
             "signature": [
               "string | undefined"
@@ -826,8 +826,8 @@
           }
         ],
         "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-          "lineNumber": 11
+          "path": "src/plugins/data/common/search/session/types.ts",
+          "lineNumber": 12
         },
         "initialIsOpen": false
       }
@@ -840,8 +840,8 @@
         "tags": [],
         "description": [],
         "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/session/status.ts",
-          "lineNumber": 8
+          "path": "src/plugins/data/common/search/session/status.ts",
+          "lineNumber": 9
         },
         "initialIsOpen": false
       }
@@ -916,8 +916,8 @@
         "label": "SEARCH_SESSION_TYPE",
         "description": [],
         "source": {
-          "path": "x-pack/plugins/data_enhanced/common/search/session/types.ts",
-          "lineNumber": 10
+          "path": "src/plugins/data/common/search/session/types.ts",
+          "lineNumber": 11
         },
         "signature": [
           "\"search-session\""

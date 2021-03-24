@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
-export const isClusterOptedIn = (clusterUsage: any): boolean => {
-  return clusterUsage?.stack_stats?.kibana?.plugins?.telemetry?.opt_in_status === true;
+import { ExecutionContext } from '../execution';
+
+export const createMockContext = () => {
+  return {
+    getSearchContext: () => ({}),
+    getSearchSessionId: () => undefined,
+    types: {},
+    variables: {},
+    abortSignal: {} as any,
+    inspectorAdapters: {} as any,
+  } as ExecutionContext;
 };
