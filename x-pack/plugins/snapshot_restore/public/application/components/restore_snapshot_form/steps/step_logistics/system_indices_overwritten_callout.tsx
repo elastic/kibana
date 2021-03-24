@@ -26,6 +26,8 @@ export const SystemIndicesOverwrittenCallOut: FunctionComponent = () => {
       )}
       iconType="pin"
       size="s"
+      aria-live="polite"
+      aria-atomic="true"
     >
       <FormattedMessage
         id="xpack.snapshotRestore.restoreForm.stepLogistics.systemIndicesCallOut.description"

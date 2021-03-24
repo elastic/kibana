@@ -581,7 +581,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
              */}
             {includeGlobalState && semverGt(version, '7.12.0') && (
               <>
-                <EuiSpacer size="xs" />
+                <EuiSpacer size="s" />
                 <SystemIndicesOverwrittenCallOut />
               </>
             )}
