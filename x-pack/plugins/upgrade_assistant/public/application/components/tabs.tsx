@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LatestMinorBanner } from './latest_minor_banner';
-import { DeprecationTab } from './elasticsearch';
+import { DeprecationTab } from './es_deprecations';
 import { OverviewTab } from './overview';
 import { TelemetryState, UpgradeAssistantTabProps } from './types';
 import { useAppContext } from '../app_context';
