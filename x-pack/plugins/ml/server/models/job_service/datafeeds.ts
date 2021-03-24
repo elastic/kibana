@@ -219,6 +219,7 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
       datafeed.indices,
       job.data_description.time_field,
       query,
+      datafeed.runtime_mappings,
       datafeed.indices_options
     );
 
