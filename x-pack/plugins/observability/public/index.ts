@@ -6,12 +6,22 @@
  */
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
-import { Plugin, ObservabilityPluginSetup, ObservabilityPluginStart } from './plugin';
-export type { ObservabilityPluginSetup, ObservabilityPluginStart };
+import {
+  Plugin,
+  ObservabilityPluginSetup,
+  ObservabilityClientPluginsStart,
+  ObservabilityClientPluginsSetup,
+  ObservabilityClientStart,
+  ObservabilityClientSetup,
+} from './plugin';
+export type { ObservabilityPluginSetup, ObservabilityClientPluginsStart };
 
-export const plugin: PluginInitializer<ObservabilityPluginSetup, ObservabilityPluginStart> = (
-  context: PluginInitializerContext
-) => {
+export const plugin: PluginInitializer<
+  ObservabilityClientSetup,
+  ObservabilityClientStart,
+  ObservabilityClientPluginsSetup,
+  ObservabilityClientPluginsStart
+> = (context: PluginInitializerContext) => {
   return new Plugin(context);
 };
 
