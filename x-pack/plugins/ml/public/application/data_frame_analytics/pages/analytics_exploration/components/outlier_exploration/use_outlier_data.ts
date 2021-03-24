@@ -145,26 +145,18 @@ export const useOutlierData = (
     jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD,
     (columnId, cellValue, fullItem, setCellProps) => {
       const resultsField = jobConfig?.dest.results_field ?? '';
-
-      const split = columnId.split('.');
       let backgroundColor;
 
-      const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}.feature_name`];
+      const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}`];
 
       // column with feature values get color coded by its corresponding influencer value
       if (Array.isArray(featureNames)) {
-        const featureIndex = featureNames.indexOf(columnId);
-
-        if (featureIndex > -1) {
-          backgroundColor = colorRange(
-            fullItem[`${resultsField}.${FEATURE_INFLUENCE}.influence`][featureIndex]
-          );
+        const featureForColumn = featureNames.find(
+          (feature) => columnId === feature.feature_name[0]
+        );
+        if (featureForColumn) {
+          backgroundColor = colorRange(featureForColumn.influence[0]);
         }
-      }
-
-      // column with influencer values get color coded by its own value
-      if (split.length > 2 && split[0] === resultsField && split[1] === FEATURE_INFLUENCE) {
-        backgroundColor = colorRange(cellValue);
       }
 
       if (backgroundColor !== undefined) {

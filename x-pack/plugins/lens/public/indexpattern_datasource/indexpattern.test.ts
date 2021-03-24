@@ -16,6 +16,7 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 import { getFieldByNameFactory } from './pure_helpers';
 import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedReferenceOperation } from './operations/mocks';
+import { indexPatternFieldEditorPluginMock } from 'src/plugins/index_pattern_field_editor/public/mocks';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -170,6 +171,7 @@ describe('IndexPattern Data Source', () => {
       core: coreMock.createStart(),
       data: dataPluginMock.createStartContract(),
       charts: chartPluginMock.createSetupContract(),
+      indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
     });
 
     baseState = {

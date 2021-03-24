@@ -29,7 +29,8 @@ import {
   listArtifacts,
 } from './artifacts';
 
-import { NewArtifact } from './types';
+import type { NewArtifact } from './types';
+import { newArtifactToElasticsearchProperties } from './mappings';
 
 describe('When using the artifacts services', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
@@ -86,7 +87,7 @@ describe('When using the artifacts services', () => {
         index: FLEET_SERVER_ARTIFACTS_INDEX,
         id: expect.any(String),
         body: {
-          ...newArtifact,
+          ...newArtifactToElasticsearchProperties(newArtifact),
           created: expect.any(String),
         },
         refresh: 'wait_for',

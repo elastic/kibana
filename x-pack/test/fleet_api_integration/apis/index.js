@@ -25,6 +25,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./agents/actions'));
     loadTestFile(require.resolve('./agents/upgrade'));
     loadTestFile(require.resolve('./agents/reassign'));
+    loadTestFile(require.resolve('./agents/status'));
 
     // Enrollment API keys
     loadTestFile(require.resolve('./enrollment_api_keys/crud'));

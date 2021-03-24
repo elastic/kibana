@@ -9,7 +9,7 @@
         "children": [
           {
             "type": "Object",
-            "label": "{ onChange, color: selectedColor, id, label }",
+            "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n}",
             "isRequired": true,
             "signature": [
               "ColorPickerProps"
@@ -17,18 +17,18 @@
             "description": [],
             "source": {
               "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-              "lineNumber": 83
+              "lineNumber": 111
             }
           }
         ],
         "signature": [
-          "({ onChange, color: selectedColor, id, label }: ColorPickerProps) => JSX.Element"
+          "({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, }: ColorPickerProps) => JSX.Element"
         ],
         "description": [],
         "label": "ColorPicker",
         "source": {
           "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-          "lineNumber": 83
+          "lineNumber": 111
         },
         "tags": [],
         "returnComment": [],
