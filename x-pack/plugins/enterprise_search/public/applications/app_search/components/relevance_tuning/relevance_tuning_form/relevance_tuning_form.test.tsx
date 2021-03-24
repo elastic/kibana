@@ -34,6 +34,7 @@ describe('RelevanceTuningForm', () => {
           {
             factor: 2,
             type: BoostType.Value,
+            value: [],
           },
         ],
       },
@@ -85,6 +86,7 @@ describe('RelevanceTuningForm', () => {
         {
           factor: 2,
           type: BoostType.Value,
+          value: [],
         },
       ]);
       expect(relevantTuningItems.at(1).prop('boosts')).toBeUndefined();
