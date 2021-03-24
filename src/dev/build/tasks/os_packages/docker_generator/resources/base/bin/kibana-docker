@@ -159,6 +159,7 @@ kibana_vars=(
     xpack.actions.allowedHosts
     xpack.actions.enabled
     xpack.actions.enabledActionTypes
+    xpack.actions.preconfiguredAlertHistoryEsIndex
     xpack.actions.preconfigured
     xpack.actions.proxyHeaders
     xpack.actions.proxyRejectUnauthorizedCertificates
