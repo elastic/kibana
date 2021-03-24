@@ -72,6 +72,7 @@ export const buildAlertHistoryDocument = (variables: Record<string, unknown>) =>
 
 export const AlertHistoryDocumentSchema = Object.freeze(
   buildAlertHistoryDocument({
+    date: '{{date}}',
     rule: {
       id: '{{rule.id}}',
       name: '{{rule.name}}',
