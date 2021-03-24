@@ -76,7 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.clickQuerySubmitButton();
 
       await PageObjects.visChart.openLegendOptionColors('Count', `[data-title="${visName}"]`);
-      await PageObjects.visChart.selectNewLegendColorChoice('#EA6460');
+      const overwriteColor = isNewChartsLibraryEnabled ? '#d36086' : '#EA6460';
+      await PageObjects.visChart.selectNewLegendColorChoice(overwriteColor);
 
       await PageObjects.dashboard.saveDashboard(dashboarName);
 
@@ -89,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
 
       const colorChoiceRetained = await PageObjects.visChart.doesSelectedLegendColorExist(
-        '#EA6460'
+        overwriteColor
       );
 
       expect(colorChoiceRetained).to.be(true);

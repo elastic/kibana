@@ -20,7 +20,17 @@ export function estimateBucketSpanFactory(client) {
 
   class BucketSpanEstimator {
     constructor(
-      { index, timeField, aggTypes, fields, duration, query, splitField, runtimeMappings },
+      {
+        index,
+        timeField,
+        aggTypes,
+        fields,
+        duration,
+        query,
+        splitField,
+        runtimeMappings,
+        indicesOptions,
+      },
       splitFieldValues,
       maxBuckets
     ) {
@@ -72,7 +82,8 @@ export function estimateBucketSpanFactory(client) {
         this.index,
         this.timeField,
         this.duration,
-        this.query
+        this.query,
+        indicesOptions
       );
 
       if (this.aggTypes.length === this.fields.length) {
@@ -89,7 +100,8 @@ export function estimateBucketSpanFactory(client) {
                 this.duration,
                 this.query,
                 this.thresholds,
-                this.runtimeMappings
+                this.runtimeMappings,
+                indicesOptions
               ),
               result: null,
             });
@@ -112,7 +124,8 @@ export function estimateBucketSpanFactory(client) {
                   this.duration,
                   queryCopy,
                   this.thresholds,
-                  this.runtimeMappings
+                  this.runtimeMappings,
+                  indicesOptions
                 ),
                 result: null,
               });
@@ -246,7 +259,7 @@ export function estimateBucketSpanFactory(client) {
     }
   }
 
-  const getFieldCardinality = function (index, field, runtimeMappings) {
+  const getFieldCardinality = function (index, field, runtimeMappings, indicesOptions) {
     return new Promise((resolve, reject) => {
       asCurrentUser
         .search({
@@ -262,6 +275,7 @@ export function estimateBucketSpanFactory(client) {
             },
             ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
           },
+          ...(indicesOptions ?? {}),
         })
         .then(({ body }) => {
           const value = get(body, ['aggregations', 'field_count', 'value'], 0);
@@ -273,13 +287,13 @@ export function estimateBucketSpanFactory(client) {
     });
   };
 
-  const getRandomFieldValues = function (index, field, query, runtimeMappings) {
+  const getRandomFieldValues = function (index, field, query, runtimeMappings, indicesOptions) {
     let fieldValues = [];
     return new Promise((resolve, reject) => {
       const NUM_PARTITIONS = 10;
       // use a partitioned search to load 10 random fields
       // load ten fields, to test that there are at least 10.
-      getFieldCardinality(index, field)
+      getFieldCardinality(index, field, runtimeMappings, indicesOptions)
         .then((value) => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
           asCurrentUser
@@ -301,6 +315,7 @@ export function estimateBucketSpanFactory(client) {
                 },
                 ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
               },
+              ...(indicesOptions ?? {}),
             })
             .then(({ body }) => {
               // eslint-disable-next-line camelcase
@@ -390,7 +405,8 @@ export function estimateBucketSpanFactory(client) {
               formConfig.index,
               formConfig.splitField,
               formConfig.query,
-              formConfig.runtimeMappings
+              formConfig.runtimeMappings,
+              formConfig.indicesOptions
             )
               .then((splitFieldValues) => {
                 runEstimator(splitFieldValues);

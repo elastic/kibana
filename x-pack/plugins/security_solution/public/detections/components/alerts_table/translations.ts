@@ -88,6 +88,27 @@ export const ALERTS_HEADERS_RISK_SCORE = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_THRESHOLD_COUNT = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCount',
+  {
+    defaultMessage: 'Threshold Count',
+  }
+);
+
+export const ALERTS_HEADERS_THRESHOLD_TERMS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdTerms',
+  {
+    defaultMessage: 'Threshold Terms',
+  }
+);
+
+export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCardinality',
+  {
+    defaultMessage: 'Threshold Cardinality',
+  }
+);
+
 export const ACTION_OPEN_ALERT = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.openAlertTitle',
   {
