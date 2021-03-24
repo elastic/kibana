@@ -49,7 +49,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
     });
 
   const completeButton = actionPath ? (
-    <EuiButtonEmptyTo to={actionPath} data-test-subj={testSubj} onClick={onClick}>
+    <EuiButtonEmptyTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill={true}>
       {actionTitle}
     </EuiButtonEmptyTo>
   ) : (
@@ -57,7 +57,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
   );
 
   const incompleteButton = actionPath ? (
-    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick}>
+    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill={true}>
       {actionTitle}
     </EuiButtonTo>
   ) : (
@@ -66,7 +66,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
 
   return (
     <EuiFlexItem>
-      <EuiPanel>
+      <EuiPanel color="subdued" hasShadow={false}>
         <EuiEmptyPrompt
           iconType={complete ? 'checkInCircleFilled' : (icon as IconType)}
           iconColor={complete ? 'secondary' : 'subdued'}
