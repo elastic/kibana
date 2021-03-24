@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from 'src/core/public';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import { StartServicesAccessor } from 'src/core/server';
+import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 import { getEsdslFn } from '../../../common/search/expressions/esdsl';
-import { UiSettingsCommon } from '../../../common/index_patterns';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -28,14 +27,19 @@ import { UiSettingsCommon } from '../../../common/index_patterns';
 export function getEsdsl({
   getStartServices,
 }: {
-  getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>;
 }) {
   return getEsdslFn({
-    getStartDependencies: async () => {
+    getStartDependencies: async (getKibanaRequest: any) => {
       const [core, , { search }] = await getStartServices();
+      if (!getKibanaRequest || !getKibanaRequest()) {
+        throw new Error('TODO: add text');
+      }
+      const request = getKibanaRequest();
+      const savedObjectsClient = core.savedObjects.getScopedClient(request);
       return {
-        uiSettingsClient: (core.uiSettings as any) as UiSettingsCommon,
-        search: search.search,
+        uiSettingsClient: core.uiSettings.asScopedToClient(savedObjectsClient),
+        search: search.asScoped(request).search,
       };
     },
   });
