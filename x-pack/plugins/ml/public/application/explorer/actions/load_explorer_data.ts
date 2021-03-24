@@ -21,7 +21,6 @@ import {
   getSelectionTimeRange,
   loadAnnotationsTableData,
   loadAnomaliesTableData,
-  loadDataForCharts,
   loadFilteredTopInfluencers,
   loadTopInfluencers,
   AppStateSelectedCells,
@@ -58,7 +57,6 @@ const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
 const memoizedLoadAnnotationsTableData = memoize<typeof loadAnnotationsTableData>(
   loadAnnotationsTableData
 );
-const memoizedLoadDataForCharts = memoize<typeof loadDataForCharts>(loadDataForCharts);
 const memoizedLoadFilteredTopInfluencers = memoize<typeof loadFilteredTopInfluencers>(
   loadFilteredTopInfluencers
 );
@@ -96,7 +94,7 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
 const loadExplorerDataProvider = (
   mlResultsService: MlResultsService,
   anomalyTimelineService: AnomalyTimelineService,
-  anomalyExplorerService: AnomalyExplorerChartsService,
+  anomalyExplorerChartsService: AnomalyExplorerChartsService,
   timefilter: TimefilterContract
 ) => {
   const memoizedLoadOverallData = memoize(
@@ -108,8 +106,8 @@ const loadExplorerDataProvider = (
     anomalyTimelineService
   );
   const memoizedAnomalyDataChange = memoize(
-    anomalyExplorerService.getAnomalyData,
-    anomalyExplorerService
+    anomalyExplorerChartsService.getAnomalyData,
+    anomalyExplorerChartsService
   );
 
   return (config: LoadExplorerDataConfig): Observable<Partial<ExplorerState>> => {
@@ -133,7 +131,7 @@ const loadExplorerDataProvider = (
       viewByPerPage,
     } = config;
 
-    return from(anomalyExplorerService.getCombinedJobs(selectedJobs.map((j) => j.id))).pipe(
+    return from(anomalyExplorerChartsService.getCombinedJobs(selectedJobs.map((j) => j.id))).pipe(
       switchMap((jobs) => {
         const combinedJobRecords: Record<string, CombinedJob> = jobs.reduce((acc, job) => {
           return { ...acc, [job.job_id]: job };
@@ -165,9 +163,7 @@ const loadExplorerDataProvider = (
             swimlaneBucketInterval.asSeconds(),
             bounds
           ),
-          anomalyChartRecords: memoizedLoadDataForCharts(
-            lastRefresh,
-            mlResultsService,
+          anomalyChartRecords: anomalyExplorerChartsService.loadDataForCharts$(
             jobIds,
             timerange.earliestMs,
             timerange.latestMs,
@@ -314,7 +310,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
       uiSettings,
       mlResultsService
     );
-    const anomalyExplorerService = new AnomalyExplorerChartsService(
+    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
       timefilter,
       mlApiServices,
       mlResultsService
@@ -322,7 +318,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
     return loadExplorerDataProvider(
       mlResultsService,
       anomalyTimelineService,
-      anomalyExplorerService,
+      anomalyExplorerChartsService,
       timefilter
     );
   }, []);

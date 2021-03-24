@@ -12,6 +12,7 @@ import { TimeRangeBounds } from '../util/time_buckets';
 import { RecordForInfluencer } from '../services/results_service/results_service';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { MlResultsService } from '../services/results_service';
+import { EntityField } from '../../../common/util/anomaly_utils';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -60,7 +61,7 @@ export declare const getSelectionJobIds: (
 export declare const getSelectionInfluencers: (
   selectedCells: AppStateSelectedCells | undefined,
   fieldName: string
-) => string[];
+) => EntityField[];
 
 interface SelectionTimeRange {
   earliestMs: number;

@@ -7,6 +7,8 @@
 
 import { each, find, get, map, reduce, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { from, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { RecordForInfluencer } from './results_service/results_service';
 import {
   isMappableJob,
@@ -36,6 +38,8 @@ import {
 } from '../explorer/explorer_charts/explorer_charts_container_service';
 import { TimeRangeBounds } from '../util/time_buckets';
 import { isDefined } from '../../../common/types/guards';
+import { AppStateSelectedCells } from '../explorer/explorer_utils';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
 const CHART_MAX_POINTS = 500;
 const ANOMALIES_MAX_RESULTS = 500;
 const MAX_SCHEDULED_EVENTS = 10; // Max number of scheduled events displayed per bucket.
@@ -378,6 +382,46 @@ export class AnomalyExplorerChartsService {
       .filter((r) => r.job !== undefined && r.datafeed !== undefined)
       .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed } as CombinedJob));
     return combinedJobs;
+  }
+
+  public loadDataForCharts$(
+    jobIds: string[],
+    earliestMs: number,
+    latestMs: number,
+    influencers: EntityField[] = [],
+    selectedCells: AppStateSelectedCells | undefined,
+    influencersFilterQuery: InfluencersFilterQuery
+  ) {
+    if (
+      selectedCells === undefined &&
+      influencers.length === 0 &&
+      influencersFilterQuery === undefined
+    ) {
+      of([]);
+    }
+
+    return from(
+      this.mlResultsService.getRecordsForInfluencer(
+        jobIds,
+        influencers,
+        0,
+        earliestMs,
+        latestMs,
+        500,
+        influencersFilterQuery
+      )
+    ).pipe(
+      switchMap((resp) => {
+        if (
+          (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
+          influencersFilterQuery !== undefined
+        ) {
+          return of(resp.records);
+        }
+
+        return of([]);
+      })
+    );
   }
 
   public async getAnomalyData(
