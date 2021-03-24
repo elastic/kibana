@@ -7,10 +7,12 @@
 
 import type { GetResponse, SearchResponse } from 'elasticsearch';
 
+import type { ESSearchHit } from '../../../../../../typings/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 
 type FleetServerAgentESResponse =
   | GetResponse<FleetServerAgent>
+  | ESSearchHit<FleetServerAgent>
   | SearchResponse<FleetServerAgent>['hits']['hits'][0];
 
 export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
