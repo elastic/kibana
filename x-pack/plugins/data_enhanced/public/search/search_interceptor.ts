@@ -63,11 +63,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       sessionId,
     };
 
-    return from(
-      this.deps.session.shouldCacheOnClient(sessionId)
-        ? createRequestHash(hashOptions)
-        : of(undefined)
-    );
+    return from(sessionId ? createRequestHash(hashOptions) : of(undefined));
   }
 
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {

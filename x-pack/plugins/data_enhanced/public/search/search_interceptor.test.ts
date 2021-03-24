@@ -7,7 +7,7 @@
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { coreMock } from '../../../../../src/core/public/mocks';
-import { CLIENT_CACHE_EXPIRATION, EnhancedSearchInterceptor } from './search_interceptor';
+import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
@@ -50,7 +50,8 @@ jest.mock('./utils', () => ({
 
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
-  fetchMock.mockImplementation(() => {
+  fetchMock.mockImplementation((r) => {
+    if (!r.request.id) i = 0;
     const { time = 0, value = {}, isError = false } = responses[i++];
     return new Promise((resolve, reject) =>
       setTimeout(() => {
@@ -596,21 +597,17 @@ describe('EnhancedSearchInterceptor', () => {
       sessionService.getSessionId.mockImplementation(() => sessionId);
     });
 
-    test('should be disabled by default', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => false);
+    test('should be disabled if there is no session', async () => {
       mockFetchImplementation(basicCompleteResponse);
 
-      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
-      await timeTravel(10);
+      searchInterceptor.search(basicReq, {}).subscribe({ next, error, complete });
       expect(fetchMock).toBeCalledTimes(1);
 
-      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
-      await timeTravel(10);
+      searchInterceptor.search(basicReq, {}).subscribe({ next, error, complete });
       expect(fetchMock).toBeCalledTimes(2);
     });
 
     test('should fetch different requests in a single session', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => true);
       mockFetchImplementation(basicCompleteResponse);
 
       const req2 = {
@@ -629,7 +626,6 @@ describe('EnhancedSearchInterceptor', () => {
     });
 
     test('should fetch the same request for two different sessions', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => true);
       mockFetchImplementation(basicCompleteResponse);
 
       searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
@@ -643,9 +639,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(fetchMock).toBeCalledTimes(2);
     });
 
-    test('should not cache partial responses', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => true);
-
+    test('should cache partial responses', async () => {
       const responses = [
         {
           time: 10,
@@ -665,12 +659,10 @@ describe('EnhancedSearchInterceptor', () => {
 
       searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
       await timeTravel(10);
-      expect(fetchMock).toBeCalledTimes(2);
+      expect(fetchMock).toBeCalledTimes(1);
     });
 
     test('should not cache error responses', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => true);
-
       const responses = [
         {
           time: 10,
@@ -694,7 +686,6 @@ describe('EnhancedSearchInterceptor', () => {
     });
 
     test('should ignore anything outside params when hashing', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => true);
       mockFetchImplementation(basicCompleteResponse);
 
       const req = {
@@ -721,7 +712,6 @@ describe('EnhancedSearchInterceptor', () => {
     });
 
     test('should ignore preference when hashing', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => true);
       mockFetchImplementation(basicCompleteResponse);
 
       const req = {
@@ -748,53 +738,12 @@ describe('EnhancedSearchInterceptor', () => {
     });
 
     test('should return from cache for identical requests in the same session', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => true);
       mockFetchImplementation(basicCompleteResponse);
 
       searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
       await timeTravel(10);
       expect(fetchMock).toBeCalledTimes(1);
 
-      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
-      await timeTravel(10);
-      expect(fetchMock).toBeCalledTimes(1);
-    });
-
-    test('cached responses should expire', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => true);
-      mockFetchImplementation(basicCompleteResponse);
-
-      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
-      await timeTravel(10);
-      expect(fetchMock).toBeCalledTimes(1);
-
-      await timeTravel(CLIENT_CACHE_EXPIRATION);
-
-      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
-      await timeTravel(10);
-      expect(fetchMock).toBeCalledTimes(2);
-    });
-
-    test('fetching a cached response should reset its expiration', async () => {
-      sessionService.shouldCacheOnClient.mockImplementation(() => true);
-      mockFetchImplementation(basicCompleteResponse);
-
-      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
-      await timeTravel(10);
-      expect(fetchMock).toBeCalledTimes(1);
-
-      // wait a little more than half the timeout
-      await timeTravel(CLIENT_CACHE_EXPIRATION / 2 + 1);
-
-      // fetch again
-      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
-      await timeTravel(10);
-      expect(fetchMock).toBeCalledTimes(1);
-
-      // wait a little more than half the timeout again (so the response should have expired now)
-      await timeTravel(CLIENT_CACHE_EXPIRATION / 2 + 1);
-
-      // fetch again and see that the cached response was still used
       searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
       await timeTravel(10);
       expect(fetchMock).toBeCalledTimes(1);
