@@ -8,7 +8,7 @@
 import { useTimeRange } from './use_time_range';
 import * as pluginContext from './use_plugin_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import { ObservabilityPluginSetupDeps } from '../plugin';
+import { ObservabilityClientPluginsStart } from '../plugin';
 import * as kibanaUISettings from './use_kibana_ui_settings';
 
 jest.mock('react-router-dom', () => ({
@@ -36,7 +36,7 @@ describe('useTimeRange', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPluginSetupDeps,
+      } as unknown) as ObservabilityClientPluginsStart,
     }));
     jest.spyOn(kibanaUISettings, 'useKibanaUISettings').mockImplementation(() => ({
       from: '2020-10-08T05:00:00.000Z',
@@ -76,7 +76,7 @@ describe('useTimeRange', () => {
                 },
               },
             },
-          } as unknown) as ObservabilityPluginSetupDeps,
+          } as unknown) as ObservabilityClientPluginsStart,
         }));
       });
       it('returns ranges and absolute times from kibana default settings', () => {
