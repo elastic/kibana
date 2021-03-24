@@ -79,7 +79,7 @@ async function executor(
   const params = execOptions.params;
   const services = execOptions.services;
 
-  const index = params.indexOverride ?? config.index;
+  const index = params.indexOverride || config.index;
 
   const bulkBody = [];
   for (const document of params.documents) {
