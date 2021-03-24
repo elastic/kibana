@@ -83,3 +83,8 @@ When creating a new rule, add an <<index-action-type, Index action>> and select 
 image::images/pre-configured-alert-history-connector.png[Select pre-configured alert history connectors]
 
 With this connector, documents are indexed using a pre-configured schema that captures all of the rule and alert information that is available as <<defining-alerts-actions-variables, action variables>>. By default, these documents will be indexed into the `alert-history-default` index, but you may specify a different index if desired. Note that all index names must start with `alert-history-` in order to take advantage of the pre-configured Alert History index template.
+
+[IMPORTANT]
+==============================================
+Make sure you have `all` or `write` privileges to the `alert-history-*` indices in order to ensure your documents will be written. Refer to <<xpack-kibana-role-management>> for more information.
+==============================================
