@@ -20,6 +20,7 @@ import {
   existsSync,
   mkdirSync,
   copyFileSync,
+  appendFileSync,
   rmdirSync,
 } from 'fs';
 import { Readable, Writable } from 'stream';
@@ -324,6 +325,7 @@ export async function rebuildAllAction({
     const tempFile = childPath + (gzip ? '.rebuilding.gz' : '.rebuilding');
 
     if (childName.includes('data.json') && !archiveName.includes('_mb')) {
+      const existingDir = `${rootDir}/${archiveName}`;
       const mbDir = `${rootDir}/${archiveName}_mb`;
       const mbTempFile = `${mbDir}/${childName + (gzip ? '.rebuilding.gz' : '.rebuilding')}`;
       const mbFile = mbTempFile.replace('.rebuilding.gz', '');
@@ -400,6 +402,10 @@ export async function rebuildAllAction({
       if (foundMbFiles) {
         await fromNode((cb) => rename(mbTempFile, mbFile, cb));
         copyFileSync(`/Users/chris/Desktop/mb_settings.json`, `${mbDir}/mappings.json`);
+        appendFileSync(
+          `${mbDir}/mappings.json`,
+          `\n\n${readFileSync(`${existingDir}/mappings.json`)}`
+        );
       } else {
         try {
           rmdirSync(mbDir, { recursive: true });

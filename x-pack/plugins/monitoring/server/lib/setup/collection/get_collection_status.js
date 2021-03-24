@@ -576,7 +576,8 @@ export const getCollectionStatus = async (
       for (const indexBucket of indexBuckets) {
         const isFullyMigrated =
           considerAllInstancesMigrated ||
-          indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+          indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN) ||
+          matchesMetricbeatIndex(metricbeatIndex, indexBucket.key);
         const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
         const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
 
