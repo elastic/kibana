@@ -685,7 +685,7 @@ For our testing, we have a single GCP image, built using Packer, with the Buildk
 
 Summary of Responsibilities
 
-- An automated process for creating new images, at least daily
+- An automated process for creating new images, at least daily, running automated smoke tests against them, and promoting them
 - Delete old images when creating new ones
 - Ability to roll back images easily and/or pin specific image versions
 - Manage dependencies, failures, updates, etc across all supported OSes and architectures, on a regular basis
