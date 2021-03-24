@@ -6,7 +6,7 @@
  */
 
 import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
-import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { expand, map, share, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import type { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
 import { isErrorResponse, isPartialResponse } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
@@ -42,5 +42,5 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
       takeWhile<Response>(isPartialResponse, true),
       takeUntil<Response>(aborted$)
     );
-  });
+  }).pipe(share());
 };

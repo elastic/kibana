@@ -15,23 +15,19 @@ import {
   UI_SETTINGS,
   IKibanaSearchRequest,
   SearchSessionState,
-  IKibanaSearchResponse,
-  isCompleteResponse,
 } from '../../../../../src/plugins/data/public';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
+import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
 
 export const CLIENT_CACHE_EXPIRATION = 30000;
-
-interface ResponseCacheItem {
-  response: IKibanaSearchResponse<any>;
-  timeout: NodeJS.Timeout;
-}
+const MAX_CACHE_ITEMS = 50;
+const MAX_CACHE_SIZE_MB = 10;
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
   private searchTimeout: number;
-  private responseCache: Map<string, ResponseCacheItem>;
+  private responseCache: SearchResponseCache;
 
   /**
    * @internal
@@ -39,7 +35,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
     this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
-    this.responseCache = new Map();
+    this.responseCache = new SearchResponseCache(MAX_CACHE_ITEMS, MAX_CACHE_SIZE_MB);
 
     this.uiSettingsSub = deps.uiSettings
       .get$(UI_SETTINGS.SEARCH_TIMEOUT)
@@ -72,25 +68,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         ? createRequestHash(hashOptions)
         : of(undefined)
     );
-  }
-
-  private cacheResponse(requestHash: string, response: IKibanaSearchResponse<any>) {
-    const timeout = setTimeout(() => {
-      this.responseCache.delete(requestHash);
-    }, CLIENT_CACHE_EXPIRATION);
-
-    this.responseCache.set(requestHash, {
-      response,
-      timeout,
-    });
-  }
-
-  private touchCachedResponse(requestHash: string) {
-    const item = this.responseCache.get(requestHash);
-    if (item) {
-      clearTimeout(item.timeout);
-      this.cacheResponse(requestHash, item.response);
-    }
   }
 
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
@@ -135,22 +112,25 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       switchMap((requestHash) => {
         const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
         if (cached) {
-          this.touchCachedResponse(requestHash!);
-          return of(cached.response);
+          return cached;
         }
 
-        return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
+        const search$ = pollSearch(search, cancel, {
+          ...options,
+          abortSignal: combinedSignal,
+        }).pipe(
           tap((response) => (id = response.id)),
-          tap((response) => {
-            if (requestHash && isCompleteResponse(response)) {
-              this.cacheResponse(requestHash, response);
-            }
-          }),
           catchError((e: Error) => {
             cancel();
             return throwError(this.handleSearchError(e, timeoutSignal, options));
           })
         );
+
+        if (requestHash) {
+          this.responseCache.set(requestHash, search$);
+        }
+
+        return search$;
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
