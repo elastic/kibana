@@ -8,6 +8,7 @@
 
 import { PluginServices, PluginServiceProviders, PluginServiceProvider } from '../create';
 import { dashboardsServiceFactory } from '../stub/dashboards';
+import { experimentsServiceFactory } from '../stub/experiments';
 import { capabilitiesServiceFactory } from './capabilities';
 import { PresentationUtilServices } from '..';
 
@@ -21,8 +22,9 @@ export interface StorybookParams {
 }
 
 export const providers: PluginServiceProviders<PresentationUtilServices, StorybookParams> = {
-  dashboards: new PluginServiceProvider(dashboardsServiceFactory),
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
+  dashboards: new PluginServiceProvider(dashboardsServiceFactory),
+  experiments: new PluginServiceProvider(experimentsServiceFactory),
 };
 
 export const pluginServices = new PluginServices<PresentationUtilServices>();

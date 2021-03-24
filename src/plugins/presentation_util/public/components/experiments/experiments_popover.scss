@@ -1,0 +1,18 @@
+.experimentsPopover__footer {
+  position: relative;
+  text-align: right;
+
+  .experimentsPopover__callout {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: $euiSizeS * 2;
+  }
+
+  .experimentsPopover__reset {
+    position: relative;
+    background: $euiColorEmptyShade;
+  }
+}

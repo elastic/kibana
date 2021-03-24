@@ -6,7 +6,18 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
+import { CoreSetup, Plugin } from 'kibana/server';
+import { getUISettings } from './ui_settings';
 
-export * from './experiments';
+export class PresentationUtilPluginSetup implements Plugin<object, object> {
+  public setup(core: CoreSetup) {
+    core.uiSettings.register(getUISettings());
+    return {};
+  }
+
+  public start() {
+    return {};
+  }
+
+  public stop() {}
+}

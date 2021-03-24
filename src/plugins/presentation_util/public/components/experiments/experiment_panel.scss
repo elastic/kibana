@@ -1,0 +1,32 @@
+.experimentListItem {
+  position: relative;
+  overflow: hidden;
+  width: 500px;
+  margin-bottom: $euiSizeM;
+
+  &--isOverridden {
+    &:before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 3px;
+      background: $euiColorAccent;
+      content: '';
+    }
+  }
+
+  &--isOverriddenEnabled {
+    &:before {
+      background: $euiColorSecondary;
+    }
+  }
+
+  .experimentListItem__title {
+    margin-top: -.5rem;
+  }
+
+  .euiSwitch__label {
+    width: 100%;
+  }
+}

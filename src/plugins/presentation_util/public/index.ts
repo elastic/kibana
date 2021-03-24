@@ -7,6 +7,9 @@
  */
 
 import { PresentationUtilPlugin } from './plugin';
+import { pluginServices } from './services';
+
+export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 
 export {
   SavedObjectSaveModalDashboard,
@@ -14,8 +17,12 @@ export {
 } from './components/saved_object_save_modal_dashboard';
 
 export { DashboardPicker } from './components/dashboard_picker';
+export { ExperimentsButton } from './components/experiments';
 
 export function plugin() {
   return new PresentationUtilPlugin();
 }
-export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
+
+export const useExperimentsService = () => {
+  const {} = pluginServices.getHooks().experiments.useService();
+};

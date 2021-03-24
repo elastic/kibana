@@ -62,7 +62,7 @@ export class PluginServiceProvider<Service extends {}, StartParameters = {}> {
   /**
    * Returns a function for providing a Context hook for the service.
    */
-  getUseServiceHook() {
+  getServiceReactHook() {
     return () => {
       const service = useContext(this.context);
 

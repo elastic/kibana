@@ -76,7 +76,7 @@ export class PluginServices<Services> {
 
     // @ts-expect-error Need to fix this; the type isn't fully understood when inferred.
     return mapValues(providers, (provider) => ({
-      useService: provider.getUseServiceHook(),
+      useService: provider.getServiceReactHook(),
     }));
   }
 }

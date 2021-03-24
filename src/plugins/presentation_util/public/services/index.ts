@@ -6,28 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SimpleSavedObject } from 'src/core/public';
 import { PluginServices } from './create';
-import { PartialDashboardAttributes } from './kibana/dashboards';
-
-export interface PresentationDashboardsService {
-  findDashboards: (
-    query: string,
-    fields: string[]
-  ) => Promise<Array<SimpleSavedObject<PartialDashboardAttributes>>>;
-  findDashboardsByTitle: (
-    title: string
-  ) => Promise<Array<SimpleSavedObject<PartialDashboardAttributes>>>;
-}
-
-export interface PresentationCapabilitiesService {
-  canAccessDashboards: () => boolean;
-  canCreateNewDashboards: () => boolean;
-}
-
+import { PresentationCapabilitiesService } from './capabilities';
+import { PresentationDashboardsService } from './dashboards';
+import { PresentationExperimentsService } from './experiments';
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
   capabilities: PresentationCapabilitiesService;
+  experiments: PresentationExperimentsService;
 }
 
 export const pluginServices = new PluginServices<PresentationUtilServices>();

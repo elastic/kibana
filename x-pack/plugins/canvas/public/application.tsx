@@ -56,17 +56,20 @@ export const renderApp = (
   { element }: AppMountParameters,
   canvasStore: Store
 ) => {
+  const { presentationUtil } = plugins;
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
 
   ReactDOM.render(
     <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
       <ServicesProvider providers={services}>
-        <I18nProvider>
-          <Provider store={canvasStore}>
-            <App />
-          </Provider>
-        </I18nProvider>
+        <presentationUtil.ContextProvider>
+          <I18nProvider>
+            <Provider store={canvasStore}>
+              <App />
+            </Provider>
+          </I18nProvider>
+        </presentationUtil.ContextProvider>
       </ServicesProvider>
     </KibanaContextProvider>,
     element

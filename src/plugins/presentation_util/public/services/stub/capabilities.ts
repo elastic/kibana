@@ -7,7 +7,7 @@
  */
 
 import { PluginServiceFactory } from '../create';
-import { PresentationCapabilitiesService } from '..';
+import { PresentationCapabilitiesService } from '../capabilities';
 
 type CapabilitiesServiceFactory = PluginServiceFactory<PresentationCapabilitiesService>;
 

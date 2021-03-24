@@ -13,6 +13,7 @@
       "expressions",
       "features",
       "inspector",
+      "presentationUtil",
       "uiActions"
     ],
     "optionalPlugins": [

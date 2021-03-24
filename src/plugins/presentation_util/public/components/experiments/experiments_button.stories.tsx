@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'presentationUtil';
-export const PLUGIN_NAME = 'presentationUtil';
+import React from 'react';
+import { ExperimentsButton } from './experiments_button';
 
-export * from './experiments';
+export default {
+  component: ExperimentsButton,
+  title: 'Experiments Button',
+  description: '',
+  argTypes: {},
+};
+
+export function Example() {
+  return <ExperimentsButton />;
+}
