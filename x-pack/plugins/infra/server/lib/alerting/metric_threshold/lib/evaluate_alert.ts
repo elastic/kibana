@@ -127,6 +127,7 @@ const getMetric: (
         (response) => response.aggregations?.groupings?.after_key
       );
       const compositeBuckets = (await getAllCompositeData(
+        // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
         (body) => esClient.search({ body, index }),
         searchBody,
         bucketSelector,
@@ -147,7 +148,12 @@ const getMetric: (
       index,
     });
 
-    return { [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(result.aggregations, aggType) };
+    return {
+      [UNGROUPED_FACTORY_KEY]: getValuesFromAggregations(
+        (result.aggregations! as unknown) as Aggregation,
+        aggType
+      ),
+    };
   } catch (e) {
     if (timeframe) {
       // This code should only ever be reached when previewing the alert, not executing it
