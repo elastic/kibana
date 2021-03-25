@@ -7,9 +7,10 @@
  */
 
 import { get, throttle } from 'lodash';
+import type { Editor } from 'brace';
 
 // eslint-disable-next-line import/no-default-export
-export default function (editor: any) {
+export default function (editor: Editor) {
   const resize = editor.resize;
 
   const throttledResize = throttle(() => {

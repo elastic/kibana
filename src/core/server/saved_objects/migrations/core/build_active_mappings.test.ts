@@ -164,6 +164,7 @@ describe('diffMappings', () => {
       _meta: {
         migrationMappingPropertyHashes: { foo: 'bar' },
       },
+      // @ts-expect-error
       dynamic: 'abcde',
       properties: {},
     };

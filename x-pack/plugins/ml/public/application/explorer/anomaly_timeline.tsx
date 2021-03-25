@@ -160,7 +160,11 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                 </EuiFlexItem>
                 {selectedCells ? (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty size="xs" onClick={setSelectedCells.bind(null, undefined)}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      onClick={setSelectedCells.bind(null, undefined)}
+                      data-test-subj="mlAnomalyTimelineClearSelection"
+                    >
                       <FormattedMessage
                         id="xpack.ml.explorer.clearSelectionLabel"
                         defaultMessage="Clear selection"
