@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
@@ -25,7 +26,7 @@ describe('fetchAvailableCcs', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         [connectedRemote]: {
           connected: true,
-        },
+        } as estypes.RemoteInfo,
       })
     );
 
@@ -40,7 +41,7 @@ describe('fetchAvailableCcs', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         [disconnectedRemote]: {
           connected: false,
-        },
+        } as estypes.RemoteInfo,
       })
     );
 
