@@ -9,6 +9,9 @@
     "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build"
   },
+  "kibana": {
+    "devOnly": true
+  },
   "dependencies": {
     "@kbn/config": "link:../kbn-config",
     "@kbn/config-schema": "link:../kbn-config-schema",
