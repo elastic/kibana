@@ -13,6 +13,8 @@ import type { DeprecationsServiceStart } from './deprecations_service';
 const createServiceMock = (): jest.Mocked<DeprecationsServiceStart> => ({
   getAllDeprecations: jest.fn().mockResolvedValue([]),
   getDeprecations: jest.fn().mockResolvedValue([]),
+  isDeprecationResolvable: jest.fn().mockReturnValue(false),
+  resolveDepreaction: jest.fn().mockResolvedValue({ status: 'ok', payload: {} }),
 });
 
 const createMock = () => {
