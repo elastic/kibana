@@ -19209,10 +19209,10 @@ mapcap@^1.0.0:
   resolved "https://registry.yarnpkg.com/mapcap/-/mapcap-1.0.0.tgz#e8e29d04a160eaf8c92ec4bcbd2c5d07ed037e5a"
   integrity sha512-KcNlZSlFPx+r1jYZmxEbTVymG+dIctf10WmWkuhrhrblM+KMoF77HelwihL5cxYlORye79KoR4IlOOk99lUJ0g==
 
-maplibre-gl@^1.13.0-rc.5:
-  version "1.13.0-rc.5"
-  resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-1.13.0-rc.5.tgz#31cc48c5bb0f8bf279d37169578c5c4c28486516"
-  integrity sha512-IXyKr1+/6tW5Yk/Ov7VGmtEnBpGnW8G9S8FRAoNZ4KIJbm8XULRhGJ5Llg7DIzUBeZ28uzx0bIHCHzlR0+zpsA==
+maplibre-gl@^1.14.0:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-1.14.0.tgz#035663dae6cbaaca5b06024f6c5b51a42db1fc84"
+  integrity sha512-pqr/nsoZHx1rUY2Bpp0EFVcFVgrVOLkDDh2DhZcLVZVHYXdFOH/LyKUoLZda/3/CDTmlZy9ldJeZN8O0g1Ocpg==
   dependencies:
     "@mapbox/geojson-rewind" "^0.5.0"
     "@mapbox/geojson-types" "^1.0.2"
