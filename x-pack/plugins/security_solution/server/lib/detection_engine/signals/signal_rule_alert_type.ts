@@ -40,8 +40,8 @@ import {
   hasTimestampFields,
   hasReadIndexPrivileges,
   getRuleRangeTuples,
+  isMachineLearningParams,
 } from './utils';
-import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import {
   scheduleNotificationActions,
@@ -52,7 +52,6 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { TelemetryEventsSender } from '../../telemetry/sender';
-import { RuleTypeParams } from '../types';
 import { eqlExecutor } from './executors/eql';
 import { queryExecutor } from './executors/query';
 import { threatMatchExecutor } from './executors/threat_match';
@@ -118,7 +117,7 @@ export const signalRulesAlertType = ({
       spaceId,
       updatedBy: updatedByUser,
     }) {
-      const { ruleId, index, maxSignals, meta, outputIndex, timestampOverride, type } = params;
+      const { ruleId, maxSignals, meta, outputIndex, timestampOverride, type } = params;
 
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
@@ -154,7 +153,8 @@ export const signalRulesAlertType = ({
       // move this collection of lines into a function in utils
       // so that we can use it in create rules route, bulk, etc.
       try {
-        if (!isEmpty(index)) {
+        if (!isMachineLearningParams(params)) {
+          const index = params.index;
           const hasTimestampOverride = timestampOverride != null && !isEmpty(timestampOverride);
           const inputIndices = await getInputIndex(services, version, index);
           const [privileges, timestampFieldCaps] = await Promise.all([

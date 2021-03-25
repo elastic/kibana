@@ -104,8 +104,9 @@ import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
 import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
+import { RuleParams } from '../schemas/rule_schemas';
 
-export type RuleAlertType = Alert<RuleTypeParams>;
+export type RuleAlertType = Alert<RuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
