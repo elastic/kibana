@@ -43,6 +43,10 @@ export interface DiscoverProps {
    */
   fieldCounts: Record<string, number>;
   /**
+   * Current state of data fetching
+   */
+  fetchStatus: string;
+  /**
    * Histogram aggregation data
    */
   histogramData?: Chart;

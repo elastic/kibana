@@ -310,13 +310,20 @@ export const installPackageByUploadHandler: RequestHandler<
 };
 
 export const deletePackageHandler: RequestHandler<
-  TypeOf<typeof DeletePackageRequestSchema.params>
+  TypeOf<typeof DeletePackageRequestSchema.params>,
+  undefined,
+  TypeOf<typeof DeletePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
     const { pkgkey } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
     const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const res = await removeInstallation({ savedObjectsClient, pkgkey, esClient });
+    const res = await removeInstallation({
+      savedObjectsClient,
+      pkgkey,
+      esClient,
+      force: request.body?.force,
+    });
     const body: DeletePackageResponse = {
       response: res,
     };
