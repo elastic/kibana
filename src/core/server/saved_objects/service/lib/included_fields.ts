@@ -12,7 +12,10 @@ function toArray(value: string | string[]): string[] {
 /**
  * Provides an array of paths for ES source filtering
  */
-export function includedFields(type: string | string[] = '*', fields?: string[] | string) {
+export function includedFields(
+  type: string | string[] = '*',
+  fields?: string[] | string
+): string[] | undefined {
   if (!fields || fields.length === 0) {
     return;
   }

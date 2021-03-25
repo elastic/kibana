@@ -37,7 +37,7 @@
             {
               "pluginId": "data",
               "scope": "server",
-              "docId": "kibDataSearchPluginApi",
+              "docId": "kibDataPluginApi",
               "section": "def-server.DataRequestHandlerContext",
               "text": "DataRequestHandlerContext"
             },

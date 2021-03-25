@@ -19,7 +19,7 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_obje
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { escapeHatch, wrapError, decodeCommentRequest } from '../../utils';
-import { CASE_COMMENTS_URL } from '../../../../../common/constants';
+import { CASE_COMMENTS_URL, ENABLE_CASE_CONNECTOR } from '../../../../../common/constants';
 import { CaseServiceSetup } from '../../../../services';
 
 interface CombinedCaseParams {
@@ -82,6 +82,12 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
     },
     async (context, request, response) => {
       try {
+        if (!ENABLE_CASE_CONNECTOR && request.query?.subCaseId !== undefined) {
+          throw Boom.badRequest(
+            'The `subCaseId` is not supported when the case connector feature is disabled'
+          );
+        }
+
         const client = context.core.savedObjects.client;
         const query = pipe(
           CommentPatchRequestRt.decode(request.body),

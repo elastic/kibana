@@ -12,8 +12,8 @@ import { getAgentStatusById } from './status';
 describe('Agent status service', () => {
   it('should return inactive when agent is not active', async () => {
     const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    // @ts-expect-error
     mockElasticsearchClient.get.mockResolvedValue({
+      // @ts-expect-error not full interface
       body: {
         _id: 'id',
         _source: {
@@ -29,8 +29,8 @@ describe('Agent status service', () => {
 
   it('should return online when agent is active', async () => {
     const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    // @ts-expect-error
     mockElasticsearchClient.get.mockResolvedValue({
+      // @ts-expect-error not full interface
       body: {
         _id: 'id',
         _source: {
@@ -47,8 +47,8 @@ describe('Agent status service', () => {
 
   it('should return enrolling when agent is active but never checkin', async () => {
     const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    // @ts-expect-error
     mockElasticsearchClient.get.mockResolvedValue({
+      // @ts-expect-error not full interface
       body: {
         _id: 'id',
         _source: {
@@ -64,8 +64,8 @@ describe('Agent status service', () => {
 
   it('should return unenrolling when agent is unenrolling', async () => {
     const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    // @ts-expect-error
     mockElasticsearchClient.get.mockResolvedValue({
+      // @ts-expect-error not full interface
       body: {
         _id: 'id',
 
