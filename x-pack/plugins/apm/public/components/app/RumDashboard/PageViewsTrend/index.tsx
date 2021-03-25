@@ -13,20 +13,18 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import rison from 'rison-node';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { createExploratoryViewUrl } from '../../../../../../observability/public';
 
 export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, searchTerm } = urlParams;
-
-  const { serviceName } = uiFilters;
+  const { start, end, rangeFrom, rangeTo, searchTerm, serviceName } = urlParams;
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
@@ -55,13 +53,18 @@ export function PageViewsTrend() {
     [end, start, uiFilters, breakdown, searchTerm, serviceName]
   );
 
-  const analyzeHref = {
-    [serviceName + '-kpi']: {
-      rt: 'kpi',
-      serviceName,
-      time: { from: start, to: end },
+  const analyzeHref = createExploratoryViewUrl(
+    {
+      'page-views': {
+        reportType: 'kpi',
+        reportDefinitions: {
+          'service.name': serviceName as string,
+        },
+        time: { from: rangeFrom!, to: rangeTo! },
+      },
     },
-  };
+    ''
+  );
 
   return (
     <div>
@@ -79,12 +82,7 @@ export function PageViewsTrend() {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            href={`/app/observability/exploratory-view#?sr=${rison.encode(
-              analyzeHref
-            )}`}
-          >
+          <EuiButton size="s" href={analyzeHref}>
             Analyze
           </EuiButton>
         </EuiFlexItem>

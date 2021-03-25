@@ -26,19 +26,20 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
 
   const { labels } = dataSeries;
 
-  let filters: UrlFilter[] = [];
-  filters = (series.filters ?? []).concat(getFiltersFromDefs(reportDefinitions, dataSeries));
+  const filters: UrlFilter[] = series.filters ?? [];
+
+  let definitionFilters: UrlFilter[] = getFiltersFromDefs(reportDefinitions, dataSeries);
 
   // we don't want to display report definition filters in new series view
   if (seriesId === NEW_SERIES_KEY && isNew) {
-    filters = series.filters ?? [];
+    definitionFilters = [];
   }
 
   const { removeFilter } = useSeriesFilters({ seriesId });
 
   const { indexPattern } = useIndexPatternContext();
 
-  return filters.length > 0 && indexPattern ? (
+  return (filters.length > 0 || definitionFilters.length > 0) && indexPattern ? (
     <EuiFlexItem>
       <EuiFlexGroup wrap gutterSize="xs">
         {filters.map(({ field, values, notValues }) => (
@@ -64,6 +65,26 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
                   value={val}
                   negate={true}
                   removeFilter={() => removeFilter({ field, value: val, negate: true })}
+                />
+              </EuiFlexItem>
+            ))}
+          </Fragment>
+        ))}
+
+        {definitionFilters.map(({ field, values }) => (
+          <Fragment key={field}>
+            {(values ?? []).map((val) => (
+              <EuiFlexItem key={field + val} grow={false}>
+                <FilterLabel
+                  seriesId={seriesId}
+                  field={field}
+                  label={labels[field]}
+                  value={val}
+                  removeFilter={() => {
+                    // FIXME handle this use case
+                  }}
+                  negate={false}
+                  definitionFilter={true}
                 />
               </EuiFlexItem>
             ))}

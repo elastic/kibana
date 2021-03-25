@@ -18,9 +18,18 @@ interface Props {
   value: string;
   seriesId: string;
   negate: boolean;
+  definitionFilter?: boolean;
   removeFilter: (field: string, value: string, notVal: boolean) => void;
 }
-export function FilterLabel({ label, seriesId, field, value, negate, removeFilter }: Props) {
+export function FilterLabel({
+  label,
+  seriesId,
+  field,
+  value,
+  negate,
+  removeFilter,
+  definitionFilter,
+}: Props) {
   const FilterItem = injectI18n(esFilters.FilterItem);
 
   const { indexPattern } = useIndexPatternContext();
@@ -51,7 +60,9 @@ export function FilterLabel({ label, seriesId, field, value, negate, removeFilte
         removeFilter(field, value, false);
       }}
       onUpdate={(filterN: Filter) => {
-        if (filterN.meta.negate !== negate) {
+        if (definitionFilter) {
+          // FIXME handle this use case
+        } else if (filterN.meta.negate !== negate) {
           invertFilter({ field, value, negate });
         }
       }}

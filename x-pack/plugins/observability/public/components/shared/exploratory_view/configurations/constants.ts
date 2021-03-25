@@ -45,7 +45,7 @@ export const DataViewLabels: Record<ReportViewTypeId, string> = {
   upd: 'Uptime monitor duration',
   upp: 'Uptime pings',
   svl: 'APM Service latency',
-  kpi: 'Business KPI over time',
+  kpi: 'KPI over time',
   tpt: 'APM Service throughput',
   cpu: 'System CPU Usage',
   logs: 'Logs Frequency',
