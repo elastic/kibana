@@ -94,7 +94,7 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
       }
 
       function getPixelPercentage(pixelsNum: number): number {
-        return (pixelsNum / colors.length) * 100;
+        return Math.round((pixelsNum / colors.length) * 100);
       }
 
       // - d3's nest/key/entries methods will group the array of hex values so we can count
