@@ -14,6 +14,8 @@ const defaultBytesParameters = {
   description: undefined,
 };
 
+const BYTES_TYPE = 'bytes';
+
 describe('Processor: Bytes', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
@@ -56,7 +58,7 @@ describe('Processor: Bytes', () => {
     expect(form.getErrorsMessages()).toEqual(['A type is required.']);
 
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'bytes', label: 'Bytes' });
+    await addProcessorType(BYTES_TYPE);
 
     // Click submit button with only the type defined
     await saveNewProcessor();
@@ -74,7 +76,7 @@ describe('Processor: Bytes', () => {
     // Open flyout to add new processor
     addProcessor();
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'bytes', label: 'Bytes' });
+    await addProcessorType(BYTES_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
     // Save the field
@@ -97,7 +99,7 @@ describe('Processor: Bytes', () => {
     // Open flyout to add new processor
     addProcessor();
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'bytes', label: 'Bytes' });
+    await addProcessorType(BYTES_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 

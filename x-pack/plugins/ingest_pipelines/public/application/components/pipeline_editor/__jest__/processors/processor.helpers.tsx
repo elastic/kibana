@@ -90,9 +90,9 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       component.update();
     },
 
-    async addProcessorType({ type, label }: { type: string; label: string }) {
+    async addProcessorType(type: string) {
       await act(async () => {
-        find('processorTypeSelector.input').simulate('change', [{ value: type, label }]);
+        find('processorTypeSelector.input').simulate('change', [{ value: type }]);
       });
       component.update();
     },

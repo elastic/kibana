@@ -16,6 +16,8 @@ const defaultUriPartsParameters = {
   description: undefined,
 };
 
+const URI_PARTS_TYPE = 'uri_parts';
+
 describe('Processor: URI parts', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
@@ -51,14 +53,9 @@ describe('Processor: URI parts', () => {
 
     // Open flyout to add new processor
     addProcessor();
-    // Click submit button without entering any fields
-    await saveNewProcessor();
-
-    // Expect form error as a processor type is required
-    expect(form.getErrorsMessages()).toEqual(['A type is required.']);
 
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'uri_parts', label: 'URI parts' });
+    await addProcessorType(URI_PARTS_TYPE);
 
     // Click submit button with only the type defined
     await saveNewProcessor();
@@ -76,7 +73,7 @@ describe('Processor: URI parts', () => {
     // Open flyout to add new processor
     addProcessor();
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'uri_parts', label: 'URI parts' });
+    await addProcessorType(URI_PARTS_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
     // Save the field
@@ -99,7 +96,7 @@ describe('Processor: URI parts', () => {
     // Open flyout to add new processor
     addProcessor();
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'uri_parts', label: 'URI parts' });
+    await addProcessorType(URI_PARTS_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
