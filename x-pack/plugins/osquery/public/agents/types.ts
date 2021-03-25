@@ -5,18 +5,16 @@
  * 2.0.
  */
 
+import { TermsAggregate } from '@elastic/elasticsearch/api/types';
+
 interface BaseDataPoint {
   key: string;
   doc_count: number;
 }
 
-export type AggregationDataPoint = AgentAggregation & BaseDataPoint;
-
-export interface AgentAggregation {
-  [aggregationKey: string]: {
-    buckets: AggregationDataPoint[];
-  };
-}
+export type AggregationDataPoint = BaseDataPoint & {
+  [key: string]: TermsAggregate<AggregationDataPoint>;
+};
 
 export interface Group {
   name: string;

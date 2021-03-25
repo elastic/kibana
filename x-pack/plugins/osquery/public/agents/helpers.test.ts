@@ -6,7 +6,7 @@
  */
 
 import { getNumOverlapped, getNumAgentsInGrouping, processAggregations } from './helpers';
-import { Overlap, SelectedGroups, AgentAggregation } from './types';
+import { Overlap, SelectedGroups } from './types';
 
 describe('processAggregations', () => {
   it('should parse aggregation responses down into metadata objects', () => {
@@ -44,10 +44,7 @@ describe('processAggregations', () => {
         ],
       },
     };
-    // TODO: make this type check
-    const { platforms, policies, overlap } = processAggregations(
-      (input as unknown) as AgentAggregation
-    );
+    const { platforms, policies, overlap } = processAggregations(input);
     expect(platforms).toEqual([
       {
         name: 'darwin',

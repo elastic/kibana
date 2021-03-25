@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Aggregate, TermsAggregate } from '@elastic/elasticsearch/api/types';
 import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   PaginationInputPaginated,
@@ -18,7 +19,7 @@ import {
   Overlap,
   Group,
   AgentOptionValue,
-  AgentAggregation,
+  AggregationDataPoint,
 } from './types';
 
 export type InspectResponse = Inspect & { response: string[] };
@@ -33,11 +34,12 @@ export const getNumOverlapped = ({ policy, platform }: SelectedGroups, overlap: 
   });
   return sum;
 };
-
-export const processAggregations = (aggs: AgentAggregation) => {
+export const processAggregations = (aggs: Record<string, Aggregate>) => {
   const platforms: Group[] = [];
   const overlap: Overlap = {};
-  for (const { key, doc_count: size, policies } of aggs.platforms.buckets) {
+  const platformTerms = aggs.platforms as TermsAggregate<AggregationDataPoint>;
+  const policyTerms = aggs.policies as TermsAggregate<AggregationDataPoint>;
+  for (const { key, doc_count: size, policies } of platformTerms.buckets) {
     platforms.push({ name: key, size });
     overlap[key] = policies.buckets.reduce((acc: { [key: string]: number }, pol) => {
       acc[pol.key] = pol.doc_count;
@@ -47,7 +49,7 @@ export const processAggregations = (aggs: AgentAggregation) => {
   return {
     platforms,
     overlap,
-    policies: aggs.policies.buckets.map((o) => ({ name: o.key, size: o.doc_count })),
+    policies: policyTerms.buckets.map((o) => ({ name: o.key, size: o.doc_count })),
   };
 };
 export const generateColorPicker = () => {

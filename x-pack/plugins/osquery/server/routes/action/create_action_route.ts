@@ -28,7 +28,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
       const { agentSelection } = request.body as { agentSelection: AgentSelection };
-      const selectedAgents = parseAgentSelection(esClient, osqueryContext, agentSelection);
+      const selectedAgents = await parseAgentSelection(esClient, osqueryContext, agentSelection);
       // @ts-expect-error update validation
       if (request.body.pack_id) {
         const savedObjectsClient = context.core.savedObjects.client;
