@@ -73,7 +73,9 @@ export interface FullAgentPolicy {
   };
   output_permissions?: {
     [output: string]: {
-      [role: string]: FullAgentPolicyPermission[];
+      [role: string]: {
+        index: FullAgentPolicyPermission[];
+      };
     };
   };
   fleet?: {

@@ -145,7 +145,7 @@ describe('test agent checkin new action services', () => {
             },
           },
           output_permissions: {
-            default: { fallback: [] },
+            default: { fallback: { index: [] } },
           },
           inputs: [],
         },
