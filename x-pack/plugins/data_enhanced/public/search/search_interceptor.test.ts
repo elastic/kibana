@@ -504,7 +504,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(untrack).toBeCalledTimes(1);
     });
 
-    test.only('session service should be able to cancel search', async () => {
+    test('session service should be able to cancel search', async () => {
       const sessionId = 'sessionId';
       sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       sessionService.getSessionId.mockImplementation(() => sessionId);

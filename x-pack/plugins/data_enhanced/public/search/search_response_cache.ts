@@ -108,10 +108,7 @@ export class SearchResponseCache {
         },
       })
     );
-    item.subs.add(response$.subscribe({
-      next: r => responseReplay$.next(r),
-      error: e => responseReplay$.error(e),
-    }));
+    item.subs.add(response$.subscribe(responseReplay$));
     this.shrink();
     return responseReplay$;
   }
