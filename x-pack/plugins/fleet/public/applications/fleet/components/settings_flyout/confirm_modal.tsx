@@ -123,9 +123,7 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
               <p>
                 <FormattedMessage
                   id="xpack.fleet.settingsConfirmModal.fleetServerChangedText"
-                  defaultMessage={
-                    'If agents are unable to connect at the new {fleetServerUrl}, they will log an error and report an unhealthy status. They will remain on the current agent policy version and check for updates at the old URL until they successfully connect at the new URL'
-                  }
+                  defaultMessage="If agents are unable to connect at the new {fleetServerUrl}, they will log an error and report an unhealthy status. They will remain on the current agent policy version and check for updates at the old URL until they successfully connect at the new URL"
                   values={{
                     fleetServerUrl: (
                       <b>
@@ -143,10 +141,8 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
             {hasESChanges && (
               <p>
                 <FormattedMessage
-                  id="xpack.fleet.settingsConfirmModal.fleetServerChangedText"
-                  defaultMessage={
-                    'If agents are unable to connect at the new {elasticsearchUrl}, Fleet Server will report them as healthy but they will be unable to send data to Elasticsearch. This will not update URL that Fleet server itself uses to connect to Elasticsearch; you must manually reenroll it to update the URL'
-                  }
+                  id="xpack.fleet.settingsConfirmModal.eserverChangedText"
+                  defaultMessage="If agents are unable to connect at the new {elasticsearchUrl}, Fleet Server will report them as healthy but they will be unable to send data to Elasticsearch. This will not update URL that Fleet server itself uses to connect to Elasticsearch; you must manually reenroll it to update the URL"
                   values={{
                     elasticsearchUrl: (
                       <b>
