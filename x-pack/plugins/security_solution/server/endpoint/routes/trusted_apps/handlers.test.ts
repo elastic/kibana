@@ -20,6 +20,7 @@ import {
   OperatingSystem,
   TrustedApp,
 } from '../../../../common/endpoint/types';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createConditionEntry, createEntryMatch } from './mapping';
 import {
@@ -93,6 +94,7 @@ describe('handlers', () => {
       logFactory: loggingSystemMock.create(),
       service: new EndpointAppContextService(),
       config: () => Promise.resolve(createMockConfig()),
+      experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
     };
 
     // Ensure that `logFactory.get()` always returns the same instance for the same given prefix

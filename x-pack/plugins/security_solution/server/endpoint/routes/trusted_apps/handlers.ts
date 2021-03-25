@@ -18,7 +18,6 @@ import {
   PutTrustedAppsRequestParams,
   PutTrustedAppUpdateRequest,
 } from '../../../../common/endpoint/types';
-import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { EndpointAppContext } from '../../types';
 
 import {
@@ -34,7 +33,7 @@ import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './error
 const getBodyAfterFeatureFlagCheck = (
   body: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest,
   endpointAppContext: EndpointAppContext
-): Promise<PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest> => {
+): PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest => {
   const isTrustedAppsByPolicyEnabled =
     endpointAppContext.experimentalFeatures.trustedAppsByPolicyEnabled;
   return {
@@ -148,7 +147,7 @@ export const getTrustedAppsCreateRouteHandler = (
   const logger = endpointAppContext.logFactory.get('trusted_apps');
   return async (context, req, res) => {
     try {
-      const body = await getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
+      const body = getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
 
       return res.ok({
         body: await createTrustedApp(exceptionListClientFromContext(context), body),
@@ -171,7 +170,7 @@ export const getTrustedAppsUpdateRouteHandler = (
 
   return async (context, req, res) => {
     try {
-      const body = await getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
+      const body = getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
 
       return res.ok({
         body: await updateTrustedApp(exceptionListClientFromContext(context), req.params.id, body),
