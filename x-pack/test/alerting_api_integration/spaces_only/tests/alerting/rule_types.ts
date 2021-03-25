@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function listAlertTypes({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('list_alert_types', () => {
+  describe('rule_types', () => {
     it('should return 200 with list of alert types', async () => {
       const response = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule_types`

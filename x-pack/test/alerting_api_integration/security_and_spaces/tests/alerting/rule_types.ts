@@ -59,7 +59,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
     enabled_in_license: true,
   };
 
-  describe('list_alert_types', () => {
+  describe('rule_types', () => {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
