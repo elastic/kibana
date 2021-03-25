@@ -824,7 +824,7 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
-                  curve={CurveType[curveType || 'LINEAR']}
+                  curve={curveType ? CurveType[curveType] : undefined}
                 />
               );
             case 'area':

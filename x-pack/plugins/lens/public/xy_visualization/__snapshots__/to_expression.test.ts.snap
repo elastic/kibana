@@ -28,7 +28,7 @@ Object {
           },
         ],
         "curveType": Array [
-          9,
+          "LINEAR",
         ],
         "description": Array [
           "",
