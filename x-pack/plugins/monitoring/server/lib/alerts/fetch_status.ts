@@ -20,7 +20,7 @@ export async function fetchStatus(
   alertsClient: AlertsClient,
   licenseService: MonitoringLicenseService,
   alertTypes: string[] | undefined,
-  clusterUuid: string,
+  clusterUuids: string[],
   filters: CommonAlertFilter[] = []
 ): Promise<{ [type: string]: CommonAlertStatus }> {
   const types: Array<{ type: string; result: CommonAlertStatus }> = [];
@@ -57,7 +57,7 @@ export async function fetchStatus(
         }
         for (const state of alertInstanceState.alertStates) {
           const meta = instance.meta;
-          if (clusterUuid && state.cluster.clusterUuid !== clusterUuid) {
+          if (clusterUuids && !clusterUuids.includes(state.cluster.clusterUuid)) {
             return accum;
           }
 

@@ -120,6 +120,13 @@ export async function getClustersFromRequest(
     // add alerts data
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
       const alertsClient = req.getAlertsClient();
+      const alertStatus = await fetchStatus(
+        alertsClient,
+        req.server.plugins.monitoring.info,
+        undefined,
+        clusters.map((cluster) => cluster.cluster_uuid)
+      );
+
       for (const cluster of clusters) {
         const verification = verifyMonitoringLicense(req.server);
         if (!verification.enabled) {
@@ -154,12 +161,20 @@ export async function getClustersFromRequest(
         if (prodLicenseInfo.clusterAlerts.enabled) {
           try {
             cluster.alerts = {
-              list: await fetchStatus(
-                alertsClient,
-                req.server.plugins.monitoring.info,
-                undefined,
-                cluster.cluster_uuid
-              ),
+              list: Object.keys(alertStatus).reduce((accum, alertName) => {
+                const value = alertStatus[alertName];
+                if (value.states && value.states.length) {
+                  accum[alertName] = {
+                    ...value,
+                    states: value.states.filter(
+                      (state) => state.state.cluster.clusterUuid === cluster.cluster_uuid
+                    ),
+                  };
+                } else {
+                  accum[alertName] = value;
+                }
+                return accum;
+              }, {}),
               alertsMeta: {
                 enabled: true,
               },
