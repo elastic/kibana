@@ -7,11 +7,11 @@
  */
 
 import { Transform } from 'stream';
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
-export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
+export function createGenerateIndexRecordsStream(client: KibanaClient, stats: Stats) {
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,

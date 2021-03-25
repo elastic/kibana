@@ -674,6 +674,7 @@ export class DataVisualizer {
     });
 
     const aggregations = body.aggregations;
+    // @ts-expect-error fix search response
     const totalCount = body.hits.total.value;
     const stats = {
       totalCount,
@@ -761,6 +762,7 @@ export class DataVisualizer {
       size,
       body: searchBody,
     });
+    // @ts-expect-error fix search response
     return body.hits.total.value > 0;
   }
 
@@ -1247,6 +1249,7 @@ export class DataVisualizer {
       fieldName: field,
       examples: [] as any[],
     };
+    // @ts-expect-error fix search response
     if (body.hits.total.value > 0) {
       const hits = body.hits.hits;
       for (let i = 0; i < hits.length; i++) {

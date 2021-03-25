@@ -28,6 +28,7 @@ export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.
     return {
       ...response,
       inspect,
+      // @ts-expect-error code doesn't handle TotalHits
       tlsHandshakes: response.rawResponse.hits.total,
     };
   },
