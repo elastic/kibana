@@ -114,9 +114,8 @@ The API tests for "trial" are located in `x-pack/test/apm_api_integration/trial/
 
 
 **API Test tips**
-For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
-
-To update snapshots append `--updateSnapshots` to the functional_test_runner command
+ - For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
+ - To update snapshots append `--updateSnapshots` to the functional_test_runner command
 
 ## Linting
 
