@@ -64,7 +64,7 @@ import {
   registerOutputRoutes,
   registerSettingsRoutes,
   registerAppRoutes,
-  registerPreconfigRoutes,
+  registerPreconfigurationRoutes,
 } from './routes';
 import type {
   ESIndexPatternService,
@@ -289,7 +289,7 @@ export class FleetPlugin
             router: routerSuperuserOnly,
             basePath: core.http.basePath,
           });
-          registerPreconfigRoutes(routerSuperuserOnly);
+          registerPreconfigurationRoutes(routerSuperuserOnly);
           // Do not enforce superuser role for Elastic Agent routes
           registerElasticAgentRoutes(router, config);
         }

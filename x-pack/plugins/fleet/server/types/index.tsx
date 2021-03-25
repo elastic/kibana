@@ -32,6 +32,7 @@ export {
   AgentPolicy,
   AgentPolicySOAttributes,
   NewAgentPolicy,
+  PreconfiguredAgentPolicy,
   AgentPolicyStatus,
   DataStream,
   Output,

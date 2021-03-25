@@ -6,9 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-
-const semverRegex = () =>
-  /^([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+)?$/;
+import semverValid from 'semver/functions/valid';
 
 const varsSchema = schema.maybe(
   schema.arrayOf(
@@ -20,12 +18,12 @@ const varsSchema = schema.maybe(
   )
 );
 
-export const PackagesPreconfigSchema = schema.arrayOf(
+export const PreconfiguredPackagesSchema = schema.arrayOf(
   schema.object({
     name: schema.string(),
     version: schema.string({
       validate: (value) => {
-        if (!semverRegex().test(value)) {
+        if (!semverValid(value)) {
           return i18n.translate('xpack.fleet.config.invalidPackageVersionError', {
             defaultMessage: 'must be a valid semver',
           });
@@ -35,7 +33,7 @@ export const PackagesPreconfigSchema = schema.arrayOf(
   })
 );
 
-export const AgentPoliciesPreconfigSchema = schema.arrayOf(
+export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   schema.object({
     name: schema.string(),
     id: schema.oneOf([schema.string(), schema.number()]),

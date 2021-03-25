@@ -8,17 +8,17 @@
 import type { IRouter, RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { FleetConfigType } from '../../../common';
+import type { PreconfiguredAgentPolicy } from '../../../common';
 
-import { PLUGIN_ID, POLICY_PRECONFIG_API_ROUTES } from '../../constants';
-import { PutPolicyPreconfigSchema } from '../../types';
+import { PLUGIN_ID, PRECONFIGURATION_API_ROUTES } from '../../constants';
+import { PutPreconfigurationSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
 
-export const putPolicyPreconfigHandler: RequestHandler<
+export const putPreconfigurationHandler: RequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof PutPolicyPreconfigSchema.body>
+  TypeOf<typeof PutPreconfigurationSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -30,7 +30,7 @@ export const putPolicyPreconfigHandler: RequestHandler<
     const body = await ensurePreconfiguredPackagesAndPolicies(
       soClient,
       esClient,
-      (agentPolicies as FleetConfigType['agentPolicies']) ?? [],
+      (agentPolicies as PreconfiguredAgentPolicy[]) ?? [],
       packages ?? [],
       defaultOutput
     );
@@ -43,10 +43,10 @@ export const putPolicyPreconfigHandler: RequestHandler<
 export const registerRoutes = (router: IRouter) => {
   router.put(
     {
-      path: POLICY_PRECONFIG_API_ROUTES.PUT_PRECONFIG,
-      validate: PutPolicyPreconfigSchema,
+      path: PRECONFIGURATION_API_ROUTES.PUT_PRECONFIG,
+      validate: PutPreconfigurationSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    putPolicyPreconfigHandler
+    putPreconfigurationHandler
   );
 };

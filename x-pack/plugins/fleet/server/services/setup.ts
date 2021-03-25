@@ -29,7 +29,7 @@ import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
-import { addPackageToAgentPolicy } from './policy_preconfig';
+import { addPackageToAgentPolicy } from './preconfiguration';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';

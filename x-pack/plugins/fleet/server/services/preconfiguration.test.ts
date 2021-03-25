@@ -10,7 +10,7 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/serve
 import type { FleetConfigType } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
-import { ensurePreconfiguredPackagesAndPolicies } from './policy_preconfig';
+import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 
 const mockInstalledPackages = new Map();
 const mockConfiguredPolicies = new Map();
@@ -74,9 +74,6 @@ jest.mock('./epm/packages/install', () => ({
     mockInstalledPackages.set(pkgName, packageInstallation);
     return packageInstallation;
   },
-  isPackageInstalled({ pkgName }: { pkgName: string }) {
-    return mockInstalledPackages.get(pkgName) ?? false;
-  },
 }));
 
 jest.mock('./epm/packages/get', () => ({
@@ -87,6 +84,9 @@ jest.mock('./epm/packages/get', () => ({
       status: 'installed',
       ...installedPackage,
     };
+  },
+  getInstallation({ pkgName }: { pkgName: string }) {
+    return mockInstalledPackages.get(pkgName) ?? false;
   },
 }));
 

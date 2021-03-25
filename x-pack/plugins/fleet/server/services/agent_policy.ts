@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
+import { uniq, omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import uuid from 'uuid/v4';
 import type {
@@ -23,6 +23,7 @@ import {
 import type {
   PackagePolicy,
   NewAgentPolicy,
+  PreconfiguredAgentPolicy,
   AgentPolicy,
   AgentPolicySOAttributes,
   FullAgentPolicy,
@@ -137,15 +138,16 @@ class AgentPolicyService {
   public async ensurePreconfiguredAgentPolicy(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    config: Omit<NewAgentPolicy, 'namespace'> & { namespace?: string }
+    config: PreconfiguredAgentPolicy
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
   }> {
-    const id = config.preconfiguration_id!;
+    const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
+    const preconfigurationId = String(id);
     const searchParams = {
       searchFields: ['preconfiguration_id'],
-      search: escapeSearchQueryPhrase(id),
+      search: escapeSearchQueryPhrase(preconfigurationId),
     };
 
     const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
@@ -153,10 +155,11 @@ class AgentPolicyService {
       monitoring_enabled: ['logs', 'metrics'],
     };
 
-    const newAgentPolicy: NewAgentPolicy = {
+    const newAgentPolicy = {
       ...newAgentPolicyDefaults,
-      ...(config as NewAgentPolicy),
-    };
+      ...preconfiguredAgentPolicy,
+      preconfiguration_id: preconfigurationId,
+    } as NewAgentPolicy;
 
     return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
   }

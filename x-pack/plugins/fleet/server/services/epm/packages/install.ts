@@ -97,14 +97,14 @@ export async function ensureInstalledDefaultPackages(
   });
 }
 
-export async function isPackageInstalled(options: {
+export async function isPackageVersionInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  version?: string;
+  pkgVersion?: string;
 }): Promise<Installation | false> {
-  const { savedObjectsClient, pkgName, version } = options;
+  const { savedObjectsClient, pkgName, pkgVersion } = options;
   const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
-  if (installedPackage && (!version || installedPackage.version === version)) {
+  if (installedPackage && (!pkgVersion || installedPackage.version === pkgVersion)) {
     return installedPackage;
   }
   return false;
@@ -114,18 +114,22 @@ export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   esClient: ElasticsearchClient;
-  version?: string;
+  pkgVersion?: string;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, esClient, version } = options;
-  const installedPackage = await isPackageInstalled({ savedObjectsClient, pkgName, version });
+  const { savedObjectsClient, pkgName, esClient, pkgVersion } = options;
+  const installedPackage = await isPackageVersionInstalled({
+    savedObjectsClient,
+    pkgName,
+    pkgVersion,
+  });
   if (installedPackage) {
     return installedPackage;
   }
   // if the requested packaged was not found to be installed, install
-  if (version) {
+  if (pkgVersion) {
     const pkgkey = Registry.pkgToPkgKey({
       name: pkgName,
-      version,
+      version: pkgVersion,
     });
     await installPackage({
       installSource: 'registry',

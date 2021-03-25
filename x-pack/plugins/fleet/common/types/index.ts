@@ -8,10 +8,6 @@
 export * from './models';
 export * from './rest_spec';
 
-import type { InputsOverride } from '../services';
-
-import type { NewAgentPolicy, NewPackagePolicy, PackagePolicyPackage } from './models';
-
 export interface FleetConfigType {
   enabled: boolean;
   registryUrl?: string;
@@ -33,22 +29,6 @@ export interface FleetConfigType {
     agentPolicyRolloutRateLimitIntervalMs: number;
     agentPolicyRolloutRateLimitRequestPerInterval: number;
   };
-  agentPolicies?: Array<
-    NewAgentPolicy & {
-      id: string | number;
-      package_policies: Array<
-        Partial<Omit<NewPackagePolicy, 'inputs'>> & {
-          name: string;
-          package: Partial<PackagePolicyPackage>;
-          inputs?: InputsOverride[];
-        }
-      >;
-    }
-  >;
-  packages?: Array<{
-    name: string;
-    version: string;
-  }>;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

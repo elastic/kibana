@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { AgentPoliciesPreconfigSchema, PackagesPreconfigSchema } from '../models';
+import { PreconfiguredAgentPoliciesSchema, PreconfiguredPackagesSchema } from '../models';
 
-export const PutPolicyPreconfigSchema = {
+export const PutPreconfigurationSchema = {
   body: schema.object({
-    agentPolicies: schema.maybe(AgentPoliciesPreconfigSchema),
-    packages: schema.maybe(PackagesPreconfigSchema),
+    agentPolicies: schema.maybe(PreconfiguredAgentPoliciesSchema),
+    packages: schema.maybe(PreconfiguredPackagesSchema),
   }),
 };
