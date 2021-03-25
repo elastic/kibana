@@ -63,6 +63,7 @@ export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuer
         matrixHistogramData,
         myConfig.parseKey
       ),
+      // @ts-expect-error code doesn't handle TotalHits
       totalCount,
     };
   },

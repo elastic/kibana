@@ -248,7 +248,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.count_in_progress_cases).to.eql(1);
     });
 
-    describe('stats with sub cases', () => {
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    describe.skip('stats with sub cases', () => {
       let collection: CreateSubCaseResp;
       let actionID: string;
       before(async () => {

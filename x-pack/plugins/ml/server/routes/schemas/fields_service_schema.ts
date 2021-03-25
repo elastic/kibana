@@ -31,5 +31,6 @@ export const getTimeFieldRangeSchema = schema.object({
   /** Query to match documents in the index(es). */
   query: schema.maybe(schema.any()),
   /** Additional search options. */
+  runtimeMappings: schema.maybe(schema.any()),
   indicesOptions: indicesOptionsSchema,
 });

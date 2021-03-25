@@ -83,32 +83,33 @@ export async function sendUpgradeAgentsActions(
     force?: boolean;
   }
 ) {
+  // Full set of agents
+  const agentsGiven = await getAgents(esClient, options);
+
+  // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
   const kibanaVersion = appContextService.getKibanaVersion();
-  // Filter out agents currently unenrolling, agents unenrolled, and agents not upgradeable
-  const agents = await getAgents(esClient, options);
-
-  // upgradeable if they pass the version check
   const upgradeableAgents = options.force
-    ? agents
-    : agents.filter((agent) => isAgentUpgradeable(agent, kibanaVersion));
+    ? agentsGiven
+    : agentsGiven.filter((agent) => isAgentUpgradeable(agent, kibanaVersion));
 
-  // get any policy ids from upgradable agents
-  const policyIdsToGet = new Set(
-    upgradeableAgents.filter((agent) => agent.policy_id).map((agent) => agent.policy_id!)
-  );
+  if (!options.force) {
+    // get any policy ids from upgradable agents
+    const policyIdsToGet = new Set(
+      upgradeableAgents.filter((agent) => agent.policy_id).map((agent) => agent.policy_id!)
+    );
 
-  // get the agent policies for those ids
-  const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
-    fields: ['is_managed'],
-  });
+    // get the agent policies for those ids
+    const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
+      fields: ['is_managed'],
+    });
 
-  // throw if any of those agent policies are managed
-  for (const policy of agentPolicies) {
-    if (policy.is_managed) {
-      throw new IngestManagerError(`Cannot upgrade agent in managed policy ${policy.id}`);
+    // throw if any of those agent policies are managed
+    for (const policy of agentPolicies) {
+      if (policy.is_managed) {
+        throw new IngestManagerError(`Cannot upgrade agent in managed policy ${policy.id}`);
+      }
     }
   }
-
   // Create upgrade action for each agent
   const now = new Date().toISOString();
   const data = {
