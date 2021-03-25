@@ -25,6 +25,7 @@ import { waitFor } from '@testing-library/dom';
 import * as callApmApiModule from '../../../services/rest/createCallApmApi';
 import * as useApmServiceContextHooks from '../../../context/apm_service/use_apm_service_context';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { TimeRangeComparisonType } from '../../shared/time_comparison/get_time_range_comparison';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
@@ -51,6 +52,8 @@ function Wrapper({ children }: { children?: ReactNode }) {
               rangeFrom: 'now-15m',
               rangeTo: 'now',
               latencyAggregationType: LatencyAggregationType.avg,
+              comparisonType: TimeRangeComparisonType.DayBefore,
+              comparisonEnabled: true,
             }}
           >
             {children}

@@ -32,6 +32,7 @@ import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
 import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
 import { SpanIcon } from '../../../shared/span_icon';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 
@@ -41,8 +42,14 @@ interface Props {
 
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
   const {
-    urlParams: { start, end, environment },
+    urlParams: { start, end, environment, comparisonType, comparisonEnabled },
   } = useUrlParams();
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
 
   const columns: Array<EuiBasicTableColumn<ServiceDependencyItem>> = [
     {
@@ -97,12 +104,15 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         }
       ),
       width: px(unit * 10),
-      render: (_, { latency }) => {
+      render: (_, { currentPeriod, previousPeriod }) => {
         return (
           <SparkPlot
             color="euiColorVis1"
-            series={latency.timeseries}
-            valueLabel={asMillisecondDuration(latency.value)}
+            series={currentPeriod.latency.timeseries}
+            valueLabel={asMillisecondDuration(currentPeriod.latency.value)}
+            comparisonSeries={
+              comparisonEnabled ? previousPeriod.latency.timeseries : undefined
+            }
           />
         );
       },
@@ -115,13 +125,18 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         { defaultMessage: 'Throughput' }
       ),
       width: px(unit * 10),
-      render: (_, { throughput }) => {
+      render: (_, { currentPeriod, previousPeriod }) => {
         return (
           <SparkPlot
             compact
             color="euiColorVis0"
-            series={throughput.timeseries}
-            valueLabel={asTransactionRate(throughput.value)}
+            series={currentPeriod.throughput.timeseries}
+            valueLabel={asTransactionRate(currentPeriod.throughput.value)}
+            comparisonSeries={
+              comparisonEnabled
+                ? previousPeriod.throughput.timeseries
+                : undefined
+            }
           />
         );
       },
@@ -136,13 +151,18 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         }
       ),
       width: px(unit * 10),
-      render: (_, { errorRate }) => {
+      render: (_, { currentPeriod, previousPeriod }) => {
         return (
           <SparkPlot
             compact
             color="euiColorVis7"
-            series={errorRate.timeseries}
-            valueLabel={asPercent(errorRate.value, 1)}
+            series={currentPeriod.errorRate.timeseries}
+            valueLabel={asPercent(currentPeriod.errorRate.value, 1)}
+            comparisonSeries={
+              comparisonEnabled
+                ? previousPeriod.errorRate.timeseries
+                : undefined
+            }
           />
         );
       },
@@ -157,8 +177,23 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
         }
       ),
       width: px(unit * 5),
-      render: (_, { impact }) => {
-        return <ImpactBar size="m" value={impact} />;
+      render: (_, { currentPeriod, previousPeriod }) => {
+        return (
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexItem>
+              <ImpactBar value={currentPeriod.impact} size="m" />
+            </EuiFlexItem>
+            {comparisonEnabled && (
+              <EuiFlexItem>
+                <ImpactBar
+                  value={previousPeriod.impact}
+                  size="s"
+                  color="subdued"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
       },
       sortable: true,
     },
@@ -166,10 +201,9 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
 
   const { data = [], status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end) {
+      if (!start || !end || !comparisonStart || !comparisonEnd) {
         return;
       }
-
       return callApmApi({
         endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
         params: {
@@ -181,20 +215,22 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             end,
             environment,
             numBuckets: 20,
+            comparisonStart,
+            comparisonEnd,
           },
         },
       });
     },
-    [start, end, serviceName, environment]
+    [start, end, serviceName, environment, comparisonStart, comparisonEnd]
   );
 
   // need top-level sortable fields for the managed table
   const items = data.map((item) => ({
     ...item,
-    errorRateValue: item.errorRate.value,
-    latencyValue: item.latency.value,
-    throughputValue: item.throughput.value,
-    impactValue: item.impact,
+    errorRateValue: item.currentPeriod.errorRate.value,
+    latencyValue: item.currentPeriod.latency.value,
+    throughputValue: item.currentPeriod.throughput.value,
+    impactValue: item.currentPeriod.impact,
   }));
 
   return (

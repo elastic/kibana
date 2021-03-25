@@ -489,6 +489,8 @@ export const serviceDependenciesRoute = createRoute({
     query: t.intersection([
       t.type({
         numBuckets: toNumberRt,
+        comparisonStart: isoToEpochRt,
+        comparisonEnd: isoToEpochRt,
       }),
       environmentRt,
       rangeRt,
@@ -501,13 +503,20 @@ export const serviceDependenciesRoute = createRoute({
     const setup = await setupRequest(context, request);
 
     const { serviceName } = context.params.path;
-    const { environment, numBuckets } = context.params.query;
+    const {
+      environment,
+      numBuckets,
+      comparisonStart,
+      comparisonEnd,
+    } = context.params.query;
 
     return getServiceDependencies({
       serviceName,
       environment,
       setup,
       numBuckets,
+      comparisonStart,
+      comparisonEnd,
     });
   },
 });
