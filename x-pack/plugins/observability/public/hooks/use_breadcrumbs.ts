@@ -39,11 +39,11 @@ export const makeBaseBreadcrumb = (href: string, params?: any): EuiBreadcrumb =>
     const crumbParams = { ...params };
 
     delete crumbParams.statusFilter;
-    const query = stringify(crumbParams, true);
+    const query = stringify(crumbParams, { skipEmptyString: true, skipNull: true });
     href += query === EMPTY_QUERY ? '' : query;
   }
   return {
-    text: i18n.translate('xpack.uptime.breadcrumbs.observability', {
+    text: i18n.translate('xpack.observability.breadcrumbs.observability', {
       defaultMessage: 'Observability',
     }),
     href,
