@@ -182,9 +182,9 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  public async click() {
+  public async click(topOffset?: number) {
     await this.retryCall(async function click(wrapper) {
-      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper.scrollIntoViewIfNecessary(topOffset);
       await wrapper._webElement.click();
     });
   }
@@ -693,11 +693,11 @@ export class WebElementWrapper {
    * @nonstandard
    * @return {Promise<void>}
    */
-  public async scrollIntoViewIfNecessary(): Promise<void> {
+  public async scrollIntoViewIfNecessary(topOffset?: number): Promise<void> {
     await this.driver.executeScript(
       scrollIntoViewIfNecessary,
       this._webElement,
-      this.fixedHeaderHeight
+      topOffset || this.fixedHeaderHeight
     );
   }
 
