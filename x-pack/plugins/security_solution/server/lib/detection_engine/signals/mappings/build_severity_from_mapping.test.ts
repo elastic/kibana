@@ -148,6 +148,7 @@ interface TestCase {
 
 function testIt({ fieldName, fieldValue, severityDefault, severityMapping, expected }: TestCase) {
   const result = buildSeverityFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: sampleDocSeverity(fieldValue, fieldName)._source,
     severity: severityDefault,
     severityMapping,
