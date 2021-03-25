@@ -538,6 +538,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
   const drop = (e: DroppableEvent, dropType: DropType) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsInZone(false);
     if (onDrop && dragging) {
       const modifiedDropType = getModifiedDropType(e, dropType);
       onDrop(dragging, modifiedDropType);
