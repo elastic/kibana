@@ -11,7 +11,6 @@ import './timeseries_visualization.scss';
 import React, { useCallback, useEffect } from 'react';
 
 import { get } from 'lodash';
-import { I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexItem } from '@elastic/eui';
 
 import { IUiSettingsClient } from 'src/core/public';
@@ -107,19 +106,17 @@ function TimeseriesVisualization({
     return (
       <>
         {shouldDisplayLastValueIndicator && (
-          <I18nProvider>
-            <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
-              <LastValueModeIndicator
-                seriesData={get(
-                  visData,
-                  `${isVisSeriesData(visData) ? model.id : 'series[0]'}.series[0].data`,
-                  undefined
-                )}
-                panelInterval={getInterval(visData, model)}
-                modelInterval={model.interval ?? AUTO_INTERVAL}
-              />
-            </EuiFlexItem>
-          </I18nProvider>
+          <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
+            <LastValueModeIndicator
+              seriesData={get(
+                visData,
+                `${isVisSeriesData(visData) ? model.id : 'series[0]'}.series[0].data`,
+                undefined
+              )}
+              panelInterval={getInterval(visData, model)}
+              modelInterval={model.interval ?? AUTO_INTERVAL}
+            />
+          </EuiFlexItem>
         )}
 
         <VisComponent

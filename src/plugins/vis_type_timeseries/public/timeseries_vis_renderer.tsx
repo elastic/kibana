@@ -9,6 +9,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient } from 'kibana/public';
 import type { PersistedState } from '../../visualizations/public';
 import { VisualizationContainer } from '../../visualizations/public';
@@ -46,22 +47,24 @@ export const getTimeseriesVisRenderer: (deps: {
     const palettesService = await palettes.getPalettes();
 
     render(
-      <VisualizationContainer
-        data-test-subj="timeseriesVis"
-        handlers={handlers}
-        showNoResult={showNoResult}
-      >
-        <TimeseriesVisualization
-          // it is mandatory to bind uiSettings because of "this" usage inside "get" method
-          getConfig={uiSettings.get.bind(uiSettings)}
+      <I18nProvider>
+        <VisualizationContainer
+          data-test-subj="timeseriesVis"
           handlers={handlers}
-          model={config.visParams}
-          visData={config.visData as TimeseriesVisData}
-          syncColors={config.syncColors}
-          uiState={handlers.uiState! as PersistedState}
-          palettesService={palettesService}
-        />
-      </VisualizationContainer>,
+          showNoResult={showNoResult}
+        >
+          <TimeseriesVisualization
+            // it is mandatory to bind uiSettings because of "this" usage inside "get" method
+            getConfig={uiSettings.get.bind(uiSettings)}
+            handlers={handlers}
+            model={config.visParams}
+            visData={config.visData as TimeseriesVisData}
+            syncColors={config.syncColors}
+            uiState={handlers.uiState! as PersistedState}
+            palettesService={palettesService}
+          />
+        </VisualizationContainer>
+      </I18nProvider>,
       domNode
     );
   },
