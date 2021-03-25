@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { useMemo } from 'react';
 import { useFetcher } from '../../../..';
 import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -32,20 +30,15 @@ export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
 
   const firstSeries = allSeries[firstSeriesId];
 
-  const { data: indexPattern, status } = useFetcher(() => {
+  const { data: indexPattern } = useFetcher(() => {
     const obsvIndexP = new ObservabilityIndexPatterns(data);
     let reportType: DataType = 'apm';
     if (firstSeries?.rt) {
       reportType = ReportToDataTypeMap[firstSeries?.rt];
     }
-    if (firstSeries?.reportType) {
-      reportType = ReportToDataTypeMap[firstSeries?.reportType];
-    }
 
     return obsvIndexP.getIndexPattern(reportType);
-  }, [firstSeries?.rt]);
+  }, [firstSeries?.rt, data]);
 
-  return useMemo(() => {
-    return indexPattern;
-  }, [status]);
+  return indexPattern;
 };

@@ -13,13 +13,11 @@ import {
   EuiLoadingSpinner,
   EuiFilterGroup,
 } from '@elastic/eui';
-import { ObservabilityClientPluginsStart } from '../../../../../plugin';
-import { useFetcher } from '../../../../..';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
+import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
 import { UrlFilter } from '../../types';
 import { FilterValueButton } from './filter_value_btn';
+import { useValuesList } from '../../../../../hooks/use_values_list';
 
 interface Props {
   seriesId: string;
@@ -36,20 +34,13 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
 
   const [isOpen, setIsOpen] = useState({ value: '', negate: false });
 
-  const {
-    services: { data },
-  } = useKibana<ObservabilityClientPluginsStart>();
-
   const { series } = useUrlStorage(seriesId);
 
-  const { data: values, status } = useFetcher<Promise<string[]>>(() => {
-    return data.autocomplete.getValueSuggestions({
-      indexPattern,
-      query: '',
-      useTimeRange: false,
-      field: { name: field, type: 'string', aggregatable: true },
-    });
-  }, [field]);
+  const { values, loading } = useValuesList({
+    sourceField: field,
+    time: series.time,
+    indexPattern,
+  });
 
   const filters = series?.filters ?? [];
 
@@ -68,7 +59,7 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
         }}
       />
       <EuiSpacer size="s" />
-      {status === 'loading' && (
+      {loading && (
         <div style={{ textAlign: 'center' }}>
           <EuiLoadingSpinner />
         </div>

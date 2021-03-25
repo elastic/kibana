@@ -24,14 +24,14 @@ import { BreakdownItem } from '../../../../../typings/ui_filters';
 export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, searchTerm, serviceName } = urlParams;
+  const { start, end, searchTerm } = urlParams;
+
+  const { serviceName } = uiFilters;
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      const { serviceName } = uiFilters;
-
       if (start && end && serviceName) {
         return callApmApi({
           endpoint: 'GET /api/apm/rum-client/page-view-trends',
@@ -52,7 +52,7 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [end, start, uiFilters, breakdown, searchTerm]
+    [end, start, uiFilters, breakdown, searchTerm, serviceName]
   );
 
   const analyzeHref = {

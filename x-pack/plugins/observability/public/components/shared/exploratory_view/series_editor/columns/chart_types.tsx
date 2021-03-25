@@ -107,7 +107,7 @@ function XYChartTypes({
       <ButtonGroup
         isIconOnly
         buttonSize="m"
-        legend={i18n.translate('xpack.lens.xyChart.chartTypeLegend', {
+        legend={i18n.translate('xpack.observability.xyChart.chartTypeLegend', {
           defaultMessage: 'Chart type',
         })}
         name="chartType"

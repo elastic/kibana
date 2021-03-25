@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
 import { FilterLabel } from '../components/filter_label';
 import { DataSeries, UrlFilter } from '../types';
-import { useIndexPatternContext } from '../../../../hooks/use_default_index_pattern';
+import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 import { getFiltersFromDefs } from '../hooks/use_lens_attributes';
 
@@ -26,12 +26,13 @@ export function SelectedFilters({ seriesId, isNew, series: dataSeries }: Props) 
 
   const { labels } = dataSeries;
 
-  const filters: UrlFilter[] = useMemo(() => {
-    if (seriesId === NEW_SERIES_KEY && isNew) {
-      return series.filters ?? [];
-    }
-    return (series.filters ?? []).concat(getFiltersFromDefs(reportDefinitions, dataSeries));
-  }, [series.filters, reportDefinitions]);
+  let filters: UrlFilter[] = [];
+  filters = (series.filters ?? []).concat(getFiltersFromDefs(reportDefinitions, dataSeries));
+
+  // we don't want to display report definition filters in new series view
+  if (seriesId === NEW_SERIES_KEY && isNew) {
+    filters = series.filters ?? [];
+  }
 
   const { removeFilter } = useSeriesFilters({ seriesId });
 

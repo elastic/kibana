@@ -53,7 +53,7 @@ export const useLensAttributes = ({
 
   const filters: UrlFilter[] = useMemo(() => {
     return (series.filters ?? []).concat(getFiltersFromDefs(reportDefinitions, dataViewConfig));
-  }, [series.filters, reportDefinitions]);
+  }, [series.filters, reportDefinitions, dataViewConfig]);
 
   return useMemo(() => {
     if (!indexPattern || !reportType) {

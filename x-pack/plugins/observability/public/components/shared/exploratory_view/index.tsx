@@ -13,7 +13,7 @@ import { ExploratoryView } from './exploratory_view';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityClientPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { IndexPatternContextProvider } from '../../../hooks/use_default_index_pattern';
+import { IndexPatternContextProvider } from './hooks/use_default_index_pattern';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,

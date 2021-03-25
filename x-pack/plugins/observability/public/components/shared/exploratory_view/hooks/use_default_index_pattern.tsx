@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, Context, useState, useMemo, useEffect } from 'react';
-import { IIndexPattern } from '../../../../../src/plugins/data/common';
-import { AppDataType } from '../components/shared/exploratory_view/types';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { ObservabilityClientPluginsStart } from '../plugin';
-import { ObservabilityIndexPatterns } from '../utils/observability_Index_patterns';
+import React, { createContext, useContext, Context, useState, useEffect } from 'react';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { AppDataType } from '../types';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ObservabilityClientPluginsStart } from '../../../../plugin';
+import { ObservabilityIndexPatterns } from '../../../../utils/observability_index_patterns';
 
 export interface IIndexPatternContext {
   indexPattern: IIndexPattern;
@@ -44,14 +44,16 @@ export function IndexPatternContextProvider({
     setIndexPattern(indPattern!);
   };
 
-  const value = useMemo(() => {
-    return {
-      indexPattern,
-      loadIndexPattern,
-    };
-  }, [indexPattern]);
-
-  return <IndexPatternContext.Provider value={value}>{children}</IndexPatternContext.Provider>;
+  return (
+    <IndexPatternContext.Provider
+      value={{
+        indexPattern,
+        loadIndexPattern,
+      }}
+    >
+      {children}
+    </IndexPatternContext.Provider>
+  );
 }
 
 export const useIndexPatternContext = () => {

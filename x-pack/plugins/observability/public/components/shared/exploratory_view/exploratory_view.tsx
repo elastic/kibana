@@ -15,7 +15,7 @@ import { SeriesEditor } from './series_editor/series_editor';
 import { useUrlStorage } from './hooks/use_url_strorage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import { EmptyView } from './components/empty_view';
-import { useIndexPatternContext } from '../../../hooks/use_default_index_pattern';
+import { useIndexPatternContext } from './hooks/use_default_index_pattern';
 import { TypedLensByValueInput } from '../../../../../lens/public';
 
 export function ExploratoryView() {
@@ -40,6 +40,7 @@ export function ExploratoryView() {
 
   useEffect(() => {
     setLensAttributes(lensAttributesT);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(lensAttributesT ?? {}), series?.reportType, series?.time?.from]);
 
   return (

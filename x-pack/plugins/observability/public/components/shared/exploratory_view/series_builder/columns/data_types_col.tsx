@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AppDataType } from '../../types';
-import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
+import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 
 const dataTypes: Array<{ id: AppDataType; label: string }> = [

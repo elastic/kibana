@@ -15,22 +15,22 @@ interface Props {
   sourceField: string;
   query?: string;
   indexPattern: IIndexPattern;
-  filters: ESFilter[];
+  filters?: ESFilter[];
   time?: { from: string; to: string };
 }
 
 export const useValuesList = ({
   sourceField,
   indexPattern,
-  query,
+  query = '',
   filters = [],
   time,
-}: Props): { values: string[]; loading: boolean } => {
+}: Props): { values: string[]; loading?: boolean } => {
   const {
     services: { data },
   } = useKibana<{ data: DataPublicPluginStart }>();
 
-  const { data: values, status } = useFetcher(() => {
+  const { data: values, loading } = useFetcher(() => {
     if (!sourceField || !indexPattern) {
       return [];
     }
@@ -55,5 +55,5 @@ export const useValuesList = ({
     });
   }, [sourceField, query, time, data.autocomplete, indexPattern, filters]);
 
-  return { values: values as string[], loading: status === 'loading' || status === 'pending' };
+  return { values: values as string[], loading };
 };

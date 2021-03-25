@@ -15,6 +15,7 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 
 export interface FieldValueSelectionProps {
   value?: string;
@@ -23,6 +24,9 @@ export interface FieldValueSelectionProps {
   onChange: (val?: string) => void;
   values?: string[];
   setQuery: Dispatch<SetStateAction<string>>;
+  anchorPosition?: PopoverAnchorPosition;
+  forceOpen?: boolean;
+  button?: JSX.Element;
 }
 
 const formatOptions = (values?: string[], value?: string): EuiSelectableOption[] => {
@@ -38,6 +42,9 @@ export function FieldValueSelection({
   loading,
   values,
   setQuery,
+  button,
+  forceOpen,
+  anchorPosition,
   onChange: onSelectionChange,
 }: FieldValueSelectionProps) {
   const [options, setOptions] = useState<EuiSelectableOption[]>(formatOptions(values, value));
@@ -63,7 +70,7 @@ export function FieldValueSelection({
     setQuery((evt.target as HTMLInputElement).value);
   };
 
-  const button = (
+  const anchorButton = (
     <EuiButton
       size="s"
       iconType="arrowDown"
@@ -80,9 +87,10 @@ export function FieldValueSelection({
       <EuiPopover
         id="popover"
         panelPaddingSize="none"
-        button={button}
-        isOpen={isPopoverOpen}
+        button={button || anchorButton}
+        isOpen={isPopoverOpen || forceOpen}
         closePopover={closePopover}
+        anchorPosition={anchorPosition}
       >
         <EuiSelectable
           searchable

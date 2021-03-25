@@ -48,7 +48,7 @@ export function SeriesDatePicker({ seriesId }: Props) {
     if (!series || !series.time) {
       setSeries(seriesId, { ...series, time: { from: 'now-5h', to: 'now' } });
     }
-  }, []);
+  }, [seriesId, series, setSeries]);
 
   return (
     <EuiSuperDatePicker

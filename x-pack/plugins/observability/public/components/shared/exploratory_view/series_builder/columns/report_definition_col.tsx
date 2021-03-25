@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FieldValueSelection } from '../../../field_value_selection';
-import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
+import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 import { CustomReportField } from '../custom_report_field';
+import FieldValueSuggestions from '../../../field_value_suggestions';
 
 export function ReportDefinitionCol() {
   const { indexPattern } = useIndexPatternContext();
@@ -25,11 +25,19 @@ export function ReportDefinitionCol() {
     seriesId: 'newSeries',
   });
 
-  const onChange = (field: string, value: string) => {
-    setSeries(NEW_SERIES_KEY, {
-      ...series,
-      reportDefinitions: { ...rtd, [field]: value },
-    });
+  const onChange = (field: string, value?: string) => {
+    if (!value) {
+      delete rtd[field];
+      setSeries(NEW_SERIES_KEY, {
+        ...series,
+        reportDefinitions: { ...rtd },
+      });
+    } else {
+      setSeries(NEW_SERIES_KEY, {
+        ...series,
+        reportDefinitions: { ...rtd, [field]: value },
+      });
+    }
   };
 
   const onRemove = (field: string) => {
@@ -48,12 +56,12 @@ export function ReportDefinitionCol() {
             {!custom ? (
               <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <FieldValueSelection
+                  <FieldValueSuggestions
                     label={labels[field]}
                     sourceField={field}
                     indexPattern={indexPattern}
                     value={reportDefinitions?.[field]}
-                    onChange={(val: string) => onChange(field, val)}
+                    onChange={(val?: string) => onChange(field, val)}
                     filters={(filters ?? []).map(({ query }) => query)}
                     time={series.time}
                   />

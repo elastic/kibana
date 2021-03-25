@@ -8,7 +8,7 @@
 import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
 import { esFilters, Filter } from '../../../../../../../../src/plugins/data/public';
-import { useIndexPatternContext } from '../../../../hooks/use_default_index_pattern';
+import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useSeriesFilters } from '../hooks/use_series_filters';
 

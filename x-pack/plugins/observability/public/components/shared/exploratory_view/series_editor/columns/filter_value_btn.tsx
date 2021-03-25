@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
-import { useIndexPatternContext } from '../../../../../hooks/use_default_index_pattern';
+import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
-import { FieldValueSelection } from '../../../field_value_selection';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import FieldValueSuggestions from '../../../field_value_suggestions';
 
 interface Props {
   value: string;
@@ -73,7 +73,7 @@ export function FilterValueButton({
   };
 
   return nestedField ? (
-    <FieldValueSelection
+    <FieldValueSuggestions
       button={button}
       label={'Version'}
       indexPattern={indexPattern}
