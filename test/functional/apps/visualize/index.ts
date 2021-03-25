@@ -14,8 +14,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const deployment = getService('deployment');
-  let isOss = true;
 
   describe('visualize app', () => {
     before(async () => {
@@ -28,7 +26,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
         [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       });
-      isOss = await deployment.isOss();
     });
 
     // TODO: Remove when vislib is removed
@@ -66,11 +63,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_data_table'));
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
       loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
-
-      // this check is not needed when the CI doesn't run anymore for the OSS
-      if (!isOss) {
-        loadTestFile(require.resolve('./_chart_types'));
-      }
+      loadTestFile(require.resolve('./_chart_types'));
     });
 
     describe('', function () {
@@ -98,11 +91,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_linked_saved_searches'));
       loadTestFile(require.resolve('./_visualize_listing'));
       loadTestFile(require.resolve('./_add_to_dashboard.ts'));
-
-      if (isOss) {
-        loadTestFile(require.resolve('./_tile_map'));
-        loadTestFile(require.resolve('./_region_map'));
-      }
+      loadTestFile(require.resolve('./_tile_map'));
+      loadTestFile(require.resolve('./_region_map'));
     });
 
     describe('', function () {
