@@ -16,14 +16,14 @@ interface AggregationResult {
   };
 }
 
-function isPrimative(a: AggregationValue): a is string {
+function isPrimitive(a: AggregationValue): a is string {
   return typeof a === 'string';
 }
 
 export function parseAggregator(aggs: Aggregation) {
   return Object.keys(aggs).reduce((acc, aggKey) => {
     const value = aggs[aggKey];
-    if (isPrimative(value)) {
+    if (isPrimitive(value)) {
       acc[aggKey] = {
         terms: {
           field: aggs[aggKey] as string,
