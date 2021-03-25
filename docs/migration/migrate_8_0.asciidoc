@@ -57,7 +57,7 @@ for example, `logstash-*`.
 -------------------
 logging:
   appenders:
-    console:
+    custom:
       type: console
       layout:
         type: pattern
@@ -73,9 +73,14 @@ See https://github.com/elastic/kibana/pull/90368 for more details.
 [source,yaml]
 -------------------
 logging:
+  appenders:
+    custom:
+      type: console
+      layout:
+        type: pattern
   loggers:
     - name: http.server.response
-      appenders: [console]
+      appenders: [custom]
       level: debug
 -------------------
 See https://github.com/elastic/kibana/pull/87939 for more details.
@@ -84,12 +89,17 @@ See https://github.com/elastic/kibana/pull/87939 for more details.
 ==== Logging destination is specified by the appender
 *Details:* Previously log destination would be `stdout` and could be changed to `file` using `logging.dest`. With the new logging configuration, you can specify the destination using appenders. 
 
-*Impact:* To restore the previous behavior and log records to *stdout*, in `kibana.yml` use the `console` appender.
+*Impact:* To restore the previous behavior and log records to *stdout*, in `kibana.yml` use an appender with `type: console`.
 [source,yaml]
 -------------------
 logging:
+  appenders:
+    custom:
+      type: console
+      layout:
+        type: pattern
   root:
-    appenders: [default, console]
+    appenders: [default, custom]
 -------------------
 
 To send logs to `file` with a given file path, you should define a custom appender with `type:file`:
@@ -116,7 +126,6 @@ logging:
 # suppress all logs
 logging:
   root:
-    appenders: [default]
     level: off
 -------------------
 
@@ -125,7 +134,6 @@ logging:
 # only log error messages
 logging:
   root:
-    appenders: [default]
     level: error
 -------------------
 
@@ -134,7 +142,6 @@ logging:
 # log all events
 logging:
   root:
-    appenders: [default]
     level: all
 -------------------
 

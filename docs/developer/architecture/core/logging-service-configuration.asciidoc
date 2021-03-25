@@ -4,10 +4,7 @@
 As with any configuration in the {kib} platform, logging configuration is validated against the predefined schema and if there are
 any issues with it, {kib} will fail to start with the detailed error message.
 
-Once the code acquired a logger instance it should not care about any runtime changes in the configuration that may
-happen: all changes will be applied to existing logger instances under the hood.
-
-Here is the configuration example that can be used to configure _loggers_, _appenders_ and _layouts_:
+Here is a configuration example that can be used to configure _loggers_, _appenders_ and _layouts_:
 
 [source,yaml]
 ----

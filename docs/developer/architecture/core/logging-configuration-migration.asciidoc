@@ -39,7 +39,7 @@ the log messages aren't handled by the `root` logger anymore and are not forward
 
 | level | `log.level: DEBUG` | `tags: ['debug']`
 
-| meta | separate property `"meta": {"to": "v8"}` | merged in log record  `{... "to": "v8"}`
+| meta | merged in log record  `{... "to": "v8"}` | merged in log record  `{... "to": "v8"}`
 
 | pid | `process.pid: 12345` | `pid: 12345`
 
@@ -50,19 +50,35 @@ the log messages aren't handled by the `root` logger anymore and are not forward
 |===
 
 [[logging-cli-migration]]
-=== Logging configuration via CLI migration guide
+=== Logging configuration via CLI
 
-NOTE: The `--verbose` and `--silent` cli flags are supported and have build-in behavior. You can override the default behavior using the following equivalent platform logging configurations:
+As is the case for any of Kibana's config settings, you can specify your logging configuration via the CLI. For convenience, the `--verbose` and `--silent` flags exist as shortcuts and will continue to be supported beyond v7.
+
+If you wish to override these flags, you can always do so by passing your preferred logging configuration directly to the CLI. For example, with the following configuration:
+
+[source,yaml]
+----
+logging:
+  appenders:
+    custom:
+      type: console
+      layout:
+        type: pattern
+        pattern: "[%date][%level] %message"
+----
+
+you can override the flags with:
+
 [options="header"]
 |===
 
 | legacy logging | {kib} Platform logging | cli shortcuts
 
-|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=console | --verbose
+|--verbose| --logging.root.level=debug --logging.root.appenders[0]=default --logging.root.appenders[1]=custom | --verbose
 
-|--quiet| --logging.root.level=error --logging.root.appenders[0]=default --logging.root.appenders[1]=console | not supported
+|--quiet| --logging.root.level=error --logging.root.appenders[0]=default --logging.root.appenders[1]=custom | not supported
 
 |--silent| --logging.root.level=off | --silent
 |===
 
-NOTE: you have to pass the `default` appender until the legacy logging system is removed in v8.0
+NOTE: To preserve backwards compatibility, you are required to pass the root `default` appender until the legacy logging system is removed in `v8.0`.

@@ -3,24 +3,12 @@
 [[scoped-services]]
 === Scoped services
 Whenever Kibana needs to get access to data saved in elasticsearch, it
-should perform a check whether an end-user has access to the data. In
-the legacy platform, Kibana requires binding elasticsearch related API
-with an incoming request to access elasticsearch service on behalf of a
-user.
-
-[source,js]
-----
-async function handler(req, res) {
-  const dataCluster = server.plugins.elasticsearch.getCluster('data');
-  const data = await dataCluster.callWithRequest(req, 'ping');
-}
-----
-
+should perform a check whether an end-user has access to the data. 
 The Kibana Platform introduced a handler interface on the server-side to perform that association
 internally. Core services, that require impersonation with an incoming
 request, are exposed via `context` argument of
 {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandler.md[the
-request handler interface.] The above example looks in the Kibana Platform
+request handler interface.]
 as
 
 [source,js]
@@ -32,23 +20,15 @@ async function handler(context, req, res) {
 
 The
 {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md[request
-handler context] exposed the next scoped *core* services:
+handler context] exposes the following scoped *core* services:
 
-[width="100%",cols="30%,70%",options="header",]
-|===
-|Legacy Platform |Kibana Platform
-|`request.getSavedObjectsClient`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsclient.md[`context.savedObjects.client`]
+{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsclient.md[`context.savedObjects.client`]
 
-|`server.plugins.elasticsearch.getCluster('admin')`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
+{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
 
-|`server.plugins.elasticsearch.getCluster('data')`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
+{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
 
-|`request.getUiSettingsService`
-|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.uiSettings.client`]
-|===
+{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.uiSettings.client`]
 
 ==== Declare a custom scoped service
 
