@@ -29,3 +29,15 @@ They are enabled by default.
   | Set to `true` to enable the <<xpack-profiler,{searchprofiler}>>. Defaults to `true`.
 
 |===
+
+[float]
+[[painless_lab-settings]]
+==== Painless Lab settings
+
+[cols="2*<"]
+|===
+| `xpack.painless_lab.enabled`
+  | Set to `true` to enable the <<xpack-painless_lab, Painless Lab>>. Defaults to `true`.
+
+|===
+
