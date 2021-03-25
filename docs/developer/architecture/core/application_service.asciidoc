@@ -35,7 +35,7 @@ export class MyPlugin implements Plugin {
 <4> `core.getStartServices` method provides API available during `start` lifecycle.
 <5> `mount` method must return a function that will be called to unmount the application that will be called when Kibana unmounting the application. You can put a clean-up logic there.
 
-NOTE:: you are free to use any UI library to render a plugin application in DOM.
+NOTE: you are free to use any UI library to render a plugin application in DOM.
 However, we recommend using React and https://elastic.github.io/eui[EUI] for all your basic UI
 components to create a consistent UI experience.
 

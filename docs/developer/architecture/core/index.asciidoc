@@ -27,7 +27,7 @@ export class MyPlugin {
 }
 ----
 
-The services that are available are:
+The services that core provides are:
 
 * <<application-service, Application service>>
 * <<configuration-service, Configuration service>>
