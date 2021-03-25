@@ -7258,7 +7258,7 @@
                 "section": "def-common.IndexPatternsService",
                 "text": "IndexPatternsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, dependencies: ",
+              ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, dependencies: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -7306,7 +7306,7 @@
                     "section": "def-common.IndexPatternsService",
                     "text": "IndexPatternsService"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
                 ],
                 "description": [],
                 "source": {
@@ -8230,7 +8230,7 @@
                 "section": "def-common.IndexPatternsService",
                 "text": "IndexPatternsService"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+              ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
             ],
             "description": [],
             "source": {
@@ -8267,7 +8267,7 @@
             "section": "def-common.IndexPatternsService",
             "text": "IndexPatternsService"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, searchSourceDependencies: ",
+          ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">, searchSourceDependencies: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10662,7 +10662,7 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<any> | undefined) => boolean | undefined"
+          "<any> | undefined) => boolean"
         ],
         "description": [],
         "label": "isErrorResponse",
