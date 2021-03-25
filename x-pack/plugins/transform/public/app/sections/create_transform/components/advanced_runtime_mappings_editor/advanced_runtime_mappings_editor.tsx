@@ -44,8 +44,11 @@ export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappin
           // Try to parse the string passed on from the editor.
           // If parsing fails, the "Apply"-Button will be disabled
           try {
-            const parsedJson = JSON.parse(convertToJson(d));
-            setRuntimeMappingsEditorApplyButtonEnabled(isRuntimeMappings(parsedJson));
+            // if the user deletes the json in the editor
+            // they should still be able to apply changes
+            const isEmptyStr = d === '';
+            const parsedJson = isEmptyStr ? {} : JSON.parse(convertToJson(d));
+            setRuntimeMappingsEditorApplyButtonEnabled(isEmptyStr || isRuntimeMappings(parsedJson));
           } catch (e) {
             setRuntimeMappingsEditorApplyButtonEnabled(false);
           }

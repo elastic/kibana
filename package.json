@@ -96,7 +96,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "link:packages/elastic-datemath",
-    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.3",
+    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary.4",
     "@elastic/ems-client": "7.12.0",
     "@elastic/eui": "31.7.0",
     "@elastic/filesaver": "1.1.2",
@@ -697,6 +697,7 @@
     "jest-cli": "^26.6.3",
     "jest-diff": "^26.6.2",
     "jest-environment-jsdom-thirteen": "^1.0.1",
+    "jest-environment-jsdom": "^26.6.2",
     "jest-raw-loader": "^1.0.1",
     "jest-silent-reporter": "^0.2.1",
     "jest-snapshot": "^26.6.2",

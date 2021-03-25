@@ -1876,6 +1876,12 @@
             "app_query_change": {
               "type": "long"
             },
+            "open_help_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened one of the in-product help popovers."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2076,6 +2082,12 @@
           "properties": {
             "app_query_change": {
               "type": "long"
+            },
+            "open_help_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened one of the in-product help popovers."
+              }
             },
             "indexpattern_field_info_click": {
               "type": "long"
