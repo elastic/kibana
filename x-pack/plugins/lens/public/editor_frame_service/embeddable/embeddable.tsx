@@ -111,6 +111,7 @@ export class Embeddable
   private activeData: Partial<DefaultInspectorAdapters> | undefined;
   private errors: ErrorMessage[] | undefined;
   private inputReloadSubscriptions: Subscription[];
+  private isDestroyed?: boolean;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -241,7 +242,7 @@ export class Embeddable
       this.onFatalError(e);
       return false;
     });
-    if (!attributes || this.input === null) {
+    if (!attributes || this.isDestroyed) {
       return;
     }
     this.savedVis = {
@@ -300,7 +301,7 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
-    if (!this.savedVis || !this.isInitialized) {
+    if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
     if (this.input.onLoad) {
@@ -412,7 +413,7 @@ export class Embeddable
   };
 
   async reload() {
-    if (!this.savedVis || !this.isInitialized || this.input === null) {
+    if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
     this.handleContainerStateChanged(this.input);
@@ -481,12 +482,11 @@ export class Embeddable
 
   destroy() {
     super.destroy();
+    this.isDestroyed = true;
     if (this.inputReloadSubscriptions.length > 0) {
       this.inputReloadSubscriptions.forEach((reloadSub) => {
         reloadSub.unsubscribe();
       });
-      // @ts-expect-error
-      this.input = null;
     }
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
