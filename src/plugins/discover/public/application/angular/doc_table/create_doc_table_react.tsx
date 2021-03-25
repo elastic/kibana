@@ -14,6 +14,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices, IIndexPattern } from '../../../kibana_services';
 import { IndexPatternField } from '../../../../../data/common/index_patterns';
+import { SkipBottomButton } from '../../components/skip_bottom_button';
 
 export interface DocTableLegacyProps {
   columns: string[];
@@ -98,18 +99,42 @@ function getRenderFn(domNode: Element, props: any) {
 export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   const ref = useRef<HTMLDivElement>(null);
   const scope = useRef<AngularScope | undefined>();
+  const [rows, setRows] = useState(renderProps.rows);
+  const [minimumVisibleRows, setMinimumVisibleRows] = useState(50);
+  const onSkipBottomButtonClick = useCallback(async () => {
+    // delay scrolling to after the rows have been rendered
+    const bottomMarker = document.getElementById('discoverBottomMarker');
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    // show all the rows
+    setMinimumVisibleRows(renderProps.rows.length);
+
+    while (renderProps.rows.length !== document.getElementsByClassName('kbnDocTable__row').length) {
+      await wait(50);
+    }
+    bottomMarker!.focus();
+    await wait(50);
+    bottomMarker!.blur();
+  }, [setMinimumVisibleRows, renderProps.rows]);
+
+  useEffect(() => {
+    if (minimumVisibleRows > 50) {
+      setMinimumVisibleRows(50);
+    }
+    setRows(renderProps.rows);
+  }, [renderProps.rows, minimumVisibleRows, setMinimumVisibleRows]);
 
   useEffect(() => {
     if (ref && ref.current && !scope.current) {
-      const fn = getRenderFn(ref.current, renderProps);
+      const fn = getRenderFn(ref.current, { ...renderProps, rows, minimumVisibleRows });
       fn().then((newScope) => {
         scope.current = newScope;
       });
     } else if (scope && scope.current) {
-      scope.current.renderProps = renderProps;
+      scope.current.renderProps = { ...renderProps, rows, minimumVisibleRows };
       scope.current.$apply();
     }
-  }, [renderProps]);
+  }, [renderProps, minimumVisibleRows, rows]);
+
   useEffect(() => {
     return () => {
       if (scope.current) {
@@ -119,6 +144,7 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
   }, []);
   return (
     <div>
+      <SkipBottomButton onClick={onSkipBottomButtonClick} />
       <div ref={ref} />
       {renderProps.rows.length === renderProps.sampleSize ? (
         <div
@@ -133,7 +159,7 @@ export function DocTableLegacy(renderProps: DocTableLegacyProps) {
                   your search, refine your search to see others."
             values={{ sampleSize: renderProps.sampleSize }}
           />
-          <EuiButtonEmpty onClick={renderProps.onBackToTop}>
+          <EuiButtonEmpty onClick={renderProps.onBackToTop} data-test-subj="discoverBackToTop">
             <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
           </EuiButtonEmpty>
         </div>
