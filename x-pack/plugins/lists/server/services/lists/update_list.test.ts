@@ -34,6 +34,7 @@ describe('update_list', () => {
     const options = getUpdateListOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.update.mockReturnValue(
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
     );
     const updatedList = await updateList({ ...options, esClient });
@@ -51,6 +52,7 @@ describe('update_list', () => {
     const options = getUpdateListOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.update.mockReturnValue(
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
     );
     const updatedList = await updateList({ ...options, esClient });
