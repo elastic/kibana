@@ -97,6 +97,10 @@ export const getMetrics = ({
               },
               ...environmentQuery(environment),
             ],
+            should: [
+              ...rangeQuery(start, end),
+              ...rangeQuery(comparisonStart, comparisonEnd),
+            ],
           },
         },
         aggs: {
