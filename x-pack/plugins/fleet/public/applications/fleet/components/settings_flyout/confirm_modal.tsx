@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiBasicTable,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { EuiBasicTableProps } from '@elastic/eui';
 
@@ -161,7 +162,10 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
           </EuiCallOut>
 
           {changes.length > 0 && (
-            <EuiBasicTable tableLayout="auto" columns={TABLE_COLUMNS} items={changes} />
+            <>
+              <EuiSpacer size="m" />
+              <EuiBasicTable tableLayout="auto" columns={TABLE_COLUMNS} items={changes} />
+            </>
           )}
         </EuiModalBody>
 
