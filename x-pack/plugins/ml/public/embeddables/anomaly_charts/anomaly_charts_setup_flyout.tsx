@@ -7,115 +7,51 @@
 
 import React from 'react';
 import { CoreStart } from 'kibana/public';
-import moment from 'moment';
-import { takeUntil } from 'rxjs/operators';
-import { from } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import {
-  KibanaContextProvider,
-  toMountPoint,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
-import { JobSelectorFlyoutContent } from '../../application/components/job_selector/job_selector_flyout';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { getDefaultExplorerChartsPanelTitle } from './anomaly_charts_embeddable';
-import { getMlGlobalServices } from '../../application/app';
 import { HttpService } from '../../application/services/http_service';
-import { DashboardConstants } from '../../../../../../src/plugins/dashboard/public';
 import { AnomalyChartsEmbeddableInput } from '..';
+import { resolveJobSelection } from '../common/resolve_job_selection';
+import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 
 export async function resolveEmbeddableAnomalyChartsUserInput(
   coreStart: CoreStart,
   input?: AnomalyChartsEmbeddableInput
 ): Promise<Partial<AnomalyChartsEmbeddableInput>> {
-  const {
-    http,
-    uiSettings,
-    overlays,
-    application: { currentAppId$ },
-  } = coreStart;
+  const { http, overlays } = coreStart;
 
   const anomalyDetectorService = new AnomalyDetectorService(new HttpService(http));
 
   return new Promise(async (resolve, reject) => {
-    const maps = {
-      groupsMap: getInitialGroupsMap([]),
-      jobsMap: {},
-    };
+    const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
 
-    const tzConfig = uiSettings.get('dateFormat:tz');
-    const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
+    const title = input?.title ?? getDefaultExplorerChartsPanelTitle(jobIds);
+    const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
+    const influencers = anomalyDetectorService.extractInfluencers(jobs);
+    influencers.push(VIEW_BY_JOB_LABEL);
 
-    const selectedIds = input?.jobIds;
-
-    const flyoutSession = coreStart.overlays.openFlyout(
+    const modalSession = overlays.openModal(
       toMountPoint(
-        <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
-          <JobSelectorFlyoutContent
-            selectedIds={selectedIds}
-            withTimeRangeSelector={false}
-            dateFormatTz={dateFormatTz}
-            singleSelection={false}
-            timeseriesOnly={true}
-            onFlyoutClose={() => {
-              flyoutSession.close();
-              reject();
-            }}
-            onSelectionConfirmed={async ({ jobIds, groups }) => {
-              const title = input?.title ?? getDefaultExplorerChartsPanelTitle(jobIds);
+        <AnomalyChartsInitializer
+          defaultTitle={title}
+          initialInput={input}
+          onCreate={({ panelTitle, maxSeriesToPlot }) => {
+            modalSession.close();
 
-              const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
-
-              const influencers = anomalyDetectorService.extractInfluencers(jobs);
-              influencers.push(VIEW_BY_JOB_LABEL);
-
-              await flyoutSession.close();
-
-              const modalSession = overlays.openModal(
-                toMountPoint(
-                  <AnomalyChartsInitializer
-                    defaultTitle={title}
-                    initialInput={input}
-                    onCreate={({ panelTitle, maxSeriesToPlot }) => {
-                      modalSession.close();
-
-                      resolve({
-                        jobIds,
-                        title: panelTitle,
-                        maxSeriesToPlot,
-                      });
-                    }}
-                    onCancel={() => {
-                      modalSession.close();
-                      reject();
-                    }}
-                  />
-                )
-              );
-            }}
-            maps={maps}
-          />
-        </KibanaContextProvider>
-      ),
-      {
-        'data-test-subj': 'mlFlyoutJobSelector',
-        ownFocus: true,
-        closeButtonAriaLabel: i18n.translate(
-          'xpack.ml.anomalyChartsEmbeddable.setupFlyout.closeJobSelectionDialogAriaLabel',
-          {
-            defaultMessage: 'Close job selection dialog',
-          }
-        ),
-      }
+            resolve({
+              jobIds,
+              title: panelTitle,
+              maxSeriesToPlot,
+            });
+          }}
+          onCancel={() => {
+            modalSession.close();
+            reject();
+          }}
+        />
+      )
     );
-
-    // Close the flyout when user navigates out of the dashboard plugin
-    currentAppId$.pipe(takeUntil(from(flyoutSession.onClose))).subscribe((appId) => {
-      if (appId !== DashboardConstants.DASHBOARDS_ID) {
-        flyoutSession.close();
-      }
-    });
   });
 }
