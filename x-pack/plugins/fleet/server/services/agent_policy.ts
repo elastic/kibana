@@ -705,7 +705,7 @@ class AgentPolicyService {
       const output = fullAgentPolicy.outputs[outputName];
       if (output && output.type === 'elasticsearch') {
         permissions[outputName] = {};
-        permissions[outputName].fallback = {
+        permissions[outputName]._fallback = {
           index: [
             {
               names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
