@@ -143,7 +143,6 @@ export const useTimelineEvents = ({
         activeTimeline.setExpandedDetail({});
         activeTimeline.setActivePage(newActivePage);
       }
-
       setActivePage(newActivePage);
     },
     [clearSignalsState, id]
@@ -294,22 +293,22 @@ export const useTimelineEvents = ({
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
-        ...(prevEqlRequest?.eventCategoryField
+        ...(!isEmpty(prevEqlRequest?.eventCategoryField)
           ? {
               eventCategoryField: prevEqlRequest?.eventCategoryField,
             }
           : {}),
-        ...(prevEqlRequest?.size
+        ...(!isEmpty(prevEqlRequest?.size)
           ? {
               size: prevEqlRequest?.size,
             }
           : {}),
-        ...(prevEqlRequest?.tiebreakerField
+        ...(!isEmpty(prevEqlRequest?.tiebreakerField)
           ? {
               tiebreakerField: prevEqlRequest?.tiebreakerField,
             }
           : {}),
-        ...(prevEqlRequest?.timestampField
+        ...(!isEmpty(prevEqlRequest?.timestampField)
           ? {
               timestampField: prevEqlRequest?.timestampField,
             }
