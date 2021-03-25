@@ -141,7 +141,7 @@ export async function getServiceInstancesSystemMetricStatistics<
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
                 ...kqlQuery(kuery),
-                ...(isComparisonSearch
+                ...(isComparisonSearch && serviceNodeIds
                   ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
                   : []),
               ],
