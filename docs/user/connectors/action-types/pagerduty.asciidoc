@@ -101,7 +101,7 @@ and select *Elastic Alerts* from the *Integration Type* menu.
 You will be redirected to the *Integrations* tab for your service. An Integration Key is generated on this screen.
 +
 [role="screenshot"]
-image::user/alerting/images/pagerduty-integration.png[PagerDuty Integrations tab]
+image::images/pagerduty-integration.png[PagerDuty Integrations tab]
 
 . Save this key, as you will use it when you configure the integration with Elastic in the next section.
 
