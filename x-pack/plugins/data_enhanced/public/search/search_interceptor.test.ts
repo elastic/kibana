@@ -504,7 +504,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(untrack).toBeCalledTimes(1);
     });
 
-    test('session service should be able to cancel search', async () => {
+    test.only('session service should be able to cancel search', async () => {
       const sessionId = 'sessionId';
       sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       sessionService.getSessionId.mockImplementation(() => sessionId);
@@ -746,6 +746,128 @@ describe('EnhancedSearchInterceptor', () => {
 
       searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
       await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+    });
+
+    test('aborting a search that didnt get any response should retrigger search', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      const abortController = new AbortController();
+
+      // Start a search request
+      searchInterceptor
+        .search(basicReq, { sessionId, abortSignal: abortController.signal })
+        .subscribe({ next, error, complete });
+
+      // Abort the search request before it started
+      abortController.abort();
+
+      // Time travel to make sure nothing appens
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(next).toBeCalledTimes(0);
+      expect(error).toBeCalledTimes(1);
+      expect(complete).toBeCalledTimes(0);
+
+      const error2 = jest.fn();
+      const next2 = jest.fn();
+      const complete2 = jest.fn();
+
+      // Search for the same thing again
+      searchInterceptor
+        .search(basicReq, { sessionId })
+        .subscribe({ next: next2, error: error2, complete: complete2 });
+
+      // Should search again
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(2);
+      expect(next2).toBeCalledTimes(1);
+      expect(error2).toBeCalledTimes(0);
+      expect(complete2).toBeCalledTimes(1);
+    });
+
+    test.skip('aborting a running search shouldnt effect cache', async () => {
+      const responses = [
+        {
+          time: 10,
+          value: {
+            isPartial: true,
+            isRunning: true,
+            id: 1,
+            rawResponse: {
+              took: 1,
+            },
+          },
+        },
+        {
+          time: 20,
+          value: {
+            isPartial: false,
+            isRunning: false,
+            id: 1,
+            rawResponse: {
+              took: 1,
+            },
+          },
+        },
+      ];
+      mockFetchImplementation(responses);
+
+      const abortController = new AbortController();
+
+      // Search once
+      searchInterceptor
+        .search(basicReq, { sessionId, abortSignal: abortController.signal })
+        .subscribe({ next, error, complete });
+
+      // Get partial result
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(next).toBeCalledTimes(1);
+      expect(error).not.toBeCalled();
+
+      // Search the same thing again, this will return the result from cache
+      const error2 = jest.fn();
+      const next2 = jest.fn();
+      const resp2$ = searchInterceptor.search(basicReq, { sessionId });
+      resp2$.subscribe({ next: next2, error: error2, complete });
+
+      // Abort the original request
+      abortController.abort();
+      await timeTravel(10);
+
+      expect(error).toBeCalledTimes(1);
+      expect(next2).toBeCalledTimes(1);
+      // expect(error2).toBeCalledTimes(1);
+
+      await timeTravel(10);
+      expect(next2).toBeCalledTimes(2);
+
+      //
+      // expect(fetchMock).toBeCalledTimes(2);
+    });
+
+    test('aborting a completed search shouldnt effect cache', async () => {
+      mockFetchImplementation(basicCompleteResponse);
+
+      const abortController = new AbortController();
+
+      // Start a search request
+      searchInterceptor
+        .search(basicReq, { sessionId, abortSignal: abortController.signal })
+        .subscribe({ next, error, complete });
+
+      // Get a final response
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+
+      // Abort the search request
+      abortController.abort();
+
+      // Search for the same thing again
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+
+      // Get the response from cache
       expect(fetchMock).toBeCalledTimes(1);
     });
   });

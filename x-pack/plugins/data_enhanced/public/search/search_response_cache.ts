@@ -64,7 +64,18 @@ export class SearchResponseCache {
     }
   }
 
-  public set(key: string, response: Observable<IKibanaSearchResponse<any>>) {
+  /**
+   *
+   * @param key key to cache
+   * @param response$
+   * @returns A ReplaySubject that mimics the behavior of the original observable
+   * @throws error if key already exists
+   */
+  public set(key: string, response$: Observable<IKibanaSearchResponse<any>>) {
+    if (this.responseCache.has(key)) {
+      throw new Error('duplicate key');
+    }
+
     const responseReplay$ = new ReplaySubject<IKibanaSearchResponse<any>>(1);
     const item = {
       response: responseReplay$,
@@ -75,7 +86,7 @@ export class SearchResponseCache {
     this.setItem(key, item);
 
     item.subs.add(
-      response.subscribe({
+      response$.subscribe({
         next: (r) => {
           const newSize = JSON.stringify(r).length;
 
@@ -97,9 +108,12 @@ export class SearchResponseCache {
         },
       })
     );
-    item.subs.add(response.subscribe(responseReplay$));
-
+    item.subs.add(response$.subscribe({
+      next: r => responseReplay$.next(r),
+      error: e => responseReplay$.error(e),
+    }));
     this.shrink();
+    return responseReplay$;
   }
 
   public get(key: string) {

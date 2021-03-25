@@ -38,6 +38,28 @@ describe('pollSearch', () => {
     expect(cancelFn).toBeCalledTimes(0);
   });
 
+  test('Shares execution', async () => {
+    const searchFn = getMockedSearch$(1);
+    const cancelFn = jest.fn();
+    const r$ = pollSearch(searchFn, cancelFn);
+
+    expect(searchFn).toBeCalledTimes(0);
+    expect(cancelFn).toBeCalledTimes(0);
+
+    const s1 = jest.fn();
+    const s2 = jest.fn();
+
+    r$.subscribe(s1);
+    r$.subscribe(s2);
+
+    await r$.toPromise();
+
+    expect(searchFn).toBeCalledTimes(1);
+    expect(cancelFn).toBeCalledTimes(0);
+    expect(s1).toBeCalledTimes(1);
+    expect(s2).toBeCalledTimes(1);
+  });
+
   test('Resolves immediatelly', async () => {
     const searchFn = getMockedSearch$(1);
     const cancelFn = jest.fn();

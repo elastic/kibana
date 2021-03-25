@@ -26,7 +26,10 @@ const MAX_CACHE_SIZE_MB = 10;
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
   private searchTimeout: number;
-  private responseCache: SearchResponseCache;
+  private readonly responseCache: SearchResponseCache = new SearchResponseCache(
+    MAX_CACHE_ITEMS,
+    MAX_CACHE_SIZE_MB
+  );
 
   /**
    * @internal
@@ -34,7 +37,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
     this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
-    this.responseCache = new SearchResponseCache(MAX_CACHE_ITEMS, MAX_CACHE_SIZE_MB);
 
     this.uiSettingsSub = deps.uiSettings
       .get$(UI_SETTINGS.SEARCH_TIMEOUT)
@@ -122,7 +124,8 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         );
 
         if (requestHash) {
-          this.responseCache.set(requestHash, search$);
+          // Cache and return from cache
+          return this.responseCache.set(requestHash, search$);
         }
 
         return search$;
