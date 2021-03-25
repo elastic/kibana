@@ -12,7 +12,9 @@ import { useValues, useActions } from 'kea';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { LogRetentionLogic, LogRetentionMessage, LogRetentionOptions } from '../';
+import { AppLogic } from '../../../app_logic';
+
+import { LogRetentionLogic, LogRetentionMessage, LogRetentionOptions } from '../index';
 
 interface Props {
   type: LogRetentionOptions;
@@ -21,11 +23,14 @@ interface Props {
 export const LogRetentionTooltip: React.FC<Props> = ({ type, position = 'bottom' }) => {
   const { fetchLogRetention } = useActions(LogRetentionLogic);
   const { logRetention } = useValues(LogRetentionLogic);
+  const {
+    myRole: { canManageLogSettings },
+  } = useValues(AppLogic);
 
   const hasLogRetention = logRetention !== null;
 
   useEffect(() => {
-    if (!hasLogRetention) fetchLogRetention();
+    if (!hasLogRetention && canManageLogSettings) fetchLogRetention();
   }, []);
 
   return hasLogRetention ? (

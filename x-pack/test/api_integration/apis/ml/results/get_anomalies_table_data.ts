@@ -16,6 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
+  // @ts-expect-error not full interface
   const JOB_CONFIG: Job = {
     job_id: `fq_multi_1_ae`,
     description:
@@ -35,6 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
     model_plot_config: { enabled: true },
   };
 
+  // @ts-expect-error not full interface
   const DATAFEED_CONFIG: Datafeed = {
     datafeed_id: 'datafeed-fq_multi_1_ae',
     indices: ['ft_farequote'],
