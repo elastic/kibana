@@ -12,6 +12,10 @@ import { getAllCasesLazy } from './methods/get_all_cases';
 import { getConfigureCasesLazy } from './methods/get_configure_cases';
 import { KibanaServices } from './common/lib/kibana';
 
+/**
+ * @public
+ * A plugin for retrieving Cases UI components
+ */
 export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
 
@@ -23,12 +27,27 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     return {
+      /**
+       * Get the all cases table
+       * @param props AllCasesProps
+       * @return {ReactElement<AllCasesProps>}
+       */
       getAllCases: (props) => {
         return getAllCasesLazy(props);
       },
+      /**
+       * Get the create case form
+       * @param props CreateCaseProps
+       * @return {ReactElement<CreateCaseProps>}
+       */
       getCreateCase: (props) => {
         return getCreateCaseLazy(props);
       },
+      /**
+       * Get the configure case component
+       * @param props ConfigureCasesProps
+       * @return {ReactElement<ConfigureCasesProps>}
+       */
       getConfigureCases: (props) => {
         return getConfigureCasesLazy(props);
       },
