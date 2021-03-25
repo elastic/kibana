@@ -131,7 +131,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       if (columnId === 'agent_status') {
         const agentIdValue = value.fields?.agent_id[0];
-        const agent = find(['_id', agentIdValue], agentData?.agents);
+        const agent = find(['_id', agentIdValue], agentData?.list);
         const online = agent?.active;
         const color = online ? 'success' : 'danger';
         const label = online ? 'Online' : 'Offline';
@@ -140,7 +140,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       if (columnId === 'agent') {
         const agentIdValue = value.fields?.agent_id[0];
-        const agent = find(['_id', agentIdValue], agentData?.agents);
+        const agent = find(['_id', agentIdValue], agentData?.list);
         const agentName = agent?.local_metadata.host.name;
 
         // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -157,7 +157,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       return '-';
     },
-    [actionId, agentData?.agents, pagination.pageIndex, pagination.pageSize]
+    [actionId, agentData?.list, pagination.pageIndex, pagination.pageSize]
   );
 
   const tableSorting: EuiDataGridSorting = useMemo(
