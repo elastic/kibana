@@ -94,7 +94,7 @@ export interface PaletteDefinition<T = unknown> {
    * @param series The current series along with its ancestors.
    * @param state  The internal state of the palette
    */
-  getColor: (
+  getCategoricalColor: (
     series: SeriesLayer[],
     chartConfiguration?: ChartColorConfiguration,
     state?: T
@@ -103,11 +103,19 @@ export interface PaletteDefinition<T = unknown> {
    * Get a spectrum of colors of the current palette.
    * This can be used if the chart wants to control color assignment locally.
    */
-  getColors: (size: number, state?: T) => string[];
+  getCategoricalColors: (size: number, state?: T) => string[];
   /**
    * Define whether a palette supports dynamic coloring (i.e. gradient colors mapped to number values)
    */
   canDynamicColoring?: boolean;
+  /**
+   * Get a helper function to compute interpolated gradient colors based on value and its domain.
+   * This can be used for dynamic coloring based on value.
+   */
+  getGradientColorHelper?: (
+    { min, max }: { min: number; max: number },
+    state?: T
+  ) => (value: number) => string;
 }
 
 export interface PaletteRegistry {

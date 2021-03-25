@@ -58,7 +58,10 @@ function getPaletteColors(
   }
   return palettes
     .get(prevPalette || activePaletteParams?.name || defaultParams.name)
-    .getColors(activePaletteParams?.steps || defaultParams.steps, activePaletteParams ?? undefined)
+    .getCategoricalColors(
+      activePaletteParams?.steps || defaultParams.steps,
+      activePaletteParams ?? undefined
+    )
     .map((color, i) => ({ color, stop: i * stopFactor }));
 }
 

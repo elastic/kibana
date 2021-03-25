@@ -39,12 +39,12 @@ export function PalettePicker<ParamName extends string>({
         palettes={palettes
           .getAll()
           .filter(({ internal }) => !internal)
-          .map(({ id, title, getColors }) => {
+          .map(({ id, title, getCategoricalColors }) => {
             return {
               value: id,
               title,
               type: 'fixed',
-              palette: getColors(
+              palette: getCategoricalColors(
                 10,
                 id === activePalette?.name ? activePalette?.params : undefined
               ),

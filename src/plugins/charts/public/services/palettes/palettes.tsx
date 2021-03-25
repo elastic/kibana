@@ -64,8 +64,8 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
   }
   return {
     id: 'default',
-    getColor,
-    getColors: () => euiPaletteColorBlind(),
+    getCategoricalColor: getColor,
+    getCategoricalColors: () => euiPaletteColorBlind(),
     toExpression: () => ({
       type: 'expression',
       chain: [
@@ -102,8 +102,8 @@ function buildGradient(
   }
   return {
     id,
-    getColor,
-    getColors: colors,
+    getCategoricalColor: getColor,
+    getCategoricalColors: colors,
     canDynamicColoring: true,
     toExpression: () => ({
       type: 'expression',
@@ -142,8 +142,8 @@ function buildSyncedKibanaPalette(
   }
   return {
     id: 'kibana_palette',
-    getColor,
-    getColors: () => colors.seedColors.slice(0, 10),
+    getCategoricalColor: getColor,
+    getCategoricalColors: () => colors.seedColors.slice(0, 10),
     toExpression: () => ({
       type: 'expression',
       chain: [
@@ -162,7 +162,17 @@ function buildSyncedKibanaPalette(
 function buildCustomPalette(): PaletteDefinition {
   return {
     id: 'custom',
-    getColor: (
+    getGradientColorHelper: (
+      { min, max }: { min: number; max: number },
+      { colors, stops }: { colors: string[]; stops: number[] }
+    ) => {
+      const gradientColorFn = chroma
+        .scale(colors)
+        // if explicit stops are passed use them, or use min/max values in the series
+        .domain(stops.length ? stops : [min, max]);
+      return (value: number) => gradientColorFn(value).hex();
+    },
+    getCategoricalColor: (
       series: SeriesLayer[],
       chartConfiguration: ChartColorConfiguration = { behindText: false },
       { colors, gradient }: { colors: string[]; gradient: boolean }
@@ -180,7 +190,7 @@ function buildCustomPalette(): PaletteDefinition {
     },
     internal: true,
     title: i18n.translate('charts.palettes.customLabel', { defaultMessage: 'Custom' }),
-    getColors: (
+    getCategoricalColors: (
       size: number,
       { colors, gradient }: { colors: string[]; gradient: boolean } = {
         colors: [],

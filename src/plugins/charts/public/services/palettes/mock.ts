@@ -14,8 +14,8 @@ export const getPaletteRegistry = () => {
   const mockPalette1: jest.Mocked<PaletteDefinition> = {
     id: 'default',
     title: 'My Palette',
-    getColor: jest.fn((_: SeriesLayer[]) => 'black'),
-    getColors: jest.fn((num: number) => ['red', 'black']),
+    getCategoricalColor: jest.fn((_: SeriesLayer[]) => 'black'),
+    getCategoricalColors: jest.fn((num: number) => ['red', 'black']),
     toExpression: jest.fn(() => ({
       type: 'expression',
       chain: [
@@ -33,8 +33,8 @@ export const getPaletteRegistry = () => {
   const mockPalette2: jest.Mocked<PaletteDefinition> = {
     id: 'mocked',
     title: 'Mocked Palette',
-    getColor: jest.fn((_: SeriesLayer[]) => 'blue'),
-    getColors: jest.fn((num: number) => ['blue', 'yellow']),
+    getCategoricalColor: jest.fn((_: SeriesLayer[]) => 'blue'),
+    getCategoricalColors: jest.fn((num: number) => ['blue', 'yellow']),
     toExpression: jest.fn(() => ({
       type: 'expression',
       chain: [

@@ -30,12 +30,15 @@ export function PalettePicker({
     .filter(({ internal, canDynamicColoring }) =>
       showDynamicColorOnly ? canDynamicColoring : !internal
     )
-    .map(({ id, title, getColors }) => {
+    .map(({ id, title, getCategoricalColors }) => {
       return {
         value: id,
         title,
         type: 'fixed' as const,
-        palette: getColors(10, id === activePalette?.name ? activePalette?.params : undefined),
+        palette: getCategoricalColors(
+          10,
+          id === activePalette?.name ? activePalette?.params : undefined
+        ),
       };
     });
   if (showCustomPalette) {
