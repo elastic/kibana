@@ -87,7 +87,6 @@ export class Root {
     // Stream that maps config updates to logger updates, including update failures.
     const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
-      // except for the CLI process where we only apply the default logging config once
       switchMap(() => configService.atPath<LoggingConfigType>('logging')),
       concatMap((config) => this.loggingSystem.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.

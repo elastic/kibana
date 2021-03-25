@@ -24,7 +24,6 @@ interface BootstrapArgs {
  */
 export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
   if (cliArgs.optimize) {
-    // TODO: move to devCliMode
     // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
     return;
   }

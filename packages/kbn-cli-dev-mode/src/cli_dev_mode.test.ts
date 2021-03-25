@@ -176,7 +176,7 @@ it('disables the watcher', () => {
   expect(Watcher.mock.calls[0][0]).toHaveProperty('enabled', false);
 });
 
-it('enable the basePath proxy', () => {
+it('enables the basePath proxy', () => {
   new CliDevMode(createOptions({ cliArgs: { basePath: true } }));
 
   expect(BasePathProxyServer).toHaveBeenCalledTimes(1);
