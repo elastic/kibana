@@ -263,30 +263,28 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   );
 
   return (
-    <div className="step-4">
-      <form onSubmit={handleFormSubmit}>
-        <EuiFlexGroup
-          direction="row"
-          alignItems="flexStart"
-          justifyContent="spaceBetween"
-          gutterSize="xl"
-          responsive={false}
-        >
-          <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
-            <EuiPanel paddingSize="none">
-              <EuiPanel hasShadow={false} paddingSize="l">
-                {header}
-              </EuiPanel>
-              <EuiHorizontalRule margin="xs" />
-              <EuiPanel hasShadow={false} paddingSize="l">
-                <SourceFeatures features={features} name={name} objTypes={objTypes} />
-              </EuiPanel>
+    <form onSubmit={handleFormSubmit}>
+      <EuiFlexGroup
+        direction="row"
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="xl"
+        responsive={false}
+      >
+        <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
+          <EuiPanel paddingSize="none">
+            <EuiPanel hasShadow={false} paddingSize="l">
+              {header}
             </EuiPanel>
-            <EuiSpacer />
-            {formFields}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </form>
-    </div>
+            <EuiHorizontalRule margin="xs" />
+            <EuiPanel hasShadow={false} paddingSize="l">
+              <SourceFeatures features={features} name={name} objTypes={objTypes} />
+            </EuiPanel>
+          </EuiPanel>
+          <EuiSpacer />
+          {formFields}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </form>
   );
 };
