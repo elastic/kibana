@@ -29,12 +29,10 @@ describe('useExperimentalFeatures', () => {
   afterEach(() => {
     useSelectorMock.mockClear();
   });
-  it('returns false when unexisting feature', async () => {
-    const result = useIsExperimentalFeatureEnabled(
-      'unexistingFeature' as keyof ExperimentalFeatures
-    );
-
-    expect(result).toBeFalsy();
+  it('throws an error when unexisting feature', async () => {
+    expect(() =>
+      useIsExperimentalFeatureEnabled('unexistingFeature' as keyof ExperimentalFeatures)
+    ).toThrowError();
   });
   it('returns true when existing feature and is enabled', async () => {
     const result = useIsExperimentalFeatureEnabled('featureA' as keyof ExperimentalFeatures);
