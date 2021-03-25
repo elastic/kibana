@@ -137,7 +137,7 @@ export function DiscoverSidebar({
       if (clientHeight === scrollHeight && pageSize < unpopularFields.length) {
         // in case of there is so much height available that there's no scrolling at initial rendering
         // pagination starts after the first bulk of rendering
-        paginate();
+        setTimeout(() => paginate(), 100);
       }
     }
   }, [scrollContainer, paginate, unpopularFields, pageSize]);
