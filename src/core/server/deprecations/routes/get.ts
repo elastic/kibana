@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { IRouter } from '../../http';
-import { GetDeprecationsContext } from '../types';
+import { GetDeprecationsContext, DeprecationsGetResponse } from '../types';
 import { DeprecationsFactory } from '../deprecations_factory';
 
 interface RouteDependencies {
@@ -26,12 +26,11 @@ export const registerGetRoute = (router: IRouter, { deprecationsFactory }: Route
       };
 
       const deprecationsInfo = await deprecationsFactory.getAllDeprecations(dependencies);
+      const body: DeprecationsGetResponse = {
+        deprecationsInfo,
+      };
 
-      return res.ok({
-        body: {
-          deprecationsInfo,
-        },
-      });
+      return res.ok({ body });
     }
   );
 };

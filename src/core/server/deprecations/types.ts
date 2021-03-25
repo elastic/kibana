@@ -61,3 +61,7 @@ export interface GetDeprecationsContext {
   esClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+export interface DeprecationsGetResponse {
+  deprecationsInfo: DomainDeprecationDetails[];
+}

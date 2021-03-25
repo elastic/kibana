@@ -122,7 +122,7 @@ describe('DeprecationsFactory', () => {
         {
           domainId,
           message: `Failed to get deprecations info for plugin "${domainId}".`,
-          level: 'warning',
+          level: 'fetch_error',
           correctiveActions: {
             manualSteps: ['Check Kibana server logs for error message.'],
           },
@@ -162,7 +162,7 @@ describe('DeprecationsFactory', () => {
         {
           domainId: 'anotherMockPlugin',
           message: `Failed to get deprecations info for plugin "anotherMockPlugin".`,
-          level: 'warning',
+          level: 'fetch_error',
           correctiveActions: {
             manualSteps: ['Check Kibana server logs for error message.'],
           },

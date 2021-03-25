@@ -8,13 +8,14 @@
 
 import { httpServiceMock } from '../http/http_service.mock';
 import { DeprecationsClient } from './deprecations_client';
+import type { DomainDeprecationDetails } from '../../server/types';
 
 describe('DeprecationsClient', () => {
   const http = httpServiceMock.createSetupContract();
   const mockDeprecationsInfo = [
-    { pluginId: 'testPluginId-1' },
-    { pluginId: 'testPluginId-1' },
-    { pluginId: 'testPluginId-2' },
+    { domainId: 'testPluginId-1' },
+    { domainId: 'testPluginId-1' },
+    { domainId: 'testPluginId-2' },
   ];
 
   beforeEach(() => {
@@ -36,18 +37,18 @@ describe('DeprecationsClient', () => {
   });
 
   describe('getDeprecations', () => {
-    it('returns deprecations for a single pluginId', async () => {
+    it('returns deprecations for a single domainId', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const deprecations = await deprecationsClient.getDeprecations('testPluginId-1');
 
       expect(deprecations.length).toBe(2);
       expect(deprecations).toEqual([
-        { pluginId: 'testPluginId-1' },
-        { pluginId: 'testPluginId-1' },
+        { domainId: 'testPluginId-1' },
+        { domainId: 'testPluginId-1' },
       ]);
     });
 
-    it('returns [] if the pluginId does not have any deprecations', async () => {
+    it('returns [] if the domainId does not have any deprecations', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const deprecations = await deprecationsClient.getDeprecations('testPluginId-4');
 
@@ -57,10 +58,10 @@ describe('DeprecationsClient', () => {
     it('calls the fetch api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       http.fetch.mockResolvedValueOnce({
-        deprecationsInfo: [{ pluginId: 'testPluginId-1' }, { pluginId: 'testPluginId-1' }],
+        deprecationsInfo: [{ domainId: 'testPluginId-1' }, { domainId: 'testPluginId-1' }],
       });
       http.fetch.mockResolvedValueOnce({
-        deprecationsInfo: [{ pluginId: 'testPluginId-2' }, { pluginId: 'testPluginId-2' }],
+        deprecationsInfo: [{ domainId: 'testPluginId-2' }, { domainId: 'testPluginId-2' }],
       });
       const results = [
         ...(await deprecationsClient.getDeprecations('testPluginId-1')),
@@ -69,11 +70,120 @@ describe('DeprecationsClient', () => {
 
       expect(http.fetch).toBeCalledTimes(2);
       expect(results).toEqual([
-        { pluginId: 'testPluginId-1' },
-        { pluginId: 'testPluginId-1' },
-        { pluginId: 'testPluginId-2' },
-        { pluginId: 'testPluginId-2' },
+        { domainId: 'testPluginId-1' },
+        { domainId: 'testPluginId-1' },
+        { domainId: 'testPluginId-2' },
+        { domainId: 'testPluginId-2' },
       ]);
+    });
+  });
+
+  describe('isDeprecationResolvable', () => {
+    it('returns true if deprecation has correctiveActions.api', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const mockDeprecationDetails: DomainDeprecationDetails = {
+        domainId: 'testPluginId-1',
+        message: 'some-message',
+        level: 'warning',
+        correctiveActions: {
+          api: {
+            path: 'some-path',
+            method: 'POST',
+          },
+        },
+      };
+
+      const isResolvable = deprecationsClient.isDeprecationResolvable(mockDeprecationDetails);
+
+      expect(isResolvable).toBe(true);
+    });
+
+    it('returns false if deprecation is missing correctiveActions.api', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const mockDeprecationDetails: DomainDeprecationDetails = {
+        domainId: 'testPluginId-1',
+        message: 'some-message',
+        level: 'warning',
+        correctiveActions: {},
+      };
+
+      const isResolvable = deprecationsClient.isDeprecationResolvable(mockDeprecationDetails);
+
+      expect(isResolvable).toBe(false);
+    });
+  });
+
+  describe('resolveDepreaction', () => {
+    it('fails if deprecation is not resolvable', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const mockDeprecationDetails: DomainDeprecationDetails = {
+        domainId: 'testPluginId-1',
+        message: 'some-message',
+        level: 'warning',
+        correctiveActions: {},
+      };
+      const result = await deprecationsClient.resolveDepreaction(mockDeprecationDetails);
+
+      expect(result).toEqual({
+        status: 'fail',
+        payload: 'deprecation has no correctiveAction via api.',
+      });
+    });
+
+    it('fetches the deprecation api', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const mockPayload = {};
+      const mockDeprecationDetails: DomainDeprecationDetails = {
+        domainId: 'testPluginId-1',
+        message: 'some-message',
+        level: 'warning',
+        correctiveActions: {
+          api: {
+            path: 'some-path',
+            method: 'POST',
+            body: {
+              extra_param: 123,
+            },
+          },
+        },
+      };
+      http.fetch.mockResolvedValue(mockPayload);
+      const result = await deprecationsClient.resolveDepreaction(mockDeprecationDetails);
+
+      expect(http.fetch).toBeCalledTimes(1);
+      expect(http.fetch).toBeCalledWith({
+        path: 'some-path',
+        method: 'POST',
+        asSystemRequest: true,
+        body: JSON.stringify({
+          extra_param: 123,
+          deprecationDetails: { domainId: 'testPluginId-1' },
+        }),
+      });
+      expect(result).toEqual({ status: 'ok', payload: mockPayload });
+    });
+
+    it('fails when fetch fails', async () => {
+      const deprecationsClient = new DeprecationsClient({ http });
+      const mockPayload = new Error('Failed to fetch');
+      const mockDeprecationDetails: DomainDeprecationDetails = {
+        domainId: 'testPluginId-1',
+        message: 'some-message',
+        level: 'warning',
+        correctiveActions: {
+          api: {
+            path: 'some-path',
+            method: 'POST',
+            body: {
+              extra_param: 123,
+            },
+          },
+        },
+      };
+      http.fetch.mockRejectedValue(mockPayload);
+      const result = await deprecationsClient.resolveDepreaction(mockDeprecationDetails);
+
+      expect(result).toEqual({ status: 'fail', payload: mockPayload });
     });
   });
 });

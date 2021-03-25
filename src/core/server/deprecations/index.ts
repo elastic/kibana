@@ -10,6 +10,7 @@ export type {
   DeprecationsDetails,
   GetDeprecationsContext,
   RegisterDeprecationsConfig,
+  DeprecationsGetResponse,
 } from './types';
 
 export type {

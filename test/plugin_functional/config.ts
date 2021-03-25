@@ -22,15 +22,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [
       require.resolve('./test_suites/core'),
-      require.resolve('./test_suites/custom_visualizations'),
-      require.resolve('./test_suites/panel_actions'),
-      require.resolve('./test_suites/core_plugins'),
-      require.resolve('./test_suites/management'),
-      require.resolve('./test_suites/doc_views'),
-      require.resolve('./test_suites/application_links'),
-      require.resolve('./test_suites/data_plugin'),
-      require.resolve('./test_suites/saved_objects_management'),
-      require.resolve('./test_suites/saved_objects_hidden_type'),
+
+      // require.resolve('./test_suites/custom_visualizations'),
+      // require.resolve('./test_suites/panel_actions'),
+      // require.resolve('./test_suites/core_plugins'),
+      // require.resolve('./test_suites/management'),
+      // require.resolve('./test_suites/doc_views'),
+      // require.resolve('./test_suites/application_links'),
+      // require.resolve('./test_suites/data_plugin'),
+      // require.resolve('./test_suites/saved_objects_management'),
+      // require.resolve('./test_suites/saved_objects_hidden_type'),
     ],
     services: {
       ...functionalConfig.get('services'),
@@ -56,6 +57,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
+        '--corePluginDeprecations.oldProperty=hello',
+        '--corePluginDeprecations.secret=100',
+        '--corePluginDeprecations.noLongerUsed=still_using',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

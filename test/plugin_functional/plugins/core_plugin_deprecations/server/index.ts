@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from '../../services';
+import { CorePluginDeprecationsPlugin } from './plugin';
 
-export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
-  describe('core', function () {
-    loadTestFile(require.resolve('./deprecations'));
-    loadTestFile(require.resolve('./route'));
-  });
-}
+export { config } from './config';
+export const plugin = () => new CorePluginDeprecationsPlugin();

@@ -7,18 +7,9 @@
  */
 
 import type { HttpStart } from '../http';
-import type { DomainDeprecationDetails } from '../../server/types';
+import type { DomainDeprecationDetails, DeprecationsGetResponse } from '../../server/types';
 
-/**
- * @internal
- */
-interface DeprecationsGetResponse {
-  deprecationsInfo: DomainDeprecationDetails[];
-}
-
-/**
- * @internal
- */
+/* @internal */
 export interface DeprecationsClientDeps {
   http: Pick<HttpStart, 'fetch'>;
 }
@@ -47,5 +38,40 @@ export class DeprecationsClient {
   public getDeprecations = async (domainId: string) => {
     const deprecations = await this.fetchDeprecations();
     return deprecations.filter((deprecation) => deprecation.domainId === domainId);
+  };
+
+  public isDeprecationResolvable = (details: DomainDeprecationDetails) => {
+    return typeof details.correctiveActions.api === 'object';
+  };
+
+  public resolveDepreaction = async (details: DomainDeprecationDetails) => {
+    const { domainId, correctiveActions } = details;
+    // explicit check required for TS type guard
+    if (typeof correctiveActions.api !== 'object') {
+      return {
+        status: 'fail',
+        payload: 'deprecation has no correctiveAction via api.',
+      };
+    }
+
+    const { body, method, path } = correctiveActions.api;
+    try {
+      const payload = await this.http.fetch<unknown>({
+        path,
+        method,
+        asSystemRequest: true,
+        body: JSON.stringify({
+          ...body,
+          deprecationDetails: { domainId },
+        }),
+      });
+
+      return { status: 'ok', payload };
+    } catch (err) {
+      return {
+        status: 'fail',
+        payload: err,
+      };
+    }
   };
 }
