@@ -330,7 +330,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // since we're filtering on status and the collection only has an in-progress case, it should only return the
           // individual case that has the open status and no collections
-          // sub-cases-enabled: this value is not correct because it includes a collection
+          // ENABLE_CASE_CONNECTOR: this value is not correct because it includes a collection
           // that does not have an open case. This is a known issue and will need to be resolved
           // when this issue is addressed: https://github.com/elastic/kibana/issues/94115
           expect(body.total).to.eql(2);
@@ -431,7 +431,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(body.cases.length).to.eql(1);
           // it should not include the collection that has a sub case as in-progress
-          // sub-cases-enabled: this value is not correct because it includes collections. This short term
+          // ENABLE_CASE_CONNECTOR: this value is not correct because it includes collections. This short term
           // fix for when sub cases are not enabled. When the feature is completed the _find API
           // will need to be fixed as explained in this ticket: https://github.com/elastic/kibana/issues/94115
           expect(body.total).to.eql(2);
@@ -456,7 +456,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(body.cases.length).to.eql(1);
 
-          // sub-cases-enabled: this value is not correct because it includes collections. This short term
+          // ENABLE_CASE_CONNECTOR: this value is not correct because it includes collections. This short term
           // fix for when sub cases are not enabled. When the feature is completed the _find API
           // will need to be fixed as explained in this ticket: https://github.com/elastic/kibana/issues/94115
           expect(body.total).to.eql(2);
