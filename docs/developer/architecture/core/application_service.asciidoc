@@ -1,6 +1,6 @@
 [[application-service]]
 == Application service
-Kibana has migrated to be a Single Page Application. Plugins should use `Application service` API to instruct Kibana what an application should be loaded & rendered in the UI in response to user interactions.
+Kibana has migrated to be a Single Page Application. Plugins should use `Application service` API to instruct Kibana what an application should be loaded & rendered in the UI in response to user interactions. The service also provides utilities for controlling the navigation link state, seamlessly integrating routing between applications, and loading async chunks on demand.
 
 NOTE: The Application service is only available client side.
 

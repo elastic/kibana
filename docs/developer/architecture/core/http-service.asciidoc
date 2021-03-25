@@ -5,8 +5,9 @@ NOTE: The HTTP service is available both server and client side.
 
 === Server side usage
 
-Allows plugins:
+The server-side HttpService allows server-side plugins to register endpoints with built-in support for request validation. These endpoints may be used by client-side code or be exposed as a public API for users. Most plugins integrate directly with this service.
 
+The service allows plugins to:
 * to extend the {kib} server with custom HTTP API.
 * to execute custom logic on an incoming request or server response.
 * implement custom authentication and authorization strategy.
@@ -48,7 +49,8 @@ export class MyPlugin implements Plugin {
 
 === Client side usage
 
-The HTTP service is also offered on the client side and provides an API to communicate with the {kib} server via HTTP interface. Feel free to use another HTTP client library to request 3rd party services.
+The HTTP service is also offered on the client side and provides an API to communicate with the {kib} server via HTTP interface. 
+The client-side HttpService is a preconfigured wrapper around `window.fetch` that includes some default behavior and automatically handles common errors (such as session expiration). The service should only be used for access to backend endpoints registered by the same plugin. Feel free to use another HTTP client library to request 3rd party services.
 
 [source,typescript]
 ----
