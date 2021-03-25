@@ -194,6 +194,7 @@ export async function getTile({
             [KBN_TOO_MANY_FEATURES_PROPERTY]: true,
           },
           geometry: esBboxToGeoJsonPolygon(
+            // @ts-expect-error @elastic/elasticsearch no way to declare aggregations for search response
             bboxResponse.rawResponse.aggregations.data_bounds.bounds,
             tileToESBbox(x, y, z)
           ),
@@ -217,6 +218,7 @@ export async function getTile({
 
       // Todo: pass in epochMillies-fields
       const featureCollection = hitsToGeoJson(
+        // @ts-expect-error hitsToGeoJson should be refactored to accept estypes.Hit
         documentsResponse.rawResponse.hits.hits,
         (hit: Record<string, unknown>) => {
           return flattenHit(geometryFieldName, hit);

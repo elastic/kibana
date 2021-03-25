@@ -25,6 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
+      // @ts-expect-error not full interface
       await ml.api.createAnomalyDetectionJob(testJobConfig);
     });
 

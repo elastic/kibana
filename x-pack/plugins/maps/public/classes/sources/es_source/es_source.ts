@@ -291,11 +291,29 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         abortSignal: abortController.signal,
         legacyHitsTotal: false,
       });
-      if (!esResp.aggregations.fitToBounds.bounds) {
+
+      if (!esResp.aggregations) {
+        return null;
+      }
+
+      const fitToBounds = esResp.aggregations.fitToBounds as {
+        bounds?: {
+          top_left: {
+            lat: number;
+            lon: number;
+          };
+          bottom_right: {
+            lat: number;
+            lon: number;
+          };
+        };
+      };
+
+      if (!fitToBounds.bounds) {
         // aggregations.fitToBounds is empty object when there are no matching documents
         return null;
       }
-      esBounds = esResp.aggregations.fitToBounds.bounds;
+      esBounds = fitToBounds.bounds;
     } catch (error) {
       if (error.name === 'AbortError') {
         throw new DataRequestAbortError();
