@@ -685,6 +685,8 @@ We could likely maintain a single linux-based image to cover all of our current 
 
 Another thing to note: Just because we need to run something on a specific OS or architecture, it doesn't necessarily mean we need to maintain an agent image for it. For example, we might use something like Vagrant to create a separate VM, using the default, cloud-provided images, that we run something on (e.g. for testing system packages), rather than running it on the same machine as the agent. In this case, we would potentially only be managing a small number of images, or even a single image.
 
+Also, we always have the option of running a small number of jobs using Jenkins, if we need to do so to target additional OSes and architectures.
+
 For our testing, we have a single GCP image, [built using Packer](https://github.com/elastic/kibana/tree/kb-bk/.buildkite/agents/packer), with the Buildkite agent installed and all of our dependencies.
 
 Summary of Responsibilities
