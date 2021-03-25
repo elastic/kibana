@@ -9,8 +9,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
-  const security = getService('security');
   const { common, detections } = getPageObjects(['common', 'detections']);
+  const security = getService('security');
+  const toasts = getService('toasts');
 
   describe('Security Solution', () => {
     before(async () => {
@@ -31,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         describe('Custom Query Rule', () => {
           describe('Define Step', () => {
             it('default view meets a11y requirements', async () => {
+              await toasts.dismissAllToasts();
               await a11y.testAppSnapshot();
             });
 
