@@ -31,12 +31,11 @@ function canRequire(path) {
   }
 }
 
-const DEV_MODE_PATH = resolve(__dirname, '../../dev/cli_dev_mode');
-const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
+const DEV_MODE_SUPPORTED = canRequire('@kbn/cli-dev-mode');
 
 const getBootstrapScript = (isDev) => {
   if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
-    const { bootstrapDevMode } = require('../../dev/cli_dev_mode');
+    const { bootstrapDevMode } = require('@kbn/cli-dev-mode');
     return bootstrapDevMode;
   } else {
     const { bootstrap } = require('../../core/server');

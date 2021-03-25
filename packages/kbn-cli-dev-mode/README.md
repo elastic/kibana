@@ -26,8 +26,12 @@ The `DevServer` object is responsible for everything related to running and rest
 
 The `Optimizer` object manages a `@kbn/optimizer` instance, adapting its configuration and logging to the data available to the CLI.
 
-## `BasePathProxyServer` (currently passed from core)
+## `BasePathProxyServer`
 
-The `BasePathProxyServer` is passed to the `CliDevMode` from core when the dev mode is trigged by the `--dev` flag. This proxy injects a random three character base path in the URL that Kibana is served from to help ensure that Kibana features are written to adapt to custom base path configurations from users.
+This proxy injects a random three character base path in the URL that Kibana is served from to help ensure that Kibana features 
+are written to adapt to custom base path configurations from users.
 
-The basePathProxy also has another important job, ensuring that requests don't fail because the server is restarting and that the browser receives front-end assets containing all saved changes. We accomplish this by observing the ready state of the `Optimizer` and `DevServer` objects and pausing all requests through the proxy until both objects report that they aren't building/restarting based on recently saved changes.
+The basePathProxy also has another important job, ensuring that requests don't fail because the server is restarting and 
+that the browser receives front-end assets containing all saved changes. We accomplish this by observing the ready state of 
+the `Optimizer` and `DevServer` objects and pausing all requests through the proxy until both objects report that 
+they aren't building/restarting based on recently saved changes.

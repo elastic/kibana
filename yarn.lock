@@ -2617,6 +2617,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
+  version "0.0.0"
+  uid ""
+
 "@kbn/config-schema@link:packages/kbn-config-schema":
   version "0.0.0"
   uid ""
