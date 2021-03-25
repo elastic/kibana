@@ -16,11 +16,6 @@ import { BasePathProxyServer, BasePathProxyServerOptions } from './base_path_pro
 import { DevConfig } from './config/dev_config';
 import { TestLog } from './log';
 
-/**
- * Most of these tests are inspired by:
- * src/core/server/http/http_server.test.ts
- * and copied for completeness from that file. The modifications are that these tests use the developer proxy.
- */
 describe('BasePathProxyServer', () => {
   let server: Server;
   let proxyServer: BasePathProxyServer;
