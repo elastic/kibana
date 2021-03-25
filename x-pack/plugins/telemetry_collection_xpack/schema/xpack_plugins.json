@@ -73,6 +73,9 @@
             },
             "__resilient": {
               "type": "long"
+            },
+            "__teams": {
+              "type": "long"
             }
           }
         }
@@ -136,6 +139,9 @@
             "__index-threshold": {
               "type": "long"
             },
+            "__es-query": {
+              "type": "long"
+            },
             "apm__error_rate": {
               "type": "long"
             },
@@ -194,6 +200,9 @@
               "type": "long"
             },
             "xpack__uptime__alerts__durationAnomaly": {
+              "type": "long"
+            },
+            "__geo-containment": {
               "type": "long"
             }
           }
