@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
+import { AuditLogger } from '../../../security/server';
 import { ActionsClient } from '../../../actions/server';
 import {
   CasePostRequest,
@@ -79,6 +80,7 @@ export interface CasesClientConstructorArguments {
   alertsService: AlertServiceContract;
   logger: Logger;
   authorization: Authorization;
+  auditLogger?: AuditLogger;
 }
 
 export interface ConfigureFields {

@@ -97,3 +97,8 @@ export const countAlertsForID = ({
 }): number | undefined => {
   return groupTotalAlertsByID({ comments }).get(id);
 };
+
+/**
+ * Creates a message to be used for an audit logger indicating the status of a request.
+ */
+export function createAuditMsg({}: {}): void {}

@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
+import { AuditLogger } from '../../../security/server';
 import {
   CasesClientConstructorArguments,
   CasesClient,
@@ -54,6 +55,7 @@ export class CasesClientHandler implements CasesClient {
   private readonly _alertsService: AlertServiceContract;
   private readonly logger: Logger;
   private readonly authorization: Authorization;
+  private readonly auditLogger?: AuditLogger;
 
   constructor(clientArgs: CasesClientConstructorArguments) {
     this._scopedClusterClient = clientArgs.scopedClusterClient;
@@ -66,11 +68,11 @@ export class CasesClientHandler implements CasesClient {
     this._alertsService = clientArgs.alertsService;
     this.logger = clientArgs.logger;
     this.authorization = clientArgs.authorization;
+    this.auditLogger = clientArgs.auditLogger;
   }
 
   public async create(caseInfo: CasePostRequest) {
     try {
-      // TODO: authorize the user
       return create({
         savedObjectsClient: this._savedObjectsClient,
         caseService: this._caseService,
@@ -80,6 +82,7 @@ export class CasesClientHandler implements CasesClient {
         theCase: caseInfo,
         logger: this.logger,
         auth: this.authorization,
+        auditLogger: this.auditLogger,
       });
     } catch (error) {
       throw createCaseError({

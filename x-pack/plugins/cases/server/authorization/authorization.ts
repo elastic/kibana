@@ -12,7 +12,7 @@ import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { GetSpaceFn } from './types';
 import { getClassFilter } from './utils';
-import { OperationDetails, Operations } from '.';
+import { AuthorizationAuditLogger, OperationDetails, Operations } from '.';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -22,21 +22,23 @@ export class Authorization {
   private readonly request: KibanaRequest;
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
   private readonly featureCaseClasses: Set<string>;
-  // TODO: create this
-  // private readonly auditLogger: AuthorizationAuditLogger;
+  private readonly auditLogger: AuthorizationAuditLogger;
 
   private constructor({
     request,
     securityAuth,
     caseClasses,
+    auditLogger,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     caseClasses: Set<string>;
+    auditLogger: AuthorizationAuditLogger;
   }) {
     this.request = request;
     this.securityAuth = securityAuth;
     this.featureCaseClasses = caseClasses;
+    this.auditLogger = auditLogger;
   }
 
   /**
@@ -47,11 +49,13 @@ export class Authorization {
     securityAuth,
     getSpace,
     features,
+    auditLogger,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     getSpace: GetSpaceFn;
     features: FeaturesPluginStart;
+    auditLogger: AuthorizationAuditLogger;
   }): Promise<Authorization> {
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseClasses: Set<string>;
@@ -69,7 +73,7 @@ export class Authorization {
       caseClasses = new Set<string>();
     }
 
-    return new Authorization({ request, securityAuth, caseClasses });
+    return new Authorization({ request, securityAuth, caseClasses, auditLogger });
   }
 
   private shouldCheckAuthorization(): boolean {
@@ -80,20 +84,17 @@ export class Authorization {
     const { securityAuth } = this;
     const isAvailableClass = this.featureCaseClasses.has(className);
 
-    // TODO: throw if the request is not authorized
     if (securityAuth && this.shouldCheckAuthorization()) {
-      // TODO: implement ensure logic
       const requiredPrivileges: string[] = [
         securityAuth.actions.cases.get(className, operation.name),
       ];
 
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, username, privileges } = await checkPrivileges({
+      const { hasAllRequested, username } = await checkPrivileges({
         kibana: requiredPrivileges,
       });
 
       if (!isAvailableClass) {
-        // TODO: throw if any of the class are not available
         /**
          * Under most circumstances this would have been caught by `checkPrivileges` as
          * a user can't have Privileges to an unknown class, but super users
@@ -101,31 +102,16 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        // TODO: audit log using `username`
-        throw Boom.forbidden('User does not have permissions for this class');
+        throw Boom.forbidden(this.auditLogger.failure({ username, className, operation }));
       }
 
       if (hasAllRequested) {
-        // TODO: user authorized. log success
+        this.auditLogger.success({ username, operation, className });
       } else {
-        const authorizedPrivileges = privileges.kibana.reduce<string[]>((acc, privilege) => {
-          if (privilege.authorized) {
-            return [...acc, privilege.privilege];
-          }
-          return acc;
-        }, []);
-
-        const unauthorizedPrivilages = requiredPrivileges.filter(
-          (privilege) => !authorizedPrivileges.includes(privilege)
-        );
-
-        // TODO: audit log
-        // TODO: User unauthorized. throw an error. authorizedPrivileges & unauthorizedPrivilages are needed for logging.
-        throw Boom.forbidden('Not authorized for this class');
+        throw Boom.forbidden(this.auditLogger.failure({ className, operation, username }));
       }
     } else if (!isAvailableClass) {
-      // TODO: throw an error
-      throw Boom.forbidden('Security is disabled but no class was found');
+      throw Boom.forbidden(this.auditLogger.failure({ className, operation }));
     }
 
     // else security is disabled so let the operation proceed
@@ -136,28 +122,36 @@ export class Authorization {
   ): Promise<{
     filter?: KueryNode;
     ensureSavedObjectIsAuthorized: (className: string) => void;
+    logSuccessfulAuthorization: () => void;
   }> {
     const { securityAuth } = this;
+    const operation = Operations.findCases;
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const { authorizedClassNames } = await this.getAuthorizedClassNames([Operations.findCases]);
+      const { username, authorizedClassNames } = await this.getAuthorizedClassNames([operation]);
 
       if (!authorizedClassNames.length) {
-        // TODO: Better error message, log error
-        throw Boom.forbidden('Not authorized for this class');
+        throw Boom.forbidden(this.auditLogger.failure({ username, operation }));
       }
 
       return {
         filter: getClassFilter(savedObjectType, authorizedClassNames),
         ensureSavedObjectIsAuthorized: (className: string) => {
           if (!authorizedClassNames.includes(className)) {
-            // TODO: log error
-            throw Boom.forbidden('Not authorized for this class');
+            throw Boom.forbidden(this.auditLogger.failure({ username, operation, className }));
+          }
+        },
+        logSuccessfulAuthorization: () => {
+          if (authorizedClassNames.length) {
+            this.auditLogger.bulkSuccess({ username, classNames: authorizedClassNames, operation });
           }
         },
       };
     }
 
-    return { ensureSavedObjectIsAuthorized: (className: string) => {} };
+    return {
+      ensureSavedObjectIsAuthorized: (className: string) => {},
+      logSuccessfulAuthorization: () => {},
+    };
   }
 
   private async getAuthorizedClassNames(

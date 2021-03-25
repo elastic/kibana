@@ -6,30 +6,35 @@
  */
 
 import { EventType } from '../../../security/server';
+import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
 export * from './audit_logger';
 export * from './types';
 
-export interface OperationDetails {
-  type: EventType;
-  name: ReadOperations | WriteOperations;
-  action: string;
-}
+const createVerbs: Verbs = {
+  present: 'create',
+  progressive: 'creating',
+  past: 'created',
+};
 
-// TODO: we need to have an operation per entity route so I think we need to create a bunch like
-//  getCase, getComment, getSubCase etc for each, need to think of a clever way of creating them for all the routes easily?
-enum ReadOperations {
-  GetCase = 'getCase',
-  FindCases = 'findCases',
-}
+const accessVerbs: Verbs = {
+  present: 'access',
+  progressive: 'accessing',
+  past: 'accessed',
+};
 
-// TODO: comments
-enum WriteOperations {
-  CreateCase = 'createCase',
-  DeleteCase = 'deleteCase',
-  UpdateCase = 'updateCase',
-}
+const updateVerbs: Verbs = {
+  present: 'update',
+  progressive: 'updating',
+  past: 'updated',
+};
+
+const deleteVerbs: Verbs = {
+  present: 'delete',
+  progressive: 'deleting',
+  past: 'delated',
+};
 
 export const Operations: Record<ReadOperations | WriteOperations, OperationDetails> = {
   // case operations
@@ -37,25 +42,35 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     type: EventType.CREATION,
     name: WriteOperations.CreateCase,
     action: 'create-case',
+    verbs: createVerbs,
+    docType: 'case',
   },
   [WriteOperations.DeleteCase]: {
     type: EventType.DELETION,
     name: WriteOperations.DeleteCase,
     action: 'delete-case',
+    verbs: deleteVerbs,
+    docType: 'case',
   },
   [WriteOperations.UpdateCase]: {
     type: EventType.CHANGE,
     name: WriteOperations.UpdateCase,
     action: 'update-case',
+    verbs: updateVerbs,
+    docType: 'case',
   },
   [ReadOperations.GetCase]: {
     type: EventType.ACCESS,
     name: ReadOperations.GetCase,
     action: 'get-case',
+    verbs: accessVerbs,
+    docType: 'case',
   },
   [ReadOperations.FindCases]: {
     type: EventType.ACCESS,
     name: ReadOperations.FindCases,
     action: 'find-cases',
+    verbs: accessVerbs,
+    docType: 'cases',
   },
 };

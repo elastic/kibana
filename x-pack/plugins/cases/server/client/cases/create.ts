@@ -36,7 +36,8 @@ import {
 } from '../../services';
 import { createCaseError } from '../../common/error';
 import { Authorization } from '../../authorization/authorization';
-import { WriteOperations } from '../../authorization/types';
+import { Operations } from '../../authorization';
+import { AuditLogger } from '../../../../security/server';
 
 interface CreateCaseArgs {
   caseConfigureService: CaseConfigureServiceSetup;
@@ -47,6 +48,7 @@ interface CreateCaseArgs {
   theCase: CasePostRequest;
   logger: Logger;
   auth: Authorization;
+  auditLogger?: AuditLogger;
 }
 
 /**
@@ -61,6 +63,7 @@ export const create = async ({
   theCase,
   logger,
   auth,
+  auditLogger,
 }: CreateCaseArgs): Promise<CaseResponse> => {
   // default to an individual case if the type is not defined.
   const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
@@ -72,7 +75,7 @@ export const create = async ({
 
   try {
     try {
-      await auth.ensureAuthorized(query.class, WriteOperations.Create);
+      await auth.ensureAuthorized(query.class, Operations.createCase);
     } catch (error) {
       // TODO: log error using audit logger
       throw error;

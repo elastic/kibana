@@ -8,7 +8,7 @@
 import { OperationDetails } from '.';
 import { AuditLogger, EventCategory, EventOutcome } from '../../../security/server';
 
-export enum AuthorizationResult {
+enum AuthorizationResult {
   Unauthorized = 'Unauthorized',
   Authorized = 'Authorized',
 }
@@ -20,16 +20,48 @@ export class AuthorizationAuditLogger {
     this.auditLogger = logger;
   }
 
-  public createMessage({
+  private createMessage({
     result,
     className,
     operation,
   }: {
     result: AuthorizationResult;
-    className: string;
+    className?: string;
     operation: OperationDetails;
   }): string {
-    return `${result} to ${operation.name} of class "${className}"`;
+    // class: determine what we're calling this (don't use class)
+    const classMsg = className === undefined ? 'of any class' : `of class "${className}"`;
+    /**
+     * This will take the form:
+     * `Unauthorized to create case of class "securitySolution"`
+     * `Unauthorized to find cases of any class`.
+     */
+    return `${result} to ${operation.verbs.present} ${operation.docType} ${classMsg}`;
+  }
+
+  private logSuccessEvent({
+    message,
+    operation,
+    username,
+  }: {
+    message: string;
+    operation: OperationDetails;
+    username?: string;
+  }) {
+    this.auditLogger?.log({
+      message,
+      event: {
+        action: operation.action,
+        category: EventCategory.DATABASE,
+        type: operation.type,
+        outcome: EventOutcome.SUCCESS,
+      },
+      ...(username !== undefined && {
+        user: {
+          name: username,
+        },
+      }),
+    });
   }
 
   public failure({
@@ -37,10 +69,10 @@ export class AuthorizationAuditLogger {
     className,
     operation,
   }: {
-    username: string;
-    className: string;
+    username?: string;
+    className?: string;
     operation: OperationDetails;
-  }) {
+  }): string {
     const message = this.createMessage({
       result: AuthorizationResult.Unauthorized,
       className,
@@ -50,13 +82,51 @@ export class AuthorizationAuditLogger {
       message,
       event: {
         action: operation.action,
-        category: EventCategory.AUTHENTICATION,
+        category: EventCategory.DATABASE,
         type: operation.type,
         outcome: EventOutcome.FAILURE,
       },
-      user: {
-        name: username,
-      },
+      // add the user information if we have it
+      ...(username !== undefined && {
+        user: {
+          name: username,
+        },
+      }),
     });
+    return message;
+  }
+
+  public success({
+    username,
+    operation,
+    className,
+  }: {
+    username: string;
+    className: string;
+    operation: OperationDetails;
+  }): string {
+    const message = this.createMessage({
+      result: AuthorizationResult.Authorized,
+      className,
+      operation,
+    });
+    this.logSuccessEvent({ message, operation, username });
+    return message;
+  }
+
+  public bulkSuccess({
+    username,
+    operation,
+    classNames,
+  }: {
+    username?: string;
+    classNames: string[];
+    operation: OperationDetails;
+  }): string {
+    const message = `${AuthorizationResult.Authorized} to ${operation.verbs.present} ${
+      operation.docType
+    } of class: ${classNames.join(', ')}`;
+    this.logSuccessEvent({ message, operation, username });
+    return message;
   }
 }
