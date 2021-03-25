@@ -24,8 +24,6 @@ import {
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
   API_ROOT_PATH,
-  INDEX_SOURCE_API_PATH,
-  MAX_DRAWING_SIZE_BYTES,
 } from '../common';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
@@ -35,8 +33,7 @@ import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
-import { createDocSource } from './data_indexing/create_doc_source';
-import { writeDataToIndex } from './data_indexing/index_data';
+import { initIndexingRoutes } from './data_indexing/indexing_routes';
 
 const EMPTY_EMS_CLIENT = {
   async getFileLayers() {
@@ -599,81 +596,6 @@ export async function initRoutes(
     }
   );
 
-  if (drawingFeatureEnabled) {
-    router.post(
-      {
-        path: `/${INDEX_SOURCE_API_PATH}`,
-        validate: {
-          body: schema.object({
-            index: schema.string(),
-            mappings: schema.any(),
-          }),
-        },
-        options: {
-          body: {
-            accepts: ['application/json'],
-          },
-        },
-      },
-      async (context, request, response) => {
-        const { index, mappings } = request.body;
-        const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser
-        );
-        const result = await createDocSource(
-          index,
-          mappings,
-          context.core.elasticsearch.client,
-          indexPatternsService
-        );
-        if (result.success) {
-          return response.ok({ body: result });
-        } else {
-          logger.error(result.error);
-          return response.custom({
-            body: result.error.message,
-            statusCode: 500,
-          });
-        }
-      }
-    );
-
-    router.post(
-      {
-        path: `/${GIS_API_PATH}/feature`,
-        validate: {
-          body: schema.object({
-            index: schema.string(),
-            data: schema.any(),
-          }),
-        },
-        options: {
-          body: {
-            accepts: ['application/json'],
-            maxBytes: MAX_DRAWING_SIZE_BYTES,
-          },
-        },
-      },
-      async (context, request, response) => {
-        const result = await writeDataToIndex(
-          request.body.index,
-          request.body.data,
-          context.core.elasticsearch.client.asCurrentUser
-        );
-        if (result.success) {
-          return response.ok({ body: result });
-        } else {
-          logger.error(result.error);
-          return response.custom({
-            body: result.error.message,
-            statusCode: 500,
-          });
-        }
-      }
-    );
-  }
-
   function checkEMSProxyEnabled() {
     const proxyEMSInMaps = emsSettings.isProxyElasticMapsServiceInMaps();
     if (!proxyEMSInMaps) {
@@ -705,4 +627,7 @@ export async function initRoutes(
   }
 
   initMVTRoutes({ router, logger });
+  if (drawingFeatureEnabled) {
+    initIndexingRoutes({ router, logger, dataPlugin });
+  }
 }
