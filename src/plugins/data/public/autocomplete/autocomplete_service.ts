@@ -65,7 +65,13 @@ export class AutocompleteService {
       this.querySuggestionProviders.set(KUERY_LANGUAGE_NAME, setupKqlQuerySuggestionProvider(core));
     }
 
-    return {};
+    return {
+      /**
+       * @deprecated
+       * please use "getQuerySuggestions" from the start contract
+       */
+      getQuerySuggestions: this.getQuerySuggestions,
+    };
   }
 
   /** @public **/
