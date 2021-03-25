@@ -191,6 +191,27 @@ function applyCustomESRules(item: any, legacyDoc: any, mbDoc: any) {
       legacyDoc.cluster_stats.indices.store.size_in_bytes
     );
     set(mbDoc, 'elasticsearch.cluster.stats.state', legacyDoc.cluster_state);
+    set(mbDoc, 'elasticsearch.cluster.name', legacyDoc.cluster_name);
+    set(
+      mbDoc,
+      'elasticsearch.cluster.stats.license.expiry_date_in_millis',
+      legacyDoc.license.expiry_date_in_millis
+    );
+    set(
+      mbDoc,
+      'elasticsearch.cluster.stats.nodes.fs.total.bytes',
+      legacyDoc.cluster_stats.nodes.fs.total_in_bytes
+    );
+    set(
+      mbDoc,
+      'elasticsearch.cluster.stats.nodes.fs.available.bytes',
+      legacyDoc.cluster_stats.nodes.fs.available_in_bytes
+    );
+    set(
+      mbDoc,
+      'elasticsearch.cluster.stats.indices.shards.primaries',
+      legacyDoc.cluster_stats.indices.shards.primaries
+    );
     set(
       mbDoc,
       'elasticsearch.cluster.stats.nodes.versions',

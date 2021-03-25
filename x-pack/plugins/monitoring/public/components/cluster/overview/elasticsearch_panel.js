@@ -58,7 +58,7 @@ import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
 const calculateShards = (shards) => {
-  const total = get(shards, 'count', get(shards, 'total', 0));
+  const total = get(shards, 'total', 0);
   let primaries = get(shards, 'primaries', 'N/A');
   let replicas = 'N/A';
 

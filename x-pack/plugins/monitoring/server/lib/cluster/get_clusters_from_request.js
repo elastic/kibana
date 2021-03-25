@@ -152,7 +152,7 @@ export async function getClustersFromRequest(
         }
 
         // check the license type of the production cluster for alerts feature support
-        const license = cluster.license || {};
+        const license = get(cluster, 'elasticsearch.cluster.stats.license', cluster.license) || {};
         const prodLicenseInfo = checkLicenseForAlerts(
           license.type,
           license.status === 'active',
@@ -206,7 +206,7 @@ export async function getClustersFromRequest(
                 defaultMessage:
                   'Cluster [{clusterName}] license type [{licenseType}] does not support Cluster Alerts',
                 values: {
-                  clusterName: cluster.cluster_name,
+                  clusterName: get(cluster, 'elasticsearch.cluster.name', cluster.cluster_name),
                   licenseType: `${license.type}`,
                 },
               }

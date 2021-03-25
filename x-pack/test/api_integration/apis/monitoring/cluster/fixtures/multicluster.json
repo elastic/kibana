@@ -17,25 +17,7 @@
         },
         "shards": {
           "total": 1,
-          "primaries": 1,
-          "replication": 0,
-          "index": {
-            "shards": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            },
-            "primaries": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            },
-            "replication": {
-              "min": 0,
-              "max": 0,
-              "avg": 0
-            }
-          }
+          "primaries": 1
         },
         "store": {
           "size_in_bytes": 34095
@@ -136,25 +118,7 @@
         },
         "shards": {
           "total": 8,
-          "primaries": 8,
-          "replication": 0,
-          "index": {
-            "shards": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            },
-            "primaries": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            },
-            "replication": {
-              "min": 0,
-              "max": 0,
-              "avg": 0
-            }
-          }
+          "primaries": 8
         },
         "store": {
           "size_in_bytes": 2647163
@@ -251,25 +215,7 @@
         },
         "shards": {
           "total": 26,
-          "primaries": 13,
-          "replication": 1,
-          "index": {
-            "shards": {
-              "min": 2,
-              "max": 10,
-              "avg": 5.2
-            },
-            "primaries": {
-              "min": 1,
-              "max": 5,
-              "avg": 2.6
-            },
-            "replication": {
-              "min": 1,
-              "max": 1,
-              "avg": 1
-            }
-          }
+          "primaries": 13
         },
         "store": {
           "size_in_bytes": 4838464
@@ -278,7 +224,6 @@
       "nodes": {
         "fs": {
           "total_in_bytes": 499065712640,
-          "free_in_bytes": 200666353664,
           "available_in_bytes": 200404209664
         },
         "count": {

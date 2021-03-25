@@ -153,16 +153,21 @@ export interface ElasticsearchLegacySource {
           heap_max_in_bytes?: number;
         };
       };
-      fs: {};
+      fs: {
+        available_in_bytes?: number;
+        total_in_bytes?: number;
+      };
       versions?: string[];
     };
     indices?: {
       count?: number;
       docs?: {
+        deleted?: number;
         count?: number;
       };
       shards?: {
         total?: number;
+        primaries?: number;
       };
       store?: {
         size_in_bytes?: number;
@@ -458,6 +463,7 @@ export interface ElasticsearchMetricbeatSource {
         indices?: {
           total?: number;
           docs?: {
+            deleted?: number;
             total?: number;
           };
           shards?: {
@@ -489,13 +495,11 @@ export interface ElasticsearchMetricbeatSource {
             };
           };
           fs?: {
+            available?: {
+              bytes?: number;
+            };
             total?: {
-              available?: {
-                bytes?: number;
-              };
-              total?: {
-                bytes?: number;
-              };
+              bytes?: number;
             };
           };
         };

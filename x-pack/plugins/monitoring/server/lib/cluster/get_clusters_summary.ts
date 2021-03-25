@@ -77,20 +77,46 @@ export function getClustersSummary(
 
     const indices = {
       count: clusterStatsLegacy?.indices?.count ?? clusterStatsMB?.indices?.total,
-      docs: clusterStatsLegacy?.indices?.docs ?? clusterStatsMB?.indices?.docs,
-      shards: clusterStatsLegacy?.indices?.shards ?? clusterStatsMB?.indices?.shards,
-      store: clusterStatsLegacy?.indices?.store ?? clusterStatsMB?.indices?.store,
+      docs: {
+        deleted:
+          clusterStatsLegacy?.indices?.docs?.deleted ?? clusterStatsMB?.indices?.docs?.deleted,
+        count: clusterStatsLegacy?.indices?.docs?.count ?? clusterStatsMB?.indices?.docs?.total,
+      },
+      shards: {
+        total: clusterStatsLegacy?.indices?.shards?.total ?? clusterStatsMB?.indices?.shards?.count,
+        primaries:
+          clusterStatsLegacy?.indices?.shards?.primaries ??
+          clusterStatsMB?.indices?.shards?.primaries,
+      },
+      store: {
+        size_in_bytes:
+          clusterStatsLegacy?.indices?.store?.size_in_bytes ??
+          clusterStatsMB?.indices?.store?.size?.bytes,
+      },
     };
 
     const jvm = {
       max_uptime_in_millis:
         clusterStatsLegacy?.nodes?.jvm?.max_uptime_in_millis ??
         clusterStatsMB?.nodes?.jvm?.max_uptime?.ms,
-      mem: clusterStatsLegacy?.nodes?.jvm?.mem ?? clusterStatsMB?.nodes?.jvm?.memory,
+      mem: {
+        heap_max_in_bytes:
+          clusterStatsLegacy?.nodes?.jvm?.mem?.heap_max_in_bytes ??
+          clusterStatsMB?.nodes?.jvm?.memory?.heap?.max?.bytes,
+        heap_used_in_bytes:
+          clusterStatsLegacy?.nodes?.jvm?.mem?.heap_used_in_bytes ??
+          clusterStatsMB?.nodes?.jvm?.memory?.heap?.used?.bytes,
+      },
     };
 
     const nodes = {
-      fs: clusterStatsLegacy?.nodes?.fs ?? clusterStatsMB?.nodes?.fs,
+      fs: {
+        total_in_bytes:
+          clusterStatsLegacy?.nodes?.fs?.total_in_bytes ?? clusterStatsMB?.nodes?.fs?.total?.bytes,
+        available_in_bytes:
+          clusterStatsLegacy?.nodes?.fs?.available_in_bytes ??
+          clusterStatsMB?.nodes?.fs?.available?.bytes,
+      },
       count: {
         total: clusterStatsLegacy?.nodes?.count?.total ?? clusterStatsMB?.nodes?.count,
       },
