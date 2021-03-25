@@ -34,7 +34,7 @@ _Docker Compose is required_
 ### Cypress tests
 
 ```sh
-x-pack/plugins/apm/e2e/run-e2e.sh
+node x-pack/plugins/apm/scripts/ftr_e2e/cypress_run.js
 ```
 
 _Starts Kibana (:5701), APM Server (:8201) and Elasticsearch (:9201). Ingests sample data into Elasticsearch via APM Server and runs the Cypress tests_
