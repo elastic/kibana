@@ -67,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should able to remove field', async () => {
       await PageObjects.lens.clickField('runtimefield2');
       await PageObjects.lens.removeField();
+      await fieldEditor.confirmDelete();
       await PageObjects.lens.waitForFieldMissing('runtimefield2');
     });
   });
