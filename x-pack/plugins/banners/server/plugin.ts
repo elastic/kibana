@@ -6,17 +6,16 @@
  */
 
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
-import { BannerConfiguration } from '../common';
 import { BannersConfigType } from './config';
 import { BannersRequestHandlerContext } from './types';
 import { registerRoutes } from './routes';
 import { registerSettings } from './ui_settings';
 
 export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
-  private readonly config: BannerConfiguration;
+  private readonly config: BannersConfigType;
 
   constructor(context: PluginInitializerContext) {
-    this.config = convertConfig(context.config.get<BannersConfigType>());
+    this.config = context.config.get<BannersConfigType>();
   }
 
   setup({ uiSettings, getStartServices, http }: CoreSetup<{}, {}>) {
@@ -31,5 +30,3 @@ export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
     return {};
   }
 }
-
-const convertConfig = (raw: BannersConfigType): BannerConfiguration => raw;

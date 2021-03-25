@@ -30,6 +30,7 @@ const configSchema = schema.object({
     },
     defaultValue: '#FFF9E8',
   }),
+  disableSpaceBanners: schema.boolean({ defaultValue: false }),
 });
 
 export type BannersConfigType = TypeOf<typeof configSchema>;

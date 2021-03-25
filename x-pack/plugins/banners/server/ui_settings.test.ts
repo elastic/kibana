@@ -6,14 +6,15 @@
  */
 
 import { uiSettingsServiceMock } from '../../../../src/core/server/mocks';
-import type { BannerConfiguration } from '../common';
+import { BannersConfigType } from './config';
 import { registerSettings } from './ui_settings';
 
-const createConfig = (parts: Partial<BannerConfiguration> = {}): BannerConfiguration => ({
+const createConfig = (parts: Partial<BannersConfigType> = {}): BannersConfigType => ({
   placement: 'disabled',
   backgroundColor: '#0000',
   textColor: '#FFFFFF',
   textContent: 'Hello from the banner',
+  disableSpaceBanners: false,
   ...parts,
 });
 
@@ -34,6 +35,12 @@ describe('registerSettings', () => {
       'banners:textColor': expect.any(Object),
       'banners:backgroundColor': expect.any(Object),
     });
+  });
+
+  it('does not register the settings if `config.disableSpaceBanners` is `true`', () => {
+    registerSettings(uiSettings, createConfig({ disableSpaceBanners: true }));
+
+    expect(uiSettings.register).not.toHaveBeenCalled();
   });
 
   it('uses the configuration values as defaults', () => {

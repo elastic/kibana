@@ -8,13 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { UiSettingsServiceSetup } from 'src/core/server';
-import { BannerConfiguration } from '../common';
+import { BannersConfigType } from './config';
 import { isHexColor } from './utils';
 
-export const registerSettings = (
-  uiSettings: UiSettingsServiceSetup,
-  config: BannerConfiguration
-) => {
+export const registerSettings = (uiSettings: UiSettingsServiceSetup, config: BannersConfigType) => {
+  if (config.disableSpaceBanners) {
+    return;
+  }
   uiSettings.register({
     'banners:placement': {
       name: i18n.translate('xpack.banners.settings.placement.title', {

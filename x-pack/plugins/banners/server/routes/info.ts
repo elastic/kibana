@@ -7,10 +7,11 @@
 
 import { IUiSettingsClient } from 'kibana/server';
 import { ILicense } from '../../../licensing/server';
+import { BannersConfigType } from '../config';
 import { BannerInfoResponse, BannerConfiguration, BannerPlacement } from '../../common';
 import { BannersRouter } from '../types';
 
-export const registerInfoRoute = (router: BannersRouter, config: BannerConfiguration) => {
+export const registerInfoRoute = (router: BannersRouter, config: BannersConfigType) => {
   router.get(
     {
       path: '/api/banners/info',
@@ -22,9 +23,10 @@ export const registerInfoRoute = (router: BannersRouter, config: BannerConfigura
     async (ctx, req, res) => {
       const allowed = isValidLicense(ctx.licensing.license);
 
-      const bannerConfig = req.auth.isAuthenticated
-        ? await getBannerConfig(ctx.core.uiSettings.client)
-        : config;
+      const bannerConfig =
+        req.auth.isAuthenticated && config.disableSpaceBanners === false
+          ? await getBannerConfig(ctx.core.uiSettings.client)
+          : config;
 
       return res.ok({
         body: {

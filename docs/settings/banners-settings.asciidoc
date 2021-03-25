@@ -27,6 +27,9 @@ You can configure the `xpack.banners` settings in your `kibana.yml` file.
 | `xpack.banners.backgroundColor`
 | The color of the banner background. Defaults to `#FFF9E8`.
 
+| `xpack.banners.disableSpaceBanners`
+| If true, per-space banner overrides will be disabled. Defaults to `false`.
+
 |===
 
 [NOTE]
