@@ -98,7 +98,7 @@ export class DrawFilterControl extends Component<Props, {}> {
       await this.props.addFilters([filter!], this.props.drawState.actionId);
     } catch (error) {
       getToasts().addWarning(
-        i18n.translate('xpack.maps.drawControl.unableToCreatFilter', {
+        i18n.translate('xpack.maps.drawFilterControl.unableToCreatFilter', {
           defaultMessage: `Unable to create filter, error: '{errorMsg}'.`,
           values: {
             errorMsg: error.message,
