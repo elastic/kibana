@@ -140,7 +140,7 @@ export function DiscoverGridFlyout({
                   iconType="documents"
                   flush="left"
                   href={getContextUrl(
-                    hit._id,
+                    String(hit._id),
                     indexPattern.id,
                     columns,
                     services.filterManager,
