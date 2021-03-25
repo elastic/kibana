@@ -51,16 +51,21 @@ describe('EnginesTable', () => {
     onDeleteEngine,
   };
 
+  const resetMocks = () => {
+    jest.clearAllMocks();
+    setMockValues({
+      myRole: {
+        canManageEngines: false,
+      },
+    });
+  };
+
   describe('basic table', () => {
     let wrapper: ReactWrapper<any>;
     let table: ReactWrapper<any>;
 
     beforeAll(() => {
-      jest.clearAllMocks();
-      setMockValues({
-        // LicensingLogic
-        hasPlatinumLicense: false,
-      });
+      resetMocks();
       wrapper = mountWithIntl(<EnginesTable {...props} />);
       table = wrapper.find(EuiBasicTable);
     });
@@ -101,11 +106,7 @@ describe('EnginesTable', () => {
 
   describe('loading', () => {
     it('passes the loading prop', () => {
-      jest.clearAllMocks();
-      setMockValues({
-        // LicensingLogic
-        hasPlatinumLicense: false,
-      });
+      resetMocks();
       const wrapper = mountWithIntl(<EnginesTable {...props} loading />);
 
       expect(wrapper.find(EuiBasicTable).prop('loading')).toEqual(true);
@@ -114,6 +115,7 @@ describe('EnginesTable', () => {
 
   describe('noItemsMessage', () => {
     it('passes the noItemsMessage prop', () => {
+      resetMocks();
       const wrapper = mountWithIntl(<EnginesTable {...props} noItemsMessage={'No items.'} />);
       expect(wrapper.find(EuiBasicTable).prop('noItemsMessage')).toEqual('No items.');
     });
@@ -121,11 +123,7 @@ describe('EnginesTable', () => {
 
   describe('language field', () => {
     beforeAll(() => {
-      jest.clearAllMocks();
-      setMockValues({
-        // LicensingLogic
-        hasPlatinumLicense: false,
-      });
+      resetMocks();
     });
 
     it('renders language when available', () => {
@@ -181,29 +179,27 @@ describe('EnginesTable', () => {
   });
 
   describe('actions', () => {
-    it('will hide the action buttons if the user does not have a platinum license', () => {
-      jest.clearAllMocks();
-      setMockValues({
-        // LicensingLogic
-        hasPlatinumLicense: false,
-      });
+    it('will hide the action buttons if the user cannot manage/delete engines', () => {
+      resetMocks();
       const wrapper = shallow(<EnginesTable {...props} />);
       const tableRow = wrapper.find(EuiTableRow).first();
 
       expect(tableRow.find(EuiIcon)).toHaveLength(0);
     });
 
-    describe('when user has a platinum license', () => {
+    describe('when the user can manage/delete engines', () => {
       let wrapper: ReactWrapper<any>;
       let tableRow: ReactWrapper<any>;
       let actions: ReactWrapper<any>;
 
       beforeEach(() => {
-        jest.clearAllMocks();
+        resetMocks();
         setMockValues({
-          // LicensingLogic
-          hasPlatinumLicense: true,
+          myRole: {
+            canManageEngines: true,
+          },
         });
+
         wrapper = mountWithIntl(<EnginesTable {...props} />);
         tableRow = wrapper.find(EuiTableRow).first();
         actions = tableRow.find(EuiIcon);

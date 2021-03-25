@@ -13,6 +13,7 @@ describe('actions telemetry', () => {
   test('getTotalCount should replace first symbol . to __ for action types names', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockReturnValue(
+      // @ts-expect-error not full search response
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           byActionTypeId: {
@@ -116,6 +117,7 @@ Object {
   test('getInUseTotalCount', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockReturnValue(
+      // @ts-expect-error not full search response
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           refs: {

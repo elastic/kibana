@@ -9,6 +9,7 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
@@ -27,7 +28,6 @@ import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../..
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
-  BulkResponse,
   BulkResponseErrorAggregation,
   SignalHit,
   SearchAfterAndBulkCreateReturnType,
@@ -408,7 +408,7 @@ export const makeFloatString = (num: number): string => Number(num).toFixed(2);
  * @returns The aggregated example as shown above.
  */
 export const errorAggregator = (
-  response: BulkResponse,
+  response: estypes.BulkResponse,
   ignoreStatusCodes: number[]
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
@@ -568,7 +568,7 @@ export const lastValidDate = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: estypes.SearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
@@ -579,7 +579,8 @@ export const lastValidDate = ({
     const timestampValue =
       lastRecord.fields != null && lastRecord.fields[timestamp] != null
         ? lastRecord.fields[timestamp][0]
-        : lastRecord._source[timestamp];
+        : // @ts-expect-error @elastic/elasticsearch _source is optional
+          lastRecord._source[timestamp];
     const lastTimestamp =
       typeof timestampValue === 'string' || typeof timestampValue === 'number'
         ? timestampValue
@@ -599,7 +600,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: estypes.SearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
@@ -736,6 +737,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
         total: newShards.total + existingShards.total,
         successful: newShards.successful + existingShards.successful,
         failed: newShards.failed + existingShards.failed,
+        // @ts-expect-error @elastic/elaticsearch skipped is optional in ShardStatistics
         skipped: newShards.skipped + existingShards.skipped,
         failures: [
           ...(existingShards.failures != null ? existingShards.failures : []),
@@ -747,7 +749,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
         total:
           createTotalHitsFromSearchResult({ searchResult: prev }) +
           createTotalHitsFromSearchResult({ searchResult: next }),
-        max_score: Math.max(newHits.max_score, existingHits.max_score),
+        max_score: Math.max(newHits.max_score!, existingHits.max_score!),
         hits: [...existingHits.hits, ...newHits.hits],
       },
     };
@@ -757,7 +759,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
 export const createTotalHitsFromSearchResult = ({
   searchResult,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: { hits: { total: number | { value: number } } };
 }): number => {
   const totalHits =
     typeof searchResult.hits.total === 'number'

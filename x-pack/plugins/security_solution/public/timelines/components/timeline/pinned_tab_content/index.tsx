@@ -198,7 +198,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
   return (
     <>
-      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`} direction="column">
+      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
         {timelineFullScreen && setTimelineFullScreen != null && (
           <ExitFullScreenFlexItem grow={false}>
             <ExitFullScreen fullScreen={timelineFullScreen} setFullScreen={setTimelineFullScreen} />

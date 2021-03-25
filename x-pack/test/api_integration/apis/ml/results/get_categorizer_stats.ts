@@ -43,6 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     daily_model_snapshot_retention_after_days: 1,
     allow_lazy_open: false,
   };
+  // @ts-expect-error not full interface
   const testDatafeedConfig: Datafeed = {
     datafeed_id: `datafeed-${jobId}`,
     indices: ['ft_module_sample_logs'],
@@ -54,6 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/module_sample_logs');
       await ml.testResources.setKibanaTimeZoneToUTC();
+      // @ts-expect-error not full interface
       await ml.api.createAndRunAnomalyDetectionLookbackJob(testJobConfig, testDatafeedConfig);
     });
 

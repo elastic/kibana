@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchClusterHealth } from './fetch_cluster_health';
@@ -29,7 +30,7 @@ describe('fetchClusterHealth', () => {
             },
           ],
         },
-      })
+      } as estypes.SearchResponse)
     );
 
     const clusters = [{ clusterUuid, clusterName: 'foo' }];
