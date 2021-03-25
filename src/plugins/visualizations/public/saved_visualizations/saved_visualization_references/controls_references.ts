@@ -7,12 +7,13 @@
  */
 
 import { SavedObjectReference } from '../../../../../core/types';
+import { VisParams } from '../../../common';
 
 export const extractControlsReferences = (
-  visState: Record<string, any>,
+  visParams: VisParams,
   references: SavedObjectReference[] = []
 ) => {
-  const controls = visState.params?.controls ?? [];
+  const controls = visParams?.controls ?? [];
 
   controls.forEach((control: Record<string, string>, i: number) => {
     if (!control.indexPattern) {
@@ -29,10 +30,10 @@ export const extractControlsReferences = (
 };
 
 export const injectControlsReferences = (
-  visState: Record<string, any>,
+  visParams: VisParams,
   references: SavedObjectReference[]
 ) => {
-  const controls = visState.params?.controls ?? [];
+  const controls = visParams.controls ?? [];
 
   controls.forEach((control: Record<string, string>) => {
     if (!control.indexPatternRefName) {

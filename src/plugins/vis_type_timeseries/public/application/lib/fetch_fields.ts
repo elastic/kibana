@@ -50,9 +50,10 @@ export async function fetchFields(
       {}
     );
 
-    if (defaultIndexPattern?.title && patterns.includes(defaultIndexPattern.title)) {
-      fields[''] = fields[defaultIndexPattern.title];
+    if (defaultIndexPattern) {
+      fields[''] = toSanitizedFieldType(await defaultIndexPattern.getNonScriptedFields());
     }
+
     return fields;
   } catch (error) {
     if (error.name !== 'AbortError') {

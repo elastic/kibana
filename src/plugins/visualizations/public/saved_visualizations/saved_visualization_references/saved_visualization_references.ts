@@ -11,7 +11,7 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from '../../../../../core/public';
-import { VisSavedObject } from '../../types';
+import { SavedVisState, VisSavedObject } from '../../types';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
@@ -52,10 +52,13 @@ export function extractReferences({
 
   // Extract index patterns from controls
   if (updatedAttributes.visState) {
-    const visState = JSON.parse(String(updatedAttributes.visState));
+    const visState = JSON.parse(String(updatedAttributes.visState)) as SavedVisState;
 
-    extractControlsReferences(visState, updatedReferences);
-    extractTimeSeriesReferences(visState, updatedReferences);
+    extractControlsReferences(visState.params, updatedReferences);
+
+    if (visState.type === 'metrics') {
+      extractTimeSeriesReferences(visState.params, updatedReferences);
+    }
 
     updatedAttributes.visState = JSON.stringify(visState);
   }
@@ -85,7 +88,10 @@ export function injectReferences(savedObject: VisSavedObject, references: SavedO
   }
 
   if (savedObject.visState?.params) {
-    injectControlsReferences(savedObject.visState, references);
-    injectTimeSeriesReferences(savedObject.visState, references);
+    injectControlsReferences(savedObject.visState.params, references);
+
+    if (savedObject.visState.type === 'metrics') {
+      injectTimeSeriesReferences(savedObject.visState.params, references);
+    }
   }
 }

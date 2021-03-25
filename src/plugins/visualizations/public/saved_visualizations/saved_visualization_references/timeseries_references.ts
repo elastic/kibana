@@ -7,6 +7,7 @@
  */
 
 import { SavedObjectReference } from '../../../../../core/types';
+import { VisParams } from '../../../common';
 
 /** @internal **/
 const REF_NAME_POSTFIX = '_ref_name';
@@ -17,28 +18,24 @@ const INDEX_PATTERN_REF_TYPE = 'index_pattern';
 /** @internal **/
 type Action = (object: Record<string, any>, key: string) => void;
 
-const doForExtractedIndices = (action: Action, visState: Record<string, any>) => {
-  if (visState.type !== 'metrics') {
-    return;
-  }
+const doForExtractedIndices = (action: Action, visParams: VisParams) => {
+  action(visParams, 'index_pattern');
 
-  action(visState.params, 'index_pattern');
-
-  visState.params.series.forEach((series: any) => {
+  visParams.series.forEach((series: any) => {
     if (series.override_index_pattern) {
       action(series, 'series_index_pattern');
     }
   });
 
-  if (visState.params.annotations) {
-    visState.params.annotations.forEach((annotation: any) => {
+  if (visParams.annotations) {
+    visParams.annotations.forEach((annotation: any) => {
       action(annotation, 'index_pattern');
     });
   }
 };
 
 export const extractTimeSeriesReferences = (
-  visState: Record<string, any>,
+  visParams: VisParams,
   references: SavedObjectReference[] = []
 ) => {
   let i = 0;
@@ -55,11 +52,11 @@ export const extractTimeSeriesReferences = (
       });
       delete object[key];
     }
-  }, visState);
+  }, visParams);
 };
 
 export const injectTimeSeriesReferences = (
-  visState: Record<string, any>,
+  visParams: VisParams,
   references: SavedObjectReference[]
 ) => {
   doForExtractedIndices((object, key) => {
@@ -74,5 +71,5 @@ export const injectTimeSeriesReferences = (
 
       delete object[refKey];
     }
-  }, visState);
+  }, visParams);
 };

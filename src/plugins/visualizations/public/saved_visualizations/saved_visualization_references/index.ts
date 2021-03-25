@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { extractControlsReferences, injectControlsReferences } from './controls_references';
+export { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
+
 export { extractReferences, injectReferences } from './saved_visualization_references';
