@@ -1,0 +1,155 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const PageObjects = getPageObjects([
+    'timeToVisualize',
+    'dashboard',
+    'visualize',
+    'security',
+    'common',
+    'header',
+    'lens',
+  ]);
+
+  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const testSubjects = getService('testSubjects');
+  const esArchiver = getService('esArchiver');
+  const security = getService('security');
+  const find = getService('find');
+
+  describe('dashboard time to visualize security', () => {
+    before(async () => {
+      await esArchiver.load('dashboard/feature_controls/security');
+      await esArchiver.loadIfNeeded('logstash_functional');
+
+      // ensure we're logged out so we can login as the appropriate users
+      await PageObjects.security.forceLogout();
+
+      await security.role.create('dashboard_write_vis_read', {
+        elasticsearch: {
+          indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+        },
+        kibana: [
+          {
+            feature: {
+              dashboard: ['all'],
+              visualize: ['read'],
+            },
+            spaces: ['*'],
+          },
+        ],
+      });
+
+      await security.user.create('dashboard_write_vis_read_user', {
+        password: 'dashboard_write_vis_read_user-password',
+        roles: ['dashboard_write_vis_read'],
+        full_name: 'test user',
+      });
+
+      await PageObjects.security.login(
+        'dashboard_write_vis_read_user',
+        'dashboard_write_vis_read_user-password',
+        {
+          expectSpaceSelector: false,
+        }
+      );
+    });
+
+    after(async () => {
+      await security.role.delete('dashboard_write_vis_read');
+      await security.user.delete('dashboard_write_vis_read_user');
+
+      await esArchiver.unload('dashboard/feature_controls/security');
+
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      await PageObjects.security.forceLogout();
+    });
+
+    describe('lens by value works without library save permissions', () => {
+      before(async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.preserveCrossAppState();
+        await PageObjects.dashboard.clickNewDashboard();
+      });
+
+      it('can add a lens panel by value', async () => {
+        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
+        await PageObjects.lens.createAndAddLensFromDashboard({});
+        const newPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(newPanelCount).to.eql(1);
+      });
+
+      it('edits to a by value lens panel are properly applied', async () => {
+        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboardPanelActions.openContextMenu();
+        await dashboardPanelActions.clickEdit();
+        await PageObjects.lens.switchToVisualization('donut');
+        await PageObjects.lens.saveAndReturn();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        const pieExists = await find.existsByCssSelector('.lnsPieExpression__container');
+        expect(pieExists).to.be(true);
+      });
+
+      it('disables save to library button without visualize save permissions', async () => {
+        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboardPanelActions.openContextMenu();
+        await dashboardPanelActions.clickEdit();
+        const saveButton = await testSubjects.find('lnsApp_saveButton');
+        expect(await saveButton.getAttribute('disabled')).to.equal('true');
+        await PageObjects.lens.saveAndReturn();
+        await PageObjects.timeToVisualize.resetNewDashboard();
+      });
+
+      it('should allow new lens to be added by value, but not by reference', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.lens.goToTimeRange();
+
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'avg',
+          field: 'bytes',
+        });
+
+        await PageObjects.lens.switchToVisualization('lnsMetric');
+        await PageObjects.lens.waitForVisualization();
+        await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.click('lnsApp_saveButton');
+
+        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
+        expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
+
+        await PageObjects.timeToVisualize.saveFromModal('New Lens from Modal', {
+          addToDashboard: 'new',
+          saveAsNew: true,
+          saveToLibrary: false,
+        });
+
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
+        const isLinked = await PageObjects.timeToVisualize.libraryNotificationExists(
+          'New Lens from Modal'
+        );
+        expect(isLinked).to.be(false);
+
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.eql(1);
+
+        await PageObjects.timeToVisualize.resetNewDashboard();
+      });
+    });
+  });
+}
