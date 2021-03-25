@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 
 import {
   Filter,
@@ -75,8 +74,9 @@ export const findListItem = async ({
       sortOrder,
     });
 
-    const { body: respose } = await esClient.count<{ count: number }>({
+    const { body: respose } = await esClient.count({
       body: {
+        // @ts-expect-error GetQueryFilterReturn is not assignable to QueryContainer
         query,
       },
       ignore_unavailable: true,
@@ -87,8 +87,9 @@ export const findListItem = async ({
       // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
       // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
       // to explicitly define the type <T>.
-      const { body: response } = await esClient.search<SearchResponse<SearchEsListItemSchema>>({
+      const { body: response } = await esClient.search<SearchEsListItemSchema>({
         body: {
+          // @ts-expect-error GetQueryFilterReturn is not assignable to QueryContainer
           query,
           search_after: scroll.searchAfter,
           sort: getSortWithTieBreaker({ sortField, sortOrder }),

@@ -42,7 +42,7 @@ import {
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
-import { EditorFrameStart } from './types';
+import type { EditorFrameStart, VisualizationType } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { getSearchProvider } from './search_provider';
@@ -101,6 +101,11 @@ export interface LensPublicStart {
    * Method which returns true if the user has permission to use Lens as defined by application capabilities.
    */
   canUseEditor: () => boolean;
+
+  /**
+   * Method which returns xy VisualizationTypes array keeping this async as to not impact page load bundle
+   */
+  getXyVisTypes: () => Promise<VisualizationType[]>;
 }
 
 export class LensPlugin {
@@ -256,6 +261,10 @@ export class LensPlugin {
       },
       canUseEditor: () => {
         return Boolean(core.application.capabilities.visualize?.show);
+      },
+      getXyVisTypes: async () => {
+        const { visualizationTypes } = await import('./xy_visualization/types');
+        return visualizationTypes;
       },
     };
   }

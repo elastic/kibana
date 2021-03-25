@@ -28,6 +28,7 @@ import { DetailedPeerCertificate } from 'tls';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
+import { estypes } from '@elastic/elasticsearch';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiComboBoxProps } from '@elastic/eui';
@@ -92,8 +93,6 @@ import { SavedObjectsFindOptions } from 'kibana/public';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { Search } from '@elastic/elasticsearch/api/requestParams';
-import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { StartServicesAccessor } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
@@ -329,6 +328,10 @@ export interface AggFunctionsMapping {
     //
     // (undocumented)
     aggFilter: ReturnType<typeof aggFilter>;
+    // Warning: (ae-forgotten-export) The symbol "aggFilteredMetric" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    aggFilteredMetric: ReturnType<typeof aggFilteredMetric>;
     // Warning: (ae-forgotten-export) The symbol "aggFilters" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -711,7 +714,7 @@ export const ES_SEARCH_STRATEGY = "es";
 // Warning: (ae-missing-release-tag) "EsaggsExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input_34, Arguments_20, Output_34>;
+export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input_35, Arguments_21, Output_35>;
 
 // Warning: (ae-forgotten-export) The symbol "name" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "Input" needs to be exported by the entry point index.d.ts
@@ -720,7 +723,7 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'e
 // Warning: (ae-missing-release-tag) "EsdslExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition_2<typeof name_3, Input_35, Arguments_22, Output_35>;
+export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition_2<typeof name_3, Input_36, Arguments_23, Output_36>;
 
 // Warning: (ae-missing-release-tag) "esFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -861,7 +864,7 @@ export type ExpressionFunctionKibana = ExpressionFunctionDefinition<'kibana', Ex
 // Warning: (ae-missing-release-tag) "ExpressionFunctionKibanaContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<'kibana_context', KibanaContext | null, Arguments_21, Promise<KibanaContext>, ExecutionContext<Adapters_2, ExecutionContextSearch>>;
+export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<'kibana_context', KibanaContext | null, Arguments_22, Promise<KibanaContext>, ExecutionContext<Adapters_2, ExecutionContextSearch>>;
 
 // Warning: (ae-missing-release-tag) "ExpressionValueSearchContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1124,7 +1127,7 @@ export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestPar
 // Warning: (ae-missing-release-tag) "IEsSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
+export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<estypes.SearchResponse<Source>>;
 
 // Warning: (ae-missing-release-tag) "IFieldFormat" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1830,6 +1833,8 @@ export enum METRIC_TYPES {
     // (undocumented)
     DERIVATIVE = "derivative",
     // (undocumented)
+    FILTERED_METRIC = "filtered_metric",
+    // (undocumented)
     GEO_BOUNDS = "geo_bounds",
     // (undocumented)
     GEO_CENTROID = "geo_centroid",
@@ -2409,9 +2414,9 @@ export class SearchSource {
     createChild(options?: {}): SearchSource;
     createCopy(): SearchSource;
     destroy(): void;
-    fetch$(options?: ISearchOptions): import("rxjs").Observable<import("elasticsearch").SearchResponse<any>>;
+    fetch$(options?: ISearchOptions): import("rxjs").Observable<import("@elastic/elasticsearch/api/types").SearchResponse<any>>;
     // @deprecated
-    fetch(options?: ISearchOptions): Promise<import("elasticsearch").SearchResponse<any>>;
+    fetch(options?: ISearchOptions): Promise<import("@elastic/elasticsearch/api/types").SearchResponse<any>>;
     getField<K extends keyof SearchSourceFields>(field: K, recurse?: boolean): SearchSourceFields[K];
     getFields(): SearchSourceFields;
     getId(): string;
@@ -2649,7 +2654,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:65:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:138:7 - (ae-forgotten-export) The symbol "FieldAttrSet" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:169:7 - (ae-forgotten-export) The symbol "RuntimeField" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/search/aggs/types.ts:139:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/search/aggs/types.ts:141:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:56:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:56:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:56:23 - (ae-forgotten-export) The symbol "getDisplayValueFromFilter" needs to be exported by the entry point index.d.ts

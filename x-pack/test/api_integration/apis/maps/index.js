@@ -11,6 +11,7 @@ export default function ({ loadTestFile, getService }) {
   describe('Maps endpoints', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
+      await esArchiver.load('maps/data');
     });
 
     describe('', () => {
