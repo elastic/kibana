@@ -479,6 +479,8 @@ export interface DeprecationsServiceStart {
     // Warning: (ae-forgotten-export) The symbol "DomainDeprecationDetails" needs to be exported by the entry point index.d.ts
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
     getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
+    isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
+    resolveDepreaction: <Payload = unknown>(details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse<Payload>>;
 }
 
 // @public (undocumented)
@@ -1081,6 +1083,17 @@ export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLin
 
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
+
+// Warning: (ae-missing-release-tag) "ResolveDeprecationResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type ResolveDeprecationResponse<Payload> = {
+    status: 'ok';
+    payload: Payload;
+} | {
+    status: 'fail';
+    payload: string | Error;
+};
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

@@ -165,6 +165,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PublicAppMetaInfo](./kibana-plugin-core-public.publicappmetainfo.md) | Public information about a registered app's [keywords](./kibana-plugin-core-public.appmeta.md) |
 |  [PublicAppSearchDeepLinkInfo](./kibana-plugin-core-public.publicappsearchdeeplinkinfo.md) | Public information about a registered app's [searchDeepLinks](./kibana-plugin-core-public.appsearchdeeplink.md) |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
+|  [ResolveDeprecationResponse](./kibana-plugin-core-public.resolvedeprecationresponse.md) |  |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-core-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) |
 |  [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) |

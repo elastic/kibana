@@ -18,4 +18,6 @@ export interface DeprecationsServiceStart
 |  --- | --- | --- |
 |  [getAllDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getalldeprecations.md) | <code>() =&gt; Promise&lt;DomainDeprecationDetails[]&gt;</code> | Grabs deprecations details for all domains. |
 |  [getDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getdeprecations.md) | <code>(domainId: string) =&gt; Promise&lt;DomainDeprecationDetails[]&gt;</code> | Grabs deprecations for a specific domain. |
+|  [isDeprecationResolvable](./kibana-plugin-core-public.deprecationsservicestart.isdeprecationresolvable.md) | <code>(details: DomainDeprecationDetails) =&gt; boolean</code> | Returns a boolean if the pprovided deprecation can be automtically resolvable. |
+|  [resolveDepreaction](./kibana-plugin-core-public.deprecationsservicestart.resolvedepreaction.md) | <code>&lt;Payload = unknown&gt;(details: DomainDeprecationDetails) =&gt; Promise&lt;ResolveDeprecationResponse&lt;Payload&gt;&gt;</code> | Calls the correctiveActions.api to automatically resolve the depprecation. |
 
