@@ -12,17 +12,7 @@ import { RouteDeps } from '../../types';
 import { CASE_COMMENTS_URL, ENABLE_CASE_CONNECTOR } from '../../../../../common/constants';
 import { CommentRequest } from '../../../../../common/api';
 
-export function initPostCommentApi({ router, logger, subCasesEnabled }: RouteDeps) {
-  const querySchema = subCasesEnabled
-    ? {
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
-      }
-    : {};
-
+export function initPostCommentApi({ router, logger }: RouteDeps) {
   router.post(
     {
       path: CASE_COMMENTS_URL,
@@ -30,7 +20,11 @@ export function initPostCommentApi({ router, logger, subCasesEnabled }: RouteDep
         params: schema.object({
           case_id: schema.string(),
         }),
-        ...querySchema,
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
         body: escapeHatch,
       },
     },

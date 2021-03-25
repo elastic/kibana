@@ -18,17 +18,7 @@ export function initDeleteAllCommentsApi({
   router,
   userActionService,
   logger,
-  subCasesEnabled,
 }: RouteDeps) {
-  const querySchema = subCasesEnabled
-    ? {
-        query: schema.maybe(
-          schema.object({
-            subCaseId: schema.maybe(schema.string()),
-          })
-        ),
-      }
-    : {};
   router.delete(
     {
       path: CASE_COMMENTS_URL,
@@ -36,7 +26,11 @@ export function initDeleteAllCommentsApi({
         params: schema.object({
           case_id: schema.string(),
         }),
-        ...querySchema,
+        query: schema.maybe(
+          schema.object({
+            subCaseId: schema.maybe(schema.string()),
+          })
+        ),
       },
     },
     async (context, request, response) => {

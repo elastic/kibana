@@ -45,7 +45,6 @@ interface CreateCaseArgs {
   userActionService: CaseUserActionServiceSetup;
   theCase: CasePostRequest;
   logger: Logger;
-  subCasesEnabled: boolean;
 }
 
 /**
@@ -59,7 +58,6 @@ export const create = async ({
   user,
   theCase,
   logger,
-  subCasesEnabled,
 }: CreateCaseArgs): Promise<CaseResponse> => {
   // default to an individual case if the type is not defined.
   const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;

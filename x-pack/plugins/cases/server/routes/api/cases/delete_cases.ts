@@ -46,13 +46,7 @@ async function deleteSubCases({
   );
 }
 
-export function initDeleteCasesApi({
-  caseService,
-  router,
-  userActionService,
-  logger,
-  subCasesEnabled,
-}: RouteDeps) {
+export function initDeleteCasesApi({ caseService, router, userActionService, logger }: RouteDeps) {
   router.delete(
     {
       path: CASES_URL,

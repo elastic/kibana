@@ -171,6 +171,7 @@ interface SubCasesMapWithPageInfo {
   subCasesMap: Map<string, SubCaseResponse[]>;
   page: number;
   perPage: number;
+  total: number;
 }
 
 interface CaseCommentStats {
@@ -253,13 +254,11 @@ export interface CaseServiceSetup {
     client: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptions;
     subCaseOptions?: SavedObjectFindOptions;
-    subCasesEnabled: boolean;
   }): Promise<number>;
   findCasesGroupedByID(args: {
     client: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptions;
     subCaseOptions?: SavedObjectFindOptions;
-    subCasesEnabled: boolean;
   }): Promise<CasesMapWithPageInfo>;
 }
 
@@ -276,12 +275,10 @@ export class CaseService implements CaseServiceSetup {
     client,
     caseOptions,
     subCaseOptions,
-    subCasesEnabled,
   }: {
     client: SavedObjectsClientContract;
     caseOptions: FindCaseOptions;
     subCaseOptions?: SavedObjectFindOptions;
-    subCasesEnabled: boolean;
   }): Promise<CasesMapWithPageInfo> {
     const cases = await this.findCases({
       client,
@@ -365,12 +362,10 @@ export class CaseService implements CaseServiceSetup {
     client,
     caseOptions,
     subCaseOptions,
-    subCasesEnabled,
   }: {
     client: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptions;
     subCaseOptions?: SavedObjectFindOptions;
-    subCasesEnabled: boolean;
   }): Promise<number> {
     const casesStats = await this.findCases({
       client,
@@ -537,6 +532,7 @@ export class CaseService implements CaseServiceSetup {
       subCasesMap: new Map<string, SubCaseResponse[]>(),
       page: 0,
       perPage: 0,
+      total: 0,
     };
 
     if (!options) {
@@ -593,7 +589,7 @@ export class CaseService implements CaseServiceSetup {
       return accMap;
     }, new Map<string, SubCaseResponse[]>());
 
-    return { subCasesMap, page: subCases.page, perPage: subCases.per_page };
+    return { subCasesMap, page: subCases.page, perPage: subCases.per_page, total: subCases.total };
   }
 
   /**

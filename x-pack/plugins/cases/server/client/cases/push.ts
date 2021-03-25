@@ -69,7 +69,6 @@ interface PushParams {
   casesClient: CasesClientHandler;
   actionsClient: ActionsClient;
   logger: Logger;
-  subCasesEnabled: boolean;
 }
 
 export const push = async ({
@@ -83,7 +82,6 @@ export const push = async ({
   caseId,
   user,
   logger,
-  subCasesEnabled,
 }: PushParams): Promise<CaseResponse> => {
   /* Start of push to external service */
   let theCase: CaseResponse;

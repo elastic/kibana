@@ -20,7 +20,6 @@ interface GetParams {
   includeComments?: boolean;
   includeSubCaseComments?: boolean;
   logger: Logger;
-  subCasesEnabled: boolean;
 }
 
 /**
@@ -33,7 +32,6 @@ export const get = async ({
   logger,
   includeComments = false,
   includeSubCaseComments = false,
-  subCasesEnabled,
 }: GetParams): Promise<CaseResponse> => {
   try {
     let theCase: SavedObject<ESCaseAttributes>;

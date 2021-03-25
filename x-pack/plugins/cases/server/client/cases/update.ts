@@ -337,7 +337,6 @@ interface UpdateArgs {
   casesClient: CasesClientHandler;
   cases: CasesPatchRequest;
   logger: Logger;
-  subCasesEnabled: boolean;
 }
 
 export const update = async ({
@@ -348,7 +347,6 @@ export const update = async ({
   casesClient,
   cases,
   logger,
-  subCasesEnabled,
 }: UpdateArgs): Promise<CasesResponse> => {
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),

@@ -54,16 +54,15 @@ export class CasePlugin {
   private connectorMappingsService?: ConnectorMappingsServiceSetup;
   private userActionService?: CaseUserActionServiceSetup;
   private alertsService?: AlertService;
-  private config?: ConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get();
   }
 
   public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    this.config = createConfig(this.initializerContext);
+    const config = createConfig(this.initializerContext);
 
-    if (!this.config.enabled) {
+    if (!config.enabled) {
       return;
     }
 
@@ -109,7 +108,6 @@ export class CasePlugin {
       connectorMappingsService: this.connectorMappingsService,
       userActionService: this.userActionService,
       router,
-      subCasesEnabled: this.config.subCasesEnabled,
     });
 
     if (ENABLE_CASE_CONNECTOR) {
@@ -144,7 +142,6 @@ export class CasePlugin {
         userActionService: this.userActionService!,
         alertsService: this.alertsService!,
         logger: this.log,
-        subCasesEnabled: this.config?.subCasesEnabled ?? false,
       });
     };
 
@@ -189,7 +186,6 @@ export class CasePlugin {
             alertsService,
             user,
             logger,
-            subCasesEnabled: this.config?.subCasesEnabled ?? false,
           });
         },
       };

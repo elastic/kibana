@@ -81,7 +81,6 @@ export const createCasesClientWithMockSavedObjectsClient = async ({
     alertsService,
     scopedClusterClient: esClient,
     logger: log,
-    subCasesEnabled: true,
   });
   return {
     client: casesClient,
