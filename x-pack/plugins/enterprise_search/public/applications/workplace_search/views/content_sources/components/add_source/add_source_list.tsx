@@ -65,12 +65,6 @@ export const AddSourceList: React.FC = () => {
     ({ serviceType }) => serviceType !== CUSTOM_SERVICE_TYPE
   );
 
-  const BASE_DESCRIPTION = hasSources ? '' : ADD_SOURCE_NEW_SOURCE_DESCRIPTION;
-  const PAGE_CONTEXT_DESCRIPTION = isOrganization
-    ? ADD_SOURCE_ORG_SOURCE_DESCRIPTION
-    : ADD_SOURCE_PRIVATE_SOURCE_DESCRIPTION;
-
-  const PAGE_DESCRIPTION = BASE_DESCRIPTION + PAGE_CONTEXT_DESCRIPTION;
   const HAS_SOURCES_TITLE = isOrganization
     ? ADD_SOURCE_ORG_SOURCES_TITLE
     : ADD_SOURCE_PRIVATE_SOURCES_TITLE;
@@ -99,27 +93,29 @@ export const AddSourceList: React.FC = () => {
 
   return (
     <>
-      <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+      <ViewContentHeader title={PAGE_TITLE} />
       {showConfiguredSourcesList || isOrganization ? (
         <ContentSection>
-          <EuiSpacer size="m" />
-          <EuiFormRow>
-            <EuiFieldSearch
-              data-test-subj="FilterSourcesInput"
-              value={filterValue}
-              onChange={handleFilterChange}
-              fullWidth
-              placeholder={ADD_SOURCE_PLACEHOLDER}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="xxl" />
           {showConfiguredSourcesList && (
             <ConfiguredSourcesList
               isOrganization={isOrganization}
               sources={visibleConfiguredSources}
             />
           )}
-          {isOrganization && <AvailableSourcesList sources={visibleAvailableSources} />}
+          {isOrganization && (
+            <>
+              <EuiFormRow>
+                <EuiFieldSearch
+                  data-test-subj="FilterSourcesInput"
+                  value={filterValue}
+                  onChange={handleFilterChange}
+                  fullWidth
+                  placeholder={ADD_SOURCE_PLACEHOLDER}
+                />
+              </EuiFormRow>
+              <AvailableSourcesList sources={visibleAvailableSources} />
+            </>
+          )}
         </ContentSection>
       ) : (
         <ContentSection>
