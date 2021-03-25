@@ -19,15 +19,25 @@ import { ResultSettingsNonTextFieldsHeader } from './result_settings_non_text_fi
 import { ResultSettingsTextFieldsBody } from './result_settings_text_fields_body';
 import { ResultSettingsTextFieldsHeader } from './result_settings_text_fields_header';
 
+import './result_settings_table.scss';
+
 export const ResultSettingsTable: React.FC = () => {
-  const { schemaConflicts } = useValues(ResultSettingsLogic);
+  const { schemaConflicts, textResultFields, nonTextResultFields } = useValues(ResultSettingsLogic);
 
   return (
     <EuiTable className="resultSettingsTable" responsive={false}>
-      <ResultSettingsTextFieldsHeader />
-      <ResultSettingsTextFieldsBody />
-      <ResultSettingsNonTextFieldsHeader />
-      <ResultSettingsNonTextFieldsBody />
+      {!!Object.keys(textResultFields).length && (
+        <>
+          <ResultSettingsTextFieldsHeader />
+          <ResultSettingsTextFieldsBody />
+        </>
+      )}
+      {!!Object.keys(nonTextResultFields).length && (
+        <>
+          <ResultSettingsNonTextFieldsHeader />
+          <ResultSettingsNonTextFieldsBody />
+        </>
+      )}
       {!!Object.keys(schemaConflicts).length && (
         <>
           <ResultSettingsDisabledFieldsHeader />

@@ -12,24 +12,18 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ResultSettingsDisabledFieldsHeader } from './result_settings_disabled_fields_header';
+import { ResultSettingsNonTextFieldsBody } from './result_settings_non_text_fields_body';
 import { ResultSettingsTable } from './result_settings_table';
+import { ResultSettingsTextFieldsBody } from './result_settings_text_fields_body';
 
 describe('ResultSettingsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({
-      schemaConflicts: {},
-    });
-  });
-
-  it('renders', () => {
-    const wrapper = shallow(<ResultSettingsTable />);
-    expect(wrapper.isEmptyRender()).toBe(false);
-    expect(wrapper.find(ResultSettingsDisabledFieldsHeader).exists()).toBe(false);
-  });
-
-  it('renders a disabled fields section if there are schema conflicts', () => {
-    setMockValues({
+      textResultFields: { foo: { raw: true, rawSize: 5, snippet: false, snippetFallback: false } },
+      nonTextResultFields: {
+        bar: { raw: true, rawSize: 5, snippet: false, snippetFallback: false },
+      },
       schemaConflicts: {
         foo: {
           text: ['foo'],
@@ -39,8 +33,25 @@ describe('ResultSettingsTable', () => {
         },
       },
     });
+  });
+
+  it('renders', () => {
+    const wrapper = shallow(<ResultSettingsTable />);
+    expect(wrapper.find(ResultSettingsTextFieldsBody).exists()).toBe(true);
+    expect(wrapper.find(ResultSettingsNonTextFieldsBody).exists()).toBe(true);
+    expect(wrapper.find(ResultSettingsDisabledFieldsHeader).exists()).toBe(true);
+  });
+
+  it('will hide sections that have no data avialble to show', () => {
+    setMockValues({
+      textResultFields: {},
+      nonTextResultFields: {},
+      schemaConflicts: {},
+    });
 
     const wrapper = shallow(<ResultSettingsTable />);
-    expect(wrapper.find(ResultSettingsDisabledFieldsHeader).exists()).toBe(true);
+    expect(wrapper.find(ResultSettingsTextFieldsBody).exists()).toBe(false);
+    expect(wrapper.find(ResultSettingsNonTextFieldsBody).exists()).toBe(false);
+    expect(wrapper.find(ResultSettingsDisabledFieldsHeader).exists()).toBe(false);
   });
 });

@@ -34,12 +34,7 @@ export const ResultSettingsNonTextFieldsBody: React.FC = () => {
     <EuiTableBody>
       {resultSettingsArray.map(([fieldName, fieldSettings]) => (
         <EuiTableRow key={fieldName}>
-          <EuiTableRowCell
-            data-test-subj="ResultSettingFieldName"
-            className="TODO c-stui-engine-schema-field__name"
-          >
-            {fieldName}
-          </EuiTableRowCell>
+          <EuiTableRowCell data-test-subj="ResultSettingFieldName">{fieldName}</EuiTableRowCell>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
               data-test-subj="ResultSettingRawCheckBox"

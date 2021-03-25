@@ -21,11 +21,7 @@ export const ResultSettingsDisabledFieldsBody: React.FC = () => {
       {Object.keys(schemaConflicts).map((fieldName) => (
         <EuiTableRow key={fieldName}>
           <EuiTableRowCell colSpan={6}>
-            <EuiText
-              className="TODO c-stui-engine-schema-field__name has-conflcit"
-              size="s"
-              data-test-subj="ResultSettingFieldName"
-            >
+            <EuiText size="s" data-test-subj="ResultSettingFieldName">
               {fieldName}
             </EuiText>
             <EuiHealth color="warning">
