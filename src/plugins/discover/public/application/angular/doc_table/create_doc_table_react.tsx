@@ -8,7 +8,7 @@
 
 import angular, { auto, ICompileService, IScope } from 'angular';
 import { render } from 'react-dom';
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
