@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { FleetConfigType } from '../../common/types';
+import type { PreconfiguredAgentPolicy } from '../../common/types';
 import type { AgentPolicy, NewPackagePolicy, Output } from '../types';
 
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
@@ -165,7 +165,7 @@ describe('policy preconfiguration', () => {
             },
           ],
         },
-      ] as FleetConfigType['agentPolicies'],
+      ] as PreconfiguredAgentPolicy[],
       [{ name: 'test-package', version: '3.0.0' }],
       mockDefaultOutput
     );
@@ -209,7 +209,7 @@ describe('policy preconfiguration', () => {
           id: 'test-id',
           package_policies: [],
         },
-      ] as FleetConfigType['agentPolicies'],
+      ] as PreconfiguredAgentPolicy[],
       [],
       mockDefaultOutput
     );
@@ -232,7 +232,7 @@ describe('policy preconfiguration', () => {
             },
           ],
         },
-      ] as FleetConfigType['agentPolicies'],
+      ] as PreconfiguredAgentPolicy[],
       [],
       mockDefaultOutput
     );
