@@ -1,0 +1,112 @@
+---
+id: kibDevTutorialAdvancedSettings
+slug: /kibana-dev-docs/tutorials/advanced-settings
+title: Kibana advanced settings tutorial
+summary: How to use advanced settings in Kibana
+date: 2021-03-25
+tags: ['kibana', 'feature flag', 'dev', 'tutorials', 'advanced settings']
+---
+
+Kibana's advanced settings can be used to provide space or instance-specific
+settings to users, which can be useful for things like feature flags or other
+user preferences.
+
+Advanced settings are stored in saved objects. To access the settings for your
+current space go to _Stack Management > Advanced Settings_. The settings here
+are grouped by category and can be modified.
+
+Modifying the setting in the UI makes it applicable for the current space. If you
+want the setting to be used for all spaces you can override it in kibana.yml. For example:
+
+```yaml
+uiSettings.overrides['theme:darkMode']: false
+```
+
+You can add settings to your Kibana plugin to make them show up in Advanced Settings and
+consume the settings on the server or client.
+
+## Using an existing setting
+
+Before we create our own, let's see how we can use an existing setting in our app.
+
+For example, if we look in Advanced Settings under General we have `theme:darkMode`.
+Let's say I want to access the value of this setting on the server:
+
+```ts
+const darkMode = await core.context.uiSettings.client.get('theme:darkMode');
+```
+
+You can access these values in the setup lifecycle method or in request handlers.
+
+In a client-side React app we can use the `useUiSetting` hook from kibana_react:
+
+```ts
+const defaultValue = false;
+const darkMode = useUiSetting<boolean>('theme:darkMode', defaultValue);
+```
+
+`defaultValue` is optional. The `<boolean>` type parameter can be used to indicate
+the expected type of the result.
+
+In order for this hook to work it must be used in a component that is a child of
+a `KibanaContextProvider` from kibana_react. This provider can take `CoreStart` (which includes
+`core.uiSettings`) and plugins as its `services` prop. Most existing plugins have
+this set up already.
+
+## Creating a new setting
+
+Settings need to be registered in order to show up in Stack Management.
+Additional changes need to be made to ensure telemetry for the setting exists.
+
+Let's say we want to register a new setting in the Observability plugin. We'll
+call it `observability:enableAlertingExperience`. (This is a simplified version of
+changes included in elastic/kibana#93365)
+
+In the `setup` method of the server plugin we can register settings:
+
+```ts
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+// ...
+core.uiSettings.register({
+  'observability:enableAlertingExperience': {
+    category: ['observability'],
+    name: i18n.translate('xpack.observability.enableAlertingExperienceExperimentName', {
+      defaultMessage: 'Observability alerting experience',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.enableAlertingExperienceExperimentDescription',
+      {
+        defaultMessage:
+          'Enable the experimental alerting experience for Observability. Adds the Alerts and Cases pages.',
+      }
+    ),
+    schema: schema.boolean(),
+  },
+});
+```
+
+An object needs to be added to src/plugins/kibana_usage_collection/server/collectors/management/schema.ts
+to make sure it's registered in the usage collection schema:
+
+```ts
+'observability:enableAlertingExperience': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+```
+
+It also should be added to src/plugins/kibana_usage_collection/server/collectors/management/types.ts:
+
+```
+'observability:enableAlertingExperience': boolean;
+```
+
+After these have been added, running `node scripts/telemetry_check --fix` will make
+the necessary changes in the telemetry plugin.
+
+When these changes are merged and the telemetry cluster is updated, you'll be able
+to see usage of the setting under `stack_stats.kibana.plugins.stack_management.observability:enableAlertingExperience`.
+
+With all of this complete, you now have an advanced setting that can be updated by users and read from your app.
