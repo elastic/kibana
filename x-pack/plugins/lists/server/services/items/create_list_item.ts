@@ -6,7 +6,6 @@
  */
 
 import uuid from 'uuid';
-import { CreateDocumentResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
 
 import {
@@ -69,7 +68,7 @@ export const createListItem = async ({
       ...baseBody,
       ...elasticQuery,
     };
-    const { body: response } = await esClient.index<CreateDocumentResponse>({
+    const { body: response } = await esClient.index({
       body,
       id,
       index: listItemIndex,
