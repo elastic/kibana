@@ -177,7 +177,7 @@ function applyCustomESRules(item: any, legacyDoc: any, mbDoc: any) {
   if (legacyDoc.type === 'cluster_stats') {
     set(
       mbDoc,
-      'elasticsearch.cluster.stats.indices.docs.count',
+      'elasticsearch.cluster.stats.indices.docs.total',
       legacyDoc.cluster_stats.indices.docs.count
     );
     set(

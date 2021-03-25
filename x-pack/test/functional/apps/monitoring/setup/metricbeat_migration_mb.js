@@ -14,12 +14,12 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'console']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/74327
-  describe.skip('Setup mode metricbeat migration', function () {
+  describe.skip('Setup mode metricbeat migration mb', function () {
     describe('setup mode btn', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/setup/collection/es_and_kibana', {
+        await setup('monitoring/setup/collection/es_and_kibana_mb', {
           from: 'Apr 9, 2019 @ 00:00:00.741',
           to: 'Apr 9, 2019 @ 23:59:59.741',
           useSuperUser: true,
