@@ -17,31 +17,6 @@ If your problem isn’t described here, please review open issues in the followi
 Have a question? Contact us in the https://discuss.elastic.co/[discuss forum].
 
 [float]
-[[task-manager-cannot-operate-when-inline-scripts-are-disabled]]
-==== Task manager cannot operate when inline scripts are disabled in Elasticsearch
-
-*Problem*:
-
-Tasks are not scheduled and Server log contains the error messages:
-
-[source, txt]
---------------------------------------------------
-[warning][plugins][taskManager] Task Manager cannot operate when inline scripts are disabled in Elasticsearch
---------------------------------------------------
-
-*Solution*:
-
-The scripts are a hard requirement for Task Manager to function.
-To enable scripts, specify:
-
-[source,yaml]
-----
-script.allowed_types: both <1>
-----
-<1> To see the configuration details for Elasticsearch scripts check https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting-security.html#allowed-script-types-setting[Elasticsearch documentation].
-
-
-[float]
 [[task-manager-health-scheduled-tasks-small-schedule-interval-run-late]]
 ==== Tasks with small schedule intervals run late
 
@@ -731,3 +706,21 @@ These rough calculations give you a lower bound to the required throughput, whic
 Given these inferred attributes, it would be safe to assume that a single {kib} instance with default settings **would not** provide the required throughput. It is possible that scaling horizontally by adding a couple more {kib} instances will.
 
 For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
+
+[float]
+[[task-manager-cannot-operate-when-inline-scripts-are-disabled]]
+==== Inline scripts are disabled in {es}
+
+*Problem*:
+
+Tasks are not running, and the server logs contain the following error message:
+
+[source, txt]
+--------------------------------------------------
+[warning][plugins][taskManager] Task Manager cannot operate when inline scripts are disabled in {es}
+--------------------------------------------------
+
+*Solution*:
+
+Inline scripts are a hard requirement for Task Manager to function.
+To enable inline scripting, see the Elasticsearch documentation for {ref}/modules-scripting-security.html#allowed-script-types-setting[configuring allowed script types setting].

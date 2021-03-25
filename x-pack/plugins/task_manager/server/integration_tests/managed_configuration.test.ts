@@ -15,8 +15,6 @@ import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration'
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
 import { coreMock } from '../../../../../src/core/server/mocks';
 import { TaskManagerConfig } from '../config';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 describe('managed configuration', () => {
   let taskManagerStart: TaskManagerStartContract;
@@ -124,7 +122,7 @@ describe('managed configuration', () => {
     esStart
       .createClient('taskManager')
       .asInternalUser.search.mockRejectedValueOnce(
-        elasticsearchClientMock.createErrorTransportRequestPromise(
+        elasticsearchServiceMock.createErrorTransportRequestPromise(
           new Error('cannot execute [inline] scripts" error')
         )
       );
@@ -147,7 +145,7 @@ describe('managed configuration', () => {
     esStart
       .createClient('taskManager')
       .asInternalUser.search.mockRejectedValueOnce(
-        elasticsearchClientMock.createErrorTransportRequestPromise(
+        elasticsearchServiceMock.createErrorTransportRequestPromise(
           new Error('cannot execute [inline] scripts" error')
         )
       );
