@@ -160,7 +160,9 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           aggFieldPairList,
           jobCreator.splitField,
           cs.intervalMs,
-          jobCreator.runtimeMappings
+          jobCreator.runtimeMappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+          jobCreator.datafeedConfig.indices_options
         );
 
         setLineChartsData(resp);
@@ -180,7 +182,12 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
           (async (index: number, field: Field) => {
             return {
               index,
-              fields: await chartLoader.loadFieldExampleValues(field, jobCreator.runtimeMappings),
+              fields: await chartLoader.loadFieldExampleValues(
+                field,
+                jobCreator.runtimeMappings,
+                // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+                jobCreator.datafeedConfig.indices_options
+              ),
             };
           })(i, af.by.field)
         );

@@ -5,27 +5,32 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
 import { getTotalCountInUse } from './alerts_telemetry';
 
 describe('alerts telemetry', () => {
   test('getTotalCountInUse should replace first "." symbol to "__" in alert types names', async () => {
-    const mockEsClient = jest.fn();
-    mockEsClient.mockReturnValue({
-      aggregations: {
-        byAlertTypeId: {
-          value: {
-            types: { '.index-threshold': 2, 'logs.alert.document.count': 1, 'document.test.': 1 },
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        aggregations: {
+          byAlertTypeId: {
+            value: {
+              types: { '.index-threshold': 2, 'logs.alert.document.count': 1, 'document.test.': 1 },
+            },
           },
         },
-      },
-      hits: {
-        hits: [],
-      },
-    });
+        hits: {
+          hits: [],
+        },
+      })
+    );
 
     const telemetry = await getTotalCountInUse(mockEsClient, 'test');
 
-    expect(mockEsClient).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
     expect(telemetry).toMatchInlineSnapshot(`
 Object {

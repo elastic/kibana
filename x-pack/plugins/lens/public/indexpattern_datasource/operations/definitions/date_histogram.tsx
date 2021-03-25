@@ -355,7 +355,11 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     <HelpPopover
       anchorPosition="upCenter"
       button={
-        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+        <HelpPopoverButton
+          onClick={() => {
+            setIsPopoverOpen(!isPopoverOpen);
+          }}
+        >
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
             defaultMessage: 'How it works',
           })}

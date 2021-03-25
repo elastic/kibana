@@ -132,7 +132,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
     }
   }
 
-  await services.scopedClusterClient.index({
+  await services.scopedClusterClient.asCurrentUser.index({
     index: params.index,
     refresh: 'wait_for',
     body: {
@@ -212,7 +212,7 @@ function getNeverFiringAlertType() {
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     async executor({ services, params, state }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.asCurrentUser.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -252,7 +252,7 @@ function getFailingAlertType() {
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     async executor({ services, params, state }) {
-      await services.callCluster('index', {
+      await services.scopedClusterClient.asCurrentUser.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -269,7 +269,6 @@ function getFailingAlertType() {
 }
 
 function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
-  const clusterClient = core.elasticsearch.legacy.client;
   const paramsSchema = schema.object({
     callClusterAuthorizationIndex: schema.string(),
     savedObjectsClientType: schema.string(),
@@ -298,7 +297,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
       let callClusterSuccess = false;
       let callClusterError;
       try {
-        await services.callCluster('index', {
+        await services.scopedClusterClient.asCurrentUser.index({
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {
@@ -310,11 +309,11 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
         callClusterError = e;
       }
       // Call scoped cluster
-      const scopedClusterClient = services.getLegacyScopedClusterClient(clusterClient);
+      const scopedClusterClient = services.scopedClusterClient;
       let callScopedClusterSuccess = false;
       let callScopedClusterError;
       try {
-        await scopedClusterClient.callAsCurrentUser('index', {
+        await scopedClusterClient.asCurrentUser.index({
           index: params.callClusterAuthorizationIndex,
           refresh: 'wait_for',
           body: {
@@ -338,7 +337,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
         savedObjectsClientError = e;
       }
       // Save the result
-      await services.callCluster('index', {
+      await services.scopedClusterClient.asCurrentUser.index({
         index: params.index,
         refresh: 'wait_for',
         body: {
@@ -417,7 +416,7 @@ function getPatternFiringAlertType() {
       }
 
       if (params.reference) {
-        await services.scopedClusterClient.index({
+        await services.scopedClusterClient.asCurrentUser.index({
           index: ES_TEST_INDEX_NAME,
           refresh: 'wait_for',
           body: {
