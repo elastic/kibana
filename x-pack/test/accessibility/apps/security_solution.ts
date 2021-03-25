@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, detections } = getPageObjects(['common', 'detections']);
   const security = getService('security');
   const toasts = getService('toasts');
+  const testSubjects = getService('testSubjects');
 
   describe('Security Solution', () => {
     before(async () => {
@@ -33,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           describe('Define Step', () => {
             it('default view meets a11y requirements', async () => {
               await toasts.dismissAllToasts();
+              await testSubjects.click('customRuleType');
               await a11y.testAppSnapshot();
             });
 
