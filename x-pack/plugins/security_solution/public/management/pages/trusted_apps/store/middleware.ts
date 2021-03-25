@@ -46,6 +46,7 @@ import {
   getLastLoadedListResourceState,
   getCurrentLocationPageIndex,
   getCurrentLocationPageSize,
+  getCurrentLocationFilter,
   needsRefreshOfListData,
   getCreationSubmissionResourceState,
   getCreationDialogFormEntry,
@@ -90,9 +91,12 @@ const refreshListIfNeeded = async (
     try {
       const pageIndex = getCurrentLocationPageIndex(store.getState());
       const pageSize = getCurrentLocationPageSize(store.getState());
+      const filter = getCurrentLocationFilter(store.getState());
+
       const response = await trustedAppsService.getTrustedAppsList({
         page: pageIndex + 1,
         per_page: pageSize,
+        ...(filter ? { filter } : {}),
       });
 
       store.dispatch(

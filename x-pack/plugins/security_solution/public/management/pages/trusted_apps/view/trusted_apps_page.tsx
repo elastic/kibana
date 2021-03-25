@@ -100,6 +100,7 @@ export const TrustedAppsPage = memo(() => {
           gutterSize="none"
           data-test-subj="trustedAppsListPageContent"
         >
+          <EuiFlexItem>{'Caca de la vaca'}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ControlPanel
               totalItemCount={totalItemsCount}

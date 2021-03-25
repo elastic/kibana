@@ -69,6 +69,10 @@ export const getCurrentLocationPageSize = (state: Immutable<TrustedAppsListPageS
   return state.location.page_size;
 };
 
+export const getCurrentLocationFilter = (state: Immutable<TrustedAppsListPageState>): string => {
+  return state.location.filter;
+};
+
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
   return getLastLoadedResourceState(state.listView.listResourceState)?.data.totalItemsCount || 0;
 };
