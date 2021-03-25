@@ -31,11 +31,14 @@ function canRequire(path) {
   }
 }
 
-const DEV_MODE_SUPPORTED = canRequire('@kbn/cli-dev-mode');
+const DEV_MODE_PATH = '@kbn/cli-dev-mode';
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
 const getBootstrapScript = (isDev) => {
   if (DEV_MODE_SUPPORTED && isDev && process.env.isDevCliChild !== 'true') {
-    const { bootstrapDevMode } = require('@kbn/cli-dev-mode');
+    // need dynamic require to exclude it from production build
+    // eslint-disable-next-line import/no-dynamic-require
+    const { bootstrapDevMode } = require(DEV_MODE_PATH);
     return bootstrapDevMode;
   } else {
     const { bootstrap } = require('../../core/server');
