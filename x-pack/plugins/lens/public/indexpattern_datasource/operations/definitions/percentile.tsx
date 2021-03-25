@@ -102,7 +102,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       enabled: true,
       schema: 'metric',
       field: column.sourceField,
-      percents: [60, column.params.percentile],
+      percents: [column.params.percentile],
     }).toAst();
   },
   getEsAggsSuffix: (column) => {

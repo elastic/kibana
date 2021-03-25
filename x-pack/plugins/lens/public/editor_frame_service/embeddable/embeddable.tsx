@@ -45,9 +45,6 @@ import {
   isLensBrushEvent,
   isLensFilterEvent,
   isLensTableRowContextMenuClickEvent,
-  LensBrushEvent,
-  LensFilterEvent,
-  LensTableRowContextMenuEvent,
 } from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
@@ -66,10 +63,6 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
-  onBrushEnd?: (data: LensBrushEvent['data']) => void;
-  onLoad?: (isLoading: boolean) => void;
-  onFilter?: (data: LensFilterEvent['data']) => void;
-  onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
 export type LensByValueInput = {
@@ -275,10 +268,6 @@ export class Embeddable
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => {
     this.activeData = inspectorAdapters;
-    if (this.input.onLoad) {
-      // once onData$ is get's called from expression renderer, loading becomes false
-      this.input.onLoad(false);
-    }
   };
 
   /**
@@ -290,9 +279,6 @@ export class Embeddable
     this.domNode = domNode;
     if (!this.savedVis || !this.isInitialized) {
       return;
-    }
-    if (this.input.onLoad) {
-      this.input.onLoad(true);
     }
     const input = this.getInput();
     render(
@@ -370,19 +356,12 @@ export class Embeddable
         data: event.data,
         embeddable: this,
       });
-
-      if (this.input.onBrushEnd) {
-        this.input.onBrushEnd(event.data);
-      }
     }
     if (isLensFilterEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: event.data,
         embeddable: this,
       });
-      if (this.input.onFilter) {
-        this.input.onFilter(event.data);
-      }
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
@@ -393,9 +372,6 @@ export class Embeddable
         },
         true
       );
-      if (this.input.onTableRowClick) {
-        this.input.onTableRowClick((event.data as unknown) as LensTableRowContextMenuEvent['data']);
-      }
     }
   };
 
