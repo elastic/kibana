@@ -176,8 +176,8 @@ export async function createAgentActionFromPolicyAction(
 
   const permissions =
     'policy' in newAgentAction.data
-      ? newAgentAction.data.policy.outputPermissions.default
-      : newAgentAction.data.config.outputPermissions.default; // agent <= 7.9
+      ? newAgentAction.data.policy.output_permissions.default
+      : newAgentAction.data.config.output_permissions.default; // agent <= 7.9
 
   // Mutate the policy to set the api token for this agent
   const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, esClient, agent, permissions);
