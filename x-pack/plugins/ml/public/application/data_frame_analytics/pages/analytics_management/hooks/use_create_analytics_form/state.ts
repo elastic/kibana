@@ -97,6 +97,7 @@ export interface State {
     resultsField: undefined | string;
     runtimeMappings: undefined | Record<string, RuntimeField>;
     runtimeMappingsUpdated: boolean;
+    previousRuntimeMapping: undefined | Record<string, RuntimeField>;
     softTreeDepthLimit: undefined | number;
     softTreeDepthTolerance: undefined | number;
     sourceIndex: EsIndexName;
@@ -176,6 +177,7 @@ export const getInitialState = (): State => ({
     resultsField: undefined,
     runtimeMappings: undefined,
     runtimeMappingsUpdated: false,
+    previousRuntimeMapping: undefined,
     softTreeDepthLimit: undefined,
     softTreeDepthTolerance: undefined,
     sourceIndex: '',

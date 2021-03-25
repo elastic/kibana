@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiCallOut,
@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
+import { debounce, cloneDeep } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
@@ -37,7 +37,7 @@ import {
   DEFAULT_MODEL_MEMORY_LIMIT,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { shouldAddAsDepVarOption } from './form_options_validation';
+import { handleExplainErrorMessage, shouldAddAsDepVarOption } from './form_options_validation';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { ANALYTICS_STEPS } from '../../page';
@@ -58,6 +58,14 @@ import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix'
 import { RuntimeMappings } from '../runtime_mappings';
 
 const runtimeMappingKey = 'runtime_mapping';
+const maxRuntimeFieldsDisplayCount = 5;
+const requiredFieldsErrorText = i18n.translate(
+  'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
+  {
+    defaultMessage:
+      'At least one field must be included in the analysis in addition to the dependent variable.',
+  }
+);
 
 function getIndexDataQuery(savedSearchQuery: SavedSearchQuery, jobConfigQuery: any) {
   // Return `undefined` if savedSearchQuery itself is `undefined`, meaning it hasn't been initialized yet.
@@ -67,16 +75,6 @@ function getIndexDataQuery(savedSearchQuery: SavedSearchQuery, jobConfigQuery: a
 
   return savedSearchQuery !== null ? savedSearchQuery : jobConfigQuery;
 }
-
-const requiredFieldsErrorText = i18n.translate(
-  'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
-  {
-    defaultMessage:
-      'At least one field must be included in the analysis in addition to the dependent variable.',
-  }
-);
-
-const maxRuntimeFieldsDisplayCount = 5;
 
 export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
@@ -115,11 +113,21 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     previousJobType,
     requiredFieldsError,
     runtimeMappings,
+    previousRuntimeMapping,
     runtimeMappingsUpdated,
     sourceIndex,
     trainingPercent,
     useEstimatedMml,
   } = form;
+
+  const isJobTypeWithDepVar =
+    jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
+  const dependentVariableEmpty = isJobTypeWithDepVar && dependentVariable === '';
+  const hasBasicRequiredFields = jobType !== undefined;
+  const hasRequiredAnalysisFields =
+    (isJobTypeWithDepVar && dependentVariable !== '') ||
+    jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
+
   const [query, setQuery] = useState<Query>({
     query: jobConfigQueryString ?? '',
     language: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -146,11 +154,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     dataTestSubj: 'mlAnalyticsCreationDataGrid',
     toastNotifications,
   };
-
-  const isJobTypeWithDepVar =
-    jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
-
-  const dependentVariableEmpty = isJobTypeWithDepVar && dependentVariable === '';
 
   const isStepInvalid =
     dependentVariableEmpty ||
@@ -245,40 +248,18 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       }
       setFetchingExplainData(false);
     } else {
-      let maxDistinctValuesErrorMessage;
-      let unsupportedFieldsErrorMessage;
-      if (
-        jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
-      ) {
-        maxDistinctValuesErrorMessage = errorMessage;
-      } else if (
-        errorMessage.includes('status_exception') &&
-        errorMessage.includes('unsupported type')
-      ) {
-        unsupportedFieldsErrorMessage = errorMessage;
-      } else if (
-        errorMessage.includes('status_exception') &&
-        errorMessage.includes('Unable to estimate memory usage as no documents')
-      ) {
-        toastNotifications.addWarning(
-          i18n.translate('xpack.ml.dataframe.analytics.create.allDocsMissingFieldsErrorMessage', {
-            defaultMessage: `Unable to estimate memory usage. There are mapped fields for source index [{index}] that do not exist in any indexed documents. You will have to switch to the JSON editor for explicit field selection and include only fields that exist in indexed documents.`,
-            values: {
-              index: sourceIndex,
-            },
-          })
-        );
-      } else {
-        toastNotifications.addDanger({
-          title: i18n.translate(
-            'xpack.ml.dataframe.analytics.create.unableToFetchExplainDataMessage',
-            {
-              defaultMessage: 'An error occurred fetching analysis fields data.',
-            }
-          ),
-          text: errorMessage,
-        });
+      const {
+        maxDistinctValuesErrorMessage,
+        unsupportedFieldsErrorMessage,
+        toastNotificationDanger,
+        toastNotificationWarning,
+      } = handleExplainErrorMessage(errorMessage, sourceIndex, jobType);
+
+      if (toastNotificationDanger) {
+        toastNotifications.addDanger(toastNotificationDanger);
+      }
+      if (toastNotificationWarning) {
+        toastNotifications.addWarning(toastNotificationWarning);
       }
 
       const fallbackModelMemoryLimit =
@@ -314,50 +295,88 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     }
   }, [jobType]);
 
-  useEffect(() => {
+  const handleRuntimeUpdate = useCallback(async () => {
     if (runtimeMappingsUpdated) {
       let resetDepVar = false;
-      const updatedOptions = dependentVariableOptions.filter((option) => {
+      const filteredOptions = dependentVariableOptions.filter((option) => {
         if (option.label === dependentVariable && option.key?.includes(runtimeMappingKey)) {
           resetDepVar = true;
         }
         return !option.key?.includes(runtimeMappingKey);
       });
-
+      // Runtime mappings have been removed
       if (runtimeMappings === undefined && runtimeMappingsUpdated === true) {
-        // Removed all runtimeFields so remove from depVar options
-        setDependentVariableOptions(updatedOptions);
+        setDependentVariableOptions(filteredOptions);
       } else if (runtimeMappings) {
-        // add to depVarOptions if it's the type supported
+        // add to filteredOptions if it's the type supported
         Object.keys(runtimeMappings).forEach((id) => {
           const field = runtimeMappings[id];
-          // @ts-ignore TODO: fix types here
           if (shouldAddAsDepVarOption(id, field.type, jobType)) {
-            updatedOptions.push({
+            filteredOptions.push({
               label: id,
               key: `runtime_mapping_${id}`,
             });
           }
         });
-        setDependentVariableOptions(updatedOptions);
+        setDependentVariableOptions(filteredOptions);
       }
 
       if (resetDepVar) {
+        setIncludesTableItems([]);
         setFormState({
           dependentVariable: '',
-          includes: includes.filter((field) => field !== dependentVariable),
+          includes: includes.filter((field) => {
+            const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
+            return field !== dependentVariable || !isRemovedRuntimeField;
+          }),
         });
+      } else if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
+        const formCopy = cloneDeep(form);
+        const filteredIncludes = includes.filter((field) => {
+          const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
+          return !isRemovedRuntimeField;
+        });
+        formCopy.includes = filteredIncludes;
+        const { success, fieldSelection, errorMessage } = await fetchExplainData(formCopy);
+        if (success) {
+          // update the field selection table
+          const hasRequiredFields = fieldSelection.some(
+            (field) => field.is_included === true && field.is_required === false
+          );
+          setIncludesTableItems(fieldSelection);
+          setMaxDistinctValuesError(undefined);
+          setUnsupportedFieldsError(undefined);
+          setFormState({
+            includes: filteredIncludes,
+            requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
+          });
+        } else {
+          const {
+            maxDistinctValuesErrorMessage,
+            unsupportedFieldsErrorMessage,
+            toastNotificationDanger,
+            toastNotificationWarning,
+          } = handleExplainErrorMessage(errorMessage, sourceIndex, jobType);
+
+          if (toastNotificationDanger) {
+            toastNotifications.addDanger(toastNotificationDanger);
+          }
+          if (toastNotificationWarning) {
+            toastNotifications.addWarning(toastNotificationWarning);
+          }
+
+          setMaxDistinctValuesError(maxDistinctValuesErrorMessage);
+          setUnsupportedFieldsError(unsupportedFieldsErrorMessage);
+        }
       }
     }
   }, [JSON.stringify(runtimeMappings)]);
 
   useEffect(() => {
-    const hasBasicRequiredFields = jobType !== undefined;
+    handleRuntimeUpdate();
+  }, [JSON.stringify(runtimeMappings)]);
 
-    const hasRequiredAnalysisFields =
-      (isJobTypeWithDepVar && dependentVariable !== '') ||
-      jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION;
-
+  useEffect(() => {
     if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
       debouncedGetExplainData();
     }
@@ -365,7 +384,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     return () => {
       debouncedGetExplainData.cancel();
     };
-  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]); // JSON.stringify(runtimeMappings),
+  }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
   const unsupportedRuntimeFields = useMemo(
     () =>

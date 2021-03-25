@@ -59,7 +59,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   const [advancedEditorRuntimeMappings, setAdvancedEditorRuntimeMappings] = useState<string>();
 
   const { setFormState } = actions;
-  const { jobType, runtimeMappings } = state.form;
+  const { jobType, previousRuntimeMapping, runtimeMappings } = state.form;
 
   const {
     convertToJson,
@@ -75,9 +75,14 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     const prettySourceConfig = removeRuntimeMappings
       ? ''
       : JSON.stringify(parsedRuntimeMappings, null, 2);
+    const previous =
+      previousRuntimeMapping === undefined && runtimeMappings === undefined
+        ? parsedRuntimeMappings
+        : runtimeMappings;
     setFormState({
       runtimeMappings: parsedRuntimeMappings,
       runtimeMappingsUpdated: true,
+      previousRuntimeMapping: previous,
     });
     setAdvancedEditorRuntimeMappings(prettySourceConfig);
     setAdvancedEditorRuntimeMappingsLastApplied(prettySourceConfig);
