@@ -1,5 +1,10 @@
 [[http-service]]
 == HTTP service
+
+NOTE: The HTTP service is available both server and client side.
+
+=== Server side usage
+
 Allows plugins:
 
 * to extend the {kib} server with custom HTTP API.
@@ -40,3 +45,21 @@ export class MyPlugin implements Plugin {
   }
 }
 ----
+
+=== Client side usage
+
+The HTTP service is also offered on the client side and provides an API to communicate with the {kib} server via HTTP interface. Feel free to use another HTTP client library to request 3rd party services.
+
+[source,typescript]
+----
+import { CoreStart } from 'kibana/public';
+interface ResponseType {…};
+interface MyPluginData {…};
+async function fetchData<ResponseType>(core: CoreStart) {
+  return await core.http.get<MyPluginData>(
+    '/api/my_plugin/',
+    { query: … },
+  ); 
+}
+----
+See {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.httpsetup.md[for all available API].

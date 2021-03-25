@@ -4,6 +4,8 @@
 adjustable runtime behavior for their plugins.
 Plugins can only read their own configuration values, it is not possible to access the configuration values from {kib} Core or other plugins directly.
 
+NOTE: The Configuration service is only available server side.
+
 [source,js]
 ----
 // in Legacy platform

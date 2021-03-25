@@ -2,6 +2,8 @@
 == Logging service
 Allows a plugin to provide status and diagnostic information.
 
+NOTE: The Logging service is only available server side. 
+
 [source,typescript]
 ----
 import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from 'kibana/server';

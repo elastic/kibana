@@ -1,12 +1,16 @@
 [[ui-settings-service]]
 == UI settings service
+
+NOTE: The UI settings service is available both server and client side.
+
+=== Server side usage
+
 The program interface to <<advanced-options, UI settings>>.
 It makes it possible for Kibana plugins to extend Kibana UI Settings Management with custom settings.
 
 See:
 
 - {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.register.md[UI settings service Setup API docs]
-- {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicestart.register.md[UI settings service Start API docs]
 
 [source,typescript]
 ----
