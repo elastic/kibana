@@ -77,11 +77,11 @@ function createMaxWorkersScan(logger: Logger, startingMaxWorkers: number) {
     }
     if (newMaxWorkers !== previousMaxWorkers) {
       logger.debug(
-        `Max workers configuration changing from ${previousMaxWorkers} to ${newMaxWorkers} after seeing ${errorCount} error(s)`
+        `Max workers configuration changing from ${previousMaxWorkers} to ${newMaxWorkers} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
       );
       if (previousMaxWorkers === startingMaxWorkers) {
         logger.warn(
-          `Max workers configuration is temporarily reduced after Elasticsearch returned ${errorCount} error(s).`
+          `Max workers configuration is temporarily reduced after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
         );
       }
     }
@@ -106,11 +106,11 @@ function createPollIntervalScan(logger: Logger, startingPollInterval: number) {
     }
     if (newPollInterval !== previousPollInterval) {
       logger.debug(
-        `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${errorCount} error(s)`
+        `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s)`
       );
       if (previousPollInterval === startingPollInterval) {
         logger.warn(
-          `Poll interval configuration is temporarily increased after Elasticsearch returned ${errorCount} error(s).`
+          `Poll interval configuration is temporarily increased after Elasticsearch returned ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
         );
       }
     }
