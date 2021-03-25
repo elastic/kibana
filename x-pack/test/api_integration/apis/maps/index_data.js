@@ -11,12 +11,12 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('index feature data', () => {
-    it('should add data to an existing index', async () => {
+    it('should add point data to an existing index', async () => {
       await supertest
         .post(`/api/maps/docSource`)
         .set('kbn-xsrf', 'kibana')
         .send({
-          index: 'new-feature-index',
+          index: 'new-point-feature-index',
           mappings: { properties: { coordinates: { type: 'geo_point' } } },
         });
 
@@ -24,8 +24,42 @@ export default function ({ getService }) {
         .post(`/api/maps/feature`)
         .set('kbn-xsrf', 'kibana')
         .send({
-          index: 'new-feature-index',
+          index: 'new-point-feature-index',
           data: { coordinates: [125.6, 10.1], name: 'Dinagat Islands' },
+        })
+        .expect(200);
+
+      expect(resp.body.success).to.be(true);
+    });
+
+    it('should add shape data to an existing index', async () => {
+      await supertest
+        .post(`/api/maps/docSource`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          index: 'new-shape-feature-index',
+          mappings: { properties: { coordinates: { type: 'geo_shape' } } },
+        });
+
+      const resp = await supertest
+        .post(`/api/maps/feature`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          index: 'new-shape-feature-index',
+          data: {
+            coordinates: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [-20.91796875, 25.64152637306577],
+                  [-13.0517578125, 25.64152637306577],
+                  [-13.0517578125, 31.203404950917395],
+                  [-20.91796875, 31.203404950917395],
+                  [-20.91796875, 25.64152637306577],
+                ],
+              ],
+            },
+          },
         })
         .expect(200);
 
