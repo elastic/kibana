@@ -40,6 +40,6 @@ export const ContentSection: React.FC<ContentSectionProps> = ({
       </>
     )}
     {children}
-    <EuiSpacer size={'l'} />
+    <EuiSpacer />
   </div>
 );
