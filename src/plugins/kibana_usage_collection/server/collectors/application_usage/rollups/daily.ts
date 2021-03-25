@@ -34,9 +34,12 @@ type ApplicationUsageDailyWithVersion = Pick<
  * @param logger
  * @param savedObjectsClient
  */
-export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedObjectsRepository) {
+export async function rollDailyData(
+  logger: Logger,
+  savedObjectsClient?: ISavedObjectsRepository
+): Promise<boolean> {
   if (!savedObjectsClient) {
-    return;
+    return false;
   }
 
   try {
@@ -98,9 +101,11 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
         }
       }
     } while (toCreate.size > 0);
+    return true;
   } catch (err) {
     logger.debug(`Failed to rollup transactional to daily entries`);
     logger.debug(err);
+    return false;
   }
 }
 
