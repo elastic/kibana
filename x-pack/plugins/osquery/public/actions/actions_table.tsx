@@ -28,7 +28,7 @@ const ActionsTableComponent = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
-  const { isLoading, data: actionsData } = useAllActions({
+  const { data: actionsData } = useAllActions({
     activePage: pageIndex,
     limit: pageSize,
     direction: Direction.desc,

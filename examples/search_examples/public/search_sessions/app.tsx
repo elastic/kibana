@@ -702,13 +702,15 @@ function doSearch(
   const startTs = performance.now();
 
   // Submit the search request using the `data.search` service.
+  // @ts-expect-error request.params is incompatible. Filter is not assignable to QueryContainer
   return data.search
     .search(req, { sessionId })
     .pipe(
       tap((res) => {
         if (isCompleteResponse(res)) {
           const avgResult: number | undefined = res.rawResponse.aggregations
-            ? res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
+            ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+              res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
             : undefined;
           const message = (
             <EuiText>

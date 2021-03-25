@@ -11,7 +11,6 @@ import {
   EuiDataGridProps,
   EuiDataGridColumn,
   EuiDataGridSorting,
-  EuiHealth,
   EuiIcon,
   EuiLink,
   EuiLoadingContent,
@@ -132,7 +131,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const { data: allResultsData } = useAllResults({
           actionId,
-          agentId: value.fields.agent_id[0],
+          agentId: value.fields?.agent_id[0],
           activePage: pagination.pageIndex,
           limit: pagination.pageSize,
           direction: Direction.asc,

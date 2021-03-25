@@ -25,7 +25,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
   const { getUrlForApp } = useKibana().services.application;
 
   const getFleetAppUrl = useCallback(
-    (agentId) => getUrlForApp('fleet', { path: `#/fleet/agents/${agentId}` }),
+    (fleetAgentId) => getUrlForApp('fleet', { path: `#/fleet/agents/${fleetAgentId}` }),
     [getUrlForApp]
   );
 

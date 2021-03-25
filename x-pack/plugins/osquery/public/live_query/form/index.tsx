@@ -66,7 +66,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const [{ agents, query }] = useFormData({ form, watch: ['agents', 'query'] });
 
-  const agentSelected = useMemo(() => !!agents?.agents?.length, [agents]);
+  const agentSelected = useMemo(() => !!agents?.length, [agents]);
 
   const queryValueProvided = useMemo(() => !!query?.query?.length, [query]);
 

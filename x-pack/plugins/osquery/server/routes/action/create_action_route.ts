@@ -21,16 +21,14 @@ export const createActionRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const savedObjectsClient = context.core.savedObjects.client;
-      const { query, actions } = await createActionHandler(
+      const { response: actionResponse, actions } = await createActionHandler(
         esClient,
-        savedObjectsClient,
         request.body
       );
 
       return response.ok({
         body: {
-          response: query,
+          response: actionResponse,
           actions,
         },
       });
