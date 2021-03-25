@@ -224,49 +224,40 @@ as they are implemented in different locations, they are disjointed&mdash;we can
 create a short URL using an URL generator.
 
 
----
-
 # Detailed design
 
-This is the bulk of the RFC. Explain the design in enough detail for somebody
-familiar with Kibana to understand, and for somebody familiar with the
-implementation to implement. This should get into specifics and corner-cases,
-and include examples of how the feature is used. Any new terminology should be
-defined here.
+...
+
 
 # Drawbacks
 
-Why should we *not* do this? Please consider:
+Why should we *not* do this?
 
-- implementation cost, both in term of code size and complexity
-- the impact on teaching people Kibana development
-- integration of this feature with other existing and planned features
-- cost of migrating existing Kibana plugins (is it a breaking change?)
-
-There are tradeoffs to choosing any path. Attempt to identify them here.
+- Implementation cost will be few weeks, but the code complexity and quality should improve.
+- Cost of migrating existing Kibana plugins.
 
 # Alternatives
 
-What other designs have been considered? What is the impact of not doing this?
+[What other designs have been considered? What is the impact of not doing this?]
+
 
 # Adoption strategy
 
-If we implement this proposal, how will existing Kibana developers adopt it? Is
-this a breaking change? Can we write a codemod? Should we coordinate with
-other projects or libraries?
+Is this a breaking change? It is a breaking change in the sense that the API will
+change. However, all the existing use cases will be supported. When implementing
+this we will also adjust all Kibana code to use the new API. From the perspective
+of the developers using the existing URL services nothing will change, they will
+simply need to review a PR which stops using the URL Generator Service and uses
+the combined URL Service instead, which will provide a superset of features.
+
+Alternatively, we can deprecate the URL Generator Service and maintain it for
+few minor releases.
+
 
 # How we teach this
 
-What names and terminology work best for these concepts and why? How is this
-idea best presented? As a continuation of existing Kibana patterns?
+For the existing short URL and URL generator functionality there is not much to
+teach, as they will continue working with a largely similar API.
 
-Would the acceptance of this proposal mean the Kibana documentation must be
-re-organized or altered? Does it change how Kibana is taught to new developers
-at any level?
-
-How should this feature be taught to existing Kibana developers?
-
-# Unresolved questions
-
-Optional, but suggested for first drafts. What parts of the design are still
-TBD?
+Everything in the new URL Service will have JSDoc comments and good documentation
+on or website.
