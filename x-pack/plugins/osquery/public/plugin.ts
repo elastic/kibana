@@ -20,7 +20,7 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,
-  SetupPlugins,
+  // SetupPlugins,
   StartPlugins,
   AppPluginStartDependencies,
 } from './types';
@@ -55,7 +55,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
+  public setup(core: CoreSetup): OsqueryPluginSetup {
     const config = this.initializerContext.config.get<{
       enabled: boolean;
       actionEnabled: boolean;

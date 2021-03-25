@@ -21,22 +21,28 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
   ({ onChange, newPolicy }) => {
     const [files, setFiles] = useState({});
 
+    // @ts-expect-error update types
     let fileReader;
 
+    // @ts-expect-error update types
     const handleFileRead = (e) => {
+      // @ts-expect-error update types
       const content = fileReader.result;
 
+      // @ts-expect-error update types
       let queriesJSON;
 
       try {
         queriesJSON = JSON.parse(content);
-      } catch (e) {}
+        // eslint-disable-next-line no-empty
+      } catch (error) {}
 
       if (!queriesJSON?.queries) {
         return;
       }
 
       const updatedPolicy = produce(newPolicy, (draft) => {
+        // @ts-expect-error update types
         draft.inputs[0].streams = map(queriesJSON?.queries, (queryConfig, queryName) => ({
           data_stream: {
             type: 'logs',
@@ -66,6 +72,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
       });
     };
 
+    // @ts-expect-error update types
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const handleFileChosen = (file) => {
       fileReader = new FileReader();
@@ -74,9 +81,9 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
     };
 
     const handleInputChange = useCallback(
-      (files) => {
-        handleFileChosen(files[0]);
-        setFiles(files);
+      (inputFiles) => {
+        handleFileChosen(inputFiles[0]);
+        setFiles(inputFiles);
       },
       [handleFileChosen]
     );

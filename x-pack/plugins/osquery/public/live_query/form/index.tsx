@@ -27,12 +27,19 @@ interface LiveQueryFormProps {
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   defaultValue,
-  onSubmit,
+  // onSubmit,
   onSuccess,
 }) => {
   const { http } = useKibana().services;
 
-  const { data, isLoading, mutateAsync, isError, isSuccess, error } = useMutation(
+  const {
+    data,
+    isLoading,
+    mutateAsync,
+    isError,
+    isSuccess,
+    // error
+  } = useMutation(
     (payload: Record<string, unknown>) =>
       http.post('/internal/osquery/action', {
         body: JSON.stringify(payload),
@@ -131,12 +138,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           defaultMessage: 'Check results',
         }),
         children: actionId ? (
-          <ResultTabs actionId={actionId} agentsCount={agentSelected} isLive={true} />
+          <ResultTabs actionId={actionId} agentsCount={agents?.length} isLive={true} />
         ) : null,
         status: resultsStatus,
       },
     ],
-    [actionId, agentSelected, queryStatus, resultsStatus, submit, submitQueryStatus]
+    [actionId, agentSelected, agents?.length, queryStatus, resultsStatus, submit, submitQueryStatus]
   );
 
   return (

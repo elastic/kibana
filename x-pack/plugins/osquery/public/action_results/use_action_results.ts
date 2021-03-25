@@ -85,7 +85,9 @@ export const useActionResults = ({
         ...responseData,
         aggregations: {
           totalResponded,
+          // @ts-expect-error update types
           successful: aggsBuckets.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
+          // @ts-expect-error update types
           failed: aggsBuckets.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
         },
         inspect: getInspectResponse(responseData, {} as InspectResponse),

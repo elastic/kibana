@@ -79,7 +79,6 @@ export const useAllResults = ({
 
       return {
         ...responseData,
-        results: responseData.edges,
         inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },

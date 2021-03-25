@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCard,
-  EuiText,
   EuiTextColor,
   EuiSpacer,
   EuiDescriptionList,
@@ -19,7 +18,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { useActionResults } from './use_action_results';
-import { Direction, ResultEdges } from '../../common/search_strategy';
+import { Direction } from '../../common/search_strategy';
 
 interface ActionResultsSummaryProps {
   actionId: string;

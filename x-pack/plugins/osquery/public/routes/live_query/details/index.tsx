@@ -49,15 +49,6 @@ const LiveQueryDetailsPageComponent = () => {
     sortField: '@timestamp',
   });
 
-  const agentsFailedCount = useMemo(
-    () =>
-      actionResultsData?.rawResponse?.aggregations?.responses?.buckets?.find(
-        // @ts-expect-error update types
-        (bucket) => bucket.key === 'error'
-      )?.doc_count ?? 0,
-    [actionResultsData?.rawResponse?.aggregations?.responses?.buckets]
-  );
-
   const LeftColumn = useMemo(
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
@@ -130,13 +121,13 @@ const LiveQueryDetailsPageComponent = () => {
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              <EuiTextColor color={agentsFailedCount ? 'danger' : 'default'}>
-                {agentsFailedCount}
+              <EuiTextColor color={actionResultsData?.aggregations.failed ? 'danger' : 'default'}>
+                {actionResultsData?.aggregations.failed}
               </EuiTextColor>
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} key="agents_count_divider">
+        <EuiFlexItem grow={false} key="agents_failed_count_divider">
           <Divider />
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="actions_menu">
@@ -144,7 +135,7 @@ const LiveQueryDetailsPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [actionId, agentsFailedCount, data?.actionDetails?.fields?.agents?.length]
+    [actionId, actionResultsData?.aggregations.failed, data?.actionDetails?.fields?.agents?.length]
   );
 
   return (

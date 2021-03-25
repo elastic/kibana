@@ -53,7 +53,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
-  const { data: allResultsData = [] } = useAllResults({
+  const { data: allResultsData } = useAllResults({
     actionId,
     agentId,
     activePage: pagination.pageIndex,
@@ -74,9 +74,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
+      // @ts-expect-error update types
       const value = data[rowIndex % pagination.pageSize]?.fields[columnId];
 
       if (columnId === 'agent.name') {
+        // @ts-expect-error update types
         const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
 
         return (
@@ -106,12 +108,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   useEffect(() => {
-    // @ts-expect-error update types
-    if (!allResultsData?.results) {
+    if (!allResultsData?.edges) {
       return;
     }
-    // @ts-expect-error update types
-    const newColumns = keys(allResultsData?.results[0]?.fields)
+
+    const newColumns = keys(allResultsData?.edges[0]?.fields)
       .sort()
       .reduce((acc, fieldName) => {
         if (fieldName === 'agent.name') {
@@ -143,17 +144,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       setColumns(newColumns);
       setVisibleColumns(map('id', newColumns));
     }
-    // @ts-expect-error update types
-  }, [columns, allResultsData?.results]);
+  }, [columns, allResultsData?.edges]);
 
   return (
     // @ts-expect-error update types
-    <DataContext.Provider value={allResultsData?.results}>
+    <DataContext.Provider value={allResultsData?.edges}>
       <EuiDataGrid
         aria-label="Osquery results"
         columns={columns}
         columnVisibility={columnVisibility}
-        // @ts-expect-error update types
         rowCount={allResultsData?.totalCount ?? 0}
         renderCellValue={renderCellValue}
         sorting={tableSorting}
