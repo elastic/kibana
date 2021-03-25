@@ -59,7 +59,7 @@ export function getServicesFromMetricDocuments({
               },
               latest: {
                 top_metrics: {
-                  metrics: { field: AGENT_NAME } as const,
+                  metrics: [{ field: AGENT_NAME } as const],
                   sort: { '@timestamp': 'desc' },
                 },
               },

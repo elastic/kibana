@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { ExpressionTypeDefinition } from '../../../../expressions/common';
 
 const name = 'es_raw_response';
 
 export interface EsRawResponse<T = unknown> {
   type: typeof name;
-  body: SearchResponse<T>;
+  body: estypes.SearchResponse<T>;
 }
 
 // flattens elasticsearch object into table rows
@@ -46,11 +46,11 @@ function flatten(obj: any, keyPrefix = '') {
   }
 }
 
-const parseRawDocs = (hits: SearchResponse<unknown>['hits']) => {
+const parseRawDocs = (hits: estypes.SearchResponse<unknown>['hits']) => {
   return hits.hits.map((hit) => hit.fields || hit._source).filter((hit) => hit);
 };
 
-const convertResult = (body: SearchResponse<unknown>) => {
+const convertResult = (body: estypes.SearchResponse<unknown>) => {
   return !body.aggregations ? parseRawDocs(body.hits) : flatten(body.aggregations);
 };
 

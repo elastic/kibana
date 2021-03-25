@@ -9,7 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSourceConfiguration } from '../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useTrackPageview } from '../../../../../observability/public';
 import { DocumentTitle } from '../../../components/document_title';
 import { NoData } from '../../../components/empty_states';
@@ -19,7 +19,7 @@ import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 
 interface MetricsExplorerPageProps {
-  source: InfraSourceConfiguration;
+  source: MetricsSourceConfigurationProperties;
   derivedIndexPattern: IIndexPattern;
 }
 
