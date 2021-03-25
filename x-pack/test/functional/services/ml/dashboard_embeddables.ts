@@ -80,16 +80,6 @@ export function MachineLearningDashboardEmbeddablesProvider(
       });
     },
 
-    async getDashboardPanelIdByTitle(title: string) {
-      await this.assertDashboardPanelExists(title);
-
-      await retry.tryForTime(5000, async () => {
-        const panelTitleEl = await find.byLinkText(title);
-        const panel = await panelTitleEl.findByXpath('.//div[@class="euiPanel"]/*');
-        return await panel.getAttribute('data-test-embeddable-id');
-      });
-    },
-
     async assertAnomalyChartsSeverityThresholdControlExists() {
       await testSubjects.existOrFail(`mlAnomalySeverityThresholdControls`);
     },

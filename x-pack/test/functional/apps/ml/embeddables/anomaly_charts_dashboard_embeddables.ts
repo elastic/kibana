@@ -28,7 +28,7 @@ const JOB_CONFIG: Job = {
 };
 
 const DATAFEED_CONFIG: Datafeed = {
-  datafeed_id: 'datafeed-fq_multi_1_se',
+  datafeed_id: 'datafeed-fq_multi_1_ae',
   indices: ['ft_farequote'],
   job_id: 'fq_multi_1_ae',
   query: { bool: { must: [{ match_all: {} }] } },
@@ -36,7 +36,7 @@ const DATAFEED_CONFIG: Datafeed = {
 
 const testDataList = [
   {
-    suiteSuffix: 'anomaly charts embeddables',
+    suiteSuffix: 'with multi metric job',
     panelTitle: `ML anomaly charts for ${JOB_CONFIG.job_id}`,
     jobConfig: JOB_CONFIG,
     datafeedConfig: DATAFEED_CONFIG,
@@ -55,11 +55,10 @@ const testDataList = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
-  const PageObjects = getPageObjects(['security', 'common', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'dashboard']);
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const { dashboard } = getPageObjects(['dashboard']);
 
-  describe('ml anomaly charts embeddables', function () {
+  describe('anomaly charts', function () {
     this.tags(['mlqa']);
 
     before(async () => {
@@ -84,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('can open job selection flyout', async () => {
-          await dashboard.clickCreateDashboardPrompt();
+          await PageObjects.dashboard.clickCreateDashboardPrompt();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
           await dashboardAddPanel.clickOpenAddPanel();
           await dashboardAddPanel.clickAddNewEmbeddableLink('ml_anomaly_charts');

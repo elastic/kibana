@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
   };
 
   const DATAFEED_CONFIG: Datafeed = {
-    datafeed_id: 'datafeed-fq_multi_1_se',
+    datafeed_id: 'datafeed-fq_multi_1_ae',
     indices: ['ft_farequote'],
     job_id: 'fq_multi_1_ae',
     query: { bool: { must: [{ match_all: {} }] } },

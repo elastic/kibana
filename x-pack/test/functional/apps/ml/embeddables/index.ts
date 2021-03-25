@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('ml embeddables', function () {
+  describe('embeddables', function () {
     this.tags(['skipFirefox']);
     loadTestFile(require.resolve('./anomaly_charts_dashboard_embeddables'));
   });

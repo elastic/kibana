@@ -21,6 +21,12 @@ export function MachineLearningDashboardJobSelectionTableProvider({
       });
     },
 
+    async assertJobSelectionTableNotExists(): Promise<void> {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.missingOrFail('mlCustomSelectionTable');
+      });
+    },
+
     rowSelector(jobId: string, subSelector?: string) {
       const row = `~mlCustomSelectionTable > ~row-${jobId}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
@@ -46,7 +52,7 @@ export function MachineLearningDashboardJobSelectionTableProvider({
       const actualCheckState = await this.getRowCheckboxCheckedState(jobId);
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Apply to all jobs switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        `Table row for job '${jobId}' check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
@@ -69,6 +75,7 @@ export function MachineLearningDashboardJobSelectionTableProvider({
     async applyJobSelection() {
       const subj = 'mlFlyoutJobSelectorButtonApply';
       await testSubjects.clickWhenNotDisabled(subj);
+      await this.assertJobSelectionTableNotExists();
     },
   };
 }
