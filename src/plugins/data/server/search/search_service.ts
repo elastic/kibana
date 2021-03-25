@@ -52,7 +52,6 @@ import {
   ISearchOptions,
   kibana,
   kibanaContext,
-  kibanaContextFunction,
   kibanaTimerangeFunction,
   kibanaFilterFunction,
   kqlFunction,
@@ -75,6 +74,7 @@ import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
 import { DataRequestHandlerContext } from '../types';
+import { getKibanaContext } from './expressions/kibana_context';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -154,7 +154,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
-    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerFunction(getKibanaContext({ getStartServices: core.getStartServices }));
     expressions.registerFunction(fieldFunction);
     expressions.registerFunction(rangeFunction);
     expressions.registerFunction(kibanaFilterFunction);
