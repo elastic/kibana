@@ -102,11 +102,7 @@
   },
   "alerts": {
     "alertsMeta": {
-      "enabled": false
-    },
-    "clusterMeta": {
-      "enabled": false,
-      "message": "Cluster [monitoring] license type [basic] does not support Cluster Alerts"
+      "enabled": true
     },
     "list": {}
   },
@@ -170,11 +166,7 @@
   },
   "alerts": {
     "alertsMeta": {
-      "enabled": false
-    },
-    "clusterMeta": {
-      "enabled": false,
-      "message": "Cluster [] license type [undefined] does not support Cluster Alerts"
+      "enabled": true
     },
     "list": {}
   },
