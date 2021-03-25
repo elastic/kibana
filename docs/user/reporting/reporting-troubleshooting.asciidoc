@@ -1,40 +1,30 @@
 [role="xpack"]
 [[reporting-troubleshooting]]
-== Reporting troubleshooting
+== Sharing troubleshooting
 ++++
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-Having trouble? Here are solutions to common problems you might encounter while using Reporting.
-
-* <<reporting-diagnostics>>
-* <<reporting-troubleshooting-system-dependencies>>
-* <<reporting-troubleshooting-text-incorrect>>
-* <<reporting-troubleshooting-missing-data>>
-* <<reporting-troubleshooting-file-permissions>>
-* <<reporting-troubleshooting-error-messages>>
-* <<reporting-troubleshooting-puppeteer-debug-logs>>
-* <<reporting-troubleshooting-system-requirements>>
-* <<reporting-troubleshooting-arm-systems>>
+Having trouble? Here are solutions to common problems you might encounter.
 
 [float]
 [[reporting-diagnostics]]
-=== Reporting diagnostics
-Reporting comes with a built-in utility to try to automatically find common issues.
-When {kib} is running, navigate to the Report Listing page, and click *Run reporting diagnostics*.
-This will open up a diagnostic tool that checks various parts of the {kib} deployment and
-come up with any relevant recommendations.
+=== Run the reporting diagnostics
+To find recommendations to common issues, use the diagnostic tool to evaluate the {kib} deployment. 
 
+. Open the main menu, then click *Stack Management > Reporting*.
+
+. On the *Reports* page, click *Run reporting diagnostics*.
+ 
 [float]
 [[reporting-troubleshooting-system-dependencies]]
 === System dependencies
-Reporting launches a "headless" web browser called Chromium on the Kibana server. It is a custom build made by Elastic of an open source
-project, and it is intended to have minimal dependencies on OS libraries. However, the Kibana server OS might still require additional
+Reporting launches a "headless" web browser called Chromium on the {kib} server. The {kib} server OS can require additional
 dependencies to run the Chromium executable.
 
-Make sure Kibana server OS has the appropriate packages installed for the distribution.
+. Make sure the {kib} server OS has the appropriate packages installed for the distribution.
 
-If you are using CentOS/RHEL systems, install the following packages:
+. If you are using CentOS/RHEL systems, install the following packages:
 
 * `ipa-gothic-fonts`
 * `xorg-x11-fonts-100dpi`
@@ -46,120 +36,128 @@ If you are using CentOS/RHEL systems, install the following packages:
 * `fontconfig`
 * `freetype`
 
-If you are using Ubuntu/Debian systems, install the following packages:
+. If you are using Ubuntu/Debian systems, install the following packages:
 
 * `fonts-liberation`
 * `libfontconfig1`
 
-If the system is missing dependencies, then Reporting will fail in a non-deterministic way. {kib} runs a self-test at server startup, and
-if it encounters errors, logs them in the Console. Unfortunately, the error message does not include
-information about why Chromium failed to run. The most common error message is `Error: connect ECONNREFUSED`, which indicates
-that {kib} could not connect to the Chromium process.
+When the system is missing dependencies, report generation fails in a non-deterministic way. {kib} runs a self-test at server startup, and
+if errors occur, they appear in <<console-kibana,Console>>. The most common error message is `Error: connect ECONNREFUSED`, which indicates
+that {kib} was unable to connect to the Chromium process.
 
-To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. See the
-<<reporting-troubleshooting-puppeteer-debug-logs, Puppeteer debug method>> for more information.
+To troubleshoot the problem, start the {kib} server with environment variables that tell Chromium to print verbose logs. For more information,
+refer to <<reporting-troubleshooting-puppeteer-debug-logs, Puppeteer debug method>>.
 
 [float]
 [[reporting-troubleshooting-text-incorrect]]
-=== Text rendered incorrectly in generated reports
+=== Text rendered incorrectly in reports
 
-If a report label is rendered as an empty rectangle, no system fonts are available. Install at least one font package on the system.
+When a report label is rendered as an empty rectangle, all system fonts are unavailable. Install at least one font package on the system.
 
-If the report is missing certain Chinese, Japanese or Korean characters, ensure that a system font with those characters is installed.
+When the report is missing certain Chinese, Japanese, or Korean characters, make sure the system font with the missing characters is installed.
 
 [float]
 [[reporting-troubleshooting-missing-data]]
-=== Missing data in PDF report of data table visualization
-There is currently a known limitation with the Data Table visualization that only the first page of data rows, which are the only data
+=== Missing data in PDF reports with data table visualization
+
+In PDF reports that include a data table or saved search, only the first page of data rows, which are the only data rows
 visible on the screen, are shown in PDF reports.
 
 [float]
 [[reporting-troubleshooting-file-permissions]]
 === File permissions
-Ensure that the `headless_shell` binary located in your Kibana data directory is owned by the user who is running Kibana, that the
-user has the execute permission, and if applicable, that the filesystem is mounted with the `exec` option.
+
+Make sure that the `headless_shell` binary located in your {kib} data directory is owned by the user running {kib}, the
+user has the execute permission, and when applicable, the filesystem is mounted with the `exec` option.
 
 [NOTE]
 --
-The Chromium binary is located in the Kibana installation directory as `data/headless_shell-OS_TYPE/headless_shell`. The full path is logged
-the first time Kibana starts when verbose logging is enabled.
+The Chromium binary is located in the {kib} installation directory as `data/headless_shell-OS_TYPE/headless_shell`. The full path is logged
+the first time {kib} starts when verbose logging is enabled.
 --
 
 [float]
 [[reporting-troubleshooting-error-messages]]
 === Error messages
-Whenever possible, a Reporting error message tries to be as self-explanatory as possible. Here are some error messages you might encounter,
-along with the solution.
+
+Review common error messages and the solutions.
 
 [float]
 ==== Max attempts reached
-There are two primary causes of this error:
 
-* You're creating a PDF of a visualization or dashboard that spans a large amount of data and Kibana is hitting the `xpack.reporting.queue.timeout`
+*Cause:*
 
-* Kibana is hosted behind a reverse-proxy, and the <<reporting-kibana-server-settings, Kibana server settings>> are not configured correctly
+* You're creating a PDF of a visualization or dashboard that spans a large amount of data and {kib} is hitting the `xpack.reporting.queue.timeout`.
 
-Create a Markdown visualization and then create a PDF report. If this succeeds, increase the `xpack.reporting.queue.timeout` setting. If the
-PDF report fails with "Max attempts reached," check your <<reporting-kibana-server-settings, Kibana server settings>>.
+* {kib} is hosted behind a reverse-proxy and the <<reporting-kibana-server-settings, Kibana server settings>> are incorrectly configured.
+
+*Solution:*
+Create a Markdown visualization, then create the PDF report. 
+
+If you can successfully create the report, increase `xpack.reporting.queue.timeout`.
+
+If the report fails with `Max attempts reached`, check the <<reporting-kibana-server-settings, Kibana server settings>>.
 
 [float]
 [[reporting-troubleshooting-nss-dependency]]
 ==== You must install nss for Reporting to work
-Reporting using the Chromium browser relies on the Network Security Service libraries (NSS). Install the appropriate nss package for your
-distribution.
+
+*Cause:*
+{kib} relies on the Network Security Service libraries (NSS) to use the Chromium browser. 
+
+*Solution:*
+Install the appropriate nss package for your distribution.
 
 [float]
 [[reporting-troubleshooting-sandbox-dependency]]
 ==== Unable to use Chromium sandbox
-Chromium uses sandboxing techniques that are built on top of operating system primitives. The Linux sandbox depends on user namespaces,
-which were introduced with the 3.8 Linux kernel. However, many distributions don't have user namespaces enabled by default, or they require
-the CAP_SYS_ADMIN capability.
 
-Elastic recommends that you research the feasibility of enabling unprivileged user namespaces before disabling the sandbox. An exception
-is if you are running Kibana in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters.
+*Cause:*
+Chromium uses sandboxing techniques that are built on top of operating system primitives.
+
+*Solution:*
+Before you disable the sandbox, research the feasibility of enabling unprivileged user namespaces. 
+If you are running {kib} in Docker, the container can run in a user namespace with the built-in seccomp/bpf filters.
 
 [float]
 [[reporting-troubleshooting-verbose-logs]]
 === Verbose logs
-{kib} server logs have a lot of useful information for troubleshooting and understanding how things work. If you're having any issues at
-all, the full logs from Reporting will be the first place to look. In `kibana.yml`:
+
+{kib} server logs contain information for troubleshooting and understanding behavior. If you have issues, refer to the logs:
 
 [source,yaml]
 --------------------------------------------------------------------------------
 logging.verbose: true
 --------------------------------------------------------------------------------
 
-For more information about logging, see <<logging-verbose,Kibana configuration settings>>.
+For more information about logging, refer to <<logging-verbose,Kibana configuration settings>>.
 
 [float]
 [[reporting-troubleshooting-puppeteer-debug-logs]]
 === Puppeteer debug logs
-The Chromium browser that {kib} launches on the server is driven by a NodeJS library for Chromium called Puppeteer. The Puppeteer library
-has its own command-line method to generate its own debug logs, which can sometimes be helpful, particularly to figure out if a problem is
-caused by Kibana or Chromium. See more at https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips[debugging tips].
 
-Using Puppeteer's debug method when launching Kibana would look like:
+The Chromium browser that {kib} launches on the server is driven by a NodeJS library for Chromium called Puppeteer. The Puppeteer library
+has its own command-line method to generate its own debug logs, which can be helpful to figure out if a problem is
+caused by {kib} or Chromium. For more information, refer to https://github.com/GoogleChrome/puppeteer/blob/v1.19.0/README.md#debugging-tips[debugging tips].
+
+Use Puppeteer's debug method when launching {kib}:
 ```
 env DEBUG="puppeteer:*" ./bin/kibana
 ```
-The internal DevTools protocol traffic will be logged via the `debug` module under the `puppeteer` namespace.
+The internal *Dev Tools* protocol traffic is logged via the `debug` module under the `puppeteer` namespace.
 
-
-The Puppeteer logs are very verbose and could possibly contain sensitive information. Handle the generated output with care.
+The Puppeteer logs are very verbose and can contain sensitive information. Handle the output with care.
 
 [float]
 [[reporting-troubleshooting-system-requirements]]
 === System requirements
-In Elastic Cloud, the {kib} instances that most configurations provide by default is for 1GB of RAM for the instance. That is enough for
-{kib} Reporting when the visualization or dashboard is relatively simple, such as a single pie chart or a dashboard with
-a few visualizations. However, certain visualization types incur more load than others. For example, a TSVB panel has a lot of network
-requests to render.
 
-If the {kib} instance doesn't have enough memory to run the report, the report fails with an error such as `Error: Page crashed!`
-In this case, try increasing the memory for the {kib} instance to 2GB.
+By default, the {kib} instances that most configurations provide include 1GB of RAM, which is enough memory to generate reports of simple objects.
+Some objects require more memory than others, for example, a *TSVB* panel that has a lot of network requests. When the {kib} instance needs more memory 
+to run the report, the report fails with an error. For example, `Error: Page crashed!` Increase the memory for the {kib} instance to 2GB.
 
 [float]
 [[reporting-troubleshooting-arm-systems]]
-=== ARM systems
+=== ARM systems compatibility 
 
 Chromium is not compatible with ARM RHEL/CentOS.

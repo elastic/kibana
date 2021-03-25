@@ -31,6 +31,8 @@ include::core/index.asciidoc[leveloffset=+1]
 
 include::security/index.asciidoc[leveloffset=+1]
 
+include::reporting_integration.asciidoc[]
+
 include::add-data-tutorials.asciidoc[leveloffset=+1]
 
 include::development-visualize-index.asciidoc[leveloffset=+1]

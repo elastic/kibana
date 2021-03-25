@@ -200,8 +200,6 @@ include::{kib-repo-dir}/canvas/canvas-edit-workpads.asciidoc[]
 
 include::{kib-repo-dir}/canvas/canvas-present-workpad.asciidoc[]
 
-include::{kib-repo-dir}/canvas/canvas-share-workpad.asciidoc[]
-
 include::{kib-repo-dir}/canvas/canvas-tutorial.asciidoc[]
 
 include::{kib-repo-dir}/canvas/canvas-expression-lifecycle.asciidoc[]

@@ -2,25 +2,30 @@
 [[reporting-chromium-sandbox]]
 === Chromium sandbox
 
-When {report-features} uses the Chromium browser for generating PDF reports,
-it's recommended to use the sandbox for an additional layer of security. The
-Chromium sandbox uses operating system provided mechanisms to ensure that
-code execution cannot make persistent changes to the computer or access
-confidential information. The specific sandboxing techniques differ for each
-operating system.
+The reporting options are automatically enabled and run a custom build of the Chromium web browser, which
+runs on the server in headless mode to load {kib} and capture the rendered {kib} objects.
 
+Chromium is an open-source project unrelated to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
+works with minimal setup. However, the {kib} server OS can require additional dependencies for Chromium. For more information about the system dependencies
+for different operating systems, refer to <<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>>.
+
+When {report-features} uses the Chromium browser to generate PDF reports, use the sandbox for an additional layer of security. To make sure that
+code execution is unable to make persistent changes to the computer or access
+confidential information, the Chromium sandbox uses operating system-provided mechanisms. For each operating system, the specific sandboxing techniques differ.
+
+[float]
 ==== Linux sandbox
+
 The Linux sandbox depends on user namespaces, which were introduced with the 3.8 Linux kernel. However, many
 distributions don't have user namespaces enabled by default, or they require the CAP_SYS_ADMIN capability. The {report-features}
-will automatically disable the sandbox when it is running on Debian and CentOS as additional steps are required to enable
-unprivileged usernamespaces. In these situations, you'll see the following message in your {kib} startup logs:
+automatically disable the sandbox when it is running on Debian and CentOS because additional steps are required to enable
+unprivileged usernamespaces. When the sandbox is disabled, the following message appears in your {kib} startup logs:
 `Chromium sandbox provides an additional layer of protection, but is not supported for your OS.
 Automatically setting 'xpack.reporting.capture.browser.chromium.disableSandbox: true'.`
 
-Reporting will automatically enable the Chromium sandbox at startup when a supported OS is detected. However, if your kernel is 3.8 or newer, it's
-recommended to set `xpack.reporting.capture.browser.chromium.disableSandbox: false` in your `kibana.yml` to explicitly enable usernamespaces.
+{kib} automatically enables the Chromium sandbox at startup when a supported operating system is detected.If you use kernel 3.8 or later, 
+set `xpack.reporting.capture.browser.chromium.disableSandbox: false` to enable usernamespaces.
 
 ==== Docker
 When running {kib} in a Docker container, all container processes are run within a usernamespace with seccomp-bpf and
-AppArmor profiles that prevent the Chromium sandbox from being used. In these situations, disabling the sandbox is recommended,
-as the container implements similar security mechanisms.
+AppArmor profiles that prevent {kib} from using the Chromium sandbox. You must disable the sandbox to allow the container to implement similar security mechanisms.

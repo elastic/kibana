@@ -1,54 +1,74 @@
 [role="xpack"]
 [[reporting-getting-started]]
-= Reporting
+= Sharing
 
 [partintro]
 
 --
 
-You can generate a report that contains a {kib} dashboard, visualization,
-saved search, or Canvas workpad. Depending on the object type, you can export the data as
-a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
+To share {kib} objects, such as dashboards, visualizations, saved searches, and *Canvas* workpads, with a larger audience, {kib} provides you with several sharing options. 
 
-Reporting is available from the *Share* menu
-in *Discover*, *Dashboard*, *Visualize Library*, and *Canvas*.
+Sharing options include:
 
-[role="screenshot"]
-image::user/reporting/images/share-menu.png["Share"]
+* *Embed code* &mdash; Embed a fully interactive dashboard or visualization as an iframe on a web page.
 
-[float]
-== Setup
+* *Permalinks* &mdash; Share a direct link to a saved search, dashboard, or visualization. User authentication is required.
 
-The {report-features} are automatically enabled in {kib}. It runs a custom build of the Chromium web browser, which
-runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
+* *PDF Reports* &mdash; Generate and download a PDF file of a dashboard, visualization, or *Canvas* workpad.
 
-Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
-works with minimal setup. However, the {kib} server OS might still require additional dependencies for Chromium. See the
-<<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>> section for more information about the system dependencies
-for different operating systems.
+* *PNG Reports* &mdash; Generate and download a PNG file of a dashboard or visualization.
+
+* *CSV Reports* &mdash; Generate and download a CSV file of a saved search.
+
+* *Download as JSON* &mdash; Generate and download a JSON file of a *Canvas* workpad.
+
+* beta[] *Share on a website* &mdash; Download and securely share *Canvas* workpads on any website.
 
 [float]
-[[reporting-required-privileges]]
-== Roles and privileges
+[[embedding]]
+== Embed code
 
-To generate a report, you must have the `reporting_user` role. You also need
-the appropriate {kib} privileges to access the objects that you
-want to report on and the {es} indices.  See <<secure-reporting, Reporting and security>>
-for an example.
+Display your dashboard or visualization on an internal company website or personal webpage, then share the link so others can view your work.
+
+. Open the main menu, then click *Dashboard* or *Visualize Library*. 
+
+. Open the dashboard or visualization you want to display.
+
+. In the toolbar, click *Share*, then click *Embed code > Copy iFrame code*. 
++
+You can embed this snippet in your web page, and then add analysis, images, and links to give more context to the object you're sharing.
++
+image::images/embed-kibana.png[Generate an HTML snippet to embed {kib}, align=center]
++
+NOTE: Embedding other {kib} objects is generally possible, but you must manually craft the HTML code
+
+[float]
+[[share-direct-links]]
+== Share direct links
+
+Share a direct link to a saved search, dashboard, or visualization. To access the {kib} snapshot or object, user authentication is required.
+
+. Open the main menu, then click *Discover*, *Dashboard*, or *Visualize Library*. 
+
+. Open the saved search, dashboard, or visualization you want to share.
+
+. In the toolbar, click *Share*, click *Permalinks > Copy link*, then share the copied link.
 
 [float]
 [[manually-generate-reports]]
-== Manually generate and download reports
+== Generate and download reports
 
-Generate and download PDF, PNG, and CSV files of dashboards, visualizations, **Canvas** workpads, and saved searches.
+Generate and download reports of saved searches, dashboards, visualizations, and *Canvas* workpads
 
-. Open the dashboard, visualization, **Canvas** workpad, or saved search.
+. Open the main menu, then click *Discover*, *Dashboard*, *Visualize Library*, or *Canvas*.
 
-. From the {kib} toolbar, click **Share**, then select one of the following options:
+. Open the saved search, dashboard, visualization, or *Canvas* workpad you want to share.
 
-** **PDF Reports** &mdash; Generates a PDF file of the dashboard, visualization, or **Canvas** workpad.
-** **PNG Reports** &mdash; Generates a PNG file of the dashboard or visualization.
-** **CSV Reports** &mdash; Generates a CSV report of the saved search.
+. In the toolbar, click *Share*, then select the report type.
+
+* When you generate dashboard PDF reports, select *Optimize for printing* to create a printer-friendly PDF with multiple A4 portrait pages and two visualizations per page.
+
+* When you generate *Canvas* workpad PDF reports, select *Full page layout* to create a PDF without margins surrounding the workpad.
 
 . Generate the report.
 +
@@ -56,60 +76,60 @@ When the report completes, a notification appears.
 
 . Click **Download report**.
 
-NOTE: When you create a dashboard report that includes a data table or saved search, the PDF includes only the visible data.
+. To view the status of your report, or download previously generated reports, open the main menu, then click *Stack Management > Reporting*.
 
 [float]
 [[reporting-layout-sizing]]
-== Layout and sizing
-The layout and size of the PDF or PNG image depends on the {kib} app
-with which the Reporting plugin is integrated. For *Canvas*, the
-worksheet dimensions determine the size for reports. In other apps,
-the dimensions are taken on the fly by looking at
-the size of the visualization elements or panels on the page.
+=== Change the layout and size
 
-The size dimensions are part of the reporting job parameters. Therefore, to
-make the report output larger or smaller, you can change the size of the browser.
-This resizes the shareable container before generating the
-report, so the desired dimensions are passed in the job parameters.
-
-In the following {kib} dashboard, the shareable container is highlighted.
-The shareable container is captured when you click
-*Generate* or *Copy POST URL* from the *Share* menu. It might take some trial and error
-before you're satisfied with the layout and dimensions in the
-PNG or PDF image.
+The layout and size of the PDF or PNG images depend on the {kib} app.
+When you generate *Canvas* reports, the workpad dimensions determine the size of the report. 
+When you generate *Discover*, *Dashboard*, and *Visualize Library* reports, the table, panel, and visualization dimensions determine the size of the report.
+To change the layout and size of the report, change the size of your browser, which resizes the shareable container. {kib} captures the shareable container when you click
+*Generate* or *Copy POST URL*.
 
 [role="screenshot"]
 image::user/reporting/images/shareable-container.png["Shareable Container"]
 
+[float]
+[[export-single-workpad]]
+== Generate JSON files
 
+To view a *Canvas* workpad in another {kib} installation, create a JSON file.
+
+. Open the main menu, then click *Canvas*.
+
+. Open the Canvas* workpad you want to share.
+
+. In the toolbar, click *Share > Download as JSON*, then save the file. 
+
+. Open another {kib} installation, open the main menu, then click *Canvas*.
+
+. Click *Import workpad JSON file*, then select the saved file.
++
+Want to create a JSON file with multiple workpads? On the *Canvas workpads* page, select the workpads you want to share, then click *Export*.
 
 [float]
-[[optimize-pdf]]
-== Optimize PDF for print&mdash;dashboard only
+[[add-workpad-website]]
+== Share on a website
 
-To create a printer-friendly PDF with multiple A4 portrait pages and two visualizations per page, turn on *Optimize for printing*.
+beta[] *Canvas* allows you to create _shareables_, which are workpads that you download and securely share on any website. 
+To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
+. In the toolbar, click *Share > Share on a website*.
+
+. Follow the *Share on a website* instructions.
+
+. To autoplay the pages or hide the toolbar, use the inline parameters.
++
+To make sure that your data remains secure, the data in the JSON file is not connected to {kib}. *Canvas* does not display elements that manipulate the data on the workpad.
++
 [role="screenshot"]
-image::user/reporting/images/preserve-layout-switch.png["Share"]
+image::canvas/images/canvas-embed_workpad.gif[Image showing how to share the workpad on a website]
++
+NOTE: Shareable workpads encode the current state of the workpad in a JSON file. When you make changes to the workpad, the changes do not appear in the shareable workpad on your website.
 
-
-[float]
-[[full-page-pdf]]
-== Full page PDF layout &mdash;Canvas only
-
-To create a PDF without margins surrounding the Canvas workpad, turn on *Full page layout* before generating the PDF.
-
-[role="screenshot"]
-image::user/reporting/images/canvas-full-page-layout.png["Full Page Layout"]
-
-
-[float]
-[[manage-report-history]]
-== View and manage report history
-
-For a list of your reports, open the main menu, then click *Stack Management > Reporting*.
-From this view, you can monitor the status of a report and
-download reports that you previously generated.
+. To change the settings, click the settings icon, then choose the settings you want to use.
 
 --
 
@@ -117,4 +137,3 @@ include::automating-report-generation.asciidoc[]
 include::configuring-reporting.asciidoc[]
 include::chromium-sandbox.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]
-include::development/index.asciidoc[]

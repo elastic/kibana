@@ -367,22 +367,13 @@ From the toolbar, choose one of the following options:
 [[share-the-dashboard]]
 === Share the dashboard
 
-To share the dashboard with a larger audience, click *Share* in the toolbar, then choose one of the following options:
-
-* *Embed code* &mdash; Embed a fully interactive dashboard as an iframe on a web page. To access embedded dashboards, you can require users to
-log in using their {kib} credentials, via reverse proxy, or enable <<anonymous-access-and-embedding, anonymous access>>.
-
-* *Permalinks* &mdash; Share a direct link to a {kib} dashboard. User authentication is required.
-
-* *PDF Reports* &mdash; Generate a PDF report. For more information, refer to <<reporting-getting-started,Reporting>>.
-
-* *PNG Reports* &mdash; Generate a PNG report. For more information, refer to <<reporting-getting-started,Reporting>>.
+To share the dashboard with a larger audience, click *Share* in the toolbar, then choose an option. For information about the sharing options, refer to <reporting-getting-started,Sharing>>.
 
 [float]
 [[import-dashboards]]
 === Export the dashboard
 
-To automate {kib}, you can export dashboards as JSON using the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all references needed.
+To automate the export of dashboards as JSON, use the <<dashboard-api,import and export dashboard APIs>>. It is important to export dashboards with all references needed.
 
 --
 include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]

@@ -1,28 +1,27 @@
 [role="xpack"]
 [[reporting-network-policy]]
-=== Restrict requests with a Reporting network policy
+=== Restrict requests with a network policy
 
-When Reporting generates PDF reports, it uses the Chromium browser to fully load the {kib} page on the server. This
-potentially involves sending requests to external hosts. For example, a request might go to an external image server to show a
+When you generate PDF reports, {kib} uses the Chromium browser to load the {kib} page on the server, which
+potentially involves sending requests to external hosts. For example, when a request is sent to an external image server to show a
 field formatted as an image, or to show an image in a Markdown visualization.
 
-If the Chromium browser is asked to send a request that violates the network policy, Reporting stops processing the page
-before the request goes out, and the report is marked as a failure. Additional information about the event is in
-the Kibana server logs.
+When the Chromium browser is asked to send a request that violates the network policy, {kib} stops processing the page
+before the request goes out, and the report fails. Additional information about the failure appears in
+the {kib} server logs.
 
 [NOTE]
 ============
-{kib} installations are not designed to be publicly accessible over the Internet. The Reporting network policy and other capabilities
-of the Elastic Stack security features do not change this condition.
+{kib} installations are not designed to be publicly accessible over the internet. The network policy and Elastic Stack security features do not change this condition.
 ============
 
-==== Configure a Reporting network policy
+[float]
+==== Configure a network policy
 
-You configure the network policy by specifying the `xpack.reporting.capture.networkPolicy.rules` setting in `kibana.yml`. A policy is specified as
-an array of objects that describe what to allow or deny based on a host or protocol. If a host or protocol
-is not specified, the rule matches any host or protocol.
+A network policy is specified as an array of objects that describe what to allow or deny based on a host or protocol. When a host or protocol
+are unspecified, the rule matches any host or protocol.
 
-The rule objects are evaluated sequentially from the beginning to the end of the array, and continue until there is a matching rule.
+The rule objects are sequentially evaluated from the beginning to the end of the array, and continue until there is a matching rule.
 If no rules allow a request, the request is denied.
 
 [source,yaml]
@@ -39,7 +38,7 @@ xpack.reporting.capture.networkPolicy:
   rules: [ { allow: true, host: "placeholder.com", protocol: "https:" } ] 
 -------------------------------------------------------
 
-A final `allow` rule with no host or protocol will allow all requests that are not explicitly denied.
+A final `allow` rule with no host or protocol allows all requests that are not explicitly denied.
 
 [source,yaml]
 -------------------------------------------------------
@@ -48,7 +47,7 @@ xpack.reporting.capture.networkPolicy:
   rules: [{ allow: false, host: "placeholder.com", protocol: "http:" }, { allow: true }];
 -------------------------------------------------------
 
-A network policy can be composed of multiple rules.
+A network policy can include multiple rules.
 
 [source,yaml]
 -------------------------------------------------------
@@ -62,10 +61,15 @@ xpack.reporting.capture.networkPolicy
 
 [NOTE]
 ============
-The `file:` protocol is always denied, even if no network policy is configured.
+The `file:` protocol is always denied, even if when no network policy is configured.
 ============
 
-==== Disable a Reporting network policy
+[float]
+==== Disable a network policy
 
-You can use the `xpack.reporting.capture.networkPolicy.enabled: false` setting to disable the network policy feature. The default for
-this configuration property is `true`, so it is not necessary to explicitly enable it.  
+To disable a network policy, open kibana.yml, then specify the following:
+
+[source,yaml]
+-------------------------------------------------------
+xpack.reporting.capture.networkPolicy.enabled: false
+-------------------------------------------------------

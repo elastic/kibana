@@ -1,7 +1,8 @@
 [role="xpack"]
 [[automating-report-generation]]
-== Automating report generation
-Automatically generate PDF and CSV reports by submitting HTTP `POST` requests using {watcher} or a script.
+== Automatically generate reports
+
+To automatically generate PDF and CSV reports, generate a POST URL, then submit the HTTP `POST` request using {watcher} or a script.
 
 include::report-intervals.asciidoc[]
 
@@ -12,36 +13,31 @@ Create the POST URL that triggers a report to generate PDF and CSV reports.
 
 To create the POST URL for PDF reports:
 
-. Open the  dashboard, visualization, or **Canvas** workpad.
+. Open the main menu, then click *Dashboard, *Visualize Library*, or *Canvas*.
 
-. From the {kib} toolbar, click *Share*, then select *PDF Reports*.
+. Open the dashboard, visualization, or **Canvas** workpad you want to share.
 
-. If you are using **Canvas**,  click *Advanced options*.
+. From the toolbar, click *Share > PDF Reports*, then choose an option:
 
-. Click *Copy POST URL*.
-+
-[role="screenshot"]
-image::images/report-automate-pdf.png[Automatically generate *Dashboard* and *Visualize Library* reports]
+* If you are using *Dashboard* or *Visulize Library*, click *Copy POST URL*.
 
+* If you are using *Canvas*, click *Advanced options > Copy POST URL*.
 
 To create the POST URL for CSV reports:
 
-. In *Discover*, open the saved search.
+. Open the main menu, then click *Discover*.
 
-. From the {kib} toolbar, click *Share*, then select *CSV Reports*.
+. Open the saved search you want to share.
 
-. Click *Copy POST URL*.
-+
-[role="screenshot"]
-image::images/report-automate-csv.png[Generate Discover reports]
+. In the toolbar, click *Share > CSV Reports > Copy POST URL*.
 
 [float]
-=== Use Watcher
+=== Submit the request with {watcher}
 
 include::watch-example.asciidoc[]
 
 [float]
-=== Use a script
+=== Submit the request with a script
 
 include::script-example.asciidoc[]
 
@@ -53,17 +49,16 @@ include::response-codes.asciidoc[]
 [float]
 === Deprecated report URLs
 
-The following POST URL paths are deprecated. If there are
-any problems with using these paths after you upgrade {kib}, use
-{kib} to regenerate the POST URL for a particular report.
+The following POST URL paths are deprecated.
 
 * Dashboard reports:  `/api/reporting/generate/dashboard/<dashboard-id>`
 * Visualize reports:  `/api/reporting/generate/visualization/<visualization-id>`
 * Saved Search reports: `/api/reporting/generate/search/<saved-search-id>`
 
+If there are problems using the paths after you upgrade {kib}, regenerate the POST URL for the report.
+
 [IMPORTANT]
 ===================
-Previously there was a `&sync` parameter appended to generation URLs which would hold
-the request open until the document was fully generated. This feature has been removed.
-Existing use of the `&sync` parameter, in Watcher for example, will need to be updated.
+In previous {kib} versions, generation URLs included a `&sync` parameter that held requests open until documents finished generating. The `&sync` parameter has been removed.
+If you use the `&sync` parameter, such as in Watcher, you must update the generation URLs.
 ===================
