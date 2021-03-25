@@ -13,7 +13,7 @@ import { EuiDescribedFormGroup } from '@elastic/eui';
 import { EuiForm } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { InputRangeFieldProps } from './input_fields';
+import { InputRangeFieldProps } from '../../../components/source_configuration/input_fields';
 
 interface MLConfigurationPanelProps {
   isLoading: boolean;

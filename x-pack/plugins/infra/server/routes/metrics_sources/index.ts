@@ -8,63 +8,49 @@
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createValidationFunction } from '../../../common/runtime_types';
-import {
-  InfraSourceStatus,
-  SavedSourceConfigurationRuntimeType,
-  SourceResponseRuntimeType,
-} from '../../../common/http_api/source_api';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
 import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
+import {
+  partialMetricsSourceConfigurationPropertiesRT,
+  metricsSourceConfigurationResponseRT,
+  MetricsSourceStatus,
+} from '../../../common/metrics_sources';
 
-const typeToInfraIndexType = (value: string | undefined) => {
-  switch (value) {
-    case 'metrics':
-      return 'METRICS';
-    case 'logs':
-      return 'LOGS';
-    default:
-      return 'ANY';
-  }
-};
-
-export const initSourceRoute = (libs: InfraBackendLibs) => {
+export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
   const { framework } = libs;
 
   framework.registerRoute(
     {
       method: 'get',
-      path: '/api/metrics/source/{sourceId}/{type?}',
+      path: '/api/metrics/source/{sourceId}',
       validate: {
         params: schema.object({
           sourceId: schema.string(),
-          type: schema.string(),
         }),
       },
     },
     async (requestContext, request, response) => {
-      const { type, sourceId } = request.params;
+      const { sourceId } = request.params;
 
-      const [source, logIndexStatus, metricIndicesExist, indexFields] = await Promise.all([
+      const [source, metricIndicesExist, indexFields] = await Promise.all([
         libs.sources.getSourceConfiguration(requestContext.core.savedObjects.client, sourceId),
-        libs.sourceStatus.getLogIndexStatus(requestContext, sourceId),
         libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-        libs.fields.getFields(requestContext, sourceId, typeToInfraIndexType(type)),
+        libs.fields.getFields(requestContext, sourceId, 'METRICS'),
       ]);
 
       if (!source) {
         return response.notFound();
       }
 
-      const status: InfraSourceStatus = {
-        logIndicesExist: logIndexStatus !== 'missing',
+      const status: MetricsSourceStatus = {
         metricIndicesExist,
         indexFields,
       };
 
       return response.ok({
-        body: SourceResponseRuntimeType.encode({ source: { ...source, status } }),
+        body: metricsSourceConfigurationResponseRT.encode({ source: { ...source, status } }),
       });
     }
   );
@@ -77,7 +63,7 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
         params: schema.object({
           sourceId: schema.string(),
         }),
-        body: createValidationFunction(SavedSourceConfigurationRuntimeType),
+        body: createValidationFunction(partialMetricsSourceConfigurationPropertiesRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
@@ -110,20 +96,18 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
               patchedSourceConfigurationProperties
             ));
 
-        const [logIndexStatus, metricIndicesExist, indexFields] = await Promise.all([
-          libs.sourceStatus.getLogIndexStatus(requestContext, sourceId),
+        const [metricIndicesExist, indexFields] = await Promise.all([
           libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-          libs.fields.getFields(requestContext, sourceId, typeToInfraIndexType('metrics')),
+          libs.fields.getFields(requestContext, sourceId, 'METRICS'),
         ]);
 
-        const status: InfraSourceStatus = {
-          logIndicesExist: logIndexStatus !== 'missing',
+        const status: MetricsSourceStatus = {
           metricIndicesExist,
           indexFields,
         };
 
         return response.ok({
-          body: SourceResponseRuntimeType.encode({
+          body: metricsSourceConfigurationResponseRT.encode({
             source: { ...patchedSourceConfiguration, status },
           }),
         });
@@ -154,25 +138,23 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'get',
-      path: '/api/metrics/source/{sourceId}/{type}/hasData',
+      path: '/api/metrics/source/{sourceId}/hasData',
       validate: {
         params: schema.object({
           sourceId: schema.string(),
-          type: schema.string(),
         }),
       },
     },
     async (requestContext, request, response) => {
-      const { type, sourceId } = request.params;
+      const { sourceId } = request.params;
 
       const client = createSearchClient(requestContext, framework);
       const source = await libs.sources.getSourceConfiguration(
         requestContext.core.savedObjects.client,
         sourceId
       );
-      const indexPattern =
-        type === 'metrics' ? source.configuration.metricAlias : source.configuration.logAlias;
-      const results = await hasData(indexPattern, client);
+
+      const results = await hasData(source.configuration.metricAlias, client);
 
       return response.ok({
         body: { hasData: results },
