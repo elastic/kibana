@@ -27,11 +27,7 @@ import { getIndexPatternLoad } from './expressions';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
-<<<<<<< HEAD
-import { DataRequestHandlerContext } from '../types';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
-=======
->>>>>>> master
 
 export interface IndexPatternsServiceStart {
   indexPatternsServiceFactory: (
@@ -42,11 +38,8 @@ export interface IndexPatternsServiceStart {
 
 export interface IndexPatternsServiceSetupDeps {
   expressions: ExpressionsServerSetup;
-<<<<<<< HEAD
   logger: Logger;
   usageCollection?: UsageCollectionSetup;
-=======
->>>>>>> master
 }
 
 export interface IndexPatternsServiceStartDeps {
