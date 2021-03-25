@@ -258,7 +258,7 @@ describe('migration actions', () => {
           index: 'clone_red_then_yellow_index',
           body: {
             // Enable all shard allocation so that the index status goes yellow
-            'index.routing.allocation.enable': 'all',
+            index: { routing: { allocation: { enable: 'all' } } },
           },
         });
         indexYellow = true;
@@ -500,7 +500,7 @@ describe('migration actions', () => {
 
       // Create an index with incompatible mappings
       await createIndex(client, 'reindex_target_6', {
-        dynamic: 'false',
+        dynamic: false,
         properties: { title: { type: 'integer' } }, // integer is incompatible with string title
       })();
 
@@ -926,7 +926,7 @@ describe('migration actions', () => {
           index: 'red_then_yellow_index',
           body: {
             // Disable all shard allocation so that the index status is red
-            'index.routing.allocation.enable': 'all',
+            index: { routing: { allocation: { enable: 'all' } } },
           },
         });
         indexYellow = true;
