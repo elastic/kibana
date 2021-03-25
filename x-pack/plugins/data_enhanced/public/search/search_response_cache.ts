@@ -28,10 +28,12 @@ export class SearchResponseCache {
     return size / (1024 * 1024);
   }
 
-  private deleteItem(key: string) {
+  private deleteItem(key: string, clearSubs = true) {
     const item = this.responseCache.get(key);
     if (item) {
-      item.subs.unsubscribe();
+      if (clearSubs) {
+        item.subs.unsubscribe();
+      }
       this.cacheSize -= item.size;
       this.responseCache.delete(key);
     }
@@ -39,7 +41,7 @@ export class SearchResponseCache {
 
   private setItem(key: string, item: ResponseCacheItem) {
     // The deletion of the key will move it to the end of the Map's entries.
-    this.deleteItem(key);
+    this.deleteItem(key, false);
     this.cacheSize += item.size;
     this.responseCache.set(key, item);
   }
