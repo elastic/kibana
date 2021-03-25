@@ -260,7 +260,9 @@ We were able to connect 2,200 running agents and run a [single job with 1,800 pa
 
 2,200 agents was the maximum that we were able to test because of quotas on our GCP account that could not easily be increased.
 
-TODO test a large number of parallel jobs as well? Use API to trigger 200 builds with 10 steps each?
+We also create a job with 5 parallel steps, and triggered 300 parallel builds at once. The jobs executed and finished quickly, across ~1500 agents, with no issues and very little overhead. Interestingly, it seems that we were able to see the effects of our test in Buildkite's status page graphs (see below), but, from a user perspective, we were unable to notice any issues.
+
+![Status Graphs](../images/0016_buildkite_uptime.png)
 
 #### Stable
 
@@ -593,7 +595,7 @@ It uses [Google Secret Manager](https://cloud.google.com/secret-manager) for sto
 
 For TeamCity, we built a bot that was going to handle webhooks from GitHub and trigger builds for PRs based on configuration, user permissions, etc. Since we will not be moving to TeamCity, we've repurposed this bot for Buildkite, since Buildkite does not support all of our requirements around triggering builds for PRs out-of-the-box. The bot supports everything we currently use in Jenkins, and has some additional features as well.
 
-TODO add link to repo when available
+[Elastic Buildkite PR Bot](https://github.com/elastic/buildkite-pr-bot)
 
 Features supported by the bot:
 
@@ -643,7 +645,7 @@ Github Webhooks must also be configured to send events to the deployed bot.
 
 Currently, the bot is built and deployed using [Google Cloud Build](https://cloud.google.com/build). It is deployed to and hosted on [Google Cloud Run](https://cloud.google.com/run). It uses [Google Secret Manager](https://cloud.google.com/secret-manager) for storing/retrieving tokens for accessing GitHub and Buildkite.
 
-TODO link to cloud build yaml once available
+[Build/deploy configuration](https://github.com/elastic/buildkite-pr-bot/blob/main/cloudbuild.yaml)
 
 ### Infrastructure
 
