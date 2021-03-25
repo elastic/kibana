@@ -255,7 +255,7 @@ export const ExplorerChartsContainerUI = ({
   return (
     <>
       <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
-      <EuiFlexGrid columns={chartsColumns}>
+      <EuiFlexGrid columns={chartsColumns} data-test-subj="mlExplorerChartsContainer">
         {seriesToUse.length > 0 &&
           seriesToUse.map((series) => (
             <EuiFlexItem
