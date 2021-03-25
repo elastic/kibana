@@ -234,7 +234,7 @@ describe('when on the list page', () => {
       let firstPolicyRev: number;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
-          const mockedEndpointData = mockEndpointResultList({ total: 4 });
+          const mockedEndpointData = mockEndpointResultList({ total: 5 });
           const hostListData = mockedEndpointData.hosts;
           const queryStrategyVersion = mockedEndpointData.query_strategy_version;
 
@@ -282,6 +282,13 @@ describe('when on the list page', () => {
                 return p;
               },
             },
+            {
+              status: HostStatus.INACTIVE,
+              policy: (p: Policy) => {
+                p.agent.configured.revision += 1; // agent policy change, not propagated to agent yet
+                return p;
+              },
+            },
           ].forEach((setup, index) => {
             hostListData[index] = {
               metadata: hostListData[index].metadata,
@@ -317,7 +324,7 @@ describe('when on the list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const rows = await renderResult.findAllByRole('row');
-        expect(rows).toHaveLength(5);
+        expect(rows).toHaveLength(6);
       });
       it('should show total', async () => {
         const renderResult = render();
@@ -325,7 +332,7 @@ describe('when on the list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const total = await renderResult.findByTestId('endpointListTableTotal');
-        expect(total.textContent).toEqual('4 Hosts');
+        expect(total.textContent).toEqual('5 Hosts');
       });
       it('should display correct status', async () => {
         const renderResult = render();
@@ -353,9 +360,21 @@ describe('when on the list page', () => {
         expect(hostStatuses[3].getAttribute('style')).toMatch(
           /background-color\: rgb\(121\, 170\, 217\)\;/
         );
+
+        expect(hostStatuses[4].textContent).toEqual('Inactive');
+        expect(hostStatuses[4].getAttribute('style')).toMatch(
+          /background-color\: rgb\(211\, 218\, 230\)\;/
+        );
       });
 
       it('should display correct policy status', async () => {
+        const policyStatusToRGBColor: Array<[string, string]> = [
+          ['Success', 'background-color: rgb(109, 204, 177);'],
+          ['Warning', 'background-color: rgb(241, 216, 111);'],
+          ['Failure', 'background-color: rgb(255, 126, 98);'],
+          ['Unsupported', 'background-color: rgb(211, 218, 230);'],
+        ];
+        const policyStatusStyleMap = new Map<string, string>(policyStatusToRGBColor);
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
@@ -364,6 +383,9 @@ describe('when on the list page', () => {
 
         policyStatuses.forEach((status, index) => {
           expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
+          expect(status.getAttribute('style')).toMatch(
+            policyStatusStyleMap.get(status.textContent)
+          );
         });
       });
 
@@ -373,7 +395,7 @@ describe('when on the list page', () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
         });
         const outOfDates = await renderResult.findAllByTestId('rowPolicyOutOfDate');
-        expect(outOfDates).toHaveLength(3);
+        expect(outOfDates).toHaveLength(4);
 
         outOfDates.forEach((item, index) => {
           expect(item.textContent).toEqual('Out-of-date');
