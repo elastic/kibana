@@ -491,12 +491,11 @@ describe('indicator match', () => {
           goToManageAlertsDetectionRules();
           createCustomIndicatorRule(indicatorMatchRule);
           reload();
+          goToRuleDetails();
         });
       });
 
       it('Investigate an indicator match alert in timeline', () => {
-        cy.pause();
-
         investigateFirstAlertInTimeline();
       });
     });
