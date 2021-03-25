@@ -411,3 +411,14 @@ yarn test:jest x-pack/plugins/event_log --watch
 
 See: [`x-pack/test/plugin_api_integration/test_suites/event_log`](https://github.com/elastic/kibana/tree/master/x-pack/test/plugin_api_integration/test_suites/event_log).
 
+To develop integration tests, first start the test server from the root of the repo:
+
+```sh
+node scripts/functional_tests_server --config x-pack/test/plugin_api_integration/config.ts
+```
+
+Then start the test runner:
+
+```sh
+node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts --include x-pack/test/plugin_api_integration/test_suites/event_log/index.ts
+```
