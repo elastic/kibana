@@ -366,4 +366,26 @@ describe('QueryStringInput', () => {
     );
     expect(mockFetchIndexPatterns.mock.calls[0][1]).toStrictEqual(patternStrings);
   });
+
+  it('Should convert non-breaking spaces into regular spaces', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onChange: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+    const input = instance.inputRef;
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    input!.value = 'foo\u00A0bar';
+    inputWrapper.simulate('change');
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith({ query: 'foo bar', language: 'kuery' });
+  });
 });

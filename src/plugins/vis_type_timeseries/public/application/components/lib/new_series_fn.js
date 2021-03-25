@@ -17,6 +17,10 @@ export const newSeriesFn = (obj = {}) => {
       id: uuid.v1(),
       color: '#68BC00',
       split_mode: 'everything',
+      palette: {
+        type: 'palette',
+        name: 'default',
+      },
       metrics: [newMetricAggFn()],
       separate_axis: 0,
       axis_position: 'right',
