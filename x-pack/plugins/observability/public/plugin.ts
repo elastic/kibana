@@ -22,39 +22,38 @@ import { registerDataHandler } from './data_handler';
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 import { LensPublicStart } from '../../lens/public';
 
-export interface ObservabilityPluginSetup {
+export interface ObservabilityPublicSetup {
   dashboard: { register: typeof registerDataHandler };
 }
 
-export interface ObservabilityClientPluginsSetup {
+export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
-export interface ObservabilityClientPluginsStart {
+export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
   data: DataPublicPluginStart;
   lens: LensPublicStart;
 }
 
-export type ObservabilityClientSetup = void;
-export type ObservabilityClientStart = void;
+export type ObservabilityPublicStart = void;
 
 export class Plugin
   implements
     PluginClass<
-      ObservabilityClientSetup,
-      ObservabilityClientStart,
-      ObservabilityClientPluginsSetup,
-      ObservabilityClientPluginsStart
+      ObservabilityPublicSetup,
+      ObservabilityPublicStart,
+      ObservabilityPublicPluginsSetup,
+      ObservabilityPublicPluginsStart
     > {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<ObservabilityClientPluginsStart>,
-    plugins: ObservabilityClientPluginsSetup
+    core: CoreSetup<ObservabilityPublicPluginsStart>,
+    plugins: ObservabilityPublicPluginsSetup
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logo-observability';
