@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 
 import { Id, ListItemSchema, SearchEsListItemSchema } from '../../../common/schemas';
 import { transformElasticToListItem } from '../utils';
@@ -26,7 +25,7 @@ export const getListItem = async ({
   // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
   // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
   // to explicitly define the type <T>.
-  const { body: listItemES } = await esClient.search<SearchResponse<SearchEsListItemSchema>>({
+  const { body: listItemES } = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {
         term: {
@@ -40,6 +39,7 @@ export const getListItem = async ({
   });
 
   if (listItemES.hits.hits.length) {
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     const type = findSourceType(listItemES.hits.hits[0]._source);
     if (type != null) {
       const listItems = transformElasticToListItem({ response: listItemES, type });

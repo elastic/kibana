@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import {
   getResult,
@@ -149,12 +150,13 @@ describe('rules_notification_alert_type', () => {
         },
       })
     );
-    const value: Partial<ApiResponse> = {
+    const value: Partial<ApiResponse<estypes.FieldCapabilitiesResponse>> = {
       statusCode: 200,
       body: {
         indices: ['index1', 'index2', 'index3', 'index4'],
         fields: {
           '@timestamp': {
+            // @ts-expect-error not full interface
             date: {
               indices: ['index1', 'index2', 'index3', 'index4'],
               searchable: true,
@@ -165,7 +167,7 @@ describe('rules_notification_alert_type', () => {
       },
     };
     alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
-      value as ApiResponse
+      value as ApiResponse<estypes.FieldCapabilitiesResponse>
     );
     const ruleAlert = getResult();
     alertServices.savedObjectsClient.get.mockResolvedValue({
