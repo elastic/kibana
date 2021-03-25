@@ -96,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       let signals = await getSignalsWithES({ es, indices: defaultSignalsIndex, ids: signalID });
 
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
 
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       signals = await getSignalsWithES({ es, indices: defaultSignalsIndex, ids: signalID });
 
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses['in-progress']
       );
     });
@@ -156,10 +156,10 @@ export default function ({ getService }: FtrProviderContext) {
         ids: [signalID, signalID2],
       });
 
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
 
@@ -183,10 +183,10 @@ export default function ({ getService }: FtrProviderContext) {
         ids: [signalID, signalID2],
       });
 
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses['in-progress']
       );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
         CaseStatuses['in-progress']
       );
     });
@@ -244,10 +244,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // There should be no change in their status since syncing is disabled
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
 
@@ -272,10 +272,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // There still should be no change in their status since syncing is disabled
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
 
@@ -302,10 +302,10 @@ export default function ({ getService }: FtrProviderContext) {
         ids: [signalID, signalID2],
       });
 
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses.closed
       );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
         CaseStatuses['in-progress']
       );
     });
@@ -366,10 +366,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // There should be no change in their status since syncing is disabled
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
 
@@ -408,10 +408,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // There should still be no change in their status since syncing is disabled
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
         CaseStatuses.open
       );
 
@@ -453,10 +453,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // alerts should be updated now that the
-      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
         CaseStatuses['in-progress']
       );
-      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+      expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
         CaseStatuses.closed
       );
     });

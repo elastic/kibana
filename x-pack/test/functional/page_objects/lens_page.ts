@@ -189,6 +189,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async removeField() {
+      await retry.try(async () => {
+        await testSubjects.click('lnsFieldListPanelRemove');
+        await testSubjects.missingOrFail('lnsFieldListPanelRemove');
+        await testSubjects.click('confirmModalConfirmButton');
+        await testSubjects.missingOrFail('confirmModalConfirmButton');
+      });
+    },
+
     async searchField(name: string) {
       await testSubjects.setValue('lnsIndexPatternFieldSearch', name);
     },
@@ -196,6 +205,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async waitForField(field: string) {
       await retry.try(async () => {
         await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
+      });
+    },
+
+    async waitForFieldMissing(field: string) {
+      await retry.try(async () => {
+        await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
       });
     },
 

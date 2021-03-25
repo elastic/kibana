@@ -8,6 +8,7 @@ import { fetchLicenses } from './fetch_licenses';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { estypes } from '@elastic/elasticsearch';
 
 describe('fetchLicenses', () => {
   const clusterName = 'MyCluster';
@@ -32,7 +33,7 @@ describe('fetchLicenses', () => {
             },
           ],
         },
-      })
+      } as estypes.SearchResponse)
     );
     const clusters = [{ clusterUuid, clusterName }];
     const index = '.monitoring-es-*';

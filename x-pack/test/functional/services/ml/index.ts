@@ -45,6 +45,7 @@ import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
 import { MachineLearningAlertingProvider } from './alerting';
+import { SwimLaneProvider } from './swim_lane';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -96,6 +97,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
   const alerting = MachineLearningAlertingProvider(context, commonUI);
+  const swimLane = SwimLaneProvider(context);
 
   return {
     anomaliesTable,
@@ -134,6 +136,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     settingsCalendar,
     settingsFilterList,
     singleMetricViewer,
+    swimLane,
     testExecution,
     testResources,
   };

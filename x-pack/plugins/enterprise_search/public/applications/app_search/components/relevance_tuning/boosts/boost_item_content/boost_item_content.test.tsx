@@ -35,6 +35,7 @@ describe('BoostItemContent', () => {
     const boost = {
       factor: 2,
       type: 'value' as BoostType,
+      value: [''],
     };
 
     const wrapper = shallow(<BoostItemContent boost={boost} index={3} name="foo" />);
