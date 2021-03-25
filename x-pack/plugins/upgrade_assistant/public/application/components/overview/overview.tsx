@@ -60,7 +60,7 @@ const i18nTexts = {
     />
   ),
   docLink: i18n.translate('xpack.upgradeAssistant.documentationLinkText', {
-    defaultMessage: 'Upgrade Assistant docs',
+    defaultMessage: 'Documentation',
   }),
 };
 
@@ -101,8 +101,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
           pageTitle={i18nTexts.pageTitle}
           rightSideItems={[
             <EuiButtonEmpty
-              // TODO add doc link
-              href={'#'}
+              href={docLinks.links.upgradeAssistant}
               target="_blank"
               iconType="help"
               data-test-subj="documentationLink"

@@ -17,6 +17,7 @@ import {
   EuiTabbedContentTab,
   EuiPageContent,
   EuiPageContentBody,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -39,6 +40,12 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.backupDataButtonLabel',
     {
       defaultMessage: 'Back up your data',
+    }
+  ),
+  backupDataTooltipText: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.backupDataTooltipText',
+    {
+      defaultMessage: 'Before making index changes, back up your data using Snapshot and Restore.',
     }
   ),
   clusterTab: {
@@ -72,7 +79,7 @@ export const EsDeprecationsContent = withRouter(
   }: RouteComponentProps<MatchParams>) => {
     // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
-    const { api, breadcrumbs } = useAppContext();
+    const { api, breadcrumbs, getUrlForApp, docLinks } = useAppContext();
 
     const { data: checkupData, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
 
@@ -145,8 +152,7 @@ export const EsDeprecationsContent = withRouter(
             description={i18nTexts.pageDescription}
             rightSideItems={[
               <EuiButtonEmpty
-                // TODO add doc link
-                href={'#'}
+                href={docLinks.links.upgradeAssistant}
                 target="_blank"
                 iconType="help"
                 data-test-subj="documentationLink"
@@ -155,10 +161,19 @@ export const EsDeprecationsContent = withRouter(
               </EuiButtonEmpty>,
             ]}
           >
-            {/* TODO Add link to Snapshot + Restore */}
-            <EuiButton fill href="#" iconType="popout" iconSide="right">
-              {i18nTexts.backupDataButtonLabel}
-            </EuiButton>
+            <EuiToolTip position="bottom" content={i18nTexts.backupDataTooltipText}>
+              <EuiButton
+                fill
+                href={getUrlForApp('management', {
+                  path: 'data/snapshot_restore',
+                })}
+                iconType="popout"
+                iconSide="right"
+                target="_blank"
+              >
+                {i18nTexts.backupDataButtonLabel}
+              </EuiButton>
+            </EuiToolTip>
           </EuiPageHeader>
 
           <EuiPageContentBody>
