@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+// @ts-ignore
+import { parse as parseKuery } from '@kbn/interpreter/target/plugins/data/kuery';
 import { nodeTypes } from '../node_types/index';
 import { KQLSyntaxError } from '../kuery_syntax_error';
 import { KueryNode, DslQuery, KueryParseOptions } from '../types';
 import { IIndexPattern } from '../../../index_patterns/types';
 
-// @ts-ignore
-import { parse as parseKuery } from './_generated_/kuery';
 import { JsonObject } from '../../../../../kibana_utils/common';
 
 const fromExpression = (

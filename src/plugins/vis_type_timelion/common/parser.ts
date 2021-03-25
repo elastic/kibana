@@ -7,7 +7,7 @@
  */
 
 // @ts-ignore
-import { parse } from './_generated_/chain';
+import { parse } from '@kbn/interpreter/target/plugins/vis_type_timelion/chain';
 
 export interface ExpressionLocation {
   min: number;

@@ -38,6 +38,8 @@ snapshots.js
 # package overrides
 /packages/elastic-eslint-config-kibana
 /packages/kbn-interpreter/src/common/lib/grammar.js
+/packages/kbn-interpreter/src/plugins/data/kuery.js
+/packages/kbn-interpreter/src/plugins/vis_type_timelion/chain.js
 /packages/kbn-tinymath/src/grammar.js
 /packages/kbn-plugin-generator/template
 /packages/kbn-pm/dist

@@ -3,10 +3,11 @@
 Contains the timelion visualization and the timelion backend.
 
 # Generate a parser
-If your grammar was changed in `public/chain.peg` you need to re-generate the static parser. You could use a grunt task:
+
+If your grammar was changed in `packages/kbn-interpreter/src/plugins/vis_type_timelion/chain.peg` you need to re-generate the static parser. You can use the yarn script in `kbn-interpreter`:
 
 ```
-grunt peg:timelion_chain
+yarn vis_type_timelion:peg
 ```
 
-The generated parser will be appeared at `public/_generated_` folder, which is included in `.eslintignore`
+The generated parser will be appeared at `packages/kbn-interpreter/src/plugins/vis_type_timelion` folder, which is included in `.eslintignore`

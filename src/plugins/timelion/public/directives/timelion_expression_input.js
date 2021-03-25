@@ -32,7 +32,7 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
-import grammar from 'raw-loader!../../../vis_type_timelion/common/chain.peg';
+import grammar from 'raw-loader!@kbn/interpreter/src/plugins/vis_type_timelion/chain.peg';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,

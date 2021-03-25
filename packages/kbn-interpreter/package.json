@@ -5,6 +5,8 @@
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
     "interpreter:peg": "../../node_modules/.bin/pegjs src/common/lib/grammar.peg",
+    "data:peg": "../../node_modules/.bin/pegjs src/plugins/data/kuery.peg",
+    "vis_type_timelion:peg": "../../node_modules/.bin/pegjs src/plugins/vis_type_timelion/chain.peg",
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --dev",
     "kbn:watch": "node scripts/build --dev --watch"

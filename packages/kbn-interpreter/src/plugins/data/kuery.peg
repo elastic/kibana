@@ -1,6 +1,5 @@
 /**
- * To generate the parsing module (kuery.js), run `grunt peg`
- * To watch changes and generate on file change, run `grunt watch:peg`
+ * To generate the parsing module (kuery.js), run `yarn data:peg`
  */
 
 // Initialization block
