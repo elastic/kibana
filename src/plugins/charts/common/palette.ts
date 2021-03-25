@@ -145,7 +145,7 @@ export function palette(): ExpressionFunctionDefinition<
         name: 'custom',
         params: {
           colors: reverse ? colors.reverse() : colors,
-          stops: reverse ? stops.reverse() : stops,
+          stops,
           range: range ?? 'auto',
           rangeMin,
           rangeMax,
