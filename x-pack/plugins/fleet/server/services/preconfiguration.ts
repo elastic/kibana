@@ -9,8 +9,6 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
 
-import { packageToPackagePolicy } from '../../common';
-
 import type {
   PackagePolicyPackage,
   NewPackagePolicy,
@@ -22,10 +20,9 @@ import type {
   PreconfiguredAgentPolicy,
 } from '../../common';
 
-import { getPackageInfo, getInstallation } from './epm/packages';
+import { getInstallation } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
-import { packagePolicyService } from './package_policy';
-import { agentPolicyService } from './agent_policy';
+import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -130,40 +127,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   };
 }
 
-export async function addPackageToAgentPolicy(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  packageToInstall: Installation,
-  agentPolicy: AgentPolicy,
-  defaultOutput: Output,
-  packagePolicyName?: string,
-  packagePolicyDescription?: string,
-  inputsOverride?: InputsOverride[]
-) {
-  const packageInfo = await getPackageInfo({
-    savedObjectsClient: soClient,
-    pkgName: packageToInstall.name,
-    pkgVersion: packageToInstall.version,
-  });
-
-  const basePackagePolicy = packageToPackagePolicy(
-    packageInfo,
-    agentPolicy.id,
-    defaultOutput.id,
-    agentPolicy.namespace ?? 'default',
-    packagePolicyName,
-    packagePolicyDescription
-  );
-
-  const newPackagePolicy = inputsOverride
-    ? overridePackageInputs(basePackagePolicy, inputsOverride)
-    : basePackagePolicy;
-
-  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
-    bumpRevision: false,
-  });
-}
-
 async function addPreconfiguredPolicyPackages(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -187,7 +150,7 @@ async function addPreconfiguredPolicyPackages(
         defaultOutput,
         name,
         description,
-        inputs
+        (policy) => overridePackageInputs(policy, inputs)
       )
     )
   );
@@ -209,8 +172,10 @@ async function ensureInstalledPreconfiguredPackage(
 
 function overridePackageInputs(
   basePackagePolicy: NewPackagePolicy,
-  inputsOverride: InputsOverride[]
+  inputsOverride?: InputsOverride[]
 ) {
+  if (!inputsOverride) return basePackagePolicy;
+
   const inputs = [...basePackagePolicy.inputs];
   const packageName = basePackagePolicy.package!.name;
 

@@ -28,15 +28,23 @@ import type {
   AgentPolicySOAttributes,
   FullAgentPolicy,
   ListWithKuery,
+  NewPackagePolicy,
 } from '../types';
 import {
   agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
   dataTypes,
+  packageToPackagePolicy,
   AGENT_POLICY_INDEX,
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
-import type { DeleteAgentPolicyResponse, Settings, FleetServerPolicy } from '../../common';
+import type {
+  DeleteAgentPolicyResponse,
+  Settings,
+  FleetServerPolicy,
+  Installation,
+  Output,
+} from '../../common';
 import {
   AgentPolicyNameExistsError,
   AgentPolicyDeletionError,
@@ -44,6 +52,7 @@ import {
 } from '../errors';
 import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 
+import { getPackageInfo } from './epm/packages';
 import { createAgentPolicyAction, getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -748,3 +757,37 @@ class AgentPolicyService {
 }
 
 export const agentPolicyService = new AgentPolicyService();
+
+export async function addPackageToAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  packageToInstall: Installation,
+  agentPolicy: AgentPolicy,
+  defaultOutput: Output,
+  packagePolicyName?: string,
+  packagePolicyDescription?: string,
+  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy
+) {
+  const packageInfo = await getPackageInfo({
+    savedObjectsClient: soClient,
+    pkgName: packageToInstall.name,
+    pkgVersion: packageToInstall.version,
+  });
+
+  const basePackagePolicy = packageToPackagePolicy(
+    packageInfo,
+    agentPolicy.id,
+    defaultOutput.id,
+    agentPolicy.namespace ?? 'default',
+    packagePolicyName,
+    packagePolicyDescription
+  );
+
+  const newPackagePolicy = transformPackagePolicy
+    ? transformPackagePolicy(basePackagePolicy)
+    : basePackagePolicy;
+
+  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+    bumpRevision: false,
+  });
+}

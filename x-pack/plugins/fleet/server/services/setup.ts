@@ -15,7 +15,7 @@ import type { PackagePolicy } from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
-import { agentPolicyService } from './agent_policy';
+import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import { outputService } from './output';
 import {
   ensureInstalledDefaultPackages,
@@ -29,7 +29,6 @@ import { awaitIfPending } from './setup_utils';
 import { createDefaultSettings } from './settings';
 import { ensureAgentActionPolicyChangeExists } from './agents';
 import { awaitIfFleetServerSetupPending } from './fleet_server';
-import { addPackageToAgentPolicy } from './preconfiguration';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
