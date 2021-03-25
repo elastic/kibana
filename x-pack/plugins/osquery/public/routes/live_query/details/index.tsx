@@ -51,7 +51,7 @@ const LiveQueryDetailsPageComponent = () => {
 
   const agentsFailedCount = useMemo(
     () =>
-      actionResultsData?.rawResponse?.aggregations?.responses?.buckets.find(
+      actionResultsData?.rawResponse?.aggregations?.responses?.buckets?.find(
         // @ts-expect-error update types
         (bucket) => bucket.key === 'error'
       )?.doc_count ?? 0,
@@ -153,7 +153,10 @@ const LiveQueryDetailsPageComponent = () => {
         {data?.actionDetails._source?.data?.query}
       </EuiCodeBlock>
       <EuiSpacer />
-      <ResultTabs actionId={actionId} />
+      <ResultTabs
+        actionId={actionId}
+        agentsCount={data?.actionDetails?.fields?.agents?.length ?? 0}
+      />
     </WithHeaderLayout>
   );
 };

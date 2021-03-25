@@ -39,6 +39,7 @@ interface UseAllResults {
   sortField: string;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
+  isLive?: boolean;
 }
 
 export const useAllResults = ({
@@ -50,6 +51,7 @@ export const useAllResults = ({
   sortField,
   filterQuery,
   skip = false,
+  isLive = false,
 }: UseAllResults) => {
   const { data } = useKibana().services;
 
@@ -82,7 +84,7 @@ export const useAllResults = ({
       };
     },
     {
-      refetchInterval: 1000,
+      refetchInterval: isLive ? 1000 : false,
       enabled: !skip,
     }
   );

@@ -22,6 +22,11 @@ export const buildActionResultsQuery = ({
         action_id: actionId,
       },
     },
+    {
+      exists: {
+        field: 'error.keyword',
+      },
+    },
   ];
 
   const dslQuery = {
@@ -30,12 +35,32 @@ export const buildActionResultsQuery = ({
     ignoreUnavailable: true,
     body: {
       aggs: {
-        responses: {
-          terms: {
-            script: {
-              lang: 'painless',
-              source:
-                "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
+        aggs: {
+          global: {},
+          aggs: {
+            responses_by_action_id: {
+              filter: {
+                bool: {
+                  must: [
+                    {
+                      match: {
+                        action_id: actionId,
+                      },
+                    },
+                  ],
+                },
+              },
+              aggs: {
+                responses: {
+                  terms: {
+                    script: {
+                      lang: 'painless',
+                      source:
+                        "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
+                    },
+                  },
+                },
+              },
             },
           },
         },

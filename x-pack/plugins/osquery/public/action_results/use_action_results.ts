@@ -38,6 +38,7 @@ interface UseActionResults {
   sortField: string;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
+  isLive?: boolean;
 }
 
 export const useActionResults = ({
@@ -48,6 +49,7 @@ export const useActionResults = ({
   sortField,
   filterQuery,
   skip = false,
+  isLive = false,
 }: UseActionResults) => {
   const { data } = useKibana().services;
 
@@ -72,14 +74,34 @@ export const useActionResults = ({
         )
         .toPromise();
 
+      const totalResponded =
+        // @ts-expect-error update types
+        responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.doc_count;
+      const aggsBuckets =
+        // @ts-expect-error update types
+        responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
+
       return {
         ...responseData,
-        results: responseData.edges,
+        aggregations: {
+          totalResponded,
+          successful: aggsBuckets.find((bucket) => bucket.key === 'success')?.doc_count ?? 0,
+          failed: aggsBuckets.find((bucket) => bucket.key === 'error')?.doc_count ?? 0,
+        },
         inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
     {
-      refetchInterval: 1000,
+      placeholderData: {
+        edges: [],
+        aggregations: {
+          totalResponded: 0,
+          successful: 0,
+          failed: 0,
+        },
+      },
+      refetchInterval: isLive ? 1000 : false,
+      keepPreviousData: true,
       enabled: !skip,
     }
   );

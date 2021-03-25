@@ -19,9 +19,14 @@ const DataContext = createContext<ResultEdges>([]);
 interface ResultsTableComponentProps {
   actionId: string;
   agentId?: string;
+  isLive?: boolean;
 }
 
-const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId, agentId }) => {
+const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
+  actionId,
+  agentId,
+  isLive,
+}) => {
   const { getUrlForApp } = useKibana().services.application;
 
   const getFleetAppUrl = useCallback(
@@ -55,6 +60,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
     limit: pagination.pageSize,
     direction: Direction.asc,
     sortField: '@timestamp',
+    isLive,
   });
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);

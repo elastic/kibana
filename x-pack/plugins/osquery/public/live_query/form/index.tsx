@@ -130,7 +130,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         title: i18n.translate('xpack.osquery.liveQueryForm.steps.resultsStepHeading', {
           defaultMessage: 'Check results',
         }),
-        children: actionId ? <ResultTabs actionId={actionId} /> : <></>,
+        children: actionId ? (
+          <ResultTabs actionId={actionId} agentsCount={agentSelected} isLive={true} />
+        ) : null,
         status: resultsStatus,
       },
     ],
