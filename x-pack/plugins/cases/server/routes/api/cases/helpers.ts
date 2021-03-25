@@ -9,6 +9,8 @@ import { get, isPlainObject } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
+import { nodeBuilder } from '../../../../../../../src/plugins/data/common';
+import { KueryNode } from '../../../../../../../src/plugins/data/server';
 import {
   CaseConnector,
   ESCaseConnector,
@@ -16,12 +18,13 @@ import {
   ConnectorTypes,
   CaseStatuses,
   CaseType,
-  SavedObjectFindOptions,
+  ESConnectorFields,
+  ConnectorTypeFields,
 } from '../../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { sortToSnake } from '../utils';
-import { combineFilters } from '../../../common';
 import { combineFilterWithAuthorizationFilter } from '../../../authorization/utils';
+import { SavedObjectFindOptionsKueryNode } from '../../../common';
 
 export const addStatusFilter = ({
   status,
@@ -29,18 +32,19 @@ export const addStatusFilter = ({
   type = CASE_SAVED_OBJECT,
 }: {
   status?: CaseStatuses;
-  appendFilter?: string;
+  appendFilter?: KueryNode;
   type?: string;
-}) => {
-  const filters: string[] = [];
+}): KueryNode => {
+  const filters: KueryNode[] = [];
   if (status) {
-    filters.push(`${type}.attributes.status: ${status}`);
+    filters.push(nodeBuilder.is(`${type}.attributes.status`, status));
   }
 
   if (appendFilter) {
     filters.push(appendFilter);
   }
-  return combineFilters(filters, 'AND');
+
+  return nodeBuilder.and(filters);
 };
 
 export const buildFilter = ({
@@ -51,19 +55,12 @@ export const buildFilter = ({
 }: {
   filters: string | string[] | undefined;
   field: string;
-  operator: 'OR' | 'AND';
+  operator: 'or' | 'and';
   type?: string;
-}): string => {
-  // if it is an empty string, empty array of strings, or undefined just return
-  if (!filters || filters.length <= 0) {
-    return '';
-  }
-
-  const arrayFilters = !Array.isArray(filters) ? [filters] : filters;
-
-  return combineFilters(
-    arrayFilters.map((filter) => `${type}.attributes.${field}: ${filter}`),
-    operator
+}): KueryNode => {
+  const filtersAsArray = Array.isArray(filters) ? filters : filters != null ? [filters] : [];
+  return nodeBuilder[operator](
+    filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
   );
 };
 
@@ -106,13 +103,13 @@ export const constructQueryOptions = ({
   status?: CaseStatuses;
   sortByField?: string;
   caseType?: CaseType;
-  authorizationFilter?: string;
-}): { case: SavedObjectFindOptions; subCase?: SavedObjectFindOptions } => {
-  const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'OR' });
+  authorizationFilter?: KueryNode;
+}): { case: SavedObjectFindOptionsKueryNode; subCase?: SavedObjectFindOptionsKueryNode } => {
+  const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = buildFilter({
     filters: reporters,
     field: 'created_by.username',
-    operator: 'OR',
+    operator: 'or',
   });
   const sortField = sortToSnake(sortByField);
 
@@ -122,11 +119,15 @@ export const constructQueryOptions = ({
       // The subCase filter will be undefined because we don't need to find sub cases if type === individual
 
       // We do not want to support multiple type's being used, so force it to be a single filter value
-      const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.individual}`;
+      const typeFilter = nodeBuilder.is(
+        `${CASE_SAVED_OBJECT}.attributes.type`,
+        CaseType.individual
+      );
       const caseFilters = addStatusFilter({
         status,
-        appendFilter: combineFilters([tagsFilter, reportersFilter, typeFilter], 'AND'),
+        appendFilter: nodeBuilder.and([tagsFilter, reportersFilter, typeFilter]),
       });
+
       return {
         case: {
           filter:
@@ -140,8 +141,11 @@ export const constructQueryOptions = ({
     case CaseType.collection: {
       // The cases filter will result in this structure "(type == parent) and (tags == blah) and (reporter == yo)"
       // The sub case filter will use the query.status if it exists
-      const typeFilter = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.collection}`;
-      const caseFilters = combineFilters([tagsFilter, reportersFilter, typeFilter], 'AND');
+      const typeFilter = nodeBuilder.is(
+        `${CASE_SAVED_OBJECT}.attributes.type`,
+        CaseType.collection
+      );
+      const caseFilters = nodeBuilder.and([tagsFilter, reportersFilter, typeFilter]);
       const subCaseFilters = addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT });
 
       return {
@@ -172,12 +176,18 @@ export const constructQueryOptions = ({
        * The cases filter will result in this structure "((status == open and type === individual) or type == parent) and (tags == blah) and (reporter == yo)"
        * The sub case filter will use the query.status if it exists
        */
-      const typeIndividual = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.individual}`;
-      const typeParent = `${CASE_SAVED_OBJECT}.attributes.type: ${CaseType.collection}`;
+      const typeIndividual = nodeBuilder.is(
+        `${CASE_SAVED_OBJECT}.attributes.type`,
+        CaseType.individual
+      );
+      const typeParent = nodeBuilder.is(
+        `${CASE_SAVED_OBJECT}.attributes.type`,
+        CaseType.collection
+      );
 
-      const statusFilter = combineFilters([addStatusFilter({ status }), typeIndividual], 'AND');
-      const statusAndType = combineFilters([statusFilter, typeParent], 'OR');
-      const caseFilters = combineFilters([statusAndType, tagsFilter, reportersFilter], 'AND');
+      const statusFilter = nodeBuilder.and([addStatusFilter({ status }), typeIndividual]);
+      const statusAndType = nodeBuilder.or([statusFilter, typeParent]);
+      const caseFilters = nodeBuilder.and([statusAndType, tagsFilter, reportersFilter]);
       const subCaseFilters = addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT });
 
       return {

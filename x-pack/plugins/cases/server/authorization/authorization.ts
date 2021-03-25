@@ -7,6 +7,7 @@
 
 import { KibanaRequest } from 'kibana/server';
 import Boom from '@hapi/boom';
+import { KueryNode } from '../../../../../src/plugins/data/server';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { GetSpaceFn } from './types';
@@ -133,7 +134,7 @@ export class Authorization {
   public async getFindAuthorizationFilter(
     savedObjectType: string
   ): Promise<{
-    filter?: string;
+    filter?: KueryNode;
     ensureSavedObjectIsAuthorized: (className: string) => void;
   }> {
     const { securityAuth } = this;
