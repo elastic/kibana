@@ -9,9 +9,9 @@ import {
   IndicesExistsAlias,
   IndicesGet,
   MlGetBuckets,
-  Msearch,
 } from '@elastic/elasticsearch/api/requestParams';
 import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import { estypes } from '@elastic/elasticsearch';
 import {
   InfraRouteConfig,
   InfraServerPluginSetupDeps,
@@ -153,7 +153,7 @@ export class KibanaFramework {
         apiResult = elasticsearch.client.asCurrentUser.msearch({
           ...params,
           ...frozenIndicesParams,
-        } as Msearch<any>);
+        } as estypes.MultiSearchRequest);
         break;
       case 'fieldCaps':
         apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
