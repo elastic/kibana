@@ -14,6 +14,17 @@ export interface DeprecationsClientDeps {
   http: Pick<HttpStart, 'fetch'>;
 }
 
+/* @internal */
+export type ResolveDeprecationResponse<Payload> =
+  | {
+      status: 'ok';
+      payload: Payload;
+    }
+  | {
+      status: 'fail';
+      payload: string | Error;
+    };
+
 export class DeprecationsClient {
   private readonly http: Pick<HttpStart, 'fetch'>;
   constructor({ http }: DeprecationsClientDeps) {
@@ -44,19 +55,21 @@ export class DeprecationsClient {
     return typeof details.correctiveActions.api === 'object';
   };
 
-  public resolveDepreaction = async (details: DomainDeprecationDetails) => {
+  public resolveDepreaction = async <Payload = unknown>(
+    details: DomainDeprecationDetails
+  ): Promise<ResolveDeprecationResponse<Payload>> => {
     const { domainId, correctiveActions } = details;
     // explicit check required for TS type guard
     if (typeof correctiveActions.api !== 'object') {
       return {
         status: 'fail',
-        payload: 'deprecation has no correctiveAction via api.',
+        payload: new Error('deprecation has no correctiveAction via api.'),
       };
     }
 
     const { body, method, path } = correctiveActions.api;
     try {
-      const payload = await this.http.fetch<unknown>({
+      const payload = await this.http.fetch<Payload>({
         path,
         method,
         asSystemRequest: true,

@@ -185,7 +185,7 @@ export type {
   ErrorToastOptions,
 } from './notifications';
 
-export type { DeprecationsServiceStart } from './deprecations';
+export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
 
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 

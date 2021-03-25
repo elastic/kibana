@@ -8,7 +8,7 @@
 
 import type { CoreService } from '../../types';
 import type { HttpStart } from '../http';
-import { DeprecationsClient } from './deprecations_client';
+import { DeprecationsClient, ResolveDeprecationResponse } from './deprecations_client';
 import type { DomainDeprecationDetails } from '../../server/types';
 
 /**
@@ -28,6 +28,20 @@ export interface DeprecationsServiceStart {
    * @param {string} domainId
    */
   getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
+  /**
+   * Returns a boolean if the pprovided deprecation can be automtically resolvable.
+   *
+   * @param {DomainDeprecationDetails} details
+   */
+  isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
+  /**
+   * Calls the correctiveActions.api to automatically resolve the depprecation.
+   *
+   * @param {DomainDeprecationDetails} details
+   */
+  resolveDepreaction: <Payload = unknown>(
+    details: DomainDeprecationDetails
+  ) => Promise<ResolveDeprecationResponse<Payload>>;
 }
 
 export class DeprecationsService implements CoreService<void, DeprecationsServiceStart> {
@@ -39,6 +53,8 @@ export class DeprecationsService implements CoreService<void, DeprecationsServic
     return {
       getAllDeprecations: deprecationsClient.getAllDeprecations,
       getDeprecations: deprecationsClient.getDeprecations,
+      isDeprecationResolvable: deprecationsClient.isDeprecationResolvable,
+      resolveDepreaction: deprecationsClient.resolveDepreaction,
     };
   }
 
