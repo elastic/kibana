@@ -116,7 +116,7 @@ TODO link the conclusions to each section?
 
 # Motivation
 
-We have lived with the scalability and stability problems of our current Jenkins infrastructure for several years. We have spent a significant amount of time designing around problems, and are limited in how we can design our pipelines. Since the company-wide effort to move to a new system has been cancelled for the forseeable future, we are faced with either re-engineering the way we use Jenkins, or exploring other solutions and potentially managing one ourselves.
+We have lived with the scalability and stability problems of our current Jenkins infrastructure for several years. We have spent a significant amount of time designing around problems, and are limited in how we can design our pipelines. Since the company-wide effort to move to a new system has been cancelled for the foreseeable future, we are faced with either re-engineering the way we use Jenkins, or exploring other solutions and potentially managing one ourselves.
 
 This RFC is focused on the option of using a system other than Jenkins, and managing it ourselves (to the extent that it must be managed). If the RFC is rejected, the alternative will be to instead invest significantly into Jenkins to further stabilize and scale our usage of it.
 
@@ -263,7 +263,7 @@ We were able to connect 2,200 running agents and run a [single job with 1,800 pa
 
 2,200 agents was the maximum that we were able to test because of quotas on our GCP account that could not easily be increased.
 
-We also create a job with 5 parallel steps, and triggered 300 parallel builds at once. The jobs executed and finished quickly, across ~1500 agents, with no issues and very little overhead. Interestingly, it seems that we were able to see the effects of our test in Buildkite's status page graphs (see below), but, from a user perspective, we were unable to notice any issues.
+We also created a job with 5 parallel steps, and triggered 300 parallel builds at once. The jobs executed and finished quickly, across ~1500 agents, with no issues and very little overhead. Interestingly, it seems that we were able to see the effects of our test in Buildkite's status page graphs (see below), but, from a user perspective, we were unable to notice any issues.
 
 ![Status Graphs](../images/0016_buildkite_uptime.png)
 
@@ -423,7 +423,7 @@ Since we will manage our own agents with Buildkite, we have full control over th
 
 [Buildkite maintains](https://buildkite.com/docs/tutorials/docker-containerized-builds) two officially-supported plugins for making it easier to create pipelines using containers: [one for Docker](https://github.com/buildkite-plugins/docker-buildkite-plugin) and [one for Docker Compose](https://github.com/buildkite-plugins/docker-compose-buildkite-plugin).
 
-The Docker plugin is essentially a wrapper around `docker run` that makes it easier to define steps that run in containers, while settings various flags. It also provides some logging, and provides mechanisms for automatically propagating environment variables or mounting the workspace into the container.
+The Docker plugin is essentially a wrapper around `docker run` that makes it easier to define steps that run in containers, while setting various flags. It also provides some logging, and provides mechanisms for automatically propagating environment variables or mounting the workspace into the container.
 
 A simple, working example for running Jest tests using a container is below. The `Dockerfile` contains all dependencies for CI, and runs `yarn kbn bootstrap` so that it contains a full environment, ready to run tasks.
 
