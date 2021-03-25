@@ -7,11 +7,10 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreSetup } from 'src/core/server';
-import { IndexPatternsCommonService, PluginStart } from '..';
+import { StartServicesAccessor } from 'src/core/server';
+import { IndexPatternsCommonService } from '..';
 import { SavedObjectsClient } from '../../../../core/server';
-// import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
-// import { MapsConfigType } from '../../../config';
+import { DataPluginStartDependencies, DataPluginStart } from '../plugin';
 
 interface CountSummary {
   min: number;
@@ -120,7 +119,7 @@ export async function getIndexPatternTelemetry(indexPatterns: IndexPatternsCommo
 }
 
 export function registerIndexPatternsUsageCollector(
-  getStartServices: CoreSetup<PluginStart>['getStartServices'],
+  getStartServices: StartServicesAccessor<DataPluginStartDependencies, DataPluginStart>,
   usageCollection?: UsageCollectionSetup
 ): void {
   if (!usageCollection) {
@@ -131,7 +130,7 @@ export function registerIndexPatternsUsageCollector(
     type: 'index-patterns',
     isReady: () => true,
     fetch: async () => {
-      const [{ savedObjects, elasticsearch }, { indexPatterns }] = await getStartServices();
+      const [{ savedObjects, elasticsearch }, , { indexPatterns }] = await getStartServices();
       const indexPatternService = await indexPatterns.indexPatternsServiceFactory(
         new SavedObjectsClient(savedObjects.createInternalRepository()),
         elasticsearch.client.asInternalUser

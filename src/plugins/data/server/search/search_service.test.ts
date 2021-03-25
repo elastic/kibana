@@ -10,7 +10,7 @@ import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup, CoreStart, SavedObject } from '../../../../core/server';
 import { coreMock } from '../../../../core/server/mocks';
 
-import { DataPluginStart } from '../plugin';
+import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { createFieldFormatsStartMock } from '../field_formats/mocks';
 import { createIndexPatternsStartMock } from '../index_patterns/mocks';
 
@@ -32,7 +32,7 @@ import { createSearchSessionsClientMock } from './mocks';
 
 describe('Search service', () => {
   let plugin: SearchService;
-  let mockCoreSetup: MockedKeys<CoreSetup<object, DataPluginStart>>;
+  let mockCoreSetup: MockedKeys<CoreSetup<DataPluginStartDependencies, DataPluginStart>>;
   let mockCoreStart: MockedKeys<CoreStart>;
 
   beforeEach(() => {

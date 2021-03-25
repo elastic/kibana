@@ -13,10 +13,11 @@ import {
   Logger,
   SavedObjectsClientContract,
   ElasticsearchClient,
+  UiSettingsServiceStart,
 } from 'kibana/server';
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { DataPluginStartDependencies, DataPluginStart } from '../plugin';
+import { DataPluginStart } from '../plugin';
 import { registerRoutes } from './routes';
 import { indexPatternSavedObjectType } from '../saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -47,9 +48,38 @@ export interface IndexPatternsServiceStartDeps {
   logger: Logger;
 }
 
+export const indexPatternsServiceFactory = ({
+  logger,
+  uiSettings,
+  fieldFormats,
+}: {
+  logger: Logger;
+  uiSettings: UiSettingsServiceStart;
+  fieldFormats: FieldFormatsStart;
+}) => async (
+  savedObjectsClient: SavedObjectsClientContract,
+  elasticsearchClient: ElasticsearchClient
+) => {
+  const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+  const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
+
+  return new IndexPatternsCommonService({
+    uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
+    savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
+    apiClient: new IndexPatternsApiServer(elasticsearchClient),
+    fieldFormats: formats,
+    onError: (error) => {
+      logger.error(error);
+    },
+    onNotification: ({ title, text }) => {
+      logger.warn(`${title} : ${text}`);
+    },
+  });
+};
+
 export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsServiceStart> {
   public setup(
-    core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
+    core: CoreSetup<IndexPatternsServiceStartDeps, DataPluginStart>,
     { logger, expressions, usageCollection }: IndexPatternsServiceSetupDeps
   ) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
@@ -81,26 +111,11 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
     const { uiSettings } = core;
 
     return {
-      indexPatternsServiceFactory: async (
-        savedObjectsClient: SavedObjectsClientContract,
-        elasticsearchClient: ElasticsearchClient
-      ) => {
-        const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
-        const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
-
-        return new IndexPatternsCommonService({
-          uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
-          savedObjectsClient: new SavedObjectsClientServerToCommon(savedObjectsClient),
-          apiClient: new IndexPatternsApiServer(elasticsearchClient),
-          fieldFormats: formats,
-          onError: (error) => {
-            logger.error(error);
-          },
-          onNotification: ({ title, text }) => {
-            logger.warn(`${title} : ${text}`);
-          },
-        });
-      },
+      indexPatternsServiceFactory: indexPatternsServiceFactory({
+        logger,
+        uiSettings,
+        fieldFormats,
+      }),
     };
   }
 }
