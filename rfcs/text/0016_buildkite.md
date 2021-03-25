@@ -24,7 +24,6 @@
       - [Core functionality is first-party](#core-functionality-is-first-party)
       - [First-class support for test results](#first-class-support-for-test-results)
       - [GitHub Integration](#github-integration)
-      - [Local testing / reproduction?](#local-testing--reproduction)
 - [Buildkite - Detailed design](#buildkite---detailed-design)
   - [Overview](#overview)
   - [Required and Desired Capabilities](#required-and-desired-capabilities-1)
@@ -87,7 +86,6 @@
     - [GitHub Actions](#github-actions)
 - [Adoption strategy](#adoption-strategy)
 - [How we teach this](#how-we-teach-this)
-- [Unresolved questions](#unresolved-questions)
 
 # Summary
 
@@ -110,10 +108,9 @@ This table provides an overview of the conclusions made throughout the rest of t
 | Container support                    | Partial | Yes       | Yes            | Yes      | Partial  |
 |                                      |         |           |                |          |          |
 | Customization                        | No      | Yes       | No             | No       | No       |
-| Core functionality is first-party    | No      | Mostly    | Mostly         | TODO     | Mostly   |
+| Core functionality is first-party    | No      | Yes       | Mostly         | Yes      | Mostly   |
 | First-class support for test results | Buggy   | No        | No             | Yes      | Yes      |
 | GitHub Integration                   | Yes     | Limited   | Yes            | Yes      | Yes      |
-| Local testing / reproduction?        | TODO    | TODO      | TODO           | TODO     | TODO     |
 
 TODO link the conclusions to each section?
 
@@ -219,20 +216,22 @@ We have very large CI pipelines which generate a lot of information (bundle size
 
 #### Core functionality is first-party
 
-Any core functionality that we depend on should be created and maintained by the organization maintaining the CI software. There is a large amount of risk associated with relying on third-part solutions for too much functionality.
-
-<!-- Functionality can break with updates to the CI system, have security problems that are not addressed, and  -->
+Most core functionality that we depend on should be created and maintained by the organization maintaining the CI software. It's important for bugs to be addressed quickly, for security issues to be resolved, and for functionality to be tested before a new release of the system. In this way, there is a large amount of risk associated with relying on third-party solutions for too much core functionality.
 
 #### First-class support for test results
+
+One of the primary reasons we run CI is to run tests and make sure they pass. There are currently around 65,000 tests (unit, integration, and functional) that run in CI. Being able to see summaries, histories, and details of test execution directly on build pages is extremely useful. Flaky test identification is also very useful, as we deal with flaky tests on a daily basis.
+
+For example, being able to easily see that a build passed but included 5,000 tests fewer than the previous build can make something like a pipeline misconfiguration more obvious. Being able to click on a failed test and see other recent builds where the same test failed can help identify what kind of failure it is and how important it is to resolve it quickly (e.g is it failing in 75% of builds or 5% of builds?).
+
+For any system that doesn't have this kind of support, we will need to maintain our own solution, customize build pages to include this (if the system allows), or both.
 
 #### GitHub Integration
 
 - Ability to trigger jobs based on webhooks
 - Integrate GitHub-specific information into UI, e.g. a build for a PR should link back to the PR
-
-#### Local testing / reproduction?
-
-TODO
+- Ability to set commit statuses based on job status
+- Fine-grained permission handling for pull request triggering
 
 # Buildkite - Detailed design
 
@@ -281,8 +280,6 @@ If Buildkite's status pages are accurate, they seem to be extremely stable, and 
 For agents, stability and availability will depend primarily on the infrastructure that we build and the availability of the cloud provider (GCP, primarily) running our agents. Since [we control our agents](#elastic-buildkite-agent-manager), we will be able to run agents across multiple zones, and possibly regions, in GCP for increased availability.
 
 They have a [99.95% uptime SLA](https://buildkite.com/enterprise) for Enterprise customers.
-
-TODO how does Buildkite handle failures? What happens to jobs? Even if poorly, downtime seems to be very rare
 
 #### Surfaces information intuitively
 
@@ -614,8 +611,6 @@ Features supported by the bot:
 - Option to set commit status on trigger
 - Capture custom arguments from comment text using capture groups and forward them to the triggered build
 
-TODO add link showing successful build triggers
-
 #### Configuration
 
 The configuration is stored in a `json` file (default: `.ci/pull-requests.json`) in the repo for which pull requests will be monitored. Multiple branches in the repo can store different configurations, or one configuration (e.g. in `master`) can cover the entire repo.
@@ -860,17 +855,17 @@ Jenkins is very modular, and almost all Jenkins functionality is provided by plu
 
 It's difficult to understand which plugins are required to support which base features. For example, Pipelines support is provided by a group of many plugins, and many of them have outdated names ([Pipeline: Nodes and Processes](https://github.com/jenkinsci/workflow-durable-task-step-plugin) is actually a plugin called `workflow-durable-task-step-plugin`).
 
-Many plugins are maintained by CloudBees employees, but it can be very difficult to determine which ones are, without knowing the names of CloudBees employees. All Jenkins community/third-party plugins reside under the `jenkinsci` organization in GitHub, which makes finding "official" ones difficult.
-
-TODO
+Many plugins are maintained by CloudBees employees, but it can be very difficult to determine which ones are, without knowing the names of CloudBees employees. All Jenkins community/third-party plugins reside under the `jenkinsci` organization in GitHub, which makes finding "official" ones difficult. Given the open source nature of the Jenkins ecosystem and the way that development is handled by Cloudbees, it might be incorrect to say that any plugins outside of the Cloudbees plugins (for the Cloudbees Jenkins distribution) are "first-party".
 
 #### First-class support for test results
 
-TODO
+It's a bit buggy at times (for example, if you run the same test multiple times, you have to load pages in a specific order to see the correct results in the UI), but Jenkins does have support for ingesting and displaying test results, including graphs that show changes over time. We use this feature to ingest test results from JUnit files produced by unit tests, integration tests, and end-to-end/functional tests.
 
 #### GitHub Integration
 
-TODO
+Jenkins has rich support for GitHub spread across many different plugins. It can trigger builds in response to webhook payloads, automatically create jobs for repositories in an organization, has support for self-hosted GitHub, and has many settings for triggering pull requests.
+
+It's worth mentioning, however, that we've had many issues with these integrations. For example, the GitHub Pull Request Builder plugin, which currently provides PR triggering for us and other teams, has been the source of several issues at Elastic. It's had performance issues, triggers builds erroneously, and has been mostly unmaintained for several years.
 
 ## Other solutions
 
@@ -893,12 +888,6 @@ Also, even with self-hosted runners, there is a 1,000 API request per hour hard 
 
 # Adoption strategy
 
-TODO
-
-If we implement this proposal, how will existing Kibana developers adopt it? Is
-this a breaking change? Can we write a codemod? Should we coordinate with
-other projects or libraries?
-
 We have already done a lot of the required legwork to begin building and running pipelines in Buildkite, including getting approval from various business groups inside Elastic. After all business groups have signed off, and a deal has been signed with Buildkite, we can begin adopting Buildkite. A rough plan outline is below. It's not meant to be a full migration plan.
 
 - Build minimal supporting services, automation, and pipelines to migrate a low-risk job from Jenkins to Buildkite (e.g. "Baseline" CI for tracked branches)
@@ -914,24 +903,21 @@ We have already done a lot of the required legwork to begin building and running
 - Build, test, migrate tracked branch pipelines
 - Build, test, migrate PR pipelines
   - Will additionally need PR comment support
-  - PR pipelines are the most disruptive, so we should have a high level of confidence before migrating
+  - PR pipelines are the most disruptive if there are problems, so we should have a high level of confidence before migrating
 
 # How we teach this
 
-TODO
+The primary way that developers interact with Jenkins/CI today is through pull requests. Since we push a lot of information to pull requests via comments, developers mostly only need to interact with Jenkins when something goes wrong.
 
-What names and terminology work best for these concepts and why? How is this
-idea best presented? As a continuation of existing Kibana patterns?
+The Buildkite UI is simple and intuitive enough that, even without documentation, there would likely be a pretty small learning curve to navigating the build page UI that will be linked from PR comments. That's not to say we're not going to provide documentation, we just think it would be easy even without it!
 
-Would the acceptance of this proposal mean the Kibana documentation must be
-re-organized or altered? Does it change how Kibana is taught to new developers
-at any level?
+We would also like to provide simple documentation that will guide developers through setting up new pipelines without our help. Getting a new job up and running with our current Jenkins setup is a bit complicated for someone who hasn't done it before, and there isn't good documentation for it. We'd like to change that if we move to Buildkite.
 
-How should this feature be taught to existing Kibana developers?
+To teach and inform, we will likely do some subset of these things:
 
-# Unresolved questions
-
-TODO
-
-Optional, but suggested for first drafts. What parts of the design are still
-TBD?
+- Documentation around new CI pipelines in Buildkite
+- Documentation on how to handle PR failures using Buildkite
+- Documentation on the new infrastructure, supporting services, etc.
+- Zoom sessions with walkthrough and Q&A
+- E-mail announcement with links to documentation
+- Temporarily add an extra message to PR comments, stating the change and adding links to relevant documentation
