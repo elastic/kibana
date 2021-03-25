@@ -7,6 +7,7 @@
 
 import { ValuesType } from 'utility-types';
 import { merge } from 'lodash';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { Coordinate } from '../../../../typings/timeseries';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/elasticsearch_fieldnames';
 import { maybe } from '../../../../common/utils/maybe';
@@ -41,6 +42,30 @@ export type ServiceDependencyItem = {
   | { type: 'external'; spanType?: string; spanSubtype?: string }
 );
 
+type GetMetricsResponse = PromiseReturnType<typeof getMetrics>[0];
+type PeriodsMetrics =
+  | GetMetricsResponse['previousPeriod']
+  | GetMetricsResponse['currentPeriod'];
+function reduceMetrics(acc: PeriodsMetrics, current: PeriodsMetrics) {
+  return {
+    value: {
+      count: acc.value.count + current.value.count,
+      latency_sum: acc.value.latency_sum + current.value.latency_sum,
+      error_count: acc.value.error_count + current.value.error_count,
+    },
+    timeseries: joinByKey(
+      [...acc.timeseries, ...current.timeseries],
+      'x',
+      (a, b) => ({
+        x: a.x,
+        count: a.count + b.count,
+        latency_sum: a.latency_sum + b.latency_sum,
+        error_count: a.error_count + b.error_count,
+      })
+    ),
+  };
+}
+
 function getDestinationMetrics({
   start,
   end,
@@ -48,19 +73,7 @@ function getDestinationMetrics({
 }: {
   start: number;
   end: number;
-  metrics: {
-    value: {
-      count: number;
-      latency_sum: number;
-      error_count: number;
-    };
-    timeseries: Array<{
-      x: number;
-      count: number;
-      latency_sum: number;
-      error_count: number;
-    }>;
-  };
+  metrics: ReturnType<typeof reduceMetrics>;
 }) {
   return {
     latency: {
@@ -101,6 +114,22 @@ function getDestinationMetrics({
       })),
     },
   };
+}
+
+function calculateImpact({
+  latency,
+  throughput,
+  minLatency,
+  maxLatency,
+}: {
+  latency: number | null;
+  throughput: number | null;
+  minLatency: number;
+  maxLatency: number;
+}) {
+  return isFiniteNumber(latency) && isFiniteNumber(throughput)
+    ? ((latency * throughput - minLatency) / (maxLatency - minLatency)) * 100
+    : 0;
 }
 
 export function getServiceDependencies({
@@ -178,75 +207,23 @@ export function getServiceDependencies({
         >(
           (prev, current) => {
             return {
-              currentPeriod: {
-                value: {
-                  count:
-                    prev.currentPeriod.value.count +
-                    current.currentPeriod.value.count,
-                  latency_sum:
-                    prev.currentPeriod.value.latency_sum +
-                    current.currentPeriod.value.latency_sum,
-                  error_count:
-                    prev.currentPeriod.value.error_count +
-                    current.currentPeriod.value.error_count,
-                },
-                timeseries: joinByKey(
-                  [
-                    ...prev.currentPeriod.timeseries,
-                    ...current.currentPeriod.timeseries,
-                  ],
-                  'x',
-                  (a, b) => ({
-                    x: a.x,
-                    count: a.count + b.count,
-                    latency_sum: a.latency_sum + b.latency_sum,
-                    error_count: a.error_count + b.error_count,
-                  })
-                ),
-              },
-              previousPeriod: {
-                value: {
-                  count:
-                    prev.previousPeriod.value.count +
-                    current.previousPeriod.value.count,
-                  latency_sum:
-                    prev.previousPeriod.value.latency_sum +
-                    current.previousPeriod.value.latency_sum,
-                  error_count:
-                    prev.previousPeriod.value.error_count +
-                    current.previousPeriod.value.error_count,
-                },
-                timeseries: joinByKey(
-                  [
-                    ...prev.previousPeriod.timeseries,
-                    ...current.previousPeriod.timeseries,
-                  ],
-                  'x',
-                  (a, b) => ({
-                    x: a.x,
-                    count: a.count + b.count,
-                    latency_sum: a.latency_sum + b.latency_sum,
-                    error_count: a.error_count + b.error_count,
-                  })
-                ),
-              },
+              currentPeriod: reduceMetrics(
+                prev.currentPeriod,
+                current.currentPeriod
+              ),
+              previousPeriod: reduceMetrics(
+                prev.previousPeriod,
+                current.previousPeriod
+              ),
             };
           },
           {
             currentPeriod: {
-              value: {
-                count: 0,
-                latency_sum: 0,
-                error_count: 0,
-              },
+              value: { count: 0, latency_sum: 0, error_count: 0 },
               timeseries: [],
             },
             previousPeriod: {
-              value: {
-                count: 0,
-                latency_sum: 0,
-                error_count: 0,
-              },
+              value: { count: 0, latency_sum: 0, error_count: 0 },
               timeseries: [],
             },
           }
@@ -313,23 +290,19 @@ export function getServiceDependencies({
     return metricsByResolvedAddress.map((metric) => {
       const { currentPeriod, previousPeriod, ...rest } = metric;
 
-      const currentPeriodImpact =
-        isFiniteNumber(currentPeriod.latency.value) &&
-        isFiniteNumber(currentPeriod.throughput.value)
-          ? ((currentPeriod.latency.value * currentPeriod.throughput.value -
-              currentPeriodMinLatencySum) /
-              (currentPeriodMaxLatencySum - currentPeriodMinLatencySum)) *
-            100
-          : 0;
+      const currentPeriodImpact = calculateImpact({
+        latency: currentPeriod.latency.value,
+        throughput: currentPeriod.throughput.value,
+        minLatency: currentPeriodMinLatencySum,
+        maxLatency: currentPeriodMaxLatencySum,
+      });
 
-      const previousPeriodImpact =
-        isFiniteNumber(previousPeriod.latency.value) &&
-        isFiniteNumber(previousPeriod.throughput.value)
-          ? ((previousPeriod.latency.value * previousPeriod.throughput.value -
-              previousPeriodMinLatencySum) /
-              (previousPeriodMaxLatencySum - previousPeriodMinLatencySum)) *
-            100
-          : 0;
+      const previousPeriodImpact = calculateImpact({
+        latency: previousPeriod.latency.value,
+        throughput: previousPeriod.throughput.value,
+        minLatency: previousPeriodMinLatencySum,
+        maxLatency: previousPeriodMaxLatencySum,
+      });
 
       return {
         ...rest,

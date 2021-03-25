@@ -6,6 +6,7 @@
  */
 
 import { sum } from 'lodash';
+import { AggregationResultOf } from 'typings/elasticsearch';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -30,31 +31,20 @@ function getPeriodAggregation(start: number, end: number, numBuckets: number) {
           end,
           numBuckets,
         }).intervalString,
-        extended_bounds: {
-          min: start,
-          max: end,
-        },
+        extended_bounds: { min: start, max: end },
       },
       aggs: {
         latency_sum: {
-          sum: {
-            field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
-          },
+          sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM },
         },
         count: {
-          sum: {
-            field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-          },
+          sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT },
         },
         [EVENT_OUTCOME]: {
-          terms: {
-            field: EVENT_OUTCOME,
-          },
+          terms: { field: EVENT_OUTCOME },
           aggs: {
             count: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
+              sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT },
             },
           },
         },
@@ -63,7 +53,44 @@ function getPeriodAggregation(start: number, end: number, numBuckets: number) {
   };
 }
 
-export const getMetrics = ({
+export type PeriodAggregationResultType = AggregationResultOf<
+  ReturnType<typeof getPeriodAggregation>['timeseries'],
+  {}
+>;
+
+function calculateMetrics(timeseries: PeriodAggregationResultType) {
+  return {
+    value: {
+      count: sum(
+        timeseries.buckets.map((dateBucket) => dateBucket.count.value ?? 0)
+      ),
+      latency_sum: sum(
+        timeseries.buckets.map(
+          (dateBucket) => dateBucket.latency_sum.value ?? 0
+        )
+      ),
+      error_count: sum(
+        timeseries.buckets.flatMap(
+          (dateBucket) =>
+            dateBucket[EVENT_OUTCOME].buckets.find(
+              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+            )?.count.value ?? 0
+        )
+      ),
+    },
+    timeseries: timeseries.buckets.map((dateBucket) => ({
+      x: dateBucket.key,
+      count: dateBucket.count.value ?? 0,
+      latency_sum: dateBucket.latency_sum.value ?? 0,
+      error_count:
+        dateBucket[EVENT_OUTCOME].buckets.find(
+          (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+        )?.count.value ?? 0,
+    })),
+  };
+}
+
+export const getMetrics = async ({
   setup,
   serviceName,
   environment,
@@ -82,9 +109,7 @@ export const getMetrics = ({
     const { start, end, apmEventClient } = setup;
 
     const response = await apmEventClient.search({
-      apm: {
-        events: [ProcessorEvent.metric],
-      },
+      apm: { events: [ProcessorEvent.metric] },
       body: {
         track_total_hits: true,
         size: 0,
@@ -138,70 +163,8 @@ export const getMetrics = ({
 
         return {
           span: { destination: { service: { resource: String(key) } } },
-          currentPeriod: {
-            value: {
-              count: sum(
-                currentPeriod.timeseries.buckets.map(
-                  (dateBucket) => dateBucket.count.value ?? 0
-                )
-              ),
-              latency_sum: sum(
-                currentPeriod.timeseries.buckets.map(
-                  (dateBucket) => dateBucket.latency_sum.value ?? 0
-                )
-              ),
-              error_count: sum(
-                currentPeriod.timeseries.buckets.flatMap(
-                  (dateBucket) =>
-                    dateBucket[EVENT_OUTCOME].buckets.find(
-                      (outcomeBucket) =>
-                        outcomeBucket.key === EventOutcome.failure
-                    )?.count.value ?? 0
-                )
-              ),
-            },
-            timeseries: currentPeriod.timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              count: dateBucket.count.value ?? 0,
-              latency_sum: dateBucket.latency_sum.value ?? 0,
-              error_count:
-                dateBucket[EVENT_OUTCOME].buckets.find(
-                  (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-                )?.count.value ?? 0,
-            })),
-          },
-          previousPeriod: {
-            value: {
-              count: sum(
-                previousPeriod.timeseries.buckets.map(
-                  (dateBucket) => dateBucket.count.value ?? 0
-                )
-              ),
-              latency_sum: sum(
-                previousPeriod.timeseries.buckets.map(
-                  (dateBucket) => dateBucket.latency_sum.value ?? 0
-                )
-              ),
-              error_count: sum(
-                previousPeriod.timeseries.buckets.flatMap(
-                  (dateBucket) =>
-                    dateBucket[EVENT_OUTCOME].buckets.find(
-                      (outcomeBucket) =>
-                        outcomeBucket.key === EventOutcome.failure
-                    )?.count.value ?? 0
-                )
-              ),
-            },
-            timeseries: previousPeriod.timeseries.buckets.map((dateBucket) => ({
-              x: dateBucket.key,
-              count: dateBucket.count.value ?? 0,
-              latency_sum: dateBucket.latency_sum.value ?? 0,
-              error_count:
-                dateBucket[EVENT_OUTCOME].buckets.find(
-                  (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-                )?.count.value ?? 0,
-            })),
-          },
+          currentPeriod: calculateMetrics(currentPeriod.timeseries),
+          previousPeriod: calculateMetrics(previousPeriod.timeseries),
         };
       }) ?? []
     );
