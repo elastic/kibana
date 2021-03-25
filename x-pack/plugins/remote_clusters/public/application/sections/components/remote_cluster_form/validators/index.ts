@@ -12,7 +12,7 @@ export { validateSeed } from './validate_seed';
 export { validateServerName } from './validate_server_name';
 export { validateCluster, ClusterErrors } from './validate_cluster';
 export {
-  isCloudUrl,
+  isCloudUrlEnabled,
   validateCloudUrl,
   convertProxyConnectionToCloudUrl,
   convertCloudUrlToProxyConnection,
