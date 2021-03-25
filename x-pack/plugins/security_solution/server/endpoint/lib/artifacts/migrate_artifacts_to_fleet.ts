@@ -47,6 +47,7 @@ export const migrateArtifactsToFleet = async (
       // If nothing else to process, then exit out
       if (total === 0) {
         hasMore = false;
+        logger.info(`Total Artifacts migrated to Fleet: ${totalArtifactsMigrated}`);
         return;
       }
 
@@ -70,6 +71,4 @@ export const migrateArtifactsToFleet = async (
   } catch (e) {
     logger.error(new Error('Artifact SO migration to fleet failed'), e);
   }
-
-  logger.info(`Total Artifact migrated to Fleet: ${totalArtifactsMigrated}`);
 };

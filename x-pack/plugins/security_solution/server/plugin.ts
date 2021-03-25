@@ -368,19 +368,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
 
       // Migrate artifacts to fleet and then start the minifest task after that is done
-      migrateArtifactsToFleet(
-        savedObjectsClient,
-        artifactClient,
-        logger,
-        fleetServerEnabled
-      ).finally(() => {
-        if (this.manifestTask) {
-          this.manifestTask.start({
-            taskManager,
-          });
-        } else {
-          logger.debug('User artifacts task not available.');
-        }
+      plugins.fleet.fleetSetupCompleted().then(() => {
+        migrateArtifactsToFleet(
+          savedObjectsClient,
+          artifactClient,
+          logger,
+          fleetServerEnabled
+        ).finally(() => {
+          logger.info('starting manifest task!');
+
+          if (this.manifestTask) {
+            this.manifestTask.start({
+              taskManager,
+            });
+          } else {
+            logger.debug('User artifacts task not available.');
+          }
+        });
       });
 
       // License related start
