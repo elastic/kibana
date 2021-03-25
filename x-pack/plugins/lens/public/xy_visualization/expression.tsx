@@ -338,14 +338,7 @@ export function XYChart({
   renderMode,
   syncColors,
 }: XYChartRenderProps) {
-  const {
-    legend,
-    layers,
-    fittingFunction,
-    gridlinesVisibilitySettings,
-    valueLabels,
-    curveType,
-  } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -788,6 +781,8 @@ export function XYChart({
 
           const index = `${layerIndex}-${accessorIndex}`;
 
+          const curveType = args.curveType ? CurveType[args.curveType] : undefined;
+
           switch (seriesType) {
             case 'line':
               return (
@@ -795,7 +790,7 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={getFitOptions(fittingFunction)}
-                  curve={CurveType[curveType || 'LINEAR']}
+                  curve={curveType}
                 />
               );
             case 'bar':
@@ -824,7 +819,7 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
-                  curve={curveType ? CurveType[curveType] : undefined}
+                  curve={curveType}
                 />
               );
             case 'area':
@@ -833,7 +828,7 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={getFitOptions(fittingFunction)}
-                  curve={CurveType[curveType || 'LINEAR']}
+                  curve={curveType}
                 />
               );
             default:

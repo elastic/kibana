@@ -83,7 +83,6 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       }
     }
     color={[Function]}
-    curve={9}
     data={
       Array [
         Object {
@@ -144,7 +143,6 @@ exports[`xy_expression XYChart component it renders area 1`] = `
       }
     }
     color={[Function]}
-    curve={9}
     data={
       Array [
         Object {
@@ -689,7 +687,6 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       }
     }
     color={[Function]}
-    curve={9}
     data={
       Array [
         Object {
@@ -750,7 +747,6 @@ exports[`xy_expression XYChart component it renders line 1`] = `
       }
     }
     color={[Function]}
-    curve={9}
     data={
       Array [
         Object {
@@ -887,7 +883,6 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       }
     }
     color={[Function]}
-    curve={9}
     data={
       Array [
         Object {
@@ -952,7 +947,6 @@ exports[`xy_expression XYChart component it renders stacked area 1`] = `
       }
     }
     color={[Function]}
-    curve={9}
     data={
       Array [
         Object {
