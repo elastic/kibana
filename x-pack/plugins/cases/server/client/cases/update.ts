@@ -55,6 +55,7 @@ import { CasesClientHandler } from '..';
 import { createAlertUpdateRequest } from '../../common';
 import { UpdateAlertRequest } from '../types';
 import { createCaseError } from '../../common/error';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -414,7 +415,7 @@ export const update = async ({
       return acc;
     }, new Map<string, SavedObject<ESCaseAttributes>>());
 
-    if (!subCasesEnabled) {
+    if (!ENABLE_CASE_CONNECTOR) {
       throwIfUpdateType(updateFilterCases);
     }
 

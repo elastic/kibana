@@ -35,6 +35,7 @@ import {
   CaseUserActionServiceSetup,
 } from '../../services';
 import { createCaseError } from '../../common/error';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 interface CreateCaseArgs {
   caseConfigureService: CaseConfigureServiceSetup;
@@ -63,8 +64,10 @@ export const create = async ({
   // default to an individual case if the type is not defined.
   const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
 
-  if (!subCasesEnabled && type === CaseType.collection) {
-    throw Boom.badRequest('Case type cannot be collection when the sub cases feature is disabled');
+  if (!ENABLE_CASE_CONNECTOR && type === CaseType.collection) {
+    throw Boom.badRequest(
+      'Case type cannot be collection when the case connector feature is disabled'
+    );
   }
 
   const query = pipe(

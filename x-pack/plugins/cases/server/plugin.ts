@@ -10,7 +10,7 @@ import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
-import { APP_ID } from '../common/constants';
+import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common/constants';
 
 import { ConfigType } from './config';
 import { initCaseApi } from './routes/api';
@@ -112,7 +112,7 @@ export class CasePlugin {
       subCasesEnabled: this.config.subCasesEnabled,
     });
 
-    if (this.config.subCasesEnabled) {
+    if (ENABLE_CASE_CONNECTOR) {
       core.savedObjects.registerType(subCaseSavedObjectType);
       registerConnectors({
         actionsRegisterType: plugins.actions.registerType,

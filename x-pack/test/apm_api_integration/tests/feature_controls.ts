@@ -14,7 +14,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const log = getService('log');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());

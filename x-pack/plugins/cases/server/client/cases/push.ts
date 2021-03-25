@@ -40,6 +40,7 @@ import {
 } from '../../services';
 import { CasesClientHandler } from '../client';
 import { createCaseError } from '../../common/error';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -97,7 +98,7 @@ export const push = async ({
       casesClient.get({
         id: caseId,
         includeComments: true,
-        includeSubCaseComments: subCasesEnabled,
+        includeSubCaseComments: ENABLE_CASE_CONNECTOR,
       }),
       actionsClient.get({ id: connectorId }),
       casesClient.getUserActions({ caseId }),
@@ -189,7 +190,7 @@ export const push = async ({
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },
-        includeSubCaseComments: subCasesEnabled,
+        includeSubCaseComments: ENABLE_CASE_CONNECTOR,
       }),
     ]);
   } catch (e) {
