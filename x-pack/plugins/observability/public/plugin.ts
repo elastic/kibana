@@ -39,7 +39,7 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
 
   public setup(core: CoreSetup, plugins: ObservabilityPluginSetupDeps) {
     const category = DEFAULT_APP_CATEGORIES.observability;
-    const euiIconType = 'logo-observability';
+    const euiIconType = 'logoObservability';
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
