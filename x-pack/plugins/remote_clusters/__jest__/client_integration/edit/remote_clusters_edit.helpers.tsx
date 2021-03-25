@@ -7,9 +7,12 @@
 
 import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 
+import React from 'react';
 import { RemoteClusterEdit } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
 import { AppRouter, registerRouter } from '../../../public/application/services';
+import { basePathMock, createRemoteClustersActions } from '../helpers';
+import { AppContextProvider } from '../../../public/application/app_context';
 
 export const REMOTE_CLUSTER_EDIT_NAME = 'new-york';
 
@@ -17,6 +20,15 @@ export const REMOTE_CLUSTER_EDIT = {
   name: REMOTE_CLUSTER_EDIT_NAME,
   seeds: ['localhost:9400'],
   skipUnavailable: true,
+};
+
+const ComponentWithContext = (props: { isCloudEnabled: boolean }) => {
+  const { isCloudEnabled, ...rest } = props;
+  return (
+    <AppContextProvider context={{ isCloudEnabled, basePath: basePathMock }}>
+      <RemoteClusterEdit {...rest} />
+    </AppContextProvider>
+  );
 };
 
 const testBedConfig: TestBedConfig = {
@@ -31,4 +43,16 @@ const testBedConfig: TestBedConfig = {
   },
 };
 
-export const setup = registerTestBed(RemoteClusterEdit, testBedConfig);
+const initTestBed = (isCloudEnabled: boolean) =>
+  registerTestBed(ComponentWithContext, testBedConfig)({ isCloudEnabled });
+
+export const setup = async (isCloudEnabled = false) => {
+  const testBed = await initTestBed(isCloudEnabled);
+
+  return {
+    ...testBed,
+    actions: {
+      ...createRemoteClustersActions(testBed),
+    },
+  };
+};

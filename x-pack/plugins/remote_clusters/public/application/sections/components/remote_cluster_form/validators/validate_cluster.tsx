@@ -23,15 +23,17 @@ export interface ClusterErrors {
   cloudUrl?: ClusterError;
 }
 export const validateCluster = (fields: FormFields, isCloudEnabled: boolean): ClusterErrors => {
-  const { name, seeds = [], mode, proxyAddress, serverName, isCloudUrl, cloudUrl } = fields;
+  const { name, seeds = [], mode, proxyAddress, serverName, cloudUrlEnabled, cloudUrl } = fields;
 
   return {
     name: validateName(name),
     seeds: mode === SNIFF_MODE ? validateSeeds(seeds) : null,
-    proxyAddress: !isCloudUrl && mode === PROXY_MODE ? validateProxy(proxyAddress) : null,
+    proxyAddress: !cloudUrlEnabled && mode === PROXY_MODE ? validateProxy(proxyAddress) : null,
     // server name is only required in cloud when proxy mode is enabled
     serverName:
-      !isCloudUrl && isCloudEnabled && mode === PROXY_MODE ? validateServerName(serverName) : null,
-    cloudUrl: isCloudUrl ? validateCloudUrl(cloudUrl) : null,
+      !cloudUrlEnabled && isCloudEnabled && mode === PROXY_MODE
+        ? validateServerName(serverName)
+        : null,
+    cloudUrl: cloudUrlEnabled ? validateCloudUrl(cloudUrl) : null,
   };
 };

@@ -7,3 +7,5 @@
 
 export { nextTick, getRandomString, findTestSubject } from '@kbn/test/jest';
 export { setupEnvironment } from './setup_environment';
+export { createRemoteClustersActions, RemoteClustersActions } from './remote_clusters_actions';
+export { basePathMock } from './base_path_mock';

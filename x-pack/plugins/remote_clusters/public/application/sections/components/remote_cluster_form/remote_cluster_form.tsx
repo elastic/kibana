@@ -41,14 +41,14 @@ import { AppContext, Context } from '../../../app_context';
 import { skippingDisconnectedClustersUrl } from '../../../services/documentation';
 
 import { RequestFlyout } from './request_flyout';
-import { ConnectionMode } from './connection_mode';
+import { ConnectionMode } from './components';
 import {
   ClusterErrors,
-  validateCluster,
   convertCloudUrlToProxyConnection,
   convertProxyConnectionToCloudUrl,
-  isCloudUrl,
+  validateCluster,
 } from './validators';
+import { isCloudUrlEnabled } from './validators/validate_cloud_url';
 
 const defaultClusterValues: Cluster = {
   name: '',
@@ -71,7 +71,7 @@ interface Props {
   cluster?: Cluster;
 }
 
-export type FormFields = Cluster & { isCloudUrl: boolean; cloudUrl: string };
+export type FormFields = Cluster & { cloudUrl: string; cloudUrlEnabled: boolean };
 
 interface State {
   fields: FormFields;
@@ -96,14 +96,13 @@ export class RemoteClusterForm extends Component<Props, State> {
 
     // Connection mode should default to "proxy" in cloud
     const defaultMode = isCloudEnabled ? PROXY_MODE : SNIFF_MODE;
-    const isCloudUrlEnabled: boolean = isCloudUrl(cluster) && isCloudEnabled;
     const fieldsState: FormFields = merge(
       {},
       {
         ...defaultClusterValues,
         mode: defaultMode,
-        isCloudUrl: isCloudUrlEnabled,
         cloudUrl: convertProxyConnectionToCloudUrl(cluster),
+        cloudUrlEnabled: isCloudEnabled && isCloudUrlEnabled(cluster),
       },
       cluster
     );
@@ -241,7 +240,7 @@ export class RemoteClusterForm extends Component<Props, State> {
             <p>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
-                defaultMessage="A request fails if any of the queried remote clusters are unavailable. To send requests to other remote clusters if this cluster is unavailable, enable {optionName}. {learnMoreLink}"
+                defaultMessage="If any of the remote clusters are unavailable, the query request fails. To avoid this and continue to send requests to other clusters, enable {optionName}. {learnMoreLink}"
                 values={{
                   optionName: (
                     <strong>
@@ -582,7 +581,7 @@ export class RemoteClusterForm extends Component<Props, State> {
               helpText={
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.fieldNameLabelHelpText"
-                  defaultMessage="Name can only contain letters, numbers, underscores, and dashes."
+                  defaultMessage="Must contain only letters, numbers, underscores, and dashes."
                 />
               }
               error={errorClusterName}

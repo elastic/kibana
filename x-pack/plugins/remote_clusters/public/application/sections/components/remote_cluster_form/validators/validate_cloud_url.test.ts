@@ -6,7 +6,7 @@
  */
 
 import {
-  isCloudUrl,
+  isCloudUrlEnabled,
   validateCloudUrl,
   convertCloudUrlToProxyConnection,
   convertProxyConnectionToCloudUrl,
@@ -28,17 +28,17 @@ describe('Cloud url', () => {
 
   describe('is cloud url', () => {
     it('true for a new cluster', () => {
-      const actual = isCloudUrl();
+      const actual = isCloudUrlEnabled();
       expect(actual).toBe(true);
     });
 
     it('true when proxy connection is empty', () => {
-      const actual = isCloudUrl({ name: 'test', proxyAddress: '', serverName: '' });
+      const actual = isCloudUrlEnabled({ name: 'test', proxyAddress: '', serverName: '' });
       expect(actual).toBe(true);
     });
 
     it('true when proxy address is the same as server name and default port', () => {
-      const actual = isCloudUrl({
+      const actual = isCloudUrlEnabled({
         name: 'test',
         proxyAddress: 'some-proxy:9400',
         serverName: 'some-proxy',
@@ -46,7 +46,7 @@ describe('Cloud url', () => {
       expect(actual).toBe(true);
     });
     it('false when proxy address is the same as server name but not default port', () => {
-      const actual = isCloudUrl({
+      const actual = isCloudUrlEnabled({
         name: 'test',
         proxyAddress: 'some-proxy:1234',
         serverName: 'some-proxy',
@@ -54,7 +54,7 @@ describe('Cloud url', () => {
       expect(actual).toBe(false);
     });
     it('true when proxy address is  not the same as server name', () => {
-      const actual = isCloudUrl({
+      const actual = isCloudUrlEnabled({
         name: 'test',
         proxyAddress: 'some-proxy:9400',
         serverName: 'some-server-name',

@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Cluster } from '../../../../../../common/lib';
+import { isAddressValid } from './validate_address';
 
 export const i18nTexts = {
   urlEmpty: (
@@ -28,7 +29,7 @@ const CLOUD_DEFAULT_PROXY_PORT = '9400';
 const EMPTY_PROXY_VALUES = { proxyAddress: '', serverName: '' };
 const PROTOCOL_REGEX = new RegExp(/^https?:\/\//);
 
-export const isCloudUrl = (cluster?: Cluster): boolean => {
+export const isCloudUrlEnabled = (cluster?: Cluster): boolean => {
   // enable cloud url for new clusters
   if (!cluster) {
     return true;
@@ -43,47 +44,36 @@ export const isCloudUrl = (cluster?: Cluster): boolean => {
   return port === CLOUD_DEFAULT_PROXY_PORT && proxyAddressWithoutPort === serverName;
 };
 
-const hasProtocol = (url: string): boolean => PROTOCOL_REGEX.test(url);
 const formatUrl = (url: string) => {
   url = (url ?? '').trim().toLowerCase();
-  // add protocol if missing to avoid URL constructor throwing error
-  if (!hasProtocol(url)) {
-    url = `${'http://'}${url}`;
-  }
+  // delete http(s):// protocol string if any
+  url = url.replace(PROTOCOL_REGEX, '');
   return url;
 };
 
 export const convertProxyConnectionToCloudUrl = (cluster?: Cluster): string => {
-  if (!isCloudUrl(cluster)) {
+  if (!isCloudUrlEnabled(cluster)) {
     return '';
   }
   return cluster?.serverName ?? '';
 };
 export const convertCloudUrlToProxyConnection = (
-  cloudDeploymentUrl: string = ''
+  cloudUrl: string = ''
 ): { proxyAddress: string; serverName: string } => {
-  cloudDeploymentUrl = formatUrl(cloudDeploymentUrl);
-  if (!cloudDeploymentUrl) {
+  cloudUrl = formatUrl(cloudUrl);
+  if (!cloudUrl || !isAddressValid(cloudUrl)) {
     return EMPTY_PROXY_VALUES;
   }
-  let url: URL;
-  try {
-    url = new URL(cloudDeploymentUrl);
-    const hostname = url.hostname;
-    return { proxyAddress: `${hostname}:${CLOUD_DEFAULT_PROXY_PORT}`, serverName: hostname };
-  } catch (err) {
-    return EMPTY_PROXY_VALUES;
-  }
+  const address = cloudUrl.split(':')[0];
+  return { proxyAddress: `${address}:${CLOUD_DEFAULT_PROXY_PORT}`, serverName: address };
 };
 
-export const validateCloudUrl = (cloudDeploymentUrl: string): JSX.Element | null => {
-  if (!cloudDeploymentUrl) {
+export const validateCloudUrl = (cloudUrl: string): JSX.Element | null => {
+  if (!cloudUrl) {
     return i18nTexts.urlEmpty;
   }
-  cloudDeploymentUrl = formatUrl(cloudDeploymentUrl);
-  try {
-    new URL(cloudDeploymentUrl);
-  } catch (err) {
+  cloudUrl = formatUrl(cloudUrl);
+  if (!isAddressValid(cloudUrl)) {
     return i18nTexts.urlInvalid;
   }
   return null;
