@@ -480,7 +480,7 @@ export interface DeprecationsServiceStart {
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
     getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
     isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
-    resolveDepreaction: <Payload = unknown>(details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse<Payload>>;
+    resolveDeprecation: <Payload = unknown>(details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse<Payload>>;
 }
 
 // @public (undocumented)

@@ -23,6 +23,9 @@ import { registerRoutes } from './routes';
  * if the deployment is using these features. Allowing for a user tailored experience
  * for upgrading the stack version.
  *
+ * The Deprecation service is consumed by the upgrade assistant to assist with the upgrade
+ * experience.
+ *
  * @example
  * ```ts
  * import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from 'src/core/server';
@@ -50,6 +53,18 @@ import { registerRoutes } from './routes';
  *     });
  *   }
  *
+ *   deprecations.push({
+ *     message: `You have ${count} Timelion worksheets. The Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard.`,
+ *     documentationUrl:
+ *       'https://www.elastic.co/guide/en/kibana/current/create-panels-with-timelion.html',
+ *     level: 'critical',
+ *     correctiveActions: {
+ *       api: {
+ *         path: '',
+ *       }
+ *     },
+ *   });
+ *
  *   return deprecations;
  * }
  *
@@ -61,6 +76,43 @@ import { registerRoutes } from './routes';
  * }
  * ```
  *
+ * If a deprecated feature can be resolved without manual user intervention.
+ * Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the
+ * deprecation upon a user trigger.
+ *
+ * @example
+ * ```
+ * core.deprecations.registerDeprecations({ getDeprecations: () => [
+ *   {
+ *     "message": "User 'test_dashboard_user' is using a deprecated role: 'kibana_user'",
+ *     "correctiveActions": {
+ *         "api": {
+ *             "path": "/internal/security/users/test_dashboard_user",
+ *             "method": "POST",
+ *             "body": {
+ *                 "username": "test_dashboard_user",
+ *                 "roles": [
+ *                     "machine_learning_user",
+ *                     "enrich_user",
+ *                     "kibana_admin"
+ *                 ],
+ *                 "full_name": "Alison Goryachev",
+ *                 "email": "alisongoryachev@gmail.com",
+ *                 "metadata": {},
+ *                 "enabled": true
+ *             }
+ *         },
+ *         "manualSteps": [
+ *             "Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.",
+ *             "Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role."
+ *         ]
+ *     },
+ *     "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html",
+ *     "level": "critical",
+ *     "domainId": "security"
+ *   },
+ * ]});
+ * ```
  * @public
  */
 export interface DeprecationsServiceSetup {

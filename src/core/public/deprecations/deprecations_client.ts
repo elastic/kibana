@@ -55,7 +55,7 @@ export class DeprecationsClient {
     return typeof details.correctiveActions.api === 'object';
   };
 
-  public resolveDepreaction = async <Payload = unknown>(
+  public resolveDeprecation = async <Payload = unknown>(
     details: DomainDeprecationDetails
   ): Promise<ResolveDeprecationResponse<Payload>> => {
     const { domainId, correctiveActions } = details;

@@ -29,7 +29,7 @@ export interface DeprecationsServiceStart {
    */
   getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
   /**
-   * Returns a boolean if the pprovided deprecation can be automtically resolvable.
+   * Returns a boolean if the provided deprecation can be automatically resolvable.
    *
    * @param {DomainDeprecationDetails} details
    */
@@ -39,7 +39,7 @@ export interface DeprecationsServiceStart {
    *
    * @param {DomainDeprecationDetails} details
    */
-  resolveDepreaction: <Payload = unknown>(
+  resolveDeprecation: <Payload = unknown>(
     details: DomainDeprecationDetails
   ) => Promise<ResolveDeprecationResponse<Payload>>;
 }
@@ -54,7 +54,7 @@ export class DeprecationsService implements CoreService<void, DeprecationsServic
       getAllDeprecations: deprecationsClient.getAllDeprecations,
       getDeprecations: deprecationsClient.getDeprecations,
       isDeprecationResolvable: deprecationsClient.isDeprecationResolvable,
-      resolveDepreaction: deprecationsClient.resolveDepreaction,
+      resolveDeprecation: deprecationsClient.resolveDeprecation,
     };
   }
 

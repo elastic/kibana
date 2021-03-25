@@ -4,7 +4,7 @@
 
 ## DeprecationsServiceStart.isDeprecationResolvable property
 
-Returns a boolean if the pprovided deprecation can be automtically resolvable.
+Returns a boolean if the provided deprecation can be automatically resolvable.
 
 <b>Signature:</b>
 

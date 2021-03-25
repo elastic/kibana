@@ -113,7 +113,7 @@ describe('DeprecationsClient', () => {
     });
   });
 
-  describe('resolveDepreaction', () => {
+  describe('resolveDeprecation', () => {
     it('fails if deprecation is not resolvable', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const mockDeprecationDetails: DomainDeprecationDetails = {
@@ -122,7 +122,7 @@ describe('DeprecationsClient', () => {
         level: 'warning',
         correctiveActions: {},
       };
-      const result = await deprecationsClient.resolveDepreaction(mockDeprecationDetails);
+      const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
       expect(result).toEqual({
         status: 'fail',
@@ -148,7 +148,7 @@ describe('DeprecationsClient', () => {
         },
       };
       http.fetch.mockResolvedValue(mockPayload);
-      const result = await deprecationsClient.resolveDepreaction(mockDeprecationDetails);
+      const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
       expect(http.fetch).toBeCalledTimes(1);
       expect(http.fetch).toBeCalledWith({
@@ -181,7 +181,7 @@ describe('DeprecationsClient', () => {
         },
       };
       http.fetch.mockRejectedValue(mockPayload);
-      const result = await deprecationsClient.resolveDepreaction(mockDeprecationDetails);
+      const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
       expect(result).toEqual({ status: 'fail', payload: mockPayload });
     });
