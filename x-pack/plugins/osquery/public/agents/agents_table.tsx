@@ -10,7 +10,7 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiHealth, EuiHighlight } from '@
 
 import { useAllAgents } from './use_all_agents';
 import { useAgentGroups } from './use_agent_groups';
-import { Direction } from '../../common/search_strategy';
+import { useOsqueryPolicies } from './use_osquery_policies';
 import { Agent } from '../../common/shared_imports';
 import {
   getNumAgentsInGrouping,
@@ -18,6 +18,13 @@ import {
   getNumOverlapped,
   generateColorPicker,
 } from './helpers';
+
+import {
+  ALL_AGENTS_LABEL,
+  AGENT_PLATFORMS_LABEL,
+  AGENT_POLICY_LABEL,
+  AGENT_SELECTION_LABEL,
+} from './translations';
 
 import { AGENT_GROUP_KEY, SelectedGroups, AgentOptionValue, GroupOptionValue } from './types';
 
@@ -38,27 +45,18 @@ type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 const getColor = generateColorPicker();
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
-  // handle paged fetching of agents
-  const [pageIndex /* , setPageIndex*/] = useState(0);
-  const [pageSize /* , setPageSize*/] = useState(1000);
-  const [sortField /* , setSortField*/] = useState<keyof Agent>('upgraded_at');
-  const [sortDirection /* , setSortDirection*/] = useState<Direction>(Direction.asc);
-
-  const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups();
+  const osqueryPolicyData = useOsqueryPolicies();
+  const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
+    osqueryPolicyData
+  );
+  const { agentData } = useAllAgents(osqueryPolicyData);
   const [loading, setLoading] = useState<boolean>(true);
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
   const [numAgentsSelected, setNumAgentsSelected] = useState<number>(0);
 
-  const { data: agentData = { agents: [] } } = useAllAgents({
-    activePage: pageIndex,
-    limit: pageSize,
-    direction: sortDirection,
-    sortField,
-  });
-
   useEffect(() => {
-    const allAgentsLabel = 'All agents';
+    const allAgentsLabel = ALL_AGENTS_LABEL;
     const opts: GroupOption[] = [
       {
         label: allAgentsLabel,
@@ -75,7 +73,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
     if (groups.platforms.length > 0) {
       const groupType = AGENT_GROUP_KEY.Platform;
       opts.push({
-        label: 'Platform',
+        label: AGENT_PLATFORMS_LABEL,
         options: groups.platforms.map(({ name, size }) => ({
           label: name,
           color: getColor(groupType),
@@ -87,7 +85,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
     if (groups.policies.length > 0) {
       const groupType = AGENT_GROUP_KEY.Policy;
       opts.push({
-        label: 'Policy',
+        label: AGENT_POLICY_LABEL,
         options: groups.policies.map(({ name, size }) => ({
           label: name,
           color: getColor(groupType),
@@ -96,11 +94,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
       });
     }
 
-    if (agentData.agents.length > 0) {
+    if (agentData && agentData.list.length > 0) {
       const groupType = AGENT_GROUP_KEY.Agent;
       opts.push({
-        label: 'Agents',
-        options: (agentData.agents as Agent[]).map((agent: Agent) => ({
+        label: AGENT_SELECTION_LABEL,
+        options: (agentData.list as Agent[]).map((agent: Agent) => ({
           label: agent.local_metadata.host.hostname,
           color: getColor(groupType),
           value: {

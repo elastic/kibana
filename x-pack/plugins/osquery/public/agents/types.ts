@@ -5,6 +5,23 @@
  * 2.0.
  */
 
+interface BaseDataPoint {
+  key: string;
+  doc_count: number;
+}
+
+export type AggregationDataPoint = AgentAggregation & BaseDataPoint;
+
+export interface AgentAggregation {
+  [aggregationKey: string]: {
+    buckets: AggregationDataPoint[];
+  };
+}
+
+export interface Group {
+  name: string;
+  size: number;
+}
 export interface Overlap {
   [platform: string]: { [policy: string]: number };
 }

@@ -5,94 +5,32 @@
  * 2.0.
  */
 
-import deepEqual from 'fast-deep-equal';
-import { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
 
-import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import {
-  PageInfoPaginated,
-  OsqueryQueries,
-  AgentsRequestOptions,
-  AgentsStrategyResponse,
-  Direction,
-} from '../../common/search_strategy';
-import { ESTermQuery } from '../../common/typed_json';
-import { Agent } from '../../common/shared_imports';
-
-import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
-
-export interface AgentsArgs {
-  agents: Agent[];
-  id: string;
-  inspect: InspectResponse;
-  isInspected: boolean;
-  pageInfo: PageInfoPaginated;
-  totalCount: number;
-}
 
 interface UseAllAgents {
-  activePage: number;
-  direction: Direction;
-  limit: number;
-  sortField: string;
-  filterQuery?: ESTermQuery | string;
-  skip?: boolean;
+  osqueryPolicies: string[];
+  osqueryPoliciesLoading: boolean;
 }
 
-export const useAllAgents = ({
-  activePage,
-  direction,
-  limit,
-  sortField,
-  filterQuery,
-  skip = false,
-}: UseAllAgents) => {
-  const { data } = useKibana().services;
-
-  const [agentsRequest, setHostRequest] = useState<AgentsRequestOptions | null>(null);
-
-  const response = useQuery(
-    ['agents', { activePage, direction, limit, sortField }],
+export const useAllAgents = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAllAgents) => {
+  // TODO: properly fetch these in an async manner
+  const { http } = useKibana().services;
+  const { isLoading: agentsLoading, data: agentData } = useQuery(
+    ['agents', osqueryPolicies],
     async () => {
-      if (!agentsRequest) return Promise.resolve();
-
-      const responseData = await data.search
-        .search<AgentsRequestOptions, AgentsStrategyResponse>(agentsRequest, {
-          strategy: 'osquerySearchStrategy',
-        })
-        .toPromise();
-
-      return {
-        ...responseData,
-        agents: responseData.edges,
-        inspect: getInspectResponse(responseData),
-      };
+      return await http.get('/api/fleet/agents', {
+        query: {
+          kuery: osqueryPolicies.map((p) => `policy_id:${p}`).join(' or '),
+          perPage: 9000,
+        },
+      });
     },
     {
-      enabled: !skip && !!agentsRequest,
+      enabled: !osqueryPoliciesLoading,
     }
   );
 
-  useEffect(() => {
-    setHostRequest((prevRequest) => {
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        factoryQueryType: OsqueryQueries.agents,
-        filterQuery: createFilter(filterQuery),
-        pagination: generateTablePaginationOptions(activePage, limit),
-        sort: {
-          direction,
-          field: sortField,
-        },
-      };
-      if (!deepEqual(prevRequest, myRequest)) {
-        return myRequest;
-      }
-      return prevRequest;
-    });
-  }, [activePage, direction, filterQuery, limit, sortField]);
-
-  return response;
+  return { agentsLoading, agentData };
 };

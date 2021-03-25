@@ -7,17 +7,12 @@
 
 import type { ElasticsearchClient } from 'src/core/server';
 import { OsqueryAppContext } from './osquery_app_context_services';
-import { AgentService } from '../../../fleet/server';
 
 export interface AgentSelection {
   agents: string[];
   allAgentsSelected: boolean;
   platformsSelected: string[];
   policiesSelected: string[];
-}
-
-function checkService(service: AgentService | undefined): service is AgentService {
-  return service !== undefined;
 }
 
 export const parseAgentSelection = async (
@@ -28,7 +23,7 @@ export const parseAgentSelection = async (
   let selectedAgents: string[] = [];
   const { allAgentsSelected, platformsSelected, policiesSelected, agents } = agentSelection;
   const agentService = context.service.getAgentService();
-  if (checkService(agentService)) {
+  if (agentService) {
     if (allAgentsSelected) {
       // TODO: actually fetch all the agents
       const { agents: fetchedAgents } = await agentService.listAgents(esClient, {

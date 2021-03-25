@@ -12,14 +12,21 @@ import {
   StrategyResponseType,
   Inspect,
 } from '../../common/search_strategy';
-import { AGENT_GROUP_KEY, SelectedGroups, Overlap, AgentOptionValue } from './types';
+import {
+  AGENT_GROUP_KEY,
+  SelectedGroups,
+  Overlap,
+  Group,
+  AgentOptionValue,
+  AgentAggregation,
+} from './types';
 
 export type InspectResponse = Inspect & { response: string[] };
 
 export const getNumOverlapped = ({ policy, platform }: SelectedGroups, overlap: Overlap) => {
   let sum = 0;
   Object.keys(platform).forEach((plat) => {
-    const policies = overlap[plat];
+    const policies = overlap[plat] ?? {};
     Object.keys(policy).forEach((pol) => {
       sum += policies[pol] ?? 0;
     });
@@ -27,6 +34,22 @@ export const getNumOverlapped = ({ policy, platform }: SelectedGroups, overlap: 
   return sum;
 };
 
+export const processAggregations = (aggs: AgentAggregation) => {
+  const platforms: Group[] = [];
+  const overlap: Overlap = {};
+  for (const { key, doc_count: size, policies } of aggs.platforms.buckets) {
+    platforms.push({ name: key, size });
+    overlap[key] = policies.buckets.reduce((acc: { [key: string]: number }, pol) => {
+      acc[pol.key] = pol.doc_count;
+      return acc;
+    }, {} as { [key: string]: number });
+  }
+  return {
+    platforms,
+    overlap,
+    policies: aggs.policies.buckets.map((o) => ({ name: o.key, size: o.doc_count })),
+  };
+};
 export const generateColorPicker = () => {
   const visColorsBehindText = euiPaletteColorBlindBehindText();
   const typeColors = new Map<AGENT_GROUP_KEY, string>();

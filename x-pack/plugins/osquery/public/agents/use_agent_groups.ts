@@ -7,7 +7,6 @@
 import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { useKibana } from '../common/lib/kibana';
-import { useOsqueryPolicies } from './use_osquery_policies';
 
 import {
   OsqueryQueries,
@@ -15,76 +14,75 @@ import {
   AgentsStrategyResponse,
 } from '../../common/search_strategy';
 
-import { generateTablePaginationOptions } from './helpers';
-import { Overlap } from './types';
+import { generateTablePaginationOptions, processAggregations } from './helpers';
+import { Overlap, Group } from './types';
 
-interface Group {
-  name: string;
-  size: number;
+interface UseAgentGroups {
+  osqueryPolicies: string[];
+  osqueryPoliciesLoading: boolean;
 }
 
-export const useAgentGroups = () => {
+export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAgentGroups) => {
   const { data } = useKibana().services;
-  const { osqueryPolicies, osqueryPoliciesLoading } = useOsqueryPolicies();
 
   const [platforms, setPlatforms] = useState<Group[]>([]);
-  const [policyOptions, setPolicyOptions] = useState<Group[]>([]);
+  const [policies, setPolicies] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [overlap, setOverlap] = useState<Overlap>(() => ({}));
   const [totalCount, setTotalCount] = useState<number>(0);
-  useQuery(['agentGroups', osqueryPoliciesLoading], async () => {
-    if (osqueryPoliciesLoading) return null;
-    const responseData = await data.search
-      .search<AgentsRequestOptions, AgentsStrategyResponse>(
-        {
-          filterQuery: { terms: { policy_id: osqueryPolicies } },
-          factoryQueryType: OsqueryQueries.agents,
-          aggregations: {
-            platforms: {
-              field: 'local_metadata.os.platform',
-              subaggs: { policies: 'policy_id' },
+  useQuery(
+    ['agentGroups'],
+    async () => {
+      const responseData = await data.search
+        .search<AgentsRequestOptions, AgentsStrategyResponse>(
+          {
+            filterQuery: { terms: { policy_id: osqueryPolicies } },
+            factoryQueryType: OsqueryQueries.agents,
+            aggregations: {
+              platforms: {
+                field: 'local_metadata.os.platform',
+                subaggs: { policies: 'policy_id' },
+              },
+              policies: 'policy_id',
             },
-            policies: 'policy_id',
-          },
-          pagination: generateTablePaginationOptions(0, 9000),
-          sort: {
-            direction: 'asc',
-            field: 'local_metadata.os.platform',
-          },
-        } as AgentsRequestOptions,
-        {
-          strategy: 'osquerySearchStrategy',
-        }
-      )
-      .toPromise();
-    setLoading(false);
-    if (responseData.aggregations) {
-      const aggs = responseData.aggregations;
-      const newPlatforms: Group[] = [];
-      const newOverlap: Overlap = {};
-      for (const { key, doc_count: docCount, policies } of aggs.platforms.buckets) {
-        newPlatforms.push({ name: key, size: docCount });
-        newOverlap[key] = policies.buckets.reduce(
-          (acc: { [key: string]: number }, pol: { key: string; doc_count: number }) => {
-            acc[pol.key] = pol.doc_count;
-            return acc;
-          },
-          {} as { [key: string]: number }
-        );
+            pagination: generateTablePaginationOptions(0, 9000),
+            sort: {
+              direction: 'asc',
+              field: 'local_metadata.os.platform',
+            },
+          } as AgentsRequestOptions,
+          {
+            strategy: 'osquerySearchStrategy',
+          }
+        )
+        .toPromise();
+
+      if (responseData.rawResponse.aggregations) {
+        const {
+          platforms: newPlatforms,
+          overlap: newOverlap,
+          policies: newPolicies,
+        } = processAggregations(responseData.rawResponse.aggregations);
+
+        setPlatforms(newPlatforms);
+        setOverlap(newOverlap);
+        setPolicies(newPolicies);
       }
-      setPlatforms(newPlatforms);
-      setOverlap(newOverlap);
-      setPolicyOptions(aggs.policies.buckets.map((o) => ({ name: o.key, size: o.doc_count })));
+
+      setLoading(false);
+      setTotalCount(responseData.totalCount);
+    },
+    {
+      enabled: !osqueryPoliciesLoading,
     }
-    setTotalCount(responseData.totalCount);
-  });
+  );
 
   return {
     loading,
     totalCount,
     groups: {
       platforms,
-      policies: policyOptions,
+      policies,
       overlap,
     },
   };

@@ -22,6 +22,7 @@ import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useRouterNavigate } from '../common/lib/kibana';
+import { useOsqueryPolicies } from '../agents/use_osquery_policies';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -91,12 +92,8 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
     setVisibleColumns,
   ]);
 
-  const { data: agentsData } = useAllAgents({
-    activePage: 0,
-    limit: 1000,
-    direction: Direction.desc,
-    sortField: 'updated_at',
-  });
+  const osqueryPolicyData = useOsqueryPolicies();
+  const { agentData } = useAllAgents(osqueryPolicyData);
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
     () => ({ rowIndex, columnId }) => {
@@ -134,8 +131,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       if (columnId === 'agent_status') {
         const agentIdValue = value.fields.agent_id[0];
-        // @ts-expect-error update types
-        const agent = find(['_id', agentIdValue], agentsData?.agents);
+        const agent = find(['_id', agentIdValue], agentData?.agents);
         const online = agent?.active;
         const color = online ? 'success' : 'danger';
         const label = online ? 'Online' : 'Offline';
@@ -144,8 +140,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       if (columnId === 'agent') {
         const agentIdValue = value.fields.agent_id[0];
-        // @ts-expect-error update types
-        const agent = find(['_id', agentIdValue], agentsData?.agents);
+        const agent = find(['_id', agentIdValue], agentData?.agents);
         const agentName = agent?.local_metadata.host.name;
 
         // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -161,8 +156,7 @@ const ActionResultsTableComponent: React.FC<ActionResultsTableProps> = ({ action
 
       return '-';
     },
-    // @ts-expect-error update types
-    [actionId, agentsData?.agents, pagination.pageIndex, pagination.pageSize]
+    [actionId, agentData?.agents, pagination.pageIndex, pagination.pageSize]
   );
 
   const tableSorting: EuiDataGridSorting = useMemo(
