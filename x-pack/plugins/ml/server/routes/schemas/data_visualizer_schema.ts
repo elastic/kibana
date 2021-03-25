@@ -20,7 +20,7 @@ const runtimeMappingsSchema = schema.maybe(
       unknowns: 'allow',
       validate: (v: object) => {
         if (Object.values(v).some((o) => !isRuntimeField(o))) {
-          return 'Your error message about invalid runtime definition';
+          return 'Invalid runtime field';
         }
       },
     }

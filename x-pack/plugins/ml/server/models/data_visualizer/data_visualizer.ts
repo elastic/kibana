@@ -630,7 +630,7 @@ export class DataVisualizer {
     // Combine runtime mappings from the index pattern as well as the datafeed
     const combinedRuntimeMappings: RuntimeMappings = {
       ...(isPopulatedObject(runtimeMappings) ? runtimeMappings : {}),
-      ...(datafeedConfig !== undefined && isPopulatedObject(datafeedConfig.runtime_mappings)
+      ...(isPopulatedObject(datafeedConfig) && isPopulatedObject(datafeedConfig.runtime_mappings)
         ? datafeedConfig.runtime_mappings
         : {}),
     };
