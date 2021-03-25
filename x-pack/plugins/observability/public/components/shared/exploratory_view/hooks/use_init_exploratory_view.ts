@@ -13,7 +13,7 @@ import { ReportToDataTypeMap } from '../configurations/constants';
 import {
   DataType,
   ObservabilityIndexPatterns,
-} from '../../../../utils/observability_Index_patterns';
+} from '../../../../utils/observability_index_patterns';
 
 export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
   const {
