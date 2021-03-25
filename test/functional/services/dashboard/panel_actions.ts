@@ -96,7 +96,7 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }: Ft
 
     async clickExpandPanelToggle() {
       log.debug(`clickExpandPanelToggle`);
-      this.openContextMenu();
+      await this.openContextMenu();
       const isActionVisible = await testSubjects.exists(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);
       if (!isActionVisible) await this.clickContextMenuMoreItem();
       await testSubjects.click(TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ);

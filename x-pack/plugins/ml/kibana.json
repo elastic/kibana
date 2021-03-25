@@ -21,7 +21,7 @@
     "triggersActionsUi"
   ],
   "optionalPlugins": [
-    "alerts",
+    "alerting",
     "home",
     "security",
     "spaces",
@@ -39,7 +39,6 @@
     "dashboard",
     "savedObjects",
     "home",
-    "spaces",
     "maps"
   ],
   "extraPublicDirs": [

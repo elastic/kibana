@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AssetReference,
   CategorySummaryList,
   Installable,
@@ -82,12 +82,15 @@ export interface IBulkInstallPackageHTTPError {
   error: string | Error;
 }
 
+export interface InstallResult {
+  assets: AssetReference[];
+  status: 'installed' | 'already_installed';
+}
+
 export interface BulkInstallPackageInfo {
   name: string;
-  newVersion: string;
-  // this will be null if no package was present before the upgrade (aka it was an install)
-  oldVersion: string | null;
-  assets: AssetReference[];
+  version: string;
+  result: InstallResult;
 }
 
 export interface BulkInstallPackagesResponse {

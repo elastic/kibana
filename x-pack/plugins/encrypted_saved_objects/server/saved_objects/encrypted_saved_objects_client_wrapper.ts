@@ -5,32 +5,35 @@
  * 2.0.
  */
 
-import {
+import type {
+  ISavedObjectTypeRegistry,
   SavedObject,
+  SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
-  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
+  SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsOpenPointInTimeOptions,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsDeleteFromNamespacesOptions,
-  SavedObjectsRemoveReferencesToOptions,
-  ISavedObjectTypeRegistry,
-  SavedObjectsRemoveReferencesToResponse,
-  SavedObjectsUtils,
-} from '../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../security/common/model';
-import { EncryptedSavedObjectsService } from '../crypto';
+} from 'src/core/server';
+
+import { SavedObjectsUtils } from '../../../../../src/core/server';
+import type { AuthenticatedUser } from '../../../security/common/model';
+import type { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
 
 interface EncryptedSavedObjectsClientOptions {
@@ -260,6 +263,17 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   public async closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions) {
     return await this.options.baseClient.closePointInTime(id, options);
+  }
+
+  public createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ) {
+    return this.options.baseClient.createPointInTimeFinder(findOptions, {
+      client: this,
+      // Include dependencies last so that subsequent SO client wrappers have their settings applied.
+      ...dependencies,
+    });
   }
 
   /**

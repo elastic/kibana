@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { debounce, distinctUntilChanged, map, mapTo, switchMap } from 'rxjs/operators';
+import React, { useCallback, useEffect, useState } from 'react';
+import { debounce, distinctUntilChanged, map, mapTo, switchMap, tap } from 'rxjs/operators';
 import { merge, of, timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -15,9 +15,10 @@ import {
   ISessionService,
   SearchSessionState,
   TimefilterContract,
-} from '../../../../../../../src/plugins/data/public/';
+  SearchUsageCollector,
+} from '../../../../../../../src/plugins/data/public';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
-import { ApplicationStart } from '../../../../../../../src/core/public';
+import { ApplicationStart, IBasePath } from '../../../../../../../src/core/public';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
 import { useSearchSessionTour } from './search_session_tour';
 
@@ -25,12 +26,14 @@ export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
   timeFilter: TimefilterContract;
   application: ApplicationStart;
+  basePath: IBasePath;
   storage: IStorageWrapper;
   /**
    * Controls for how long we allow to save a session,
    * after the last search in the session has completed
    */
   disableSaveAfterSessionCompletesTimeout: number;
+  usageCollector?: SearchUsageCollector;
 }
 
 export const createConnectedSearchSessionIndicator = ({
@@ -39,7 +42,10 @@ export const createConnectedSearchSessionIndicator = ({
   timeFilter,
   storage,
   disableSaveAfterSessionCompletesTimeout,
+  usageCollector,
+  basePath,
 }: SearchSessionIndicatorDeps): React.FC => {
+  const searchSessionsManagementUrl = basePath.prepend('/app/management/kibana/search_sessions');
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
     .getRefreshIntervalUpdate$()
@@ -55,7 +61,10 @@ export const createConnectedSearchSessionIndicator = ({
         ? merge(of(false), timer(disableSaveAfterSessionCompletesTimeout).pipe(mapTo(true)))
         : of(false)
     ),
-    distinctUntilChanged()
+    distinctUntilChanged(),
+    tap((value) => {
+      if (value) usageCollector?.trackSessionIndicatorSaveDisabled();
+    })
   );
 
   return () => {
@@ -123,7 +132,8 @@ export const createConnectedSearchSessionIndicator = ({
       storage,
       searchSessionIndicator,
       state,
-      saveDisabled
+      saveDisabled,
+      usageCollector
     );
 
     const onOpened = useCallback(
@@ -138,16 +148,34 @@ export const createConnectedSearchSessionIndicator = ({
 
     const onContinueInBackground = useCallback(() => {
       if (saveDisabled) return;
+      usageCollector?.trackSessionSentToBackground();
       sessionService.save();
     }, [saveDisabled]);
 
     const onSaveResults = useCallback(() => {
       if (saveDisabled) return;
+      usageCollector?.trackSessionSavedResults();
       sessionService.save();
     }, [saveDisabled]);
 
     const onCancel = useCallback(() => {
+      usageCollector?.trackSessionCancelled();
       sessionService.cancel();
+    }, []);
+
+    const onViewSearchSessions = useCallback(() => {
+      usageCollector?.trackViewSessionsList();
+    }, []);
+
+    useEffect(() => {
+      if (state === SearchSessionState.Restored) {
+        usageCollector?.trackSessionIsRestored();
+      }
+    }, [state]);
+
+    const searchSessionName = useObservable(sessionService.searchSessionName$);
+    const saveSearchSessionNameFn = useCallback(async (newName: string) => {
+      await sessionService.renameCurrentSession(newName);
     }, []);
 
     if (!sessionService.isSessionStorageReady()) return null;
@@ -164,6 +192,10 @@ export const createConnectedSearchSessionIndicator = ({
           onSaveResults={onSaveResults}
           onCancel={onCancel}
           onOpened={onOpened}
+          onViewSearchSessions={onViewSearchSessions}
+          viewSearchSessionsLink={searchSessionsManagementUrl}
+          searchSessionName={searchSessionName}
+          saveSearchSessionNameFn={saveSearchSessionNameFn}
         />
       </RedirectAppLinks>
     );

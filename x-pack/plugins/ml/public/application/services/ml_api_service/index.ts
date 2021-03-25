@@ -24,6 +24,8 @@ import {
 
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import { BucketSpanEstimatorData } from '../../../../common/types/job_service';
+import { RuntimeMappings } from '../../../../common/types/fields';
 import {
   Job,
   JobStats,
@@ -32,8 +34,8 @@ import {
   Detector,
   AnalysisConfig,
   ModelSnapshot,
+  IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
-import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
 import {
   FieldHistogramRequestConfig,
   FieldRequestConfig,
@@ -50,19 +52,6 @@ export interface MlInfoResponse {
   };
   upgrade_mode: boolean;
   cloudId?: string;
-}
-
-export interface BucketSpanEstimatorData {
-  aggTypes: Array<ES_AGGREGATION | null>;
-  duration: {
-    start: number;
-    end: number;
-  };
-  fields: Array<string | null>;
-  index: string;
-  query: any;
-  splitField: string | undefined;
-  timeField: string | undefined;
 }
 
 export interface BucketSpanEstimatorResponse {
@@ -702,12 +691,16 @@ export function mlApiServicesProvider(httpService: HttpService) {
       index,
       timeFieldName,
       query,
+      runtimeMappings,
+      indicesOptions,
     }: {
       index: string;
       timeFieldName?: string;
       query: any;
+      runtimeMappings?: RuntimeMappings;
+      indicesOptions?: IndicesOptions;
     }) {
-      const body = JSON.stringify({ index, timeFieldName, query });
+      const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings, indicesOptions });
 
       return httpService.http<GetTimeFieldRangeResponse>({
         path: `${basePath()}/fields_service/time_field_range`,

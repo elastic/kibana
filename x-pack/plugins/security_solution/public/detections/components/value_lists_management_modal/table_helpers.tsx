@@ -29,7 +29,7 @@ export const buildColumns = (
   {
     field: 'name',
     name: i18n.COLUMN_FILE_NAME,
-    truncateText: true,
+    truncateText: false,
   },
   {
     field: 'type',

@@ -19,7 +19,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -49,37 +48,35 @@ export const AddGroupModal: React.FC<{}> = () => {
   };
 
   return (
-    <EuiOverlayMask>
-      <EuiModal onClose={closeNewGroupModal} initialFocus=".euiFieldText">
-        <form onSubmit={handleFormSumbit}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>{ADD_GROUP_HEADER}</EuiModalHeaderTitle>
-          </EuiModalHeader>
+    <EuiModal onClose={closeNewGroupModal} initialFocus=".euiFieldText">
+      <form onSubmit={handleFormSumbit}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{ADD_GROUP_HEADER}</EuiModalHeaderTitle>
+        </EuiModalHeader>
 
-          <EuiModalBody>
-            <EuiFormRow isInvalid={isInvalid} error={newGroupNameErrors} label="Group name">
-              <EuiFieldText
-                isInvalid={isInvalid}
-                value={newGroupName}
-                data-test-subj="AddGroupInput"
-                onChange={(e) => setNewGroupName(e.target.value)}
-              />
-            </EuiFormRow>
-          </EuiModalBody>
+        <EuiModalBody>
+          <EuiFormRow isInvalid={isInvalid} error={newGroupNameErrors} label="Group name">
+            <EuiFieldText
+              isInvalid={isInvalid}
+              value={newGroupName}
+              data-test-subj="AddGroupInput"
+              onChange={(e) => setNewGroupName(e.target.value)}
+            />
+          </EuiFormRow>
+        </EuiModalBody>
 
-          <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeNewGroupModal}>{CANCEL_BUTTON}</EuiButtonEmpty>
-            <EuiButton
-              disabled={!newGroupName}
-              onClick={saveNewGroup}
-              fill
-              data-test-subj="AddGroupSubmit"
-            >
-              {ADD_GROUP_SUBMIT}
-            </EuiButton>
-          </EuiModalFooter>
-        </form>
-      </EuiModal>
-    </EuiOverlayMask>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={closeNewGroupModal}>{CANCEL_BUTTON}</EuiButtonEmpty>
+          <EuiButton
+            disabled={!newGroupName}
+            onClick={saveNewGroup}
+            fill
+            data-test-subj="AddGroupSubmit"
+          >
+            {ADD_GROUP_SUBMIT}
+          </EuiButton>
+        </EuiModalFooter>
+      </form>
+    </EuiModal>
   );
 };

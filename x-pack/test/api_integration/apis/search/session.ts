@@ -99,6 +99,38 @@ export default function ({ getService }: FtrProviderContext) {
         expect(status).to.equal(SearchSessionStatus.CANCELLED);
       });
 
+      it('should rename a session', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        const oldName = 'name1';
+        const newName = 'name2';
+        const {
+          body: { attributes: originalSession },
+        } = await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: oldName,
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        const {
+          body: { attributes: updatedSession },
+        } = await supertest
+          .put(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: newName,
+          })
+          .expect(200);
+
+        expect(originalSession.name).not.to.equal(updatedSession.name);
+        expect(updatedSession.name).to.equal(newName);
+      });
+
       it('should sync search ids into persisted session', async () => {
         const sessionId = `my-session-${Math.random()}`;
 
@@ -326,6 +358,122 @@ export default function ({ getService }: FtrProviderContext) {
       expect(getSessionFirstTime.body.attributes.touched).to.be.lessThan(
         getSessionSecondTime.body.attributes.touched
       );
+    });
+
+    describe('with security', () => {
+      before(async () => {
+        await security.user.create('other_user', {
+          password: 'password',
+          roles: ['superuser'],
+          full_name: 'other user',
+        });
+      });
+
+      after(async () => {
+        await security.user.delete('other_user');
+      });
+
+      it(`should prevent users from accessing other users' sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .auth('other_user', 'password')
+          .expect(404);
+      });
+
+      it(`should prevent users from deleting other users' sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .delete(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .auth('other_user', 'password')
+          .expect(404);
+      });
+
+      it(`should prevent users from cancelling other users' sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .post(`/internal/session/${sessionId}/cancel`)
+          .set('kbn-xsrf', 'foo')
+          .auth('other_user', 'password')
+          .expect(404);
+      });
+
+      it(`should prevent users from extending other users' sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        await supertestWithoutAuth
+          .post(`/internal/session/${sessionId}/_extend`)
+          .set('kbn-xsrf', 'foo')
+          .auth('other_user', 'password')
+          .send({
+            expires: '2021-02-26T21:02:43.742Z',
+          })
+          .expect(404);
+      });
+
+      it(`should prevent unauthorized users from creating sessions`, async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        await supertestWithoutAuth
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: 'My Session',
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(401);
+      });
     });
 
     describe('search session permissions', () => {

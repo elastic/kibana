@@ -249,7 +249,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
       await find.clickByCssSelector(
         `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
-          td:last-child button`
+          td:nth-last-child(2) button`
       );
     }
 
@@ -334,8 +334,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         await retry.try(async () => {
           await this.setIndexPatternField(indexPatternName);
         });
-        await PageObjects.common.sleep(2000);
-        await (await this.getCreateIndexPatternGoToStep2Button()).click();
+
+        const btn = await this.getCreateIndexPatternGoToStep2Button();
+        await retry.waitFor(`index pattern Go To Step 2 button to be enabled`, async () => {
+          return await btn.isEnabled();
+        });
+        await btn.click();
+
         await PageObjects.common.sleep(2000);
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
@@ -484,6 +489,58 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       if (popularity) await this.setScriptedFieldPopularity(popularity);
       await this.setScriptedFieldScript(script);
       await this.clickSaveScriptedField();
+    }
+
+    async addRuntimeField(name: string, type: string, script: string) {
+      await this.clickAddField();
+      await this.setFieldName(name);
+      await this.setFieldType(type);
+      if (script) {
+        await this.setFieldScript(script);
+      }
+      await this.clickSaveField();
+      await this.closeIndexPatternFieldEditor();
+    }
+
+    async closeIndexPatternFieldEditor() {
+      await retry.waitFor('field editor flyout to close', async () => {
+        return !(await testSubjects.exists('euiFlyoutCloseButton'));
+      });
+    }
+
+    async clickAddField() {
+      log.debug('click Add Field');
+      await testSubjects.click('addField');
+    }
+
+    async clickSaveField() {
+      log.debug('click Save');
+      await testSubjects.click('fieldSaveButton');
+    }
+
+    async setFieldName(name: string) {
+      log.debug('set field name = ' + name);
+      await testSubjects.setValue('nameField', name);
+    }
+
+    async setFieldType(type: string) {
+      log.debug('set type = ' + type);
+      await testSubjects.setValue('typeField', type);
+    }
+
+    async setFieldScript(script: string) {
+      log.debug('set script = ' + script);
+      const formatRow = await testSubjects.find('valueRow');
+      const formatRowToggle = (
+        await formatRow.findAllByCssSelector('[data-test-subj="toggle"]')
+      )[0];
+
+      await formatRowToggle.click();
+      const getMonacoTextArea = async () => (await formatRow.findAllByCssSelector('textarea'))[0];
+      retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
+      const monacoTextArea = await getMonacoTextArea();
+      await monacoTextArea.focus();
+      browser.pressKeys(script);
     }
 
     async clickAddScriptedField() {

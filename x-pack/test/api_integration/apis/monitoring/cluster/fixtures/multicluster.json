@@ -98,6 +98,9 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "container": false
     }
   },
   "alerts": {
@@ -214,6 +217,9 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "container": false
     }
   },
   "alerts": {
@@ -326,6 +332,9 @@
     "memTotal": null,
     "apms": {
       "total": null
+    },
+    "config": {
+      "container": false
     }
   },
   "alerts": {

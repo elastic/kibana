@@ -46,6 +46,7 @@ export interface TrainedModelStat {
 }
 
 export interface TrainedModelConfigResponse {
+  description: string;
   created_by: string;
   create_time: string;
   default_field_map: Record<string, string>;
@@ -61,7 +62,7 @@ export interface TrainedModelConfigResponse {
       }
     | Record<string, any>;
   model_id: string;
-  tags: string;
+  tags: string[];
   version: string;
   inference_config?: Record<string, any>;
   pipelines?: Record<string, PipelineDefinition> | null;

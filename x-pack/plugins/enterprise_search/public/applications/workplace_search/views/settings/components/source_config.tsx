@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../shared/loading';
@@ -18,6 +18,11 @@ import { AddSourceHeader } from '../../content_sources/components/add_source/add
 import { AddSourceLogic } from '../../content_sources/components/add_source/add_source_logic';
 import { SaveConfig } from '../../content_sources/components/add_source/save_config';
 import { staticSourceData } from '../../content_sources/source_data';
+import {
+  CONFIRM_REMOVE_CONFIG_TITLE,
+  CONFIRM_REMOVE_CONFIG_CONFIRM_BUTTON_TEXT,
+  CONFIRM_REMOVE_CONFIG_CANCEL_BUTTON_TEXT,
+} from '../constants';
 import { SettingsLogic } from '../settings_logic';
 
 interface SourceConfigProps {
@@ -56,22 +61,22 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
         header={header}
       />
       {confirmModalVisible && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            onConfirm={() => deleteSourceConfig(serviceType, name)}
-            onCancel={hideConfirmModal}
-            buttonColor="danger"
-          >
-            {i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfig.message',
-              {
-                defaultMessage:
-                  'Are you sure you want to remove the OAuth configuration for {name}?',
-                values: { name },
-              }
-            )}
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          onConfirm={() => deleteSourceConfig(serviceType, name)}
+          onCancel={hideConfirmModal}
+          buttonColor="danger"
+          title={CONFIRM_REMOVE_CONFIG_TITLE}
+          confirmButtonText={CONFIRM_REMOVE_CONFIG_CONFIRM_BUTTON_TEXT}
+          cancelButtonText={CONFIRM_REMOVE_CONFIG_CANCEL_BUTTON_TEXT}
+        >
+          {i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfig.message',
+            {
+              defaultMessage: 'Are you sure you want to remove the OAuth configuration for {name}?',
+              values: { name },
+            }
+          )}
+        </EuiConfirmModal>
       )}
     </>
   );

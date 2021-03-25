@@ -18,8 +18,8 @@ interface JobSelection {
 }
 
 export interface JobSelectorControlProps {
-  jobSelection?: JobSelection;
-  onSelectionChange: (jobSelection: JobSelection) => void;
+  jobsAndGroupIds?: string[];
+  onChange: (jobSelection: JobSelection) => void;
   adJobsApiService: MlApiServices['jobs'];
   /**
    * Validation is handled by alerting framework
@@ -28,14 +28,22 @@ export interface JobSelectorControlProps {
 }
 
 export const JobSelectorControl: FC<JobSelectorControlProps> = ({
-  jobSelection,
-  onSelectionChange,
+  jobsAndGroupIds,
+  onChange,
   adJobsApiService,
   errors,
 }) => {
   const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const jobIds = useMemo(() => new Set(), []);
   const groupIds = useMemo(() => new Set(), []);
+
+  const selectedOptions = useMemo(
+    () =>
+      (jobsAndGroupIds ?? []).map((v) => ({
+        label: v,
+      })),
+    [jobsAndGroupIds]
+  );
 
   const fetchOptions = useCallback(async () => {
     try {
@@ -70,18 +78,18 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
     }
   }, [adJobsApiService]);
 
-  const onChange: EuiComboBoxProps<string>['onChange'] = useCallback(
-    (selectedOptions) => {
+  const onSelectionChange: EuiComboBoxProps<string>['onChange'] = useCallback(
+    (selectionUpdate) => {
       const selectedJobIds: JobId[] = [];
       const selectedGroupIds: string[] = [];
-      selectedOptions.forEach(({ label }: { label: string }) => {
+      selectionUpdate.forEach(({ label }: { label: string }) => {
         if (jobIds.has(label)) {
           selectedJobIds.push(label);
         } else if (groupIds.has(label)) {
           selectedGroupIds.push(label);
         }
       });
-      onSelectionChange({
+      onChange({
         ...(selectedJobIds.length > 0 ? { jobIds: selectedJobIds } : {}),
         ...(selectedGroupIds.length > 0 ? { groupIds: selectedGroupIds } : {}),
       });
@@ -92,12 +100,6 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
   useEffect(() => {
     fetchOptions();
   }, []);
-
-  const selectedOptions = Object.values(jobSelection ?? {})
-    .flat()
-    .map((v) => ({
-      label: v,
-    }));
 
   return (
     <EuiFormRow
@@ -114,7 +116,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
       <EuiComboBox<string>
         selectedOptions={selectedOptions}
         options={options}
-        onChange={onChange}
+        onChange={onSelectionChange}
         fullWidth
         data-test-subj={'mlAnomalyAlertJobSelection'}
         isInvalid={!!errors?.length}

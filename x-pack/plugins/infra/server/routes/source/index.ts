@@ -44,34 +44,28 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const { type, sourceId } = request.params;
+      const { type, sourceId } = request.params;
 
-        const [source, logIndexStatus, metricIndicesExist, indexFields] = await Promise.all([
-          libs.sources.getSourceConfiguration(requestContext.core.savedObjects.client, sourceId),
-          libs.sourceStatus.getLogIndexStatus(requestContext, sourceId),
-          libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-          libs.fields.getFields(requestContext, sourceId, typeToInfraIndexType(type)),
-        ]);
+      const [source, logIndexStatus, metricIndicesExist, indexFields] = await Promise.all([
+        libs.sources.getSourceConfiguration(requestContext.core.savedObjects.client, sourceId),
+        libs.sourceStatus.getLogIndexStatus(requestContext, sourceId),
+        libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
+        libs.fields.getFields(requestContext, sourceId, typeToInfraIndexType(type)),
+      ]);
 
-        if (!source) {
-          return response.notFound();
-        }
-
-        const status: InfraSourceStatus = {
-          logIndicesExist: logIndexStatus !== 'missing',
-          metricIndicesExist,
-          indexFields,
-        };
-
-        return response.ok({
-          body: SourceResponseRuntimeType.encode({ source: { ...source, status } }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
+      if (!source) {
+        return response.notFound();
       }
+
+      const status: InfraSourceStatus = {
+        logIndicesExist: logIndexStatus !== 'missing',
+        metricIndicesExist,
+        indexFields,
+      };
+
+      return response.ok({
+        body: SourceResponseRuntimeType.encode({ source: { ...source, status } }),
+      });
     }
   );
 
@@ -169,26 +163,20 @@ export const initSourceRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const { type, sourceId } = request.params;
+      const { type, sourceId } = request.params;
 
-        const client = createSearchClient(requestContext, framework);
-        const source = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          sourceId
-        );
-        const indexPattern =
-          type === 'metrics' ? source.configuration.metricAlias : source.configuration.logAlias;
-        const results = await hasData(indexPattern, client);
+      const client = createSearchClient(requestContext, framework);
+      const source = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        sourceId
+      );
+      const indexPattern =
+        type === 'metrics' ? source.configuration.metricAlias : source.configuration.logAlias;
+      const results = await hasData(indexPattern, client);
 
-        return response.ok({
-          body: { hasData: results },
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      return response.ok({
+        body: { hasData: results },
+      });
     }
   );
 };

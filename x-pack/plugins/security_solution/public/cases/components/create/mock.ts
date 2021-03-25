@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CasePostRequest } from '../../../../../case/common/api';
-import { ConnectorTypes } from '../../../../../case/common/api/connectors';
+import { CasePostRequest, CaseType } from '../../../../../cases/common/api';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
 import { choices } from '../connectors/mock';
 
 export const sampleTags = ['coke', 'pepsi'];
@@ -14,6 +14,7 @@ export const sampleData: CasePostRequest = {
   description: 'what a great description',
   tags: sampleTags,
   title: 'what a cool title',
+  type: CaseType.individual,
   connector: {
     fields: null,
     id: 'none',

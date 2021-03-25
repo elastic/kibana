@@ -13,5 +13,7 @@ export function plugin() {
 
 export * from '../common';
 
-export { StartContract } from './plugin';
-export { FileUploadComponentProps } from './get_file_upload_component';
+export * from './importer/types';
+
+export { FileUploadPluginStart } from './plugin';
+export { FileUploadComponentProps } from './lazy_load_bundle';

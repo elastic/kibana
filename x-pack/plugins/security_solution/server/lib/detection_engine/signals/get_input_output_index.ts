@@ -10,7 +10,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 
 export const getInputIndex = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,

@@ -9,7 +9,7 @@ import React, { FC, useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiText, EuiTitle, EuiFlexGroup } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiFlexGroup } from '@elastic/eui';
 import { LinkCard } from '../../../../components/link_card';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
@@ -35,6 +35,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
   const [discoverLink, setDiscoverLink] = useState('');
   const {
     services: {
+      application: { capabilities },
       share: {
         urlGenerators: { getUrlGenerator },
       },
@@ -66,6 +67,11 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
 
     const indexPatternId = indexPattern.id;
     const getDiscoverUrl = async (): Promise<void> => {
+      const isDiscoverAvailable = capabilities.discover?.show ?? false;
+      if (!isDiscoverAvailable) {
+        return;
+      }
+
       const state: DiscoverUrlGeneratorState = {
         indexPatternId,
       };
@@ -110,7 +116,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
             <h2>
               <FormattedMessage
                 id="xpack.ml.datavisualizer.actionsPanel.createJobTitle"
-                defaultMessage="Create Job"
+                defaultMessage="Create job"
               />
             </h2>
           </EuiTitle>
@@ -118,14 +124,6 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
           {showCreateAnomalyDetectionJob && (
             <>
               <div hidden={recognizerResultsCount === 0}>
-                <EuiText size="s" color="subdued">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.ml.datavisualizer.actionsPanel.selectKnownConfigurationDescription"
-                      defaultMessage="Select known configurations for recognized data:"
-                    />
-                  </p>
-                </EuiText>
                 <EuiSpacer size="m" />
                 <EuiFlexGroup gutterSize="l" responsive={true} wrap={true}>
                   <DataRecognizer
@@ -136,26 +134,18 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />
               </div>
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.actionsPanel.createJobDescription"
-                    defaultMessage="Use the Advanced job wizard to create a job to find anomalies in this data:"
-                  />
-                </p>
-              </EuiText>
               <EuiSpacer size="m" />
               <LinkCard
                 href={createJobLink}
                 icon="createAdvancedJob"
                 title={i18n.translate('xpack.ml.datavisualizer.actionsPanel.advancedTitle', {
-                  defaultMessage: 'Advanced',
+                  defaultMessage: 'Advanced anomaly detection',
                 })}
                 description={i18n.translate(
                   'xpack.ml.datavisualizer.actionsPanel.advancedDescription',
                   {
                     defaultMessage:
-                      'Create a job with the full range of options for more advanced use cases',
+                      'Create a job with the full range of options for more advanced use cases.',
                   }
                 )}
                 data-test-subj="mlDataVisualizerCreateAdvancedJobCard"
@@ -167,14 +157,6 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
       )}
       {mlAvailable && indexPattern.id !== undefined && createDataFrameAnalyticsLink && (
         <>
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.ml.datavisualizer.actionsPanel.createDataFrameAnalyticsDescription"
-                defaultMessage="Use the Data Frame Analytics wizard to perform analyses of your data:"
-              />
-            </p>
-          </EuiText>
           <EuiSpacer size="m" />
           <LinkCard
             href={createDataFrameAnalyticsLink}
@@ -182,13 +164,14 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
             description={i18n.translate(
               'xpack.ml.datavisualizer.actionsPanel.dataframeTypesDescription',
               {
-                defaultMessage: 'Create outlier detection, regression, or classification analytics',
+                defaultMessage:
+                  'Create outlier detection, regression, or classification analytics.',
               }
             )}
             title={
               <FormattedMessage
                 id="xpack.ml.datavisualizer.actionsPanel.dataframeAnalyticsTitle"
-                defaultMessage="Data Frame Analytics"
+                defaultMessage="Data frame analytics"
               />
             }
             data-test-subj="mlDataVisualizerCreateDataFrameAnalyticsCard"
@@ -203,7 +186,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
             <h2>
               <FormattedMessage
                 id="xpack.ml.datavisualizer.actionsPanel.exploreTitle"
-                defaultMessage="Explore"
+                defaultMessage="Explore your data"
               />
             </h2>
           </EuiTitle>
@@ -214,7 +197,7 @@ export const ActionsPanel: FC<Props> = ({ indexPattern, searchString, searchQuer
             description={i18n.translate(
               'xpack.ml.datavisualizer.actionsPanel.viewIndexInDiscoverDescription',
               {
-                defaultMessage: 'Explore index in Discover',
+                defaultMessage: 'Explore the documents in your index.',
               }
             )}
             title={

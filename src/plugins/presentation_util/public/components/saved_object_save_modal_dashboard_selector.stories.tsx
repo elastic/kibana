@@ -44,6 +44,7 @@ export function Example({
   hasDocumentId: boolean;
 } & StorybookParams) {
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing' | null>('existing');
+  const [isAddToLibrarySelected, setAddToLibrary] = useState(false);
 
   return (
     <SaveModalDashboardSelector
@@ -52,6 +53,8 @@ export function Example({
       dashboardOption={dashboardOption}
       copyOnSave={copyOnSave}
       documentId={hasDocumentId ? 'abc' : undefined}
+      isAddToLibrarySelected={isAddToLibrarySelected}
+      setAddToLibrary={setAddToLibrary}
     />
   );
 }

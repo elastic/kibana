@@ -6,8 +6,9 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { Session, SessionValue } from './session';
+import type { Session, SessionValue } from './session';
 import { sessionIndexMock } from './session_index.mock';
 
 export const sessionMock = {
@@ -17,7 +18,7 @@ export const sessionMock = {
     create: jest.fn(),
     update: jest.fn(),
     extend: jest.fn(),
-    clear: jest.fn(),
+    invalidate: jest.fn(),
   }),
 
   createValue: (sessionValue: Partial<SessionValue> = {}): SessionValue => ({

@@ -11,7 +11,12 @@ import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
 
-import { getBazelDiskCacheFolder, getBazelRepositoryCacheFolder, runBazel } from '../utils/bazel';
+import {
+  getBazelDiskCacheFolder,
+  getBazelRepositoryCacheFolder,
+  isBazelBinAvailable,
+  runBazel,
+} from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import { ICommand } from './';
@@ -52,15 +57,18 @@ export const ResetCommand: ICommand = {
       }
     }
 
-    // Runs Bazel hard clean
-    await runBazel(['clean', '--expunge']);
-    log.success('Hard cleaned bazel');
+    // Runs Bazel hard clean and deletes Bazel Cache Folders
+    if (await isBazelBinAvailable()) {
+      // Hard cleaning bazel
+      await runBazel(['clean', '--expunge']);
+      log.success('Hard cleaned bazel');
 
-    // Deletes Bazel Cache Folders
-    await del([await getBazelDiskCacheFolder(), await getBazelRepositoryCacheFolder()], {
-      force: true,
-    });
-    log.success('Removed disk caches');
+      // Deletes Bazel Cache Folders
+      await del([await getBazelDiskCacheFolder(), await getBazelRepositoryCacheFolder()], {
+        force: true,
+      });
+      log.success('Removed disk caches');
+    }
 
     if (toDelete.length === 0) {
       return;

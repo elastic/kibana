@@ -12,7 +12,7 @@ jest.mock('../../layouts/layouts', () => {
   return {
     Layouts: {
       configSchema: schema.object({
-        kind: schema.literal('mock'),
+        type: schema.literal('mock'),
       }),
     },
   };

@@ -52,6 +52,7 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '../../triggers_actions_ui/public';
 import { registerMlAlerts } from './alerting/register_ml_alerts';
+import { FileUploadPluginStart } from '../../file_upload/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -62,7 +63,8 @@ export interface MlStartDependencies {
   embeddable: EmbeddableStart;
   maps?: MapsStartApi;
   lens?: LensPublicStart;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  fileUpload: FileUploadPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -76,7 +78,7 @@ export interface MlSetupDependencies {
   kibanaVersion: string;
   share: SharePluginSetup;
   indexPatternManagement: IndexPatternManagementSetup;
-  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -119,6 +121,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             lens: pluginsStart.lens,
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
+            fileUpload: pluginsStart.fileUpload,
           },
           params
         );
@@ -127,6 +130,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.urlGenerator = registerUrlGenerator(pluginsSetup.share, core);
+    }
+
+    if (pluginsSetup.triggersActionsUi) {
+      registerMlAlerts(pluginsSetup.triggersActionsUi);
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -190,7 +197,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       http: core.http,
       i18n: core.i18n,
     });
-    registerMlAlerts(deps.triggersActionsUi.alertTypeRegistry);
+
     return {
       urlGenerator: this.urlGenerator,
     };

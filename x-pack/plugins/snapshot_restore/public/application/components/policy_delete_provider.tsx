@@ -7,7 +7,7 @@
 
 import React, { Fragment, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 
 import { useServices, useToastNotifications } from '../app_context';
 import { deletePolicies } from '../services/http';
@@ -96,58 +96,56 @@ export const PolicyDeleteProvider: React.FunctionComponent<Props> = ({ children 
     const isSingle = policyNames.length === 1;
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title={
-            isSingle ? (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deletePolicy.confirmModal.deleteSingleTitle"
-                defaultMessage="Delete policy '{name}'?"
-                values={{ name: policyNames[0] }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.snapshotRestore.deletePolicy.confirmModal.deleteMultipleTitle"
-                defaultMessage="Delete {count} policies?"
-                values={{ count: policyNames.length }}
-              />
-            )
-          }
-          onCancel={closeModal}
-          onConfirm={deletePolicy}
-          cancelButtonText={
+      <EuiConfirmModal
+        title={
+          isSingle ? (
             <FormattedMessage
-              id="xpack.snapshotRestore.deletePolicy.confirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
+              id="xpack.snapshotRestore.deletePolicy.confirmModal.deleteSingleTitle"
+              defaultMessage="Delete policy '{name}'?"
+              values={{ name: policyNames[0] }}
             />
-          }
-          confirmButtonText={
+          ) : (
             <FormattedMessage
-              id="xpack.snapshotRestore.deletePolicy.confirmModal.confirmButtonLabel"
-              defaultMessage="Delete {count, plural, one {policy} other {policies}}"
+              id="xpack.snapshotRestore.deletePolicy.confirmModal.deleteMultipleTitle"
+              defaultMessage="Delete {count} policies?"
               values={{ count: policyNames.length }}
             />
-          }
-          buttonColor="danger"
-          data-test-subj="srdeletePolicyConfirmationModal"
-        >
-          {!isSingle ? (
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.deletePolicy.confirmModal.deleteMultipleListDescription"
-                  defaultMessage="You are about to delete these policies:"
-                />
-              </p>
-              <ul>
-                {policyNames.map((name) => (
-                  <li key={name}>{name}</li>
-                ))}
-              </ul>
-            </Fragment>
-          ) : null}
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+          )
+        }
+        onCancel={closeModal}
+        onConfirm={deletePolicy}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.deletePolicy.confirmModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.snapshotRestore.deletePolicy.confirmModal.confirmButtonLabel"
+            defaultMessage="Delete {count, plural, one {policy} other {policies}}"
+            values={{ count: policyNames.length }}
+          />
+        }
+        buttonColor="danger"
+        data-test-subj="srdeletePolicyConfirmationModal"
+      >
+        {!isSingle ? (
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.deletePolicy.confirmModal.deleteMultipleListDescription"
+                defaultMessage="You are about to delete these policies:"
+              />
+            </p>
+            <ul>
+              {policyNames.map((name) => (
+                <li key={name}>{name}</li>
+              ))}
+            </ul>
+          </Fragment>
+        ) : null}
+      </EuiConfirmModal>
     );
   };
 

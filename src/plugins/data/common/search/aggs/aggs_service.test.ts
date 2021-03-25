@@ -97,6 +97,7 @@ describe('Aggs service', () => {
           "sum_bucket",
           "min_bucket",
           "max_bucket",
+          "filtered_metric",
           "geo_bounds",
           "geo_centroid",
         ]
@@ -142,6 +143,7 @@ describe('Aggs service', () => {
           "sum_bucket",
           "min_bucket",
           "max_bucket",
+          "filtered_metric",
           "geo_bounds",
           "geo_centroid",
         ]

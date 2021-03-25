@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { LegacyScopedClusterClient } from 'src/core/server';
-
 export {
   // Object types
   Agent,
@@ -74,6 +72,7 @@ export {
   SettingsSOAttributes,
   InstallType,
   InstallSource,
+  InstallResult,
   // Agent Request types
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,
@@ -86,12 +85,16 @@ export {
   FleetServerPolicy,
 } from '../../common';
 
-export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
-
 export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
   agentPolicyId: string
 ) => Promise<void>;
+
+export interface BulkActionResult {
+  id: string;
+  success: boolean;
+  error?: Error;
+}
 
 export * from './models';
 export * from './rest_spec';

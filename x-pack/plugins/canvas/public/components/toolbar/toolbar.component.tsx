@@ -12,7 +12,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiOverlayMask,
   EuiModal,
   EuiModalFooter,
   EuiButton,
@@ -93,16 +92,14 @@ export const Toolbar: FC<Props> = ({
   const openWorkpadManager = () => setShowWorkpadManager(true);
 
   const workpadManager = (
-    <EuiOverlayMask>
-      <EuiModal onClose={closeWorkpadManager} className="canvasModal--fixedSize" maxWidth="1000px">
-        <WorkpadManager onClose={closeWorkpadManager} />
-        <EuiModalFooter>
-          <EuiButton size="s" onClick={closeWorkpadManager}>
-            {strings.getWorkpadManagerCloseButtonLabel()}
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal onClose={closeWorkpadManager} className="canvasModal--fixedSize" maxWidth="1000px">
+      <WorkpadManager onClose={closeWorkpadManager} />
+      <EuiModalFooter>
+        <EuiButton size="s" onClick={closeWorkpadManager}>
+          {strings.getWorkpadManagerCloseButtonLabel()}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 
   const trays = {

@@ -7,7 +7,8 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 
 import {
   saveAction,

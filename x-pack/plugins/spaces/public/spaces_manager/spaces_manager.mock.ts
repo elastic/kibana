@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { of, Observable } from 'rxjs';
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
-import { SpacesManager } from './spaces_manager';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
+
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { SpacesManager } from './spaces_manager';
 
 function createSpacesManagerMock() {
   return ({

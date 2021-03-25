@@ -15,9 +15,10 @@ import type {
   CombinedJobWithStats,
   Job,
   Datafeed,
+  IndicesOptions,
 } from '../../../../common/types/anomaly_detection_jobs';
 import type { JobMessage } from '../../../../common/types/audit_message';
-import type { AggFieldNamePair } from '../../../../common/types/fields';
+import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type {
   CategorizationAnalyzer,
@@ -188,7 +189,9 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     query: any,
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
-    splitFieldValue: string | null
+    splitFieldValue: string | null,
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -200,6 +203,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       aggFieldNamePairs,
       splitFieldName,
       splitFieldValue,
+      runtimeMappings,
+      indicesOptions,
     });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/new_job_line_chart`,
@@ -216,7 +221,9 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     intervalMs: number,
     query: any,
     aggFieldNamePairs: AggFieldNamePair[],
-    splitFieldName: string
+    splitFieldName: string,
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -227,6 +234,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       query,
       aggFieldNamePairs,
       splitFieldName,
+      runtimeMappings,
+      indicesOptions,
     });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/new_job_population_chart`,
@@ -263,7 +272,9 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     timeField: string,
     start: number,
     end: number,
-    analyzer: CategorizationAnalyzer
+    analyzer: CategorizationAnalyzer,
+    runtimeMappings?: RuntimeMappings,
+    indicesOptions?: IndicesOptions
   ) {
     const body = JSON.stringify({
       indexPatternTitle,
@@ -274,6 +285,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       start,
       end,
       analyzer,
+      runtimeMappings,
+      indicesOptions,
     });
     return httpService.http<{
       examples: CategoryFieldExample[];
@@ -312,6 +325,18 @@ export const jobsApiProvider = (httpService: HttpService) => ({
       categories: Array<{ count?: number; category: Category }>;
     }>({
       path: `${ML_BASE_PATH}/jobs/revert_model_snapshot`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  datafeedPreview(job: Job, datafeed: Datafeed) {
+    const body = JSON.stringify({ job, datafeed });
+    return httpService.http<{
+      total: number;
+      categories: Array<{ count?: number; category: Category }>;
+    }>({
+      path: `${ML_BASE_PATH}/jobs/datafeed_preview`,
       method: 'POST',
       body,
     });

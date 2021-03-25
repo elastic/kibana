@@ -7,6 +7,7 @@
 
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import styled from 'styled-components';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { FlowTarget } from '../../../../../common/search_strategy';
@@ -31,14 +32,20 @@ interface ExpandableNetworkProps {
   expandedNetwork: { ip: string; flowTarget: FlowTarget };
 }
 
+const StyledTitle = styled.h4`
+  word-break: break-all;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+`;
+
 export const ExpandableNetworkDetailsTitle = ({ ip }: { ip: string }) => (
   <EuiTitle size="s">
-    <h4>
+    <StyledTitle>
       {i18n.translate('xpack.securitySolution.timeline.sidePanel.networkDetails.title', {
         defaultMessage: 'Network details',
       })}
       {`: ${ip}`}
-    </h4>
+    </StyledTitle>
   </EuiTitle>
 );
 

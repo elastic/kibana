@@ -12,7 +12,7 @@ import { RollingFileContext } from '../../rolling_file_context';
 import { TriggeringPolicy } from '../policy';
 
 export interface SizeLimitTriggeringPolicyConfig {
-  kind: 'size-limit';
+  type: 'size-limit';
 
   /**
    * The minimum size the file must have to roll over.
@@ -21,7 +21,7 @@ export interface SizeLimitTriggeringPolicyConfig {
 }
 
 export const sizeLimitTriggeringPolicyConfigSchema = schema.object({
-  kind: schema.literal('size-limit'),
+  type: schema.literal('size-limit'),
   size: schema.byteSize({ min: '1b', defaultValue: '100mb' }),
 });
 

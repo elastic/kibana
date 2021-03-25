@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
-import { CheckPrivileges, CheckPrivilegesWithRequest } from './types';
-import { SpacesService } from '../plugin';
+import type { SpacesService } from '../plugin';
+import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
+import type { CheckPrivileges, CheckPrivilegesWithRequest } from './types';
 
 let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
 let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;

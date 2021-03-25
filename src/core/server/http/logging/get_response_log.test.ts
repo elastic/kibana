@@ -171,6 +171,53 @@ describe('getEcsResponseLog', () => {
     });
 
     test('does not mutate original headers', () => {
+      const reqHeaders = { a: 'foo', b: ['hello', 'world'] };
+      const resHeaders = { headers: { c: 'bar' } };
+      const req = createMockHapiRequest({
+        headers: reqHeaders,
+        response: { headers: resHeaders },
+      });
+
+      const responseLog = getEcsResponseLog(req, logger);
+      expect(reqHeaders).toMatchInlineSnapshot(`
+        Object {
+          "a": "foo",
+          "b": Array [
+            "hello",
+            "world",
+          ],
+        }
+      `);
+      expect(resHeaders).toMatchInlineSnapshot(`
+        Object {
+          "headers": Object {
+            "c": "bar",
+          },
+        }
+      `);
+
+      responseLog.http.request.headers.a = 'testA';
+      responseLog.http.request.headers.b[1] = 'testB';
+      responseLog.http.request.headers.c = 'testC';
+      expect(reqHeaders).toMatchInlineSnapshot(`
+        Object {
+          "a": "foo",
+          "b": Array [
+            "hello",
+            "world",
+          ],
+        }
+      `);
+      expect(resHeaders).toMatchInlineSnapshot(`
+        Object {
+          "headers": Object {
+            "c": "bar",
+          },
+        }
+      `);
+    });
+
+    test('does not mutate original headers when redacting sensitive data', () => {
       const reqHeaders = { authorization: 'a', cookie: 'b', 'user-agent': 'hi' };
       const resHeaders = { headers: { 'content-length': 123, 'set-cookie': 'c' } };
       const req = createMockHapiRequest({

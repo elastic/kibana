@@ -1,3 +1,12 @@
 .kbnTopNavMenu {
   margin-right: $euiSizeXS;
 }
+
+.kbnTopNavMenu__badgeWrapper {
+  display: flex;
+  align-items: baseline;
+}
+
+.kbnTopNavMenu__badgeGroup {
+  margin-right: $euiSizeM;
+}

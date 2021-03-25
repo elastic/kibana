@@ -13,6 +13,8 @@ export { DataTierAllocation } from './data_tier_allocation';
 
 export { DefaultAllocationNotice } from './default_allocation_notice';
 
+export { DefaultAllocationWarning } from './default_allocation_warning';
+
 export { NoNodeAttributesWarning } from './no_node_attributes_warning';
 
 export { CloudDataTierCallout } from './cloud_data_tier_callout';

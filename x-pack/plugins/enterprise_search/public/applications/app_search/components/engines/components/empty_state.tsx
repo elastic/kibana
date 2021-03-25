@@ -7,14 +7,15 @@
 
 import React from 'react';
 
-import { useActions } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../../shared/telemetry';
+import { AppLogic } from '../../../app_logic';
 import { ENGINE_CREATION_PATH } from '../../../routes';
 
 import { EnginesOverviewHeader } from './header';
@@ -22,6 +23,9 @@ import { EnginesOverviewHeader } from './header';
 import './empty_state.scss';
 
 export const EmptyState: React.FC = () => {
+  const {
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   return (
@@ -29,46 +33,71 @@ export const EmptyState: React.FC = () => {
       <SetPageChrome />
       <EnginesOverviewHeader />
       <EuiPageContent className="emptyState">
-        <EuiEmptyPrompt
-          className="emptyState__prompt"
-          iconType="eyeClosed"
-          title={
-            <h2>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.appSearch.emptyState.title"
-                defaultMessage="Create your first engine"
-              />
-            </h2>
-          }
-          titleSize="l"
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.enterpriseSearch.appSearch.emptyState.description1"
-                defaultMessage="An App Search engine stores the documents for your search experience."
-              />
-            </p>
-          }
-          actions={
-            <EuiButtonTo
-              data-test-subj="EmptyStateCreateFirstEngineCta"
-              iconType="popout"
-              fill
-              to={ENGINE_CREATION_PATH}
-              onClick={() =>
-                sendAppSearchTelemetry({
-                  action: 'clicked',
-                  metric: 'create_first_engine_button',
-                })
-              }
-            >
-              <FormattedMessage
-                id="xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta"
-                defaultMessage="Create an engine"
-              />
-            </EuiButtonTo>
-          }
-        />
+        {canManageEngines ? (
+          <EuiEmptyPrompt
+            data-test-subj="AdminEmptyEnginesPrompt"
+            className="emptyState__prompt"
+            iconType="eyeClosed"
+            title={
+              <h2>
+                {i18n.translate('xpack.enterpriseSearch.appSearch.emptyState.title', {
+                  defaultMessage: 'Create your first engine',
+                })}
+              </h2>
+            }
+            titleSize="l"
+            body={
+              <p>
+                {i18n.translate('xpack.enterpriseSearch.appSearch.emptyState.description1', {
+                  defaultMessage:
+                    'An App Search engine stores the documents for your search experience.',
+                })}
+              </p>
+            }
+            actions={
+              <EuiButtonTo
+                data-test-subj="EmptyStateCreateFirstEngineCta"
+                fill
+                to={ENGINE_CREATION_PATH}
+                onClick={() =>
+                  sendAppSearchTelemetry({
+                    action: 'clicked',
+                    metric: 'create_first_engine_button',
+                  })
+                }
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta',
+                  { defaultMessage: 'Create an engine' }
+                )}
+              </EuiButtonTo>
+            }
+          />
+        ) : (
+          <EuiEmptyPrompt
+            data-test-subj="NonAdminEmptyEnginesPrompt"
+            className="emptyState__prompt"
+            iconType="eyeClosed"
+            title={
+              <h2>
+                {i18n.translate('xpack.enterpriseSearch.appSearch.emptyState.nonAdmin.title', {
+                  defaultMessage: 'No engines available',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.emptyState.nonAdmin.description',
+                  {
+                    defaultMessage:
+                      'Contact your App Search administrator to either create or grant you access to an engine.',
+                  }
+                )}
+              </p>
+            }
+          />
+        )}
       </EuiPageContent>
     </>
   );

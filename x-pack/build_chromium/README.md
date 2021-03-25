@@ -44,7 +44,7 @@ gsutil cp -r gs://my-bucket/build_chromium .
 # Install the OS packages, configure the environment, download the chromium source (25GB)
 python ./build_chromium/init.sh [arch_name]
 
-# Run the build script with the path to the chromium src directory, the git commit id
+# Run the build script with the path to the chromium src directory, the git commit hash
 python ./build_chromium/build.py <commit_id> x86
 
 # OR You can build for ARM
@@ -55,16 +55,14 @@ python ./build_chromium/build.py <commit_id> arm64
 the Chromium repo to be cloned successfully. If checking out the Chromium fails
 with "early EOF" errors, the instance could be low on memory or disk space.
 
-## Getting the Commit ID
-The `build.py` script requires a commit ID of the Chromium repo. Getting `<commit_id>` can be tricky. The best technique seems to be:
-1. Create a temporary working directory and intialize yarn
-2. `yarn add puppeteer # install latest puppeter`
-3. Look through Puppeteer documentation and Changelogs to find information
-about where the "chromium revision" is located in the Puppeteer code. The code
-containing it might not be distributed in the node module.
-    - Example: https://github.com/puppeteer/puppeteer/blob/b549256/src/revisions.ts
-4. Use `https://crrev.com` and look up the revision and find the git commit info.
-    - Example: http://crrev.com/818858 leads to the git commit e62cb7e3fc7c40548cef66cdf19d270535d9350b
+## Getting the Commit Hash
+If you need to bump the version of Puppeteer, you need to get a new git commit hash for Chromium that corresponds to the Puppeteer version.
+```
+node x-pack/dev-tools/chromium_version.js [PuppeteerVersion]
+```
+
+When bumping the Puppeteer version, make sure you also update the `.chromium-commit` file with the commit hash
+for the current Chromium build, so we'll be able to construct a build pipeline for each OS (coming soon!).
 
 ## Build args
 
@@ -143,7 +141,7 @@ The more cores the better, as the build makes effective use of each. For Linux, 
 
 ## Initializing each VM / environment
 
-In a VM, you'll want to use the init scripts to to initialize each environment.
+In a VM, you'll want to use the init scripts to initialize each environment.
 On Mac OS you'll need to install XCode and accept the license agreement.
 
 Create the build folder:

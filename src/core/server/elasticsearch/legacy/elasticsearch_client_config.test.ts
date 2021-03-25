@@ -99,7 +99,6 @@ test('parses fully specified config', () => {
       "apiVersion": "v7.0.0",
       "hosts": Array [
         Object {
-          "auth": "elastic:changeme",
           "headers": Object {
             "x-elastic-product-origin": "kibana",
             "xsrf": "something",
@@ -111,7 +110,6 @@ test('parses fully specified config', () => {
           "query": null,
         },
         Object {
-          "auth": "elastic:changeme",
           "headers": Object {
             "x-elastic-product-origin": "kibana",
             "xsrf": "something",
@@ -123,7 +121,6 @@ test('parses fully specified config', () => {
           "query": null,
         },
         Object {
-          "auth": "elastic:changeme",
           "headers": Object {
             "x-elastic-product-origin": "kibana",
             "xsrf": "something",
@@ -135,6 +132,7 @@ test('parses fully specified config', () => {
           "query": null,
         },
       ],
+      "httpAuth": "elastic:changeme",
       "keepAlive": true,
       "log": [Function],
       "pingTimeout": 12345,

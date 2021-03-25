@@ -98,6 +98,12 @@ export class LensReportManager {
         this.write();
       } catch (e) {
         // Silent error because events will be reported during the next timer
+
+        // If posting stats is forbidden for the current user, stop attempting to send them,
+        // but keep them in storage to push in case the user logs in with sufficient permissions at some point.
+        if (e.response && e.response.status === 403) {
+          this.stop();
+        }
       }
     }
   }

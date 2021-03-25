@@ -7,14 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { MlStartDependencies } from '../plugin';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
 
-export function registerMlAlerts(
-  alertTypeRegistry: MlStartDependencies['triggersActionsUi']['alertTypeRegistry']
-) {
-  alertTypeRegistry.register({
+export function registerMlAlerts(triggersActionsUi: TriggersAndActionsUIPublicPluginSetup) {
+  triggersActionsUi.alertTypeRegistry.register({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
     description: i18n.translate('xpack.ml.alertTypes.anomalyDetection.description', {
       defaultMessage: 'Alert when anomaly detection jobs results match the condition.',
@@ -67,25 +65,28 @@ export function registerMlAlerts(
       'xpack.ml.alertTypes.anomalyDetection.defaultActionMessage',
       {
         defaultMessage: `Elastic Stack Machine Learning Alert:
-- Job IDs: \\{\\{#context.jobIds\\}\\}\\{\\{context.jobIds\\}\\} - \\{\\{/context.jobIds\\}\\}
+- Job IDs: \\{\\{context.jobIds\\}\\}
 - Time: \\{\\{context.timestampIso8601\\}\\}
 - Anomaly score: \\{\\{context.score\\}\\}
 
 Alerts are raised based on real-time scores. Remember that scores may be adjusted over time as data continues to be analyzed.
 
-\\{\\{! Section might be not relevant if selected jobs don't contain influencer configuration \\}\\}
-Top influencers:
-\\{\\{#context.topInfluencers\\}\\}
-  \\{\\{influencer_field_name\\}\\} = \\{\\{influencer_field_value\\}\\} [\\{\\{score\\}\\}]
-\\{\\{/context.topInfluencers\\}\\}
+\\{\\{#context.topInfluencers.length\\}\\}
+  Top influencers:
+  \\{\\{#context.topInfluencers\\}\\}
+    \\{\\{influencer_field_name\\}\\} = \\{\\{influencer_field_value\\}\\} [\\{\\{score\\}\\}]
+  \\{\\{/context.topInfluencers\\}\\}
+\\{\\{/context.topInfluencers.length\\}\\}
 
-Top records:
-\\{\\{#context.topRecords\\}\\}
-  \\{\\{function\\}\\}(\\{\\{field_name\\}\\}) \\{\\{by_field_value\\}\\} \\{\\{over_field_value\\}\\} \\{\\{partition_field_value\\}\\} [\\{\\{score\\}\\}]
-\\{\\{/context.topRecords\\}\\}
+\\{\\{#context.topRecords.length\\}\\}
+  Top records:
+  \\{\\{#context.topRecords\\}\\}
+    \\{\\{function\\}\\}(\\{\\{field_name\\}\\}) \\{\\{by_field_value\\}\\} \\{\\{over_field_value\\}\\} \\{\\{partition_field_value\\}\\} [\\{\\{score\\}\\}]
+  \\{\\{/context.topRecords\\}\\}
+\\{\\{/context.topRecords.length\\}\\}
 
 \\{\\{! Replace kibanaBaseUrl if not configured in Kibana \\}\\}
-[Open in Anomaly Explorer](\\{\\{\\{context.kibanaBaseUrl\\}\\}\\}\\{\\{\\{context.anomalyExplorerUrl\\}\\}\\})
+[Open in Anomaly Explorer](\\{\\{\\{kibanaBaseUrl\\}\\}\\}\\{\\{\\{context.anomalyExplorerUrl\\}\\}\\})
 `,
       }
     ),

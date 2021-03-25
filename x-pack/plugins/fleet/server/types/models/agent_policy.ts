@@ -6,8 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { PackagePolicySchema, NamespaceSchema } from './package_policy';
+
 import { agentPolicyStatuses, dataTypes } from '../../../common';
+
+import { PackagePolicySchema, NamespaceSchema } from './package_policy';
 
 const AgentPolicyBaseSchema = {
   name: schema.string({ minLength: 1 }),

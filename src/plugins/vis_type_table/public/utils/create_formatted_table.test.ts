@@ -28,20 +28,14 @@ const visConfig: TableVisConfig = {
   totalFunc: AggTypes.SUM,
   percentageCol: '',
   title: 'My data table',
-  dimensions: {
-    buckets: [
-      {
-        accessor: 1,
-        aggType: 'terms',
-        format: { id: 'string' },
-        label: 'category_keyword: Descending',
-        params: {},
-      },
-    ],
-    metrics: [
-      { accessor: 0, aggType: 'count', format: { id: 'number' }, label: 'Count', params: {} },
-    ],
-  },
+  buckets: [
+    {
+      accessor: 1,
+      format: { id: 'string', params: {} },
+      type: 'vis_dimension',
+    },
+  ],
+  metrics: [{ accessor: 0, format: { id: 'number', params: {} }, type: 'vis_dimension' }],
 };
 
 describe('createFormattedTable', () => {

@@ -21,6 +21,14 @@ import { createStore, State } from '../../../common/store';
 import { DetailsPanel } from './index';
 import { TimelineExpandedDetail, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
+jest.mock('react-apollo', () => {
+  const original = jest.requireActual('react-apollo');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    Query: () => <></>,
+  };
+});
 
 describe('Details Panel Component', () => {
   const state: State = { ...mockGlobalState };

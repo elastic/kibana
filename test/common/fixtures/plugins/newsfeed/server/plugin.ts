@@ -34,7 +34,7 @@ export class NewsFeedSimulatorPlugin implements Plugin {
         options: { authRequired: false },
       },
       (context, req, res) => {
-        return res.internalError({ body: new Error('Internal server error') });
+        throw new Error('Internal server error');
       }
     );
   }

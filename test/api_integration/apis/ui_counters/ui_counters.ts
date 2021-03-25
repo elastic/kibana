@@ -10,11 +10,12 @@ import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { SavedObject } from '../../../../src/core/server';
+import { UICounterSavedObjectAttributes } from '../../../../src/plugins/kibana_usage_collection/server/collectors/ui_counters/ui_counter_saved_object_type';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
 
   const createUiCounterEvent = (eventName: string, type: UiCounterMetricType, count = 1) => ({
     eventName,
@@ -23,12 +24,21 @@ export default function ({ getService }: FtrProviderContext) {
     count,
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/85086
-  describe.skip('UI Counters API', () => {
-    before(async () => {
-      await esArchiver.emptyKibanaIndex();
-    });
+  const getCounterById = (
+    savedObjects: Array<SavedObject<UICounterSavedObjectAttributes>>,
+    targetId: string
+  ): SavedObject<UICounterSavedObjectAttributes> => {
+    const savedObject = savedObjects.find(({ id }: { id: string }) => id === targetId);
+    if (!savedObject) {
+      throw new Error(`Unable to find savedObject id ${targetId}`);
+    }
+
+    return savedObject;
+  };
+
+  describe('UI Counters API', () => {
     const dayDate = moment().format('DDMMYYYY');
+    before(async () => await esArchiver.emptyKibanaIndex());
 
     it('stores ui counter events in savedObjects', async () => {
       const reportManager = new ReportManager();
@@ -44,12 +54,18 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ report })
         .expect(200);
 
-      const { body: response } = await es.search({ index: '.kibana', q: 'type:ui-counter' });
+      const {
+        body: { saved_objects: savedObjects },
+      } = await supertest
+        .get('/api/saved_objects/_find?type=ui-counter')
+        .set('kbn-xsrf', 'kibana')
+        .expect(200);
 
-      const ids = response.hits.hits.map(({ _id }: { _id: string }) => _id);
-      expect(ids.includes(`ui-counter:myApp:${dayDate}:${METRIC_TYPE.COUNT}:my_event`)).to.eql(
-        true
+      const countTypeEvent = getCounterById(
+        savedObjects,
+        `myApp:${dayDate}:${METRIC_TYPE.COUNT}:my_event`
       );
+      expect(countTypeEvent.attributes.count).to.eql(1);
     });
 
     it('supports multiple events', async () => {
@@ -70,28 +86,29 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const {
-        body: {
-          hits: { hits },
-        },
-      } = await es.search({ index: '.kibana', q: 'type:ui-counter' });
+        body: { saved_objects: savedObjects },
+      } = await supertest
+        .get('/api/saved_objects/_find?type=ui-counter&fields=count')
+        .set('kbn-xsrf', 'kibana')
+        .expect(200);
 
-      const countTypeEvent = hits.find(
-        (hit: { _id: string }) =>
-          hit._id === `ui-counter:myApp:${dayDate}:${METRIC_TYPE.COUNT}:${uniqueEventName}`
+      const countTypeEvent = getCounterById(
+        savedObjects,
+        `myApp:${dayDate}:${METRIC_TYPE.COUNT}:${uniqueEventName}`
       );
-      expect(countTypeEvent._source['ui-counter'].count).to.eql(1);
+      expect(countTypeEvent.attributes.count).to.eql(1);
 
-      const clickTypeEvent = hits.find(
-        (hit: { _id: string }) =>
-          hit._id === `ui-counter:myApp:${dayDate}:${METRIC_TYPE.CLICK}:${uniqueEventName}`
+      const clickTypeEvent = getCounterById(
+        savedObjects,
+        `myApp:${dayDate}:${METRIC_TYPE.CLICK}:${uniqueEventName}`
       );
-      expect(clickTypeEvent._source['ui-counter'].count).to.eql(2);
+      expect(clickTypeEvent.attributes.count).to.eql(2);
 
-      const secondEvent = hits.find(
-        (hit: { _id: string }) =>
-          hit._id === `ui-counter:myApp:${dayDate}:${METRIC_TYPE.COUNT}:${uniqueEventName}_2`
+      const secondEvent = getCounterById(
+        savedObjects,
+        `myApp:${dayDate}:${METRIC_TYPE.COUNT}:${uniqueEventName}_2`
       );
-      expect(secondEvent._source['ui-counter'].count).to.eql(1);
+      expect(secondEvent.attributes.count).to.eql(1);
     });
   });
 }

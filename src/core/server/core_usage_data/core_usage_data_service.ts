@@ -226,7 +226,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         logging: {
           appendersTypesUsed: Array.from(
             Array.from(this.loggingConfig?.appenders.values() ?? [])
-              .reduce((acc, a) => acc.add(a.kind), new Set<string>())
+              .reduce((acc, a) => acc.add(a.type), new Set<string>())
               .values()
           ),
           loggersConfiguredCount: this.loggingConfig?.loggers.length ?? 0,
@@ -235,7 +235,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         savedObjects: {
           customIndex: isCustomIndex(this.kibanaConfig!.index),
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
-          maxImportExportSizeBytes: this.soConfig.maxImportExportSize.getValueInBytes(),
+          maxImportExportSize: this.soConfig.maxImportExportSize,
         },
       },
       environment: {

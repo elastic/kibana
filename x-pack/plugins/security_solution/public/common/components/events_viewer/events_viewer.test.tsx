@@ -201,7 +201,7 @@ describe('EventsViewer', () => {
         testProps = {
           ...testProps,
           // Update with a new id, to force columns back to default.
-          id: TimelineId.test2,
+          id: TimelineId.alternateTest,
         };
         const wrapper = mount(
           <TestProviders>

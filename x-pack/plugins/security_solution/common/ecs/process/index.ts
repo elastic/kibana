@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { Ext } from '../file';
+
 export interface ProcessEcs {
+  Ext?: Ext;
   entity_id?: string[];
   exit_code?: number[];
   hash?: ProcessHashData;
@@ -28,6 +31,7 @@ export interface ProcessHashData {
 
 export interface ProcessParentData {
   name?: string[];
+  pid?: number[];
 }
 
 export interface Thread {

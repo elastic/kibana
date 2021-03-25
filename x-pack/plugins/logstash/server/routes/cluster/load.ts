@@ -29,7 +29,7 @@ export function registerClusterLoadRoute(router: LogstashPluginRouter) {
         if (err.status === 403) {
           return response.ok();
         }
-        return response.internalError();
+        throw err;
       }
     })
   );

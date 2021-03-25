@@ -300,9 +300,9 @@ export const SOURCE_REMOVE_TITLE = i18n.translate(
 );
 
 export const SOURCE_REMOVE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
+  'xpack.enterpriseSearch.workplaceSearch.sources.remove.description',
   {
-    defaultMessage: 'Edit content source connector settings to change.',
+    defaultMessage: 'This action cannot be undone.',
   }
 );
 
@@ -412,10 +412,6 @@ export const SHARED_EMPTY_DESCRIPTION = i18n.translate(
       'Once content sources are shared with you, they will be displayed here, and available via the search experience.',
   }
 );
-
-export const AND = i18n.translate('xpack.enterpriseSearch.workplaceSearch.and', {
-  defaultMessage: 'and',
-});
 
 export const LICENSE_CALLOUT_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.licenseCallout.title',

@@ -87,7 +87,7 @@ export const PRIORITY = i18n.translate(
 export const ALERT_FIELDS_LABEL = i18n.translate(
   'xpack.securitySolution.components.connectors.serviceNow.alertFieldsTitle',
   {
-    defaultMessage: 'Fields associated with alerts',
+    defaultMessage: 'Select Observables to push',
   }
 );
 

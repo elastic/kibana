@@ -161,6 +161,14 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       await testSubjects.missingOrFail('mlDataVisualizerCreateDataFrameAnalyticsCard');
     },
 
+    async assertViewInDiscoverCard(shouldExist: boolean) {
+      if (shouldExist) {
+        await this.assertViewInDiscoverCardExists();
+      } else {
+        await this.assertViewInDiscoverCardNotExists();
+      }
+    },
+
     async assertViewInDiscoverCardExists() {
       await testSubjects.existOrFail('mlDataVisualizerViewInDiscoverCard');
     },

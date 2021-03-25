@@ -21,9 +21,9 @@ import {
 
 import { SlmPolicyPayload } from '../../../../../common/types';
 import { TIME_UNITS } from '../../../../../common/constants';
-import { documentationLinksService } from '../../../services/documentation';
 import { StepProps } from './';
 import { textService } from '../../../services/text';
+import { useCore } from '../../../app_context';
 
 const getExpirationTimeOptions = (unitSize = '0') =>
   Object.entries(TIME_UNITS).map(([_key, value]) => ({
@@ -37,6 +37,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
   errors,
 }) => {
   const { retention = {} } = policy;
+  const { docLinks } = useCore();
 
   const updatePolicyRetention = (
     updatedFields: Partial<SlmPolicyPayload['retention']>,
@@ -224,7 +225,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getSlmUrl()}
+            href={docLinks.links.apis.putSnapshotLifecyclePolicy}
             target="_blank"
             iconType="help"
           >

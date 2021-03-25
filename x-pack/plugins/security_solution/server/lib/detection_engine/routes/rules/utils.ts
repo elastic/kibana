@@ -12,7 +12,7 @@ import uuid from 'uuid';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
-import { PartialAlert, FindResult } from '../../../../../../alerts/server';
+import { PartialAlert, FindResult } from '../../../../../../alerting/server';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import {
   RuleAlertType,
@@ -150,6 +150,7 @@ export const transformAlertToRule = (
     threshold: alert.params.threshold,
     threat_filters: alert.params.threatFilters,
     threat_index: alert.params.threatIndex,
+    threat_indicator_path: alert.params.threatIndicatorPath,
     threat_query: alert.params.threatQuery,
     threat_mapping: alert.params.threatMapping,
     threat_language: alert.params.threatLanguage,
