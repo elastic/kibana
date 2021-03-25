@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { CoreSetup } from 'kibana/public';
@@ -17,6 +18,7 @@ import {
   QuerySuggestion,
   QuerySuggestionGetFnArgs,
   QuerySuggestionGetFn,
+  DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 
 const cursorSymbol = '@kuery-cursor@';
@@ -26,7 +28,9 @@ const dedup = (suggestions: QuerySuggestion[]): QuerySuggestion[] =>
 
 export const KUERY_LANGUAGE_NAME = 'kuery';
 
-export const setupKqlQuerySuggestionProvider = (core: CoreSetup): QuerySuggestionGetFn => {
+export const setupKqlQuerySuggestionProvider = (
+  core: CoreSetup<object, DataPublicPluginStart>
+): QuerySuggestionGetFn => {
   const providers = {
     field: setupGetFieldSuggestions(core),
     value: setupGetValueSuggestions(core),

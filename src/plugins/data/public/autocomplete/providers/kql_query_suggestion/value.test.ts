@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { setupGetValueSuggestions } from './value';
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { QuerySuggestionGetFnArgs, KueryNode } from '../../../../../../../src/plugins/data/public';
-import { setAutocompleteService } from '../../../services';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => (kueryNode as unknown) as KueryNode;
 
@@ -19,11 +19,6 @@ describe('Kuery value suggestions', () => {
   let autocompleteServiceMock: any;
 
   beforeEach(() => {
-    getSuggestions = setupGetValueSuggestions(coreMock.createSetup());
-    querySuggestionsArgs = ({
-      indexPatterns: [indexPatternResponse],
-    } as unknown) as QuerySuggestionGetFnArgs;
-
     autocompleteServiceMock = {
       getValueSuggestions: jest.fn(({ field }) => {
         let res: any[];
@@ -40,7 +35,16 @@ describe('Kuery value suggestions', () => {
         return Promise.resolve(res);
       }),
     };
-    setAutocompleteService(autocompleteServiceMock);
+
+    const coreSetup = coreMock.createSetup({
+      pluginStartContract: {
+        autocomplete: autocompleteServiceMock,
+      },
+    });
+    getSuggestions = setupGetValueSuggestions(coreSetup);
+    querySuggestionsArgs = ({
+      indexPatterns: [indexPatternResponse],
+    } as unknown) as QuerySuggestionGetFnArgs;
 
     jest.clearAllMocks();
   });

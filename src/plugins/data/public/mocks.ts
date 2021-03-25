@@ -16,10 +16,7 @@ import { createNowProviderMock } from './now_provider/mocks';
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
-const automcompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
-  addQuerySuggestionProvider: jest.fn(),
-  getQuerySuggestions: jest.fn(),
-};
+const automcompleteSetupMock: jest.Mocked<AutocompleteSetup> = {};
 
 const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
   getValueSuggestions: jest.fn(),
