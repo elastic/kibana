@@ -18,6 +18,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsFindOptions,
   SavedObjectsOpenPointInTimeOptions,
@@ -418,6 +420,33 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     return await this.client.closePointInTime(id, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Returns a generator to help page through large sets of saved objects.
+   *
+   * The generator wraps calls to `SavedObjects.find` and iterates over
+   * multiple pages of results using `_pit` and `search_after`. This will
+   * open a new Point In Time (PIT), and continue paging until a set of
+   * results is received that's smaller than the designated `perPage`.
+   *
+   * @param {object} findOptions - {@link SavedObjectsCreatePointInTimeFinderOptions}
+   * @param {object} [dependencies] - {@link SavedObjectsCreatePointInTimeFinderDependencies}
+   */
+  createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ) {
+    throwErrorIfNamespaceSpecified(findOptions);
+    // We don't need to handle namespaces here, because `createPointInTimeFinder`
+    // is simply a helper that calls `find`, `openPointInTimeForType`, and
+    // `closePointInTime` internally, so namespaces will already be handled
+    // in those methods.
+    return this.client.createPointInTimeFinder(findOptions, {
+      client: this,
+      // Include dependencies last so that subsequent SO client wrappers have their settings applied.
+      ...dependencies,
     });
   }
 }
