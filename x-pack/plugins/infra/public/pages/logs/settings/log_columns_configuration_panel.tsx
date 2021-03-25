@@ -181,7 +181,11 @@ const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
     }
   );
   return (
-    <EuiPanel data-test-subj={`logColumnPanel fieldLogColumnPanel fieldLogColumnPanel:${field}`}>
+    <EuiPanel
+      color="subdued"
+      data-test-subj={`logColumnPanel fieldLogColumnPanel fieldLogColumnPanel:${field}`}
+      hasShadow={false}
+    >
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
@@ -210,7 +214,9 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   dragHandleProps: DragHandleProps;
 }> = ({ fieldName, helpText, removeColumn, dragHandleProps }) => (
   <EuiPanel
+    color="subdued"
     data-test-subj={`logColumnPanel systemLogColumnPanel systemLogColumnPanel:${fieldName}`}
+    hasShadow={false}
   >
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={false}>
