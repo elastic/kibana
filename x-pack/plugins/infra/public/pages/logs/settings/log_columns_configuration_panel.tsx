@@ -13,7 +13,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
@@ -53,7 +52,7 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<LogColumnsCon
   );
 
   return (
-    <EuiForm>
+    <>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="s" data-test-subj="sourceConfigurationLogColumnsSectionTitle">
@@ -99,7 +98,7 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<LogColumnsCon
       ) : (
         <LogColumnConfigurationEmptyPrompt />
       )}
-    </EuiForm>
+    </>
   );
 };
 

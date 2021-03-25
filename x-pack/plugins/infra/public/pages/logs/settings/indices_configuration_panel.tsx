@@ -15,7 +15,7 @@ import { LogIndexNameReference, LogIndexPatternReference, LogIndexReference } fr
 export const IndicesConfigurationPanel: React.FC<{
   isLoading: boolean;
   isReadOnly: boolean;
-  indicesFormElementProps: FormElementProps<LogIndexReference>;
+  indicesFormElementProps: FormElementProps<LogIndexReference | undefined>;
   tiebreakerFieldFormElementProps: FormElementProps<string>;
   timestampFieldFormElementProps: FormElementProps<string>;
 }> = ({
@@ -26,13 +26,13 @@ export const IndicesConfigurationPanel: React.FC<{
   timestampFieldFormElementProps,
 }) => {
   const switchToIndexPatternReference = useCallback(() => {
-    indicesFormElementProps.onChange?.({
-      type: 'index-pattern',
-      indexPattern: '',
-    });
+    indicesFormElementProps.onChange?.(undefined);
   }, [indicesFormElementProps]);
 
-  if (isIndexPatternFormElementProps(indicesFormElementProps)) {
+  if (
+    isUndefinedFormElementProps(indicesFormElementProps) ||
+    isIndexPatternFormElementProps(indicesFormElementProps)
+  ) {
     return (
       <IndexPatternConfigurationPanel
         isLoading={isLoading}
@@ -62,10 +62,14 @@ export const IndicesConfigurationPanel: React.FC<{
   }
 };
 
+const isUndefinedFormElementProps = isFormElementPropsForType(
+  (value): value is undefined => value == null
+);
+
 const isIndexPatternFormElementProps = isFormElementPropsForType(
-  (value): value is LogIndexPatternReference => value.type === 'index-pattern'
+  (value): value is LogIndexPatternReference => value?.type === 'index-pattern'
 );
 
 const isIndexNamesFormElementProps = isFormElementPropsForType(
-  (value): value is LogIndexNameReference => value.type === 'index-name'
+  (value): value is LogIndexNameReference => value?.type === 'index-name'
 );

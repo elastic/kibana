@@ -68,8 +68,9 @@ export const useLogSourceConfigurationFormState = (
     () => ({
       name: indicesConfigurationFormState.formState.name,
       description: indicesConfigurationFormState.formState.description,
+      // TODO: store as logIndices when the source config supports it
       logAlias:
-        indicesConfigurationFormState.formState.logIndices.type === 'index-name'
+        indicesConfigurationFormState.formState.logIndices?.type === 'index-name'
           ? indicesConfigurationFormState.formState.logIndices.indexName
           : '',
       fields: {
@@ -85,6 +86,7 @@ export const useLogSourceConfigurationFormState = (
     () => ({
       name: indicesConfigurationFormState.formStateChanges.name,
       description: indicesConfigurationFormState.formStateChanges.description,
+      // TODO: store as logIndices when the source config supports it
       logAlias:
         indicesConfigurationFormState.formStateChanges.logIndices?.type === 'index-name'
           ? indicesConfigurationFormState.formStateChanges.logIndices.indexName

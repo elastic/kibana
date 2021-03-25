@@ -7,13 +7,17 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useKibanaIndexPatternTitles } from '../../../hooks/use_kibana_index_patterns';
 
+type IndexPatternOption = EuiComboBoxOptionOption<string>;
+
 export const IndexPatternSelector: React.FC<{
+  indexPatternId: string | undefined;
   isLoading: boolean;
   isReadOnly: boolean;
-}> = ({ isLoading, isReadOnly }) => {
+  onChangeIndexPatternId: (indexPatternId: string | undefined) => void;
+}> = ({ indexPatternId, isLoading, isReadOnly, onChangeIndexPatternId }) => {
   const {
     indexPatternTitles: availableIndexPatterns,
     latestIndexPatternTitlesRequest,
@@ -24,7 +28,7 @@ export const IndexPatternSelector: React.FC<{
     fetchIndexPatternTitles();
   }, [fetchIndexPatternTitles]);
 
-  const availableOptions = useMemo<EuiComboBoxOptionOption[]>(
+  const availableOptions = useMemo<IndexPatternOption[]>(
     () =>
       availableIndexPatterns.map(({ id, title }) => ({
         key: id,
@@ -34,19 +38,33 @@ export const IndexPatternSelector: React.FC<{
     [availableIndexPatterns]
   );
 
+  const selectedOptions = useMemo<IndexPatternOption[]>(
+    () => availableOptions.filter(({ key }) => key === indexPatternId),
+    [availableOptions, indexPatternId]
+  );
+
+  const changeSelectedIndexPatterns = useCallback(
+    ([newlySelectedOption]: IndexPatternOption[]) => {
+      if (typeof newlySelectedOption?.key === 'string') {
+        return onChangeIndexPatternId(newlySelectedOption.key);
+      }
+
+      return onChangeIndexPatternId(undefined);
+    },
+    [onChangeIndexPatternId]
+  );
+
   return (
-    <EuiComboBox
+    <EuiComboBox<string>
       isLoading={isLoading || latestIndexPatternTitlesRequest.state === 'pending'}
       isDisabled={isReadOnly}
       options={availableOptions}
       placeholder={indexPatternSelectorPlaceholder}
-      singleSelection={plainTextSingleSelection}
+      selectedOptions={selectedOptions}
+      singleSelection={true}
+      onChange={changeSelectedIndexPatterns}
     />
   );
-};
-
-const plainTextSingleSelection = {
-  asPlainText: true,
 };
 
 const indexPatternSelectorPlaceholder = i18n.translate(

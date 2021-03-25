@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
+  EuiPageContentBody,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -76,103 +77,101 @@ export const LogsSettingsPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <EuiPage>
-        <EuiPageBody
-          className="eui-displayBlock"
-          restrictWidth
-          data-test-subj="sourceConfigurationContent"
-        >
-          <Prompt prompt={isFormDirty ? unsavedFormPromptMessage : undefined} />
-          <EuiPanel paddingSize="l">
-            <NameConfigurationPanel
-              isLoading={isLoading}
-              isReadOnly={!isWriteable}
-              nameFormElementProps={indicesConfigurationProps.name}
-            />
-          </EuiPanel>
-          <EuiSpacer />
-          <EuiPanel paddingSize="l">
-            <IndicesConfigurationPanel
-              isLoading={isLoading}
-              isReadOnly={!isWriteable}
-              indicesFormElementProps={indicesConfigurationProps.logIndices}
-              tiebreakerFieldFormElementProps={indicesConfigurationProps.tiebreakerField}
-              timestampFieldFormElementProps={indicesConfigurationProps.timestampField}
-            />
-          </EuiPanel>
-          <EuiSpacer />
-          <EuiPanel paddingSize="l">
-            <LogColumnsConfigurationPanel
-              addLogColumn={addLogColumn}
-              moveLogColumn={moveLogColumn}
-              availableFields={availableFields}
-              isLoading={isLoading}
-              logColumnConfiguration={logColumnConfigurationProps}
-            />
-          </EuiPanel>
-          {errors.length > 0 ? (
-            <>
-              <EuiCallOut color="danger">
-                <ul>
-                  {errors.map((error, errorIndex) => (
-                    <li key={errorIndex}>{error}</li>
-                  ))}
-                </ul>
-              </EuiCallOut>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-          <EuiSpacer size="m" />
-          <EuiFlexGroup>
-            {isWriteable && (
-              <EuiFlexItem>
-                {isLoading ? (
-                  <EuiFlexGroup justifyContent="flexEnd">
-                    <EuiFlexItem grow={false}>
-                      <EuiButton color="primary" isLoading fill>
-                        Loading
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <>
+      <EuiPage style={{ flex: '1 0 0%' }}>
+        <EuiPageBody data-test-subj="sourceConfigurationContent" restrictWidth>
+          <EuiPageContentBody>
+            <Prompt prompt={isFormDirty ? unsavedFormPromptMessage : undefined} />
+            <EuiPanel paddingSize="l">
+              <NameConfigurationPanel
+                isLoading={isLoading}
+                isReadOnly={!isWriteable}
+                nameFormElementProps={indicesConfigurationProps.name}
+              />
+            </EuiPanel>
+            <EuiSpacer />
+            <EuiPanel paddingSize="l">
+              <IndicesConfigurationPanel
+                isLoading={isLoading}
+                isReadOnly={!isWriteable}
+                indicesFormElementProps={indicesConfigurationProps.logIndices}
+                tiebreakerFieldFormElementProps={indicesConfigurationProps.tiebreakerField}
+                timestampFieldFormElementProps={indicesConfigurationProps.timestampField}
+              />
+            </EuiPanel>
+            <EuiSpacer />
+            <EuiPanel paddingSize="l">
+              <LogColumnsConfigurationPanel
+                addLogColumn={addLogColumn}
+                moveLogColumn={moveLogColumn}
+                availableFields={availableFields}
+                isLoading={isLoading}
+                logColumnConfiguration={logColumnConfigurationProps}
+              />
+            </EuiPanel>
+            <EuiSpacer />
+            {errors.length > 0 ? (
+              <>
+                <EuiCallOut color="danger">
+                  <ul>
+                    {errors.map((error, errorIndex) => (
+                      <li key={errorIndex}>{error}</li>
+                    ))}
+                  </ul>
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            ) : null}
+            <EuiFlexGroup>
+              {isWriteable && (
+                <EuiFlexItem>
+                  {isLoading ? (
                     <EuiFlexGroup justifyContent="flexEnd">
                       <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj="discardSettingsButton"
-                          color="danger"
-                          iconType="cross"
-                          isDisabled={isLoading || !isFormDirty}
-                          onClick={() => {
-                            resetForm();
-                          }}
-                        >
-                          <FormattedMessage
-                            id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
-                            defaultMessage="Discard"
-                          />
-                        </EuiButton>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          data-test-subj="applySettingsButton"
-                          color="primary"
-                          isDisabled={!isFormDirty || !isFormValid}
-                          fill
-                          onClick={persistUpdates}
-                        >
-                          <FormattedMessage
-                            id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
-                            defaultMessage="Apply"
-                          />
+                        <EuiButton color="primary" isLoading fill>
+                          Loading
                         </EuiButton>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                  </>
-                )}
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+                  ) : (
+                    <>
+                      <EuiFlexGroup justifyContent="flexEnd">
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            data-test-subj="discardSettingsButton"
+                            color="danger"
+                            iconType="cross"
+                            isDisabled={isLoading || !isFormDirty}
+                            onClick={() => {
+                              resetForm();
+                            }}
+                          >
+                            <FormattedMessage
+                              id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
+                              defaultMessage="Discard"
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            data-test-subj="applySettingsButton"
+                            color="primary"
+                            isDisabled={!isFormDirty || !isFormValid}
+                            fill
+                            onClick={persistUpdates}
+                          >
+                            <FormattedMessage
+                              id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
+                              defaultMessage="Apply"
+                            />
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </>
+                  )}
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiPageContentBody>
         </EuiPageBody>
       </EuiPage>
     </EuiErrorBoundary>

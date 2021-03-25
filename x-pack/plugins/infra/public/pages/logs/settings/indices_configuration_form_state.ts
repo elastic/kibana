@@ -13,7 +13,7 @@ import { FormValidationError, validateStringNotEmpty } from './validation_errors
 export interface LogIndicesConfigurationFormState {
   name: string;
   description: string;
-  logIndices: LogIndexReference;
+  logIndices: LogIndexReference | undefined;
   tiebreakerField: string;
   timestampField: string;
 }
@@ -48,12 +48,19 @@ export const useLogIndicesConfigurationFormState = ({
   );
 
   const logIndicesFormElementProps: FormElementProps<
-    LogIndexNameReference | LogIndexPatternReference
+    LogIndexNameReference | LogIndexPatternReference | undefined
   > = useMemo(() => {
-    const onChange = (logIndices: LogIndexReference) =>
+    const onChange = (logIndices: LogIndexReference | undefined) =>
       setFormStateChanges((changes) => ({ ...changes, logIndices }));
 
-    if (formState.logIndices.type === 'index-name') {
+    if (formState.logIndices == null) {
+      return {
+        errors: ['EMPTY'],
+        name: 'indexPatternReference',
+        onChange,
+        value: undefined,
+      };
+    } else if (formState.logIndices.type === 'index-name') {
       return {
         errors: validateStringNotEmpty(formState.logIndices.indexName),
         name: 'indexNameReference',

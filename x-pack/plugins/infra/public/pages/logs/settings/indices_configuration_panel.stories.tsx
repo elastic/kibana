@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiPage, EuiPageBody, EuiPageContent, PropsOf } from '@elastic/eui';
+import { EuiCodeBlock, EuiPage, EuiPageBody, EuiPageContent, PropsOf } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
@@ -27,8 +27,8 @@ export default {
       <I18nProvider>
         <EuiThemeProvider>
           <MockIndexPatternsKibanaContextProvider
-            asyncDelay={5}
-            mockIndexPatterns={args.indexPatterns}
+            asyncDelay={2000}
+            mockIndexPatterns={args.availableIndexPatterns}
           >
             <EuiPage restrictWidth>
               <EuiPageBody>
@@ -46,7 +46,7 @@ export default {
         type: 'object',
       },
     },
-    indexPatterns: {
+    availableIndexPatterns: {
       control: {
         type: 'object',
       },
@@ -56,22 +56,38 @@ export default {
 
 type IndicesConfigurationPanelProps = PropsOf<typeof IndicesConfigurationPanel>;
 
-const IndicesConfigurationPanelTemplate: Story<
-  Pick<IndicesConfigurationPanelProps, 'isLoading' | 'isReadOnly'> &
-    LogIndicesConfigurationFormState
-> = ({ isLoading, isReadOnly, ...initialFormState }) => {
+type IndicesConfigurationPanelStoryArgs = Pick<
+  IndicesConfigurationPanelProps,
+  'isLoading' | 'isReadOnly'
+> &
+  LogIndicesConfigurationFormState & {
+    availableIndexPatterns: MockIndexPattern[];
+  };
+
+const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArgs> = ({
+  isLoading,
+  isReadOnly,
+  availableIndexPatterns,
+  ...initialFormState
+}) => {
   const indicesConfigurationFormState = useLogIndicesConfigurationFormState({
     initialFormState,
   });
 
   return (
-    <IndicesConfigurationPanel
-      isLoading={isLoading}
-      isReadOnly={isReadOnly}
-      indicesFormElementProps={indicesConfigurationFormState.fieldProps.logIndices}
-      tiebreakerFieldFormElementProps={indicesConfigurationFormState.fieldProps.tiebreakerField}
-      timestampFieldFormElementProps={indicesConfigurationFormState.fieldProps.timestampField}
-    />
+    <>
+      <IndicesConfigurationPanel
+        isLoading={isLoading}
+        isReadOnly={isReadOnly}
+        indicesFormElementProps={indicesConfigurationFormState.fieldProps.logIndices}
+        tiebreakerFieldFormElementProps={indicesConfigurationFormState.fieldProps.tiebreakerField}
+        timestampFieldFormElementProps={indicesConfigurationFormState.fieldProps.timestampField}
+      />
+      <EuiCodeBlock language="json">
+        // form state{'\n'}
+        {JSON.stringify(indicesConfigurationFormState.formState, null, 2)}
+      </EuiCodeBlock>
+    </>
   );
 };
 
@@ -86,7 +102,7 @@ const defaultArgs = {
   name: 'My log source configuration',
   tiebreakerField: '_doc',
   timestampField: '@timestamp',
-  indexPatterns: [
+  availableIndexPatterns: [
     {
       id: 'INDEX_PATTERN_A',
       title: 'pattern-a-*',
@@ -108,8 +124,5 @@ export const IndexPattern = IndicesConfigurationPanelTemplate.bind({});
 
 IndexPattern.args = {
   ...defaultArgs,
-  logIndices: {
-    type: 'index-pattern',
-    indexPattern: '',
-  },
+  logIndices: undefined,
 };
