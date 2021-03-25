@@ -59,16 +59,18 @@ export const getStats = async (
     }
   }
 
-  for (const hit of esResponse.hits.hits) {
-    const visualization = hit._source?.visualization;
-    let visState: VisState = {};
-    try {
-      visState = JSON.parse(visualization?.visState ?? '{}');
-    } catch (e) {
-      // invalid visState
-    }
+  if (esResponse?.hits?.hits?.length) {
+    for (const hit of esResponse.hits.hits) {
+      const visualization = hit._source?.visualization;
+      let visState: VisState = {};
+      try {
+        visState = JSON.parse(visualization?.visState ?? '{}');
+      } catch (e) {
+        // invalid visState
+      }
 
-    telemetryUseLastValueMode(visState);
+      telemetryUseLastValueMode(visState);
+    }
   }
 
   const byValueVisualizations = await findByValueEmbeddables(soClient, 'visualization');
