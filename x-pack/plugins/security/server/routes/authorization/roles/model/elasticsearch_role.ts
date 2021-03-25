@@ -25,7 +25,7 @@ export type ElasticsearchRole = Pick<Role, 'name' | 'metadata' | 'transient_meta
 };
 
 export function transformElasticsearchRoleToRole(
-  elasticsearchRole: ElasticsearchRole,
+  elasticsearchRole: Omit<ElasticsearchRole, 'name'>,
   name: string,
   application: string
 ): Role {
