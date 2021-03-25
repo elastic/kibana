@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -73,8 +73,8 @@ describe('UtilityBar', () => {
     );
     const siemUtilityBar = wrapper.find('.siemUtilityBar').first();
 
-    expect(siemUtilityBar).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemUtilityBar).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.s);
+    expect(siemUtilityBar).toHaveStyleRule('border-bottom', euiThemeVars.euiBorderThin);
+    expect(siemUtilityBar).toHaveStyleRule('padding-bottom', euiThemeVars.paddingSizes.s);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -103,7 +103,7 @@ describe('UtilityBar', () => {
     );
     const siemUtilityBar = wrapper.find('.siemUtilityBar').first();
 
-    expect(siemUtilityBar).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemUtilityBar).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.s);
+    expect(siemUtilityBar).not.toHaveStyleRule('border-bottom', euiThemeVars.euiBorderThin);
+    expect(siemUtilityBar).not.toHaveStyleRule('padding-bottom', euiThemeVars.paddingSizes.s);
   });
 });

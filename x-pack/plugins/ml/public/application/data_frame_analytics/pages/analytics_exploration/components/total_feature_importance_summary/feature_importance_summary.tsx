@@ -21,7 +21,7 @@ import {
   BarSeriesSpec,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import euiVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import {
   TotalFeatureImportance,
   isClassificationTotalFeatureImportance,
@@ -38,7 +38,7 @@ import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data
 import { getAnalysisType } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 
-const { euiColorMediumShade } = euiVars;
+const { euiColorMediumShade } = euiThemeVars;
 const axisColor = euiColorMediumShade;
 
 const axes: RecursivePartial<AxisStyle> = {

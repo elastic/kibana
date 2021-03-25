@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -83,8 +83,8 @@ describe('HeaderSection', () => {
     );
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
-    expect(siemHeaderSection).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderSection).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(siemHeaderSection).toHaveStyleRule('border-bottom', euiThemeVars.euiBorderThin);
+    expect(siemHeaderSection).toHaveStyleRule('padding-bottom', euiThemeVars.paddingSizes.l);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -95,8 +95,8 @@ describe('HeaderSection', () => {
     );
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
-    expect(siemHeaderSection).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(siemHeaderSection).not.toHaveStyleRule('border-bottom', euiThemeVars.euiBorderThin);
+    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiThemeVars.paddingSizes.l);
   });
 
   test('it splits the title and supplement areas evenly when split is true', () => {

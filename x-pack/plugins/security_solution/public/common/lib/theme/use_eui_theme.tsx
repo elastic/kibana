@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { useUiSetting$ } from '../kibana';
 
 export const useEuiTheme = () => {
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-  return darkMode ? darkTheme : lightTheme;
+  return darkMode ? euiDarkVars : euiLightVars;
 };

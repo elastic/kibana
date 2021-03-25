@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import { JobMessage } from '../../../../common/types/audit_message';
 import { JobIcon } from '../job_message_icon';
@@ -48,7 +48,7 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error, re
         ''
       ),
       render: (message: JobMessage) => <JobIcon message={message} />,
-      width: `${theme.euiSizeL}`,
+      width: `${euiThemeVars.euiSizeL}`,
     },
     {
       field: 'timestamp',

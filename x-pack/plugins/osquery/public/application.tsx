@@ -6,16 +6,15 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import React, { useMemo } from 'react';
+
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 
+import { EuiThemeProvider } from '../../../../src/plugins/kibana_react/common';
 import { useUiSetting$ } from '../../../../src/plugins/kibana_react/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
@@ -28,18 +27,11 @@ const queryClient = new QueryClient();
 
 const OsqueryAppContext = () => {
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-  const theme = useMemo(
-    () => ({
-      eui: darkMode ? euiDarkVars : euiLightVars,
-      darkMode,
-    }),
-    [darkMode]
-  );
 
   return (
-    <ThemeProvider theme={theme}>
+    <EuiThemeProvider darkMode={darkMode}>
       <OsqueryApp />
-    </ThemeProvider>
+    </EuiThemeProvider>
   );
 };
 

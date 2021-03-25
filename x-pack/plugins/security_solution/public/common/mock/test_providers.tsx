@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { I18nProvider } from '@kbn/i18n/react';
 import { InMemoryCache as Cache } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
@@ -16,8 +15,7 @@ import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
-import { ThemeProvider } from 'styled-components';
-
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
 import {
@@ -67,9 +65,9 @@ const TestProvidersComponent: React.FC<Props> = ({
     <MockKibanaContextProvider>
       <ApolloProvider client={apolloClient}>
         <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <EuiThemeProvider darkMode={true}>
             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-          </ThemeProvider>
+          </EuiThemeProvider>
         </ReduxStoreProvider>
       </ApolloProvider>
     </MockKibanaContextProvider>

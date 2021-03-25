@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import euiVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import { stringHash } from './string_utils';
 
 const COLORS = [
-  euiVars.euiColorVis0,
-  euiVars.euiColorVis1,
-  euiVars.euiColorVis2,
-  euiVars.euiColorVis3,
-  euiVars.euiColorVis4,
-  euiVars.euiColorVis5,
-  euiVars.euiColorVis6,
-  euiVars.euiColorVis7,
-  euiVars.euiColorVis8,
-  euiVars.euiColorVis9,
-  euiVars.euiColorDarkShade,
-  euiVars.euiColorPrimary,
+  euiThemeVars.euiColorVis0,
+  euiThemeVars.euiColorVis1,
+  euiThemeVars.euiColorVis2,
+  euiThemeVars.euiColorVis3,
+  euiThemeVars.euiColorVis4,
+  euiThemeVars.euiColorVis5,
+  euiThemeVars.euiColorVis6,
+  euiThemeVars.euiColorVis7,
+  euiThemeVars.euiColorVis8,
+  euiThemeVars.euiColorVis9,
+  euiThemeVars.euiColorDarkShade,
+  euiThemeVars.euiColorPrimary,
 ];
 
 const colorMap: Record<string, string> = {};

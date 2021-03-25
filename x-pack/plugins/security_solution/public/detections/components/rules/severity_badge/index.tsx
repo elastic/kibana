@@ -8,7 +8,7 @@
 import { upperFirst } from 'lodash/fp';
 import React from 'react';
 import { EuiHealth } from '@elastic/eui';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 interface Props {
   value: string;
@@ -19,12 +19,12 @@ const SeverityBadgeComponent: React.FC<Props> = ({ value }) => (
     data-test-subj="severity"
     color={
       value === 'low'
-        ? euiLightVars.euiColorVis0
+        ? euiThemeVars.euiColorVis0
         : value === 'medium'
-        ? euiLightVars.euiColorVis5
+        ? euiThemeVars.euiColorVis5
         : value === 'high'
-        ? euiLightVars.euiColorVis7
-        : euiLightVars.euiColorVis9
+        ? euiThemeVars.euiColorVis7
+        : euiThemeVars.euiColorVis9
     }
   >
     {upperFirst(value)}

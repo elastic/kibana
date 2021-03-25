@@ -6,15 +6,11 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { storiesOf, addDecorator } from '@storybook/react';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { ItemDetailsAction, ItemDetailsCard, ItemDetailsPropertySummary } from '.';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
+addDecorator((storyFn) => <EuiThemeProvider darkMode={false}>{storyFn()}</EuiThemeProvider>);
 
 storiesOf('Components/ItemDetailsCard', module).add('default', () => {
   return (

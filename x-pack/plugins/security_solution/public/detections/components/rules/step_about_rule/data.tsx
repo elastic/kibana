@@ -7,7 +7,7 @@
 
 import styled from 'styled-components';
 import { EuiHealth } from '@elastic/eui';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import React from 'react';
 
 import { Severity } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -25,22 +25,22 @@ const StyledEuiHealth = styled(EuiHealth)`
 export const severityOptions: SeverityOptionItem[] = [
   {
     value: 'low',
-    inputDisplay: <StyledEuiHealth color={euiLightVars.euiColorVis0}>{I18n.LOW}</StyledEuiHealth>,
+    inputDisplay: <StyledEuiHealth color={euiThemeVars.euiColorVis0}>{I18n.LOW}</StyledEuiHealth>,
   },
   {
     value: 'medium',
     inputDisplay: (
-      <StyledEuiHealth color={euiLightVars.euiColorVis5}>{I18n.MEDIUM}</StyledEuiHealth>
+      <StyledEuiHealth color={euiThemeVars.euiColorVis5}>{I18n.MEDIUM}</StyledEuiHealth>
     ),
   },
   {
     value: 'high',
-    inputDisplay: <StyledEuiHealth color={euiLightVars.euiColorVis7}>{I18n.HIGH}</StyledEuiHealth>,
+    inputDisplay: <StyledEuiHealth color={euiThemeVars.euiColorVis7}>{I18n.HIGH}</StyledEuiHealth>,
   },
   {
     value: 'critical',
     inputDisplay: (
-      <StyledEuiHealth color={euiLightVars.euiColorVis9}>{I18n.CRITICAL}</StyledEuiHealth>
+      <StyledEuiHealth color={euiThemeVars.euiColorVis9}>{I18n.CRITICAL}</StyledEuiHealth>
     ),
   },
 ];

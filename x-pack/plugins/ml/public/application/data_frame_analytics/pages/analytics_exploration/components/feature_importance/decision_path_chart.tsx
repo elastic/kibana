@@ -24,14 +24,14 @@ import { EuiIcon } from '@elastic/eui';
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import euiVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import type { DecisionPathPlotData } from './use_classification_path_data';
 import { formatSingleValue } from '../../../../../formatters/format_value';
 import {
   FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
 } from '../../../../../../../common/types/feature_importance';
-const { euiColorFullShade, euiColorMediumShade } = euiVars;
+const { euiColorFullShade, euiColorMediumShade } = euiThemeVars;
 const axisColor = euiColorMediumShade;
 
 const baselineStyle: LineAnnotationStyle = {

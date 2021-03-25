@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -142,8 +142,8 @@ describe('HeaderPage', () => {
     );
     const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
 
-    expect(siemHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(siemHeaderPage).toHaveStyleRule('border-bottom', euiThemeVars.euiBorderThin);
+    expect(siemHeaderPage).toHaveStyleRule('padding-bottom', euiThemeVars.paddingSizes.l);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -154,7 +154,7 @@ describe('HeaderPage', () => {
     );
     const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
 
-    expect(siemHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(siemHeaderPage).not.toHaveStyleRule('border-bottom', euiThemeVars.euiBorderThin);
+    expect(siemHeaderPage).not.toHaveStyleRule('padding-bottom', euiThemeVars.paddingSizes.l);
   });
 });

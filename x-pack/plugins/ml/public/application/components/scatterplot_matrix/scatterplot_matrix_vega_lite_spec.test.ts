@@ -8,7 +8,7 @@
 // @ts-ignore
 import { compile } from 'vega-lite/build-es5/vega-lite';
 
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
 import { LEGEND_TYPES } from '../vega_chart/common';
 
@@ -22,27 +22,27 @@ import {
 
 describe('getColorSpec()', () => {
   it('should return the default color for non-outlier specs', () => {
-    const colorSpec = getColorSpec(euiThemeLight);
+    const colorSpec = getColorSpec(euiThemeVars);
 
     expect(colorSpec).toEqual({ value: DEFAULT_COLOR });
   });
 
   it('should return a conditional spec for outliers', () => {
-    const colorSpec = getColorSpec(euiThemeLight, 'outlier_score');
+    const colorSpec = getColorSpec(euiThemeVars, 'outlier_score');
 
     expect(colorSpec).toEqual({
       condition: {
         test: "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
         value: COLOR_OUTLIER,
       },
-      value: euiThemeLight.euiColorMediumShade,
+      value: euiThemeVars.euiColorMediumShade,
     });
   });
 
   it('should return a field based spec for non-outlier specs with legendType supplied', () => {
     const colorName = 'the-color-field';
 
-    const colorSpec = getColorSpec(euiThemeLight, undefined, colorName, LEGEND_TYPES.NOMINAL);
+    const colorSpec = getColorSpec(euiThemeVars, undefined, colorName, LEGEND_TYPES.NOMINAL);
 
     expect(colorSpec).toEqual({
       field: colorName,
@@ -58,7 +58,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
   it('should return the default spec for non-outliers without a legend', () => {
     const data = [{ x: 1, y: 1 }];
 
-    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, ['x', 'y'], euiThemeLight);
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, ['x', 'y'], euiThemeVars);
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
     expect(() => compile(vegaLiteSpec)).not.toThrow();
@@ -83,7 +83,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
   it('should return the spec for outliers', () => {
     const data = [{ x: 1, y: 1 }];
 
-    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, ['x', 'y'], euiThemeLight, 'ml');
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, ['x', 'y'], euiThemeVars, 'ml');
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
     expect(() => compile(vegaLiteSpec)).not.toThrow();
@@ -104,7 +104,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
         test: "(datum['ml․outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
         value: COLOR_OUTLIER,
       },
-      value: euiThemeLight.euiColorMediumShade,
+      value: euiThemeVars.euiColorMediumShade,
     });
     expect(vegaLiteSpec.spec.encoding.tooltip).toEqual([
       { field: 'x', type: 'quantitative' },
@@ -124,7 +124,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
       data,
       ['x', 'y'],
-      euiThemeLight,
+      euiThemeVars,
       undefined,
       'the-color-field',
       LEGEND_TYPES.NOMINAL

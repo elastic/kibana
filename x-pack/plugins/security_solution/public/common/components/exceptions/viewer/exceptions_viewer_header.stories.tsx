@@ -8,15 +8,11 @@
 import { storiesOf, addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-
+import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { ExceptionsViewerHeader } from './exceptions_viewer_header';
 import { ExceptionListTypeEnum } from '../../../../../public/lists_plugin_deps';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
+addDecorator((storyFn) => <EuiThemeProvider darkMode={false}>{storyFn()}</EuiThemeProvider>);
 
 storiesOf('Components/ExceptionsViewerHeader', module)
   .add('loading', () => {

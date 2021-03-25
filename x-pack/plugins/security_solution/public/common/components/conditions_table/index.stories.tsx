@@ -6,16 +6,12 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { storiesOf, addDecorator } from '@storybook/react';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-
+import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 import { createItems, TEST_COLUMNS } from './test_utils';
 import { ConditionsTable } from '.';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
+addDecorator((storyFn) => <EuiThemeProvider darkMode={false}>{storyFn()}</EuiThemeProvider>);
 
 storiesOf('Components/ConditionsTable', module)
   .add('single item', () => {
