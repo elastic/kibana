@@ -93,10 +93,12 @@ const refreshListIfNeeded = async (
       const pageSize = getCurrentLocationPageSize(store.getState());
       const filter = getCurrentLocationFilter(store.getState());
 
+      const kqlQuert = `exception-list-agnostic.attributes.name:${filter} OR exception-list-agnostic.attributes.description:${filter} OR exception-list-agnostic.attributes.entries.value:"${filter}"`;
+
       const response = await trustedAppsService.getTrustedAppsList({
         page: pageIndex + 1,
         per_page: pageSize,
-        ...(filter ? { filter } : {}),
+        filter: filter ? kqlQuert : undefined,
       });
 
       store.dispatch(
