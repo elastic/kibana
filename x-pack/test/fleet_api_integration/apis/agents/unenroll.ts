@@ -45,9 +45,11 @@ export default function (providerContext: FtrProviderContext) {
         index: '.fleet-agents',
         id: 'agent1',
       });
-      // @ts-ignore
+      // @ts-expect-error agentDoc has unknown type
       agentDoc.access_api_key_id = accessAPIKeyId;
+      // @ts-expect-error agentDoc has unknown type
       agentDoc.default_api_key_id = outputAPIKeyBody.id;
+      // @ts-expect-error agentDoc has unknown type
       agentDoc.default_api_key = Buffer.from(
         `${outputAPIKeyBody.id}:${outputAPIKeyBody.api_key}`
       ).toString('base64');

@@ -6,11 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SearchResponse, MGetResponse, GetResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
-import type { ESSearchResponse } from '../../../../../../typings/elasticsearch';
+
 import { appContextService, agentPolicyService } from '../../services';
 import type { FleetServerAgent } from '../../../common';
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
@@ -120,7 +120,7 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: esKuery.toElasticsearchQuery(kueryNode) } : {};
-  const res = await esClient.search<ESSearchResponse<FleetServerAgent, {}>>({
+  const res = await esClient.search<FleetServerAgent, {}>({
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,
     size: perPage,
@@ -140,7 +140,7 @@ export async function getAgentsByKuery(
 
   return {
     agents,
-    total: res.body.hits.total.value,
+    total: (res.body.hits.total as estypes.TotalHits).value,
     page,
     perPage,
   };
@@ -183,13 +183,14 @@ export async function countInactiveAgents(
     track_total_hits: true,
     body,
   });
+  // @ts-expect-error value is number | TotalHits
   return res.body.hits.total.value;
 }
 
 export async function getAgentById(esClient: ElasticsearchClient, agentId: string) {
   const agentNotFoundError = new AgentNotFoundError(`Agent ${agentId} not found`);
   try {
-    const agentHit = await esClient.get<ESAgentDocumentResult>({
+    const agentHit = await esClient.get<FleetServerAgent>({
       index: AGENTS_INDEX,
       id: agentId,
     });
@@ -210,16 +211,16 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
 
 export function isAgentDocument(
   maybeDocument: any
-): maybeDocument is GetResponse<FleetServerAgent> {
+): maybeDocument is estypes.MultiGetHit<FleetServerAgent> {
   return '_id' in maybeDocument && '_source' in maybeDocument;
 }
 
-export type ESAgentDocumentResult = GetResponse<FleetServerAgent>;
+export type ESAgentDocumentResult = estypes.MultiGetHit<FleetServerAgent>;
 export async function getAgentDocuments(
   esClient: ElasticsearchClient,
   agentIds: string[]
 ): Promise<ESAgentDocumentResult[]> {
-  const res = await esClient.mget<MGetResponse<FleetServerAgent>>({
+  const res = await esClient.mget<FleetServerAgent>({
     index: AGENTS_INDEX,
     body: { docs: agentIds.map((_id) => ({ _id })) },
   });
@@ -247,7 +248,7 @@ export async function getAgentByAccessAPIKeyId(
   esClient: ElasticsearchClient,
   accessAPIKeyId: string
 ): Promise<Agent> {
-  const res = await esClient.search<SearchResponse<FleetServerAgent>>({
+  const res = await esClient.search<FleetServerAgent>({
     index: AGENTS_INDEX,
     q: `access_api_key_id:${escapeSearchQueryPhrase(accessAPIKeyId)}`,
   });
@@ -309,10 +310,11 @@ export async function bulkUpdateAgents(
   });
 
   return {
-    items: res.body.items.map((item: { update: { _id: string; error?: Error } }) => ({
-      id: item.update._id,
-      success: !item.update.error,
-      error: item.update.error,
+    items: res.body.items.map((item: estypes.BulkResponseItemContainer) => ({
+      id: item.update!._id as string,
+      success: !item.update!.error,
+      // @ts-expect-error ErrorCause is not assignable to Error
+      error: item.update!.error as Error,
     })),
   };
 }
