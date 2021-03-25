@@ -199,4 +199,54 @@ describe('native_renderer', () => {
 
     expect(unmountCallback).toHaveBeenCalled();
   });
+
+  it('should handle when the mount function is asynchronous without a cleanup fn', () => {
+    let isUnmounted = false;
+
+    function TestComponent() {
+      useEffect(() => {
+        return () => {
+          isUnmounted = true;
+        };
+      }, []);
+      return <>Hello</>;
+    }
+
+    renderAndTriggerHooks(
+      <NativeRenderer
+        render={async (element, props) => {
+          render(<TestComponent />, element);
+        }}
+        nativeProps={{}}
+      />,
+      mountpoint
+    );
+
+    // Replaces the component at the mountpoint with nothing
+    renderAndTriggerHooks(<>Empty</>, mountpoint);
+
+    expect(isUnmounted).toBe(true);
+  });
+
+  it('should handle when the mount function is asynchronous with a cleanup fn', async () => {
+    const unmountCallback = jest.fn();
+
+    renderAndTriggerHooks(
+      <NativeRenderer
+        render={async (element, props) => {
+          return unmountCallback;
+        }}
+        nativeProps={{}}
+      />,
+      mountpoint
+    );
+
+    // Schedule a promise cycle to update the DOM
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Replaces the component at the mountpoint with nothing
+    renderAndTriggerHooks(<>Empty</>, mountpoint);
+
+    expect(unmountCallback).toHaveBeenCalled();
+  });
 });

@@ -8,8 +8,13 @@
 import React, { HTMLAttributes, useEffect, useRef } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 
+type CleanupCallback = (el: Element) => void;
+
 export interface NativeRendererProps<T> extends HTMLAttributes<HTMLDivElement> {
-  render: (domElement: Element, props: T) => void;
+  render: (
+    domElement: Element,
+    props: T
+  ) => Promise<CleanupCallback | void> | CleanupCallback | void;
   nativeProps: T;
   tag?: string;
 }
@@ -32,7 +37,7 @@ export function NativeRenderer<T>({ render, nativeProps, tag, ...rest }: NativeR
   useEffect(() => {
     return () => {
       if (elementRef.current) {
-        if (cleanupRef.current) {
+        if (cleanupRef.current && typeof cleanupRef.current === 'function') {
           cleanupRef.current(elementRef.current);
         }
         unmountComponentAtNode(elementRef.current);
@@ -44,7 +49,17 @@ export function NativeRenderer<T>({ render, nativeProps, tag, ...rest }: NativeR
     ref: (el) => {
       if (el) {
         elementRef.current = el;
-        cleanupRef.current = render(el, nativeProps);
+        // Handles the editor frame renderer, which is async
+        const result = render(el, nativeProps);
+        if (result instanceof Promise) {
+          result.then((cleanup) => {
+            if (typeof cleanup === 'function') {
+              cleanupRef.current = cleanup;
+            }
+          });
+        } else if (typeof result === 'function') {
+          cleanupRef.current = result;
+        }
       }
     },
   });

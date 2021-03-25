@@ -64,7 +64,7 @@ export interface EditorFrameProps {
   showNoDataPopover: () => void;
 }
 export interface EditorFrameInstance {
-  mount: (element: Element, props: EditorFrameProps) => void;
+  mount: (element: Element, props: EditorFrameProps) => Promise<void>;
   unmount: () => void;
 }
 
