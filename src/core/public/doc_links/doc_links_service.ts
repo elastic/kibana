@@ -285,9 +285,6 @@ export class DocLinksService {
           registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
         },
-        cloud: {
-          ccs: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-enable-ccs.html`,
-        },
         ingest: {
           pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
           pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
@@ -459,7 +456,6 @@ export interface DocLinksStart {
     readonly ccs: Record<string, string>;
     readonly plugins: Record<string, string>;
     readonly snapshotRestore: Record<string, string>;
-    readonly cloud: { readonly ccs: string };
     readonly ingest: Record<string, string>;
   };
 }

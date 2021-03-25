@@ -12,7 +12,6 @@ export let remoteClustersUrl: string;
 export let transportPortUrl: string;
 export let proxyModeUrl: string;
 export let proxySettingsUrl: string;
-export let cloudRemoteClustersUrl: string;
 
 export function init({ links }: DocLinksStart): void {
   skippingDisconnectedClustersUrl = links.ccs.skippingDisconnectedClusters;
@@ -20,5 +19,4 @@ export function init({ links }: DocLinksStart): void {
   transportPortUrl = links.elasticsearch.transportSettings;
   proxyModeUrl = links.elasticsearch.remoteClustersProxy;
   proxySettingsUrl = links.elasticsearch.remoteClusersProxySettings;
-  cloudRemoteClustersUrl = links.cloud.ccs;
 }
