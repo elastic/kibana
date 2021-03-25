@@ -5,19 +5,42 @@
  * 2.0.
  */
 
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { ResultSettingsDisabledFieldsHeader } from './result_settings_disabled_fields_header';
 import { ResultSettingsTable } from './result_settings_table';
 
 describe('ResultSettingsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setMockValues({
+      schemaConflicts: {},
+    });
   });
 
   it('renders', () => {
     const wrapper = shallow(<ResultSettingsTable />);
     expect(wrapper.isEmptyRender()).toBe(false);
+    expect(wrapper.find(ResultSettingsDisabledFieldsHeader).exists()).toBe(false);
+  });
+
+  it('renders a disabled fields section if there are schema conflicts', () => {
+    setMockValues({
+      schemaConflicts: {
+        foo: {
+          text: ['foo'],
+          number: ['foo'],
+          geolocation: [],
+          date: [],
+        },
+      },
+    });
+
+    const wrapper = shallow(<ResultSettingsTable />);
+    expect(wrapper.find(ResultSettingsDisabledFieldsHeader).exists()).toBe(true);
   });
 });

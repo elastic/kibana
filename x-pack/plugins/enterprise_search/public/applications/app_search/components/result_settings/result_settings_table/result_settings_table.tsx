@@ -6,20 +6,34 @@
  */
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import { EuiTable } from '@elastic/eui';
 
+import { ResultSettingsLogic } from '..';
+
+import { ResultSettingsDisabledFieldsBody } from './result_settings_disabled_fields_body';
+import { ResultSettingsDisabledFieldsHeader } from './result_settings_disabled_fields_header';
 import { ResultSettingsNonTextFieldsBody } from './result_settings_non_text_fields_body';
 import { ResultSettingsNonTextFieldsHeader } from './result_settings_non_text_fields_header';
 import { ResultSettingsTextFieldsBody } from './result_settings_text_fields_body';
 import { ResultSettingsTextFieldsHeader } from './result_settings_text_fields_header';
 
 export const ResultSettingsTable: React.FC = () => {
+  const { schemaConflicts } = useValues(ResultSettingsLogic);
+
   return (
     <EuiTable className="resultSettingsTable" responsive={false}>
       <ResultSettingsTextFieldsHeader />
       <ResultSettingsTextFieldsBody />
       <ResultSettingsNonTextFieldsHeader />
       <ResultSettingsNonTextFieldsBody />
+      {!!Object.keys(schemaConflicts).length && (
+        <>
+          <ResultSettingsDisabledFieldsHeader />
+          <ResultSettingsDisabledFieldsBody />
+        </>
+      )}
     </EuiTable>
   );
 };
