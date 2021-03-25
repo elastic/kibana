@@ -41,6 +41,7 @@ export const searchResponseToArray = (
   if (!rawResponse.aggregations) {
     return [];
   } else {
+    // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
     return rawResponse.aggregations.indices.buckets
       .map((bucket: { key: string }) => {
         return bucket.key;
