@@ -39,7 +39,7 @@ export const useLogIndicesConfigurationFormState = ({
 
   const nameFormElementProps: FormElementProps<string> = useMemo(
     () => ({
-      errors: validateStringNotEmpty(formState.name),
+      errors: validateStringNotEmpty('name', formState.name),
       name: 'name',
       onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
       value: formState.name,
@@ -55,21 +55,21 @@ export const useLogIndicesConfigurationFormState = ({
 
     if (formState.logIndices == null) {
       return {
-        errors: ['EMPTY'],
+        errors: validateStringNotEmpty('log index pattern', ''),
         name: 'indexPatternReference',
         onChange,
         value: undefined,
       };
     } else if (formState.logIndices.type === 'index-name') {
       return {
-        errors: validateStringNotEmpty(formState.logIndices.indexName),
+        errors: validateStringNotEmpty('log indices', formState.logIndices.indexName),
         name: 'indexNameReference',
         onChange,
         value: formState.logIndices,
       };
     } else {
       return {
-        errors: validateStringNotEmpty(formState.logIndices.indexPattern),
+        errors: validateStringNotEmpty('log index pattern', formState.logIndices.indexPattern),
         name: 'indexPatternReference',
         onChange,
         value: formState.logIndices,
@@ -79,7 +79,7 @@ export const useLogIndicesConfigurationFormState = ({
 
   const tiebreakerFieldFormElementProps: FormElementProps<string> = useMemo(
     () => ({
-      errors: validateStringNotEmpty(formState.tiebreakerField),
+      errors: validateStringNotEmpty('tiebreaker', formState.tiebreakerField),
       name: `tiebreakerField`,
       onChange: (tiebreakerField) =>
         setFormStateChanges((changes) => ({ ...changes, tiebreakerField })),
@@ -90,7 +90,7 @@ export const useLogIndicesConfigurationFormState = ({
 
   const timestampFieldFormElementProps: FormElementProps<string> = useMemo(
     () => ({
-      errors: validateStringNotEmpty(formState.timestampField),
+      errors: validateStringNotEmpty('timestamp', formState.timestampField),
       name: `timestampField`,
       onChange: (timestampField) =>
         setFormStateChanges((changes) => ({ ...changes, timestampField })),

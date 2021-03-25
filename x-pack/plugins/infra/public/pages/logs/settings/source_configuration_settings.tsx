@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +26,7 @@ import { Prompt } from '../../../utils/navigation_warning_prompt';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
+import { LogSourceConfigurationFormErrors } from './source_configuration_form_errors';
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
 
 export const LogsSettingsPage = () => {
@@ -111,13 +111,7 @@ export const LogsSettingsPage = () => {
             <EuiSpacer />
             {errors.length > 0 ? (
               <>
-                <EuiCallOut color="danger">
-                  <ul>
-                    {errors.map((error, errorIndex) => (
-                      <li key={errorIndex}>{error}</li>
-                    ))}
-                  </ul>
-                </EuiCallOut>
+                <LogSourceConfigurationFormErrors errors={errors} />
                 <EuiSpacer />
               </>
             ) : null}

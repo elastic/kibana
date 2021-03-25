@@ -5,13 +5,27 @@
  * 2.0.
  */
 
-// import { i18n } from '@kbn/i18n';
+interface GenericValidationError {
+  type: 'generic';
+  message: string;
+}
 
-export type FormValidationError = 'EMPTY';
+interface EmptyFieldValidationError {
+  type: 'empty_field';
+  fieldName: string;
+}
 
-export const validateStringNotEmpty = (value: string): FormValidationError[] =>
-  value === '' ? ['EMPTY'] : [];
+interface EmptyColumnListValidationError {
+  type: 'empty_column_list';
+}
 
-// i18n.translate('xpack.infra.logsSettings.fieldEmptyErrorMessage', {
-//   defaultMessage: 'The field must not be empty',
-// }),
+export type FormValidationError =
+  | GenericValidationError
+  | EmptyFieldValidationError
+  | EmptyColumnListValidationError;
+
+export const validateStringNotEmpty = (fieldName: string, value: string): FormValidationError[] =>
+  value === '' ? [{ type: 'empty_field', fieldName }] : [];
+
+export const validateColumnListNotEmpty = (columns: unknown[]): FormValidationError[] =>
+  columns.length <= 0 ? [{ type: 'empty_column_list' }] : [];

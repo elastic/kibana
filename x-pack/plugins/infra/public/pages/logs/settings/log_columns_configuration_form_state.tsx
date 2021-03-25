@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   FieldLogColumnConfiguration,
   isMessageLogColumnConfiguration,
@@ -15,6 +14,7 @@ import {
   MessageLogColumnConfiguration,
   TimestampLogColumnConfiguration,
 } from '../../../utils/source_configuration';
+import { validateColumnListNotEmpty } from './validation_errors';
 
 export interface TimestampLogColumnConfigurationProps {
   logColumnConfiguration: TimestampLogColumnConfiguration['timestampColumn'];
@@ -119,18 +119,9 @@ export const useLogColumnsConfigurationFormState = ({
     [formState.logColumns]
   );
 
-  const errors = useMemo(
-    () =>
-      logColumnConfigurationProps.length <= 0
-        ? [
-            <FormattedMessage
-              id="xpack.infra.sourceConfiguration.logColumnListEmptyErrorMessage"
-              defaultMessage="The log column list must not be empty."
-            />,
-          ]
-        : [],
-    [logColumnConfigurationProps]
-  );
+  const errors = useMemo(() => validateColumnListNotEmpty(logColumnConfigurationProps), [
+    logColumnConfigurationProps,
+  ]);
 
   const isFormValid = useMemo(() => (errors.length <= 0 ? true : false), [errors]);
 
