@@ -17,8 +17,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { METRICS_INDEX_PATTERN } from '../../../common/constants';
-import { InputFieldProps } from './input_fields';
+import { METRICS_INDEX_PATTERN } from '../../../../common/constants';
+import { InputFieldProps } from '../../../components/source_configuration/input_fields';
 
 interface IndicesConfigurationPanelProps {
   isLoading: boolean;

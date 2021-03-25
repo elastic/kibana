@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './input_fields';
-export { SourceConfigurationSettings } from './source_configuration_settings';
-export { ViewSourceConfigurationButton } from './view_source_configuration_button';
+export const JSON_CONTENT = '[data-test-subj="jsonView"]';
+
+export const JSON_LINES = '.ace_line';
+
+export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
