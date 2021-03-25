@@ -2,3 +2,4 @@ blank_issues_enabled: false
 contact_links:
   - name: Question
     url: https://discuss.elastic.co/c/kibana
+    about: Please ask and answer questions here.
