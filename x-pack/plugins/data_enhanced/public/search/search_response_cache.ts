@@ -11,6 +11,7 @@ import { IKibanaSearchResponse, isErrorResponse } from '../../../../../src/plugi
 interface ResponseCacheItem {
   response: ReplaySubject<IKibanaSearchResponse<any>>;
   size: number;
+  subs: Subscription;
 }
 
 export const CACHE_MAX_SIZE_MB = 10;
@@ -30,6 +31,7 @@ export class SearchResponseCache {
   private deleteItem(key: string) {
     const item = this.responseCache.get(key);
     if (item) {
+      item.subs.unsubscribe();
       this.cacheSize -= item.size;
       this.responseCache.delete(key);
     }
@@ -43,6 +45,10 @@ export class SearchResponseCache {
   }
 
   public clear() {
+    this.cacheSize = 0;
+    this.responseCache.forEach((item) => {
+      item.subs.unsubscribe();
+    });
     this.responseCache.clear();
   }
 
@@ -57,16 +63,16 @@ export class SearchResponseCache {
   }
 
   public set(key: string, response: Observable<IKibanaSearchResponse<any>>) {
-    const sub = new ReplaySubject<IKibanaSearchResponse<any>>(1);
+    const responseReplay$ = new ReplaySubject<IKibanaSearchResponse<any>>(1);
     const item = {
-      response: sub,
+      response: responseReplay$,
+      subs: new Subscription(),
       size: 0,
     };
 
     this.setItem(key, item);
 
-    const subscriptions = new Subscription();
-    subscriptions.add(
+    item.subs.add(
       response.subscribe({
         next: (r) => {
           const newSize = JSON.stringify(r).length;
@@ -89,7 +95,7 @@ export class SearchResponseCache {
         },
       })
     );
-    subscriptions.add(response.subscribe(sub));
+    item.subs.add(response.subscribe(responseReplay$));
 
     this.shrink();
   }
