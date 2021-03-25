@@ -160,7 +160,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
           async function ensureLegacyAlertHasBeenMigrated(alertId: string) {
             const getResponse = await supertestWithoutAuth
-              .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${alertId}`)
+              .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${alertId}`)
               .auth(user.username, user.password);
             expect(getResponse.status).to.eql(200);
           }

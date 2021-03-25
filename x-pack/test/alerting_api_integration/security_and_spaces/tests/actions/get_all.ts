@@ -124,7 +124,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
