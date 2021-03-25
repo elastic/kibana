@@ -41,7 +41,7 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
             label={
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.fieldCloudUrlLabel"
-                defaultMessage="Elasticsearch endpoint url"
+                defaultMessage="Elasticsearch endpoint URL"
               />
             }
             isInvalid={Boolean(areErrorsVisible && cloudUrlError)}
@@ -75,7 +75,7 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
                       'xpack.remoteClusters.remoteClusterForm.cloudScreenshotAlt',
                       {
                         defaultMessage:
-                          'A screenshot of Cloud deployment page section with a highlighted endpoint url.',
+                          'A screenshot of Cloud deployment page section with a highlighted endpoint URL.',
                       }
                     )}
                   />

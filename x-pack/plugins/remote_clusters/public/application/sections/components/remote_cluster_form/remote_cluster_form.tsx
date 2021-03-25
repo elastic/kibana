@@ -502,7 +502,7 @@ export class RemoteClusterForm extends Component<Props, State> {
       errorExplanations.push({
         key: 'cloudUrlExplanation',
         field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputcloudUrlErrorMessage', {
-          defaultMessage: 'The "Cloud deployment url" field is invalid.',
+          defaultMessage: 'The "Elasticsearch endpoint URL" field is invalid.',
         }),
         error: errorCloudUrl,
       });
