@@ -244,7 +244,11 @@ For the alternative system in this RFC, we are recommending Buildkite. The UI, A
 
 The [Buildkite features](https://buildkite.com/features) page is a great overview of the functionality offered.
 
-For a public instance of Buildkite in action, check out [Bazel's Buildkite](https://buildkite.com/bazel) organization.
+For some public instances of Buildkite in action, see:
+
+- [Bazel](https://buildkite.com/bazel)
+- [Rails](https://buildkite.com/rails)
+- [Chef](https://buildkite.com/chef-oss)
 
 ## Required and Desired Capabilities
 
@@ -274,7 +278,7 @@ If Buildkite's status pages are accurate, they seem to be extremely stable, and 
 - [Historical Uptime](https://www.buildkitestatus.com/uptime)
 - [Incident History](https://www.buildkitestatus.com/history)
 
-For agents, stability and availability will depend primarily on the infrastructure that we build and the availability of the cloud provider (GCP, primarily) running our agents. Since we control our agents, we will be able to run agents across multiple zones, and possibly regions, in GCP for increased availability. See [TODO agent manager section].
+For agents, stability and availability will depend primarily on the infrastructure that we build and the availability of the cloud provider (GCP, primarily) running our agents. Since [we control our agents](#elastic-buildkite-agent-manager), we will be able to run agents across multiple zones, and possibly regions, in GCP for increased availability.
 
 They have a [99.95% uptime SLA](https://buildkite.com/enterprise) for Enterprise customers.
 
@@ -394,7 +398,7 @@ However, since we manage our own agents, we will still pay for our compute usage
 
 Buildkite has read-only public access, configurable for each pipeline. An organization can contain a mix of both public and private pipelines.
 
-There are not fine-grained settings for this, and all information in the build is publicly accessible. (TODO: confirm)
+There are not fine-grained settings for this, and all information in the build is publicly accessible.
 
 #### Secrets handling
 
@@ -894,6 +898,23 @@ TODO
 If we implement this proposal, how will existing Kibana developers adopt it? Is
 this a breaking change? Can we write a codemod? Should we coordinate with
 other projects or libraries?
+
+We have already done a lot of the required legwork to begin building and running pipelines in Buildkite, including getting approval from various business groups inside Elastic. After all business groups have signed off, and a deal has been signed with Buildkite, we can begin adopting Buildkite. A rough plan outline is below. It's not meant to be a full migration plan.
+
+- Build minimal supporting services, automation, and pipelines to migrate a low-risk job from Jenkins to Buildkite (e.g. "Baseline" CI for tracked branches)
+  - The following will need to exist (some of which has already been built)
+    - New GCP project for infrastructure, with current implementations migrated
+    - Agent Manager
+    - Agent image build/promote
+    - Slack notifications for failures (possibly utilize Buildkite's built-in solution)
+    - The Buildkite pipeline and supporting code
+  - Run the job in parallel with Jenkins until we have confidence that it's working well
+  - Turn off the Jenkins version
+- Build, test, migrate the next low-risk pipelines: ES Snapshot and/or Flaky Test Suite Runner
+- Build, test, migrate tracked branch pipelines
+- Build, test, migrate PR pipelines
+  - Will additionally need PR comment support
+  - PR pipelines are the most disruptive, so we should have a high level of confidence before migrating
 
 # How we teach this
 
