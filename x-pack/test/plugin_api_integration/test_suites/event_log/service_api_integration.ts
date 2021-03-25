@@ -78,57 +78,43 @@ export default function ({ getService }: FtrProviderContext) {
         await registerProviderActions('provider1', ['action1', 'action2']);
       }
 
-      const providerActions = await getProviderActions('provider1');
+      const providerActions = await getRegisteredProviderActions('provider1');
       expect(providerActions.body.actions).to.be.eql(['action1', 'action2']);
     });
 
     it('should allow to log an event and then find it by saved object', async () => {
-      const initResult = await isProviderActionRegistered('provider4', 'action1');
-
-      if (!initResult.body.isProviderActionRegistered) {
-        await registerProviderActions('provider4', ['action1', 'action2']);
-      }
-
-      const savedObject = { type: 'event_log_test', id: uuid.v4(), rel: 'primary' };
+      const { provider, action } = await getTestProviderAction();
+      const savedObject = getTestSavedObject();
       const event: IEvent = {
-        event: { provider: 'provider4', action: 'action1' },
+        event: { provider, action },
         kibana: { saved_objects: [savedObject] },
       };
 
-      await logTestEvent(savedObject.id, event);
+      const indexedEvent = await logAndWaitUntilIndexed(event, savedObject.type, savedObject.id);
 
-      retry.tryForTime(5000, async () => {
-        const res = await fetchEvents(savedObject.type, savedObject.id);
-        expect(res.body.data.length).to.be.eql(1);
-        expect(res.body.data.event.provider).to.be.eql(event.event?.provider);
-        expect(res.body.data.event.action).to.be.eql(event.event?.action);
-      });
+      expect(indexedEvent.event.provider).to.be.eql(event.event?.provider);
+      expect(indexedEvent.event.action).to.be.eql(event.event?.action);
     });
 
     it('should respect event schema - properly index and preserve all the properties of an event', async () => {
-      const initResult = await isProviderActionRegistered('provider5', 'action1');
-
-      if (!initResult.body.isProviderActionRegistered) {
-        await registerProviderActions('provider5', ['action1', 'action2']);
-      }
-
-      const savedObject = { type: 'event_log_test', id: uuid.v4(), rel: 'primary' };
+      const { provider, action } = await getTestProviderAction();
+      const savedObject = getTestSavedObject();
       const event: IEvent = {
         '@timestamp': '2042-03-25T11:53:24.911Z',
         message: 'some message',
         tags: ['some', 'tags'],
         event: {
-          provider: 'provider5',
-          action: 'action1',
+          provider,
+          action,
           category: ['some', 'categories'],
           code: '4242',
           created: '2042-03-25T11:53:24.911Z',
-          dataset: 'provider5.dataset',
+          dataset: `${provider}.dataset`,
           hash: '123456789012345678901234567890ABCD',
           id: '98506718-03ec-4d0a-a7bd-b8459a60a82d',
           ingested: '2042-03-25T11:53:24.911Z',
           kind: 'event',
-          module: 'provider5.module',
+          module: `${provider}.module`,
           original: 'Sep 19 08:26:10 host CEF:0&#124;Security&#124; worm successfully stopped',
           outcome: 'success',
           reason: 'Terminated an unexpected process',
@@ -153,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         log: {
           level: 'warning',
-          logger: 'provider5.child-logger',
+          logger: `${provider}.child-logger`,
         },
         rule: {
           author: ['Elastic', 'Security'],
@@ -185,18 +171,11 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
 
-      await logTestEvent(savedObject.id, event);
-
-      const response = await retry.tryForTime(5000, async () => {
-        const res = await fetchEvents(savedObject.type, savedObject.id);
-        expect(res.body.data.length).to.be.eql(1);
-        return res;
-      });
+      const indexedEvent = await logAndWaitUntilIndexed(event, savedObject.type, savedObject.id);
 
       // Omit properties which are set by the event logger
       // NOTE: event.* properties are set by the `/api/log_event_fixture/${savedObjectId}/_log` route handler
-      const [fetchedEvent] = response.body.data;
-      const propertiesToCheck = _.omit(fetchedEvent, [
+      const propertiesToCheck = _.omit(indexedEvent, [
         'ecs',
         'event.start',
         'event.end',
@@ -224,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
   }
 
-  async function getProviderActions(provider: string) {
+  async function getRegisteredProviderActions(provider: string) {
     log.debug(`getProviderActions ${provider}`);
     return await supertest
       .get(`/api/log_event_fixture/${provider}/getProviderActions`)
@@ -256,7 +235,23 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
   }
 
-  async function logTestEvent(savedObjectId: string, event: IEvent) {
+  async function getTestProviderAction() {
+    const provider = `provider-${uuid.v4()}`;
+    const action = `action-${uuid.v4()}`;
+
+    const response = await isProviderActionRegistered(provider, action);
+    if (!response.body.isProviderActionRegistered) {
+      await registerProviderActions(provider, [action]);
+    }
+
+    return { provider, action };
+  }
+
+  function getTestSavedObject() {
+    return { type: 'event_log_test', id: uuid.v4(), rel: 'primary' };
+  }
+
+  async function logEvent(event: IEvent, savedObjectId: string) {
     log.debug(`Logging Event for Saved Object ${savedObjectId}`);
     return await supertest
       .post(`/api/log_event_fixture/${savedObjectId}/_log`)
@@ -271,5 +266,22 @@ export default function ({ getService }: FtrProviderContext) {
       .get(`/api/event_log/${savedObjectType}/${savedObjectId}/_find`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
+  }
+
+  // NOTE: It supports indexing only 1 event per test.
+  async function logAndWaitUntilIndexed(
+    event: IEvent,
+    savedObjectType: string,
+    savedObjectId: string
+  ) {
+    await logEvent(event, savedObjectId);
+
+    const response = await retry.tryForTime(30000, async () => {
+      const res = await fetchEvents(savedObjectType, savedObjectId);
+      expect(res.body.data.length).to.be.eql(1);
+      return res;
+    });
+
+    return response.body.data[0];
   }
 }
