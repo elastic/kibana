@@ -9,7 +9,7 @@
 import { resolve } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
@@ -32,7 +32,7 @@ export async function saveAction({
 }: {
   name: string;
   indices: string | string[];
-  client: Client;
+  client: KibanaClient;
   dataDir: string;
   log: ToolingLog;
   raw: boolean;

@@ -7,10 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getServices } from '../../../kibana_services';
-const { docLinks } = getServices();
+import { ChromeStart, DocLinksStart } from 'kibana/public';
 
-export function addHelpMenuToAppChrome(chrome) {
+export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksStart) {
   chrome.setHelpExtension({
     appName: i18n.translate('discover.helpMenu.appName', {
       defaultMessage: 'Discover',
