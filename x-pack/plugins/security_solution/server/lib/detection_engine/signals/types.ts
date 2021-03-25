@@ -167,7 +167,7 @@ export type BaseSignalHit = estypes.Hit<SignalSource>;
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
 export type RuleExecutorOptions = AlertExecutorOptions<
-  RuleTypeParams,
+  RuleParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext

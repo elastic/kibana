@@ -10,6 +10,7 @@ import {
   BaseRuleParams,
   EqlRuleParams,
   MachineLearningRuleParams,
+  QueryRuleParams,
   ThresholdRuleParams,
 } from './rule_schemas';
 
@@ -77,5 +78,17 @@ export const getMlRuleParams = (): MachineLearningRuleParams => {
     type: 'machine_learning',
     anomalyThreshold: 42,
     machineLearningJobId: 'my-job',
+  };
+};
+
+export const getQueryRuleParams = (): QueryRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'query',
+    language: 'kuery',
+    query: '*:*',
+    index: ['some-index'],
+    filters: undefined,
+    savedId: undefined,
   };
 };

@@ -20,6 +20,7 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -33,9 +34,9 @@ describe('patch_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.create();
 
-    clients.alertsClient.get.mockResolvedValue(getResult()); // existing rule
+    clients.alertsClient.get.mockResolvedValue(getResult(getQueryRuleParams())); // existing rule
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
-    clients.alertsClient.update.mockResolvedValue(getResult()); // successful update
+    clients.alertsClient.update.mockResolvedValue(getResult(getQueryRuleParams())); // successful update
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful transform
 
     patchRulesRoute(server.router, ml);
