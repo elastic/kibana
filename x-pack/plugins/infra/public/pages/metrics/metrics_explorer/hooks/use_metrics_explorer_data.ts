@@ -9,7 +9,7 @@ import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState, useCallback } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerResponse,
   metricsExplorerResponseRT,
@@ -25,7 +25,7 @@ function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOpt
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
-  source: InfraSourceConfiguration | undefined,
+  source: MetricsSourceConfigurationProperties | undefined,
   derivedIndexPattern: IIndexPattern,
   timerange: MetricsExplorerTimeOptions,
   afterKey: string | null | Record<string, string | null>,
