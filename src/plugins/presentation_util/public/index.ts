@@ -15,10 +15,14 @@ export {
 
 export { DashboardPicker } from './components/dashboard_picker';
 export {
-  SolutionToolbar,
   AddFromLibraryButton,
-  QuickButtonGroup,
   PrimaryActionButton,
+  PrimaryActionPopover,
+  QuickButton,
+  QuickButtonGroup,
+  SolutionToolbar,
+  SolutionToolbarButton,
+  SolutionToolbarPopover,
 } from './components/solution_toolbar';
 
 export function plugin() {
