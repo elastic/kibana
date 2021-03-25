@@ -22,13 +22,9 @@ The
 {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md[request
 handler context] exposes the following scoped *core* services:
 
-{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsclient.md[`context.savedObjects.client`]
-
-{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
-
-{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
-
-{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.uiSettings.client`]
+* {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsclient.md[`context.savedObjects.client`]
+* {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md[`context.elasticsearch.client`]
+* {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.uiSettings.client`]
 
 ==== Declare a custom scoped service
 
