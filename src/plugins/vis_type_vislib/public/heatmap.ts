@@ -95,6 +95,7 @@ export const heatmapVisTypeDefinition: VisTypeDefinition<HeatmapVisParams> = {
           'std_dev',
           'top_hits',
           '!filtered_metric',
+          '!single_percentile',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

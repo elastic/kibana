@@ -28,6 +28,7 @@ const metricAggFilter: string[] = [
   '!geo_bounds',
   '!geo_centroid',
   '!filtered_metric',
+  '!single_percentile',
 ];
 const bucketAggFilter: string[] = [];
 

@@ -132,7 +132,7 @@ export const getLineVisTypeDefinition = (
         name: 'metric',
         title: i18n.translate('visTypeXy.line.metricTitle', { defaultMessage: 'Y-axis' }),
         min: 1,
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric'],
+        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {
