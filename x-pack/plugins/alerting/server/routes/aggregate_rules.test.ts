@@ -31,7 +31,7 @@ describe('aggregateRulesRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rules/_aggregate"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rules/_aggregate"`);
 
     const aggregateResult = {
       alertExecutionStatus: {

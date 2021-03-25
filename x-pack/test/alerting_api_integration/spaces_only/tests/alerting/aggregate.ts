@@ -21,7 +21,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
     it('should aggregate when there are no alerts', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_aggregate`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
       );
 
       expect(response.status).to.eql(200);
@@ -88,7 +88,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       // too early.
       await delay(1000);
       const reponse = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rules/_aggregate`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
       );
 
       expect(reponse.status).to.eql(200);

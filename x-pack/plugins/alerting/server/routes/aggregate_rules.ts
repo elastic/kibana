@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { AggregateResult, AggregateOptions } from '../alerts_client';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 // config definition
 const querySchema = schema.object({
@@ -57,7 +57,7 @@ export const aggregateRulesRoute = (
 ) => {
   router.get(
     {
-      path: `${BASE_ALERTING_API_PATH}/rules/_aggregate`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
       validate: {
         query: querySchema,
       },

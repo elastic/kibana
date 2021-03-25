@@ -12,7 +12,7 @@ import { GetAlertInstanceSummaryParams } from '../alerts_client';
 import { RewriteRequestCase, RewriteResponseCase, verifyAccessAndContext } from './lib';
 import {
   AlertingRequestHandlerContext,
-  BASE_ALERTING_API_PATH,
+  INTERNAL_BASE_ALERTING_API_PATH,
   AlertInstanceSummary,
 } from '../types';
 
@@ -57,7 +57,7 @@ export const getRuleAlertSummaryRoute = (
 ) => {
   router.get(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule/{id}/_alert_summary`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_alert_summary`,
       validate: {
         params: paramSchema,
         query: querySchema,

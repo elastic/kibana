@@ -48,7 +48,7 @@ describe('getRuleStateRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/state"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/state"`);
 
     alertsClient.getAlertState.mockResolvedValueOnce(mockedAlertState);
 
@@ -84,7 +84,7 @@ describe('getRuleStateRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/state"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/state"`);
 
     alertsClient.getAlertState.mockResolvedValueOnce(undefined);
 
@@ -120,7 +120,7 @@ describe('getRuleStateRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/state"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/state"`);
 
     alertsClient.getAlertState = jest
       .fn()

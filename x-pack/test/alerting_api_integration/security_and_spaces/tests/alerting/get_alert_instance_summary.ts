@@ -39,7 +39,9 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/_alert_summary`)
+            .get(
+              `${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+            )
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -104,7 +106,9 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/_alert_summary`)
+            .get(
+              `${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+            )
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -154,7 +158,9 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/alerting/rule/${createdAlert.id}/_alert_summary`)
+            .get(
+              `${getUrlPrefix('other')}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+            )
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -179,7 +185,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
         it(`should handle getAlertInstanceSummary request appropriately when alert doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/1/_alert_summary`)
+            .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/1/_alert_summary`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
