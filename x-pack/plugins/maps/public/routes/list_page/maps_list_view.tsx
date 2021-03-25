@@ -78,42 +78,39 @@ function navigateToNewMap() {
   });
 }
 
-function findMapsProvider(setNumMaps: (x: number) => void) {
-  return async (searchQuery: string) => {
-    let searchTerm = searchQuery;
-    let tagReferences;
+async function findMaps(searchQuery: string) {
+  let searchTerm = searchQuery;
+  let tagReferences;
 
-    if (savedObjectsTagging) {
-      const parsed = savedObjectsTagging.ui.parseSearchQuery(searchQuery, {
-        useName: true,
-      });
-      searchTerm = parsed.searchTerm;
-      tagReferences = parsed.tagReferences;
-    }
-
-    const { savedObjects, total } = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
-      type: MAP_SAVED_OBJECT_TYPE,
-      search: searchTerm ? `${searchTerm}*` : undefined,
-      perPage: getSavedObjects().settings.getListingLimit(),
-      page: 1,
-      searchFields: ['title^3', 'description'],
-      defaultSearchOperator: 'AND',
-      fields: ['description', 'title'],
-      hasReference: tagReferences,
+  if (savedObjectsTagging) {
+    const parsed = savedObjectsTagging.ui.parseSearchQuery(searchQuery, {
+      useName: true,
     });
-    setNumMaps(total);
+    searchTerm = parsed.searchTerm;
+    tagReferences = parsed.tagReferences;
+  }
 
-    return {
-      total,
-      hits: savedObjects.map((savedObject) => {
-        return {
-          id: savedObject.id,
-          title: savedObject.attributes.title,
-          description: savedObject.attributes.description,
-          references: savedObject.references,
-        };
-      }),
-    };
+  const { savedObjects, total } = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
+    type: MAP_SAVED_OBJECT_TYPE,
+    search: searchTerm ? `${searchTerm}*` : undefined,
+    perPage: getSavedObjects().settings.getListingLimit(),
+    page: 1,
+    searchFields: ['title^3', 'description'],
+    defaultSearchOperator: 'AND',
+    fields: ['description', 'title'],
+    hasReference: tagReferences,
+  });
+
+  return {
+    total,
+    hits: savedObjects.map((savedObject) => {
+      return {
+        id: savedObject.id,
+        title: savedObject.attributes.title,
+        description: savedObject.attributes.description,
+        references: savedObject.references,
+      };
+    }),
   };
 }
 
@@ -132,19 +129,28 @@ export function MapsListView({ stateTransfer }: { stateTransfer: EmbeddableState
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
-  const [numMaps, setNumMaps] = useState(1);
+  const [showEmptyList, setShowEmptyList] = useState(false);
   const isReadOnly = !getMapsCapabilities().save;
 
   getCoreChrome().docTitle.change(getAppTitle());
   getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
 
-  return numMaps ? (
+  return (
     <TableListView
+      noItemsShowEmptyList={showEmptyList}
+      noItemsFragment={<Redirect to="/map" />}
       headingId="mapsListingPage"
       rowHeader="title"
       createItem={isReadOnly ? undefined : navigateToNewMap}
-      findItems={findMapsProvider(setNumMaps)}
-      deleteItems={isReadOnly ? undefined : deleteMaps}
+      findItems={findMaps}
+      deleteItems={
+        isReadOnly
+          ? undefined
+          : (...args) => {
+              setShowEmptyList(true);
+              return deleteMaps(...args);
+            }
+      }
       tableColumns={tableColumns}
       listingLimit={getSavedObjects().settings.getListingLimit()}
       initialFilter={''}
@@ -159,7 +165,5 @@ export function MapsListView({ stateTransfer }: { stateTransfer: EmbeddableState
       toastNotifications={getToasts()}
       searchFilters={searchFilters}
     />
-  ) : (
-    <Redirect to="/map" />
   );
 }
