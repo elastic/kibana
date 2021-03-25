@@ -624,6 +624,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       const dataTimeRangeMode = await testSubjects.find('dataTimeRangeMode');
       return await comboBox.setElement(dataTimeRangeMode, value);
     }
+
+    public async checkSelectedDataTimerangeMode(value: string) {
+      const dataTimeRangeMode = await testSubjects.find('dataTimeRangeMode');
+      return await comboBox.isOptionSelected(dataTimeRangeMode, value);
+    }
   }
 
   return new VisualBuilderPage();

@@ -84,6 +84,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.checkGaugeTabIsPresent();
       });
 
+      it('should "Entire time range" selected as timerange mode for new visualization', async () => {
+        await PageObjects.visualBuilder.clickPanelOptions('gauge');
+        await PageObjects.visualBuilder.checkSelectedDataTimerangeMode('Entire time range');
+        await PageObjects.visualBuilder.clickDataTab('gauge');
+      });
+
       it('should verify gauge label and count display', async () => {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();

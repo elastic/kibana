@@ -70,9 +70,10 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
         // we set right mode in savedObject
         // ternary operator needed because old visualization have 'time_range_mode' as undefined for 'last_value'
         // but for creating new visaulization we should use 'entire_timerange' as default.
-        [TIME_RANGE_MODE_KEY]: this.props.vis.title
-          ? TIME_RANGE_DATA_MODES.LAST_VALUE
-          : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
+        [TIME_RANGE_MODE_KEY]:
+          this.props.vis.title && this.props.vis.params.type !== 'timeseries'
+            ? TIME_RANGE_DATA_MODES.LAST_VALUE
+            : TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
         ...this.props.vis.params,
       },
       extractedIndexPatterns: [''],
