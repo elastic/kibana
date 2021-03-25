@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-jest.mock('../classes/layers/vector_layer', () => {});
+import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_TYPES } from '../../common';
+
 jest.mock('../classes/layers/tiled_vector_layer/tiled_vector_layer', () => {});
 jest.mock('../classes/layers/blended_vector_layer/blended_vector_layer', () => {});
 jest.mock('../classes/layers/heatmap_layer', () => {});
@@ -23,6 +24,9 @@ jest.mock('../kibana_services', () => ({
   getMapsCapabilities() {
     return { save: true };
   },
+  getIsDarkMode() {
+    return false;
+  },
 }));
 
 import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
@@ -36,6 +40,7 @@ import {
 import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { Filter } from '../../../../../src/plugins/data/public';
+import { ESSearchSource } from '../classes/sources/es_search_source';
 
 describe('getDataFilters', () => {
   const mapExtent = {
@@ -218,11 +223,57 @@ describe('getQueryableUniqueIndexPatternIds', () => {
     } as unknown) as ILayer;
   }
 
+  function createWaitLayerDescriptorMock({
+    indexPatternId,
+    visible = true,
+  }: {
+    visible?: boolean;
+    indexPatternId: string;
+  }) {
+    return {
+      type: LAYER_TYPE.VECTOR,
+      style: {
+        type: LAYER_STYLE_TYPE.VECTOR,
+      },
+      visible,
+      sourceDescriptor: ESSearchSource.createDescriptor({
+        type: SOURCE_TYPES.ES_SEARCH,
+        indexPatternId,
+        geoField: 'field',
+      }),
+    };
+  }
+
   test('should only include visible', () => {
-    const layerList: ILayer[] = [createLayerMock({})];
-    const waitingForMapReadyLayerList: VectorLayerDescriptor[] = [];
+    const layerList: ILayer[] = [
+      createLayerMock({}),
+      createLayerMock({ indexPatterns: ['foo'] }),
+      createLayerMock({ indexPatterns: ['bar'] }),
+      createLayerMock({ indexPatterns: ['foobar'], isVisible: false }),
+      createLayerMock({ indexPatterns: ['bar'] }),
+    ];
+    const waitingForMapReadyLayerList: VectorLayerDescriptor[] = ([] as unknown) as VectorLayerDescriptor[];
     expect(
       getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
-    ).toEqual([]);
+    ).toEqual(['foo', 'bar']);
+  });
+
+  test('should only include visible and waitlist should take precedence', () => {
+    const layerList: ILayer[] = [
+      createLayerMock({}),
+      createLayerMock({ indexPatterns: ['foo'] }),
+      createLayerMock({ indexPatterns: ['bar'] }),
+      createLayerMock({ indexPatterns: ['foobar'], isVisible: false }),
+      createLayerMock({ indexPatterns: ['bar'] }),
+    ];
+    const waitingForMapReadyLayerList: VectorLayerDescriptor[] = ([
+      createWaitLayerDescriptorMock({ indexPatternId: 'foo' }),
+      createWaitLayerDescriptorMock({ indexPatternId: 'barfoo', visible: false }),
+      createWaitLayerDescriptorMock({ indexPatternId: 'fbr' }),
+      createWaitLayerDescriptorMock({ indexPatternId: 'foo' }),
+    ] as unknown) as VectorLayerDescriptor[];
+    expect(
+      getQueryableUniqueIndexPatternIds.resultFunc(layerList, waitingForMapReadyLayerList)
+    ).toEqual(['foo', 'fbr']);
   });
 });
