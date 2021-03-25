@@ -6,7 +6,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import {
+import type {
   SignalSourceHit,
   SignalSearchResponse,
   BulkResponse,
@@ -261,7 +261,9 @@ export const sampleWrappedSignalHit = (): WrappedSignalHit => {
 export const sampleDocWithAncestors = (): SignalSearchResponse => {
   const sampleDoc = sampleDocNoSortId();
   delete sampleDoc.sort;
+  // @ts-expect-error @elastic/elasticsearch _source is optional
   delete sampleDoc._source.source;
+  // @ts-expect-error @elastic/elasticsearch _source is optional
   sampleDoc._source.signal = {
     parent: {
       id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
