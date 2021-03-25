@@ -53,6 +53,7 @@ export function Discover({
   fetchCounter,
   fetchError,
   fieldCounts,
+  fetchStatus,
   histogramData,
   hits,
   indexPattern,
@@ -393,6 +394,7 @@ export function Discover({
                               columns={columns}
                               expandedDoc={expandedDoc}
                               indexPattern={indexPattern}
+                              isLoading={fetchStatus === 'loading'}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={opts.sampleSize}
