@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import supertestAsPromised from 'supertest-as-promised';
-import { SearchResponse } from 'elasticsearch';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../../plugins/cases/common/constants';
@@ -504,7 +504,7 @@ export default ({ getService }: FtrProviderContext): void => {
        * around 30 seconds which seemed too slow
        */
       const getAllCasesSortedByCreatedAtAsc = async () => {
-        const cases = await es.search<SearchResponse<CaseAttributes>>({
+        const cases: ApiResponse<estypes.SearchResponse<CaseAttributes>> = await es.search({
           index: '.kibana',
           body: {
             size: 10000,
@@ -601,7 +601,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         body.cases.map((caseInfo, index) => {
           // we started on the second page of 10 cases with a perPage of 5, so the first case should 0 + 5 (index + perPage)
-          expect(caseInfo.title).to.eql(allCases[index + perPage].cases.title);
+          expect(caseInfo.title).to.eql(allCases[index + perPage]?.cases.title);
         });
       });
 
@@ -636,7 +636,7 @@ export default ({ getService }: FtrProviderContext): void => {
             // for page 1, the cases tiles should be 0,1,2 for page 2: 3,4,5 etc (assuming the titles were sorted
             // correctly)
             expect(caseInfo.title).to.eql(
-              allCases[index + perPage * (currentPage - 1)].cases.title
+              allCases[index + perPage * (currentPage - 1)]?.cases.title
             );
           });
         }

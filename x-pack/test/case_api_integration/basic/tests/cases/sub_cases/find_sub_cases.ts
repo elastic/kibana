@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchResponse } from 'elasticsearch';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { findSubCasesResp, postCaseReq, postCollectionReq } from '../../../../common/lib/mock';
+import { findSubCasesResp, postCollectionReq } from '../../../../common/lib/mock';
 import {
   createCaseAction,
   createSubCase,
@@ -57,11 +57,11 @@ export default ({ getService }: FtrProviderContext): void => {
       after(async () => {
         await deleteCaseAction(supertest, actionID);
       });
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
-      });
 
       describe('basic find tests', () => {
+        afterEach(async () => {
+          await deleteAllCaseItems(es);
+        });
         it('should not find any sub cases when none exist', async () => {
           const { body: caseResp }: { body: CaseResponse } = await supertest
             .post(CASES_URL)
@@ -274,13 +274,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('pagination', () => {
-        const numCases = 10;
+        const numCases = 4;
         let collection: CaseResponse;
         before(async () => {
           ({ body: collection } = await supertest
             .post(CASES_URL)
             .set('kbn-xsrf', 'true')
-            .send(postCaseReq)
+            .send(postCollectionReq)
             .expect(200));
 
           await createSubCases(numCases, collection.id);
@@ -291,7 +291,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const createSubCases = async (total: number, caseID: string) => {
-          const responsePromises: Array<Promise<CreateSubCaseResp>> = [];
+          const responses: CreateSubCaseResp[] = [];
           for (let i = 0; i < total; i++) {
             const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
               alerts: createAlertsString([
@@ -299,8 +299,8 @@ export default ({ getService }: FtrProviderContext): void => {
               ]),
               type: CommentType.generatedAlert,
             };
-            responsePromises.push(
-              createSubCase({
+            responses.push(
+              await createSubCase({
                 supertest,
                 actionID,
                 caseID,
@@ -308,19 +308,11 @@ export default ({ getService }: FtrProviderContext): void => {
               })
             );
           }
-          return Promise.all(responsePromises);
+          return responses;
         };
 
-        /**
-         * This is used to retrieve all the cases in the same sorted order that we're expecting them to come back via the
-         * _find API so that we have a more true comparison instead of using the _find API to get all the cases which
-         * could mangle the results if the implementation had a bug.
-         *
-         * Ideally we could enforce how the cases are created in reasonable time, waiting for each api call to finish takes
-         * around 30 seconds which seemed too slow
-         */
         const getAllCasesSortedByCreatedAtAsc = async () => {
-          const cases = await es.search<SearchResponse<SubCaseAttributes>>({
+          const cases: ApiResponse<estypes.SearchResponse<SubCaseAttributes>> = await es.search({
             index: '.kibana',
             body: {
               size: 10000,
@@ -339,17 +331,18 @@ export default ({ getService }: FtrProviderContext): void => {
             .query({
               sortOrder: 'asc',
               page: 1,
-              perPage: 5,
+              perPage: 3,
             })
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(body.subCases.length).to.eql(5);
-          expect(body.total).to.eql(10);
+          expect(body.subCases.length).to.eql(3);
+          expect(body.total).to.eql(4);
           expect(body.page).to.eql(1);
-          expect(body.per_page).to.eql(5);
-          expect(body.count_open_cases).to.eql(10);
-          expect(body.count_closed_cases).to.eql(0);
+          expect(body.per_page).to.eql(3);
+          // there will only be 1 open sub case, all the rest will be closed
+          expect(body.count_open_cases).to.eql(1);
+          expect(body.count_closed_cases).to.eql(3);
           expect(body.count_in_progress_cases).to.eql(0);
         });
 
@@ -364,12 +357,12 @@ export default ({ getService }: FtrProviderContext): void => {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(body.total).to.eql(10);
+          expect(body.total).to.eql(4);
           expect(body.page).to.eql(1);
           expect(body.per_page).to.eql(11);
-          expect(body.subCases.length).to.eql(10);
-          expect(body.count_open_cases).to.eql(10);
-          expect(body.count_closed_cases).to.eql(0);
+          expect(body.subCases.length).to.eql(4);
+          expect(body.count_open_cases).to.eql(1);
+          expect(body.count_closed_cases).to.eql(3);
           expect(body.count_in_progress_cases).to.eql(0);
         });
 
@@ -379,22 +372,22 @@ export default ({ getService }: FtrProviderContext): void => {
             .query({
               sortOrder: 'asc',
               page: 1,
-              perPage: 10,
+              perPage: 4,
             })
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(body.total).to.eql(10);
+          expect(body.total).to.eql(4);
           expect(body.page).to.eql(1);
-          expect(body.per_page).to.eql(10);
-          expect(body.subCases.length).to.eql(10);
-          expect(body.count_open_cases).to.eql(10);
-          expect(body.count_closed_cases).to.eql(0);
+          expect(body.per_page).to.eql(4);
+          expect(body.subCases.length).to.eql(4);
+          expect(body.count_open_cases).to.eql(1);
+          expect(body.count_closed_cases).to.eql(3);
           expect(body.count_in_progress_cases).to.eql(0);
         });
 
         it('returns the second page of results', async () => {
-          const perPage = 5;
+          const perPage = 2;
           const { body }: { body: SubCasesFindResponse } = await supertest
             .get(`${getSubCasesUrl(collection.id)}/_find`)
             .query({
@@ -405,12 +398,12 @@ export default ({ getService }: FtrProviderContext): void => {
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(body.total).to.eql(10);
+          expect(body.total).to.eql(4);
           expect(body.page).to.eql(2);
-          expect(body.per_page).to.eql(5);
-          expect(body.subCases.length).to.eql(5);
-          expect(body.count_open_cases).to.eql(10);
-          expect(body.count_closed_cases).to.eql(0);
+          expect(body.per_page).to.eql(2);
+          expect(body.subCases.length).to.eql(2);
+          expect(body.count_open_cases).to.eql(1);
+          expect(body.count_closed_cases).to.eql(3);
           expect(body.count_in_progress_cases).to.eql(0);
 
           const allCases = await getAllCasesSortedByCreatedAtAsc();
@@ -418,17 +411,17 @@ export default ({ getService }: FtrProviderContext): void => {
           body.subCases.map((subCaseInfo, index) => {
             // we started on the second page of 10 cases with a perPage of 5, so the first case should 0 + 5 (index + perPage)
             expect(subCaseInfo.created_at).to.eql(
-              allCases[index + perPage]['cases-sub-case'].created_at
+              allCases[index + perPage]?.['cases-sub-case'].created_at
             );
           });
         });
 
-        it('paginates with perPage of 2 through 10 total cases', async () => {
-          const total = 10;
+        it('paginates with perPage of 2 through 4 total sub cases', async () => {
+          const total = 4;
           const perPage = 2;
 
-          // it's less than or equal here because the page starts at 1, so page 5 is a valid page number
-          // and should have case titles 9, and 10
+          // it's less than or equal here because the page starts at 1, so page 2 is a valid page number
+          // and should have sub cases titles 3, and 4
           for (let currentPage = 1; currentPage <= total / perPage; currentPage++) {
             const { body }: { body: SubCasesFindResponse } = await supertest
               .get(`${getSubCasesUrl(collection.id)}/_find`)
@@ -444,8 +437,8 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(body.page).to.eql(currentPage);
             expect(body.per_page).to.eql(perPage);
             expect(body.subCases.length).to.eql(perPage);
-            expect(body.count_open_cases).to.eql(total);
-            expect(body.count_closed_cases).to.eql(0);
+            expect(body.count_open_cases).to.eql(1);
+            expect(body.count_closed_cases).to.eql(total - 1);
             expect(body.count_in_progress_cases).to.eql(0);
 
             const allCases = await getAllCasesSortedByCreatedAtAsc();
@@ -454,30 +447,30 @@ export default ({ getService }: FtrProviderContext): void => {
               // for page 1, the cases tiles should be 0,1,2 for page 2: 3,4,5 etc (assuming the titles were sorted
               // correctly)
               expect(subCaseInfo.created_at).to.eql(
-                allCases[index + perPage * (currentPage - 1)]['cases-sub-case'].created_at
+                allCases[index + perPage * (currentPage - 1)]?.['cases-sub-case'].created_at
               );
             });
           }
         });
 
-        it('retrieves the last three cases', async () => {
+        it('retrieves the last sub case', async () => {
           const { body }: { body: SubCasesFindResponse } = await supertest
             .get(`${getSubCasesUrl(collection.id)}/_find`)
             .query({
               sortOrder: 'asc',
-              // this should skip the first 7 cases and only return the last 3
+              // this should skip the first 3 sub cases and only return the last one
               page: 2,
-              perPage: 7,
+              perPage: 3,
             })
             .set('kbn-xsrf', 'true')
             .expect(200);
 
-          expect(body.total).to.eql(10);
+          expect(body.total).to.eql(4);
           expect(body.page).to.eql(2);
-          expect(body.per_page).to.eql(7);
-          expect(body.subCases.length).to.eql(3);
-          expect(body.count_open_cases).to.eql(10);
-          expect(body.count_closed_cases).to.eql(0);
+          expect(body.per_page).to.eql(3);
+          expect(body.subCases.length).to.eql(1);
+          expect(body.count_open_cases).to.eql(1);
+          expect(body.count_closed_cases).to.eql(3);
           expect(body.count_in_progress_cases).to.eql(0);
         });
       });
