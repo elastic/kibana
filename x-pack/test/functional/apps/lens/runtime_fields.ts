@@ -63,5 +63,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('abc');
     });
+
+    it('should able to remove field', async () => {
+      await PageObjects.lens.clickField('runtimefield2');
+      await PageObjects.lens.removeField();
+      await PageObjects.lens.waitForFieldMissing('runtimefield2');
+    });
   });
 }
