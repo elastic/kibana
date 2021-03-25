@@ -7,12 +7,26 @@
  */
 
 import expect from '@kbn/expect';
+import supertestAsPromised from 'supertest-as-promised';
 import { basicUiCounters } from './__fixtures__/ui_counters';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { SavedObject } from '../../../../src/core/server';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { SavedObject } from '../../../../src/core/server';
 import ossRootTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '../../../../src/plugins/telemetry/schema/oss_plugins.json';
 import { assertTelemetryPayload, flatKeys } from './utils';
+
+async function retrieveTelemetry(
+  supertest: supertestAsPromised.SuperTest<supertestAsPromised.Test>
+) {
+  const { body } = await supertest
+    .post('/api/telemetry/v2/clusters/_stats')
+    .set('kbn-xsrf', 'xxx')
+    .send({ unencrypted: true })
+    .expect(200);
+
+  expect(body.length).to.be(1);
+  return body[0];
+}
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -35,14 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       let stats: Record<string, any>;
 
       before('pull local stats', async () => {
-        const { body } = await supertest
-          .post('/api/telemetry/v2/clusters/_stats')
-          .set('kbn-xsrf', 'xxx')
-          .send({ unencrypted: true })
-          .expect(200);
-
-        expect(body.length).to.be(1);
-        stats = body[0];
+        stats = await retrieveTelemetry(supertest);
       });
 
       it('should pass the schema validation', () => {
@@ -141,14 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
       before('Add UI Counters saved objects', () => esArchiver.load('saved_objects/ui_counters'));
       after('cleanup saved objects changes', () => esArchiver.unload('saved_objects/ui_counters'));
       it('returns ui counters aggregated by day', async () => {
-        const { body } = await supertest
-          .post('/api/telemetry/v2/clusters/_stats')
-          .set('kbn-xsrf', 'xxx')
-          .send({ unencrypted: true })
-          .expect(200);
-
-        expect(body.length).to.be(1);
-        const stats = body[0];
+        const stats = await retrieveTelemetry(supertest);
         expect(stats.stack_stats.kibana.plugins.ui_counters).to.eql(basicUiCounters);
       });
     });
@@ -191,14 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should return application_usage data', async () => {
-          const { body } = await supertest
-            .post('/api/telemetry/v2/clusters/_stats')
-            .set('kbn-xsrf', 'xxx')
-            .send({ unencrypted: true })
-            .expect(200);
-
-          expect(body.length).to.be(1);
-          const stats = body[0];
+          const stats = await retrieveTelemetry(supertest);
           expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
             'test-app': {
               appId: 'test-app',
@@ -262,14 +255,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // flaky https://github.com/elastic/kibana/issues/94513
         it.skip("should only use the first 10k docs for the application_usage data (they'll be rolled up in a later process)", async () => {
-          const { body } = await supertest
-            .post('/api/telemetry/v2/clusters/_stats')
-            .set('kbn-xsrf', 'xxx')
-            .send({ unencrypted: true })
-            .expect(200);
-
-          expect(body.length).to.be(1);
-          const stats = body[0];
+          const stats = await retrieveTelemetry(supertest);
           expect(stats.stack_stats.kibana.plugins.application_usage).to.eql({
             'test-app': {
               appId: 'test-app',

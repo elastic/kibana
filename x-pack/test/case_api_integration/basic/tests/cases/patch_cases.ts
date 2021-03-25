@@ -438,10 +438,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should be no change in their status since syncing is disabled
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
             CaseStatuses.open
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
             CaseStatuses.open
           );
 
@@ -471,10 +471,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should still be no change in their status since syncing is disabled
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
             CaseStatuses.open
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
             CaseStatuses.open
           );
 
@@ -500,10 +500,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // alerts should be updated now that the
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
             CaseStatuses.closed
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
             CaseStatuses['in-progress']
           );
         });
@@ -573,10 +573,10 @@ export default ({ getService }: FtrProviderContext): void => {
           let signals = await getSignals();
           // There should be no change in their status since syncing is disabled
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
 
           const updatedIndWithStatus: CasesResponse = (await setStatus({
@@ -597,10 +597,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // There should still be no change in their status since syncing is disabled
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
 
           // turn on the sync settings
@@ -623,15 +623,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // alerts should be updated now that the
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
           ).to.be(CaseStatuses.closed);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
           ).to.be(CaseStatuses.closed);
 
           // the duplicate signal id in the other index should not be affect (so its status should be open)
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInSecondIndex)?._source.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInSecondIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
         });
       });
