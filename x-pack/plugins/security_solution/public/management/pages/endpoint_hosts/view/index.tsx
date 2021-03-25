@@ -73,12 +73,13 @@ const EndpointListNavLink = memo<{
   name: string;
   href: string;
   route: string;
+  isBadge?: boolean;
   dataTestSubj: string;
-}>(({ name, href, route, dataTestSubj }) => {
+}>(({ name, href, route, isBadge = false, dataTestSubj }) => {
   const clickHandler = useNavigateByRouterEventHandler(route);
   const theme = useContext(ThemeContext);
 
-  return (
+  return isBadge ? (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink
       data-test-subj={dataTestSubj}
@@ -86,6 +87,16 @@ const EndpointListNavLink = memo<{
       href={href}
       onClick={clickHandler}
       style={{ color: theme.eui.euiColorInk }}
+    >
+      {name}
+    </EuiLink>
+  ) : (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink
+      data-test-subj={dataTestSubj}
+      className="eui-textTruncate"
+      href={href}
+      onClick={clickHandler}
     >
       {name}
     </EuiLink>
@@ -387,6 +398,7 @@ export const EndpointList = () => {
                 name={POLICY_STATUS_TO_TEXT[policy.status]}
                 href={toRouteUrl}
                 route={toRoutePath}
+                isBadge
                 dataTestSubj="policyStatusCellLink"
               />
             </EuiBadge>
