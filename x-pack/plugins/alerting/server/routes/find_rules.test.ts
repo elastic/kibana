@@ -71,7 +71,7 @@ describe('findRulesRoute', () => {
           "options": Object {
             "defaultSearchOperator": "OR",
             "page": 1,
-            "per_page": 1,
+            "perPage": 1,
           },
         },
       ]

@@ -16,56 +16,56 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   const expectedNoOpType = {
-    actionGroups: [
+    action_groups: [
       { id: 'default', name: 'Default' },
       { id: 'recovered', name: 'Recovered' },
     ],
-    defaultActionGroupId: 'default',
+    default_action_group_id: 'default',
     id: 'test.noop',
     name: 'Test: Noop',
-    actionVariables: {
+    action_variables: {
       state: [],
       context: [],
       params: [],
     },
     producer: 'alertsFixture',
-    minimumLicenseRequired: 'basic',
-    recoveryActionGroup: {
+    minimum_license_required: 'basic',
+    recovery_action_group: {
       id: 'recovered',
       name: 'Recovered',
     },
-    enabledInLicense: true,
+    enabled_in_license: true,
   };
 
   const expectedRestrictedNoOpType = {
-    actionGroups: [
+    action_groups: [
       { id: 'default', name: 'Default' },
       { id: 'restrictedRecovered', name: 'Restricted Recovery' },
     ],
-    recoveryActionGroup: {
+    recovery_action_group: {
       id: 'restrictedRecovered',
       name: 'Restricted Recovery',
     },
-    defaultActionGroupId: 'default',
+    default_action_group_id: 'default',
     id: 'test.restricted-noop',
     name: 'Test: Restricted Noop',
-    actionVariables: {
+    action_variables: {
       state: [],
       context: [],
       params: [],
     },
     producer: 'alertsRestrictedFixture',
-    minimumLicenseRequired: 'basic',
-    enabledInLicense: true,
+    minimum_license_required: 'basic',
+    enabled_in_license: true,
   };
 
-  describe('list_alert_types', () => {
+  describe('rule_types', () => {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should return 200 with list of globally available alert types', async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/list_alert_types`)
+            .get(`${getUrlPrefix(space.id)}/api/alerting/rule_types`)
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(200);
@@ -82,76 +82,76 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
+              expect(omit(noOpAlertType, 'authorized_consumers')).to.eql(expectedNoOpType);
               expect(restrictedNoOpAlertType).to.eql(undefined);
-              expect(noOpAlertType.authorizedConsumers).to.eql({
+              expect(noOpAlertType.authorized_consumers).to.eql({
                 alerts: { read: true, all: true },
                 alertsFixture: { read: true, all: true },
               });
               break;
             case 'global_read at space1':
-              expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
-              expect(noOpAlertType.authorizedConsumers.alertsFixture).to.eql({
+              expect(omit(noOpAlertType, 'authorized_consumers')).to.eql(expectedNoOpType);
+              expect(noOpAlertType.authorized_consumers.alertsFixture).to.eql({
                 read: true,
                 all: false,
               });
-              expect(noOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+              expect(noOpAlertType.authorized_consumers.alertsRestrictedFixture).to.eql({
                 read: true,
                 all: false,
               });
 
-              expect(omit(restrictedNoOpAlertType, 'authorizedConsumers')).to.eql(
+              expect(omit(restrictedNoOpAlertType, 'authorized_consumers')).to.eql(
                 expectedRestrictedNoOpType
               );
-              expect(Object.keys(restrictedNoOpAlertType.authorizedConsumers)).not.to.contain(
+              expect(Object.keys(restrictedNoOpAlertType.authorized_consumers)).not.to.contain(
                 'alertsFixture'
               );
-              expect(restrictedNoOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+              expect(restrictedNoOpAlertType.authorized_consumers.alertsRestrictedFixture).to.eql({
                 read: true,
                 all: false,
               });
               break;
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
-              expect(noOpAlertType.authorizedConsumers.alertsFixture).to.eql({
+              expect(omit(noOpAlertType, 'authorized_consumers')).to.eql(expectedNoOpType);
+              expect(noOpAlertType.authorized_consumers.alertsFixture).to.eql({
                 read: true,
                 all: true,
               });
-              expect(noOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+              expect(noOpAlertType.authorized_consumers.alertsRestrictedFixture).to.eql({
                 read: true,
                 all: true,
               });
 
-              expect(omit(restrictedNoOpAlertType, 'authorizedConsumers')).to.eql(
+              expect(omit(restrictedNoOpAlertType, 'authorized_consumers')).to.eql(
                 expectedRestrictedNoOpType
               );
-              expect(Object.keys(restrictedNoOpAlertType.authorizedConsumers)).not.to.contain(
+              expect(Object.keys(restrictedNoOpAlertType.authorized_consumers)).not.to.contain(
                 'alertsFixture'
               );
-              expect(restrictedNoOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+              expect(restrictedNoOpAlertType.authorized_consumers.alertsRestrictedFixture).to.eql({
                 read: true,
                 all: true,
               });
               break;
             case 'superuser at space1':
-              expect(omit(noOpAlertType, 'authorizedConsumers')).to.eql(expectedNoOpType);
-              expect(noOpAlertType.authorizedConsumers.alertsFixture).to.eql({
+              expect(omit(noOpAlertType, 'authorized_consumers')).to.eql(expectedNoOpType);
+              expect(noOpAlertType.authorized_consumers.alertsFixture).to.eql({
                 read: true,
                 all: true,
               });
-              expect(noOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+              expect(noOpAlertType.authorized_consumers.alertsRestrictedFixture).to.eql({
                 read: true,
                 all: true,
               });
 
-              expect(omit(restrictedNoOpAlertType, 'authorizedConsumers')).to.eql(
+              expect(omit(restrictedNoOpAlertType, 'authorized_consumers')).to.eql(
                 expectedRestrictedNoOpType
               );
-              expect(noOpAlertType.authorizedConsumers.alertsFixture).to.eql({
+              expect(noOpAlertType.authorized_consumers.alertsFixture).to.eql({
                 read: true,
                 all: true,
               });
-              expect(noOpAlertType.authorizedConsumers.alertsRestrictedFixture).to.eql({
+              expect(noOpAlertType.authorized_consumers.alertsRestrictedFixture).to.eql({
                 read: true,
                 all: true,
               });

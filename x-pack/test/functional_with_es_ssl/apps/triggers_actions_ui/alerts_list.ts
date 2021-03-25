@@ -20,7 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlertManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(getTestAlertData(overwrites))
       .expect(200);
@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createFailingAlert() {
     return await createAlert({
-      alertTypeId: 'test.failing',
+      rule_type_id: 'test.failing',
       schedule: { interval: '30s' },
     });
   }
@@ -444,7 +444,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         actions: [
           {
             id: action.id,
-            actionTypeId: '.slack',
             group: 'default',
             params: { level: 'info', message: 'gfghfhg' },
           },

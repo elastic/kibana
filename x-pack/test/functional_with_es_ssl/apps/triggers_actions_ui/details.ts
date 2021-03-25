@@ -42,7 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(getTestAlertData(overwrites))
       .expect(200);
@@ -52,11 +52,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function createAlwaysFiringAlert(overwrites: Record<string, any> = {}) {
     const { body: createdAlert } = await supertest
-      .post(`/api/alerts/alert`)
+      .post(`/api/alerting/rule`)
       .set('kbn-xsrf', 'foo')
       .send(
         getTestAlertData({
-          alertTypeId: 'test.always-firing',
+          rule_type_id: 'test.always-firing',
           ...overwrites,
         })
       )
@@ -93,14 +93,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function getAlertInstanceSummary(alertId: string) {
     const { body: summary } = await supertest
-      .get(`/api/alerts/alert/${alertId}/_instance_summary`)
+      .get(`/api/alerting/rule/${alertId}/_alert_summary`)
       .expect(200);
     return summary;
   }
 
   async function muteAlertInstance(alertId: string, alertInstanceId: string) {
     const { body: response } = await supertest
-      .post(`/api/alerts/alert/${alertId}/alert_instance/${alertInstanceId}/_mute`)
+      .post(`/api/alerting/rule/${alertId}/alert/${alertInstanceId}/_mute`)
       .set('kbn-xsrf', 'foo')
       .expect(204);
 
@@ -221,7 +221,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await createAlwaysFiringAlert({
           name: alertName,
-          alertTypeId: '.index-threshold',
+          rule_type_id: '.index-threshold',
           params: {
             aggType: 'count',
             termSize: 5,
@@ -526,7 +526,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+          const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
       });
@@ -552,12 +552,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const summary = await getAlertInstanceSummary(alert.id);
         const dateOnAllInstancesFromApiResponse: Record<string, string> = mapValues(
-          summary.instances,
+          summary.alerts,
           (instance) => instance.activeStartDate
         );
 
         const actionGroupNameOnAllInstancesFromApiResponse = mapValues(
-          summary.instances,
+          summary.alerts,
           (instance) => {
             const name = actionGroupNameFromId(instance.actionGroupId);
             return name ? ` (${name})` : '';
@@ -724,7 +724,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // await first run to complete so we have an initial state
         await retry.try(async () => {
-          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+          const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
           expect(Object.keys(alertInstances).length).to.eql(instances.length);
         });
 
@@ -749,7 +749,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+        const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
 
         const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
         expect(items.length).to.eql(PAGE_SIZE);
@@ -762,7 +762,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify content
         await testSubjects.existOrFail('alertInstancesList');
 
-        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+        const { alerts: alertInstances } = await getAlertInstanceSummary(alert.id);
 
         await pageObjects.alertDetailsUI.clickPaginationNextPage();
 

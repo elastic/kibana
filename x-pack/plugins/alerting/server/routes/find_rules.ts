@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
@@ -20,7 +21,7 @@ const querySchema = schema.object({
   default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   }),
-  search_fields: schema.maybe(schema.arrayOf(schema.string())),
+  search_fields: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
   sort_field: schema.maybe(schema.string()),
   sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   has_reference: schema.maybe(
@@ -41,10 +42,16 @@ const rewriteQueryReq: RewriteRequestCase<FindOptions> = ({
   default_search_operator: defaultSearchOperator,
   has_reference: hasReference,
   search_fields: searchFields,
+  per_page: perPage,
+  sort_field: sortField,
+  sort_order: sortOrder,
   ...rest
 }) => ({
   ...rest,
   defaultSearchOperator,
+  perPage,
+  ...(sortField ? { sortField } : {}),
+  ...(sortOrder ? { sortOrder } : {}),
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
@@ -67,8 +74,9 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         notifyWhen,
         muteAll,
         mutedInstanceIds,
-        executionStatus: { lastExecutionDate, ...executionStatus },
+        executionStatus,
         actions,
+        scheduledTaskId,
         ...rest
       }) => ({
         ...rest,
@@ -81,9 +89,10 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<AlertTypeParams>> = ({
         notify_when: notifyWhen,
         mute_all: muteAll,
         muted_alert_ids: mutedInstanceIds,
-        execution_status: {
-          ...executionStatus,
-          last_execution_date: lastExecutionDate,
+        scheduled_task_id: scheduledTaskId,
+        execution_status: executionStatus && {
+          ...omit(executionStatus, 'lastExecutionDate'),
+          last_execution_date: executionStatus.lastExecutionDate,
         },
         actions: actions.map(({ group, id, actionTypeId, params }) => ({
           group,
@@ -114,6 +123,7 @@ export const findRulesRoute = (
         const options = rewriteQueryReq({
           ...req.query,
           has_reference: req.query.has_reference || undefined,
+          search_fields: searchFieldsAsArray(req.query.search_fields),
         });
 
         const findResult = await alertsClient.find({ options });
@@ -124,3 +134,10 @@ export const findRulesRoute = (
     )
   );
 };
+
+function searchFieldsAsArray(searchFields: string | string[] | undefined): string[] | undefined {
+  if (!searchFields) {
+    return;
+  }
+  return Array.isArray(searchFields) ? searchFields : [searchFields];
+}

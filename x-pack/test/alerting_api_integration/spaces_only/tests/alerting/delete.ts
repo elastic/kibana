@@ -29,13 +29,13 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
 
     it('should handle delete alert request appropriately', async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
 
       await supertest
-        .delete(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
+        .delete(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(204, '');
 
@@ -49,13 +49,13 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't delete alert from another space`, async () => {
       const { body: createdAlert } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
 
       await supertest
-        .delete(`${getUrlPrefix(Spaces.other.id)}/api/alerts/alert/${createdAlert.id}`)
+        .delete(`${getUrlPrefix(Spaces.other.id)}/api/alerting/rule/${createdAlert.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(404, {
           statusCode: 404,
