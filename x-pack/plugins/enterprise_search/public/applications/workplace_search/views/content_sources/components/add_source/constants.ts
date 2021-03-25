@@ -41,7 +41,7 @@ export const ADD_SOURCE_NO_SOURCES_TITLE = i18n.translate(
 export const ADD_SOURCE_ORG_SOURCES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.addSourceList.orgSourcesTitle',
   {
-    defaultMessage: 'Add a shared content source',
+    defaultMessage: 'Sources ready for connection',
   }
 );
 
