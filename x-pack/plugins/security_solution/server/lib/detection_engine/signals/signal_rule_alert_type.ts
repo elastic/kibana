@@ -64,6 +64,8 @@ import {
   queryRuleParams,
   threatRuleParams,
   thresholdRuleParams,
+  ruleParams,
+  RuleParams,
 } from '../schemas/rule_schemas';
 
 export const signalRulesAlertType = ({
@@ -92,8 +94,17 @@ export const signalRulesAlertType = ({
        * params: signalParamsSchema(),
        * ```
        */
-      params: (signalParamsSchema() as unknown) as {
-        validate: (object: unknown) => RuleTypeParams;
+      params: {
+        validate: (object: unknown): RuleParams => {
+          const [validated, errors] = validateNonExact(object, ruleParams);
+          if (errors != null) {
+            throw new Error(errors);
+          }
+          if (validated == null) {
+            throw new Error('Validation of rule params failed');
+          }
+          return validated;
+        },
       },
     },
     producer: SERVER_APP_ID,

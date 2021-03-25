@@ -35,6 +35,7 @@ import {
   EqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
+  RuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
@@ -177,7 +178,7 @@ export type RuleExecutorOptions = AlertExecutorOptions<
 export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
 ): obj is AlertType<
-  RuleTypeParams,
+  RuleParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -187,7 +188,7 @@ export const isAlertExecutor = (
 };
 
 export type SignalRuleAlertTypeDefinition = AlertType<
-  RuleTypeParams,
+  RuleParams,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
