@@ -16,10 +16,14 @@ export class BundleRefModule extends Module {
   public built = false;
   public buildMeta?: any;
   public buildInfo?: any;
-  public exportsArgument = '__webpack_exports__';
 
   constructor(public readonly ref: BundleRef) {
     super('kbn/bundleRef', null);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
+  get exportsArgument() {
+    return (this.buildInfo && this.buildInfo.exportsArgument) || 'exports';
   }
 
   libIdent() {
