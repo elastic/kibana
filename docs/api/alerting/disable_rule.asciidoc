@@ -1,4 +1,4 @@
-[[rules-disable-api]]
+[[disable-rule-api]]
 === Disable rule API
 ++++
 <titleabbrev>Disable rule</titleabbrev>
@@ -6,14 +6,14 @@
 
 Disable a rule.
 
-[[rules-disable-api-request]]
+[[disable-rule-api-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>/_disable`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>/_disable`
 
-[[rules-disable-api-path-params]]
+[[disable-rule-api-path-params]]
 ==== Path parameters
 
 `id`::
@@ -22,7 +22,7 @@ Disable a rule.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[rules-disable-api-response-codes]]
+[[disable-rule-api-response-codes]]
 ==== Response code
 
 `200`::

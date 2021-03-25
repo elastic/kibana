@@ -1,4 +1,4 @@
-[[alerts-legacy-api-disable]]
+[[alerts-api-disable]]
 === Legacy disable alert API
 ++++
 <titleabbrev>Legacy disable alert</titleabbrev>
@@ -6,18 +6,18 @@
 
 deprecated::[7.13.0]
 
-Please use the <<rules-disable-api>> instead.
+Use the <<disable-rule-api>> instead.
 
 Disable an alert.
 
-[[alerts-legacy-api-disable-request]]
+[[alerts-api-disable-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>/_disable`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/_disable`
 
-[[alerts-legacy-api-disable-path-params]]
+[[alerts-api-disable-path-params]]
 ==== Path parameters
 
 `id`::
@@ -26,7 +26,7 @@ Disable an alert.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-legacy-api-disable-response-codes]]
+[[alerts-api-disable-response-codes]]
 ==== Response code
 
 `200`::

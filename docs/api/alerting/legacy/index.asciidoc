@@ -1,4 +1,4 @@
-[[alerts-legacy-apis]]
+[[alerts-api]]
 === Deprecated 7.x APIs
 
 These APIs are deprecated and will be removed as of 8.0.

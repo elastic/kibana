@@ -1,4 +1,4 @@
-[[rules-delete-api]]
+[[delete-rule-api]]
 === Delete rule API
 ++++
 <titleabbrev>Delete rule</titleabbrev>
@@ -8,14 +8,14 @@ Permanently remove a rule.
 
 WARNING: Once you delete a rule, you cannot recover it.
 
-[[rules-delete-api-request]]
+[[delete-rule-api-request]]
 ==== Request
 
 `DELETE <kibana host>:<port>/api/alerting/rule/<id>`
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
-[[rules-delete-api-path-params]]
+[[delete-rule-api-path-params]]
 ==== Path parameters
 
 `id`::
@@ -24,7 +24,7 @@ WARNING: Once you delete a rule, you cannot recover it.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[rules-delete-api-response-codes]]
+[[delete-rule-api-response-codes]]
 ==== Response code
 
 `200`::

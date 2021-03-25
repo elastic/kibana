@@ -1,4 +1,4 @@
-[[alerts-legacy-api-create]]
+[[alerts-api-create]]
 === Legacy create alert API
 ++++
 <titleabbrev>Legacy create alert</titleabbrev>
@@ -6,18 +6,18 @@
 
 deprecated::[7.13.0]
 
-Please use the <<rules-create-api>> instead.
+Use the <<create-rule-api>> instead.
 
 Create {kib} alerts.
 
-[[alerts-legacy-api-create-request]]
+[[alerts-api-create-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>`
 
-[[alerts-legacy-api-create-path-params]]
+[[alerts-api-create-path-params]]
 ==== Path parameters
 
 `<id>`::
@@ -26,7 +26,7 @@ Create {kib} alerts.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-legacy-api-create-request-body]]
+[[alerts-api-create-request-body]]
 ==== Request body
 
 `name`::
@@ -87,13 +87,13 @@ There are plans to support multiple other schedule formats in the near future.
 =====
 
 
-[[alerts-legacy-api-create-request-codes]]
+[[alerts-api-create-request-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[alerts-legacy-api-create-example]]
+[[alerts-api-create-example]]
 ==== Example
 
 [source,sh]
