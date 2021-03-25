@@ -593,7 +593,7 @@ export function DashboardTopNav({
                 })}
                 onClick={createNew}
                 iconType="plusInCircleFilled"
-                data-test-subj="addVisualizationButton"
+                data-test-subj="dashboardAddPanelButton"
               />
             ),
             quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
