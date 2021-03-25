@@ -166,3 +166,12 @@ function parseDateMath(mathString: string, time: moment.Moment, roundUp: boolean
 
   return dateTime;
 }
+
+// eslint-disable-next-line import/no-default-export
+export default {
+  parse,
+  unitsMap: Object.freeze(unitsMap),
+  units: Object.freeze(units),
+  unitsAsc: Object.freeze(unitsAsc),
+  unitsDesc: Object.freeze(unitsDesc),
+};
