@@ -12,7 +12,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { get } from 'lodash';
 import { I18nProvider } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
@@ -105,7 +105,7 @@ function TimeseriesVisualization({
 
   if (VisComponent) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <>
         {shouldDisplayLastValueIndicator && (
           <I18nProvider>
             <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
@@ -122,19 +122,17 @@ function TimeseriesVisualization({
           </I18nProvider>
         )}
 
-        <EuiFlexItem>
-          <VisComponent
-            getConfig={getConfig}
-            model={model}
-            visData={visData}
-            uiState={uiState}
-            onBrush={onBrush}
-            onUiState={handleUiState}
-            syncColors={syncColors}
-            palettesService={palettesService}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <VisComponent
+          getConfig={getConfig}
+          model={model}
+          visData={visData}
+          uiState={uiState}
+          onBrush={onBrush}
+          onUiState={handleUiState}
+          syncColors={syncColors}
+          palettesService={palettesService}
+        />
+      </>
     );
   }
 
