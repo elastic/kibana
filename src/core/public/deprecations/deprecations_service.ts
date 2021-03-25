@@ -6,68 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { CoreService } from 'src/core/types';
-import { CoreSetup } from 'src/core/public';
+import type { CoreService } from '../../types';
+import type { HttpStart } from '../http';
 import { DeprecationsClient } from './deprecations_client';
+import type { DomainDeprecationDetails } from '../../server/types';
 
 /**
- * DeprecationsService provides methods to fetch plugin deprecation details from
+ * DeprecationsService provides methods to fetch domain deprecation details from
  * the Kibana server.
  *
  * @public
  */
-export interface DeprecationsServiceSetup {
+export interface DeprecationsServiceStart {
   /**
-   * Grabs deprecations for all plugins.
-   *
-   * @param {Object} configs { skipCache: boolean };
-   * set skipCache: true to fetch a fresh copy of the deprecations from the kibana server.
+   * Grabs deprecations details for all domains.
    */
-  getAllDeprecations: DeprecationsClient['getAllDeprecations'];
+  getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
   /**
-   * Grabs deprecations for a specific plugin.
+   * Grabs deprecations for a specific domain.
    *
-   * @param {string} pluginId
-   * @param {Object} configs { skipCache: boolean };
-   * set skipCache: true to fetch a fresh copy of the deprecations from the kibana server.
+   * @param {string} domainId
    */
-  getDeprecations: DeprecationsClient['getDeprecations'];
+  getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
 }
 
-/**
- * DeprecationsService provides methods to fetch plugin deprecation details from
- * the Kibana server.
- *
- * @public
- */
-export type DeprecationsServiceStart = DeprecationsServiceSetup;
+export class DeprecationsService implements CoreService<void, DeprecationsServiceStart> {
+  public setup(): void {}
 
-export class DeprecationsService
-  implements CoreService<DeprecationsServiceSetup, DeprecationsServiceStart> {
-  private deprecationsClient?: DeprecationsClient;
+  public start({ http }: { http: HttpStart }): DeprecationsServiceStart {
+    const deprecationsClient = new DeprecationsClient({ http });
 
-  public setup({ http }: Pick<CoreSetup, 'http'>): DeprecationsServiceSetup {
-    this.deprecationsClient = new DeprecationsClient({ http });
     return {
-      getAllDeprecations: this.deprecationsClient.getAllDeprecations,
-      getDeprecations: this.deprecationsClient.getDeprecations,
+      getAllDeprecations: deprecationsClient.getAllDeprecations,
+      getDeprecations: deprecationsClient.getDeprecations,
     };
   }
 
-  public start(): DeprecationsServiceStart {
-    if (!this.deprecationsClient) {
-      throw new Error('#setup must be called first.');
-    }
-
-    return {
-      getAllDeprecations: this.deprecationsClient.getAllDeprecations,
-      getDeprecations: this.deprecationsClient.getDeprecations,
-    };
-  }
-
-  public stop() {
-    if (this.deprecationsClient) {
-      this.deprecationsClient.clearCache();
-    }
-  }
+  public stop(): void {}
 }

@@ -91,7 +91,6 @@ export function createPluginSetupContext<
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
-    deprecations: deps.deprecations,
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
     },

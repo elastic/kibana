@@ -11,7 +11,7 @@
  *
  * @public
  */
-export type ConfigDeprecationHook = (details: DeprecatedConfigDetails) => void;
+export type AddConfigDeprecation = (details: DeprecatedConfigDetails) => void;
 
 /**
  * Deprecated Config Details
@@ -19,18 +19,19 @@ export type ConfigDeprecationHook = (details: DeprecatedConfigDetails) => void;
  * @public
  */
 export interface DeprecatedConfigDetails {
+  /* The message to be displayed for the deprecation. */
   message: string;
+  /* (optional) set false to prevent the config service from logging the deprecation message. */
   silent?: boolean;
+  /* (optional) link to the documentation for more details on the deprecation. */
   documentationUrl?: string;
+  /* (optional) corrective action needed to fix this deprecation. */
   correctiveActions?: {
-    api?: {
-      path: string;
-      method: 'POST' | 'PUT';
-      body?: {
-        [key: string]: any;
-      };
-    };
-    manualSteps?: string[];
+    /**
+     * Specify a list of manual steps our users need to follow
+     * to fix the deprecation before upgrade.
+     */
+    manualSteps: string[];
   };
 }
 
@@ -46,7 +47,7 @@ export interface DeprecatedConfigDetails {
 export type ConfigDeprecation = (
   config: Record<string, any>,
   fromPath: string,
-  deprecationHook: ConfigDeprecationHook
+  addDeprecation: AddConfigDeprecation
 ) => Record<string, any>;
 
 /**

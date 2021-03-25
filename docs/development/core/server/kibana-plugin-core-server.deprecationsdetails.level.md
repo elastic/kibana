@@ -4,8 +4,10 @@
 
 ## DeprecationsDetails.level property
 
+levels: - warning: will not break deployment upon upgrade - critical: needs to be addressed before upgrade. - fetch\_error: Deprecations service failed to grab the deprecation details for the domain.
+
 <b>Signature:</b>
 
 ```typescript
-level: 'warning' | 'critical';
+level: 'warning' | 'critical' | 'fetch_error';
 ```

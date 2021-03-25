@@ -59,12 +59,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeUserBanner](./kibana-plugin-core-public.chromeuserbanner.md) |  |
 |  [CoreSetup](./kibana-plugin-core-public.coresetup.md) | Core services exposed to the <code>Plugin</code> setup lifecycle |
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
-|  [DeprecationsServiceSetup](./kibana-plugin-core-public.deprecationsservicesetup.md) | DeprecationsService provides methods to fetch plugin deprecation details from the Kibana server. |
+|  [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) | DeprecationsService provides methods to fetch domain deprecation details from the Kibana server. |
 |  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |
 |  [FatalErrorsSetup](./kibana-plugin-core-public.fatalerrorssetup.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
-|  [GetDeprecationsConfig](./kibana-plugin-core-public.getdeprecationsconfig.md) |  |
 |  [HttpFetchOptions](./kibana-plugin-core-public.httpfetchoptions.md) | All options that may be used with a [HttpHandler](./kibana-plugin-core-public.httphandler.md)<!-- -->. |
 |  [HttpFetchOptionsWithPath](./kibana-plugin-core-public.httpfetchoptionswithpath.md) | Similar to [HttpFetchOptions](./kibana-plugin-core-public.httpfetchoptions.md) but with the URL path included. |
 |  [HttpFetchQuery](./kibana-plugin-core-public.httpfetchquery.md) |  |
@@ -155,9 +154,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionLinkBase](./kibana-plugin-core-public.chromehelpextensionlinkbase.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-core-public.chromehelpextensionmenulink.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-core-public.chromenavlinkupdateablefields.md) |  |
-|  [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) | DeprecationsService provides methods to fetch plugin deprecation details from the Kibana server. |
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
-|  [GetAllDeprecationsConfig](./kibana-plugin-core-public.getalldeprecationsconfig.md) |  |
 |  [HttpStart](./kibana-plugin-core-public.httpstart.md) | See [HttpSetup](./kibana-plugin-core-public.httpsetup.md) |
 |  [IToasts](./kibana-plugin-core-public.itoasts.md) | Methods for adding and removing global toast messages. See [ToastsApi](./kibana-plugin-core-public.toastsapi.md)<!-- -->. |
 |  [MountPoint](./kibana-plugin-core-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |

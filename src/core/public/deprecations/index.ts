@@ -7,5 +7,4 @@
  */
 
 export { DeprecationsService } from './deprecations_service';
-export type { DeprecationsServiceSetup, DeprecationsServiceStart } from './deprecations_service';
-export type { GetDeprecationsConfig, GetAllDeprecationsConfig } from './deprecations_client';
+export type { DeprecationsServiceStart } from './deprecations_service';

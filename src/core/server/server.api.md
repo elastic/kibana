@@ -4,6 +4,7 @@
 
 ```ts
 
+import { AddConfigDeprecation } from '@kbn/config';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
@@ -35,7 +36,6 @@ import { ClusterStateParams } from 'elasticsearch';
 import { ClusterStatsParams } from 'elasticsearch';
 import { ConfigDeprecation } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';
-import { ConfigDeprecationHook } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigOptions } from 'elasticsearch';
 import { ConfigPath } from '@kbn/config';
@@ -168,6 +168,8 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { URL } from 'url';
+
+export { AddConfigDeprecation }
 
 // @public
 export interface AppCategory {
@@ -373,8 +375,6 @@ export const config: {
 export { ConfigDeprecation }
 
 export { ConfigDeprecationFactory }
-
-export { ConfigDeprecationHook }
 
 export { ConfigDeprecationProvider }
 
@@ -849,8 +849,7 @@ export interface DeprecationsDetails {
     };
     // (undocumented)
     documentationUrl?: string;
-    // (undocumented)
-    level: 'warning' | 'critical';
+    level: 'warning' | 'critical' | 'fetch_error';
     // (undocumented)
     message: string;
 }
@@ -971,6 +970,16 @@ export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest)
     status: AuthStatus;
     state: T;
 };
+
+// Warning: (ae-missing-release-tag) "GetDeprecationsContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface GetDeprecationsContext {
+    // (undocumented)
+    esClient: IScopedClusterClient;
+    // (undocumented)
+    savedObjectsClient: SavedObjectsClientContract;
+}
 
 // @public (undocumented)
 export interface GetResponse<T> {
@@ -1949,7 +1958,6 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 //
 // @public (undocumented)
 export interface RegisterDeprecationsConfig {
-    // Warning: (ae-forgotten-export) The symbol "GetDeprecationsContext" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "MaybePromise" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

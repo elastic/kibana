@@ -8,9 +8,9 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DeprecationsService } from './deprecations_service';
-import type { DeprecationsServiceSetup, DeprecationsServiceStart } from './deprecations_service';
+import type { DeprecationsServiceStart } from './deprecations_service';
 
-const createServiceMock = (): jest.Mocked<DeprecationsServiceSetup | DeprecationsServiceStart> => ({
+const createServiceMock = (): jest.Mocked<DeprecationsServiceStart> => ({
   getAllDeprecations: jest.fn().mockResolvedValue([]),
   getDeprecations: jest.fn().mockResolvedValue([]),
 });
@@ -22,13 +22,13 @@ const createMock = () => {
     stop: jest.fn(),
   };
 
-  mocked.setup.mockReturnValue(createServiceMock());
+  mocked.setup.mockReturnValue(void 0);
   mocked.start.mockReturnValue(createServiceMock());
   return mocked;
 };
 
 export const deprecationsServiceMock = {
   create: createMock,
-  createSetupContract: createServiceMock as () => jest.Mocked<DeprecationsServiceSetup>,
-  createStartContract: createServiceMock as () => jest.Mocked<DeprecationsServiceStart>,
+  createSetupContract: () => void 0,
+  createStartContract: createServiceMock,
 };

@@ -12,10 +12,10 @@ import { configDeprecationFactory } from './deprecation_factory';
 describe('DeprecationFactory', () => {
   const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
 
-  const deprecationHook = jest.fn<void, [DeprecatedConfigDetails]>();
+  const addDeprecation = jest.fn<void, [DeprecatedConfigDetails]>();
 
   beforeEach(() => {
-    deprecationHook.mockClear();
+    addDeprecation.mockClear();
   });
 
   describe('rename', () => {
@@ -29,7 +29,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', deprecationHook);
+      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', addDeprecation);
       expect(processed).toEqual({
         myplugin: {
           renamed: 'toberenamed',
@@ -39,7 +39,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationHook).toBeCalledWith({
+      expect(addDeprecation).toBeCalledWith({
         correctiveActions: {
           manualSteps: [
             'Replace "myplugin.deprecated" in the kibana.yml file with "myplugin.renamed"',
@@ -58,7 +58,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = rename('deprecated', 'new')(rawConfig, 'myplugin', deprecationHook);
+      const processed = rename('deprecated', 'new')(rawConfig, 'myplugin', addDeprecation);
       expect(processed).toEqual({
         myplugin: {
           new: 'new',
@@ -68,7 +68,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationHook).toHaveBeenCalledTimes(0);
+      expect(addDeprecation).toHaveBeenCalledTimes(0);
     });
     it('handles nested keys', () => {
       const rawConfig = {
@@ -85,7 +85,7 @@ describe('DeprecationFactory', () => {
       const processed = rename('oldsection.deprecated', 'newsection.renamed')(
         rawConfig,
         'myplugin',
-        deprecationHook
+        addDeprecation
       );
       expect(processed).toEqual({
         myplugin: {
@@ -99,7 +99,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationHook).toBeCalledWith({
+      expect(addDeprecation).toBeCalledWith({
         correctiveActions: {
           manualSteps: [
             'Replace "myplugin.oldsection.deprecated" in the kibana.yml file with "myplugin.newsection.renamed"',
@@ -116,13 +116,13 @@ describe('DeprecationFactory', () => {
           renamed: 'renamed',
         },
       };
-      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', deprecationHook);
+      const processed = rename('deprecated', 'renamed')(rawConfig, 'myplugin', addDeprecation);
       expect(processed).toEqual({
         myplugin: {
           renamed: 'renamed',
         },
       });
-      expect(deprecationHook).toBeCalledWith({
+      expect(addDeprecation).toBeCalledWith({
         correctiveActions: {
           manualSteps: [
             'Make sure "myplugin.renamed" contains the correct value in the kibana.yml file."',
@@ -149,7 +149,7 @@ describe('DeprecationFactory', () => {
       const processed = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
         rawConfig,
         'does-not-matter',
-        deprecationHook
+        addDeprecation
       );
       expect(processed).toEqual({
         myplugin: {
@@ -160,7 +160,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationHook).toBeCalledWith({
+      expect(addDeprecation).toBeCalledWith({
         correctiveActions: {
           manualSteps: [
             'Replace "myplugin.deprecated" in the kibana.yml file with "myplugin.renamed"',
@@ -183,7 +183,7 @@ describe('DeprecationFactory', () => {
       const processed = renameFromRoot('oldplugin.deprecated', 'newplugin.renamed')(
         rawConfig,
         'does-not-matter',
-        deprecationHook
+        addDeprecation
       );
       expect(processed).toEqual({
         oldplugin: {
@@ -194,7 +194,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationHook).toBeCalledWith({
+      expect(addDeprecation).toBeCalledWith({
         correctiveActions: {
           manualSteps: [
             'Replace "oldplugin.deprecated" in the kibana.yml file with "newplugin.renamed"',
@@ -218,7 +218,7 @@ describe('DeprecationFactory', () => {
       const processed = renameFromRoot('myplugin.deprecated', 'myplugin.new')(
         rawConfig,
         'does-not-matter',
-        deprecationHook
+        addDeprecation
       );
       expect(processed).toEqual({
         myplugin: {
@@ -229,7 +229,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationHook).toBeCalledTimes(0);
+      expect(addDeprecation).toBeCalledTimes(0);
     });
 
     it('remove the old property but does not overrides the new one if they both exist, and logs a specific message', () => {
@@ -242,7 +242,7 @@ describe('DeprecationFactory', () => {
       const processed = renameFromRoot('myplugin.deprecated', 'myplugin.renamed')(
         rawConfig,
         'does-not-matter',
-        deprecationHook
+        addDeprecation
       );
       expect(processed).toEqual({
         myplugin: {
@@ -250,7 +250,7 @@ describe('DeprecationFactory', () => {
         },
       });
 
-      expect(deprecationHook).toBeCalledWith({
+      expect(addDeprecation).toBeCalledWith({
         correctiveActions: {
           manualSteps: [
             'Make sure "myplugin.renamed" contains the correct value in the kibana.yml file."',
@@ -274,7 +274,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unused('deprecated')(rawConfig, 'myplugin', deprecationHook);
+      const processed = unused('deprecated')(rawConfig, 'myplugin', addDeprecation);
       expect(processed).toEqual({
         myplugin: {
           valid: 'valid',
@@ -283,7 +283,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationHook).toBeCalledWith({
+      expect(addDeprecation).toBeCalledWith({
         correctiveActions: {
           manualSteps: ['Remove "myplugin.deprecated" from the kibana.yml file."'],
         },
@@ -303,7 +303,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unused('section.deprecated')(rawConfig, 'myplugin', deprecationHook);
+      const processed = unused('section.deprecated')(rawConfig, 'myplugin', addDeprecation);
       expect(processed).toEqual({
         myplugin: {
           valid: 'valid',
@@ -314,7 +314,7 @@ describe('DeprecationFactory', () => {
         },
       });
 
-      expect(deprecationHook).toBeCalledWith({
+      expect(addDeprecation).toBeCalledWith({
         correctiveActions: {
           manualSteps: ['Remove "myplugin.section.deprecated" from the kibana.yml file."'],
         },
@@ -331,7 +331,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       };
-      const processed = unused('deprecated')(rawConfig, 'myplugin', deprecationHook);
+      const processed = unused('deprecated')(rawConfig, 'myplugin', addDeprecation);
       expect(processed).toEqual({
         myplugin: {
           valid: 'valid',
@@ -340,7 +340,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationHook).toBeCalledTimes(0);
+      expect(addDeprecation).toBeCalledTimes(0);
     });
   });
 
@@ -358,7 +358,7 @@ describe('DeprecationFactory', () => {
       const processed = unusedFromRoot('myplugin.deprecated')(
         rawConfig,
         'does-not-matter',
-        deprecationHook
+        addDeprecation
       );
       expect(processed).toEqual({
         myplugin: {
@@ -369,7 +369,7 @@ describe('DeprecationFactory', () => {
         },
       });
 
-      expect(deprecationHook).toBeCalledWith({
+      expect(addDeprecation).toBeCalledWith({
         correctiveActions: {
           manualSteps: ['Remove "myplugin.deprecated" from the kibana.yml file."'],
         },
@@ -389,7 +389,7 @@ describe('DeprecationFactory', () => {
       const processed = unusedFromRoot('myplugin.deprecated')(
         rawConfig,
         'does-not-matter',
-        deprecationHook
+        addDeprecation
       );
       expect(processed).toEqual({
         myplugin: {
@@ -399,7 +399,7 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(deprecationHook).toBeCalledTimes(0);
+      expect(addDeprecation).toBeCalledTimes(0);
     });
   });
 });

@@ -9,27 +9,27 @@
 import { has, get } from 'lodash';
 import { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
 
-const configPathDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const configPathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(process.env, 'CONFIG_PATH')) {
-    deprecationHook({
+    addDeprecation({
       message: `Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder`,
     });
   }
   return settings;
 };
 
-const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const dataPathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(process.env, 'DATA_PATH')) {
-    deprecationHook({
+    addDeprecation({
       message: `Environment variable "DATA_PATH" will be removed.  It has been replaced with kibana.yml setting "path.data"`,
     });
   }
   return settings;
 };
 
-const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'server.basePath') && !has(settings, 'server.rewriteBasePath')) {
-    deprecationHook({
+    addDeprecation({
       message:
         'You should set server.basePath along with server.rewriteBasePath. Starting in 7.0, Kibana ' +
         'will expect that all requests start with server.basePath rather than expecting you to rewrite ' +
@@ -40,10 +40,10 @@ const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, depre
   return settings;
 };
 
-const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   const corsSettings = get(settings, 'server.cors');
   if (typeof get(settings, 'server.cors') === 'boolean') {
-    deprecationHook({
+    addDeprecation({
       message: '"server.cors" is deprecated and has been replaced by "server.cors.enabled"',
     });
     settings.server.cors = {
@@ -53,7 +53,7 @@ const rewriteCorsSettings: ConfigDeprecation = (settings, fromPath, deprecationH
   return settings;
 };
 
-const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   const NONCE_STRING = `{nonce}`;
   // Policies that should include the 'self' source
   const SELF_POLICIES = Object.freeze(['script-src', 'style-src']);
@@ -70,7 +70,7 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, deprecationH
 
     settings.csp.rules = [...parsed].map(([policy, sourceList]) => {
       if (sourceList.find((source) => source.includes(NONCE_STRING))) {
-        deprecationHook({
+        addDeprecation({
           message: `csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in ${policy}`,
         });
         sourceList = sourceList.filter((source) => !source.includes(NONCE_STRING));
@@ -85,7 +85,7 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, deprecationH
         SELF_POLICIES.includes(policy) &&
         !sourceList.find((source) => source.includes(SELF_STRING))
       ) {
-        deprecationHook({
+        addDeprecation({
           message: `csp.rules must contain the 'self' source. Automatically adding to ${policy}.`,
         });
         sourceList.push(SELF_STRING);
@@ -101,10 +101,10 @@ const cspRulesDeprecation: ConfigDeprecation = (settings, fromPath, deprecationH
 const mapManifestServiceUrlDeprecation: ConfigDeprecation = (
   settings,
   fromPath,
-  deprecationHook
+  addDeprecation
 ) => {
   if (has(settings, 'map.manifestServiceUrl')) {
-    deprecationHook({
+    addDeprecation({
       message:
         'You should no longer use the map.manifestServiceUrl setting in kibana.yml to configure the location ' +
         'of the Elastic Maps Service settings. These settings have moved to the "map.emsTileApiUrl" and ' +
@@ -115,9 +115,9 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (
   return settings;
 };
 
-const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.events.ops')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
       message:
@@ -130,9 +130,9 @@ const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, depre
   return settings;
 };
 
-const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.events.request') || has(settings, 'logging.events.response')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
       message:
@@ -145,9 +145,9 @@ const requestLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, d
   return settings;
 };
 
-const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.timezone')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingtimezone',
       message:
@@ -160,9 +160,9 @@ const timezoneLoggingDeprecation: ConfigDeprecation = (settings, fromPath, depre
   return settings;
 };
 
-const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.dest')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingdest',
       message:
@@ -175,9 +175,9 @@ const destLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecati
   return settings;
 };
 
-const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.quiet')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingquiet',
       message:
@@ -188,9 +188,9 @@ const quietLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecat
   return settings;
 };
 
-const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.silent')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingsilent',
       message:
@@ -201,9 +201,9 @@ const silentLoggingDeprecation: ConfigDeprecation = (settings, fromPath, depreca
   return settings;
 };
 
-const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.verbose')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingverbose',
       message:
@@ -214,13 +214,13 @@ const verboseLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprec
   return settings;
 };
 
-const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   // We silence the deprecation warning when running in development mode because
   // the dev CLI code in src/dev/cli_dev_mode/using_server_process.ts manually
   // specifies `--logging.json=false`. Since it's executed in a child process, the
   // ` legacyLoggingConfigSchema` returns `true` for the TTY check on `process.stdout.isTTY`
   if (has(settings, 'logging.json') && settings.env !== 'development') {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx',
       message:
@@ -235,9 +235,9 @@ const jsonLoggingDeprecation: ConfigDeprecation = (settings, fromPath, deprecati
   return settings;
 };
 
-const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.rotate')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#rolling-file-appender',
       message:
@@ -250,9 +250,9 @@ const logRotateDeprecation: ConfigDeprecation = (settings, fromPath, deprecation
   return settings;
 };
 
-const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.events.log')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
       message:
@@ -263,9 +263,9 @@ const logEventsLogDeprecation: ConfigDeprecation = (settings, fromPath, deprecat
   return settings;
 };
 
-const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.events.error')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingevents',
       message:
@@ -276,9 +276,9 @@ const logEventsErrorDeprecation: ConfigDeprecation = (settings, fromPath, deprec
   return settings;
 };
 
-const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, deprecationHook) => {
+const logFilterDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.filter')) {
-    deprecationHook({
+    addDeprecation({
       documentationUrl:
         'https://github.com/elastic/kibana/blob/master/src/core/server/logging/README.mdx#loggingfilter',
       message: '"logging.filter" has been deprecated and will be removed in 8.0.',

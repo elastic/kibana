@@ -47,7 +47,6 @@ import { FormatFactory as FormatFactory_2 } from 'src/plugins/data/common/field_
 import { History } from 'history';
 import { Href } from 'history';
 import { HttpSetup } from 'kibana/public';
-import { HttpSetup as HttpSetup_3 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
 import { InjectedIntl } from '@kbn/i18n/react';

@@ -84,7 +84,6 @@ export class CoreSystem {
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreApp;
   private readonly deprecations: DeprecationsService;
-
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -136,7 +135,6 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
-      const deprecations = this.deprecations.setup({ http });
 
       const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -148,7 +146,6 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
-        deprecations,
       };
 
       // Services that do not expose contracts at setup
@@ -200,7 +197,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
       });
-      const deprecations = this.deprecations.start();
+      const deprecations = this.deprecations.start({ http });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
 

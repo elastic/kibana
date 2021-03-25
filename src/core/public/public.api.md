@@ -19,7 +19,6 @@ import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
-import { HttpSetup as HttpSetup_2 } from 'src/core/public';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
@@ -411,8 +410,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     // (undocumented)
     application: ApplicationSetup;
     // (undocumented)
-    deprecations: DeprecationsServiceSetup;
-    // (undocumented)
     fatalErrors: FatalErrorsSetup;
     // (undocumented)
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
@@ -478,14 +475,11 @@ export class CoreSystem {
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public
-export interface DeprecationsServiceSetup {
-    // Warning: (ae-forgotten-export) The symbol "DeprecationsClient" needs to be exported by the entry point index.d.ts
-    getAllDeprecations: DeprecationsClient['getAllDeprecations'];
-    getDeprecations: DeprecationsClient['getDeprecations'];
+export interface DeprecationsServiceStart {
+    // Warning: (ae-forgotten-export) The symbol "DomainDeprecationDetails" needs to be exported by the entry point index.d.ts
+    getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+    getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
 }
-
-// @public
-export type DeprecationsServiceStart = DeprecationsServiceSetup;
 
 // @public (undocumented)
 export interface DocLinksStart {
@@ -679,14 +673,6 @@ export interface FatalErrorsSetup {
 
 // @public
 export type FatalErrorsStart = FatalErrorsSetup;
-
-// @public (undocumented)
-export type GetAllDeprecationsConfig = GetDeprecationsConfig;
-
-// @public (undocumented)
-export interface GetDeprecationsConfig {
-    skipCache?: boolean;
-}
 
 // @internal (undocumented)
 export class HttpFetchError extends Error implements IHttpFetchError {
@@ -1607,6 +1593,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:169:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:166:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

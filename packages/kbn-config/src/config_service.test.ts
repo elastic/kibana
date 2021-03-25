@@ -416,10 +416,10 @@ test('throws during validation is any schema is invalid', async () => {
 test('logs deprecation warning during validation', async () => {
   const rawConfig = getRawConfigProvider({});
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
-  mockApplyDeprecations.mockImplementationOnce((config, deprecations, deprecationFactory) => {
-    const deprecationHook = deprecationFactory('');
-    deprecationHook({ message: 'some deprecation message' });
-    deprecationHook({ message: 'another deprecation message' });
+  mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+    const addDeprecation = createAddDeprecation!('');
+    addDeprecation({ message: 'some deprecation message' });
+    addDeprecation({ message: 'another deprecation message' });
     return config;
   });
 
@@ -440,10 +440,10 @@ test('logs deprecation warning during validation', async () => {
 test('does not log warnings for silent deprecations during validation', async () => {
   const rawConfig = getRawConfigProvider({});
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
-  mockApplyDeprecations.mockImplementationOnce((config, deprecations, deprecationFactory) => {
-    const deprecationHook = deprecationFactory('');
-    deprecationHook({ message: 'some deprecation message', silent: true });
-    deprecationHook({ message: 'another deprecation message' });
+  mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+    const addDeprecation = createAddDeprecation!('');
+    addDeprecation({ message: 'some deprecation message', silent: true });
+    addDeprecation({ message: 'another deprecation message' });
     return config;
   });
 
@@ -506,10 +506,10 @@ describe('getHandledDeprecatedConfigs', () => {
 
     configService.addDeprecationProvider('base', ({ unused }) => [unused('unused')]);
 
-    mockApplyDeprecations.mockImplementationOnce((config, deprecations, deprecationFactory) => {
+    mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
       deprecations.forEach((deprecation) => {
-        const deprecationHook = deprecationFactory(deprecation.path);
-        deprecationHook({ message: `some deprecation message`, documentationUrl: 'some-url' });
+        const addDeprecation = createAddDeprecation!(deprecation.path);
+        addDeprecation({ message: `some deprecation message`, documentationUrl: 'some-url' });
       });
       return config;
     });

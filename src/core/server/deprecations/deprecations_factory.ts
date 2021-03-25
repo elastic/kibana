@@ -9,7 +9,7 @@
 import { DeprecationsRegistry } from './deprecations_registry';
 import type { Logger } from '../logging';
 import type {
-  PluginDeprecationDetails,
+  DomainDeprecationDetails,
   DeprecationsDetails,
   GetDeprecationsContext,
 } from './types';
@@ -25,37 +25,37 @@ export class DeprecationsFactory {
     this.logger = logger;
   }
 
-  public createRegistry = (pluginId: string): DeprecationsRegistry => {
-    const exsiting = this.registries.get(pluginId);
-    if (exsiting) {
-      return exsiting;
+  public createRegistry = (domainId: string): DeprecationsRegistry => {
+    const existing = this.registries.get(domainId);
+    if (existing) {
+      return existing;
     }
     const registry = new DeprecationsRegistry();
-    this.registries.set(pluginId, registry);
+    this.registries.set(domainId, registry);
     return registry;
   };
 
-  public getRegistry = (pluginId: string): DeprecationsRegistry | undefined => {
-    return this.registries.get(pluginId);
+  public getRegistry = (domainId: string): DeprecationsRegistry | undefined => {
+    return this.registries.get(domainId);
   };
 
   public getDeprecations = async (
-    pluginId: string,
+    domainId: string,
     dependencies: GetDeprecationsContext
-  ): Promise<PluginDeprecationDetails[]> => {
-    const infoBody = await this.getDeprecationsBody(pluginId, dependencies);
-    return this.createDeprecationInfo(pluginId, infoBody).flat();
+  ): Promise<DomainDeprecationDetails[]> => {
+    const infoBody = await this.getDeprecationsBody(domainId, dependencies);
+    return this.createDeprecationInfo(domainId, infoBody).flat();
   };
 
   public getAllDeprecations = async (
     dependencies: GetDeprecationsContext
-  ): Promise<PluginDeprecationDetails[]> => {
-    const pluginIds = [...this.registries.keys()];
+  ): Promise<DomainDeprecationDetails[]> => {
+    const domainIds = [...this.registries.keys()];
 
     const deprecationsInfo = await Promise.all(
-      pluginIds.map(async (pluginId) => {
-        const infoBody = await this.getDeprecationsBody(pluginId, dependencies);
-        return this.createDeprecationInfo(pluginId, infoBody);
+      domainIds.map(async (domainId) => {
+        const infoBody = await this.getDeprecationsBody(domainId, dependencies);
+        return this.createDeprecationInfo(domainId, infoBody);
       })
     );
 
@@ -63,23 +63,23 @@ export class DeprecationsFactory {
   };
 
   private createDeprecationInfo = (
-    pluginId: string,
+    domainId: string,
     deprecationInfoBody: DeprecationsDetails[]
-  ): PluginDeprecationDetails[] => {
+  ): DomainDeprecationDetails[] => {
     return deprecationInfoBody
       .flat()
       .filter(Boolean)
       .map((pluginDeprecation) => ({
         ...pluginDeprecation,
-        pluginId,
+        domainId,
       }));
   };
 
   private getDeprecationsBody = async (
-    pluginId: string,
+    domainId: string,
     dependencies: GetDeprecationsContext
   ): Promise<DeprecationsDetails[]> => {
-    const deprecationsRegistry = this.registries.get(pluginId);
+    const deprecationsRegistry = this.registries.get(domainId);
     if (!deprecationsRegistry) {
       return [];
     }
@@ -88,13 +88,13 @@ export class DeprecationsFactory {
       return settledResults.flatMap((settledResult) => {
         if (settledResult.status === 'rejected') {
           this.logger.warn(
-            `Failed to get deprecations info for plugin "${pluginId}".`,
+            `Failed to get deprecations info for plugin "${domainId}".`,
             settledResult.reason
           );
           return [
             {
-              message: `Failed to get deprecations info for plugin "${pluginId}".`,
-              level: 'warning',
+              message: `Failed to get deprecations info for plugin "${domainId}".`,
+              level: 'fetch_error',
               correctiveActions: {
                 manualSteps: ['Check Kibana server logs for error message.'],
               },
@@ -105,7 +105,7 @@ export class DeprecationsFactory {
         return settledResult.value;
       });
     } catch (err) {
-      this.logger.warn(`Failed to get deprecations info for plugin "${pluginId}".`, err);
+      this.logger.warn(`Failed to get deprecations info for plugin "${domainId}".`, err);
       return [];
     }
   };

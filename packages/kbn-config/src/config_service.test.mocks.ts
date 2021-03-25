@@ -7,14 +7,14 @@
  */
 
 export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-import type { ConfigDeprecationWithContext, ConfigDeprecationHook } from './deprecation/types';
+import type { applyDeprecations } from './deprecation/apply_deprecations';
 
 jest.mock('../../../package.json', () => mockPackage);
 
 export const mockApplyDeprecations = jest.fn<
   Record<string, any>,
-  [Record<string, any>, ConfigDeprecationWithContext[], (pluginId: string) => ConfigDeprecationHook]
->((config, deprecations, deprecationFactory) => config);
+  Parameters<typeof applyDeprecations>
+>((config, deprecations, createAddDeprecation) => config);
 
 jest.mock('./deprecation/apply_deprecations', () => ({
   applyDeprecations: mockApplyDeprecations,

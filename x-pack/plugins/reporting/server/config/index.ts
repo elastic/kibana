@@ -24,10 +24,10 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     unused('poll.jobCompletionNotifier.intervalErrorMultiplier'),
     unused('poll.jobsRefresh.intervalErrorMultiplier'),
     unused('kibanaApp'),
-    (settings, fromPath, deprecationHook) => {
+    (settings, fromPath, addDeprecation) => {
       const reporting = get(settings, fromPath);
       if (reporting?.index) {
-        deprecationHook({
+        addDeprecation({
           message: `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`,
         });
       }

@@ -33,32 +33,6 @@ describe('DeprecationsClient', () => {
 
       expect(deprecations).toEqual(mockDeprecationsInfo);
     });
-
-    it('caches the results', async () => {
-      const deprecationsClient = new DeprecationsClient({ http });
-      const results = [
-        await deprecationsClient.getAllDeprecations(),
-        await deprecationsClient.getAllDeprecations(),
-      ];
-
-      expect(http.fetch).toBeCalledTimes(1);
-
-      expect(results).toEqual([mockDeprecationsInfo, mockDeprecationsInfo]);
-    });
-
-    it('calls the fetch api on skipCache: true', async () => {
-      const deprecationsClient = new DeprecationsClient({ http });
-      http.fetch.mockResolvedValueOnce({ deprecationsInfo: ['test2'] });
-      http.fetch.mockResolvedValueOnce({ deprecationsInfo: ['test3'] });
-      const results = [
-        await deprecationsClient.getAllDeprecations({ skipCache: true }),
-        await deprecationsClient.getAllDeprecations({ skipCache: true }),
-      ];
-
-      expect(http.fetch).toBeCalledTimes(2);
-
-      expect(results).toEqual([['test2'], ['test3']]);
-    });
   });
 
   describe('getDeprecations', () => {
@@ -80,18 +54,7 @@ describe('DeprecationsClient', () => {
       expect(deprecations).toEqual([]);
     });
 
-    it('caches the results', async () => {
-      const deprecationsClient = new DeprecationsClient({ http });
-      const results = [
-        ...(await deprecationsClient.getDeprecations('testPluginId-1')),
-        ...(await deprecationsClient.getDeprecations('testPluginId-2')),
-      ];
-
-      expect(http.fetch).toBeCalledTimes(1);
-      expect(results).toEqual(mockDeprecationsInfo);
-    });
-
-    it('calls the fetch api on skipCache: true', async () => {
+    it('calls the fetch api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       http.fetch.mockResolvedValueOnce({
         deprecationsInfo: [{ pluginId: 'testPluginId-1' }, { pluginId: 'testPluginId-1' }],
@@ -100,8 +63,8 @@ describe('DeprecationsClient', () => {
         deprecationsInfo: [{ pluginId: 'testPluginId-2' }, { pluginId: 'testPluginId-2' }],
       });
       const results = [
-        ...(await deprecationsClient.getDeprecations('testPluginId-1', { skipCache: true })),
-        ...(await deprecationsClient.getDeprecations('testPluginId-2', { skipCache: true })),
+        ...(await deprecationsClient.getDeprecations('testPluginId-1')),
+        ...(await deprecationsClient.getDeprecations('testPluginId-2')),
       ];
 
       expect(http.fetch).toBeCalledTimes(2);

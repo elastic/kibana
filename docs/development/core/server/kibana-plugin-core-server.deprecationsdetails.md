@@ -16,6 +16,6 @@ export interface DeprecationsDetails
 |  --- | --- | --- |
 |  [correctiveActions](./kibana-plugin-core-server.deprecationsdetails.correctiveactions.md) | <code>{</code><br/><code>        api?: {</code><br/><code>            path: string;</code><br/><code>            method: 'POST' &#124; 'PUT';</code><br/><code>            body?: {</code><br/><code>                [key: string]: any;</code><br/><code>            };</code><br/><code>        };</code><br/><code>        manualSteps?: string[];</code><br/><code>    }</code> |  |
 |  [documentationUrl](./kibana-plugin-core-server.deprecationsdetails.documentationurl.md) | <code>string</code> |  |
-|  [level](./kibana-plugin-core-server.deprecationsdetails.level.md) | <code>'warning' &#124; 'critical'</code> |  |
+|  [level](./kibana-plugin-core-server.deprecationsdetails.level.md) | <code>'warning' &#124; 'critical' &#124; 'fetch_error'</code> | levels: - warning: will not break deployment upon upgrade - critical: needs to be addressed before upgrade. - fetch\_error: Deprecations service failed to grab the deprecation details for the domain. |
 |  [message](./kibana-plugin-core-server.deprecationsdetails.message.md) | <code>string</code> |  |
 

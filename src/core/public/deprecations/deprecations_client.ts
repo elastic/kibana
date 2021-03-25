@@ -6,44 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from 'src/core/public';
-import type { PluginDeprecationDetails } from '../../server/types';
+import type { HttpStart } from '../http';
+import type { DomainDeprecationDetails } from '../../server/types';
 
 /**
  * @internal
  */
 interface DeprecationsGetResponse {
-  deprecationsInfo: PluginDeprecationDetails[];
+  deprecationsInfo: DomainDeprecationDetails[];
 }
 
 /**
  * @internal
  */
 export interface DeprecationsClientDeps {
-  http: Pick<HttpSetup, 'fetch'>;
+  http: Pick<HttpStart, 'fetch'>;
 }
-
-/** @public */
-export interface GetDeprecationsConfig {
-  /** set true to fetch a fresh copy of the deprecations from the kibana server. */
-  skipCache?: boolean;
-}
-
-/** @public */
-export type GetAllDeprecationsConfig = GetDeprecationsConfig;
 
 export class DeprecationsClient {
-  private readonly http: Pick<HttpSetup, 'fetch'>;
-  private deprecations?: PluginDeprecationDetails[];
+  private readonly http: Pick<HttpStart, 'fetch'>;
   constructor({ http }: DeprecationsClientDeps) {
     this.http = http;
   }
 
-  private fetchDeprecations = async (skipCache?: boolean): Promise<PluginDeprecationDetails[]> => {
-    if (!skipCache && this.deprecations) {
-      return this.deprecations;
-    }
-
+  private fetchDeprecations = async (): Promise<DomainDeprecationDetails[]> => {
     const { deprecationsInfo } = await this.http.fetch<DeprecationsGetResponse>(
       '/api/deprecations/',
       {
@@ -51,20 +37,15 @@ export class DeprecationsClient {
       }
     );
 
-    this.deprecations = deprecationsInfo;
     return deprecationsInfo;
   };
 
-  public getAllDeprecations = async ({ skipCache }: GetAllDeprecationsConfig = {}) => {
-    return await this.fetchDeprecations(skipCache);
+  public getAllDeprecations = async () => {
+    return await this.fetchDeprecations();
   };
 
-  public getDeprecations = async (pluginId: string, { skipCache }: GetDeprecationsConfig = {}) => {
-    const deprecations = await this.fetchDeprecations(skipCache);
-    return deprecations.filter((deprecation) => deprecation.pluginId === pluginId);
-  };
-
-  public clearCache = () => {
-    this.deprecations = undefined;
+  public getDeprecations = async (domainId: string) => {
+    const deprecations = await this.fetchDeprecations();
+    return deprecations.filter((deprecation) => deprecation.domainId === domainId);
   };
 }

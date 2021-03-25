@@ -22,9 +22,9 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
   unused('authorization.legacyFallback.enabled'),
   unused('authc.saml.maxRedirectURLSize'),
   // Deprecation warning for the old array-based format of `xpack.security.authc.providers`.
-  (settings, fromPath, deprecationHook) => {
+  (settings, fromPath, addDeprecation) => {
     if (Array.isArray(settings?.xpack?.security?.authc?.providers)) {
-      deprecationHook({
+      addDeprecation({
         message:
           'Defining `xpack.security.authc.providers` as an array of provider types is deprecated. Use extended `object` format instead.',
       });
@@ -32,7 +32,7 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     return settings;
   },
-  (settings, fromPath, deprecationHook) => {
+  (settings, fromPath, addDeprecation) => {
     const hasProviderType = (providerType: string) => {
       const providers = settings?.xpack?.security?.authc?.providers;
       if (Array.isArray(providers)) {
@@ -45,20 +45,20 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
     };
 
     if (hasProviderType('basic') && hasProviderType('token')) {
-      deprecationHook({
+      addDeprecation({
         message:
           'Enabling both `basic` and `token` authentication providers in `xpack.security.authc.providers` is deprecated. Login page will only use `token` provider.',
       });
     }
     return settings;
   },
-  (settings, fromPath, deprecationHook) => {
+  (settings, fromPath, addDeprecation) => {
     const samlProviders = (settings?.xpack?.security?.authc?.providers?.saml ?? {}) as Record<
       string,
       any
     >;
     if (Object.values(samlProviders).find((provider) => !!provider.maxRedirectURLSize)) {
-      deprecationHook({
+      addDeprecation({
         message:
           '`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` is deprecated and is no longer used',
       });
@@ -66,9 +66,9 @@ export const securityConfigDeprecationProvider: ConfigDeprecationProvider = ({
 
     return settings;
   },
-  (settings, fromPath, deprecationHook) => {
+  (settings, fromPath, addDeprecation) => {
     if (settings?.xpack?.security?.enabled === false) {
-      deprecationHook({
+      addDeprecation({
         message:
           'Disabling the security plugin (`xpack.security.enabled`) will not be supported in the next major version (8.0). ' +
           'To turn off security features, disable them in Elasticsearch instead.',

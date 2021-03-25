@@ -18,23 +18,32 @@ export interface DeprecationsServiceSetup
 ```ts
 import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from 'src/core/server';
 
-const getDeprecations = async ({ esClient, savedObjectsClient }: GetDeprecationsContext): DeprecationsDetails[] => {
-  return [
-     {
-       message: string;
-       level: 'warning' | 'critical';
-       documentationUrl?: string;
-       correctiveActions: {
-         api?: {
-           path: string;
-           method: 'POST' | 'PUT';
-           body?: { [key: string]: any },
-         },
-         manualSteps?: string[];
-       }
-     }
-  ]
+async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
+  const deprecations: DeprecationsDetails[] = [];
+  const count = await getTimelionSheetsCount(savedObjectsClient);
+
+  if (count > 0) {
+    deprecations.push({
+      message: `You have ${count} Timelion worksheets. The Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard.`,
+      documentationUrl:
+        'https://www.elastic.co/guide/en/kibana/current/create-panels-with-timelion.html',
+      level: 'warning',
+      correctiveActions: {
+        manualSteps: [
+          'Navigate to the Kibana Dashboard and click "Create dashboard".',
+          'Select Timelion from the "New Visualization" window.',
+          'Open a new tab, open the Timelion app, select the chart you want to copy, then copy the chart expression.',
+          'Go to Timelion, paste the chart expression in the Timelion expression field, then click Update.',
+          'In the toolbar, click Save.',
+          'On the Save visualization window, enter the visualization Title, then click Save and return.',
+        ],
+      },
+    });
+  }
+
+  return deprecations;
 }
+
 
 export class Plugin() {
   setup: (core: CoreSetup) => {

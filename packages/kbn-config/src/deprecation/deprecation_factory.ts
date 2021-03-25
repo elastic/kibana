@@ -11,7 +11,7 @@ import { set } from '@elastic/safer-lodash-set';
 import { unset } from '@kbn/std';
 import {
   ConfigDeprecation,
-  ConfigDeprecationHook,
+  AddConfigDeprecation,
   ConfigDeprecationFactory,
   DeprecatedConfigDetails,
 } from './types';
@@ -19,7 +19,7 @@ import {
 const _rename = (
   config: Record<string, any>,
   rootPath: string,
-  deprecationHook: ConfigDeprecationHook,
+  addDeprecation: AddConfigDeprecation,
   oldKey: string,
   newKey: string,
   details?: Partial<DeprecatedConfigDetails>
@@ -37,7 +37,7 @@ const _rename = (
   if (newValue === undefined) {
     set(config, fullNewPath, oldValue);
 
-    deprecationHook({
+    addDeprecation({
       message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}"`,
       correctiveActions: {
         manualSteps: [`Replace "${fullOldPath}" in the kibana.yml file with "${fullNewPath}"`],
@@ -45,7 +45,7 @@ const _rename = (
       ...details,
     });
   } else {
-    deprecationHook({
+    addDeprecation({
       message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`,
       correctiveActions: {
         manualSteps: [
@@ -63,7 +63,7 @@ const _rename = (
 const _unused = (
   config: Record<string, any>,
   rootPath: string,
-  deprecationHook: ConfigDeprecationHook,
+  addDeprecation: AddConfigDeprecation,
   unusedKey: string,
   details?: Partial<DeprecatedConfigDetails>
 ) => {
@@ -72,7 +72,7 @@ const _unused = (
     return config;
   }
   unset(config, fullPath);
-  deprecationHook({
+  addDeprecation({
     message: `${fullPath} is deprecated and is no longer used`,
     correctiveActions: {
       manualSteps: [`Remove "${fullPath}" from the kibana.yml file."`],
@@ -86,27 +86,27 @@ const rename = (
   oldKey: string,
   newKey: string,
   details?: Partial<DeprecatedConfigDetails>
-): ConfigDeprecation => (config, rootPath, deprecationHook) =>
-  _rename(config, rootPath, deprecationHook, oldKey, newKey, details);
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _rename(config, rootPath, addDeprecation, oldKey, newKey, details);
 
 const renameFromRoot = (
   oldKey: string,
   newKey: string,
   details?: Partial<DeprecatedConfigDetails>
-): ConfigDeprecation => (config, rootPath, deprecationHook) =>
-  _rename(config, '', deprecationHook, oldKey, newKey, details);
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _rename(config, '', addDeprecation, oldKey, newKey, details);
 
 const unused = (
   unusedKey: string,
   details?: Partial<DeprecatedConfigDetails>
-): ConfigDeprecation => (config, rootPath, deprecationHook) =>
-  _unused(config, rootPath, deprecationHook, unusedKey, details);
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _unused(config, rootPath, addDeprecation, unusedKey, details);
 
 const unusedFromRoot = (
   unusedKey: string,
   details?: Partial<DeprecatedConfigDetails>
-): ConfigDeprecation => (config, rootPath, deprecationHook) =>
-  _unused(config, '', deprecationHook, unusedKey, details);
+): ConfigDeprecation => (config, rootPath, addDeprecation) =>
+  _unused(config, '', addDeprecation, unusedKey, details);
 
 const getPath = (rootPath: string, subPath: string) =>
   rootPath !== '' ? `${rootPath}.${subPath}` : subPath;

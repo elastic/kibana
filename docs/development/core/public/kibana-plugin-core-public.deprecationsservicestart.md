@@ -2,12 +2,20 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-public](./kibana-plugin-core-public.md) &gt; [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md)
 
-## DeprecationsServiceStart type
+## DeprecationsServiceStart interface
 
-DeprecationsService provides methods to fetch plugin deprecation details from the Kibana server.
+DeprecationsService provides methods to fetch domain deprecation details from the Kibana server.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type DeprecationsServiceStart = DeprecationsServiceSetup;
+export interface DeprecationsServiceStart 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [getAllDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getalldeprecations.md) | <code>() =&gt; Promise&lt;DomainDeprecationDetails[]&gt;</code> | Grabs deprecations details for all domains. |
+|  [getDeprecations](./kibana-plugin-core-public.deprecationsservicestart.getdeprecations.md) | <code>(domainId: string) =&gt; Promise&lt;DomainDeprecationDetails[]&gt;</code> | Grabs deprecations for a specific domain. |
+

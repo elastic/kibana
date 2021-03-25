@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-export {
-  applyDeprecations,
-  ConfigDeprecation,
+export type {
   ConfigDeprecationFactory,
-  configDeprecationFactory,
-  ConfigDeprecationHook,
+  AddConfigDeprecation,
   ConfigDeprecationProvider,
   ConfigDeprecationWithContext,
+  ConfigDeprecation,
 } from './deprecation';
+
+export { applyDeprecations, configDeprecationFactory } from './deprecation';
 
 export { RawConfigurationProvider, RawConfigService, getConfigFromFiles } from './raw';
 

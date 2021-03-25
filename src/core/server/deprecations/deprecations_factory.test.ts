@@ -17,31 +17,31 @@ describe('DeprecationsFactory', () => {
   });
 
   describe('createRegistry', () => {
-    it('creates a registry for a pluginId', async () => {
+    it('creates a registry for a domainId', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
-      const pluginId = 'test-plugin';
-      const registry = deprecationsFactory.createRegistry(pluginId);
+      const domainId = 'test-plugin';
+      const registry = deprecationsFactory.createRegistry(domainId);
 
       expect(registry).toHaveProperty('registerDeprecations');
       expect(registry).toHaveProperty('getDeprecations');
     });
 
-    it('creates one registry for a pluginId', async () => {
+    it('creates one registry for a domainId', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
-      const pluginId = 'test-plugin';
-      const registry = deprecationsFactory.createRegistry(pluginId);
-      const sameRegistry = deprecationsFactory.createRegistry(pluginId);
+      const domainId = 'test-plugin';
+      const registry = deprecationsFactory.createRegistry(domainId);
+      const sameRegistry = deprecationsFactory.createRegistry(domainId);
 
       expect(registry).toStrictEqual(sameRegistry);
     });
   });
 
   describe('getRegistry', () => {
-    const pluginId = 'test-plugin';
+    const domainId = 'test-plugin';
     const deprecationsFactory = new DeprecationsFactory({ logger });
     it('returns a registered registry', () => {
-      const registry = deprecationsFactory.createRegistry(pluginId);
-      expect(deprecationsFactory.getRegistry(pluginId)).toStrictEqual(registry);
+      const registry = deprecationsFactory.createRegistry(domainId);
+      expect(deprecationsFactory.getRegistry(domainId)).toStrictEqual(registry);
     });
     it('returns undefined if no registry is defined', () => {
       expect(deprecationsFactory.getRegistry('never-registered-plugin')).toBe(undefined);
@@ -94,10 +94,10 @@ describe('DeprecationsFactory', () => {
       const derpecationsInfo = await deprecationsFactory.getAllDeprecations(mockDependencies);
       expect(derpecationsInfo).toStrictEqual(
         [
-          mockPluginDeprecationsInfo.map((info) => ({ ...info, pluginId: 'mockPlugin' })),
+          mockPluginDeprecationsInfo.map((info) => ({ ...info, domainId: 'mockPlugin' })),
           anotherMockPluginDeprecationsInfo.map((info) => ({
             ...info,
-            pluginId: 'anotherMockPlugin',
+            domainId: 'anotherMockPlugin',
           })),
         ].flat()
       );
@@ -105,23 +105,23 @@ describe('DeprecationsFactory', () => {
 
     it(`returns a failure message for failed getDeprecations functions`, async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
-      const pluginId = 'mockPlugin';
+      const domainId = 'mockPlugin';
       const mockError = new Error();
 
-      const deprecationsRegistry = deprecationsFactory.createRegistry(pluginId);
+      const deprecationsRegistry = deprecationsFactory.createRegistry(domainId);
       deprecationsRegistry.registerDeprecations({
         getDeprecations: jest.fn().mockRejectedValue(mockError),
       });
       const derpecationsInfo = await deprecationsFactory.getAllDeprecations(mockDependencies);
       expect(logger.warn).toBeCalledTimes(1);
       expect(logger.warn).toBeCalledWith(
-        `Failed to get deprecations info for plugin "${pluginId}".`,
+        `Failed to get deprecations info for plugin "${domainId}".`,
         mockError
       );
       expect(derpecationsInfo).toStrictEqual([
         {
-          pluginId,
-          message: `Failed to get deprecations info for plugin "${pluginId}".`,
+          domainId,
+          message: `Failed to get deprecations info for plugin "${domainId}".`,
           level: 'warning',
           correctiveActions: {
             manualSteps: ['Check Kibana server logs for error message.'],
@@ -158,9 +158,9 @@ describe('DeprecationsFactory', () => {
         mockError
       );
       expect(derpecationsInfo).toStrictEqual([
-        ...mockPluginDeprecationsInfo.map((info) => ({ ...info, pluginId: 'mockPlugin' })),
+        ...mockPluginDeprecationsInfo.map((info) => ({ ...info, domainId: 'mockPlugin' })),
         {
-          pluginId: 'anotherMockPlugin',
+          domainId: 'anotherMockPlugin',
           message: `Failed to get deprecations info for plugin "anotherMockPlugin".`,
           level: 'warning',
           correctiveActions: {
@@ -208,7 +208,7 @@ describe('DeprecationsFactory', () => {
         mockDependencies
       );
       expect(derpecationsInfo).toStrictEqual(
-        deprecationsInfoBody.flat().map((body) => ({ ...body, pluginId: 'mockPlugin' }))
+        deprecationsInfoBody.flat().map((body) => ({ ...body, domainId: 'mockPlugin' }))
       );
     });
 
@@ -237,7 +237,7 @@ describe('DeprecationsFactory', () => {
       );
       expect(derpecationsInfo).toHaveLength(1);
       expect(derpecationsInfo).toStrictEqual([
-        { ...deprecationsInfoBody[0], pluginId: 'mockPlugin' },
+        { ...deprecationsInfoBody[0], domainId: 'mockPlugin' },
       ]);
     });
   });

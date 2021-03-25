@@ -89,7 +89,7 @@ export type {
   ConfigDeprecation,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,
-  ConfigDeprecationHook,
+  AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
 } from './config';
@@ -384,6 +384,7 @@ export type { I18nServiceSetup } from './i18n';
 export type {
   DeprecationsDetails,
   RegisterDeprecationsConfig,
+  GetDeprecationsContext,
   DeprecationsServiceSetup,
 } from './deprecations';
 
@@ -486,10 +487,10 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
-  /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** {@link DeprecationsServiceSetup} */
   deprecations: DeprecationsServiceSetup;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
 
 /**
