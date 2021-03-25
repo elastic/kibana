@@ -65,7 +65,7 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
                   <EuiText size="xs">
                     <FormattedMessage
                       id="xpack.remoteClusters.remoteClusterForm.cloudScreenshotDescription"
-                      defaultMessage="Copy the endpoint URL from the Cloud deployment overview page under Applications"
+                      defaultMessage="Copy the endpoint URL from the Cloud deployment overview page under Applications."
                     />
                   </EuiText>
                   <EuiSpacer size="s" />
@@ -182,7 +182,7 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
         helpText={
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.fieldSocketConnectionsHelpText"
-            defaultMessage="The number of socket connections to open per remote cluster."
+            defaultMessage="The number of connections to open per remote cluster."
           />
         }
         fullWidth
