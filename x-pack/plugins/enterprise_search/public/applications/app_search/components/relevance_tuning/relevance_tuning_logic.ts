@@ -8,7 +8,11 @@
 import { kea, MakeLogicType } from 'kea';
 import { omit, cloneDeep, isEmpty } from 'lodash';
 
-import { setSuccessMessage, flashAPIErrors } from '../../../shared/flash_messages';
+import {
+  setSuccessMessage,
+  flashAPIErrors,
+  clearFlashMessages,
+} from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { Schema, SchemaConflicts } from '../../../shared/types';
 
@@ -28,6 +32,7 @@ import {
   parseBoostCenter,
   removeBoostStateProps,
   normalizeBoostValues,
+  removeEmptyValueBoosts,
 } from './utils';
 
 interface RelevanceTuningProps {
@@ -273,18 +278,21 @@ export const RelevanceTuningLogic = kea<
 
       actions.setResultsLoading(true);
 
+      const filteredBoosts = removeEmptyValueBoosts(boosts);
+
       try {
         const response = await http.post(url, {
           query: {
             query,
           },
           body: JSON.stringify({
-            boosts: isEmpty(boosts) ? undefined : boosts,
+            boosts: isEmpty(filteredBoosts) ? undefined : filteredBoosts,
             search_fields: isEmpty(searchFields) ? undefined : searchFields,
           }),
         });
 
         actions.setSearchResults(response.results);
+        clearFlashMessages();
       } catch (e) {
         flashAPIErrors(e);
       }
