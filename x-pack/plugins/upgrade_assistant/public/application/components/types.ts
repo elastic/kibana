@@ -15,7 +15,7 @@ export interface UpgradeAssistantTabProps {
   checkupData?: UpgradeAssistantStatus | null;
   deprecations?: EnrichedDeprecationInfo[];
   refreshCheckupData: () => void;
-  loadingError: ResponseError | null;
+  error: ResponseError | null;
   isLoading: boolean;
   navigateToOverviewPage: () => void;
 }

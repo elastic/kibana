@@ -15,21 +15,20 @@ const i18nTexts = {
   permissionsError: i18n.translate(
     'xpack.upgradeAssistant.esDeprecationStats.errors.permissionsErrorMessage',
     {
-      defaultMessage:
-        'You do not have sufficient privileges to view this Elasticsearch deprecations.',
+      defaultMessage: 'You do not have sufficient privileges to view Elasticsearch deprecations.',
     }
   ),
   partiallyUpgradedWarning: i18n.translate(
     'xpack.upgradeAssistant.esDeprecationStats.errors.partiallyUpgradedWarningMessage',
     {
       defaultMessage:
-        'One or more Elasticsearch nodes have a newer version of Elasticsearch than Kibana. Once all your nodes are upgraded, upgrade Kibana.',
+        'One or more Elasticsearch nodes have a newer version of Elasticsearch than Kibana.',
     }
   ),
   upgradedMessage: i18n.translate(
     'xpack.upgradeAssistant.esDeprecationStats.errors.partiallyUpgradedWarningMessage',
     {
-      defaultMessage: 'All Elasticsearch nodes have been upgraded. You may now upgrade Kibana.',
+      defaultMessage: 'All Elasticsearch nodes have been upgraded.',
     }
   ),
   loadingError: i18n.translate(
@@ -54,14 +53,21 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
   } else if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === false) {
     iconContent = (
       <EuiIconTip
-        type="help"
+        type="alert"
         color="warning"
         size="l"
         content={i18nTexts.partiallyUpgradedWarning}
       />
     );
   } else if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === true) {
-    iconContent = <EuiIconTip type="flag" size="l" content={i18nTexts.upgradedMessage} />;
+    iconContent = (
+      <EuiIconTip
+        type="checkInCircleFilled"
+        color="success"
+        size="l"
+        content={i18nTexts.upgradedMessage}
+      />
+    );
   } else {
     iconContent = (
       <EuiIconTip type="alert" color="danger" size="l" content={i18nTexts.loadingError} />

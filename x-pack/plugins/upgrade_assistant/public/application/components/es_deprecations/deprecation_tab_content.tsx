@@ -11,10 +11,10 @@ import React, { FunctionComponent, useState } from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { LoadingErrorBanner } from '../error_banner';
 import { GroupByOption, LevelFilterOption, UpgradeAssistantTabProps } from '../types';
 import { CheckupControls } from './controls';
 import { GroupedDeprecations } from './deprecations/grouped';
+import { EsDeprecationErrors } from './es_deprecation_errors';
 
 export interface CheckupTabProps extends UpgradeAssistantTabProps {
   checkupLabel: string;
@@ -27,7 +27,7 @@ export interface CheckupTabProps extends UpgradeAssistantTabProps {
 export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
   checkupLabel,
   deprecations,
-  loadingError,
+  error,
   isLoading,
   refreshCheckupData,
   navigateToOverviewPage,
@@ -71,8 +71,8 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
     <>
       <EuiSpacer />
 
-      {loadingError ? (
-        <LoadingErrorBanner loadingError={loadingError} />
+      {error ? (
+        <EsDeprecationErrors error={error} />
       ) : deprecations && deprecations.length > 0 ? (
         <div data-test-subj="deprecationsContainer">
           <CheckupControls

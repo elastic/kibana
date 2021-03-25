@@ -22,9 +22,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DeprecationTabContent } from './deprecation_tab_content';
-import { UpgradeAssistantTabProps, EsTabs, TelemetryState } from '../types';
 import { useAppContext } from '../../app_context';
+import { UpgradeAssistantTabProps, EsTabs, TelemetryState } from '../types';
+import { DeprecationTabContent } from './deprecation_tab_content';
 
 const i18nTexts = {
   pageTitle: i18n.translate('xpack.upgradeAssistant.esDeprecations.pageTitle', {
@@ -37,18 +37,14 @@ const i18nTexts = {
   docLinkText: i18n.translate('xpack.upgradeAssistant.esDeprecations.docLinkText', {
     defaultMessage: 'Documentation',
   }),
-  backupDataButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.backupDataButtonLabel',
-    {
+  backupDataButton: {
+    label: i18n.translate('xpack.upgradeAssistant.esDeprecations.backupDataButtonLabel', {
       defaultMessage: 'Back up your data',
-    }
-  ),
-  backupDataTooltipText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.backupDataTooltipText',
-    {
+    }),
+    tooltipText: i18n.translate('xpack.upgradeAssistant.esDeprecations.backupDataTooltipText', {
       defaultMessage: 'Before making index changes, back up your data using Snapshot and Restore.',
-    }
-  ),
+    }),
+  },
   clusterTab: {
     tabName: i18n.translate('xpack.upgradeAssistant.esDeprecations.clusterTabLabel', {
       defaultMessage: 'Cluster',
@@ -90,7 +86,7 @@ export const EsDeprecationsContent = withRouter(
 
     const tabs = useMemo(() => {
       const commonTabProps: UpgradeAssistantTabProps = {
-        loadingError: error,
+        error,
         isLoading,
         refreshCheckupData: resendRequest,
         navigateToOverviewPage: () => history.push('/overview'),
@@ -182,7 +178,7 @@ export const EsDeprecationsContent = withRouter(
               </EuiButtonEmpty>,
             ]}
           >
-            <EuiToolTip position="bottom" content={i18nTexts.backupDataTooltipText}>
+            <EuiToolTip position="bottom" content={i18nTexts.backupDataButton.tooltipText}>
               <EuiButton
                 fill
                 href={getUrlForApp('management', {
@@ -192,7 +188,7 @@ export const EsDeprecationsContent = withRouter(
                 iconSide="right"
                 target="_blank"
               >
-                {i18nTexts.backupDataButtonLabel}
+                {i18nTexts.backupDataButton.label}
               </EuiButton>
             </EuiToolTip>
           </EuiPageHeader>
