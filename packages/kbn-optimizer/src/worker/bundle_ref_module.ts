@@ -49,7 +49,9 @@ export class BundleRefModule extends Module {
   build(_: any, __: any, ___: any, ____: any, callback: () => void) {
     this.built = true;
     this.buildMeta = {};
-    this.buildInfo = {};
+    this.buildInfo = {
+      exportsArgument: '__webpack_exports__',
+    };
     callback();
   }
 
