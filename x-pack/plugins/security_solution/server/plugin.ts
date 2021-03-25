@@ -167,6 +167,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(config),
+      experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental),
     };
 
     initUsageCollectors({

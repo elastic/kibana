@@ -31,13 +31,12 @@ import {
 } from './service';
 import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 
-const getBodyAfterFeatureFlagCheck = async (
+const getBodyAfterFeatureFlagCheck = (
   body: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest,
   endpointAppContext: EndpointAppContext
 ): Promise<PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest> => {
-  const config = await endpointAppContext.config();
-  const isTrustedAppsByPolicyEnabled = parseExperimentalConfigValue(config.enableExperimental)
-    .trustedAppsByPolicyEnabled;
+  const isTrustedAppsByPolicyEnabled =
+    endpointAppContext.experimentalFeatures.trustedAppsByPolicyEnabled;
   return {
     ...body,
     ...(isTrustedAppsByPolicyEnabled ? body.effectScope : { effectSctope: { type: 'policy:all' } }),
