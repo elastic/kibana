@@ -13,7 +13,14 @@ import {
   GetResponse,
   SearchResponse,
 } from '../../../elasticsearch/';
+import { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
+import {
+  ISavedObjectsPointInTimeFinder,
+  PointInTimeFinder,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+} from './point_in_time_finder';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
@@ -89,6 +96,7 @@ export interface SavedObjectsRepositoryOptions {
   serializer: SavedObjectsSerializer;
   migrator: IKibanaMigrator;
   allowedTypes: string[];
+  logger: Logger;
 }
 
 /**
@@ -148,6 +156,7 @@ export class SavedObjectsRepository {
   private _allowedTypes: string[];
   private readonly client: RepositoryEsClient;
   private _serializer: SavedObjectsSerializer;
+  private _logger: Logger;
 
   /**
    * A factory function for creating SavedObjectRepository instances.
@@ -162,6 +171,7 @@ export class SavedObjectsRepository {
     typeRegistry: SavedObjectTypeRegistry,
     indexName: string,
     client: ElasticsearchClient,
+    logger: Logger,
     includedHiddenTypes: string[] = [],
     injectedConstructor: any = SavedObjectsRepository
   ): ISavedObjectsRepository {
@@ -187,6 +197,7 @@ export class SavedObjectsRepository {
       serializer,
       allowedTypes,
       client,
+      logger,
     });
   }
 
@@ -199,6 +210,7 @@ export class SavedObjectsRepository {
       serializer,
       migrator,
       allowedTypes = [],
+      logger,
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -218,6 +230,7 @@ export class SavedObjectsRepository {
     }
     this._allowedTypes = allowedTypes;
     this._serializer = serializer;
+    this._logger = logger;
   }
 
   /**
@@ -1788,6 +1801,9 @@ export class SavedObjectsRepository {
    * Opens a Point In Time (PIT) against the indices for the specified Saved Object types.
    * The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
    *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsRepository.createPointInTimeFinder} method.
+   *
    * @example
    * ```ts
    * const { id } = await savedObjectsClient.openPointInTimeForType(
@@ -1853,6 +1869,9 @@ export class SavedObjectsRepository {
    * via the Elasticsearch client, and is included in the Saved Objects Client
    * as a convenience for consumers who are using `openPointInTimeForType`.
    *
+   * Only use this API if you have an advanced use case that's not solved by the
+   * {@link SavedObjectsRepository.createPointInTimeFinder} method.
+   *
    * @remarks
    * While the `keepAlive` that is provided will cause a PIT to automatically close,
    * it is highly recommended to explicitly close a PIT when you are done with it
@@ -1894,6 +1913,62 @@ export class SavedObjectsRepository {
       body: { id },
     });
     return body;
+  }
+
+  /**
+   * Returns a {@link ISavedObjectsPointInTimeFinder} to help page through
+   * large sets of saved objects. We strongly recommend using this API for
+   * any `find` queries that might return more than 1000 saved objects,
+   * however this API is only intended for use in server-side "batch"
+   * processing of objects where you are collecting all objects in memory
+   * or streaming them back to the client.
+   *
+   * Do NOT use this API in a route handler to facilitate paging through
+   * saved objects on the client-side unless you are streaming all of the
+   * results back to the client at once. Because the returned generator is
+   * stateful, you cannot rely on subsequent http requests retrieving new
+   * pages from the same Kibana server in multi-instance deployments.
+   *
+   * This generator wraps calls to {@link SavedObjectsRepository.find} and
+   * iterates over multiple pages of results using `_pit` and `search_after`.
+   * This will open a new Point-In-Time (PIT), and continue paging until a
+   * set of results is received that's smaller than the designated `perPage`.
+   *
+   * Once you have retrieved all of the results you need, it is recommended
+   * to call `close()` to clean up the PIT and prevent Elasticsearch from
+   * consuming resources unnecessarily. This is only required if you are
+   * done iterating and have not yet paged through all of the results: the
+   * PIT will automatically be closed for you once you reach the last page
+   * of results, or if the underlying call to `find` fails for any reason.
+   *
+   * @example
+   * ```ts
+   * const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
+   *   type: 'visualization',
+   *   search: 'foo*',
+   *   perPage: 100,
+   * };
+   *
+   * const finder = savedObjectsClient.createPointInTimeFinder(findOptions);
+   *
+   * const responses: SavedObjectFindResponse[] = [];
+   * for await (const response of finder.find()) {
+   *   responses.push(...response);
+   *   if (doneSearching) {
+   *     await finder.close();
+   *   }
+   * }
+   * ```
+   */
+  createPointInTimeFinder(
+    findOptions: SavedObjectsCreatePointInTimeFinderOptions,
+    dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  ): ISavedObjectsPointInTimeFinder {
+    return new PointInTimeFinder(findOptions, {
+      logger: this._logger,
+      client: this,
+      ...dependencies,
+    });
   }
 
   /**
