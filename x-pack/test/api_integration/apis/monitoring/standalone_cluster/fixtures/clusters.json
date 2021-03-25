@@ -172,7 +172,7 @@
   },
   "alerts": {
     "alertsMeta": {
-      "enabled": false
+      "enabled": true
     },
     "list": {}
   },
