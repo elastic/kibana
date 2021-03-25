@@ -26,8 +26,8 @@ export async function fetchElasticsearchVersions(
       sort: [
         {
           timestamp: {
-            order: 'desc',
-            unmapped_type: 'long',
+            order: 'desc' as const,
+            unmapped_type: 'long' as const,
           },
         },
       ],
@@ -60,13 +60,13 @@ export async function fetchElasticsearchVersions(
     },
   };
 
-  const { body: response } = await esClient.search(params);
-  return response.hits.hits.map((hit: { _source: ElasticsearchSource; _index: string }) => {
-    const versions = hit._source.cluster_stats?.nodes?.versions;
+  const { body: response } = await esClient.search<ElasticsearchSource>(params);
+  return response.hits.hits.map((hit) => {
+    const versions = hit._source!.cluster_stats?.nodes?.versions ?? [];
     return {
       versions,
-      clusterUuid: hit._source.cluster_uuid,
-      ccs: hit._index.includes(':') ? hit._index.split(':')[0] : null,
+      clusterUuid: hit._source!.cluster_uuid,
+      ccs: hit._index.includes(':') ? hit._index.split(':')[0] : undefined,
     };
   });
 }
