@@ -7,10 +7,22 @@
 
 import { useSelector } from 'react-redux';
 import { State } from '../../common/store';
-import { ExperimentalFeatures } from '../../../common/experimental_features';
+import {
+  ExperimentalFeatures,
+  getExperimentalAllowedValues,
+} from '../../../common/experimental_features';
+
+const allowedExperimentalValues = getExperimentalAllowedValues();
 
 export const useIsExperimentalFeatureEnabled = (feature: keyof ExperimentalFeatures): boolean => {
-  return useSelector(({ app: { enableExperimental } }: State) =>
-    enableExperimental ? enableExperimental[feature] : false
-  );
+  return useSelector(({ app: { enableExperimental } }: State) => {
+    if (!enableExperimental || !(feature in enableExperimental)) {
+      throw new Error(
+        `Invalid enable value ${feature}. Allowed values are: ${allowedExperimentalValues.join(
+          ', '
+        )}`
+      );
+    }
+    return enableExperimental[feature];
+  });
 };
