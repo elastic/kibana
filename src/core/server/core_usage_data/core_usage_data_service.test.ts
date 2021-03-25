@@ -120,10 +120,10 @@ describe('CoreUsageDataService', () => {
           body: [
             {
               name: '.kibana_task_manager_1',
-              'docs.count': 10,
-              'docs.deleted': 10,
-              'store.size': 1000,
-              'pri.store.size': 2000,
+              'docs.count': '10',
+              'docs.deleted': '10',
+              'store.size': '1000',
+              'pri.store.size': '2000',
             },
           ],
         } as any);
@@ -131,10 +131,10 @@ describe('CoreUsageDataService', () => {
           body: [
             {
               name: '.kibana_1',
-              'docs.count': 20,
-              'docs.deleted': 20,
-              'store.size': 2000,
-              'pri.store.size': 4000,
+              'docs.count': '20',
+              'docs.deleted': '20',
+              'store.size': '2000',
+              'pri.store.size': '4000',
             },
           ],
         } as any);

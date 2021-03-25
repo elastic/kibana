@@ -1378,10 +1378,10 @@
   version "0.0.0"
   uid ""
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^7.12.0-canary.4":
-  version "7.12.0-canary.4"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-7.12.0-canary.4.tgz#8a96352c845140c26f453f06ef9aa98acf2a1bed"
-  integrity sha512-/g/HXJdwAKBYt5jTLX0cVKnCk1DxGtCmb287RAYvN7QYmo/XO9u9hm6lWJiaIx8HJG0AFwEGyeTacf6XszXC1A==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@7.13.0-canary.1":
+  version "7.13.0-canary.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-7.13.0-canary.1.tgz#53a8ddbaeaba77dc163aad972e56d6741c98858a"
+  integrity sha512-RqJxZyouL/lTN4EgBvN9xQKq0zUIzSUAks91q/UvM41XyATTeTa2e9+zxrK07JCi0R6l/xAlHrLglf1/LiJOyg==
   dependencies:
     debug "^4.3.1"
     hpagent "^0.1.1"
@@ -24959,9 +24959,9 @@ scss-tokenizer@^0.2.3:
     source-map "^0.4.2"
 
 secure-json-parse@^2.3.1:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/secure-json-parse/-/secure-json-parse-2.3.2.tgz#0284c9525c6f24d38774f13727addff80634c2e9"
-  integrity sha512-4oUSFU0w2d8/XQb7NO9dbMYyp/hxIwZPcZcGAlAAEziMRHs+NbUcx2Z5dda/z8o+avyQ8gpuYnTMlGh8SVwg9g==
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/secure-json-parse/-/secure-json-parse-2.3.1.tgz#908aa5e806e223ff8d179d37ad95c2433f5f147d"
+  integrity sha512-5uGhQLHSC9tVa7RGPkSwxbZVsJCZvIODOadAimCXkU1aCa1fWdszj2DktcutK8A7dD58PoRdxTYiy0jFl6qjnw==
 
 seed-random@~2.2.0:
   version "2.2.0"

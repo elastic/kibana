@@ -107,6 +107,7 @@ const getData = async (
   const client = async <Hit = {}, Aggregation = undefined>(
     options: CallWithRequestParams
   ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
+    // @ts-expect-error @elastic/elasticsearch SearchResponse.body.timeout is not required
     (await esClient.search(options as any)).body as InfraDatabaseSearchResponse<Hit, Aggregation>;
 
   const metrics = [

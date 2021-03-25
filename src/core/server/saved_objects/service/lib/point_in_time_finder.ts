@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '../../../logging';
 import type { SavedObjectsFindOptions, SavedObjectsClientContract } from '../../types';
 import type { SavedObjectsFindResponse } from '../';
@@ -96,12 +96,12 @@ export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
     await this.open();
 
     let lastResultsCount: number;
-    let lastHitSortValue: unknown[] | undefined;
+    let lastHitSortValue: estypes.Id[] | undefined;
     do {
       const results = await this.findNext({
         findOptions: this.#findOptions,
         id: this.#pitId,
-        ...(lastHitSortValue ? { searchAfter: lastHitSortValue } : {}),
+        searchAfter: lastHitSortValue,
       });
       this.#pitId = results.pit_id;
       lastResultsCount = results.saved_objects.length;
@@ -159,7 +159,7 @@ export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
   }: {
     findOptions: SavedObjectsFindOptions;
     id?: string;
-    searchAfter?: unknown[];
+    searchAfter?: estypes.Id[];
   }) {
     try {
       return await this.#client.find({
@@ -168,8 +168,8 @@ export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
         sortOrder: 'desc',
         // Bump keep_alive by 2m on every new request to allow for the ES client
         // to make multiple retries in the event of a network failure.
-        ...(id ? { pit: { id, keepAlive: '2m' } } : {}),
-        ...(searchAfter ? { searchAfter } : {}),
+        pit: id ? { id, keepAlive: '2m' } : undefined,
+        searchAfter,
         ...findOptions,
       });
     } catch (e) {
@@ -181,7 +181,7 @@ export class PointInTimeFinder implements ISavedObjectsPointInTimeFinder {
     }
   }
 
-  private getLastHitSortValue(res: SavedObjectsFindResponse): unknown[] | undefined {
+  private getLastHitSortValue(res: SavedObjectsFindResponse): estypes.Id[] | undefined {
     if (res.saved_objects.length < 1) {
       return undefined;
     }

@@ -162,7 +162,9 @@ describe('migration v2', () => {
       const expectedVersions = getExpectedVersionPerType();
       const res = await esClient.search({
         index: migratedIndex,
-        sort: ['_doc'],
+        body: {
+          sort: ['_doc'],
+        },
         size: 10000,
       });
       const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];

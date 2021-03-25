@@ -8,7 +8,8 @@
 
 import { inspect } from 'util';
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { estypes } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
 import { Stats } from '../stats';
@@ -23,7 +24,7 @@ export async function deleteKibanaIndices({
   stats,
   log,
 }: {
-  client: Client;
+  client: KibanaClient;
   stats: Stats;
   log: ToolingLog;
 }) {
@@ -58,10 +59,8 @@ export async function deleteKibanaIndices({
  * as is required by migrations.
  */
 export async function migrateKibanaIndex({
-  client,
   kbnClient,
 }: {
-  client: Client;
   kbnClient: KbnClient;
 }) {
   await kbnClient.savedObjects.migrate();
@@ -73,22 +72,27 @@ export async function migrateKibanaIndex({
  * with .kibana, then filters out any that aren't actually Kibana's core
  * index (e.g. we don't want to remove .kibana_task_manager or the like).
  */
-async function fetchKibanaIndices(client: Client) {
-  const resp = await client.cat.indices<unknown>(
+function isKibanaIndex(index?: string): index is string {
+  return Boolean(
+    index &&
+      (/^\.kibana(:?_\d*)?$/.test(index) ||
+        /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index))
+  );
+}
+
+async function fetchKibanaIndices(client: KibanaClient) {
+  const resp = await client.cat.indices(
     { index: '.kibana*', format: 'json' },
     {
       headers: ES_CLIENT_HEADERS,
     }
   );
-  const isKibanaIndex = (index: string) =>
-    /^\.kibana(:?_\d*)?$/.test(index) ||
-    /^\.kibana(_task_manager)?_(pre)?\d+\.\d+\.\d+/.test(index);
 
   if (!Array.isArray(resp.body)) {
     throw new Error(`expected response to be an array ${inspect(resp.body)}`);
   }
 
-  return resp.body.map((x: { index: string }) => x.index).filter(isKibanaIndex);
+  return resp.body.map((x: { index?: string }) => x.index).filter(isKibanaIndex);
 }
 
 const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));
@@ -99,7 +103,7 @@ export async function cleanKibanaIndices({
   log,
   kibanaPluginIds,
 }: {
-  client: Client;
+  client: KibanaClient;
   stats: Stats;
   log: ToolingLog;
   kibanaPluginIds: string[];
@@ -126,7 +130,7 @@ export async function cleanKibanaIndices({
                 },
               },
             },
-          },
+          } as estypes.QueryContainer,
         },
       },
       {
@@ -156,7 +160,13 @@ export async function cleanKibanaIndices({
   stats.deletedIndex('.kibana');
 }
 
-export async function createDefaultSpace({ index, client }: { index: string; client: Client }) {
+export async function createDefaultSpace({
+  index,
+  client,
+}: {
+  index: string;
+  client: KibanaClient;
+}) {
   await client.create(
     {
       index,
