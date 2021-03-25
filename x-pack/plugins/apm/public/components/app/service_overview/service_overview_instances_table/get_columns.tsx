@@ -50,9 +50,7 @@ export function getColumns({
       field: 'serviceNodeName',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnNodeName',
-        {
-          defaultMessage: 'Node name',
-        }
+        { defaultMessage: 'Node name' }
       ),
       render: (_, item) => {
         const { serviceNodeName } = item;
@@ -143,9 +141,7 @@ export function getColumns({
       field: 'errorRateValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
-        {
-          defaultMessage: 'Error rate',
-        }
+        { defaultMessage: 'Error rate' }
       ),
       width: px(unit * 8),
       render: (_, { serviceNodeName, errorRate }) => {
@@ -173,9 +169,7 @@ export function getColumns({
       field: 'cpuUsageValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
-        {
-          defaultMessage: 'CPU usage (avg.)',
-        }
+        { defaultMessage: 'CPU usage (avg.)' }
       ),
       width: px(unit * 8),
       render: (_, { serviceNodeName, cpuUsage }) => {
@@ -203,9 +197,7 @@ export function getColumns({
       field: 'memoryUsageValue',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
-        {
-          defaultMessage: 'Memory usage (avg.)',
-        }
+        { defaultMessage: 'Memory usage (avg.)' }
       ),
       width: px(unit * 9),
       render: (_, { serviceNodeName, memoryUsage }) => {
