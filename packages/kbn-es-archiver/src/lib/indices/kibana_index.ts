@@ -58,11 +58,7 @@ export async function deleteKibanaIndices({
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex({
-  kbnClient,
-}: {
-  kbnClient: KbnClient;
-}) {
+export async function migrateKibanaIndex({ kbnClient }: { kbnClient: KbnClient }) {
   await kbnClient.savedObjects.migrate();
 }
 

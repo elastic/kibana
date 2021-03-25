@@ -126,7 +126,7 @@ describe('API Keys', () => {
       expect(result).toEqual(true);
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: 'kibana-api-key-service-test',
+          ids: ['kibana-api-key-service-test'],
         },
       });
     });
