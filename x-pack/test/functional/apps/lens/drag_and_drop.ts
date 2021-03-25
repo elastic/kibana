@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'lnsDatatable_rows > lns-empty-dimension'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_rows', 2)).to.eql(
-          'Top values of @message.​raw'
+          'Top values of @message.raw'
         );
       });
 
