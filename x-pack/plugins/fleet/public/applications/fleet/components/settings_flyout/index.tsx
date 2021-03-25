@@ -202,6 +202,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   }, [validate, setConfirmModalVisible]);
 
   const onConfirm = useCallback(() => {
+    setConfirmModalVisible(false);
     submit();
   }, [submit]);
 
@@ -385,7 +386,6 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
           changes={changes}
           onConfirm={onConfirm}
           onClose={onConfirmModalClose}
-          isLoading={isLoading}
         />
       )}
       <EuiFlyout onClose={onClose} size="l" maxWidth={640}>
@@ -418,10 +418,17 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
                 color="primary"
                 fill
               >
-                <FormattedMessage
-                  id="xpack.fleet.settings.saveButtonLabel"
-                  defaultMessage="Save and apply settings"
-                />
+                {isLoading ? (
+                  <FormattedMessage
+                    id="xpack.fleet.settings.saveButtonLoadingLabel"
+                    defaultMessage="Applying settings..."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.settings.saveButtonLabel"
+                    defaultMessage="Save and apply settings"
+                  />
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
