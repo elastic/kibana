@@ -69,26 +69,18 @@ interface Props {
 }
 
 export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
-  // TODO
-  // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
-
-  const { kibanaVersionInfo, breadcrumbs, docLinks } = useAppContext();
+  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
-  // useEffect(() => {
-  //   if (isLoading === false) {
-  //     setTelemetryState(TelemetryState.Running);
+  useEffect(() => {
+    async function sendTelemetryData() {
+      await api.sendTelemetryData({
+        overview: true,
+      });
+    }
 
-  //     async function sendTelemetryData() {
-  //       await api.sendTelemetryData({
-  //         overview: true,
-  //       });
-  //       setTelemetryState(TelemetryState.Complete);
-  //     }
-
-  //     sendTelemetryData();
-  //   }
-  // }, [api, isLoading]);
+    sendTelemetryData();
+  }, [api]);
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('overview');

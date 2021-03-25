@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import {
@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { DeprecationTabContent } from './deprecation_tab_content';
-import { UpgradeAssistantTabProps, EsTabs } from '../types';
+import { UpgradeAssistantTabProps, EsTabs, TelemetryState } from '../types';
 import { useAppContext } from '../../app_context';
 
 const i18nTexts = {
@@ -77,7 +77,7 @@ export const EsDeprecationsContent = withRouter(
     },
     history,
   }: RouteComponentProps<MatchParams>) => {
-    // const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
+    const [telemetryState, setTelemetryState] = useState<TelemetryState>(TelemetryState.Complete);
 
     const { api, breadcrumbs, getUrlForApp, docLinks } = useAppContext();
 
@@ -125,24 +125,24 @@ export const EsDeprecationsContent = withRouter(
       ];
     }, [checkupData, error, history, isLoading, resendRequest]);
 
-    // useEffect(() => {
-    //   if (isLoading === false) {
-    //     setTelemetryState(TelemetryState.Running);
-
-    //     async function sendTelemetryData() {
-    //       await api.sendTelemetryData({
-    //         [tabName]: true,
-    //       });
-    //       setTelemetryState(TelemetryState.Complete);
-    //     }
-
-    //     sendTelemetryData();
-    //   }
-    // }, [api, selectedTabIndex, tabName, isLoading]);
-
     useEffect(() => {
       breadcrumbs.setBreadcrumbs('esDeprecations');
     }, [breadcrumbs]);
+
+    useEffect(() => {
+      if (isLoading === false) {
+        setTelemetryState(TelemetryState.Running);
+
+        async function sendTelemetryData() {
+          await api.sendTelemetryData({
+            [tabName]: true,
+          });
+          setTelemetryState(TelemetryState.Complete);
+        }
+
+        sendTelemetryData();
+      }
+    }, [api, tabName, isLoading]);
 
     return (
       <EuiPageBody>
@@ -178,9 +178,11 @@ export const EsDeprecationsContent = withRouter(
 
           <EuiPageContentBody>
             <EuiTabbedContent
-              // data-test-subj={
-              //   telemetryState === TelemetryState.Running ? 'upgradeAssistantTelemetryRunning' : undefined
-              // }
+              data-test-subj={
+                telemetryState === TelemetryState.Running
+                  ? 'upgradeAssistantTelemetryRunning'
+                  : undefined
+              }
               tabs={tabs}
               onTabClick={onTabClick}
               selectedTab={tabs.find((tab) => tab.id === tabName)}
