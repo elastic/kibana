@@ -32,6 +32,7 @@ export const BoostItem: React.FC<Props> = ({ id, boost, index, name }) => {
       id={id}
       className="boosts__item"
       buttonContentClassName="boosts__itemButton"
+      initialIsOpen={!!boost.newBoost}
       buttonContent={
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>

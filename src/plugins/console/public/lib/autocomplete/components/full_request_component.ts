@@ -11,7 +11,7 @@ import { ConstantComponent } from './constant_component';
 
 export class FullRequestComponent extends ConstantComponent {
   private readonly name: string;
-  constructor(name: string, parent: any, private readonly template: string) {
+  constructor(name: string, parent: unknown, private readonly template: string) {
     super(name, parent);
     this.name = name;
   }

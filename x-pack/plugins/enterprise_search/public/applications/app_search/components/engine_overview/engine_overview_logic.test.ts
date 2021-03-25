@@ -78,7 +78,9 @@ describe('EngineOverviewLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('pollForOverviewMetrics', () => {
       it('fetches data and calls onPollingSuccess', async () => {
         mount();
