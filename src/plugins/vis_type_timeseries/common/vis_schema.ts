@@ -215,6 +215,7 @@ export const panel = schema.object({
   gauge_inner_width: stringOrNumberOptionalNullable,
   gauge_style: stringOptionalNullable,
   gauge_max: numberOptionalOrEmptyString,
+  hide_last_value_indicator: schema.boolean(),
   id: stringRequired,
   ignore_global_filters: numberOptional,
   ignore_global_filter: numberOptional,

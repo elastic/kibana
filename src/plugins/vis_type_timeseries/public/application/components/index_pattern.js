@@ -25,7 +25,8 @@ import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { LastValueModePopover } from './last_value_mode_popover';
+import { KBN_FIELD_TYPES } from '../../../../data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import { isGteInterval, validateReInterval, isAutoInterval } from './lib/get_interval';
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,7 @@ import { UI_SETTINGS } from '../../../../data/common';
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const LEVEL_OF_DETAIL_STEPS = 10;
 const LEVEL_OF_DETAIL_MIN_BUCKETS = 1;
+const HIDE_LAST_VALUE_INDICATOR = 'hide_last_value_indicator';
 
 const validateIntervalValue = (intervalValue) => {
   const isAutoOrGteInterval = isGteInterval(intervalValue) || isAutoInterval(intervalValue);
@@ -127,6 +129,11 @@ export const IndexPattern = ({
     updateControlValidity(intervalName, intervalValidation.isValid);
   }, [intervalName, intervalValidation.isValid, updateControlValidity]);
 
+  const toggleIndicatorDisplay = useCallback(
+    () => onChange({ [HIDE_LAST_VALUE_INDICATOR]: !model.hide_last_value_indicator }),
+    [model.hide_last_value_indicator, onChange]
+  );
+
   return (
     <div className="index-pattern">
       {!isTimeSeries && (
@@ -151,6 +158,12 @@ export const IndexPattern = ({
                 onChange={handleSelectChange(TIME_RANGE_MODE_KEY)}
                 singleSelection={{ asPlainText: true }}
                 isDisabled={disabled}
+                append={
+                  <LastValueModePopover
+                    isIndicatorDisplayed={!model.hide_last_value_indicator}
+                    toggleIndicatorDisplay={toggleIndicatorDisplay}
+                  />
+                }
               />
             </EuiFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>

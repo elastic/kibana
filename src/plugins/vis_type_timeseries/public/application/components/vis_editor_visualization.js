@@ -8,15 +8,8 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { get } from 'lodash';
 import { keys, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getInterval } from './lib/get_interval';
-import { AUTO_INTERVAL } from '../../../common/constants';
-import { PANEL_TYPES } from '../../../common/panel_types';
-import { LastValueTimeRangeModeLabel } from './last_value_time_range_mode_label';
-import { isVisSeriesData } from '../../../common/types';
-import { TIME_RANGE_DATA_MODES } from '../../../common/timerange_data_modes';
 
 const MIN_CHART_HEIGHT = 300;
 
@@ -26,7 +19,6 @@ class VisEditorVisualizationUI extends Component {
     this.state = {
       height: MIN_CHART_HEIGHT,
       dragging: false,
-      panelInterval: 0,
     };
 
     this._visEl = React.createRef();
@@ -63,26 +55,7 @@ class VisEditorVisualizationUI extends Component {
     await this._handler.render(this._visEl.current);
     this.props.eventEmitter.emit('embeddableRendered');
 
-    this._subscription = this._handler.handler.data$.subscribe((data) => {
-      const visData = data.value?.visData;
-      const seriesData = get(
-        visData,
-        `${isVisSeriesData(visData) ? this.props.model.id : 'series[0]'}.series[0].data`,
-        undefined
-      );
-      this.setState({ seriesData });
-
-      this.setPanelInterval(visData);
-      onDataChange(data.value);
-    });
-  }
-
-  setPanelInterval(visData) {
-    const panelInterval = getInterval(visData, this.props.model);
-
-    if (this.state.panelInterval !== panelInterval) {
-      this.setState({ panelInterval });
-    }
+    this._subscription = this._handler.handler.data$.subscribe((data) => onDataChange(data.value));
   }
 
   /**
@@ -103,12 +76,6 @@ class VisEditorVisualizationUI extends Component {
       });
     }
   };
-
-  isAnyPanelTypeExceptTimeseries() {
-    const type = get(this.props, 'model.type', '');
-
-    return type !== PANEL_TYPES.TIMESERIES;
-  }
 
   componentWillUnmount() {
     window.removeEventListener('mousemove', this.handleMouseMove);
@@ -137,11 +104,10 @@ class VisEditorVisualizationUI extends Component {
   }
 
   render() {
-    const { dirty, autoApply, title, description, onToggleAutoApply, onCommit, model } = this.props;
-    const { seriesData, panelInterval, height, dragging } = this.state;
-    const style = { height };
+    const { dirty, autoApply, title, description, onToggleAutoApply, onCommit } = this.props;
+    const style = { height: this.state.height };
 
-    if (dragging) {
+    if (this.state.dragging) {
       style.userSelect = 'none';
     }
 
@@ -182,16 +148,6 @@ class VisEditorVisualizationUI extends Component {
             onChange={onToggleAutoApply}
           />
         </EuiFlexItem>
-
-        {this.isAnyPanelTypeExceptTimeseries() &&
-          (!model.time_range_mode ||
-            model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE) && (
-            <LastValueTimeRangeModeLabel
-              seriesData={seriesData}
-              panelInterval={panelInterval}
-              modelInterval={model.interval ?? AUTO_INTERVAL}
-            />
-          )}
 
         <EuiFlexItem grow={false}>
           <EuiText color={dirty ? 'default' : 'subdued'} size="xs">
