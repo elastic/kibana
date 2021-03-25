@@ -54,6 +54,8 @@ export interface FieldsAccordionProps {
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
+  editField?: (name: string) => void;
+  removeField?: (name: string) => void;
 }
 
 export const FieldsAccordion = memo(function InnerFieldsAccordion({
@@ -74,6 +76,8 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   groupIndex,
   dropOntoWorkspace,
   hasSuggestionForField,
+  editField,
+  removeField,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
     (field: IndexPatternField, index) => (
@@ -87,9 +91,20 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
         groupIndex={groupIndex}
         dropOntoWorkspace={dropOntoWorkspace}
         hasSuggestionForField={hasSuggestionForField}
+        editField={editField}
+        removeField={removeField}
       />
     ),
-    [fieldProps, exists, hideDetails, dropOntoWorkspace, hasSuggestionForField, groupIndex]
+    [
+      fieldProps,
+      exists,
+      hideDetails,
+      dropOntoWorkspace,
+      hasSuggestionForField,
+      groupIndex,
+      editField,
+      removeField,
+    ]
   );
 
   const renderButton = useMemo(() => {

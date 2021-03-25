@@ -44,6 +44,8 @@ import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
 import {
+  existsFilterFunction,
+  fieldFunction,
   IEsSearchRequest,
   IEsSearchResponse,
   IKibanaSearchRequest,
@@ -52,9 +54,16 @@ import {
   kibana,
   kibanaContext,
   kibanaContextFunction,
+  kibanaTimerangeFunction,
+  kibanaFilterFunction,
+  kqlFunction,
+  luceneFunction,
+  rangeFilterFunction,
+  rangeFunction,
   SearchSourceDependencies,
   searchSourceRequiredUiSettings,
   SearchSourceService,
+  phraseFilterFunction,
 } from '../../common/search';
 import { getEsaggs } from './expressions';
 import {
@@ -142,7 +151,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(kibana);
+    expressions.registerFunction(luceneFunction);
+    expressions.registerFunction(kqlFunction);
+    expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerFunction(kibanaContextFunction);
+    expressions.registerFunction(fieldFunction);
+    expressions.registerFunction(rangeFunction);
+    expressions.registerFunction(kibanaFilterFunction);
+    expressions.registerFunction(existsFilterFunction);
+    expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });

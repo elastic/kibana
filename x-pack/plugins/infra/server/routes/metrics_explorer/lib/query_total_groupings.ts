@@ -23,6 +23,23 @@ export const queryTotalGroupings = async (
     return Promise.resolve(0);
   }
 
+  let filters: Array<Record<string, any>> = [
+    {
+      range: {
+        [options.timerange.field]: {
+          gte: options.timerange.from,
+          lte: options.timerange.to,
+          format: 'epoch_millis',
+        },
+      },
+    },
+    ...options.groupBy.map((field) => ({ exists: { field } })),
+  ];
+
+  if (options.filters) {
+    filters = [...filters, ...options.filters];
+  }
+
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -31,18 +48,7 @@ export const queryTotalGroupings = async (
       size: 0,
       query: {
         bool: {
-          filter: [
-            {
-              range: {
-                [options.timerange.field]: {
-                  gte: options.timerange.from,
-                  lte: options.timerange.to,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-            ...options.groupBy.map((field) => ({ exists: { field } })),
-          ],
+          filter: filters,
         },
       },
       aggs: {
