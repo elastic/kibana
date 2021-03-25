@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
+import type { CanvasElementColorStats, MlCommonUI } from './common_ui';
 import { MlApi } from './api';
 import {
   isRegressionAnalysis,
@@ -254,6 +254,23 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         dependentVariable
       );
       await this.assertDependentVariableSelection([dependentVariable]);
+    },
+
+    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+      await testSubjects.existOrFail(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded',
+        {
+          timeout: 5000,
+        }
+      );
+      await testSubjects.scrollIntoView(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded'
+      );
+      await mlCommonUI.assertColorsInCanvasElement(
+        'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
+        expectedValue,
+        ['#000000']
+      );
     },
 
     async assertTrainingPercentInputExists() {

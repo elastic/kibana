@@ -12,7 +12,7 @@ import {
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
 import { ElasticsearchClient } from '../../../../../../../src/core/server';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { PreviewResult } from '../common/types';
 import { MetricExpressionParams } from './types';

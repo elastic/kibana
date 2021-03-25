@@ -48,7 +48,7 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
     setCustomSourceNameValue(e.target.value);
 
   return (
-    <div className="custom-api-step-1">
+    <>
       {header}
       <EuiSpacer />
       <form onSubmit={handleFormSubmit}>
@@ -93,6 +93,6 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
           </EuiFormRow>
         </EuiForm>
       </form>
-    </div>
+    </>
   );
 };
