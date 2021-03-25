@@ -110,6 +110,7 @@ export const getRuntimeFieldsMapping = (
   if (isPopulatedObject(ipRuntimeMappings)) {
     indexPatternFields.forEach((ipField) => {
       if (ipRuntimeMappings.hasOwnProperty(ipField)) {
+        // @ts-expect-error
         combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
       }
     });
