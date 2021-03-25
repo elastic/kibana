@@ -327,7 +327,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -391,11 +399,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
@@ -408,7 +418,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -474,11 +492,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
@@ -491,7 +511,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -507,7 +535,7 @@ describe('queryEventsBySavedObject', () => {
     expect(query).toMatchObject({
       index: 'index-name',
       body: {
-        sort: { 'event.end': { order: 'desc' } },
+        sort: [{ 'event.end': { order: 'desc' } }],
       },
     });
   });
@@ -517,7 +545,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -591,11 +627,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,
@@ -608,7 +646,15 @@ describe('queryEventsBySavedObject', () => {
       asApiResponse({
         hits: {
           hits: [],
-          total: { value: 0 },
+          total: { relation: 'eq', value: 0 },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          successful: 0,
+          total: 0,
+          skipped: 0,
         },
       })
     );
@@ -690,11 +736,13 @@ describe('queryEventsBySavedObject', () => {
             },
           },
           "size": 10,
-          "sort": Object {
-            "@timestamp": Object {
-              "order": "asc",
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
+              },
             },
-          },
+          ],
         },
         "index": "index-name",
         "track_total_hits": true,

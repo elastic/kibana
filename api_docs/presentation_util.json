@@ -154,7 +154,7 @@
                 "section": "def-public.OnSaveProps",
                 "text": "OnSaveProps"
               },
-              " & { dashboardId: string | null; }) => void"
+              " & { dashboardId: string | null; addToLibrary: boolean; }) => void"
             ]
           },
           {

@@ -53,21 +53,19 @@ export async function getTotalCount(esClient: ElasticsearchClient, kibanaIndex: 
       },
     },
   });
-
+  // @ts-expect-error aggegation type is not specified
+  const aggs = searchResult.aggregations?.byActionTypeId.value?.types;
   return {
-    countTotal: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
-      (total: number, key: string) =>
-        parseInt(searchResult.aggregations.byActionTypeId.value.types[key], 0) + total,
+    countTotal: Object.keys(aggs).reduce(
+      (total: number, key: string) => parseInt(aggs[key], 0) + total,
       0
     ),
-    countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
+    countByType: Object.keys(aggs).reduce(
       // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: searchResult.aggregations.byActionTypeId.value.types[
-          key
-        ],
+        [replaceFirstAndLastDotSymbols(key)]: aggs[key],
       }),
       {}
     ),
@@ -161,9 +159,9 @@ export async function getInUseTotalCount(
     },
   });
 
-  const bulkFilter = Object.entries(
-    actionResults.aggregations.refs.actionRefIds.value.connectorIds
-  ).map(([key]) => ({
+  // @ts-expect-error aggegation type is not specified
+  const aggs = actionResults.aggregations.refs.actionRefIds.value;
+  const bulkFilter = Object.entries(aggs.connectorIds).map(([key]) => ({
     id: key,
     type: 'action',
     fields: ['id', 'actionTypeId'],
@@ -179,7 +177,7 @@ export async function getInUseTotalCount(
     },
     {}
   );
-  return { countTotal: actionResults.aggregations.refs.actionRefIds.value.total, countByType };
+  return { countTotal: aggs.total, countByType };
 }
 
 function replaceFirstAndLastDotSymbols(strToReplace: string) {

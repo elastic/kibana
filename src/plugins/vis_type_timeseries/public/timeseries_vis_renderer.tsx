@@ -16,6 +16,7 @@ import { ExpressionRenderDefinition } from '../../expressions/common/expression_
 import { TimeseriesRenderValue } from './metrics_fn';
 import { TimeseriesVisData } from '../common/types';
 import { TimeseriesVisParams } from './types';
+import { getChartsSetup } from './services';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -39,8 +40,10 @@ export const getTimeseriesVisRenderer: (deps: {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
+    const { palettes } = getChartsSetup();
 
     const showNoResult = !checkIfDataExists(config.visData, config.visParams);
+    const palettesService = await palettes.getPalettes();
 
     render(
       <VisualizationContainer
@@ -54,7 +57,9 @@ export const getTimeseriesVisRenderer: (deps: {
           handlers={handlers}
           model={config.visParams}
           visData={config.visData as TimeseriesVisData}
+          syncColors={config.syncColors}
           uiState={handlers.uiState! as PersistedState}
+          palettesService={palettesService}
         />
       </VisualizationContainer>,
       domNode
