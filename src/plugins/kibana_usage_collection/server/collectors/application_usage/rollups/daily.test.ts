@@ -14,8 +14,8 @@ import { rollDailyData } from './daily';
 describe('rollDailyData', () => {
   const logger = loggingSystemMock.createLogger();
 
-  test('returns undefined if no savedObjectsClient initialised yet', async () => {
-    await expect(rollDailyData(logger, undefined)).resolves.toBe(undefined);
+  test('returns false if no savedObjectsClient initialised yet', async () => {
+    await expect(rollDailyData(logger, undefined)).resolves.toBe(false);
   });
 
   test('handle empty results', async () => {
@@ -28,7 +28,7 @@ describe('rollDailyData', () => {
           throw new Error(`Unexpected type [${type}]`);
       }
     });
-    await expect(rollDailyData(logger, savedObjectClient)).resolves.toBe(undefined);
+    await expect(rollDailyData(logger, savedObjectClient)).resolves.toBe(true);
     expect(savedObjectClient.get).not.toBeCalled();
     expect(savedObjectClient.bulkCreate).not.toBeCalled();
     expect(savedObjectClient.delete).not.toBeCalled();
@@ -96,7 +96,7 @@ describe('rollDailyData', () => {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     });
 
-    await expect(rollDailyData(logger, savedObjectClient)).resolves.toBe(undefined);
+    await expect(rollDailyData(logger, savedObjectClient)).resolves.toBe(true);
     expect(savedObjectClient.get).toHaveBeenCalledTimes(2);
     expect(savedObjectClient.get).toHaveBeenNthCalledWith(
       1,
@@ -191,7 +191,7 @@ describe('rollDailyData', () => {
       throw new Error('Something went terribly wrong');
     });
 
-    await expect(rollDailyData(logger, savedObjectClient)).resolves.toBe(undefined);
+    await expect(rollDailyData(logger, savedObjectClient)).resolves.toBe(false);
     expect(savedObjectClient.get).toHaveBeenCalledTimes(1);
     expect(savedObjectClient.get).toHaveBeenCalledWith(
       SAVED_OBJECTS_DAILY_TYPE,
