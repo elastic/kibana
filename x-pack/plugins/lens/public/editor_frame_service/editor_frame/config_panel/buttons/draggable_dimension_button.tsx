@@ -66,6 +66,16 @@ export function DraggableDimensionButton({
 
   const dropTypes = dropProps?.dropTypes;
   const nextLabel = dropProps?.nextLabel;
+  const canDuplicate = !!(
+    dropTypes &&
+    (dropTypes.includes('replace_duplicate_incompatible') ||
+      dropTypes.includes('replace_duplicate_compatible'))
+  );
+
+  const canSwap = !!(
+    dropTypes &&
+    (dropTypes.includes('swap_incompatible') || dropTypes.includes('swap_compatible'))
+  );
 
   const value = useMemo(
     () => ({
@@ -75,6 +85,8 @@ export function DraggableDimensionButton({
       id: columnId,
       filterOperations: group.filterOperations,
       humanData: {
+        canSwap,
+        canDuplicate,
         label,
         groupLabel: group.groupLabel,
         position: accessorIndex + 1,
@@ -90,6 +102,8 @@ export function DraggableDimensionButton({
       group.groupLabel,
       nextLabel,
       group.filterOperations,
+      canDuplicate,
+      canSwap,
     ]
   );
 

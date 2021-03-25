@@ -12,6 +12,8 @@ export interface HumanData {
   groupLabel?: string;
   position?: number;
   nextLabel?: string;
+  canSwap?: boolean;
+  canDuplicate?: boolean;
 }
 
 export interface Ghost {

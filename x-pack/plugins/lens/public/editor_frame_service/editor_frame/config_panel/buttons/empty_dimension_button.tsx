@@ -67,6 +67,11 @@ export function EmptyDimensionButton({
   const dropTypes = dropProps?.dropTypes;
   const nextLabel = dropProps?.nextLabel;
 
+  const canDuplicate = !!(
+    dropTypes &&
+    (dropTypes.includes('duplicate_compatible') || dropTypes.includes('duplicate_incompatible'))
+  );
+
   const value = useMemo(
     () => ({
       columnId: newColumnId,
@@ -78,9 +83,10 @@ export function EmptyDimensionButton({
         groupLabel: group.groupLabel,
         position: itemIndex + 1,
         nextLabel: nextLabel || '',
+        canDuplicate,
       },
     }),
-    [newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel]
+    [newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel, canDuplicate]
   );
 
   const handleOnDrop = React.useCallback(

@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Should duplicate and swap elements when dragging over secondary drop targets', async () => {
-        await testSubjects.click('lnsLayerRemove');
+        await PageObjects.lens.removeLayer();
         await PageObjects.lens.switchToVisualization('bar');
         await PageObjects.lens.dragFieldToWorkspace('@timestamp');
 

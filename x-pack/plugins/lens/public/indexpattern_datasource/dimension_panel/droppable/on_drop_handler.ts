@@ -316,6 +316,7 @@ const swapColumnOrder = (columnOrder: string[], sourceId: string, targetId: stri
 
   newColumnOrder[sourceIndex] = targetId;
   newColumnOrder[targetIndex] = sourceId;
+
   return newColumnOrder;
 };
 
@@ -325,6 +326,8 @@ function onSwapCompatible({
   state,
   layerId,
   droppedItem,
+  dimensionGroups,
+  groupId,
 }: DropHandlerProps<DraggedOperation>) {
   const layer = state.layers[layerId];
   const sourceId = droppedItem.columnId;
@@ -336,17 +339,20 @@ function onSwapCompatible({
   newColumns[targetId] = sourceColumn;
   newColumns[sourceId] = targetColumn;
 
-  const newColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
+  const updatedColumnOrder = swapColumnOrder(layer.columnOrder, sourceId, targetId);
+  reorderByGroups(dimensionGroups, groupId, updatedColumnOrder, columnId);
 
+  // Time to replace
   setState(
     mergeLayer({
       state,
       layerId,
       newLayer: {
-        columnOrder: newColumnOrder,
+        columnOrder: updatedColumnOrder,
         columns: newColumns,
       },
     })
   );
+
   return true;
 }

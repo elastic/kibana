@@ -237,11 +237,16 @@ const DragInner = memo(function DragInner({
   const dropTargetsByOrder = activeDraggingProps?.dropTargetsByOrder;
 
   const setTarget = useCallback(
-    (target?: DropIdentifier) => {
+    (target?: DropIdentifier, announceModifierKeys = false) => {
       setActiveDropTarget(target);
       setA11yMessage(
         target
-          ? announce.selectedTarget(value.humanData, target?.humanData, target?.dropType)
+          ? announce.selectedTarget(
+              value.humanData,
+              target?.humanData,
+              target?.dropType,
+              announceModifierKeys
+            )
           : announce.noTarget()
       );
     },
@@ -253,11 +258,10 @@ const DragInner = memo(function DragInner({
       const dropTargetsForActiveId =
         dropTargetsByOrder &&
         Object.values(dropTargetsByOrder).filter((dropTarget) => dropTarget?.id === id);
-      if (dropTargetsForActiveId?.[index]) {
-        const nextTarget = dropTargetsForActiveId[index];
-        setTarget(nextTarget);
+      if (index > 0 && dropTargetsForActiveId?.[index]) {
+        setTarget(dropTargetsForActiveId[index]);
       } else {
-        setTarget(dropTargetsForActiveId?.[0]);
+        setTarget(dropTargetsForActiveId?.[0], true);
       }
     },
     [dropTargetsByOrder, setTarget]
@@ -351,7 +355,7 @@ const DragInner = memo(function DragInner({
     } else if (e.shiftKey && nextTarget?.id) {
       setTargetOfIndex(nextTarget.id, 2);
     } else {
-      setTarget(nextTarget);
+      setTarget(nextTarget, true);
     }
   };
 

@@ -808,6 +808,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('indexPattern-add-field');
     },
 
+    /** resets visualization/layer or removes a layer */
+    async removeLayer() {
+      await testSubjects.click('lnsLayerRemove');
+    },
+
     /**
      * Starts dragging @param dragging, drags over @param draggedOver and drops it into @dropTarget
      */

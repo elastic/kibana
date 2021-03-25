@@ -9,24 +9,55 @@ import { i18n } from '@kbn/i18n';
 import { DropType } from '../../types';
 import { HumanData } from '.';
 
-type AnnouncementFunction = (draggedElement: HumanData, dropElement: HumanData) => string;
+type AnnouncementFunction = (
+  draggedElement: HumanData,
+  dropElement: HumanData,
+  announceModifierKeys?: boolean
+) => string;
 
 interface CustomAnnouncementsType {
   dropped: Partial<{ [dropType in DropType]: AnnouncementFunction }>;
   selectedTarget: Partial<{ [dropType in DropType]: AnnouncementFunction }>;
 }
 
-const replaceCopy = {
-  selectedTarget: ({ label }: HumanData, { label: dropLabel, groupLabel, position }: HumanData) =>
-    i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replace', {
-      defaultMessage: `Replace {dropLabel} in {groupLabel} group at position {position} with {label}. Press space or enter to replace`,
+const replaceAnnouncement = {
+  selectedTarget: (
+    { label, groupLabel, position }: HumanData,
+    {
+      label: dropLabel,
+      groupLabel: dropGroupLabel,
+      position: dropPosition,
+      canSwap,
+      canDuplicate,
+    }: HumanData,
+    announceModifierKeys?: boolean
+  ) => {
+    if (announceModifierKeys && (canSwap || canDuplicate)) {
+      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceMain', {
+        defaultMessage: `You're dragging {label} from {groupLabel} at position {position} over {dropLabel} from {dropGroupLabel} group at position {dropPosition}. Press space or enter to replace {dropLabel} with {label}.{duplicateCopy}{swapCopy}`,
+        values: {
+          label,
+          groupLabel,
+          position,
+          dropLabel,
+          dropGroupLabel,
+          dropPosition,
+          duplicateCopy: canDuplicate ? DUPLICATE_SHORT : '',
+          swapCopy: canSwap ? SWAP_SHORT : '',
+        },
+      });
+    }
+
+    return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replace', {
+      defaultMessage: `Replace {dropLabel} in {dropGroupLabel} group at position {dropPosition} with {label}. Press space or enter to replace.`,
       values: {
         label,
         dropLabel,
-        groupLabel,
-        position,
+        dropGroupLabel,
+        dropPosition,
       },
-    }),
+    });
+  },
   dropped: ({ label }: HumanData, { label: dropLabel, groupLabel, position }: HumanData) =>
     i18n.translate('xpack.lens.dragDrop.announce.duplicated.replace', {
       defaultMessage: 'Replaced {dropLabel} with {label} in {groupLabel} at position {position}',
@@ -39,16 +70,30 @@ const replaceCopy = {
     }),
 };
 
-const duplicateCopy = {
-  selectedTarget: ({ label }: HumanData, { groupLabel, position }: HumanData) =>
-    i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.duplicated', {
-      defaultMessage: `Duplicate {label} to {groupLabel} group at position {position}. Press space or enter to duplicate`,
+const duplicateAnnouncement = {
+  selectedTarget: (
+    { label, groupLabel }: HumanData,
+    { groupLabel: dropGroupLabel, position }: HumanData
+  ) => {
+    if (groupLabel !== dropGroupLabel) {
+      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.duplicated', {
+        defaultMessage: `Duplicate {label} to {dropGroupLabel} group at position {position}. Hold Alt or Option and press space or enter to duplicate`,
+        values: {
+          label,
+          dropGroupLabel,
+          position,
+        },
+      });
+    }
+    return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.duplicatedInGroup', {
+      defaultMessage: `Duplicate {label} to {dropGroupLabel} group at position {position}. Press space or enter to duplicate`,
       values: {
         label,
-        groupLabel,
+        dropGroupLabel,
         position,
       },
-    }),
+    });
+  },
   dropped: ({ label }: HumanData, { groupLabel, position }: HumanData) =>
     i18n.translate('xpack.lens.dragDrop.announce.dropped.duplicated', {
       defaultMessage: 'Duplicated {label} in {groupLabel} group at position {position}',
@@ -60,7 +105,7 @@ const duplicateCopy = {
     }),
 };
 
-const reorderCopy = {
+const reorderAnnouncement = {
   selectedTarget: (
     { label, groupLabel, position: prevPosition }: HumanData,
     { position }: HumanData
@@ -95,53 +140,134 @@ const reorderCopy = {
     }),
 };
 
+const DUPLICATE_SHORT = i18n.translate('xpack.lens.dragDrop.announce.duplicate.short', {
+  defaultMessage: ' Hold alt or option to duplicate.',
+});
+
+const SWAP_SHORT = i18n.translate('xpack.lens.dragDrop.announce.swap.short', {
+  defaultMessage: ' Hold shift to swap.',
+});
+
 export const announcements: CustomAnnouncementsType = {
   selectedTarget: {
-    reorder: reorderCopy.selectedTarget,
-    duplicate_compatible: duplicateCopy.selectedTarget,
-    field_replace: replaceCopy.selectedTarget,
-    replace_compatible: replaceCopy.selectedTarget,
+    reorder: reorderAnnouncement.selectedTarget,
+    duplicate_compatible: duplicateAnnouncement.selectedTarget,
+    field_replace: replaceAnnouncement.selectedTarget,
+    replace_compatible: replaceAnnouncement.selectedTarget,
     replace_incompatible: (
-      { label }: HumanData,
-      { label: dropLabel, groupLabel, position, nextLabel }: HumanData
-    ) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceIncompatible', {
-        defaultMessage: `Convert {label} to {nextLabel} and replace {dropLabel} in {groupLabel} group at position {position}. Press space or enter to replace`,
+      { label, groupLabel, position }: HumanData,
+      {
+        label: dropLabel,
+        groupLabel: dropGroupLabel,
+        position: dropPosition,
+        nextLabel,
+        canSwap,
+        canDuplicate,
+      }: HumanData,
+      announceModifierKeys?: boolean
+    ) => {
+      if (announceModifierKeys && (canSwap || canDuplicate)) {
+        return i18n.translate(
+          'xpack.lens.dragDrop.announce.selectedTarget.replaceIncompatibleMain',
+          {
+            defaultMessage: `You're dragging {label} from {groupLabel} at position {position} over {dropLabel} from {dropGroupLabel} group at position {dropPosition}. Press space or enter to convert {label} to {nextLabel} and replace {dropLabel}.{duplicateCopy}{swapCopy}`,
+            values: {
+              label,
+              groupLabel,
+              position,
+              dropLabel,
+              dropGroupLabel,
+              dropPosition,
+              nextLabel,
+              duplicateCopy: canDuplicate ? DUPLICATE_SHORT : '',
+              swapCopy: canSwap ? SWAP_SHORT : '',
+            },
+          }
+        );
+      }
+      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceIncompatible', {
+        defaultMessage: `Convert {label} to {nextLabel} and replace {dropLabel} in {dropGroupLabel} group at position {dropPosition}. Press space or enter to replace`,
         values: {
           label,
           nextLabel,
           dropLabel,
-          groupLabel,
-          position,
+          dropGroupLabel,
+          dropPosition,
         },
-      }),
-    move_incompatible: ({ label }: HumanData, { groupLabel, position, nextLabel }: HumanData) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveIncompatible', {
-        defaultMessage: `Convert {label} to {nextLabel} and move to {groupLabel} group at position {position}. Press space or enter to move`,
+      });
+    },
+    move_incompatible: (
+      { label, groupLabel, position }: HumanData,
+      {
+        groupLabel: dropGroupLabel,
+        position: dropPosition,
+        nextLabel,
+        canSwap,
+        canDuplicate,
+      }: HumanData,
+      announceModifierKeys?: boolean
+    ) => {
+      if (announceModifierKeys && (canSwap || canDuplicate)) {
+        return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveIncompatibleMain', {
+          defaultMessage: `You're dragging {label} from {groupLabel} at position {position} over position {dropPosition} in {dropGroupLabel} group. Press space or enter to convert {label} to {nextLabel} and move.{duplicateCopy}{swapCopy}`,
+          values: {
+            label,
+            groupLabel,
+            position,
+            dropGroupLabel,
+            dropPosition,
+            nextLabel,
+            duplicateCopy: canDuplicate ? DUPLICATE_SHORT : '',
+            swapCopy: canSwap ? SWAP_SHORT : '',
+          },
+        });
+      }
+      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveIncompatible', {
+        defaultMessage: `Convert {label} to {nextLabel} and move to {dropGroupLabel} group at position {dropPosition}. Press space or enter to move`,
         values: {
           label,
           nextLabel,
-          groupLabel,
-          position,
+          dropGroupLabel,
+          dropPosition,
         },
-      }),
-    move_compatible: ({ label }: HumanData, { groupLabel, position }: HumanData) =>
-      i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveCompatible', {
-        defaultMessage: `Move {label} to {groupLabel} group at position {position}. Press space or enter to move`,
+      });
+    },
+
+    move_compatible: (
+      { label, groupLabel, position }: HumanData,
+      { groupLabel: dropGroupLabel, position: dropPosition, canSwap, canDuplicate }: HumanData,
+      announceModifierKeys?: boolean
+    ) => {
+      if (announceModifierKeys && (canSwap || canDuplicate)) {
+        return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveCompatibleMain', {
+          defaultMessage: `You're dragging {label} from {groupLabel} at position {position} over position {dropPosition} in {dropGroupLabel} group. Press space or enter to move.{duplicateCopy}{swapCopy}`,
+          values: {
+            label,
+            groupLabel,
+            position,
+            dropGroupLabel,
+            dropPosition,
+            duplicateCopy: canDuplicate ? DUPLICATE_SHORT : '',
+            swapCopy: canSwap ? SWAP_SHORT : '',
+          },
+        });
+      }
+      return i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.moveCompatible', {
+        defaultMessage: `Move {label} to {dropGroupLabel} group at position {dropPosition}. Press space or enter to move`,
         values: {
           label,
-          groupLabel,
-          position,
+          dropGroupLabel,
+          dropPosition,
         },
-      }),
-
+      });
+    },
     duplicate_incompatible: (
       { label }: HumanData,
       { groupLabel, position, nextLabel }: HumanData
     ) =>
       i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.duplicateIncompatible', {
         defaultMessage:
-          'Convert copy of {label} to {nextLabel} and add to {groupLabel} group at position {position}. Press space or enter to duplicate',
+          'Convert copy of {label} to {nextLabel} and add to {groupLabel} group at position {position}. Hold Alt or Option and press space or enter to duplicate',
         values: {
           label,
           groupLabel,
@@ -155,7 +281,7 @@ export const announcements: CustomAnnouncementsType = {
     ) =>
       i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceDuplicateIncompatible', {
         defaultMessage:
-          'Convert copy of {label} to {nextLabel} and replace {dropLabel} in {groupLabel} group at position {position}. Press space or enter to duplicate and replace',
+          'Convert copy of {label} to {nextLabel} and replace {dropLabel} in {groupLabel} group at position {position}. Hold Alt or Option and press space or enter to duplicate and replace',
         values: {
           label,
           groupLabel,
@@ -170,7 +296,7 @@ export const announcements: CustomAnnouncementsType = {
     ) =>
       i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.replaceDuplicateCompatible', {
         defaultMessage:
-          'Duplicate {label} and replace {dropLabel} in {groupLabel} at position {position}. Press space or enter to duplicate and replace',
+          'Duplicate {label} and replace {dropLabel} in {groupLabel} at position {position}. Hold Alt or Option and press space or enter to duplicate and replace',
         values: {
           label,
           dropLabel,
@@ -184,7 +310,7 @@ export const announcements: CustomAnnouncementsType = {
     ) =>
       i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.swapCompatible', {
         defaultMessage:
-          'Swap {label} in {groupLabel} group at position {position} with {dropLabel} in {dropGroupLabel} group at position {dropPosition}. Press space or enter to swap',
+          'Swap {label} in {groupLabel} group at position {position} with {dropLabel} in {dropGroupLabel} group at position {dropPosition}. Hold Shift and press space or enter to swap',
         values: {
           label,
           groupLabel,
@@ -200,7 +326,7 @@ export const announcements: CustomAnnouncementsType = {
     ) =>
       i18n.translate('xpack.lens.dragDrop.announce.selectedTarget.swapIncompatible', {
         defaultMessage:
-          'Convert {label} to {nextLabel} in {groupLabel} group at position {position} and swap with {dropLabel} in {dropGroupLabel} group at position {dropPosition}. Press space or enter to swap',
+          'Convert {label} to {nextLabel} in {groupLabel} group at position {position} and swap with {dropLabel} in {dropGroupLabel} group at position {dropPosition}. Hold Shift and press space or enter to swap',
         values: {
           label,
           groupLabel,
@@ -213,10 +339,10 @@ export const announcements: CustomAnnouncementsType = {
       }),
   },
   dropped: {
-    reorder: reorderCopy.dropped,
-    duplicate_compatible: duplicateCopy.dropped,
-    field_replace: replaceCopy.dropped,
-    replace_compatible: replaceCopy.dropped,
+    reorder: reorderAnnouncement.dropped,
+    duplicate_compatible: duplicateAnnouncement.dropped,
+    field_replace: replaceAnnouncement.dropped,
+    replace_compatible: replaceAnnouncement.dropped,
     replace_incompatible: (
       { label }: HumanData,
       { label: dropLabel, groupLabel, position, nextLabel }: HumanData
@@ -416,7 +542,13 @@ export const announce = {
   dropped: (draggedElement: HumanData, dropElement: HumanData, type?: DropType) =>
     (type && announcements.dropped?.[type]?.(draggedElement, dropElement)) ||
     defaultAnnouncements.dropped(draggedElement, dropElement),
-  selectedTarget: (draggedElement: HumanData, dropElement: HumanData, type?: DropType) =>
-    (type && announcements.selectedTarget?.[type]?.(draggedElement, dropElement)) ||
+  selectedTarget: (
+    draggedElement: HumanData,
+    dropElement: HumanData,
+    type?: DropType,
+    announceModifierKeys?: boolean
+  ) =>
+    (type &&
+      announcements.selectedTarget?.[type]?.(draggedElement, dropElement, announceModifierKeys)) ||
     defaultAnnouncements.selectedTarget(draggedElement, dropElement),
 };

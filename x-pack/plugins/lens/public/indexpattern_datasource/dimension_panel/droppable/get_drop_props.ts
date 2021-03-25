@@ -132,11 +132,11 @@ function getDropPropsForSameGroup(targetColumn?: IndexPatternColumn): DropProps 
 }
 
 function getDropPropsForCompatibleGroup(targetColumn?: IndexPatternColumn): DropProps {
-  return targetColumn
-    ? {
-        dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
-      }
-    : { dropTypes: ['move_compatible', 'duplicate_compatible'] };
+  return {
+    dropTypes: targetColumn
+      ? ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible']
+      : ['move_compatible', 'duplicate_compatible'],
+  };
 }
 
 function getDropPropsFromIncompatibleGroup({
@@ -158,9 +158,11 @@ function getDropPropsFromIncompatibleGroup({
     const canSwap = !!getNewOperation(targetField, dragging.filterOperations, sourceColumn);
 
     return {
-      dropTypes: canSwap
-        ? ['replace_incompatible', 'replace_duplicate_incompatible', 'swap_incompatible']
-        : ['replace_incompatible', 'replace_duplicate_incompatible'],
+      dropTypes: targetColumn
+        ? canSwap
+          ? ['replace_incompatible', 'replace_duplicate_incompatible', 'swap_incompatible']
+          : ['replace_incompatible', 'replace_duplicate_incompatible']
+        : ['move_incompatible', 'duplicate_incompatible'],
       nextLabel: operationLabels[newOperationForSource].displayName,
     };
   }
