@@ -55,33 +55,6 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
     (deprecation) => deprecation.level === 'critical'
   );
 
-  let content: React.ReactNode;
-
-  if (error) {
-    content = <EsStatsErrors error={error} />;
-  } else {
-    content = (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiStat
-            title={allDeprecations.length}
-            description={i18nTexts.totalDeprecationsTitle}
-            isLoading={isLoading}
-          />
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiStat
-            title={criticalDeprecations.length}
-            description={i18nTexts.criticalDeprecationsTitle}
-            titleColor="danger"
-            isLoading={isLoading}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   return (
     <EuiPanel>
       <EuiTitle size="s">
@@ -94,7 +67,28 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
 
       <EuiSpacer />
 
-      {content}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiStat
+            title={error ? '--' : allDeprecations.length}
+            description={i18nTexts.totalDeprecationsTitle}
+            isLoading={isLoading}
+            textAlign="right"
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiStat
+            title={error ? '--' : criticalDeprecations.length}
+            description={i18nTexts.criticalDeprecationsTitle}
+            titleColor="danger"
+            textAlign="right"
+            isLoading={isLoading}
+          >
+            {error && <EsStatsErrors error={error} />}
+          </EuiStat>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

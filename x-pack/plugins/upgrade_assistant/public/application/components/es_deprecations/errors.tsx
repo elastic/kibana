@@ -7,9 +7,8 @@
 
 import React from 'react';
 
-import { EuiIconTip, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ResponseError } from '../../lib/api';
 
 const i18nTexts = {
   permissionsError: i18n.translate(
@@ -41,37 +40,50 @@ const i18nTexts = {
 };
 
 interface Props {
-  error: ResponseError;
+  error: any; // TODO fix
 }
 
-export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
-  let iconContent: React.ReactNode;
-
+export const EsDeprecationErrors: React.FunctionComponent<Props> = ({ error }) => {
   if (error.statusCode === 403) {
-    iconContent = (
-      <EuiIconTip type="alert" color="danger" size="l" content={i18nTexts.permissionsError} />
-    );
-  } else if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === false) {
-    iconContent = (
-      <EuiIconTip
-        type="help"
-        color="warning"
-        size="l"
-        content={i18nTexts.partiallyUpgradedWarning}
+    return (
+      <EuiCallOut
+        title={i18nTexts.permissionsError}
+        color="danger"
+        iconType="cross"
+        data-test-subj="permissionsError"
       />
     );
-  } else if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === true) {
-    iconContent = <EuiIconTip type="flag" size="l" content={i18nTexts.upgradedMessage} />;
-  } else {
-    iconContent = (
-      <EuiIconTip type="alert" color="danger" size="l" content={i18nTexts.loadingError} />
+  }
+
+  if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === false) {
+    return (
+      <EuiCallOut
+        title={i18nTexts.loadingError}
+        color="warning"
+        iconType="help"
+        data-test-subj="partiallyUpgradedWarning"
+      />
+    );
+  }
+
+  if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === true) {
+    return (
+      <EuiCallOut
+        title={i18nTexts.upgradedMessage}
+        iconType="pin"
+        data-test-subj="upgradedCallout"
+      />
     );
   }
 
   return (
-    <>
-      <EuiSpacer size="s" />
-      {iconContent}
-    </>
+    <EuiCallOut
+      title={i18nTexts.loadingError}
+      color="danger"
+      iconType="cross"
+      data-test-subj="upgradeStatusError"
+    >
+      {error.message}
+    </EuiCallOut>
   );
 };

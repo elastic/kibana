@@ -18,6 +18,7 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiToolTip,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -99,7 +100,17 @@ export const EsDeprecationsContent = withRouter(
         {
           id: 'cluster',
           'data-test-subj': 'upgradeAssistantClusterTab',
-          name: i18nTexts.clusterTab.tabName,
+          name: (
+            <span>
+              {i18nTexts.clusterTab.tabName}
+              {tabName === 'indices' && checkupData && checkupData.cluster.length > 0 && (
+                <>
+                  {' '}
+                  <EuiNotificationBadge>{checkupData.cluster.length}</EuiNotificationBadge>
+                </>
+              )}
+            </span>
+          ),
           content: (
             <DeprecationTabContent
               key="cluster"
@@ -112,7 +123,17 @@ export const EsDeprecationsContent = withRouter(
         {
           id: 'indices',
           'data-test-subj': 'upgradeAssistantIndicesTab',
-          name: i18nTexts.indicesTab.tabName,
+          name: (
+            <span>
+              {i18nTexts.indicesTab.tabName}
+              {tabName === 'cluster' && checkupData && checkupData.indices.length > 0 && (
+                <>
+                  {' '}
+                  <EuiNotificationBadge>{checkupData.indices.length}</EuiNotificationBadge>
+                </>
+              )}
+            </span>
+          ),
           content: (
             <DeprecationTabContent
               key="indices"
@@ -123,7 +144,7 @@ export const EsDeprecationsContent = withRouter(
           ),
         },
       ];
-    }, [checkupData, error, history, isLoading, resendRequest]);
+    }, [checkupData, error, history, isLoading, resendRequest, tabName]);
 
     useEffect(() => {
       breadcrumbs.setBreadcrumbs('esDeprecations');
