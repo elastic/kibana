@@ -83,17 +83,20 @@ export const deleteNotesByTimelineId = async (timelineId: string, signal: AbortS
   return response;
 };
 
-export const persistNote = async (
-  note: SavedNote,
-  noteId: string,
-  version: string,
-  overrideOwner: boolean,
-  signal: AbortSignal
-) => {
+export const persistNote = async ({
+  note,
+  noteId,
+  version,
+  overrideOwner,
+}: {
+  note: SavedNote;
+  noteId?: string | null;
+  version?: string | null;
+  overrideOwner?: boolean;
+}) => {
   const response = await KibanaServices.get().http.patch<NoteSavedObject[]>(NOTE_URL, {
     method: 'PATCH',
     body: JSON.stringify({ noteId, version, note, overrideOwner }),
-    signal,
   });
   return response;
 };

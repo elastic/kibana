@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import * as rt from 'io-ts';
-
-export const getTimelineQuerySchema = rt.partial({
-  template_timeline_id: rt.string,
-  id: rt.string,
-});
+export { deletNotesRoute } from './delete_notes';
+export { getAllNotesRoute } from './get_all_notes';
+export { getNoteRoute } from './get_note';
+export { persistNoteRoute } from './persist_note';

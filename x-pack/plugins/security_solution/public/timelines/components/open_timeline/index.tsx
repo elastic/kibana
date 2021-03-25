@@ -47,6 +47,7 @@ import {
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
+import { deleteTimelinesByIds } from '../../containers/api';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -214,17 +215,19 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           );
         }
 
-        await apolloClient!.mutate<
-          DeleteTimelineMutation.Mutation,
-          DeleteTimelineMutation.Variables
-        >({
-          mutation: deleteTimelineMutation,
-          fetchPolicy: 'no-cache',
-          variables: { id: timelineIds },
-        });
+        // await apolloClient!.mutate<
+        //   DeleteTimelineMutation.Mutation,
+        //   DeleteTimelineMutation.Variables
+        // >({
+        //   mutation: deleteTimelineMutation,
+        //   fetchPolicy: 'no-cache',
+        //   variables: { id: timelineIds },
+        // });
+
+        await deleteTimelinesByIds({ savedObjectIds: timelineIds });
         refetch();
       },
-      [apolloClient, dispatch, existingIndexNames, refetch, timelineSavedObjectId]
+      [dispatch, existingIndexNames, refetch, timelineSavedObjectId]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(

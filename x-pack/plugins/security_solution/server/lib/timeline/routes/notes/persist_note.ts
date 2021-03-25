@@ -39,12 +39,14 @@ export const persistNoteRoute = (
 
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const { noteId, version, note } = request.body;
+        const { note } = request.body;
+        const noteId = request.body?.noteId ?? null;
+        const version = request.body?.version ?? null;
 
         const res = await persistNote(
           frameworkRequest,
-          noteId || null,
-          version || null,
+          noteId,
+          version,
           {
             ...note,
             timelineId: note.timelineId || null,
@@ -53,7 +55,7 @@ export const persistNoteRoute = (
         );
 
         return response.ok({
-          body: res,
+          body: { data: { persistNote: res } },
         });
       } catch (err) {
         const error = transformError(err);

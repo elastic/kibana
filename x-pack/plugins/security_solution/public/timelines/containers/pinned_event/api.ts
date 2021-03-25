@@ -25,16 +25,18 @@ export const getPinnedEventsByTimelineId = async (timelineId: string, signal: Ab
   return response;
 };
 
-export const persistPinnedEvent = async (
-  eventId: string,
-  pinnedEventId: string,
-  timelineId: string,
-  signal: AbortSignal
-) => {
+export const persistPinnedEvent = async ({
+  eventId,
+  pinnedEventId,
+  timelineId,
+}: {
+  eventId: string;
+  pinnedEventId?: string | null;
+  timelineId?: string | null;
+}) => {
   const response = await KibanaServices.get().http.patch<PinnedEvent | null>(PINNED_EVENT_URL, {
     method: 'PATCH',
     body: JSON.stringify({ eventId, pinnedEventId, timelineId }),
-    signal,
   });
   return response;
 };

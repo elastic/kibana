@@ -7,7 +7,7 @@
 
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
-import { TIMELINE_URL } from '../../../../../../common/constants';
+import { TIMELINE_FAVORITE_URL } from '../../../../../../common/constants';
 
 import { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
@@ -27,7 +27,7 @@ export const persistFavoriteRoute = (
 ) => {
   router.patch(
     {
-      path: TIMELINE_URL,
+      path: TIMELINE_FAVORITE_URL,
       validate: {
         body: buildRouteValidationWithExcess(persistFavoriteSchema),
       },

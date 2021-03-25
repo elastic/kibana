@@ -17,6 +17,7 @@ import {
 import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { PositiveInteger } from '../../detection_engine/schemas/types';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
+import { Direction, Maybe } from '../../search_strategy';
 
 /*
  *  ColumnHeader Types
@@ -475,3 +476,91 @@ export type TimelineExpandedDetailType =
 export type TimelineExpandedDetail = {
   [tab in TimelineTabs]?: TimelineExpandedDetailType;
 };
+
+export const pageInfoTimeline = runtimeTypes.type({
+  pageIndex: runtimeTypes.number,
+  pageSize: runtimeTypes.number,
+});
+
+export enum SortFieldTimeline {
+  title = 'title',
+  description = 'description',
+  updated = 'updated',
+  created = 'created',
+}
+
+export const sortFieldTimeline = runtimeTypes.union([
+  runtimeTypes.literal(SortFieldTimeline.title),
+  runtimeTypes.literal(SortFieldTimeline.description),
+  runtimeTypes.literal(SortFieldTimeline.updated),
+  runtimeTypes.literal(SortFieldTimeline.created),
+]);
+
+export const direction = runtimeTypes.union([
+  runtimeTypes.literal(Direction.asc),
+  runtimeTypes.literal(Direction.desc),
+]);
+
+export const sortTimeline = runtimeTypes.type({
+  sortField: sortFieldTimeline,
+
+  sortOrder: direction,
+});
+
+export interface FavoriteTimelineResult {
+  fullName?: Maybe<string>;
+
+  userName?: Maybe<string>;
+
+  favoriteDate?: Maybe<number>;
+}
+export interface ResponseFavoriteTimeline {
+  code?: Maybe<number>;
+
+  message?: Maybe<string>;
+
+  savedObjectId: string;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
+
+  version: string;
+
+  favorite?: Maybe<FavoriteTimelineResult[]>;
+}
+
+export const getTimelinesBodySchema = runtimeTypes.partial({
+  onlyUserFavorite: unionWithNullType(runtimeTypes.boolean),
+  pageInfo: unionWithNullType(runtimeTypes.string),
+  search: unionWithNullType(runtimeTypes.string),
+  sort: unionWithNullType(runtimeTypes.string),
+  status: unionWithNullType(TimelineStatusLiteralRt),
+  timelineType: unionWithNullType(TimelineTypeLiteralRt),
+});
+
+export const getTimelinesArgs = runtimeTypes.partial({
+  onlyUserFavorite: unionWithNullType(runtimeTypes.boolean),
+  pageInfo: unionWithNullType(pageInfoTimeline),
+  search: unionWithNullType(runtimeTypes.string),
+  sort: unionWithNullType(sortTimeline),
+  status: unionWithNullType(TimelineStatusLiteralRt),
+  timelineType: unionWithNullType(TimelineTypeLiteralRt),
+});
+
+export type GetTimelinesArgs = runtimeTypes.TypeOf<typeof getTimelinesBodySchema>;
+
+interface ResponseTimelines {
+  timeline: TimelineSavedObject[];
+  totalCount: number;
+}
+
+export interface AllTimelinesResponse extends ResponseTimelines {
+  defaultTimelineCount: number;
+  templateTimelineCount: number;
+  elasticTemplateTimelineCount: number;
+  customTemplateTimelineCount: number;
+  favoriteCount: number;
+}

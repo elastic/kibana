@@ -21,13 +21,13 @@ import {
 import { inputsActions } from '../../../common/store/inputs';
 import { useApolloClient } from '../../../common/utils/apollo_context';
 
-import { allTimelinesQuery } from './index.gql_query';
 import * as i18n from '../../pages/translations';
 import {
   TimelineType,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
 } from '../../../../common/types/timeline';
+import { getAllTimelines } from '../api';
 
 export interface AllTimelinesArgs {
   fetchAllTimeline: ({
@@ -141,20 +141,7 @@ export const useGetAllTimeline = (): AllTimelinesArgs => {
               status,
               timelineType,
             };
-            const response = await apolloClient.query<
-              GetAllTimeline.Query,
-              GetAllTimeline.Variables
-            >({
-              query: allTimelinesQuery,
-              fetchPolicy: 'network-only',
-              variables,
-              context: {
-                fetchOptions: {
-                  abortSignal: abortCtrl.signal,
-                },
-              },
-            });
-            const getAllTimelineResponse = response?.data?.getAllTimeline;
+            const getAllTimelineResponse = await getAllTimelines(variables, abortCtrl.signal);
             const totalCount = getAllTimelineResponse?.totalCount ?? 0;
             const timelines = getAllTimelineResponse?.timeline ?? [];
             const customTemplateTimelineCount =

@@ -15,6 +15,6 @@ export const getAllNotesSchema = rt.partial({
 });
 
 export const getNotesSchema = rt.partial({
-  timelineId: string,
-  eventId: string,
+  timelineId: rt.string,
+  eventId: rt.string,
 });

@@ -17,6 +17,7 @@ import {
   TimelineTypeLiteralWithNull,
   ExportTimelineNotFoundError,
   TimelineStatusLiteralWithNull,
+  AllTimelinesResponse,
 } from '../../../../../common/types/timeline';
 import {
   ResponseTimeline,
@@ -38,19 +39,6 @@ import { draftTimelineDefaults } from '../../utils/default_timeline';
 import { AuthenticatedUser } from '../../../../../../security/server';
 export { pickSavedTimeline } from './pick_saved_timeline';
 export { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-
-interface ResponseTimelines {
-  timeline: TimelineSavedObject[];
-  totalCount: number;
-}
-
-export interface AllTimelinesResponse extends ResponseTimelines {
-  defaultTimelineCount: number;
-  templateTimelineCount: number;
-  elasticTemplateTimelineCount: number;
-  customTemplateTimelineCount: number;
-  favoriteCount: number;
-}
 
 export interface ResponseTemplateTimeline {
   code?: Maybe<number>;

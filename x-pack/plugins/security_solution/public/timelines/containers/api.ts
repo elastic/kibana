@@ -21,6 +21,8 @@ import {
   TimelineErrorResponse,
   ImportTimelineResultSchema,
   importTimelineResultSchema,
+  ResponseFavoriteTimeline,
+  GetTimelinesArgs,
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
@@ -29,6 +31,8 @@ import {
   TIMELINE_IMPORT_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_PREPACKAGED_URL,
+  TIMELINE_FAVORITE_URL,
+  TIMELINES_URL,
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -241,4 +245,73 @@ export const installPrepackedTimelines = async (): Promise<ImportTimelineResultS
   );
 
   return decodePrepackedTimelineResponse(response);
+};
+
+export const getTimeline = async (id: string) => {
+  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_URL, {
+    query: {
+      id,
+    },
+  });
+
+  // return decodeTimelineResponse(response);
+  return response;
+};
+
+export const getAllTimelines = async (args: GetTimelinesArgs, abortSignal: AbortSignal) => {
+  const onlyUserFavorite = args?.onlyUserFavorite ?? '';
+  const pageInfo = args?.pageInfo ? JSON.stringify(args.pageInfo) : null;
+  const search = args?.search ?? '';
+  const sort = args?.sort ? JSON.stringify(args.sort) : null;
+  const status = args?.status ?? '';
+  const timelineType = args?.timelineType ?? null;
+
+  const response = await KibanaServices.get().http.fetch<ResponseTimelines>(TIMELINES_URL, {
+    method: 'GET',
+    query: {
+      onlyUserFavorite,
+      pageInfo,
+      search,
+      sort,
+      status,
+      timelineType,
+    },
+  });
+
+  return response;
+};
+
+export const persistFavorite = async ({
+  timelineId,
+  templateTimelineId,
+  templateTimelineVersion,
+  timelineType,
+}: {
+  timelineId?: string | null;
+  templateTimelineId?: string | null;
+  templateTimelineVersion?: number | null;
+  timelineType: TimelineType;
+}) => {
+  const response = await KibanaServices.get().http.patch<ResponseFavoriteTimeline>(
+    TIMELINE_FAVORITE_URL,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({
+        timelineId,
+        templateTimelineId,
+        templateTimelineVersion,
+        timelineType,
+      }),
+    }
+  );
+
+  return response;
+};
+
+export const deleteTimelinesByIds = async (savedObjectIds: string[]) => {
+  const response = await KibanaServices.get().http.delete<boolean>(TIMELINE_URL, {
+    method: 'DELETE',
+    body: JSON.stringify(savedObjectIds),
+  });
+  return response;
 };

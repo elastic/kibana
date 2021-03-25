@@ -13,8 +13,7 @@ import { Epic } from 'redux-observable';
 import { from, empty, Observable } from 'rxjs';
 import { filter, mergeMap, switchMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
-import { persistTimelineNoteMutation } from '../../../timelines/containers/notes/persist.gql_query';
-import { PersistTimelineNoteMutation, ResponseNote } from '../../../graphql/types';
+import { ResponseNote } from '../../../graphql/types';
 import { updateNote, addError } from '../../../common/store/app/actions';
 import { NotesById } from '../../../common/store/app/model';
 import { inputsModel } from '../../../common/store/inputs';
@@ -28,9 +27,9 @@ import {
   showCallOutUnauthorizedMsg,
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { refetchQueries } from './refetch_queries';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { ActionTimeline, TimelineById } from './types';
+import { persistNote } from '../../containers/notes/api';
 
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 
@@ -46,22 +45,31 @@ export const epicPersistNote = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   from(
-    apolloClient.mutate<
-      PersistTimelineNoteMutation.Mutation,
-      PersistTimelineNoteMutation.Variables
-    >({
-      mutation: persistTimelineNoteMutation,
-      fetchPolicy: 'no-cache',
-      variables: {
-        noteId: null,
-        version: null,
-        note: {
-          eventId: action.payload.eventId,
-          note: getNote(action.payload.noteId, notes),
-          timelineId: myEpicTimelineId.getTimelineId(),
-        },
+    // apolloClient.mutate<
+    //   PersistTimelineNoteMutation.Mutation,
+    //   PersistTimelineNoteMutation.Variables
+    // >({
+    //   mutation: persistTimelineNoteMutation,
+    //   fetchPolicy: 'no-cache',
+    //   variables: {
+    //     noteId: null,
+    //     version: null,
+    //     note: {
+    //       eventId: action.payload.eventId,
+    //       note: getNote(action.payload.noteId, notes),
+    //       timelineId: myEpicTimelineId.getTimelineId(),
+    //     },
+    //   },
+    //   refetchQueries,
+    // })
+    persistNote({
+      noteId: null,
+      version: null,
+      note: {
+        eventId: action.payload.eventId,
+        note: getNote(action.payload.noteId, notes),
+        timelineId: myEpicTimelineId.getTimelineId(),
       },
-      refetchQueries,
     })
   ).pipe(
     withLatestFrom(timeline$, notes$, allTimelineQuery$),

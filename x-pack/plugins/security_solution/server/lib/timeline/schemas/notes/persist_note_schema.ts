@@ -9,9 +9,13 @@ import * as rt from 'io-ts';
 import { SavedNoteRuntimeType } from '../../../../../common/types/timeline/note';
 import { unionWithNullType } from '../../../../../common/utility_types';
 
-export const persistNoteSchema = rt.type({
-  noteId: unionWithNullType(rt.string),
-  version: unionWithNullType(rt.string),
-  note: SavedNoteRuntimeType,
-  overrideOwner: unionWithNullType(rt.boolean),
-});
+export const persistNoteSchema = rt.intersection([
+  rt.type({
+    note: SavedNoteRuntimeType,
+  }),
+  rt.partial({
+    overrideOwner: unionWithNullType(rt.boolean),
+    noteId: unionWithNullType(rt.string),
+    version: unionWithNullType(rt.string),
+  }),
+]);

@@ -7,7 +7,7 @@
 
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
-import { TIMELINE_URL } from '../../../../../../common/constants';
+import { TIMELINES_URL } from '../../../../../../common/constants';
 
 import { ConfigType } from '../../../../..';
 import { SetupPlugins } from '../../../../../plugin';
@@ -24,16 +24,16 @@ import {
 } from '../../../saved_object/timelines';
 import { getTimelinesBodySchema, TimelineStatus } from '../../../../../../common/types/timeline';
 
-export const getTimelineRoute = (
+export const getTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(
     {
-      path: TIMELINE_URL,
+      path: TIMELINES_URL,
       validate: {
-        query: buildRouteValidationWithExcess(getTimelineQuerySchema),
+        // query: buildRouteValidationWithExcess(getTimelinesBodySchema),
         // body: buildRouteValidationWithExcess(getTimelinesBodySchema),
       },
       options: {
@@ -42,22 +42,41 @@ export const getTimelineRoute = (
     },
     async (context, request, response) => {
       try {
-        console.log('request body', request.body);
+        console.log('request query', request.query);
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const query = request.query ?? {};
-        const { template_timeline_id: templateTimelineId, id } = query;
-
+        const onlyUserFavorite = request.query?.onlyUserFavorite ?? false;
+        const pageInfo = request.query?.pageInfo ? JSON.parse(request?.query?.pageInfo) : null;
+        const search = request.query?.search ?? null;
+        const sort = request.query?.sort ? JSON.parse(request?.query?.sort) : null;
+        const status = request.query?.status ?? null;
+        const timelineType = request.query?.timelineType ?? null;
         let res = null;
+        let totalCount = null;
 
-        if (templateTimelineId != null && id == null) {
-          res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
-        } else if (templateTimelineId == null && id != null) {
-          res = await getTimelineOrNull(frameworkRequest, id);
-        } else {
-          throw new Error('please provide id or template_timeline_id');
+        if (pageInfo == null) {
+          const allActiveTimelines = await getAllTimeline(
+            frameworkRequest,
+            false,
+            { pageSize: 1, pageIndex: 1 },
+            null,
+            null,
+            null,
+            null
+          );
+          totalCount = allActiveTimelines.totalCount;
         }
 
-        return response.ok({ body: res ? { data: { getOneTimeline: res } } : {} });
+        res = await getAllTimeline(
+          frameworkRequest,
+          onlyUserFavorite,
+          pageInfo ?? { pageSize: totalCount ?? 0, pageIndex: 1 },
+          search,
+          sort,
+          status,
+          timelineType
+        );
+
+        return response.ok({ body: res ?? {} });
       } catch (err) {
         const error = transformError(err);
         const siemResponse = buildSiemResponse(response);

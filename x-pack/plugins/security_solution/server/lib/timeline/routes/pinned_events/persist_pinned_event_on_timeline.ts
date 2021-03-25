@@ -19,7 +19,7 @@ import { buildFrameworkRequest } from '../../utils/common';
 import { persistPinnedEventSchema } from '../../schemas/pinned_events/persist_pinned_event_schema';
 import { persistPinnedEventOnTimeline } from '../../saved_object/pinned_events';
 
-export const persistNoteRoute = (
+export const persistPinnedEventsRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
@@ -51,7 +51,7 @@ export const persistNoteRoute = (
         );
 
         return response.ok({
-          body: res,
+          body: { data: { persistPinnedEventOnTimeline: res } },
         });
       } catch (err) {
         const error = transformError(err);
