@@ -26,7 +26,7 @@ const i18nTexts = {
     }
   ),
   upgradedMessage: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationStats.errors.partiallyUpgradedWarningMessage',
+    'xpack.upgradeAssistant.esDeprecationStats.errors.upgradedWarningMessage',
     {
       defaultMessage: 'All Elasticsearch nodes have been upgraded.',
     }

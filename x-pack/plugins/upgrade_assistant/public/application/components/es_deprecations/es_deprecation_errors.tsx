@@ -14,30 +14,27 @@ import { ResponseError } from '../../lib/api';
 
 const i18nTexts = {
   permissionsError: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationStats.errors.permissionsErrorMessage',
+    'xpack.upgradeAssistant.esDeprecationErrors.permissionsErrorMessage',
     {
       defaultMessage: 'You do not have sufficient privileges to view Elasticsearch deprecations.',
     }
   ),
   partiallyUpgradedWarning: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationStats.errors.partiallyUpgradedWarningMessage',
+    'xpack.upgradeAssistant.esDeprecationErrors.partiallyUpgradedWarningMessage',
     {
       defaultMessage:
         'One or more Elasticsearch nodes have a newer version of Elasticsearch than Kibana.',
     }
   ),
   upgradedMessage: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationStats.errors.partiallyUpgradedWarningMessage',
+    'xpack.upgradeAssistant.esDeprecationErrors.upgradedWarningMessage',
     {
       defaultMessage: 'All Elasticsearch nodes have been upgraded.',
     }
   ),
-  loadingError: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationStats.errors.loadingErrorMessage',
-    {
-      defaultMessage: 'An error occurred while retrieving Elasticsearch deprecations.',
-    }
-  ),
+  loadingError: i18n.translate('xpack.upgradeAssistant.esDeprecationErrors.loadingErrorMessage', {
+    defaultMessage: 'An error occurred while retrieving Elasticsearch deprecations.',
+  }),
 };
 
 interface Props {
