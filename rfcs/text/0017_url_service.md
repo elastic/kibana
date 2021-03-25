@@ -42,31 +42,32 @@ Generator Service) into a single new *URL Service*. The new unified service
 will still provide all the functionality the above mentioned services provide and
 in addition will implement the following improvements:
 
-1. it will expose a consistent client (with the same interface) through plugin
+1. It will expose a consistent client (with the same interface) through plugin
    contract mechanism on the server-side and the browser-side.
-1. improve the HTTP endpoints for use by external users, Cloud, and Support;
-1. expose a "redirect" endpoint, which given URL generator ID and parameters,
-   redirects the user to a deep link inside Kibana;
-1. add ability to generate human-readable short URLs;
-1. add ability to delete short URLs;
-1. add ability to generate short URLs using URL generators;
-1. will not use MD5 hashing algorithm.
+1. Improve the HTTP endpoints for use by external users, Cloud, and Support.
+1. Expose a "redirect" endpoint, which given URL generator ID and parameters,
+   redirects the user to a deep link inside Kibana.
+1. Add ability to generate human-readable short URLs.
+1. Add ability to delete short URLs.
+1. Add ability to generate short URLs using URL generators.
+1. Will not use MD5 hashing algorithm.
 
 
 # Basic example
 
-The URL Service will have a client, which will have the same interface, both, on
-the server-side and the client-side. It will also have a documented public set
-of API endpoints for use by: (1) the client-side client; (2) external users,
-Elastic Cloud, and Support.
+The URL Service will have a client (`UrlServiceClient`) which will have the same
+interface, both, on the server-side and the client-side. It will also have a
+documented public set of HTTP API endpoints for use by: (1) the client-side client;
+(2) external users, Elastic Cloud, and Support.
 
-The following code example, will work, both, on the server-side and the client-side as
-the base URL Service client interface will be the same for both environments. In this
-example let's consider a case where some plugin registers a URL generator, then
+The following code examples will work, both, on the server-side and the client-side, as
+the base `UrlServiceClient` interface will be the same for both environments.
+
+In this example let's consider a case where Discover app registers a URL generator, then
 another plugin uses that to create a short URL, and let's say Elastic Cloud uses
 that URL generator to navigate deeply within the Discover app.
 
-Firs, the Discover app registers a URL generator (which it already does using the old
+First, the Discover app registers a URL generator (which it already does using the old
 URL Generator Service, it will just use the new URL Service):
 
 ```ts
@@ -90,13 +91,14 @@ share.urlService.shortUrls.create({
 });
 ```
 
-Both of the code snippets above would look the same on the server-side and the client-side.
+Both of the code snippets above would look the same and work on the server and
+browser, wherever the developer needs those.
 
 Finally, the Elastic Cloud would be able to use the redirect endpoint to navigate
 deeply within the Discover app. It could use the server-side HTTP endpoint:
 
 ```
-POST /api/share/url-service/redirect/DISCOVER_DEEP_LINKS
+POST /api/url_service/redirect/DISCOVER_DEEP_LINKS
 {
   "state": {
     "indexPattern": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx"
@@ -137,7 +139,7 @@ the Short URL Service:
       migrations provided by the URL generators to migrate the stored parameters
       in the short URL saved object.
 1. There is not much documentation for developers.
-   1. __Will do:__ The new service will a much nicer API and docs.
+   1. __Will do:__ The new service will have a much nicer API and docs.
 1. There is no way to delete short URLs once they are created.
    1. __Will do:__ The new service will provide CRUD API to manage short URLs,
       including deletion.
@@ -153,8 +155,7 @@ the Short URL Service:
       store addition non-URL state with each short URL. That state would be
       provided to a Kibana app once user first navigates to that app using a
       short URL. (This non-URL state might also need migration support.)
-1. Short URLs are not automatically deleted when the target (say dashboard) is
-   deleted. (#10450)
+1. Short URLs are not automatically deleted when the target (say dashboard) is deleted. (#10450)
    1. __Could do:__ The URL Service will not provide such feature. Though the short
       URLs will keep track of saved object references used in the params to
       generate a short URL. Maybe those saved references could somehow be used
@@ -181,8 +182,8 @@ the Short URL Service:
       `url`, we would like to keep it that way and benefit from saved object
       facilities like references, migrations, authorization etc.. The consensus
       is that we will not allow anonymous users to create short URLs. We want to
-      use saved object for short URLs going forward and not compromise on its
-      security model.
+      continue using saved object for short URLs going forward and not
+      compromise on their security model.
 
 
 ## Limitations of the URL Generator Service
@@ -197,9 +198,9 @@ the URL Generator Service:
       with the Short URL Service.
 1. URL generators are not exposed externally, thus Cloud and Support cannot use
    them to generate deep links into Kibana.
-  1. __Will do:__ We will expose HTTP endpoints on the server-side and the
-     "redirect" app on the server-side which external users will be able to use
-     to deep link into Kibana using URL generators.
+   1. __Will do:__ We will expose HTTP endpoints on the server-side and the
+      "redirect" app on the client-side which external users will be able to use
+      to deep link into Kibana using URL generators.
 
 
 ## Limitations of the architecture
@@ -210,7 +211,7 @@ Service is their architecture.
 Currently, the Short URL Service is implemented on
 top of `url` type saved object on the server-side. However, it only exposes the
 HTTP endpoints, it does not expose any API on the server for the server-side plugins
-to consume; on the client-side there is not plugin API either, developers need
+to consume; on the client-side there is no plugin API either, developers need
 to manually execute HTTP requests. 
 
 The URL Generator Service is only available on the client-side, there is no way
@@ -226,15 +227,97 @@ create a short URL using an URL generator.
 
 # Detailed design
 
-...
+
+## High level architecture
+
+Below diagramed shows the proposed architecture of the URL Service.
+
+![URL Service architecture](../images/url_service/new_architecture.png)
+
+
+## Plugin contracts
+
+The is to provide developers the same experience on the server and browser.
+
+Below are preliminary interfaces of the new URL Service. `IUrlService` will be
+a shared interface defined in `/common` folder shared across server and browser.
+This will allow us to provide users a common API interface on the server and
+browser, wherever they choose to use the URL Service:
+
+```ts
+/**
+ * Common URL Service client interface for the server-side and the client-side.
+ */
+interface IUrlService {
+  generators: IUrlGeneratorClient;
+  shortUrls: IShortUrlClient;
+}
+```
+
+The URL generator client will be 
+
+```ts
+/**
+ * URL generator registry.
+ */
+interface IUrlGeneratorClient {
+  register<S>(urlGenerator: UrlGeneratorDefinition<S>): UrlGenerator;
+  get<S>(id: string): UrlGenerator<S>;
+}
+interface UrlGeneratorDefinition<State> {
+  id: string;
+  createUrl: (state: State) => Promise<string>;
+  isDeprecated?: boolean;
+  migrate?: (state: State) => Promise<{ state: unknown; id: string }>;
+}
+
+interface UrlGenerator<State> {
+  isDeprecated: boolean;
+  createUrl(state: State): Promise<URL>;
+  migrate(): Promise<never | { state: unknown; id: string }>;
+}
+```
+
+asdf...
+
+```ts
+/**
+ * CRUD-like API for short URLs.
+ */
+interface IShortUrlClient {
+  /**
+   * Create a new short URL from URL generator.
+   *
+   * @param urlGeneratorId ID of the URL generator.
+   * @param state State object to provide to the URL generator.
+   * @param slug Optionally, provide a custom slug (ID) of the short URL.
+   */
+  create(
+    urlGeneratorId: string,
+    state: unknown,
+    slug?: string
+  ): Promise<{ slug: string; url: URL }>;
+
+  /**
+   * Delete a short URL.
+   */
+  delete(slug: string): Promise<boolean>;
+
+  /**
+   * Fetch short URL.
+   */
+  get(slug: string): Promise<{ slug: string; shortUrl: object; url: URL }>;
+}
+```
 
 
 # Drawbacks
 
 Why should we *not* do this?
 
-- Implementation cost will be few weeks, but the code complexity and quality should improve.
-- Cost of migrating existing Kibana plugins.
+- Implementation cost will be few weeks, but the code complexity and quality will improve.
+- Cost of migrating existing Kibana plugins to use the new API.
+
 
 # Alternatives
 
