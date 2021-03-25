@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Map, Style, NavigationControl, MapboxOptions } from 'mapbox-gl';
+import type { Map, Style, MapboxOptions } from 'mapbox-gl';
 import { View, parse } from 'vega';
 // @ts-expect-error
 import mapboxgl from 'maplibre-gl/dist/maplibre-gl-csp';
