@@ -6,13 +6,26 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { isRuntimeField } from '../../../common/util/runtime_field_utils';
 
 export const indexPatternTitleSchema = schema.object({
   /** Title of the index pattern for which to return stats. */
   indexPatternTitle: schema.string(),
 });
 
-const runtimeMappingsSchema = schema.maybe(schema.any());
+const runtimeMappingsSchema = schema.maybe(
+  schema.object(
+    {},
+    {
+      unknowns: 'allow',
+      validate: (v: object) => {
+        if (Object.values(v).some((o) => !isRuntimeField(o))) {
+          return 'Your error message about invalid runtime definition';
+        }
+      },
+    }
+  )
+);
 
 export const dataVisualizerFieldHistogramsSchema = schema.object({
   /** Query to match documents in the index. */

@@ -211,7 +211,7 @@ const getAggIntervals = async (
       query,
       aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
       size: 0,
-      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
   });
 
@@ -297,7 +297,7 @@ export const getHistogramsForFields = async (
       query,
       aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
       size: 0,
-      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
   });
 
@@ -753,7 +753,7 @@ export class DataVisualizer {
           filter: filterCriteria,
         },
       },
-      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
     filterCriteria.push({ exists: { field } });
 
@@ -799,7 +799,7 @@ export class DataVisualizer {
         },
       },
       aggs,
-      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -904,7 +904,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
-      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -1027,7 +1027,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
-      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -1103,7 +1103,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
-      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -1172,7 +1172,7 @@ export class DataVisualizer {
         },
       },
       aggs: buildSamplerAggregation(aggs, samplerShardSize),
-      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
@@ -1237,7 +1237,7 @@ export class DataVisualizer {
           filter: filterCriteria,
         },
       },
-      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
     const { body } = await this._asCurrentUser.search({
