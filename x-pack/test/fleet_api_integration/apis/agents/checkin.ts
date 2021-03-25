@@ -38,6 +38,7 @@ export default function (providerContext: FtrProviderContext) {
         index: '.fleet-agents',
         id: 'agent1',
       });
+      // @ts-expect-error agentDoc has unknown type
       agentDoc.access_api_key_id = apiKey.id;
       await esClient.update({
         index: '.fleet-agents',

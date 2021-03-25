@@ -68,9 +68,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({ actionId,
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
 
+      // @ts-expect-error fields is optional
       const value = data[rowIndex].fields[columnId];
 
       if (columnId === 'agent.name') {
+        // @ts-expect-error fields is optional
         const agentIdValue = data[rowIndex].fields['agent.id'];
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const linkProps = useRouterNavigate(`/live_query/${actionId}/results/${agentIdValue}`);
