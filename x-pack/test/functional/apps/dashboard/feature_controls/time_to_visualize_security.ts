@@ -11,7 +11,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'timeToVisualize',
+    'timePicker',
     'dashboard',
+    'visEditor',
     'visualize',
     'security',
     'common',
@@ -21,6 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const dashboardVisualizations = getService('dashboardVisualizations');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardExpect = getService('dashboardExpect');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
@@ -149,6 +152,80 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(panelCount).to.eql(1);
 
         await PageObjects.timeToVisualize.resetNewDashboard();
+      });
+    });
+
+    describe('visualize by value works without library save permissions', () => {
+      const originalMarkdownText = 'Original markdown text';
+      const modifiedMarkdownText = 'Modified markdown text';
+
+      before(async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.preserveCrossAppState();
+        await PageObjects.dashboard.clickNewDashboard();
+      });
+
+      it('can add a markdown panel by value', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        await testSubjects.click('dashboardAddNewPanelButton');
+        await dashboardVisualizations.ensureNewVisualizationDialogIsShowing();
+        await PageObjects.visualize.clickMarkdownWidget();
+        await PageObjects.visEditor.setMarkdownTxt(originalMarkdownText);
+        await PageObjects.visEditor.clickGo();
+
+        await PageObjects.visualize.saveVisualizationAndReturn();
+        const newPanelCount = await PageObjects.dashboard.getPanelCount();
+        expect(newPanelCount).to.eql(1);
+      });
+
+      it('edits to a by value visualize panel are properly applied', async () => {
+        await dashboardPanelActions.openContextMenu();
+        await dashboardPanelActions.clickEdit();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visEditor.setMarkdownTxt(modifiedMarkdownText);
+        await PageObjects.visEditor.clickGo();
+        await PageObjects.visualize.saveVisualizationAndReturn();
+
+        await PageObjects.dashboard.waitForRenderComplete();
+        const markdownText = await testSubjects.find('markdownBody');
+        expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
+
+        const newPanelCount = PageObjects.dashboard.getPanelCount();
+        expect(newPanelCount).to.eql(1);
+      });
+
+      it('disables save to library button without visualize save permissions', async () => {
+        await dashboardPanelActions.openContextMenu();
+        await dashboardPanelActions.clickEdit();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('visualizeSaveButton');
+        await PageObjects.visualize.saveVisualizationAndReturn();
+        await PageObjects.timeToVisualize.resetNewDashboard();
+      });
+
+      it('should allow new visualization to be added by value, but not by reference', async function () {
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
+        await PageObjects.visualize.clickMetric();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+
+        await testSubjects.click('visualizeSaveButton');
+
+        await PageObjects.visualize.ensureSavePanelOpen();
+        const libraryCheckbox = await find.byCssSelector('#add-to-library-checkbox');
+        expect(await libraryCheckbox.getAttribute('disabled')).to.equal('true');
+
+        await PageObjects.timeToVisualize.saveFromModal('My New Vis 1', {
+          addToDashboard: 'new',
+        });
+
+        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboardExpect.metricValuesExist(['14,005']);
+        const panelCount = await PageObjects.dashboard.getPanelCount();
+        expect(panelCount).to.eql(1);
       });
     });
   });

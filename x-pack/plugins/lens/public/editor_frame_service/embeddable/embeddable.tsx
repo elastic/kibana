@@ -295,7 +295,7 @@ export class Embeddable
         hasCompatibleActions={this.hasCompatibleActions}
         className={input.className}
         style={input.style}
-        canEdit={this.deps.editable && input.viewMode === 'edit'}
+        canEdit={this.getIsEditable() && input.viewMode === 'edit'}
       />,
       domNode
     );

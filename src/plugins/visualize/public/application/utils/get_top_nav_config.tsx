@@ -447,6 +447,7 @@ export const getTopNavConfig = (
                     title: savedVis?.title || '',
                     description: savedVis?.description || '',
                   }}
+                  canSaveByReference={Boolean(visualizeCapabilities.save)}
                   onSave={onSave}
                   tagOptions={tagOptions}
                   objectType={'visualization'}

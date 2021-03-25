@@ -58,7 +58,7 @@ export function Example({
       onChange={setDashboardOption}
       dashboardOption={dashboardOption}
       copyOnSave={copyOnSave}
-      canSaveVisualizations={canSaveVisualizations}
+      canSaveByReference={canSaveVisualizations}
       documentId={hasDocumentId ? 'abc' : undefined}
       isAddToLibrarySelected={isAddToLibrarySelected}
       setAddToLibrary={setAddToLibrary}

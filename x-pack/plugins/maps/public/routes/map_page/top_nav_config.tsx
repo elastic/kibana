@@ -201,7 +201,11 @@ export function getTopNavConfig({
               options={tagSelector}
             />
           ) : (
-            <SavedObjectSaveModalDashboard {...saveModalProps} tagOptions={tagSelector} />
+            <SavedObjectSaveModalDashboard
+              {...saveModalProps}
+              canSaveByReference={true} // we know here that we have save capabilities.
+              tagOptions={tagSelector}
+            />
           );
 
         showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);

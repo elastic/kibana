@@ -28,6 +28,7 @@ interface SaveModalDocumentInfo {
 
 export interface SaveModalDashboardProps {
   documentInfo: SaveModalDocumentInfo;
+  canSaveByReference: boolean;
   objectType: string;
   onClose: () => void;
   onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
@@ -35,16 +36,12 @@ export interface SaveModalDashboardProps {
 }
 
 export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
-  const { documentInfo, tagOptions, objectType, onClose } = props;
+  const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
 
   const { capabilities } = pluginServices.getHooks();
-  const {
-    canAccessDashboards,
-    canCreateNewDashboards,
-    canSaveVisualizations,
-  } = capabilities.useService();
+  const { canAccessDashboards, canCreateNewDashboards } = capabilities.useService();
 
   // Disable the dashboard options if the user can't access dashboards or if they're read-only
   const disableDashboardOptions = !canAccessDashboards() || !canCreateNewDashboards();
@@ -53,7 +50,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
     documentId || disableDashboardOptions ? null : 'existing'
   );
   const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(
-    !initialCopyOnSave || disableDashboardOptions
+    canSaveByReference && (!initialCopyOnSave || disableDashboardOptions)
   );
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
@@ -69,14 +66,16 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
           onChange={(option) => {
             setDashboardOption(option);
           }}
-          canSaveVisualizations={canSaveVisualizations()}
+          canSaveByReference={canSaveByReference}
           {...{ copyOnSave, documentId, dashboardOption, setAddToLibrary, isAddToLibrarySelected }}
         />
       )
     : null;
 
   const onCopyOnSaveChange = (newCopyOnSave: boolean) => {
-    setAddToLibrary(true);
+    if (canSaveByReference) {
+      setAddToLibrary(true);
+    }
     setDashboardOption(null);
     setCopyOnSave(newCopyOnSave);
   };

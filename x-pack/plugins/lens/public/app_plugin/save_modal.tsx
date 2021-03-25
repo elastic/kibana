@@ -87,6 +87,7 @@ export const SaveModal = (props: Props) => {
     <TagEnhancedSavedObjectSaveModalDashboard
       savedObjectsTagging={savedObjectsTagging}
       initialTags={tagsIds}
+      canSaveByReference={Boolean(savingToLibraryPermitted)}
       onSave={(saveProps) => {
         const saveToLibrary = Boolean(saveProps.addToLibrary);
         onSave(saveProps, { saveToLibrary });
