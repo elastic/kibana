@@ -75,6 +75,7 @@ export const AnomalyDetectionFlyout = () => {
                 <FlyoutHome
                   hasSetupCapabilities={hasInfraMLSetupCapabilities}
                   goToSetup={openJobSetup}
+                  closeFlyout={closeFlyout}
                 />
               )}
               {screenName === 'setup' && (

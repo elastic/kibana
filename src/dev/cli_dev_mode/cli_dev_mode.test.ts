@@ -34,6 +34,9 @@ const { DevServer } = jest.requireMock('./dev_server');
 jest.mock('./base_path_proxy_server');
 const { BasePathProxyServer } = jest.requireMock('./base_path_proxy_server');
 
+jest.mock('@kbn/dev-utils/target/ci_stats_reporter');
+const { CiStatsReporter } = jest.requireMock('@kbn/dev-utils/target/ci_stats_reporter');
+
 jest.mock('./get_server_watch_paths', () => ({
   getServerWatchPaths: jest.fn(() => ({
     watchPaths: ['<mock watch paths>'],
@@ -237,6 +240,11 @@ describe('#start()/#stop()', () => {
         isReady$: jest.fn(() => devServerReady$),
         getPhase$: jest.fn(() => Rx.NEVER),
         run$: devServerRun$,
+      };
+    });
+    CiStatsReporter.fromEnv.mockImplementation(() => {
+      return {
+        isEnabled: jest.fn().mockReturnValue(false),
       };
     });
   });
