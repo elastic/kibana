@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { asyncScheduler } from 'rxjs';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonIcon,
@@ -46,6 +46,11 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(item.muteAll);
+  useEffect(() => {
+    setIsDisabled(!item.enabled);
+    setIsMuted(item.muteAll);
+  }, [item.enabled, item.muteAll]);
+
   const button = (
     <EuiButtonIcon
       disabled={!item.isEditable}
