@@ -89,15 +89,28 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
   }
 };
 
-export const minAgeValidator: ValidationFunc<any, any, any> = (arg) =>
-  numberGreaterThanField({
-    than: 0,
-    allowEquality: true,
-    message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
-  })({
-    ...arg,
-    value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
-  });
+export const integerValidator: ValidationFunc<FormInternal, string, string> = (arg) => {
+  if (!Number.isInteger(Number(arg.value ?? ''))) {
+    return { message: i18nTexts.editPolicy.errors.integerRequired };
+  }
+};
+
+export const minAgeValidator: Array<ValidationConfig<FormInternal, string, string>> = [
+  {
+    validator: (arg) =>
+      numberGreaterThanField({
+        than: 0,
+        allowEquality: true,
+        message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
+      })({
+        ...arg,
+        value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
+      }),
+  },
+  {
+    validator: integerValidator,
+  },
+];
 
 export const createPolicyNameValidations = ({
   policies,

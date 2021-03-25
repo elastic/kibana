@@ -55,7 +55,7 @@ describe('<EditPolicy /> timeline', () => {
     expect(actions.timeline.hasColdPhase()).toBe(true);
     expect(actions.timeline.hasDeletePhase()).toBe(false);
 
-    await actions.delete.enablePhase();
+    await actions.delete.enable(true);
     expect(actions.timeline.hasHotPhase()).toBe(true);
     expect(actions.timeline.hasWarmPhase()).toBe(true);
     expect(actions.timeline.hasColdPhase()).toBe(true);

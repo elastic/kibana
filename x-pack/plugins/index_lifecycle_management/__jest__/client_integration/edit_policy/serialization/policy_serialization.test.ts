@@ -13,6 +13,7 @@ import {
   POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
 } from '../constants';
 import { EditPolicyTestBed, setup } from '../edit_policy.helpers';
+import { licensingMock } from '../../../../../licensing/public/mocks';
 
 describe('<EditPolicy /> serialization', () => {
   let testBed: EditPolicyTestBed;
@@ -58,7 +59,7 @@ describe('<EditPolicy /> serialization', () => {
       // Set max docs to test whether we keep the unknown fields in that object after serializing
       await actions.hot.setMaxDocs('1000');
       // Remove the delete phase to ensure that we also correctly remove data
-      await actions.delete.disablePhase();
+      await actions.delete.enable(false);
       await actions.savePolicy();
 
       const latestRequest = server.requests[server.requests.length - 1];
@@ -87,6 +88,78 @@ describe('<EditPolicy /> serialization', () => {
               },
             },
             min_age: '0d',
+          },
+        },
+      });
+    });
+
+    it('default policy (only policy name input) on enterprise license', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([]);
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      const { component, actions } = testBed;
+      component.update();
+      await actions.setPolicyName('test_policy');
+      await actions.savePolicy();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+      expect(entirePolicy).toEqual({
+        name: 'test_policy',
+        phases: {
+          hot: {
+            actions: {
+              rollover: {
+                max_age: '30d',
+                max_size: '50gb',
+              },
+              set_priority: {
+                priority: 100,
+              },
+            },
+            min_age: '0ms',
+          },
+        },
+      });
+    });
+
+    it('default policy (only policy name input) on basic license', async () => {
+      httpRequestsMockHelpers.setLoadPolicies([]);
+
+      await act(async () => {
+        testBed = await setup({
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'basic' } }),
+          },
+        });
+      });
+
+      const { component, actions } = testBed;
+      component.update();
+      await actions.setPolicyName('test_policy');
+      await actions.savePolicy();
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const entirePolicy = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+      expect(entirePolicy).toEqual({
+        name: 'test_policy',
+        phases: {
+          hot: {
+            actions: {
+              rollover: {
+                max_age: '30d',
+                max_size: '50gb',
+              },
+              set_priority: {
+                priority: 100,
+              },
+            },
+            min_age: '0ms',
           },
         },
       });
@@ -408,7 +481,7 @@ describe('<EditPolicy /> serialization', () => {
 
   test('delete phase', async () => {
     const { actions } = testBed;
-    await actions.delete.enablePhase();
+    await actions.delete.enable(true);
     await actions.setWaitForSnapshotPolicy('test');
     await actions.savePolicy();
     const latestRequest = server.requests[server.requests.length - 1];

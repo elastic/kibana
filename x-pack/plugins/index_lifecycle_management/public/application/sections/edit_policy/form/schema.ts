@@ -16,6 +16,7 @@ import {
   ifExistsNumberNonNegative,
   rolloverThresholdsValidator,
   minAgeValidator,
+  integerValidator,
 } from './validations';
 
 const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
@@ -254,6 +255,9 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
               {
                 validator: ifExistsNumberGreaterThanZero,
               },
+              {
+                validator: integerValidator,
+              },
             ],
             fieldsToValidateOnChange: rolloverFormPaths,
           },
@@ -267,6 +271,9 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
               },
               {
                 validator: ifExistsNumberGreaterThanZero,
+              },
+              {
+                validator: integerValidator,
               },
             ],
             serializer: serializers.stringToNumber,
@@ -302,11 +309,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
     warm: {
       min_age: {
         defaultValue: '0',
-        validations: [
-          {
-            validator: minAgeValidator,
-          },
-        ],
+        validations: minAgeValidator,
       },
       actions: {
         allocate: {
@@ -326,11 +329,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
     cold: {
       min_age: {
         defaultValue: '0',
-        validations: [
-          {
-            validator: minAgeValidator,
-          },
-        ],
+        validations: minAgeValidator,
       },
       actions: {
         allocate: {
@@ -345,11 +344,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
     frozen: {
       min_age: {
         defaultValue: '0',
-        validations: [
-          {
-            validator: minAgeValidator,
-          },
-        ],
+        validations: minAgeValidator,
       },
       actions: {
         allocate: {
@@ -364,11 +359,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
     delete: {
       min_age: {
         defaultValue: '365',
-        validations: [
-          {
-            validator: minAgeValidator,
-          },
-        ],
+        validations: minAgeValidator,
       },
       actions: {
         wait_for_snapshot: {
