@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
+import { SavedObjectsClientContract, Logger, SavedObject } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
-import { CaseResponseRt, CaseResponse } from '../../../common/api';
+import { CaseResponseRt, CaseResponse, ESCaseAttributes } from '../../../common/api';
 import { CaseServiceSetup } from '../../services';
 import { countAlertsForID } from '../../common';
 import { createCaseError } from '../../common/error';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 interface GetParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -33,15 +34,26 @@ export const get = async ({
   includeSubCaseComments = false,
 }: GetParams): Promise<CaseResponse> => {
   try {
-    const [theCase, subCasesForCaseId] = await Promise.all([
-      caseService.getCase({
+    let theCase: SavedObject<ESCaseAttributes>;
+    let subCaseIds: string[] = [];
+
+    if (ENABLE_CASE_CONNECTOR) {
+      const [caseInfo, subCasesForCaseId] = await Promise.all([
+        caseService.getCase({
+          client: savedObjectsClient,
+          id,
+        }),
+        caseService.findSubCasesByCaseId({ client: savedObjectsClient, ids: [id] }),
+      ]);
+
+      theCase = caseInfo;
+      subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
+    } else {
+      theCase = await caseService.getCase({
         client: savedObjectsClient,
         id,
-      }),
-      caseService.findSubCasesByCaseId({ client: savedObjectsClient, ids: [id] }),
-    ]);
-
-    const subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
+      });
+    }
 
     if (!includeComments) {
       return CaseResponseRt.encode(
@@ -58,7 +70,7 @@ export const get = async ({
         sortField: 'created_at',
         sortOrder: 'asc',
       },
-      includeSubCaseComments,
+      includeSubCaseComments: ENABLE_CASE_CONNECTOR && includeSubCaseComments,
     });
 
     return CaseResponseRt.encode(
