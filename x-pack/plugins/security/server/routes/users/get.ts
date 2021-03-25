@@ -24,9 +24,7 @@ export function defineGetUserRoutes({ router }: RouteDefinitionParams) {
         const username = request.params.username;
         const {
           body: users,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getUser<
-          Record<string, {}>
-        >({
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getUser({
           username,
         });
 

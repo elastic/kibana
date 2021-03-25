@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('primary basic cluster shows cluster metrics', async () => {
           expect(await clusterList.getClusterName(SUPPORTED_CLUSTER_UUID)).to.be('production');
-          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('N/A');
+          expect(await clusterList.getClusterStatus(SUPPORTED_CLUSTER_UUID)).to.be('Clear');
           expect(await clusterList.getClusterNodesCount(SUPPORTED_CLUSTER_UUID)).to.be('2');
           expect(await clusterList.getClusterIndicesCount(SUPPORTED_CLUSTER_UUID)).to.be('4');
           expect(await clusterList.getClusterDataSize(SUPPORTED_CLUSTER_UUID)).to.be('1.6 MB');
