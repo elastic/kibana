@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { CoreService } from '../../types';
 import { DeprecationsFactory } from './deprecations_factory';
-import { DeprecationsRegistry } from './deprecations_registry';
+import { RegisterDeprecationsConfig } from './types';
+import { registerRoutes } from './routes';
 
 import { CoreContext } from '../core_context';
 import { CoreUsageDataSetup } from '../core_usage_data';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
+import { CoreService } from '../../types';
 import { InternalHttpServiceSetup } from '../http';
 import { Logger } from '../logging';
-import { registerRoutes } from './routes';
 
 /**
  * The deprecations service provides a way for the Kibana platform to communicate deprecated
@@ -26,6 +26,10 @@ import { registerRoutes } from './routes';
  * The Deprecation service is consumed by the upgrade assistant to assist with the upgrade
  * experience.
  *
+ * If a deprecated feature can be resolved without manual user intervention.
+ * Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the
+ * deprecation upon a user trigger.
+ *
  * @example
  * ```ts
  * import { DeprecationsDetails, GetDeprecationsContext, CoreSetup } from 'src/core/server';
@@ -35,6 +39,7 @@ import { registerRoutes } from './routes';
  *   const count = await getTimelionSheetsCount(savedObjectsClient);
  *
  *   if (count > 0) {
+ *     // Example of a manual correctiveAction
  *     deprecations.push({
  *       message: `You have ${count} Timelion worksheets. The Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard.`,
  *       documentationUrl:
@@ -53,38 +58,11 @@ import { registerRoutes } from './routes';
  *     });
  *   }
  *
+ *   // Example of an api correctiveAction
  *   deprecations.push({
- *     message: `You have ${count} Timelion worksheets. The Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard.`,
- *     documentationUrl:
- *       'https://www.elastic.co/guide/en/kibana/current/create-panels-with-timelion.html',
- *     level: 'critical',
- *     correctiveActions: {
- *       api: {
- *         path: '',
- *       }
- *     },
- *   });
- *
- *   return deprecations;
- * }
- *
- *
- * export class Plugin() {
- *   setup: (core: CoreSetup) => {
- *     core.deprecations.registerDeprecations({ getDeprecations });
- *   }
- * }
- * ```
- *
- * If a deprecated feature can be resolved without manual user intervention.
- * Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the
- * deprecation upon a user trigger.
- *
- * @example
- * ```
- * core.deprecations.registerDeprecations({ getDeprecations: () => [
- *   {
  *     "message": "User 'test_dashboard_user' is using a deprecated role: 'kibana_user'",
+ *     "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html",
+ *     "level": "critical",
  *     "correctiveActions": {
  *         "api": {
  *             "path": "/internal/security/users/test_dashboard_user",
@@ -107,16 +85,23 @@ import { registerRoutes } from './routes';
  *             "Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role."
  *         ]
  *     },
- *     "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html",
- *     "level": "critical",
- *     "domainId": "security"
- *   },
- * ]});
+ *   });
+ *
+ *   return deprecations;
+ * }
+ *
+ *
+ * export class Plugin() {
+ *   setup: (core: CoreSetup) => {
+ *     core.deprecations.registerDeprecations({ getDeprecations });
+ *   }
+ * }
  * ```
+ *
  * @public
  */
 export interface DeprecationsServiceSetup {
-  registerDeprecations: DeprecationsRegistry['registerDeprecations'];
+  registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
 }
 
 /** @internal */

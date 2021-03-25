@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-registerDeprecations: DeprecationsRegistry['registerDeprecations'];
+registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
 ```

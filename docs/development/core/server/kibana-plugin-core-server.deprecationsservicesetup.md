@@ -6,6 +6,10 @@
 
 The deprecations service provides a way for the Kibana platform to communicate deprecated features and configs with its users. These deprecations are only communicated if the deployment is using these features. Allowing for a user tailored experience for upgrading the stack version.
 
+The Deprecation service is consumed by the upgrade assistant to assist with the upgrade experience.
+
+If a deprecated feature can be resolved without manual user intervention. Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the deprecation upon a user trigger.
+
 <b>Signature:</b>
 
 ```typescript
@@ -23,6 +27,7 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
   const count = await getTimelionSheetsCount(savedObjectsClient);
 
   if (count > 0) {
+    // Example of a manual correctiveAction
     deprecations.push({
       message: `You have ${count} Timelion worksheets. The Timelion app will be removed in 8.0. To continue using your Timelion worksheets, migrate them to a dashboard.`,
       documentationUrl:
@@ -41,6 +46,35 @@ async function getDeprecations({ esClient, savedObjectsClient }: GetDeprecations
     });
   }
 
+  // Example of an api correctiveAction
+  deprecations.push({
+    "message": "User 'test_dashboard_user' is using a deprecated role: 'kibana_user'",
+    "documentationUrl": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-user.html",
+    "level": "critical",
+    "correctiveActions": {
+        "api": {
+            "path": "/internal/security/users/test_dashboard_user",
+            "method": "POST",
+            "body": {
+                "username": "test_dashboard_user",
+                "roles": [
+                    "machine_learning_user",
+                    "enrich_user",
+                    "kibana_admin"
+                ],
+                "full_name": "Alison Goryachev",
+                "email": "alisongoryachev@gmail.com",
+                "metadata": {},
+                "enabled": true
+            }
+        },
+        "manualSteps": [
+            "Using Kibana user management, change all users using the kibana_user role to the kibana_admin role.",
+            "Using Kibana role-mapping management, change all role-mappings which assing the kibana_user role to the kibana_admin role."
+        ]
+    },
+  });
+
   return deprecations;
 }
 
@@ -57,5 +91,5 @@ export class Plugin() {
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) | <code>DeprecationsRegistry['registerDeprecations']</code> |  |
+|  [registerDeprecations](./kibana-plugin-core-server.deprecationsservicesetup.registerdeprecations.md) | <code>(deprecationContext: RegisterDeprecationsConfig) =&gt; void</code> |  |
 

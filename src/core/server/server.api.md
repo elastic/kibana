@@ -862,10 +862,8 @@ export interface DeprecationSettings {
 
 // @public
 export interface DeprecationsServiceSetup {
-    // Warning: (ae-forgotten-export) The symbol "DeprecationsRegistry" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    registerDeprecations: DeprecationsRegistry['registerDeprecations'];
+    registerDeprecations: (deprecationContext: RegisterDeprecationsConfig) => void;
 }
 
 // @public
