@@ -227,7 +227,7 @@ The default application to load. *Default: `"home"`*
 for more details. {kib} uses an index in {es} to store saved searches, visualizations, and
 dashboards. {kib} creates a new index if the index doesn’t already exist.
 If you configure a custom index, the name must be lowercase, and conform to the
-{es} {ref}/indices-create-index.html[index name limitations]. 
+{es} {ref}/indices-create-index.html[index name limitations].
 *Default: `".kibana"`*
 
 | `kibana.autocompleteTimeout:` {ess-icon}
@@ -475,7 +475,7 @@ running behind a proxy. Use the <<server-rewriteBasePath, `server.rewriteBasePat
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
 
-|[[server-publicBaseUrl]] `server.publicBaseUrl:`
+|[[server-publicBaseUrl]] `server.publicBaseUrl:` {ess-icon}
  | The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port
  (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the
  <<server-basePath, `server.basePath`>> (if configured). This setting cannot end in a slash (`/`).
@@ -685,6 +685,7 @@ Valid locales are: `en`, `zh-CN`, `ja-JP`. *Default: `en`*
 
 include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[]
 include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
+include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
 include::{kib-repo-dir}/settings/dev-settings.asciidoc[]
 include::{kib-repo-dir}/settings/graph-settings.asciidoc[]
 include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
@@ -695,6 +696,7 @@ include::{kib-repo-dir}/settings/ml-settings.asciidoc[]
 include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
 include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]
 include::secure-settings.asciidoc[]
+include::{kib-repo-dir}/settings/search-sessions-settings.asciidoc[]
 include::{kib-repo-dir}/settings/security-settings.asciidoc[]
 include::{kib-repo-dir}/settings/spaces-settings.asciidoc[]
 include::{kib-repo-dir}/settings/task-manager-settings.asciidoc[]
