@@ -28,6 +28,7 @@ export const networkKpiDns: SecuritySolutionFactory<NetworkKpiQueries.dns> = {
     return {
       ...response,
       inspect,
+      // @ts-expect-error code doesn't handle TotalHits
       dnsQueries: response.rawResponse.hits.total,
     };
   },
