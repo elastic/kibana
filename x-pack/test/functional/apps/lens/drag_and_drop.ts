@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
-  const testSubjects = getService('testSubjects');
 
   describe('lens drag and drop tests', () => {
     describe('basic drag and drop', () => {
@@ -49,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'lnsDatatable_rows > lns-empty-dimension'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_rows', 2)).to.eql(
-          'Top values of @message.raw'
+          'Top values of @message.​raw'
         );
       });
 
@@ -160,7 +159,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Unique count of @timestamp'
         );
         expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-          'Top values of @message.​raw'
+          'Top values of @message.raw'
         );
       });
     });
