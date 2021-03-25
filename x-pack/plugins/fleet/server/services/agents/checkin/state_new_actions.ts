@@ -115,7 +115,7 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agent: Agent,
-  permissions: { [role: string]: { index: FullAgentPolicyPermission[] } }
+  permissions: { [role: string]: { indices: FullAgentPolicyPermission[] } }
 ): Promise<string> {
   const defaultAPIKey = await getAgentDefaultOutputAPIKey(soClient, esClient, agent);
   if (defaultAPIKey) {
@@ -174,7 +174,7 @@ export async function createAgentActionFromPolicyAction(
     }
   );
 
-  const permissions: { [role: string]: { index: FullAgentPolicyPermission[] } } =
+  const permissions: { [role: string]: { indices: FullAgentPolicyPermission[] } } =
     'policy' in newAgentAction.data
       ? newAgentAction.data.policy.output_permissions.default
       : newAgentAction.data.config.output_permissions.default; // agent <= 7.9

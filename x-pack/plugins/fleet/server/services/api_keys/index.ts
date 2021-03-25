@@ -19,12 +19,12 @@ export async function generateOutputApiKey(
   soClient: SavedObjectsClientContract,
   outputId: string,
   agentId: string,
-  permissions: { [role: string]: { index: FullAgentPolicyPermission[] } }
+  permissions: { [role: string]: { indices: FullAgentPolicyPermission[] } }
 ): Promise<{ key: string; id: string }> {
   const name = `${agentId}:${outputId}`;
 
   const APIKeyRequest = Object.entries(permissions).reduce<
-    Record<string, { cluster: string[]; index: FullAgentPolicyPermission[] }>
+    Record<string, { cluster: string[]; indices: FullAgentPolicyPermission[] }>
   >((request, [role, indices]) => {
     request[role] = {
       cluster: ['monitor'],

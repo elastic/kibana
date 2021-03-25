@@ -706,7 +706,7 @@ class AgentPolicyService {
       if (output && output.type === 'elasticsearch') {
         permissions[outputName] = {};
         permissions[outputName]._fallback = {
-          index: [
+          indices: [
             {
               names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
               privileges: ['auto_configure', 'create_doc'],

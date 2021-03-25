@@ -74,7 +74,7 @@ export interface FullAgentPolicy {
   output_permissions?: {
     [output: string]: {
       [role: string]: {
-        index: FullAgentPolicyPermission[];
+        indices: FullAgentPolicyPermission[];
       };
     };
   };
