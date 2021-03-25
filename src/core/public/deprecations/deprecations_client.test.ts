@@ -126,7 +126,7 @@ describe('DeprecationsClient', () => {
 
       expect(result).toEqual({
         status: 'fail',
-        payload: 'deprecation has no correctiveAction via api.',
+        payload: new Error('deprecation has no correctiveAction via api.'),
       });
     });
 
