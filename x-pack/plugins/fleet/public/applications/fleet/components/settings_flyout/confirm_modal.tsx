@@ -54,10 +54,7 @@ const TABLE_COLUMNS: EuiBasicTableProps<Change>['columns'] = [
       return (
         <EuiText size="s" color={item.direction === 'added' ? 'secondary' : 'danger'}>
           {item.urls.map((url) => (
-            <React.Fragment key={url}>
-              {url}
-              <br />
-            </React.Fragment>
+            <div key={url}>{url}</div>
           ))}
         </EuiText>
       );
@@ -79,18 +76,20 @@ function getLabel(change: Change) {
   }
 
   if (change.type === 'fleet_server' && change.direction === 'removed') {
-    return i18n.translate('xpack.fleet.settingsConfirmModal.FleetServerRemovedLabel', {
+    return i18n.translate('xpack.fleet.settingsConfirmModal.fleetServerRemovedLabel', {
       defaultMessage: 'Fleet Server URL (old)',
     });
   }
 
   if (change.type === 'fleet_server' && change.direction === 'added') {
-    return i18n.translate('xpack.fleet.settingsConfirmModal.FleetServerAddedLabel', {
+    return i18n.translate('xpack.fleet.settingsConfirmModal.fleetServerAddedLabel', {
       defaultMessage: 'Fleet Server URL (new)',
     });
   }
 
-  throw new Error('Invalid change');
+  return i18n.translate('xpack.fleet.settingsConfirmModal.defaultChangeLabel', {
+    defaultMessage: 'Unknown setting',
+  });
 }
 
 export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
@@ -99,7 +98,7 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
     const hasFleetServerChanges = changes.some((change) => change.type === 'fleet_server');
 
     return (
-      <EuiModal maxWidth="768px" onClose={onClose}>
+      <EuiModal maxWidth={true} onClose={onClose}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage
@@ -128,12 +127,12 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
                     defaultMessage="If agents are unable to connect at the new {fleetServerUrl}, they will log an error and report an unhealthy status. They will remain on the current agent policy version and check for updates at the old URL until they successfully connect at the new URL"
                     values={{
                       fleetServerUrl: (
-                        <b>
+                        <strong>
                           <FormattedMessage
                             id="xpack.fleet.settingsConfirmModal.fleetServerUrl"
                             defaultMessage="Fleet Server URL"
                           />
-                        </b>
+                        </strong>
                       ),
                     }}
                   />
@@ -147,12 +146,12 @@ export const SettingsConfirmModal = React.memo<SettingsConfirmModalProps>(
                     defaultMessage="If agents are unable to connect at the new {elasticsearchUrl}, Fleet Server will report them as healthy but they will be unable to send data to Elasticsearch. This will not update URL that Fleet server itself uses to connect to Elasticsearch; you must manually reenroll it to update the URL"
                     values={{
                       elasticsearchUrl: (
-                        <b>
+                        <strong>
                           <FormattedMessage
                             id="xpack.fleet.settingsConfirmModal.elasticsearchUrl"
                             defaultMessage="Elasticsearch URL"
                           />
-                        </b>
+                        </strong>
                       ),
                     }}
                   />
