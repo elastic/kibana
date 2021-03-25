@@ -42,6 +42,9 @@ export const migrateArtifactsToFleet = async (
 
       if (totalArtifactsMigrated === -1) {
         totalArtifactsMigrated = total;
+        if (total > 0) {
+          logger.info(`Migrating artifacts from SavedObject to Fleet`);
+        }
       }
 
       // If nothing else to process, then exit out

@@ -375,7 +375,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           logger,
           fleetServerEnabled
         ).finally(() => {
-          logger.info('starting manifest task!');
+          logger.info('Fleet setup complete - Starting ManifestTask');
 
           if (this.manifestTask) {
             this.manifestTask.start({
