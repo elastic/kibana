@@ -17,7 +17,7 @@ import { act } from 'react-dom/test-utils';
 import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 
-jest.mock('../../../containers/source/use_source_via_http', () => ({
+jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),

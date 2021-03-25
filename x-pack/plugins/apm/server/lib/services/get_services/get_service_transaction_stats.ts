@@ -108,9 +108,9 @@ export async function getServiceTransactionStats({
                   },
                   sample: {
                     top_metrics: {
-                      metrics: { field: AGENT_NAME } as const,
+                      metrics: [{ field: AGENT_NAME } as const],
                       sort: {
-                        '@timestamp': 'desc',
+                        '@timestamp': 'desc' as const,
                       },
                     },
                   },
