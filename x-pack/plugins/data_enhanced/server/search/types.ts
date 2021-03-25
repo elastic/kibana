@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { SearchResponse, ShardsResponse } from 'elasticsearch';
 
 export interface AsyncSearchResponse<T = unknown> {
   id?: string;
-  response: SearchResponse<T>;
+  response: estypes.SearchResponse<T>;
   start_time_in_millis: number;
   expiration_time_in_millis: number;
   is_partial: boolean;

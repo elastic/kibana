@@ -15,6 +15,7 @@ import {
   CategoryFieldExample,
 } from '../../../../../common/types/categories';
 import { RuntimeMappings } from '../../../../../common/types/fields';
+import { IndicesOptions } from '../../../../../common/types/anomaly_detection_jobs';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
@@ -34,7 +35,8 @@ export function categorizationExamplesProvider({
     start: number,
     end: number,
     analyzer: CategorizationAnalyzer,
-    runtimeMappings: RuntimeMappings | undefined
+    runtimeMappings: RuntimeMappings | undefined,
+    indicesOptions: IndicesOptions | undefined
   ): Promise<{ examples: CategoryFieldExample[]; error?: any }> {
     if (timeField !== undefined) {
       const range = {
@@ -69,6 +71,7 @@ export function categorizationExamplesProvider({
         sort: ['_doc'],
         ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
       },
+      ...(indicesOptions ?? {}),
     });
 
     // hit.fields can be undefined if value is originally null
@@ -124,7 +127,7 @@ export function categorizationExamplesProvider({
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
     const {
       body: { tokens },
-    } = await asInternalUser.indices.analyze<{ tokens: Token[] }>({
+    } = await asInternalUser.indices.analyze({
       body: {
         ...getAnalyzer(analyzer),
         text: examples,
@@ -136,19 +139,21 @@ export function categorizationExamplesProvider({
 
     const tokensPerExample: Token[][] = examples.map((e) => []);
 
-    tokens.forEach((t, i) => {
-      for (let g = 0; g < sumLengths.length; g++) {
-        if (t.start_offset <= sumLengths[g] + g) {
-          const offset = g > 0 ? sumLengths[g - 1] + g : 0;
-          tokensPerExample[g].push({
-            ...t,
-            start_offset: t.start_offset - offset,
-            end_offset: t.end_offset - offset,
-          });
-          break;
+    if (tokens !== undefined) {
+      tokens.forEach((t, i) => {
+        for (let g = 0; g < sumLengths.length; g++) {
+          if (t.start_offset <= sumLengths[g] + g) {
+            const offset = g > 0 ? sumLengths[g - 1] + g : 0;
+            tokensPerExample[g].push({
+              ...t,
+              start_offset: t.start_offset - offset,
+              end_offset: t.end_offset - offset,
+            });
+            break;
+          }
         }
-      }
-    });
+      });
+    }
     return tokensPerExample;
   }
 
@@ -169,7 +174,8 @@ export function categorizationExamplesProvider({
     start: number,
     end: number,
     analyzer: CategorizationAnalyzer,
-    runtimeMappings: RuntimeMappings | undefined
+    runtimeMappings: RuntimeMappings | undefined,
+    indicesOptions: IndicesOptions | undefined
   ) {
     const resp = await categorizationExamples(
       indexPatternTitle,
@@ -180,7 +186,8 @@ export function categorizationExamplesProvider({
       start,
       end,
       analyzer,
-      runtimeMappings
+      runtimeMappings,
+      indicesOptions
     );
 
     const { examples } = resp;

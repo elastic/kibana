@@ -27,7 +27,7 @@ export function TableDimensionEditor(
   const currentAlignment =
     column?.alignment ||
     (frame.activeData &&
-    frame.activeData[state.layerId].columns.find(
+    frame.activeData[state.layerId]?.columns.find(
       (col) => col.id === accessor || getOriginalId(col.id) === accessor
     )?.meta.type === 'number'
       ? 'right'

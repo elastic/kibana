@@ -6,6 +6,7 @@
  */
 
 import { isEqual, keyBy, mapValues } from 'lodash';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { pickKeys } from '../../../../common/utils/pick_keys';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -58,7 +59,7 @@ export const getDestinationMap = ({
             connections: {
               composite: {
                 size: 1000,
-                sources: [
+                sources: asMutableArray([
                   {
                     [SPAN_DESTINATION_SERVICE_RESOURCE]: {
                       terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
@@ -67,19 +68,18 @@ export const getDestinationMap = ({
                   // make sure we get samples for both successful
                   // and failed calls
                   { [EVENT_OUTCOME]: { terms: { field: EVENT_OUTCOME } } },
-                ],
+                ] as const),
               },
               aggs: {
                 sample: {
-                  top_metrics: {
-                    metrics: [
-                      { field: SPAN_TYPE },
-                      { field: SPAN_SUBTYPE },
-                      { field: SPAN_ID },
-                    ] as const,
-                    sort: {
-                      '@timestamp': 'desc',
-                    },
+                  top_hits: {
+                    size: 1,
+                    _source: [SPAN_TYPE, SPAN_SUBTYPE, SPAN_ID],
+                    sort: [
+                      {
+                        '@timestamp': 'desc' as const,
+                      },
+                    ],
                   },
                 },
               },
@@ -91,15 +91,15 @@ export const getDestinationMap = ({
 
     const outgoingConnections =
       response.aggregations?.connections.buckets.map((bucket) => {
-        const fieldValues = bucket.sample.top[0].metrics;
+        const sample = bucket.sample.hits.hits[0]._source;
 
         return {
           [SPAN_DESTINATION_SERVICE_RESOURCE]: String(
             bucket.key[SPAN_DESTINATION_SERVICE_RESOURCE]
           ),
-          [SPAN_ID]: (fieldValues[SPAN_ID] ?? '') as string,
-          [SPAN_TYPE]: (fieldValues[SPAN_TYPE] ?? '') as string,
-          [SPAN_SUBTYPE]: (fieldValues[SPAN_SUBTYPE] ?? '') as string,
+          [SPAN_ID]: sample.span.id,
+          [SPAN_TYPE]: sample.span.type,
+          [SPAN_SUBTYPE]: sample.span.subtype,
         };
       }) ?? [];
 
@@ -126,12 +126,12 @@ export const getDestinationMap = ({
               },
             },
             size: outgoingConnections.length,
-            docvalue_fields: [
+            docvalue_fields: asMutableArray([
               SERVICE_NAME,
               SERVICE_ENVIRONMENT,
               AGENT_NAME,
               PARENT_ID,
-            ] as const,
+            ] as const),
             _source: false,
           },
         })

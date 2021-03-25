@@ -14,6 +14,8 @@ import { shallow } from 'enzyme';
 
 import { EuiSwitch, EuiConfirmModal } from '@elastic/eui';
 
+import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+
 import { Loading } from '../../../shared/loading';
 import { UnsavedChangesPrompt } from '../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
@@ -53,20 +55,19 @@ describe('Security', () => {
     });
   });
 
-  it('renders on Basic license', () => {
+  it('renders', () => {
     setMockValues({ ...mockValues, hasPlatinumLicense: false });
     const wrapper = shallow(<Security />);
 
+    expect(wrapper.find(SetPageChrome)).toHaveLength(1);
     expect(wrapper.find(UnsavedChangesPrompt)).toHaveLength(1);
     expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(true);
   });
 
-  it('renders on Platinum license', () => {
+  it('does not disable switch on Platinum license', () => {
     const wrapper = shallow(<Security />);
 
-    expect(wrapper.find(UnsavedChangesPrompt)).toHaveLength(1);
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
     expect(wrapper.find(EuiSwitch).prop('disabled')).toEqual(false);
   });
 

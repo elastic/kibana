@@ -64,7 +64,7 @@ export const rulesNotificationAlertType = ({
       size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId,
-      callCluster: services.callCluster,
+      esClient: services.scopedClusterClient.asCurrentUser,
     });
 
     const signals = results.hits.hits.map((hit) => hit._source);
@@ -91,6 +91,7 @@ export const rulesNotificationAlertType = ({
         signalsCount,
         resultsLink,
         ruleParams,
+        // @ts-expect-error @elastic/elasticsearch _source is optional
         signals,
       });
     }

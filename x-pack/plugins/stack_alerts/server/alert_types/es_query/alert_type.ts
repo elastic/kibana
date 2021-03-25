@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { Logger } from 'src/core/server';
-import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { AlertType, AlertExecutorOptions } from '../../types';
 import { ActionContext, EsQueryAlertActionContext, addMessages } from './action_context';
 import {
@@ -19,7 +19,6 @@ import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
 import { parseDuration } from '../../../../alerting/server';
 import { buildSortedEventsQuery } from '../../../common/build_sorted_events_query';
-import { ESSearchHit } from '../../../../../typings/elasticsearch';
 
 export const ES_QUERY_ID = '.es-query';
 
@@ -157,7 +156,7 @@ export function getAlertType(
     const { alertId, name, services, params, state } = options;
     const previousTimestamp = state.latestTimestamp;
 
-    const callCluster = services.callCluster;
+    const esClient = services.scopedClusterClient.asCurrentUser;
     const { parsedQuery, dateStart, dateEnd } = getSearchParams(params);
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -215,10 +214,10 @@ export function getAlertType(
 
     logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query - ${JSON.stringify(query)}`);
 
-    const searchResult: ESSearchResponse<unknown, {}> = await callCluster('search', query);
+    const { body: searchResult } = await esClient.search(query);
 
     if (searchResult.hits.hits.length > 0) {
-      const numMatches = searchResult.hits.total.value;
+      const numMatches = (searchResult.hits.total as estypes.TotalHits).value;
       logger.debug(`alert ${ES_QUERY_ID}:${alertId} "${name}" query has ${numMatches} matches`);
 
       // apply the alert condition
@@ -252,7 +251,7 @@ export function getAlertType(
 
         // update the timestamp based on the current search results
         const firstValidTimefieldSort = getValidTimefieldSort(
-          searchResult.hits.hits.find((hit: ESSearchHit) => getValidTimefieldSort(hit.sort))?.sort
+          searchResult.hits.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
         );
         if (firstValidTimefieldSort) {
           timestamp = firstValidTimefieldSort;
@@ -266,7 +265,7 @@ export function getAlertType(
   }
 }
 
-function getValidTimefieldSort(sortValues: Array<string | number> = []): undefined | string {
+function getValidTimefieldSort(sortValues: Array<string | number | null> = []): undefined | string {
   for (const sortValue of sortValues) {
     const sortDate = tryToParseAsDate(sortValue);
     if (sortDate) {
@@ -274,7 +273,7 @@ function getValidTimefieldSort(sortValues: Array<string | number> = []): undefin
     }
   }
 }
-function tryToParseAsDate(sortValue?: string | number): undefined | string {
+function tryToParseAsDate(sortValue?: string | number | null): undefined | string {
   const sortDate = typeof sortValue === 'string' ? Date.parse(sortValue) : sortValue;
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
