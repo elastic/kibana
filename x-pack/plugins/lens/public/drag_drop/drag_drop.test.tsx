@@ -39,7 +39,10 @@ describe('DragDrop', () => {
     registerDropTarget: jest.fn(),
   };
 
-  const value = { id: '1', humanData: { label: 'hello' } };
+  const value = {
+    id: '1',
+    humanData: { label: 'hello', groupLabel: 'X', position: 1, canSwap: true, canDuplicate: true },
+  };
 
   test('renders if nothing is being dragged', () => {
     const component = render(
@@ -349,10 +352,20 @@ describe('DragDrop', () => {
           dragType: 'move' as 'copy' | 'move',
           value: {
             id: '3',
-            humanData: { label: 'label3', position: 1, groupLabel: 'Y' },
+            humanData: {
+              label: 'label3',
+              position: 1,
+              groupLabel: 'Y',
+              canSwap: true,
+              canDuplicate: true,
+            },
           },
           onDrop,
-          dropTypes: ['replace_compatible'] as DropType[],
+          dropTypes: [
+            'replace_compatible',
+            'duplicate_compatible',
+            'swap_compatible',
+          ] as DropType[],
           order: [2, 0, 2, 0],
         },
         {
@@ -375,7 +388,9 @@ describe('DragDrop', () => {
             activeDropTarget: { ...items[1].value, onDrop, dropType: 'move_compatible' },
             dropTargetsByOrder: {
               '2,0,1,0': { ...items[1].value, onDrop, dropType: 'move_compatible' },
-              '2,0,2,0': { ...items[2].value, onDrop, dropType: 'replace_compatible' },
+              '2,0,2,0,0': { ...items[2].value, onDrop, dropType: 'replace_compatible' },
+              '2,0,1,0,1': { ...items[1].value, onDrop, dropType: 'duplicate_compatible' },
+              '2,0,1,0,2': { ...items[1].value, onDrop, dropType: 'swap_compatible' },
             },
             keyboardMode: true,
           }}
@@ -400,7 +415,7 @@ describe('DragDrop', () => {
       });
       keyboardHandler.simulate('keydown', { key: 'Enter' });
       expect(setA11yMessage).toBeCalledWith(
-        'Replace label3 in Y group at position 1 with Label1. Press space or enter to replace'
+        `You're dragging Label1 from  at position 1 over label3 from Y group at position 1. Press space or enter to replace label3 with Label1. Hold alt or option to duplicate. Hold shift to swap.`
       );
       expect(setActiveDropTarget).toBeCalledWith(undefined);
       expect(onDrop).toBeCalledWith(

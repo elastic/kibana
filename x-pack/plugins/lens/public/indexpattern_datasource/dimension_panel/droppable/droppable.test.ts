@@ -1450,50 +1450,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
           });
         });
 
-        it('copies incompatible column to the bottom of the target groupd', () => {
-          // config:
-          // a: col1
-          // b: col2, col3
-          // c: col4
-          // dragging col4 into newCol in group a
-
-          onDrop({
-            ...defaultProps,
-            columnId: 'newCol',
-            dropType: 'duplicate_incompatible',
-            droppedItem: draggingCol4,
-            state: testState,
-            groupId: 'a',
-            dimensionGroups: [
-              { ...dimensionGroups[0], accessors: [{ columnId: 'col1' }] },
-              { ...dimensionGroups[1], accessors: [{ columnId: 'col2' }, { columnId: 'col3' }] },
-              { ...dimensionGroups[2] },
-            ],
-          });
-
-          expect(setState).toBeCalledTimes(1);
-          expect(setState).toHaveBeenCalledWith({
-            ...testState,
-            layers: {
-              first: {
-                ...testState.layers.first,
-                columnOrder: ['col1', 'newCol', 'col2', 'col3', 'col4'],
-                columns: {
-                  col1: testState.layers.first.columns.col1,
-                  newCol: expect.objectContaining({
-                    sourceField: (testState.layers.first.columns.col4 as MedianIndexPatternColumn)
-                      .sourceField,
-                  }),
-                  col2: testState.layers.first.columns.col2,
-                  col3: testState.layers.first.columns.col3,
-                  col4: testState.layers.first.columns.col4,
-                },
-                incompleteColumns: {},
-              },
-            },
-          });
-        });
-
         it('when swapping compatibly, columns carry order', () => {
           // config:
           // a: col1
@@ -1521,7 +1477,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             layers: {
               first: {
                 ...testState.layers.first,
-                columnOrder: ['col4', 'col2', 'col3', 'col1'],
+                columnOrder: ['col1', 'col2', 'col3', 'col4'],
                 columns: {
                   col1: testState.layers.first.columns.col4,
                   col2: testState.layers.first.columns.col2,
