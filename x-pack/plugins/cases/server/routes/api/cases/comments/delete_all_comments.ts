@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import {
+  CASE_COMMENTS_URL,
+  ENABLE_CASE_CONNECTOR,
+  SAVED_OBJECT_TYPES,
+} from '../../../../../common/constants';
 import { AssociationType } from '../../../../../common/api';
-import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 
 export function initDeleteAllCommentsApi({
   caseService,
@@ -35,6 +39,12 @@ export function initDeleteAllCommentsApi({
     },
     async (context, request, response) => {
       try {
+        if (!ENABLE_CASE_CONNECTOR && request.query?.subCaseId !== undefined) {
+          throw Boom.badRequest(
+            'The `subCaseId` is not supported when the case connector feature is disabled'
+          );
+        }
+
         const client = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
@@ -42,13 +52,12 @@ export function initDeleteAllCommentsApi({
         const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
-        const id = request.query?.subCaseId ?? request.params.case_id;
+        const subCaseId = request.query?.subCaseId;
+        const id = subCaseId ?? request.params.case_id;
         const comments = await caseService.getCommentsByAssociation({
           client,
           id,
-          associationType: request.query?.subCaseId
-            ? AssociationType.subCase
-            : AssociationType.case,
+          associationType: subCaseId ? AssociationType.subCase : AssociationType.case,
         });
 
         await Promise.all(
@@ -68,7 +77,7 @@ export function initDeleteAllCommentsApi({
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
               caseId: request.params.case_id,
-              subCaseId: request.query?.subCaseId,
+              subCaseId,
               commentId: comment.id,
               fields: ['comment'],
             })

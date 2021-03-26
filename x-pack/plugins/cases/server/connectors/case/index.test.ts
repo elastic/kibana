@@ -900,7 +900,34 @@ describe('case connector', () => {
     });
   });
 
+  it('should throw an error when executing the connector', async () => {
+    expect.assertions(2);
+    const actionId = 'some-id';
+    const params: CaseExecutorParams = {
+      // @ts-expect-error
+      subAction: 'not-supported',
+      // @ts-expect-error
+      subActionParams: {},
+    };
+
+    const executorOptions: CaseActionTypeExecutorOptions = {
+      actionId,
+      config: {},
+      params,
+      secrets: {},
+      services,
+    };
+
+    try {
+      await caseActionType.executor(executorOptions);
+    } catch (e) {
+      expect(e).not.toBeNull();
+      expect(e.message).toBe('[Action][Case] connector not supported');
+    }
+  });
+
   // TODO: enable these when the actions framework provides a request and a saved objects service
+  // ENABLE_CASE_CONNECTOR: enable these tests after the case connector feature is completed
   describe.skip('execute', () => {
     it('allows only supported sub-actions', async () => {
       expect.assertions(2);

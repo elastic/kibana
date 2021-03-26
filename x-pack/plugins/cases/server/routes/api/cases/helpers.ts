@@ -15,11 +15,11 @@ import {
   CaseConnector,
   ESCaseConnector,
   ESCasesConfigureAttributes,
+  ConnectorTypeFields,
   ConnectorTypes,
   CaseStatuses,
   CaseType,
   ESConnectorFields,
-  ConnectorTypeFields,
 } from '../../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { sortToSnake } from '../utils';

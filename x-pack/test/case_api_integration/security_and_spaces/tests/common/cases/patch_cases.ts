@@ -134,7 +134,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(404);
     });
 
-    it('should 400 and not allow converting a collection back to an individual case', async () => {
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    it.skip('should 400 and not allow converting a collection back to an individual case', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -156,7 +157,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    it('should allow converting an individual case to a collection when it does not have alerts', async () => {
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    it.skip('should allow converting an individual case to a collection when it does not have alerts', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -212,7 +214,30 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    it("should 400 when attempting to update a collection case's status", async () => {
+    it('should 400 when attempting to update the case type when the case connector feature is disabled', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              type: CaseType.collection,
+            },
+          ],
+        })
+        .expect(400);
+    });
+
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    it.skip("should 400 when attempting to update a collection case's status", async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -438,10 +463,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should be no change in their status since syncing is disabled
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
             CaseStatuses.open
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
             CaseStatuses.open
           );
 
@@ -471,10 +496,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // There should still be no change in their status since syncing is disabled
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
             CaseStatuses.open
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
             CaseStatuses.open
           );
 
@@ -500,10 +525,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           // alerts should be updated now that the
-          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID)?._source?.signal.status).to.be(
             CaseStatuses.closed
           );
-          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source.signal.status).to.be(
+          expect(signals.get(defaultSignalsIndex)?.get(signalID2)?._source?.signal.status).to.be(
             CaseStatuses['in-progress']
           );
         });
@@ -573,10 +598,10 @@ export default ({ getService }: FtrProviderContext): void => {
           let signals = await getSignals();
           // There should be no change in their status since syncing is disabled
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
 
           const updatedIndWithStatus: CasesResponse = (await setStatus({
@@ -597,10 +622,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // There should still be no change in their status since syncing is disabled
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
 
           // turn on the sync settings
@@ -623,15 +648,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
           // alerts should be updated now that the
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInFirstIndex)?._source?.signal.status
           ).to.be(CaseStatuses.closed);
           expect(
-            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source.signal.status
+            signals.get(signalsIndex2)?.get(signalIDInSecondIndex)?._source?.signal.status
           ).to.be(CaseStatuses.closed);
 
           // the duplicate signal id in the other index should not be affect (so its status should be open)
           expect(
-            signals.get(defaultSignalsIndex)?.get(signalIDInSecondIndex)?._source.signal.status
+            signals.get(defaultSignalsIndex)?.get(signalIDInSecondIndex)?._source?.signal.status
           ).to.be(CaseStatuses.open);
         });
       });
