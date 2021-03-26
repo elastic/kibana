@@ -106,6 +106,10 @@ export interface DiscoverProps {
      */
     refetch$: Subject<undefined>;
     /**
+     * Fetch observable
+     */
+    fetch$: Subject<undefined>;
+    /**
      * Kibana core services used by discover
      */
     services: DiscoverServices;

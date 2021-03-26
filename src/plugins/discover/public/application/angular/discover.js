@@ -21,7 +21,6 @@ import {
 } from '../../../../data/public';
 import { getSortArray } from './doc_table';
 import indexTemplateLegacy from './discover_legacy.html';
-import { discoverResponseHandler } from './response_handler';
 import {
   getAngularModule,
   getHeaderActionMenuMounter,
@@ -31,7 +30,6 @@ import {
   getUrlTracker,
   redirectWhenMissing,
   subscribeWithScope,
-  tabifyAggResponse,
 } from '../../kibana_services';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
 import { getStateDefaults } from '../helpers/get_state_defaults';
@@ -47,7 +45,6 @@ import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_
 import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { applyAggsToSearchSource, getDimensions } from '../components/histogram';
 import { fetchStatuses } from '../components/constants';
 
 const services = getServices();
@@ -408,14 +405,6 @@ function discoverController($route, $scope) {
     const searchSessionId = searchSessionManager.getNextSearchSessionId();
     updateSearchSourceHelper();
 
-    $scope.opts.chartAggConfigs = applyAggsToSearchSource(
-      getTimeField() && !$scope.state.hideChart,
-      volatileSearchSource,
-      $scope.state.interval,
-      $scope.indexPattern,
-      data
-    );
-
     $scope.fetchStatus = fetchStatuses.LOADING;
     $scope.resultState = getResultState($scope.fetchStatus, $scope.rows);
     logInspectorRequest({ searchSessionId });
@@ -443,15 +432,6 @@ function discoverController($route, $scope) {
     inspectorRequest
       .stats(getResponseInspectorStats(resp, $scope.volatileSearchSource))
       .ok({ json: resp });
-
-    if (getTimeField() && !$scope.state.hideChart) {
-      const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
-      $scope.volatileSearchSource.rawResponse = resp;
-      const dimensions = getDimensions($scope.opts.chartAggConfigs, data);
-      if (dimensions) {
-        $scope.histogramData = discoverResponseHandler(tabifiedData, dimensions);
-      }
-    }
 
     $scope.hits = resp.hits.total;
     $scope.rows = resp.hits.hits;
@@ -513,6 +493,7 @@ function discoverController($route, $scope) {
       (error) => addFatalError(core.fatalErrors, error)
     )
   );
+  $scope.opts.fetch$ = fetch$;
 
   // Propagate current app state to url, then start syncing and fetching
   replaceUrlAppState().then(() => {

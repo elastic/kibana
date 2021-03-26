@@ -9,8 +9,8 @@
 import { getServices } from '../../kibana_services';
 import { buildPointSeriesData } from './helpers';
 
-function tableResponseHandler(table, dimensions) {
-  const converted = { tables: [] };
+function tableResponseHandler(table: any, dimensions: any) {
+  const converted = { tables: [], direction: '' };
   const split = dimensions.splitColumn || dimensions.splitRow;
 
   if (split) {
@@ -21,10 +21,11 @@ function tableResponseHandler(table, dimensions) {
     const splitMap = {};
     let splitIndex = 0;
 
-    table.rows.forEach((row, rowIndex) => {
+    table.rows.forEach((row: any, rowIndex: any) => {
       const splitValue = row[splitColumn.id];
 
       if (!splitMap.hasOwnProperty(splitValue)) {
+        // @ts-ignore
         splitMap[splitValue] = splitIndex++;
         const tableGroup = {
           $parent: converted,
@@ -36,21 +37,30 @@ function tableResponseHandler(table, dimensions) {
           table,
           tables: [],
         };
+
         tableGroup.tables.push({
+          // @ts-ignore
           $parent: tableGroup,
+          // @ts-ignore
           columns: table.columns,
+          // @ts-ignore
           rows: [],
         });
 
+        // @ts-ignore
         converted.tables.push(tableGroup);
       }
 
+      // @ts-ignore
       const tableIndex = splitMap[splitValue];
+      // @ts-ignore
       converted.tables[tableIndex].tables[0].rows.push(row);
     });
   } else {
     converted.tables.push({
+      // @ts-ignore
       columns: table.columns,
+      // @ts-ignore
       rows: table.rows,
     });
   }
@@ -58,7 +68,7 @@ function tableResponseHandler(table, dimensions) {
   return converted;
 }
 
-function convertTableGroup(tableGroup, convertTable) {
+function convertTableGroup(tableGroup: any, convertTable: any) {
   const tables = tableGroup.tables;
 
   if (!tables.length) return;
@@ -74,11 +84,12 @@ function convertTableGroup(tableGroup, convertTable) {
   }
 
   const out = {};
-  let outList;
+  let outList: any;
 
-  tables.forEach(function (table) {
+  tables.forEach(function (table: any) {
     if (!outList) {
       const direction = tableGroup.direction === 'row' ? 'rows' : 'columns';
+      // @ts-ignore
       outList = out[direction] = [];
     }
 
@@ -91,10 +102,10 @@ function convertTableGroup(tableGroup, convertTable) {
   return out;
 }
 
-export const discoverResponseHandler = (response, dimensions) => {
+export const discoverResponseHandler = (response: any, dimensions: any) => {
   const tableGroup = tableResponseHandler(response, dimensions);
 
-  let converted = convertTableGroup(tableGroup, (table) => {
+  let converted = convertTableGroup(tableGroup, (table: any) => {
     return buildPointSeriesData(table, dimensions);
   });
   if (!converted) {

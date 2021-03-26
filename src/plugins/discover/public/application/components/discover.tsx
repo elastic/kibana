@@ -20,7 +20,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import classNames from 'classnames';
@@ -43,6 +42,7 @@ import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
+import { useChartData } from './histogram/use_chart_data';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -57,7 +57,6 @@ export function Discover({
   fetchError,
   fieldCounts,
   fetchStatus,
-  histogramData,
   hits,
   indexPattern,
   minimumVisibleRows,
@@ -76,6 +75,7 @@ export function Discover({
     // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
     return collapseIcon && !collapseIcon.current;
   };
+
   const toggleHideChart = useCallback(() => {
     const newState = { ...state, hideChart: !state.hideChart };
     opts.stateContainer.setAppState(newState);
@@ -85,12 +85,16 @@ export function Discover({
   const { trackUiMetric, capabilities, indexPatterns, chrome, docLinks } = services;
 
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const bucketInterval = useMemo(() => {
-    const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
-    return bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
-      ? bucketAggConfig.buckets?.getInterval()
-      : undefined;
-  }, [opts.chartAggConfigs]);
+
+  const { chartData, timefilterUpdateHandler, bucketInterval } = useChartData({
+    data,
+    fetch$: opts.fetch$,
+    indexPattern,
+    interval: state.interval,
+    savedSearch,
+    searchSource,
+    hideChart: hideChart || !indexPattern.timeFieldName,
+  });
 
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
@@ -165,17 +169,6 @@ export function Discover({
       }
     },
     [setAppState]
-  );
-
-  const timefilterUpdateHandler = useCallback(
-    (ranges: { from: number; to: number }) => {
-      data.query.timefilter.timefilter.setTime({
-        from: moment(ranges.from).toISOString(),
-        to: moment(ranges.to).toISOString(),
-        mode: 'absolute',
-      });
-    },
-    [data]
   );
 
   const onBackToTop = useCallback(() => {
@@ -337,7 +330,7 @@ export function Discover({
                         )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
-                    {!hideChart && opts.timefield && (
+                    {chartData && (
                       <EuiFlexItem grow={false}>
                         <section
                           aria-label={i18n.translate(
@@ -348,17 +341,15 @@ export function Discover({
                           )}
                           className="dscTimechart"
                         >
-                          {opts.chartAggConfigs && histogramData && rows.length !== 0 && (
-                            <div
-                              className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
-                              data-test-subj="discoverChart"
-                            >
-                              <DiscoverHistogramMemoized
-                                chartData={histogramData}
-                                timefilterUpdateHandler={timefilterUpdateHandler}
-                              />
-                            </div>
-                          )}
+                          <div
+                            className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
+                            data-test-subj="discoverChart"
+                          >
+                            <DiscoverHistogramMemoized
+                              chartData={chartData}
+                              timefilterUpdateHandler={timefilterUpdateHandler}
+                            />
+                          </div>
                         </section>
                         <EuiSpacer size="s" />
                       </EuiFlexItem>
