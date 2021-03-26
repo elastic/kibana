@@ -17,7 +17,7 @@ import moment, { Moment } from 'moment';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { useSourceViaHttp } from '../../../../../../containers/source/use_source_via_http';
+import { useSourceViaHttp } from '../../../../../../containers/metrics_source/use_source_via_http';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
@@ -42,7 +42,6 @@ export const JobSetupScreen = (props: Props) => {
   const [filterQuery, setFilterQuery] = useState<string>('');
   const { createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
-    type: 'metrics',
   });
 
   const indicies = h.sourceConfiguration.indices;
@@ -79,7 +78,7 @@ export const JobSetupScreen = (props: Props) => {
     }
   }, [props.jobType, k.jobSummaries, h.jobSummaries]);
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
+  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
     createDerivedIndexPattern,
   ]);
 
