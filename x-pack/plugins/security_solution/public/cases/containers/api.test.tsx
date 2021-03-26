@@ -384,7 +384,7 @@ describe('Case Configuration API', () => {
     });
     const data = {
       // TODO: remove this
-      class: 'securitySolution',
+      scope: 'securitySolution',
       description: 'description',
       tags: ['tag'],
       title: 'title',

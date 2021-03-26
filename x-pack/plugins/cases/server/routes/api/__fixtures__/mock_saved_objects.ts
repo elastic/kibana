@@ -29,7 +29,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
     type: 'cases',
     id: 'mock-id-1',
     attributes: {
-      class: 'securitySolution',
+      scope: 'securitySolution',
       closed_at: null,
       closed_by: null,
       connector: {
@@ -68,7 +68,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
     type: 'cases',
     id: 'mock-id-2',
     attributes: {
-      class: 'securitySolution',
+      scope: 'securitySolution',
       closed_at: null,
       closed_by: null,
       connector: {
@@ -107,7 +107,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
     type: 'cases',
     id: 'mock-id-3',
     attributes: {
-      class: 'securitySolution',
+      scope: 'securitySolution',
       closed_at: null,
       closed_by: null,
       connector: {
@@ -150,7 +150,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
     type: 'cases',
     id: 'mock-id-4',
     attributes: {
-      class: 'securitySolution',
+      scope: 'securitySolution',
       closed_at: '2019-11-25T22:32:17.947Z',
       closed_by: {
         full_name: 'elastic',

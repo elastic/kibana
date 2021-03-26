@@ -29,14 +29,13 @@ export class AuthorizationAuditLogger {
     scope?: string;
     operation: OperationDetails;
   }): string {
-    // class: determine what we're calling this (don't use class)
-    const classMsg = scope == null ? 'of any class' : `of class "${scope}"`;
+    const scopeMsg = scope == null ? 'of any class' : `of class "${scope}"`;
     /**
      * This will take the form:
      * `Unauthorized to create case of class "securitySolution"`
      * `Unauthorized to find cases of any class`.
      */
-    return `${result} to ${operation.verbs.present} ${operation.docType} ${classMsg}`;
+    return `${result} to ${operation.verbs.present} ${operation.docType} ${scopeMsg}`;
   }
 
   private logSuccessEvent({
@@ -125,7 +124,7 @@ export class AuthorizationAuditLogger {
   }): string {
     const message = `${AuthorizationResult.Authorized} to ${operation.verbs.present} ${
       operation.docType
-    } of class: ${scopes.join(', ')}`;
+    } of scope: ${scopes.join(', ')}`;
     this.logSuccessEvent({ message, operation, username });
     return message;
   }

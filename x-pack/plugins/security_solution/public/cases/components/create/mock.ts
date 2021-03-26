@@ -11,7 +11,7 @@ import { choices } from '../connectors/mock';
 
 export const sampleTags = ['coke', 'pepsi'];
 export const sampleData: CasePostRequest = {
-  class: 'securitySolution',
+  scope: 'securitySolution',
   description: 'what a great description',
   tags: sampleTags,
   title: 'what a cool title',
