@@ -38,7 +38,10 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: [buildPhraseFilter('transaction.type', 'page-load', indexPattern)],
+    filters: [
+      buildPhraseFilter('transaction.type', 'page-load', indexPattern),
+      buildPhraseFilter('processor.event', 'transaction', indexPattern),
+    ],
     labels: { ...FieldLabels, 'service.name': 'Web Application' },
     reportDefinitions: [
       {

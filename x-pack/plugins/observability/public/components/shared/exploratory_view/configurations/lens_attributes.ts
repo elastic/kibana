@@ -121,21 +121,17 @@ export class LensAttributes {
     | LastValueIndexPatternColumn
     | DateHistogramIndexPatternColumn
     | RangeIndexPatternColumn {
-    const { xAxisColumn } = this.reportViewConfig;
-
-    const xAxisField = xAxisColumn.sourceField!;
-
-    const fieldType = this.getFieldType();
+    const { type: fieldType, name: fieldName } = this.getFieldType()!;
 
     if (fieldType === 'date') {
-      return this.getDateHistogramColumn(xAxisField);
+      return this.getDateHistogramColumn(fieldName);
     }
     if (fieldType === 'number') {
-      return this.getNumberColumn(xAxisField);
+      return this.getNumberColumn(fieldName);
     }
 
     // FIXME review my approach again
-    return this.getDateHistogramColumn(xAxisField);
+    return this.getDateHistogramColumn(fieldName);
   }
 
   getFieldType() {
@@ -148,13 +144,15 @@ export class LensAttributes {
 
       const customField = rdf.find(({ field }) => field === xAxisField);
 
-      if (customField && this.reportDefinitions[xAxisField]) {
-        xAxisField = this.reportDefinitions[xAxisField];
+      if (customField) {
+        if (this.reportDefinitions[xAxisField]) {
+          xAxisField = this.reportDefinitions[xAxisField];
+        } else if (customField.options?.[0].field) {
+          xAxisField = customField.options?.[0].field;
+        }
       }
 
-      const fieldMeta = this.indexPattern.fields.find((field) => field.name === xAxisField);
-
-      return fieldMeta?.type;
+      return this.indexPattern.fields.find((field) => field.name === xAxisField);
     }
   }
 
