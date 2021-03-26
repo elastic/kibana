@@ -8,16 +8,18 @@
 import React from 'react';
 import { EuiImage } from '@elastic/eui';
 import styled from 'styled-components';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export function EmptyView() {
-  const { core } = usePluginContext();
+  const {
+    services: { http },
+  } = useKibana();
 
   return (
     <Wrapper>
       <EuiImage
         alt="Visulization"
-        url={core.http.basePath.prepend(`/plugins/observability/assets/kibana_dashboard_light.svg`)}
+        url={http!.basePath.prepend(`/plugins/observability/assets/kibana_dashboard_light.svg`)}
       />
     </Wrapper>
   );

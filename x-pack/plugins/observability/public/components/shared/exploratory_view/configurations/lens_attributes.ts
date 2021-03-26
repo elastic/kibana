@@ -185,6 +185,7 @@ export class LensAttributes {
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       // fittingFunction: 'None',
+
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },

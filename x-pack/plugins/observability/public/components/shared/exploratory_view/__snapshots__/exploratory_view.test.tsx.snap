@@ -1,0 +1,590 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExploratoryView renders a label for button 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": .c0 {
+  text-align: center;
+  opacity: 0.4;
+  height: 550pz;
+}
+
+<body>
+    <div>
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+        style="max-width: 1800px; min-width: 1200px; margin: 0px auto;"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <div
+              class="euiText euiText--medium"
+            >
+              <h2>
+                Exploratory view
+              </h2>
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton-isDisabled"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButtonContent__icon"
+                  data-euiicon-type="lensApp"
+                />
+                <span
+                  class="euiButton__text"
+                >
+                  Open in Lens
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="c0"
+        >
+          <figure
+            class="euiImage euiImage--original"
+          >
+            <img
+              alt="Visulization"
+              class="euiImage__img"
+              src="/plugins/observability/assets/kibana_dashboard_light.svg"
+            />
+          </figure>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiBasicTable"
+        >
+          <div>
+            <div
+              class="euiTableHeaderMobile"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+              </div>
+            </div>
+            <table
+              class="euiTable euiTable--responsive"
+              id="__table_generated-id"
+              tabindex="-1"
+            >
+              <caption
+                class="euiScreenReaderOnly euiTableCaption"
+              />
+              <thead>
+                <tr>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_id_0"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 15%;"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Name"
+                      >
+                        Name
+                      </span>
+                    </div>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_defaultFilters_1"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Filter"
+                      >
+                        Filter
+                      </span>
+                    </div>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_breakdowns_2"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 15%;"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Breakdowns"
+                      >
+                        Breakdowns
+                      </span>
+                    </div>
+                  </th>
+                  <td
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_id_3"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 15%;"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignCenter"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                      />
+                    </div>
+                  </td>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_id_4"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 20%;"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignRight"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Time"
+                      >
+                        <div>
+                          Time
+                        </div>
+                      </span>
+                    </div>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_id_5"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 5%;"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignCenter"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Actions"
+                      >
+                        Actions
+                      </span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  class="euiTableRow"
+                >
+                  <td
+                    class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                    colspan="6"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignCenter"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                      >
+                        No series found, please add a series.
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div>
+          <button
+            class="euiButton euiButton--primary"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                data-euiicon-type="arrowRight"
+              />
+              <span
+                class="euiButton__text"
+              >
+                Add series
+              </span>
+            </span>
+          </button>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+      style="max-width: 1800px; min-width: 1200px; margin: 0px auto;"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem"
+        >
+          <div
+            class="euiText euiText--medium"
+          >
+            <h2>
+              Exploratory view
+            </h2>
+          </div>
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <button
+            class="euiButton euiButton--primary euiButton-isDisabled"
+            disabled=""
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                data-euiicon-type="lensApp"
+              />
+              <span
+                class="euiButton__text"
+              >
+                Open in Lens
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="sc-AxhUy fzoAHG"
+      >
+        <figure
+          class="euiImage euiImage--original"
+        >
+          <img
+            alt="Visulization"
+            class="euiImage__img"
+            src="/plugins/observability/assets/kibana_dashboard_light.svg"
+          />
+        </figure>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiBasicTable"
+      >
+        <div>
+          <div
+            class="euiTableHeaderMobile"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              />
+            </div>
+          </div>
+          <table
+            class="euiTable euiTable--responsive"
+            id="__table_generated-id"
+            tabindex="-1"
+          >
+            <caption
+              class="euiScreenReaderOnly euiTableCaption"
+            />
+            <thead>
+              <tr>
+                <th
+                  class="euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_id_0"
+                  role="columnheader"
+                  scope="col"
+                  style="width: 15%;"
+                >
+                  <div
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="Name"
+                    >
+                      Name
+                    </span>
+                  </div>
+                </th>
+                <th
+                  class="euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_defaultFilters_1"
+                  role="columnheader"
+                  scope="col"
+                  style="width: 25%;"
+                >
+                  <div
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="Filter"
+                    >
+                      Filter
+                    </span>
+                  </div>
+                </th>
+                <th
+                  class="euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_breakdowns_2"
+                  role="columnheader"
+                  scope="col"
+                  style="width: 15%;"
+                >
+                  <div
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="Breakdowns"
+                    >
+                      Breakdowns
+                    </span>
+                  </div>
+                </th>
+                <td
+                  class="euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_id_3"
+                  role="columnheader"
+                  scope="col"
+                  style="width: 15%;"
+                >
+                  <div
+                    class="euiTableCellContent euiTableCellContent--alignCenter"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    />
+                  </div>
+                </td>
+                <th
+                  class="euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_id_4"
+                  role="columnheader"
+                  scope="col"
+                  style="width: 20%;"
+                >
+                  <div
+                    class="euiTableCellContent euiTableCellContent--alignRight"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="Time"
+                    >
+                      <div>
+                        Time
+                      </div>
+                    </span>
+                  </div>
+                </th>
+                <th
+                  class="euiTableHeaderCell"
+                  data-test-subj="tableHeaderCell_id_5"
+                  role="columnheader"
+                  scope="col"
+                  style="width: 5%;"
+                >
+                  <div
+                    class="euiTableCellContent euiTableCellContent--alignCenter"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                      title="Actions"
+                    >
+                      Actions
+                    </span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="euiTableRow"
+              >
+                <td
+                  class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                  colspan="6"
+                >
+                  <div
+                    class="euiTableCellContent euiTableCellContent--alignCenter"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      No series found, please add a series.
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <div>
+        <button
+          class="euiButton euiButton--primary"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              data-euiicon-type="arrowRight"
+            />
+            <span
+              class="euiButton__text"
+            >
+              Add series
+            </span>
+          </span>
+        </button>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "history": Object {
+    "action": "POP",
+    "block": [Function],
+    "canGo": [Function],
+    "createHref": [Function],
+    "entries": Array [
+      Object {
+        "hash": "",
+        "key": "ngqvzn",
+        "pathname": "/",
+        "search": "",
+        "state": undefined,
+      },
+    ],
+    "go": [Function],
+    "goBack": [Function],
+    "goForward": [Function],
+    "index": 0,
+    "length": 1,
+    "listen": [Function],
+    "location": Object {
+      "hash": "",
+      "key": "ngqvzn",
+      "pathname": "/",
+      "search": "",
+      "state": undefined,
+    },
+    "push": [Function],
+    "replace": [Function],
+  },
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
