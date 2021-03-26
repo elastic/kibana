@@ -307,7 +307,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         helpText={
           <FormattedMessage
             id="xpack.fleet.settings.fleetServerHostsHelpTect"
-            defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet will show the first provided URL for enrollment purposes. For more information, see the {link}.'"
+            defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet will show the first provided URL for enrollment purposes. For more information, see the {link}."
             values={{
               link: (
                 <EuiLink
