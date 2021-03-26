@@ -27,6 +27,7 @@ import {
   HostStatus,
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { registerEndpointRoutes, METADATA_REQUEST_ROUTE } from './index';
 import {
   createMockEndpointAppContextServiceStartContract,
@@ -93,6 +94,7 @@ describe('test endpoint route', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
     });
 
@@ -188,6 +190,7 @@ describe('test endpoint route', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
     });
 
