@@ -20,7 +20,7 @@ export class DynamicTextProperty extends DynamicStyleProperty<LabelDynamicOption
         '',
       ]);
     } else {
-      if (typeof mbMap.getLayoutProperty(mbLayerId, 'text-field') !== undefined) {
+      if (typeof mbMap.getLayoutProperty(mbLayerId, 'text-field') !== 'undefined') {
         mbMap.setLayoutProperty(mbLayerId, 'text-field', undefined);
       }
     }
