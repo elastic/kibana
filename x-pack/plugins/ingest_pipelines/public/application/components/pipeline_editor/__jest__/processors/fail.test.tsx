@@ -47,7 +47,7 @@ describe('Processor: Fail', () => {
   test('prevents form submission if required fields are not provided', async () => {
     const {
       actions: { addProcessor, saveNewProcessor, addProcessorType },
-      form
+      form,
     } = testBed;
 
     // Open flyout to add new processor
