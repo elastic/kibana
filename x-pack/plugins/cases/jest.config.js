@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+  testEnvironment: 'jest-environment-jsdom-thirteen',
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/cases'],
