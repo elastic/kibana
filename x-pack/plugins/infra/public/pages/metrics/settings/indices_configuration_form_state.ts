@@ -11,16 +11,14 @@ import {
   createInputFieldProps,
   createInputRangeFieldProps,
   validateInputFieldNotEmpty,
-} from './input_fields';
+} from '../../../components/source_configuration/input_fields';
 
 interface FormState {
   name: string;
   description: string;
   metricAlias: string;
-  logAlias: string;
   containerField: string;
   hostField: string;
-  messageField: string[];
   podField: string;
   tiebreakerField: string;
   timestampField: string;
@@ -55,16 +53,6 @@ export const useIndicesConfigurationFormState = ({
         value: formState.name,
       }),
     [formState.name]
-  );
-  const logAliasFieldProps = useMemo(
-    () =>
-      createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.logAlias),
-        name: 'logAlias',
-        onChange: (logAlias) => setFormStateChanges((changes) => ({ ...changes, logAlias })),
-        value: formState.logAlias,
-      }),
-    [formState.logAlias]
   );
   const metricAliasFieldProps = useMemo(
     () =>
@@ -144,7 +132,6 @@ export const useIndicesConfigurationFormState = ({
   const fieldProps = useMemo(
     () => ({
       name: nameFieldProps,
-      logAlias: logAliasFieldProps,
       metricAlias: metricAliasFieldProps,
       containerField: containerFieldFieldProps,
       hostField: hostFieldFieldProps,
@@ -155,7 +142,6 @@ export const useIndicesConfigurationFormState = ({
     }),
     [
       nameFieldProps,
-      logAliasFieldProps,
       metricAliasFieldProps,
       containerFieldFieldProps,
       hostFieldFieldProps,
@@ -193,11 +179,9 @@ export const useIndicesConfigurationFormState = ({
 const defaultFormState: FormState = {
   name: '',
   description: '',
-  logAlias: '',
   metricAlias: '',
   containerField: '',
   hostField: '',
-  messageField: [],
   podField: '',
   tiebreakerField: '',
   timestampField: '',
