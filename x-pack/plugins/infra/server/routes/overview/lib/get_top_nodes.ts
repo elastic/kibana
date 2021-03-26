@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { TopNodesRequest } from '../../../../common/http_api/overview_api';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { ESSearchClient } from '../../../lib/metrics/types';
 import { convertESResponseToTopNodesResponse } from './convert_es_response_to_top_nodes_response';
 import { createTopNodesQuery } from './create_top_nodes_query';
@@ -14,7 +14,7 @@ import { ESResponseForTopNodes } from './types';
 export const queryTopNodes = async (
   options: TopNodesRequest,
   client: ESSearchClient,
-  source: InfraSource
+  source: MetricsSourceConfiguration
 ) => {
   const params = {
     index: source.configuration.metricAlias,
