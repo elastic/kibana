@@ -499,7 +499,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 isBucketed: false,
                 sourceField: 'bytes',
-                operationType: 'avg',
+                operationType: 'average',
                 timeScale: 'h',
               },
               col3: {
@@ -612,7 +612,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'number',
                 isBucketed: false,
                 sourceField: 'bytes',
-                operationType: 'avg',
+                operationType: 'average',
                 timeScale: 'h',
               },
               col3: {
@@ -788,7 +788,7 @@ describe('IndexPattern Data Source', () => {
                 dataType: 'date',
                 isBucketed: false,
                 sourceField: 'timefield',
-                operationType: 'cardinality',
+                operationType: 'unique_count',
               },
               col2: {
                 label: 'Date',
@@ -838,7 +838,7 @@ describe('IndexPattern Data Source', () => {
                   dataType: 'date',
                   isBucketed: false,
                   sourceField: 'timefield',
-                  operationType: 'cardinality',
+                  operationType: 'unique_count',
                 },
                 col2: {
                   label: 'Reference',
@@ -1136,7 +1136,7 @@ describe('IndexPattern Data Source', () => {
                     dataType: 'number',
                     isBucketed: false,
                     label: 'Foo',
-                    operationType: 'avg',
+                    operationType: 'average',
                     sourceField: 'bytes',
                   },
                 },
@@ -1163,7 +1163,7 @@ describe('IndexPattern Data Source', () => {
             columnOrder: [],
             columns: {},
             incompleteColumns: {
-              col1: { operationType: 'avg' as const },
+              col1: { operationType: 'average' as const },
               col2: { operationType: 'sum' as const },
             },
           },

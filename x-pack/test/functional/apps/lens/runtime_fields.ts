@@ -50,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editField();
       await fieldEditor.setName('runtimefield2');
       await fieldEditor.save();
+      await fieldEditor.confirmSave();
       await PageObjects.lens.searchField('runtime');
       await PageObjects.lens.waitForField('runtimefield2');
       await PageObjects.lens.dragFieldToDimensionTrigger(
@@ -66,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should able to remove field', async () => {
       await PageObjects.lens.clickField('runtimefield2');
       await PageObjects.lens.removeField();
+      await fieldEditor.confirmDelete();
       await PageObjects.lens.waitForFieldMissing('runtimefield2');
     });
   });
