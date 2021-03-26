@@ -33,7 +33,6 @@ const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
   }
 );
 
-// const stringifiedRuntimeMappings = JSON.stringify(defaults.runtimeMappings, null, 2);
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
 
@@ -65,7 +64,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     convertToJson,
     setXJson: setAdvancedRuntimeMappingsConfig,
     xJson: advancedRuntimeMappingsConfig,
-  } = useXJsonMode(''); // stringifiedRuntimeMappings ?? ''
+  } = useXJsonMode('');
 
   const applyChanges = () => {
     const removeRuntimeMappings = advancedRuntimeMappingsConfig === '';

@@ -13,7 +13,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+import { RuntimeMappings } from '../../../../../../common/types/fields';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
@@ -27,11 +27,11 @@ import {
   EsSorting,
   UseIndexDataReturnType,
   getProcessedFields,
+  getRuntimeFieldsMapping,
 } from '../../../../components/data_grid';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
 import { ml } from '../../../../services/ml_api_service';
-import { getRuntimeFieldsMapping } from '../../../../components/data_grid/common';
 
 type IndexSearchResponse = estypes.SearchResponse;
 
@@ -51,7 +51,7 @@ export const useIndexData = (
   indexPattern: IndexPattern,
   query: Record<string, any> | undefined,
   toastNotifications: CoreSetup['notifications']['toasts'],
-  runtimeMappings?: Record<string, RuntimeField>
+  runtimeMappings?: RuntimeMappings
 ): UseIndexDataReturnType => {
   const indexPatternFields = useMemo(() => getFieldsFromKibanaIndexPattern(indexPattern), [
     indexPattern,

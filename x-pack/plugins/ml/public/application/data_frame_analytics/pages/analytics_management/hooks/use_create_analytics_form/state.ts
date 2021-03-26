@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { RuntimeMappings } from '../../../../../../../common/types/fields';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
@@ -95,9 +95,9 @@ export interface State {
     requiredFieldsError: string | undefined;
     randomizeSeed: undefined | number;
     resultsField: undefined | string;
-    runtimeMappings: undefined | Record<string, RuntimeField>;
+    runtimeMappings: undefined | RuntimeMappings;
     runtimeMappingsUpdated: boolean;
-    previousRuntimeMapping: undefined | Record<string, RuntimeField>;
+    previousRuntimeMapping: undefined | RuntimeMappings;
     softTreeDepthLimit: undefined | number;
     softTreeDepthTolerance: undefined | number;
     sourceIndex: EsIndexName;
@@ -350,6 +350,7 @@ export function getFormStateFromJobConfig(
     sourceIndex: Array.isArray(analyticsJobConfig.source.index)
       ? analyticsJobConfig.source.index.join(',')
       : analyticsJobConfig.source.index,
+    runtimeMappings: analyticsJobConfig.source.runtime_mappings,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
     maxNumThreads: analyticsJobConfig.max_num_threads,
     includes: analyticsJobConfig.analyzed_fields?.includes ?? [],

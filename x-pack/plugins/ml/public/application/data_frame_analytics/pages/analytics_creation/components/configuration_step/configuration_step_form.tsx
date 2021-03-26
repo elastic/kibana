@@ -31,7 +31,8 @@ import {
   FieldSelectionItem,
 } from '../../../../common/analytics';
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
+import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { Messages } from '../shared';
 import {
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -53,6 +54,7 @@ import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
+import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';
@@ -74,6 +76,21 @@ function getIndexDataQuery(savedSearchQuery: SavedSearchQuery, jobConfigQuery: a
   }
 
   return savedSearchQuery !== null ? savedSearchQuery : jobConfigQuery;
+}
+
+function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: RuntimeMappingsType) {
+  const runtimeOptions: EuiComboBoxOptionOption[] = [];
+  Object.keys(runtimeMappings).forEach((id) => {
+    const field = runtimeMappings[id];
+    // @ts-ignore
+    if (shouldAddAsDepVarOption(id, field.type, jobType)) {
+      runtimeOptions.push({
+        label: id,
+        key: `runtime_mapping_${id}`,
+      });
+    }
+  });
+  return runtimeOptions;
 }
 
 export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
@@ -101,7 +118,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   >();
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
-  const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
+  const { cloneJob, estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
   const {
     dependentVariable,
@@ -186,6 +203,14 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               resetDependentVariable = false;
             }
           }
+        }
+
+        if (
+          cloneJob !== undefined &&
+          typeof runtimeMappings === 'object' &&
+          Object.keys(runtimeMappings).includes(form.dependentVariable)
+        ) {
+          resetDependentVariable = false;
         }
 
         if (resetDependentVariable) {
@@ -309,16 +334,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         setDependentVariableOptions(filteredOptions);
       } else if (runtimeMappings) {
         // add to filteredOptions if it's the type supported
-        Object.keys(runtimeMappings).forEach((id) => {
-          const field = runtimeMappings[id];
-          if (shouldAddAsDepVarOption(id, field.type, jobType)) {
-            filteredOptions.push({
-              label: id,
-              key: `runtime_mapping_${id}`,
-            });
-          }
-        });
-        setDependentVariableOptions(filteredOptions);
+        const runtimeOptions = getRuntimeDepVarOptions(jobType, runtimeMappings);
+        setDependentVariableOptions([...filteredOptions, ...runtimeOptions]);
       }
 
       if (resetDepVar) {
@@ -332,6 +349,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         });
       } else if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
         const formCopy = cloneDeep(form);
+        // Remove old runtime fields from 'includes' table before sending to _explain
         const filteredIncludes = includes.filter((field) => {
           const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
           return !isRemovedRuntimeField;
