@@ -867,7 +867,7 @@ It's a bit buggy at times (for example, if you run the same test multiple times,
 
 Jenkins has rich support for GitHub spread across many different plugins. It can trigger builds in response to webhook payloads, automatically create jobs for repositories in an organization, has support for self-hosted GitHub, and has many settings for triggering pull requests.
 
-It's worth mentioning, however, that we've had many issues with these integrations. For example, the GitHub Pull Request Builder plugin, which currently provides PR triggering for us and other teams, has been the source of several issues at Elastic. It's had performance issues, triggers builds erroneously, and has been mostly unmaintained for several years.
+It's worth mentioning, however, that we've had and continue to have many issues with these integrations. For example, the GitHub Pull Request Builder plugin, which currently provides PR triggering for us and other teams, has been the source of several issues at Elastic. It's had performance issues, triggers builds erroneously, and has been mostly unmaintained for several years.
 
 ## Other solutions
 
