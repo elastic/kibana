@@ -6,10 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ConditionEntryField, OperatingSystem } from '../types';
-import { getDuplicateFields, isValidHash } from '../validation/trusted_apps';
+import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
+import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
 
 export const DeleteTrustedAppsRequestSchema = {
+  params: schema.object({
+    id: schema.string(),
+  }),
+};
+
+export const GetOneTrustedAppRequestSchema = {
   params: schema.object({
     id: schema.string(),
   }),
@@ -19,6 +25,7 @@ export const GetTrustedAppsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
     per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
+    kuery: schema.maybe(schema.string()),
   }),
 };
 
@@ -40,18 +47,18 @@ const CommonEntrySchema = {
     schema.siblingRef('field'),
     ConditionEntryField.HASH,
     schema.string({
-      validate: (hash) =>
+      validate: (hash: string) =>
         isValidHash(hash) ? undefined : `invalidField.${ConditionEntryField.HASH}`,
     }),
     schema.conditional(
       schema.siblingRef('field'),
       ConditionEntryField.PATH,
       schema.string({
-        validate: (field) =>
+        validate: (field: string) =>
           field.length > 0 ? undefined : `invalidField.${ConditionEntryField.PATH}`,
       }),
       schema.string({
-        validate: (field) =>
+        validate: (field: string) =>
           field.length > 0 ? undefined : `invalidField.${ConditionEntryField.SIGNER}`,
       })
     )
@@ -99,7 +106,7 @@ const EntrySchemaDependingOnOS = schema.conditional(
  */
 const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
   minSize: 1,
-  validate(entries) {
+  validate(entries: ConditionEntry[]) {
     return (
       getDuplicateFields(entries)
         .map((field) => `duplicatedEntry.${field}`)
@@ -108,8 +115,8 @@ const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
   },
 });
 
-export const PostTrustedAppCreateRequestSchema = {
-  body: schema.object({
+const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
+  schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
     description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
     os: schema.oneOf([
@@ -117,6 +124,26 @@ export const PostTrustedAppCreateRequestSchema = {
       schema.literal(OperatingSystem.LINUX),
       schema.literal(OperatingSystem.MAC),
     ]),
+    effectScope: schema.oneOf([
+      schema.object({
+        type: schema.literal('global'),
+      }),
+      schema.object({
+        type: schema.literal('policy'),
+        policies: schema.arrayOf(schema.string({ minLength: 1 })),
+      }),
+    ]),
     entries: EntriesSchema,
+    ...(forUpdateFlow ? { version: schema.maybe(schema.string()) } : {}),
+  });
+
+export const PostTrustedAppCreateRequestSchema = {
+  body: getTrustedAppForOsScheme(),
+};
+
+export const PutTrustedAppUpdateRequestSchema = {
+  params: schema.object({
+    id: schema.string(),
   }),
+  body: getTrustedAppForOsScheme(true),
 };
