@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
 // Default parameter values automatically added to the URI parts processor when saved
 const defaultFailParameters = {
@@ -16,6 +16,7 @@ const defaultFailParameters = {
   description: undefined,
 };
 
+const FAIL_TYPE = 'fail';
 describe('Processor: Fail', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
@@ -46,7 +47,7 @@ describe('Processor: Fail', () => {
   test('prevents form submission if required fields are not provided', async () => {
     const {
       actions: { addProcessor, saveNewProcessor, addProcessorType },
-      form,
+      form
     } = testBed;
 
     // Open flyout to add new processor
@@ -58,7 +59,7 @@ describe('Processor: Fail', () => {
     expect(form.getErrorsMessages()).toEqual(['A type is required.']);
 
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'fail', label: 'Fail' });
+    await addProcessorType(FAIL_TYPE);
 
     // Click submit button with only the type defined
     await saveNewProcessor();
@@ -76,14 +77,13 @@ describe('Processor: Fail', () => {
     // Open flyout to add new processor
     addProcessor();
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'fail', label: 'Fail' });
+    await addProcessorType(FAIL_TYPE);
     // Add "message" value (required)
     form.setInputValue('messageField.input', 'Test Error Message');
     // Save the field
     await saveNewProcessor();
 
-    const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
-    const { processors } = onUpdateResult.getData();
+    const processors = getProcessorValue(onUpdate, FAIL_TYPE);
     expect(processors[0].fail).toEqual({
       message: 'Test Error Message',
       ...defaultFailParameters,
@@ -99,15 +99,14 @@ describe('Processor: Fail', () => {
     // Open flyout to add new processor
     addProcessor();
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'fail', label: 'Fail' });
+    await addProcessorType(FAIL_TYPE);
     // Add "message" value (required)
     form.setInputValue('messageField.input', 'Test Error Message');
 
     // Save the field with new changes
     await saveNewProcessor();
 
-    const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
-    const { processors } = onUpdateResult.getData();
+    const processors = getProcessorValue(onUpdate, FAIL_TYPE);
     expect(processors[0].fail).toEqual({
       message: 'Test Error Message',
       ignore_failure: undefined,

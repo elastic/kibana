@@ -10,6 +10,10 @@ import { LensUsage } from './types';
 
 const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   app_query_change: { type: 'long' },
+  open_help_popover: {
+    type: 'long',
+    _meta: { description: 'Number of times the user opened one of the in-product help popovers.' },
+  },
   indexpattern_field_info_click: { type: 'long' },
   loaded: { type: 'long' },
   app_filters_updated: { type: 'long' },
@@ -34,6 +38,44 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   xy_change_layer_display: { type: 'long' },
   xy_layer_removed: { type: 'long' },
   xy_layer_added: { type: 'long' },
+  open_field_editor_edit: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of times the user opened the editor flyout to edit a field from within Lens.',
+    },
+  },
+  open_field_editor_add: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of times the user opened the editor flyout to add a field from within Lens.',
+    },
+  },
+  save_field_edit: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user edited a field from within Lens.',
+    },
+  },
+  save_field_add: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user added a field from within Lens.',
+    },
+  },
+  open_field_delete_modal: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user opened the field delete modal from within Lens.',
+    },
+  },
+  delete_field: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user deleted a field from within Lens.',
+    },
+  },
   indexpattern_dimension_operation_terms: {
     type: 'long',
     _meta: {

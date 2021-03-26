@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 interface Props {
   getCurl: () => Promise<string>;
   getDocumentation: () => Promise<string | null>;
-  autoIndent: (ev?: React.MouseEvent) => void;
+  autoIndent: (ev: React.MouseEvent) => void;
   addNotification?: (opts: { title: string }) => void;
 }
 
@@ -84,8 +84,7 @@ export class ConsoleMenu extends Component<Props, State> {
     window.open(documentation, '_blank');
   };
 
-  // Using `any` here per this issue: https://github.com/elastic/eui/issues/2265
-  autoIndent: any = (event: React.MouseEvent) => {
+  autoIndent = (event: React.MouseEvent) => {
     this.closePopover();
     this.props.autoIndent(event);
   };
