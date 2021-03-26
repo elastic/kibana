@@ -1,0 +1,51 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "exclude": [
+    // tests
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/integration_tests/*",
+    "**/tests/*",
+    "**/__fixtures__/*",
+    "**/__stories__/*",
+    "**/__jest__/**",
+
+    // mocks
+    "**/__mocks__/*",
+    "**/mock/*",
+    "**/mocks/*",
+    "**/*/mock.ts",
+    "**/*/mocks.ts",
+    "**/*/mocks.tsx",
+    "**/*.mock.ts",
+    "**/*.mock.tsx",
+    "**/*.mocks.ts",
+    "**/*.mocks.tsx",
+
+    // test helpers
+    "**/test_helpers/*",
+    "**/test_utils/*",
+    "**/*/test_utils.ts",
+    "**/*/test_helper.tsx",
+    "**/*/test_helpers.ts",
+    "**/*/test_helpers.tsx",
+    // apm uses non-standard file casing
+    "**/*/testHelpers.tsx",
+
+    // stubs
+    "**/*/stubs.ts",
+    "**/*.stub.ts",
+    "**/*.stories.tsx",
+    "**/*/_mock_handler_arguments.ts"
+  ],
+  "types": [
+    "node",
+    "flot",
+  ]
+}
