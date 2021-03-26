@@ -27,7 +27,7 @@ export function registerAppRoutes({
   router,
   config: { isSecurityEnabled },
   license,
-  lib: { isEsError },
+  lib: { isEsError, handleEsError },
 }: RouteDependencies) {
   router.get(
     { path: addBasePath('privileges'), validate: false },
@@ -87,10 +87,7 @@ export function registerAppRoutes({
         return res.ok({ body: privilegesResult });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;

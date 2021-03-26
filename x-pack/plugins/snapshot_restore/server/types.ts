@@ -11,8 +11,8 @@ import { SecurityPluginSetup } from '../../security/server';
 import { CloudSetup } from '../../cloud/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { License } from './services';
-import { wrapEsError } from './lib';
-import { isEsError } from './shared_imports';
+import { wrapEsError, isEsError } from './lib';
+import { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -32,6 +32,7 @@ export interface RouteDependencies {
   lib: {
     isEsError: typeof isEsError;
     wrapEsError: typeof wrapEsError;
+    handleEsError: typeof handleEsError;
   };
 }
 

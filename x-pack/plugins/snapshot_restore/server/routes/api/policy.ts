@@ -17,7 +17,7 @@ import { nameParameterSchema, policySchema } from './validate_schemas';
 export function registerPolicyRoutes({
   router,
   license,
-  lib: { isEsError, wrapEsError },
+  lib: { isEsError, wrapEsError, handleEsError },
 }: RouteDependencies) {
   // GET all policies
   router.get(
@@ -45,10 +45,7 @@ export function registerPolicyRoutes({
         });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -79,10 +76,7 @@ export function registerPolicyRoutes({
         });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -123,10 +117,7 @@ export function registerPolicyRoutes({
         return res.ok({ body: response.body });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -160,10 +151,7 @@ export function registerPolicyRoutes({
         return res.ok({ body: response.body });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -218,10 +206,7 @@ export function registerPolicyRoutes({
         return res.ok({ body: { snapshotName } });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -254,10 +239,7 @@ export function registerPolicyRoutes({
         });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -317,10 +299,7 @@ export function registerPolicyRoutes({
         return res.ok({ body: response.body });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;

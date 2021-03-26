@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
+export const isEsError = (e: Error) => e.name === 'ResponseError';

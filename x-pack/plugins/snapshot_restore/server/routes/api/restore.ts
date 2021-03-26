@@ -15,7 +15,11 @@ import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
 import { restoreSettingsSchema } from './validate_schemas';
 
-export function registerRestoreRoutes({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerRestoreRoutes({
+  router,
+  license,
+  lib: { isEsError, handleEsError },
+}: RouteDependencies) {
   // GET all snapshot restores
   router.get(
     { path: addBasePath('restores'), validate: false },
@@ -79,10 +83,7 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
         return res.ok({ body: snapshotRestores });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -117,10 +118,7 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
         return res.ok({ body: response });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;

@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { GetSnapshotResponse } from '@elastic/elasticsearch/api/types';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
 import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
@@ -15,7 +16,7 @@ import { getManagedRepositoryName } from '../../lib';
 export function registerSnapshotsRoutes({
   router,
   license,
-  lib: { isEsError, wrapEsError },
+  lib: { isEsError, wrapEsError, handleEsError },
 }: RouteDependencies) {
   // GET all snapshots
   router.get(
@@ -58,10 +59,7 @@ export function registerSnapshotsRoutes({
         }
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         throw e;
       }
@@ -73,24 +71,29 @@ export function registerSnapshotsRoutes({
       const fetchSnapshotsForRepository = async (repository: string) => {
         try {
           // If any of these repositories 504 they will cost the request significant time.
-          const {
-            body: { snapshots: fetchedResponses },
-          } = await clusterClient.asCurrentUser.snapshot.get({
+          const response = await clusterClient.asCurrentUser.snapshot.get({
             repository,
             snapshot: '_all',
             ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           });
 
+          // TODO: remove this "as unknown" workaround when the types for this endpoint are correct
+          // See https://github.com/elastic/elasticsearch-js/issues/1427
+          const { responses: fetchedResponses } = (response.body as unknown) as {
+            responses: GetSnapshotResponse[];
+          };
+
           // Decorate each snapshot with the repository with which it's associated.
-          fetchedResponses.forEach((snapshot) => {
-            snapshots.push(
-              deserializeSnapshotDetails(
-                repository,
-                // TODO: Bring {@link SnapshotDetailsEs in line with {@link SnapshotInfo}
-                snapshot as SnapshotDetailsEs,
-                managedRepository
-              )
-            );
+          fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
+            fetchedSnapshots.forEach((snapshot) => {
+              snapshots.push(
+                deserializeSnapshotDetails(
+                  repository,
+                  snapshot as SnapshotDetailsEs,
+                  managedRepository
+                )
+              );
+            });
           });
 
           repositories.push(repository);
@@ -131,15 +134,21 @@ export function registerSnapshotsRoutes({
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
       try {
-        const {
-          body: { snapshots },
-        } = await clusterClient.asCurrentUser.snapshot.get({
+        const response = await clusterClient.asCurrentUser.snapshot.get({
           repository,
           snapshot: '_all',
           ignore_unavailable: true,
         });
 
-        const selectedSnapshot = snapshots.find(
+        // TODO: remove this "as unknown" workaround when the types for this endpoint are correct
+        // See https://github.com/elastic/elasticsearch-js/issues/1427
+        const { responses: snapshotsResponse } = (response.body as unknown) as {
+          responses: GetSnapshotResponse[];
+        };
+
+        const snapshotsList =
+          snapshotsResponse && snapshotsResponse[0] && snapshotsResponse[0].snapshots;
+        const selectedSnapshot = snapshotsList.find(
           ({ snapshot: snapshotName }) => snapshot === snapshotName
         ) as SnapshotDetailsEs;
 
@@ -148,7 +157,7 @@ export function registerSnapshotsRoutes({
           return res.notFound({ body: 'Snapshot not found' });
         }
 
-        const successfulSnapshots = snapshots
+        const successfulSnapshots = snapshotsList
           .filter(({ state }) => state === 'SUCCESS')
           .sort((a, b) => {
             return +new Date(b.end_time!) - +new Date(a.end_time!);
@@ -164,10 +173,7 @@ export function registerSnapshotsRoutes({
         });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -218,10 +224,7 @@ export function registerSnapshotsRoutes({
         return res.ok({ body: response });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;

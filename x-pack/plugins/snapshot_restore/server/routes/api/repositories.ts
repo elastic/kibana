@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { SnapshotRepositorySettings } from '@elastic/elasticsearch/api/types';
+import { SnapshotRepositorySettings, GetSnapshotResponse } from '@elastic/elasticsearch/api/types';
 
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { Repository, RepositoryType } from '../../../common/types';
@@ -29,7 +29,7 @@ export function registerRepositoriesRoutes({
   router,
   license,
   config: { isCloudEnabled },
-  lib: { isEsError, wrapEsError },
+  lib: { isEsError, wrapEsError, handleEsError },
 }: RouteDependencies) {
   // GET all repositories
   router.get(
@@ -63,10 +63,7 @@ export function registerRepositoriesRoutes({
         };
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -116,21 +113,22 @@ export function registerRepositoriesRoutes({
         }));
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
       }
 
-      const {
-        body: { snapshots: snapshotResponses },
-      } = await clusterClient.asCurrentUser.snapshot.get({
+      const response = await clusterClient.asCurrentUser.snapshot.get({
         repository: name,
         snapshot: '_all',
       });
+
+      // TODO: remove this "as unknown" workaround when the types for this endpoint are correct
+      // See https://github.com/elastic/elasticsearch-js/issues/1427
+      const { responses: snapshotResponses } = (response.body as unknown) as {
+        responses: GetSnapshotResponse[];
+      };
 
       if (repositoryByName[name]) {
         const { type = '', settings = {} } = repositoryByName[name];
@@ -144,7 +142,10 @@ export function registerRepositoriesRoutes({
             },
             isManagedRepository: managedRepository === name,
             snapshots: {
-              count: snapshotResponses ? snapshotResponses.length : null,
+              count:
+                snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots
+                  ? snapshotResponses[0].snapshots.length
+                  : null,
             },
           },
         });
@@ -186,10 +187,7 @@ export function registerRepositoriesRoutes({
         return res.ok({ body: types });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -231,10 +229,7 @@ export function registerRepositoriesRoutes({
         });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -276,10 +271,7 @@ export function registerRepositoriesRoutes({
         });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -323,10 +315,7 @@ export function registerRepositoriesRoutes({
         return res.ok({ body: response });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -365,10 +354,7 @@ export function registerRepositoriesRoutes({
         });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
@@ -407,10 +393,7 @@ export function registerRepositoriesRoutes({
         return res.ok({ body: response });
       } catch (e) {
         if (isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
+          return handleEsError({ error: e, response: res });
         }
         // Case: default
         throw e;
