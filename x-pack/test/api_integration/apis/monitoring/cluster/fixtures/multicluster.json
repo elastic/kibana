@@ -26,7 +26,6 @@
       "nodes": {
         "fs": {
           "total_in_bytes": 499065712640,
-          "free_in_bytes": 200665341952,
           "available_in_bytes": 200403197952
         },
         "count": {
@@ -127,7 +126,6 @@
       "nodes": {
         "fs": {
           "total_in_bytes": 499065712640,
-          "free_in_bytes": 200665792512,
           "available_in_bytes": 200403648512
         },
         "count": {

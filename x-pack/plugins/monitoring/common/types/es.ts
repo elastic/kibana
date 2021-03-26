@@ -503,6 +503,14 @@ export interface ElasticsearchMetricbeatSource {
             };
           };
         };
+        stack?: {
+          xpack?: {
+            ccr?: {
+              available?: boolean;
+              enabled?: boolean;
+            };
+          };
+        };
       };
     };
   };

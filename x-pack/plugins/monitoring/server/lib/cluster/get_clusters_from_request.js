@@ -100,7 +100,7 @@ export async function getClustersFromRequest(
 
     cluster.logs = isInCodePath(codePaths, [CODE_PATH_LOGS])
       ? await getLogTypes(req, filebeatIndexPattern, {
-          clusterUuid: cluster.cluster_uuid,
+          clusterUuid: get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid),
           start,
           end,
         })
@@ -124,7 +124,7 @@ export async function getClustersFromRequest(
         alertsClient,
         req.server.plugins.monitoring.info,
         undefined,
-        clusters.map((cluster) => cluster.cluster_uuid)
+        clusters.map((cluster) => get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid))
       );
 
       const verification = await verifyMonitoringLicense(req.server);
@@ -167,7 +167,9 @@ export async function getClustersFromRequest(
                   accum[alertName] = {
                     ...value,
                     states: value.states.filter(
-                      (state) => state.state.cluster.clusterUuid === cluster.cluster_uuid
+                      (state) =>
+                        state.state.cluster.clusterUuid ===
+                        get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid)
                     ),
                   };
                 } else {
