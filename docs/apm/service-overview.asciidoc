@@ -38,6 +38,8 @@ image::apm/images/traffic-transactions.png[Traffic and transactions]
 === Error rate and errors
 
 The *Error rate* chart displays the average error rates relating to the service, within a specific time range.
+An HTTP response code greater than 400 does not necessarily indicate a failed transaction.
+<<transaction-error-rate,Learn more>>.
 
 The *Errors* table provides a high-level view of each error message when it first and last occurred,
 along with the total number of occurrences. This makes it very easy to quickly see which errors affect
