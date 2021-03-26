@@ -32,7 +32,7 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
   const highlightPairs: Array<[string, unknown]> = [];
   const sourcePairs: Array<[string, unknown]> = [];
   Object.entries(formatted).forEach(([key, val]) => {
-    const displayKey = fields.getByName(key)?.displayName;
+    const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     pairs.push([displayKey ? displayKey : key, val]);
   });
@@ -50,7 +50,7 @@ export const formatTopLevelObject = (
   const sorted = Object.entries(fields).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
   sorted.forEach(([key, values]) => {
     const field = indexPattern.getFieldByName(key);
-    const displayKey = fields.getByName(key)?.displayName;
+    const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const formatter = field
       ? indexPattern.getFormatterForField(field)
       : { convert: (v: string, ...rest: unknown[]) => String(v) };
