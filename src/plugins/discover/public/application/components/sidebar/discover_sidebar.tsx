@@ -68,8 +68,8 @@ export function DiscoverSidebar({
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const { indexPatternFieldEditor } = services;
-  const indexPatternFieldEditPermission = indexPatternFieldEditor.userPermissions.editIndexPattern();
-  const canEditIndexPatternField = indexPatternFieldEditPermission && useNewFieldsApi;
+  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);

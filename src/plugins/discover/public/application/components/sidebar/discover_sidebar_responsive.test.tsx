@@ -102,6 +102,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     setAppState: jest.fn(),
     state: {},
     trackUiMetric: jest.fn(),
+    onEditRuntimeField: jest.fn(),
   };
 }
 
