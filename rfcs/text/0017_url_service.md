@@ -226,7 +226,7 @@ The URL Generator Service is only available on the client-side, there is no way
 to use it on the server-side, yet we already have use cases (for example ML
 team) where a server-side plugin wants to use a URL generator.
 
-![Currenct Short URL Service and URL Generator Service architecture](../images/url_service/old_architecture.png)
+![Current Short URL Service and URL Generator Service architecture](../images/url_service/old_architecture.png)
 
 The current architecture does not allow both service to be conveniently used,
 also as they are implemented in different locations, they are disjointed&mdash;
@@ -309,17 +309,24 @@ interface IShortUrlClient {
 
   /**
    * Delete a short URL.
+   * 
+   * @param slug The slug (ID) of the short URL.
+   * @return Returns true if deletion was successful.
    */
   delete(slug: string): Promise<boolean>;
 
   /**
    * Fetch short URL.
+   * 
+   * @param slug The slug (ID) of the short URL.
    */
   get(slug: string): Promise<{ slug: string; shortUrl: object; url: URL }>;
 
   /**
    * Same as `get()` but it also increments the "view" counter and the
    * "last view" timestamp of this short URL.
+   * 
+   * @param slug The slug (ID) of the short URL.
    */
   resolve(slug: string): Promise<{ slug: string; shortUrl: object; url: URL }>;
 }
@@ -335,39 +342,44 @@ utility methods for convenience.
 
 ### Short URL CRUD+ HTTP endpoints
 
-- `POST /api/short_url` &mdash; endpoint for creating new short URLs.
-- `GET /api/short_url/<slug>` &mdash; endpoint for retrieving information about
-  an existing short URL.
-- `DELETE /api/short_url/<slug>` &mdash; endpoint for deleting an existing short
-  URL.
-- `POST /api/short_url/<slug>` &mdash; endpoint for updating information about
-  an existing short URL.
-- `GET|POST /api/short_url/<slug>/_resolve`
-- `GET|POST /api/short_url/<slug>/_redirect`
+Below HTTP endpoints are designed to work specifically with short URLs:
+
+| HTTP method           | Path                                | Description                                                                                                                              |
+|-----------------------|-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| __POST__              | `/api/short_url`                    | Endpoint for creating new short URLs.                                                                                                    |
+| __GET__               | `/api/short_url/<slug>`             | Endpoint for retrieving information about an existing short URL.                                                                         |
+| __DELETE__            | `/api/short_url/<slug>`             | Endpoint for deleting an existing short URL.                                                                                             |
+| __POST__              | `/api/short_url/<slug>`             | Endpoint for updating information about an existing short URL.                                                                           |
+| __GET__ or __POST__   | `/api/short_url/<slug>/_resolve`    | Same as `GET /api/short_url/<slug>`, but this endpoint also increments the short URL access count counter and the last access timestamp. |
+| __GET__ or __POST__   | `/api/short_url/<slug>/_redirect`   | Redirects the user using HTTP 301 (permanent) redirect to the destination long URL.                                                      |
 
 
 ### Other URL Service HTTP endpoints
 
-- `POST /api/url/_redirect`
-- `GET|POST /go/<slug>` &mdash; a very short alias for redirecting short URLs.
-  Internally it will work similar to `POST /api/share/url/<slug>/_redirect`
-  endpoint.
+Below are all the other HTTP endpoints that URL Service will provide:
+
+| HTTP method           | Path                                | Description                                                                                                                              |
+|-----------------------|-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| __POST__              | `/api/url/_redirect`                | Redirects the user using HTTP 302 (temporary) redirect. Receives URL generator ID and parameters in the POST body payload.               |
+| __GET__ or __POST__   | `/go/<slug>`                        | A very short alias for `POST /api/share/url/<slug>/_redirect` endpoint.                                                                  |
+
+
+#### The URL generator "redirect" endpoint
+
+
 
 
 ### Legacy endpoints
 
-- `GET|POST /goto/<slug>` &mdash; legacy endpoint for redirecting short URLs to
-  long URLs. We will keep this endpoint, it will be just an alias for
-  `GET|POST /go/<slug>`.
-- `GET /api/short_url/<slug>` &mdash; ...................... legacy endpoint for retrieving information
-  about a single short URL. We will remove this endpoint. Alternatively, we can
-  deprecate this endpoint and maintain it until 8.0 major release.
-- `POST /api/shorten_url` &mdash; legacy endpoints for creating a new short URL.
-  We will remove this endpoints. Alternatively, we can deprecate this endpoint
-  and maintain it until 8.0 major release.
+Below are the legacy HTTP endpoints implemented by the `share` plugin, with a plan
+of action for each endpoint:
 
+| HTTP method           | Path                                | Description                                                                                                                              |
+|-----------------------|-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| __ANY__               | `/goto/<slug>`                      | Legacy endpoint for redirecting short URLs. We will keep this endpoint, it will work the same as the `/go/<slug>` endpoint.              |
+| __GET__               | `/api/short_url/<slug>`             | The new `GET /api/short_url/<slug>` endpoint will return a superset of the payload that the legacy endpoint now returns.                 |
+| __POST__              | `/api/shorten_url`                  | The legacy endpoints for creating short URLs. We will remove it or deprecate this endpoint and maintain it until 8.0 major release.      |
 
-### The "redirect" endpoint
 
 
 --- HOW will URL generator state will be serialized to short URL?..??????
