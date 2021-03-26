@@ -244,12 +244,12 @@ describe('throws when config is invalid', () => {
   beforeAll(() => {
     const realFs = jest.requireActual('fs');
     mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
-    const utils = jest.requireActual('@kbn/crypto');
+    const crypto = jest.requireActual('@kbn/crypto');
     mockReadPkcs12Keystore.mockImplementation((path: string, password?: string) =>
-      utils.readPkcs12Keystore(path, password)
+      crypto.readPkcs12Keystore(path, password)
     );
     mockReadPkcs12Truststore.mockImplementation((path: string, password?: string) =>
-      utils.readPkcs12Truststore(path, password)
+      crypto.readPkcs12Truststore(path, password)
     );
   });
 

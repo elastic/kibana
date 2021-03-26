@@ -82,7 +82,7 @@ describe('getServerOptions', () => {
         keyPassphrase: 'passPhrase',
         rejectUnauthorized: true,
         requestCert: true,
-        secureOptions: 42,
+        getSecureOptions: () => 42,
       },
     });
 

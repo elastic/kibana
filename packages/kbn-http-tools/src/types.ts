@@ -33,5 +33,5 @@ export interface ISslConfig {
   keyPassphrase?: string;
   requestCert?: boolean;
   rejectUnauthorized?: boolean;
-  secureOptions?: number;
+  getSecureOptions?: () => number;
 }

@@ -73,7 +73,7 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
       honorCipherOrder: true,
       key: ssl.key,
       passphrase: ssl.keyPassphrase,
-      secureOptions: ssl.secureOptions,
+      secureOptions: ssl.getSecureOptions ? ssl.getSecureOptions() : undefined,
       requestCert: ssl.requestCert,
       rejectUnauthorized: ssl.rejectUnauthorized,
     };

@@ -145,7 +145,7 @@ export class SslConfig {
   /**
    * Options that affect the OpenSSL protocol behavior via numeric bitmask of the SSL_OP_* options from OpenSSL Options.
    */
-  public get secureOptions() {
+  public getSecureOptions() {
     // our validation should ensure that this.supportedProtocols is at least an empty array,
     // which the following logic depends upon.
     if (this.supportedProtocols == null || this.supportedProtocols.length === 0) {
