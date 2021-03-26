@@ -192,8 +192,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lnsFieldListPanelRemove');
         await testSubjects.missingOrFail('lnsFieldListPanelRemove');
-        await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.missingOrFail('confirmModalConfirmButton');
       });
     },
 
@@ -756,7 +754,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 

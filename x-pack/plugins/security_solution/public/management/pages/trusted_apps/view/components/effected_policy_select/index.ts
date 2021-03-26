@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export interface TrustedAppsUrlParams {
-  page_index: number;
-  page_size: number;
-  show?: 'create';
-}
+export * from './effected_policy_select';
