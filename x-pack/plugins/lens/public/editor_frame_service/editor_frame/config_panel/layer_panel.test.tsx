@@ -23,7 +23,7 @@ import {
 
 jest.mock('../../../id_generator');
 
-let container: HTMLDivElement | null;
+let container: HTMLDivElement | undefined;
 
 beforeEach(() => {
   container = document.createElement('div');
@@ -36,7 +36,7 @@ afterEach(() => {
     container.parentNode.removeChild(container);
   }
 
-  container = null;
+  container = undefined;
 });
 
 const defaultContext = {
@@ -659,7 +659,6 @@ describe('LayerPanel', () => {
         <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>,
-        // @ts-expect-error
         { attachTo: container }
       );
       act(() => {
