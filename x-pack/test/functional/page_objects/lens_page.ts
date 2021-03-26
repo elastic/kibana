@@ -192,8 +192,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lnsFieldListPanelRemove');
         await testSubjects.missingOrFail('lnsFieldListPanelRemove');
-        await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.missingOrFail('confirmModalConfirmButton');
       });
     },
 
