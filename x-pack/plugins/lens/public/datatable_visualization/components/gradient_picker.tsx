@@ -383,7 +383,7 @@ export function CustomizablePalette({
       </EuiFormRow>
       {activePalette?.params?.name !== 'custom' && progressionType !== 'gradient' && (
         <EuiFormRow
-          label={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
+          label={i18n.translate('xpack.lens.table.dynamicColoring.progression.stops.label', {
             defaultMessage: 'Color stops',
           })}
           display="columnCompressed"
