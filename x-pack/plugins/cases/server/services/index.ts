@@ -171,6 +171,7 @@ interface SubCasesMapWithPageInfo {
   subCasesMap: Map<string, SubCaseResponse[]>;
   page: number;
   perPage: number;
+  total: number;
 }
 
 interface CaseCommentStats {
@@ -194,6 +195,7 @@ interface CasesMapWithPageInfo {
   casesMap: Map<string, CaseResponse>;
   page: number;
   perPage: number;
+  total: number;
 }
 
 type FindCaseOptions = CasesFindRequest & SavedObjectFindOptions;
@@ -348,6 +350,7 @@ export class CaseService implements CaseServiceSetup {
       casesMap: casesWithComments,
       page: cases.page,
       perPage: cases.per_page,
+      total: cases.total,
     };
   }
 
@@ -529,6 +532,7 @@ export class CaseService implements CaseServiceSetup {
       subCasesMap: new Map<string, SubCaseResponse[]>(),
       page: 0,
       perPage: 0,
+      total: 0,
     };
 
     if (!options) {
@@ -585,7 +589,7 @@ export class CaseService implements CaseServiceSetup {
       return accMap;
     }, new Map<string, SubCaseResponse[]>());
 
-    return { subCasesMap, page: subCases.page, perPage: subCases.per_page };
+    return { subCasesMap, page: subCases.page, perPage: subCases.per_page, total: subCases.total };
   }
 
   /**

@@ -22,23 +22,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   interface Response {
     status: number;
-    body: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances'>;
+    body: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics'>;
   }
 
   registry.when(
-    'Service overview instances when data is not loaded',
+    'Service overview instances primary statistics when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
           const response: Response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances`,
+              pathname: `/api/apm/services/opbeans-java/service_overview_instances/primary_statistics`,
               query: {
                 latencyAggregationType: 'avg',
                 start,
                 end,
-                numBuckets: 20,
                 transactionType: 'request',
               },
             })
@@ -52,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'Service overview instances when data is loaded',
+    'Service overview instances primary statistics when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
       describe('fetching java data', () => {
@@ -61,12 +60,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         beforeEach(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances`,
+              pathname: `/api/apm/services/opbeans-java/service_overview_instances/primary_statistics`,
               query: {
                 latencyAggregationType: 'avg',
                 start,
                 end,
-                numBuckets: 20,
                 transactionType: 'request',
               },
             })
@@ -80,17 +78,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns statistics for each service node', () => {
           const item = response.body[0];
 
-          expect(isFiniteNumber(item.cpuUsage?.value)).to.be(true);
-          expect(isFiniteNumber(item.memoryUsage?.value)).to.be(true);
-          expect(isFiniteNumber(item.errorRate?.value)).to.be(true);
-          expect(isFiniteNumber(item.throughput?.value)).to.be(true);
-          expect(isFiniteNumber(item.latency?.value)).to.be(true);
-
-          expect(item.cpuUsage?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
-          expect(item.memoryUsage?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
-          expect(item.errorRate?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
-          expect(item.throughput?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
-          expect(item.latency?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
+          expect(isFiniteNumber(item.cpuUsage)).to.be(true);
+          expect(isFiniteNumber(item.memoryUsage)).to.be(true);
+          expect(isFiniteNumber(item.errorRate)).to.be(true);
+          expect(isFiniteNumber(item.throughput)).to.be(true);
+          expect(isFiniteNumber(item.latency)).to.be(true);
         });
 
         it('returns the right data', () => {
@@ -109,30 +101,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const item = items[0];
 
           const values = pick(item, [
-            'cpuUsage.value',
-            'memoryUsage.value',
-            'errorRate.value',
-            'throughput.value',
-            'latency.value',
+            'cpuUsage',
+            'memoryUsage',
+            'errorRate',
+            'throughput',
+            'latency',
           ]);
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": Object {
-                "value": 0.0120166666666667,
-              },
-              "errorRate": Object {
-                "value": 0.16,
-              },
-              "latency": Object {
-                "value": 237339.813333333,
-              },
-              "memoryUsage": Object {
-                "value": 0.941324615478516,
-              },
-              "throughput": Object {
-                "value": 2.5,
-              },
+              "cpuUsage": 0.0120166666666667,
+              "errorRate": 0.16,
+              "latency": 237339.813333333,
+              "memoryUsage": 0.941324615478516,
+              "throughput": 2.5,
             }
           `);
         });
@@ -144,12 +126,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         beforeEach(async () => {
           response = await supertest.get(
             url.format({
-              pathname: `/api/apm/services/opbeans-ruby/service_overview_instances`,
+              pathname: `/api/apm/services/opbeans-ruby/service_overview_instances/primary_statistics`,
               query: {
                 latencyAggregationType: 'avg',
                 start,
                 end,
-                numBuckets: 20,
                 transactionType: 'request',
               },
             })
@@ -159,17 +140,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('returns statistics for each service node', () => {
           const item = response.body[0];
 
-          expect(isFiniteNumber(item.cpuUsage?.value)).to.be(true);
-          expect(isFiniteNumber(item.memoryUsage?.value)).to.be(true);
-          expect(isFiniteNumber(item.errorRate?.value)).to.be(true);
-          expect(isFiniteNumber(item.throughput?.value)).to.be(true);
-          expect(isFiniteNumber(item.latency?.value)).to.be(true);
-
-          expect(item.cpuUsage?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
-          expect(item.memoryUsage?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
-          expect(item.errorRate?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
-          expect(item.throughput?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
-          expect(item.latency?.timeseries.some((point) => isFiniteNumber(point.y))).to.be(true);
+          expect(isFiniteNumber(item.cpuUsage)).to.be(true);
+          expect(isFiniteNumber(item.memoryUsage)).to.be(true);
+          expect(isFiniteNumber(item.errorRate)).to.be(true);
+          expect(isFiniteNumber(item.throughput)).to.be(true);
+          expect(isFiniteNumber(item.latency)).to.be(true);
         });
 
         it('returns the right data', () => {
@@ -187,28 +162,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const item = items[0];
 
-          const values = pick(
-            item,
-            'cpuUsage.value',
-            'errorRate.value',
-            'throughput.value',
-            'latency.value'
-          );
+          const values = pick(item, 'cpuUsage', 'errorRate', 'throughput', 'latency');
 
           expectSnapshot(values).toMatchInline(`
             Object {
-              "cpuUsage": Object {
-                "value": 0.00111666666666667,
-              },
-              "errorRate": Object {
-                "value": 0.0373134328358209,
-              },
-              "latency": Object {
-                "value": 70518.9328358209,
-              },
-              "throughput": Object {
-                "value": 4.46666666666667,
-              },
+              "cpuUsage": 0.00111666666666667,
+              "errorRate": 0.0373134328358209,
+              "latency": 70518.9328358209,
+              "throughput": 4.46666666666667,
             }
           `);
 
