@@ -29,7 +29,7 @@ import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
 
 interface InstancesLatencyDistributionChartProps {
   height: number;
-  items?: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances'>;
+  items?: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics'>;
   status: FETCH_STATUS;
 }
 
@@ -44,15 +44,11 @@ export function InstancesLatencyDistributionChart({
   const chartTheme = {
     ...useChartTheme(),
     bubbleSeriesStyle: {
-      point: {
-        strokeWidth: 0,
-        fill: theme.eui.euiColorVis1,
-        radius: 4,
-      },
+      point: { strokeWidth: 0, fill: theme.eui.euiColorVis1, radius: 4 },
     },
   };
 
-  const maxLatency = Math.max(...items.map((item) => item.latency?.value ?? 0));
+  const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
   const latencyFormatter = getDurationFormatter(maxLatency);
 
   return (
@@ -79,9 +75,9 @@ export function InstancesLatencyDistributionChart({
               'xpack.apm.instancesLatencyDistributionChartLegend',
               { defaultMessage: 'Instances' }
             )}
-            xAccessor={(item) => item.throughput?.value}
+            xAccessor={(item) => item.throughput}
             xScaleType={ScaleType.Linear}
-            yAccessors={[(item) => item.latency?.value]}
+            yAccessors={[(item) => item.latency]}
             yScaleType={ScaleType.Linear}
           />
           <Axis
