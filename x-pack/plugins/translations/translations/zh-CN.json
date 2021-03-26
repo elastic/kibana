@@ -7630,8 +7630,6 @@
     "xpack.enterpriseSearch.appSearch.engine.overview.empty.headingAction": "查看文档",
     "xpack.enterpriseSearch.appSearch.engine.overview.heading": "引擎概览",
     "xpack.enterpriseSearch.appSearch.engine.overview.title": "概览",
-    "xpack.enterpriseSearch.appSearch.engine.overview.unavailableBody": "请几分钟后重试。",
-    "xpack.enterpriseSearch.appSearch.engine.overview.unavailableTitle": "仪表板指标当前不可用",
     "xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoosts": "无效的提权",
     "xpack.enterpriseSearch.appSearch.engine.relevanceTuning.title": "相关性调整",
     "xpack.enterpriseSearch.appSearch.engine.relevanceTuning.unsearchedFields": "未搜索的字段",

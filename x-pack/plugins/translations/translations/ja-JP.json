@@ -7565,8 +7565,6 @@
     "xpack.enterpriseSearch.appSearch.engine.overview.empty.headingAction": "ドキュメンテーションを表示",
     "xpack.enterpriseSearch.appSearch.engine.overview.heading": "エンジン概要",
     "xpack.enterpriseSearch.appSearch.engine.overview.title": "概要",
-    "xpack.enterpriseSearch.appSearch.engine.overview.unavailableBody": "数分後に再試行してください。",
-    "xpack.enterpriseSearch.appSearch.engine.overview.unavailableTitle": "ダッシュボードメトリックは現在使用できません",
     "xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoosts": "無効なブースト",
     "xpack.enterpriseSearch.appSearch.engine.relevanceTuning.title": "関連性の調整",
     "xpack.enterpriseSearch.appSearch.engine.relevanceTuning.unsearchedFields": "検索されていないフィールド",
