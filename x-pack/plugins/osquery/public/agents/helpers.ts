@@ -24,7 +24,10 @@ import {
 
 export type InspectResponse = Inspect & { response: string[] };
 
-export const getNumOverlapped = ({ policy, platform }: SelectedGroups, overlap: Overlap) => {
+export const getNumOverlapped = (
+  { policy = {}, platform = {} }: SelectedGroups,
+  overlap: Overlap
+) => {
   let sum = 0;
   Object.keys(platform).forEach((plat) => {
     const policies = overlap[plat] ?? {};
@@ -39,17 +42,25 @@ export const processAggregations = (aggs: Record<string, Aggregate>) => {
   const overlap: Overlap = {};
   const platformTerms = aggs.platforms as TermsAggregate<AggregationDataPoint>;
   const policyTerms = aggs.policies as TermsAggregate<AggregationDataPoint>;
-  for (const { key, doc_count: size, policies } of platformTerms.buckets) {
-    platforms.push({ name: key, size });
-    overlap[key] = policies.buckets.reduce((acc: { [key: string]: number }, pol) => {
-      acc[pol.key] = pol.doc_count;
-      return acc;
-    }, {} as { [key: string]: number });
+
+  const policies = policyTerms?.buckets.map((o) => ({ name: o.key, size: o.doc_count })) ?? [];
+
+  if (platformTerms?.buckets) {
+    for (const { key, doc_count: size, policies: platformPolicies } of platformTerms.buckets) {
+      platforms.push({ name: key, size });
+      if (platformPolicies?.buckets && policies.length > 0) {
+        overlap[key] = platformPolicies.buckets.reduce((acc: { [key: string]: number }, pol) => {
+          acc[pol.key] = pol.doc_count;
+          return acc;
+        }, {} as { [key: string]: number });
+      }
+    }
   }
+
   return {
     platforms,
     overlap,
-    policies: policyTerms.buckets.map((o) => ({ name: o.key, size: o.doc_count })),
+    policies,
   };
 };
 export const generateColorPicker = () => {
