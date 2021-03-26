@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function getFullCloudUrl(baseUrl, dirPath) {
+export function getFullCloudUrl(baseUrl: string, dirPath: string) {
   let fullCloudUrl = '';
 
   if (baseUrl && dirPath) {
