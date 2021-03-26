@@ -32,6 +32,7 @@ export declare enum METRIC_TYPES
 |  PERCENTILE\_RANKS | <code>&quot;percentile_ranks&quot;</code> |  |
 |  PERCENTILES | <code>&quot;percentiles&quot;</code> |  |
 |  SERIAL\_DIFF | <code>&quot;serial_diff&quot;</code> |  |
+|  SINGLE\_PERCENTILE | <code>&quot;single_percentile&quot;</code> |  |
 |  STD\_DEV | <code>&quot;std_dev&quot;</code> |  |
 |  SUM | <code>&quot;sum&quot;</code> |  |
 |  SUM\_BUCKET | <code>&quot;sum_bucket&quot;</code> |  |

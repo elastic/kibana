@@ -49,13 +49,13 @@ describe('AggTypeMetricSinglePercentileProvider class', () => {
   it('requests the percentiles aggregation in the Elasticsearch query DSL', () => {
     const dsl: Record<string, any> = aggConfigs.toDsl();
 
-    expect(dsl.median.percentiles.field).toEqual('bytes');
-    expect(dsl.median.percentiles.percents).toEqual([95]);
+    expect(dsl.single_percentile.percentiles.field).toEqual('bytes');
+    expect(dsl.single_percentile.percentiles.percents).toEqual([95]);
   });
 
   it('points to right value within multi metric for value bucket path', () => {
     expect(aggConfigs.byId(METRIC_TYPES.SINGLE_PERCENTILE)!.getValueBucketPath()).toEqual(
-      `${METRIC_TYPES.MEDIAN}.95`
+      `${METRIC_TYPES.SINGLE_PERCENTILE}.95`
     );
   });
 
@@ -86,11 +86,11 @@ describe('AggTypeMetricSinglePercentileProvider class', () => {
               "field": Array [
                 "bytes",
               ],
+              "id": Array [
+                "single_percentile",
+              ],
               "percentile": Array [
                 95,
-              ],
-              "id": Array [
-                "single_perxentile",
               ],
               "schema": Array [
                 "metric",
