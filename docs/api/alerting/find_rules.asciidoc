@@ -1,4 +1,4 @@
-[[rules-find-api]]
+[[find-rules-api]]
 === Find rules API
 ++++
 <titleabbrev>Find rules</titleabbrev>
@@ -9,20 +9,20 @@ Retrieve a paginated set of rules based on condition.
 NOTE: As rules change in {kib}, the results on each page of the response also
 change. Use the find API for traditional paginated results, but avoid using it to export large amounts of data.
 
-[[rules-find-api-request]]
+[[find-rules-api-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/alerting/rules/_find`
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/rules/_find`
 
-[[rules-find-api-path-params]]
+[[find-rules-api-path-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[rules-find-api-query-params]]
+[[find-rules-api-query-params]]
 ==== Query Parameters
 
 NOTE: Rule `params` are stored as a {ref}/flattened.html[flattened field type] and analyzed as keywords.
@@ -59,7 +59,7 @@ NOTE: Rule `params` are stored as a {ref}/flattened.html[flattened field type] a
   It should look like savedObjectType.attributes.title: "myTitle". However, If you used a direct attribute of a saved object, such as `updatedAt`,
   you will have to define your filter, for example, savedObjectType.updatedAt > 2018-12-22.
 
-[[rules-find-api-request-codes]]
+[[find-rules-api-request-codes]]
 ==== Response code
 
 `200`::

@@ -1,4 +1,4 @@
-[[rules-mute-all-api]]
+[[mute-all-alerts-api]]
 === Mute all alerts API
 ++++
 <titleabbrev>Mute all alerts</titleabbrev>
@@ -6,14 +6,14 @@
 
 Mute all alerts.
 
-[[rules-mute-all-api-request]]
+[[mute-all-alerts-api-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>/_mute_all`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>/_mute_all`
 
-[[rules-mute-all-api-path-params]]
+[[mute-all-alerts-api-path-params]]
 ==== Path parameters
 
 `id`::
@@ -22,7 +22,7 @@ Mute all alerts.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[rules-mute-all-api-response-codes]]
+[[mute-all-alerts-api-response-codes]]
 ==== Response code
 
 `200`::

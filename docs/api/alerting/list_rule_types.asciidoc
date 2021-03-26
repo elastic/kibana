@@ -1,31 +1,31 @@
-[[alerting-list-rule-types-api]]
-=== List alerting rule types API
+[[list-rule-types-api]]
+=== List rule types API
 ++++
-<titleabbrev>List alerting rule types</titleabbrev>
+<titleabbrev>List rule types</titleabbrev>
 ++++
 
 Retrieve a list of alerting rule types.
 
-[[alerting-list-rule-types-api-request]]
+[[list-rule-types-api-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/alerting/rule_types`
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerting/rule_types`
 
-[[alerting-list-rule-types-api-params]]
+[[list-rule-types-api-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerting-list-rule-types-api-codes]]
+[[list-rule-types-api-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[alerting-list-rule-types-api-example]]
+[[list-rule-types-api-example]]
 ==== Example
 
 [source,sh]

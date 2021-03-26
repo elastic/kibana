@@ -1,4 +1,4 @@
-[[rules-create-api]]
+[[create-rule-api]]
 === Create rule API
 ++++
 <titleabbrev>Create rule</titleabbrev>
@@ -6,14 +6,14 @@
 
 Create {kib} rules.
 
-[[rules-create-api-request]]
+[[create-rule-api-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
-[[rules-create-api-path-params]]
+[[create-rule-api-path-params]]
 ==== Path parameters
 
 `<id>`::
@@ -22,7 +22,7 @@ Create {kib} rules.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[rules-create-api-request-body]]
+[[create-rule-api-request-body]]
 ==== Request body
 
 `name`::
@@ -80,13 +80,13 @@ There are plans to support multiple other schedule formats in the near future.
 =====
 
 
-[[rules-create-api-request-codes]]
+[[create-rule-api-request-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[rules-create-api-example]]
+[[create-rule-api-example]]
 ==== Example
 
 [source,sh]

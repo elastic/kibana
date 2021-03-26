@@ -1,4 +1,4 @@
-[[alerts-legacy-api-enable]]
+[[alerts-api-enable]]
 === Legacy enable alert API
 ++++
 <titleabbrev>Legacy enable alert</titleabbrev>
@@ -6,18 +6,18 @@
 
 deprecated::[7.13.0]
 
-Plesae use the <<rules-enable-api>> instead.
+Plesae use the <<enable-rule-api>> instead.
 
 Enable an alert.
 
-[[alerts-legacy-api-enable-request]]
+[[alerts-api-enable-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerts/alert/<id>/_enable`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>/_enable`
 
-[[alerts-legacy-api-enable-path-params]]
+[[alerts-api-enable-path-params]]
 ==== Path parameters
 
 `id`::
@@ -26,7 +26,7 @@ Enable an alert.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-legacy-api-enable-response-codes]]
+[[alerts-api-enable-response-codes]]
 ==== Response code
 
 `200`::

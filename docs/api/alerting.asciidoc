@@ -1,47 +1,47 @@
-[[rules-api]]
-== Rules APIs
+[[alerting-apis]]
+== Alerting APIs
 
-The following APIs are available for managing {kib} rules.
+The following APIs are available for {kib} alerting.
 
-* <<rules-create-api, Create rule API>> to create a rule
+* <<create-rule-api, Create rule API>> to create a rule
 
-* <<rules-update-api, Update rule API>> to update the attributes for existing rules
+* <<update-rule-api, Update rule API>> to update the attributes for existing rules
 
-* <<rules-get-api, Get rule API>> to retrieve a single rule by ID
+* <<get-rule-api, Get rule API>> to retrieve a single rule by ID
 
-* <<rules-delete-api, Delete rule API>> to permanently remove a rule
+* <<delete-rule-api, Delete rule API>> to permanently remove a rule
 
-* <<rules-find-api, Find rules API>> to retrieve a paginated set of rules by condition
+* <<find-rules-api, Find rules API>> to retrieve a paginated set of rules by condition
 
-* <<alerting-list-rule-types-api, List alerting rule types API>> to retrieve a list of rule types
+* <<list-rule-types-api, List rule types API>> to retrieve a list of rule types
 
-* <<rules-enable-api, Enable rule API>> to enable a single rule by ID
+* <<enable-rule-api, Enable rule API>> to enable a single rule by ID
 
-* <<rules-disable-api, Disable rule API>> to disable a single rule by ID
+* <<disable-rule-api, Disable rule API>> to disable a single rule by ID
 
-* <<rules-mute-api, Mute alert API>> to mute alert for a single rule by ID
+* <<mute-alert-api, Mute alert API>> to mute alert for a single rule by ID
 
-* <<rules-unmute-api, Unmute alert API>> to unmute alert for a single rule by ID
+* <<unmute-alert-api, Unmute alert API>> to unmute alert for a single rule by ID
 
-* <<rules-mute-all-api, Mute all alerts API>> to mute all alerts for a single rule by ID
+* <<mute-all-alerts-api, Mute all alerts API>> to mute all alerts for a single rule by ID
 
-* <<rules-unmute-all-api, Unmute all alerts API>> to unmute all alerts for a single rule by ID
+* <<unmute-all-alerts-api, Unmute all alerts API>> to unmute all alerts for a single rule by ID
 
-* <<alerting-health-api, Get Alerting framework health API>> to retrieve the health of the Alerting framework
+* <<get-alerting-framework-health-api, Get Alerting framework health API>> to retrieve the health of the Alerting framework
 
-For deprecated APIs, refer to <<alerts-legacy-apis>>.
+For deprecated APIs, refer to <<alerts-api>>.
 
-include::alerting/create.asciidoc[]
-include::alerting/update.asciidoc[]
-include::alerting/get.asciidoc[]
-include::alerting/delete.asciidoc[]
-include::alerting/find.asciidoc[]
+include::alerting/create_rule.asciidoc[]
+include::alerting/update_rule.asciidoc[]
+include::alerting/get_rules.asciidoc[]
+include::alerting/delete_rule.asciidoc[]
+include::alerting/find_rules.asciidoc[]
 include::alerting/list_rule_types.asciidoc[]
-include::alerting/enable.asciidoc[]
-include::alerting/disable.asciidoc[]
-include::alerting/mute_all.asciidoc[]
-include::alerting/mute.asciidoc[]
-include::alerting/unmute_all.asciidoc[]
-include::alerting/unmute.asciidoc[]
+include::alerting/enable_rule.asciidoc[]
+include::alerting/disable_rule.asciidoc[]
+include::alerting/mute_all_alerts.asciidoc[]
+include::alerting/mute_alert.asciidoc[]
+include::alerting/unmute_all_alerts.asciidoc[]
+include::alerting/unmute_alert.asciidoc[]
 include::alerting/health.asciidoc[]
 include::alerting/legacy/index.asciidoc[]

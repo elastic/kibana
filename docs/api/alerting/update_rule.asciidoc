@@ -1,4 +1,4 @@
-[[rules-update-api]]
+[[update-rule-api]]
 === Update rule API
 ++++
 <titleabbrev>Update rule</titleabbrev>
@@ -6,14 +6,14 @@
 
 Update the attributes for an existing rule.
 
-[[rules-update-api-request]]
+[[update-rule-api-request]]
 ==== Request
 
 `PUT <kibana host>:<port>/api/alerting/rule/<id>`
 
 `PUT <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
-[[rules-update-api-path-params]]
+[[update-rule-api-path-params]]
 ==== Path parameters
 
 `id`::
@@ -22,7 +22,7 @@ Update the attributes for an existing rule.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[rules-update-api-request-body]]
+[[update-rule-api-request-body]]
 ==== Request body
 
 `name`::
@@ -69,13 +69,13 @@ Example: `{ interval: "10s" }`, `{ interval: "5m" }`, `{ interval: "1h" }`, `{ i
 =====
 
 
-[[rules-update-api-response-codes]]
+[[update-rule-api-response-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[rules-update-api-example]]
+[[update-rule-api-example]]
 ==== Example
 
 Update a rule with ID `ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74` with a different name:

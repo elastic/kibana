@@ -1,4 +1,4 @@
-[[rules-unmute-api]]
+[[unmute-alert-api]]
 === Unmute alert API
 ++++
 <titleabbrev>Unmute alert</titleabbrev>
@@ -6,14 +6,14 @@
 
 Unmute an alert.
 
-[[rules-unmute-api-request]]
+[[unmute-alert-api-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerting/rule/<rule_id>/alert/<alert_id>/_unmute`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<rule_id>/alert/<alert_id>/_unmute`
 
-[[rules-unmute-api-path-params]]
+[[unmute-alert-api-path-params]]
 ==== Path parameters
 
 `rule_id`::
@@ -25,7 +25,7 @@ Unmute an alert.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[rules-unmute-api-response-codes]]
+[[unmute-alert-api-response-codes]]
 ==== Response code
 
 `200`::

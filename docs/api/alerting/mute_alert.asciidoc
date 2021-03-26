@@ -1,4 +1,4 @@
-[[rules-mute-api]]
+[[mute-alert-api]]
 === Mute alert API
 ++++
 <titleabbrev>Mute alert</titleabbrev>
@@ -6,14 +6,14 @@
 
 Mute an alert.
 
-[[rules-mute-api-request]]
+[[mute-alert-api-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerting/rule/<rule_id>/alert/<alert_id>/_mute`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<rule_id>/alert/<alert_id>/_mute`
 
-[[rules-mute-api-path-params]]
+[[mute-alert-api-path-params]]
 ==== Path parameters
 
 `rule_id`::
@@ -25,7 +25,7 @@ Mute an alert.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[rules-mute-api-response-codes]]
+[[mute-alert-api-response-codes]]
 ==== Response code
 
 `200`::
