@@ -22,6 +22,7 @@ export interface TrustedAppsListData {
   pageSize: number;
   timestamp: number;
   totalItemsCount: number;
+  filter: string;
 }
 
 export type ViewType = 'list' | 'grid';

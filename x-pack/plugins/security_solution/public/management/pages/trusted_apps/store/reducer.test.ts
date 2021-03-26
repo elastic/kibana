@@ -50,7 +50,10 @@ describe('reducer', () => {
 
     it('extracts default pagination parameters when invalid provided', () => {
       const result = trustedAppsPageReducer(
-        { ...initialState, location: { page_index: 5, page_size: 50, view_type: 'grid' } },
+        {
+          ...initialState,
+          location: { page_index: 5, page_size: 50, view_type: 'grid', filter: '' },
+        },
         createUserChangedUrlAction('/trusted_apps', '?page_index=b&page_size=60&show=a&view_type=c')
       );
 
@@ -59,7 +62,10 @@ describe('reducer', () => {
 
     it('extracts default pagination parameters when none provided', () => {
       const result = trustedAppsPageReducer(
-        { ...initialState, location: { page_index: 5, page_size: 50, view_type: 'grid' } },
+        {
+          ...initialState,
+          location: { page_index: 5, page_size: 50, view_type: 'grid', filter: '' },
+        },
         createUserChangedUrlAction('/trusted_apps')
       );
 
