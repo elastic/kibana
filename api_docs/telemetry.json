@@ -334,7 +334,7 @@
         "signature": [
           "({ esClient }: ",
           "StatsCollectionConfig",
-          ") => Promise<{ clusterUuid: any; }[]>"
+          ") => Promise<{ clusterUuid: string; }[]>"
         ],
         "description": [
           "\nGet the cluster uuids from the connected cluster."
@@ -369,7 +369,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-              "lineNumber": 59
+              "lineNumber": 60
             }
           },
           {
@@ -388,7 +388,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-              "lineNumber": 60
+              "lineNumber": 61
             }
           },
           {
@@ -407,7 +407,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-              "lineNumber": 61
+              "lineNumber": 62
             }
           }
         ],
@@ -434,7 +434,7 @@
         "label": "getLocalStats",
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-          "lineNumber": 58
+          "lineNumber": 59
         },
         "tags": [],
         "returnComment": [],
@@ -453,7 +453,7 @@
             "section": "def-server.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">, uiSettingsClient: ",
+          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, uiSettingsClient: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -478,7 +478,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">"
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ],
             "description": [],
             "source": {
@@ -694,7 +694,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/telemetry/server/telemetry_collection/get_local_stats.ts",
-          "lineNumber": 50
+          "lineNumber": 51
         },
         "signature": [
           "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: any; collection: string; stack_stats: { data: DataTelemetryPayload | undefined; kibana: { count: number; indices: number; os: {}; versions: { version: string; count: number; }[]; plugins: { [plugin: string]: any; }; } | undefined; }; }"

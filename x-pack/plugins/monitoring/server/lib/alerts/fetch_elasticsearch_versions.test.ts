@@ -9,6 +9,7 @@
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { fetchElasticsearchVersions } from './fetch_elasticsearch_versions';
+import { estypes } from '@elastic/elasticsearch';
 
 describe('fetchElasticsearchVersions', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -41,7 +42,7 @@ describe('fetchElasticsearchVersions', () => {
             },
           ],
         },
-      })
+      } as estypes.SearchResponse)
     );
 
     const result = await fetchElasticsearchVersions(esClient, clusters, index, size);

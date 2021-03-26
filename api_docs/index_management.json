@@ -1121,13 +1121,7 @@
               "lineNumber": 58
             },
             "signature": [
-              {
-                "pluginId": "indexManagement",
-                "scope": "common",
-                "docId": "kibIndexManagementPluginApi",
-                "section": "def-common.Health",
-                "text": "Health"
-              }
+              "ClusterStatus"
             ]
           },
           {

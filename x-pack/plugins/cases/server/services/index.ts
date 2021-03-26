@@ -33,7 +33,8 @@ import {
   CaseResponse,
   caseTypeField,
   CasesFindRequest,
-} from '../../common';
+} from '../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { combineFilters, defaultSortField, groupTotalAlertsByID } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
 import {
@@ -282,13 +283,15 @@ export class CaseService implements CaseServiceSetup {
       options: caseOptions,
     });
 
-    const subCasesResp = await this.findSubCasesGroupByCase({
-      client,
-      options: subCaseOptions,
-      ids: cases.saved_objects
-        .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
-        .map((caseInfo) => caseInfo.id),
-    });
+    const subCasesResp = ENABLE_CASE_CONNECTOR
+      ? await this.findSubCasesGroupByCase({
+          client,
+          options: subCaseOptions,
+          ids: cases.saved_objects
+            .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
+            .map((caseInfo) => caseInfo.id),
+        })
+      : { subCasesMap: new Map<string, SubCaseResponse[]>(), page: 0, perPage: 0 };
 
     const casesMap = cases.saved_objects.reduce((accMap, caseInfo) => {
       const subCasesForCase = subCasesResp.subCasesMap.get(caseInfo.id);
@@ -407,7 +410,7 @@ export class CaseService implements CaseServiceSetup {
 
     let subCasesTotal = 0;
 
-    if (subCaseOptions) {
+    if (ENABLE_CASE_CONNECTOR && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
         client,
         options: subCaseOptions,

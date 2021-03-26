@@ -77,6 +77,7 @@ import {
 import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -166,6 +167,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(config),
+      experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental),
     };
 
     initUsageCollectors({
@@ -201,7 +203,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
-    registerTrustedAppsRoutes(router);
+    registerTrustedAppsRoutes(router, endpointContext);
     registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({
@@ -357,7 +359,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           logger: this.logger,
           cache: this.artifactsCache,
         },
-        this.config.fleetServerEnabled
+        parseExperimentalConfigValue(this.config.enableExperimental).fleetServerEnabled
       );
 
       if (this.manifestTask) {

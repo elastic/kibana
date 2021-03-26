@@ -137,14 +137,17 @@ export async function getDailyEvents(
   const byDateByType: Record<string, Record<string, number>> = {};
   const suggestionsByDate: Record<string, Record<string, number>> = {};
 
+  // @ts-expect-error no way to declare aggregations for search response
   metrics.aggregations!.daily.buckets.forEach((daily) => {
     const byType: Record<string, number> = byDateByType[daily.key] || {};
+    // @ts-expect-error no way to declare aggregations for search response
     daily.groups.buckets.regularEvents.names.buckets.forEach((bucket) => {
       byType[bucket.key] = (bucket.sums.value || 0) + (byType[daily.key] || 0);
     });
     byDateByType[daily.key] = byType;
 
     const suggestionsByType: Record<string, number> = suggestionsByDate[daily.key] || {};
+    // @ts-expect-error no way to declare aggregations for search response
     daily.groups.buckets.suggestionEvents.names.buckets.forEach((bucket) => {
       suggestionsByType[bucket.key] =
         (bucket.sums.value || 0) + (suggestionsByType[daily.key] || 0);

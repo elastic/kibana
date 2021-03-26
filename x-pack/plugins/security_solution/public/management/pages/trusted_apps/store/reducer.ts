@@ -29,6 +29,8 @@ import {
   TrustedAppCreationDialogConfirmed,
   TrustedAppCreationDialogClosed,
   TrustedAppsExistResponse,
+  TrustedAppsPoliciesStateChanged,
+  TrustedAppCreationEditItemStateChanged,
 } from './action';
 
 import { TrustedAppsListPageState } from '../state';
@@ -37,7 +39,7 @@ import {
   initialDeletionDialogState,
   initialTrustedAppsPageState,
 } from './builders';
-import { entriesExistState } from './selectors';
+import { entriesExistState, trustedAppsListPageActive } from './selectors';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -110,7 +112,7 @@ const trustedAppCreationDialogStarted: CaseReducer<TrustedAppCreationDialogStart
     ...state,
     creationDialog: {
       ...initialCreationDialogState(),
-      formState: { ...action.payload, isValid: true },
+      formState: { ...action.payload, isValid: false },
     },
   };
 };
@@ -122,6 +124,16 @@ const trustedAppCreationDialogFormStateUpdated: CaseReducer<TrustedAppCreationDi
   return {
     ...state,
     creationDialog: { ...state.creationDialog, formState: { ...action.payload } },
+  };
+};
+
+const handleUpdateToEditItemState: CaseReducer<TrustedAppCreationEditItemStateChanged> = (
+  state,
+  action
+) => {
+  return {
+    ...state,
+    creationDialog: { ...state.creationDialog, editItem: action.payload },
   };
 };
 
@@ -150,6 +162,16 @@ const updateEntriesExists: CaseReducer<TrustedAppsExistResponse> = (state, { pay
     return {
       ...state,
       entriesExist: payload,
+    };
+  }
+  return state;
+};
+
+const updatePolicies: CaseReducer<TrustedAppsPoliciesStateChanged> = (state, { payload }) => {
+  if (trustedAppsListPageActive(state)) {
+    return {
+      ...state,
+      policies: payload,
     };
   }
   return state;
@@ -187,6 +209,9 @@ export const trustedAppsPageReducer: StateReducer = (
     case 'trustedAppCreationDialogFormStateUpdated':
       return trustedAppCreationDialogFormStateUpdated(state, action);
 
+    case 'trustedAppCreationEditItemStateChanged':
+      return handleUpdateToEditItemState(state, action);
+
     case 'trustedAppCreationDialogConfirmed':
       return trustedAppCreationDialogConfirmed(state, action);
 
@@ -198,6 +223,9 @@ export const trustedAppsPageReducer: StateReducer = (
 
     case 'trustedAppsExistStateChanged':
       return updateEntriesExists(state, action);
+
+    case 'trustedAppsPoliciesStateChanged':
+      return updatePolicies(state, action);
   }
 
   return state;
