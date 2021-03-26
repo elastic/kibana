@@ -8,46 +8,45 @@
 import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { waitFor } from '@testing-library/dom';
 
-import { BuilderEntryItem } from './entry_item';
 import {
-  isOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isNotOneOfOperator,
+  doesNotExistOperator,
+  existsOperator,
   isInListOperator,
   isNotInListOperator,
-  existsOperator,
-  doesNotExistOperator,
-} from '../../autocomplete/operators';
+  isNotOneOfOperator,
+  isNotOperator,
+  isOneOfOperator,
+  isOperator,
+} from '../autocomplete/operators';
 import {
   fields,
   getField,
-} from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { getFoundListSchemaMock } from '../../../../../../lists/common/schemas/response/found_list_schema.mock';
-import { getEmptyValue } from '../../empty_value';
-import { waitFor } from '@testing-library/dom';
+} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
+import { useFindLists } from '../../../lists/hooks/use_find_lists';
 
-// mock out lists hook
-const mockStart = jest.fn();
-const mockResult = getFoundListSchemaMock();
-jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../lists_plugin_deps', () => {
-  const originalModule = jest.requireActual('../../../../lists_plugin_deps');
+import { BuilderEntryItem } from './entry_renderer';
 
-  return {
-    ...originalModule,
-    useFindLists: () => ({
-      loading: false,
-      start: mockStart.mockReturnValue(mockResult),
-      result: mockResult,
-      error: undefined,
-    }),
-  };
-});
+jest.mock('../../../lists/hooks/use_find_lists');
+
+const mockKibanaHttpService = coreMock.createStart().http;
+const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
 
 describe('BuilderEntryItem', () => {
   let wrapper: ReactWrapper;
+
+  beforeEach(() => {
+    (useFindLists as jest.Mock).mockReturnValue({
+      error: undefined,
+      loading: false,
+      result: getFoundListSchemaMock(),
+      start: jest.fn(),
+    });
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -57,25 +56,27 @@ describe('BuilderEntryItem', () => {
   test('it renders field labels if "showLabel" is "true"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: undefined,
-          operator: isOperator,
-          value: undefined,
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: undefined,
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: undefined,
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={true}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={true}
       />
     );
 
@@ -85,25 +86,27 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isOperator,
-          value: '1234',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -117,25 +120,27 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isNotOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isNotOperator,
-          value: '1234',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isNotOperator,
+          parent: undefined,
+          value: '1234',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -151,25 +156,27 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isOneOfOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isOneOfOperator,
-          value: ['1234'],
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOneOfOperator,
+          parent: undefined,
+          value: ['1234'],
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -185,25 +192,27 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isNotOneOfOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isNotOneOfOperator,
-          value: ['1234'],
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isNotOneOfOperator,
+          parent: undefined,
+          value: ['1234'],
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -219,25 +228,27 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isInListOperator,
-          value: 'some-list-id',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isInListOperator,
+          parent: undefined,
+          value: 'some-list-id',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={true}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={true}
       />
     );
 
@@ -253,25 +264,27 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "isNotInListOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isNotInListOperator,
-          value: 'some-list-id',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isNotInListOperator,
+          parent: undefined,
+          value: 'some-list-id',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={true}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={true}
       />
     );
 
@@ -287,25 +300,27 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "existsOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: existsOperator,
-          value: undefined,
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: existsOperator,
+          parent: undefined,
+          value: undefined,
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -313,9 +328,7 @@ describe('BuilderEntryItem', () => {
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
       'exists'
     );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').text()).toEqual(
-      getEmptyValue()
-    );
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').text()).toEqual('—');
     expect(
       wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"] input').props().disabled
     ).toBeTruthy();
@@ -324,25 +337,27 @@ describe('BuilderEntryItem', () => {
   test('it renders field values correctly when operator is "doesNotExistOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: doesNotExistOperator,
-          value: undefined,
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: doesNotExistOperator,
+          parent: undefined,
+          value: undefined,
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -350,9 +365,7 @@ describe('BuilderEntryItem', () => {
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
       'does not exist'
     );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').text()).toEqual(
-      getEmptyValue()
-    );
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').text()).toEqual('—');
     expect(
       wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"] input').props().disabled
     ).toBeTruthy();
@@ -361,57 +374,59 @@ describe('BuilderEntryItem', () => {
   test('it uses "correspondingKeywordField" if it exists', () => {
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: {
-            name: 'extension.text',
-            type: 'string',
-            esTypes: ['text'],
-            count: 0,
-            scripted: false,
-            searchable: false,
-            aggregatable: false,
-            readFromDocValues: true,
-          },
-          operator: isOneOfOperator,
-          value: ['1234'],
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: {
-            name: 'extension',
-            type: 'string',
-            esTypes: ['keyword'],
+            aggregatable: true,
             count: 0,
+            esTypes: ['keyword'],
+            name: 'extension',
+            readFromDocValues: true,
             scripted: false,
             searchable: true,
-            aggregatable: true,
-            readFromDocValues: true,
+            type: 'string',
           },
+          entryIndex: 0,
+          field: {
+            aggregatable: false,
+            count: 0,
+            esTypes: ['text'],
+            name: 'extension.text',
+            readFromDocValues: true,
+            scripted: false,
+            searchable: false,
+            type: 'string',
+          },
+          id: '123',
+          nested: undefined,
+          operator: isOneOfOperator,
+          parent: undefined,
+          value: ['1234'],
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
     expect(
       wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"]').prop('selectedField')
     ).toEqual({
-      name: 'extension',
-      type: 'string',
-      esTypes: ['keyword'],
+      aggregatable: true,
       count: 0,
+      esTypes: ['keyword'],
+      name: 'extension',
+      readFromDocValues: true,
       scripted: false,
       searchable: true,
-      aggregatable: true,
-      readFromDocValues: true,
+      type: 'string',
     });
   });
 
@@ -419,25 +434,27 @@ describe('BuilderEntryItem', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isOperator,
-          value: '1234',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -446,7 +463,7 @@ describe('BuilderEntryItem', () => {
     }).onChange([{ label: 'machine.os' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { id: '123', field: 'machine.os', operator: 'included', type: 'match', value: '' },
+      { field: 'machine.os', id: '123', operator: 'included', type: 'match', value: '' },
       0
     );
   });
@@ -455,25 +472,27 @@ describe('BuilderEntryItem', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isOperator,
-          value: '1234',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -482,7 +501,7 @@ describe('BuilderEntryItem', () => {
     }).onChange([{ label: 'is not' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { id: '123', field: 'ip', operator: 'excluded', type: 'match', value: '1234' },
+      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '1234' },
       0
     );
   });
@@ -491,25 +510,27 @@ describe('BuilderEntryItem', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isNotOperator,
-          value: '1234',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isNotOperator,
+          parent: undefined,
+          value: '1234',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -518,7 +539,7 @@ describe('BuilderEntryItem', () => {
     }).onCreateOption('126.45.211.34');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { id: '123', field: 'ip', operator: 'excluded', type: 'match', value: '126.45.211.34' },
+      { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '126.45.211.34' },
       0
     );
   });
@@ -527,25 +548,27 @@ describe('BuilderEntryItem', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isOneOfOperator,
-          value: '1234',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOneOfOperator,
+          parent: undefined,
+          value: '1234',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -554,7 +577,7 @@ describe('BuilderEntryItem', () => {
     }).onCreateOption('126.45.211.34');
 
     expect(mockOnChange).toHaveBeenCalledWith(
-      { id: '123', field: 'ip', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
+      { field: 'ip', id: '123', operator: 'included', type: 'match_any', value: ['126.45.211.34'] },
       0
     );
   });
@@ -563,25 +586,27 @@ describe('BuilderEntryItem', () => {
     const mockOnChange = jest.fn();
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('ip'),
-          operator: isNotInListOperator,
-          value: '1234',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isNotInListOperator,
+          parent: undefined,
+          value: '1234',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={mockOnChange}
         setErrorsExist={jest.fn()}
+        showLabel={false}
       />
     );
 
@@ -591,11 +616,11 @@ describe('BuilderEntryItem', () => {
 
     expect(mockOnChange).toHaveBeenCalledWith(
       {
-        id: '123',
         field: 'ip',
+        id: '123',
+        list: { id: 'some-list-id', type: 'ip' },
         operator: 'excluded',
         type: 'list',
-        list: { id: 'some-list-id', type: 'ip' },
       },
       0
     );
@@ -605,25 +630,27 @@ describe('BuilderEntryItem', () => {
     const mockSetErrorExists = jest.fn();
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('bytes'),
-          operator: isOneOfOperator,
-          value: '',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('bytes'),
+          id: '123',
+          nested: undefined,
+          operator: isOneOfOperator,
+          parent: undefined,
+          value: '',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
+        showLabel={false}
       />
     );
 
@@ -640,25 +667,27 @@ describe('BuilderEntryItem', () => {
     const mockSetErrorExists = jest.fn();
     wrapper = mount(
       <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
         entry={{
-          id: '123',
-          field: getField('bytes'),
-          operator: isOneOfOperator,
-          value: '',
-          nested: undefined,
-          parent: undefined,
-          entryIndex: 0,
           correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('bytes'),
+          id: '123',
+          nested: undefined,
+          operator: isOneOfOperator,
+          parent: undefined,
+          value: '',
         }}
+        httpService={mockKibanaHttpService}
         indexPattern={{
+          fields,
           id: '1234',
           title: 'logstash-*',
-          fields,
         }}
-        showLabel={false}
         listType="detection"
         onChange={jest.fn()}
         setErrorsExist={mockSetErrorExists}
+        showLabel={false}
       />
     );
 
