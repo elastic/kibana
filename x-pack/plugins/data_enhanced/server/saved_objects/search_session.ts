@@ -7,7 +7,7 @@
 
 import { SavedObjectsType } from 'kibana/server';
 import { SEARCH_SESSION_TYPE } from '../../common';
-import { searchSessionSavedObjectMigrations } from './search_sessions_migrations';
+import { searchSessionSavedObjectMigrations } from './search_session_migration';
 
 export const searchSessionSavedObjectType: SavedObjectsType = {
   name: SEARCH_SESSION_TYPE,
