@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -31,7 +31,7 @@ interface Props {
   onFilter: (filter: string) => void;
   onTimeChange: (start: string, end: string) => void;
   data: MetricsExplorerResponse | null;
-  source: InfraSourceConfiguration | undefined;
+  source: MetricsSourceConfigurationProperties | undefined;
   timeRange: MetricsExplorerTimeOptions;
 }
 export const MetricsExplorerCharts = ({

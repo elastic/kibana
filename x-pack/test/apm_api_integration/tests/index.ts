@@ -34,7 +34,8 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
     loadTestFile(require.resolve('./service_maps/service_maps'));
 
     loadTestFile(require.resolve('./service_overview/dependencies'));
-    loadTestFile(require.resolve('./service_overview/instances'));
+    loadTestFile(require.resolve('./service_overview/instances_primary_statistics'));
+    loadTestFile(require.resolve('./service_overview/instances_comparison_statistics'));
 
     loadTestFile(require.resolve('./services/agent_name'));
     loadTestFile(require.resolve('./services/annotations'));

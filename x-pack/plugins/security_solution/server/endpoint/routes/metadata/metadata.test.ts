@@ -27,6 +27,7 @@ import {
   HostStatus,
   MetadataQueryStrategyVersions,
 } from '../../../../common/endpoint/types';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { registerEndpointRoutes, METADATA_REQUEST_ROUTE } from './index';
 import {
   createMockEndpointAppContextServiceStartContract,
@@ -93,6 +94,7 @@ describe('test endpoint route', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
     });
 
@@ -129,7 +131,7 @@ describe('test endpoint route', () => {
       );
     });
 
-    it('should return a single endpoint with status online', async () => {
+    it('should return a single endpoint with status healthy', async () => {
       const response = createV1SearchResponse(new EndpointDocGenerator().generateHostMetadata());
       const mockRequest = httpServerMock.createKibanaRequest({
         params: { id: response.hits.hits[0]._id },
@@ -159,7 +161,7 @@ describe('test endpoint route', () => {
       expect(mockResponse.ok).toBeCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result).toHaveProperty('metadata.Endpoint');
-      expect(result.host_status).toEqual(HostStatus.ONLINE);
+      expect(result.host_status).toEqual(HostStatus.HEALTHY);
       expect(result.query_strategy_version).toEqual(MetadataQueryStrategyVersions.VERSION_1);
     });
   });
@@ -188,6 +190,7 @@ describe('test endpoint route', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
     });
 
@@ -403,7 +406,7 @@ describe('test endpoint route', () => {
         expect(message).toEqual('Endpoint Not Found');
       });
 
-      it('should return a single endpoint with status online', async () => {
+      it('should return a single endpoint with status healthy', async () => {
         const response = createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata());
         const mockRequest = httpServerMock.createKibanaRequest({
           params: { id: response.hits.hits[0]._id },
@@ -433,11 +436,11 @@ describe('test endpoint route', () => {
         expect(mockResponse.ok).toBeCalled();
         const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
         expect(result).toHaveProperty('metadata.Endpoint');
-        expect(result.host_status).toEqual(HostStatus.ONLINE);
+        expect(result.host_status).toEqual(HostStatus.HEALTHY);
         expect(result.query_strategy_version).toEqual(MetadataQueryStrategyVersions.VERSION_2);
       });
 
-      it('should return a single endpoint with status error when AgentService throw 404', async () => {
+      it('should return a single endpoint with status unhealthy when AgentService throw 404', async () => {
         const response = createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
         const mockRequest = httpServerMock.createKibanaRequest({
@@ -471,10 +474,10 @@ describe('test endpoint route', () => {
         });
         expect(mockResponse.ok).toBeCalled();
         const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
-        expect(result.host_status).toEqual(HostStatus.ERROR);
+        expect(result.host_status).toEqual(HostStatus.UNHEALTHY);
       });
 
-      it('should return a single endpoint with status error when status is not offline, online or enrolling', async () => {
+      it('should return a single endpoint with status unhealthy when status is not offline, online or enrolling', async () => {
         const response = createV2SearchResponse(new EndpointDocGenerator().generateHostMetadata());
 
         const mockRequest = httpServerMock.createKibanaRequest({
@@ -504,7 +507,7 @@ describe('test endpoint route', () => {
         });
         expect(mockResponse.ok).toBeCalled();
         const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
-        expect(result.host_status).toEqual(HostStatus.ERROR);
+        expect(result.host_status).toEqual(HostStatus.UNHEALTHY);
       });
 
       it('should throw error when endpoint agent is not active', async () => {

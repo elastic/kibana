@@ -5,19 +5,19 @@ Manage Actions and Connectors.
 
 The following connector APIs are available:
 
-* <<actions-and-connectors-api-get, Get connector API>> to retrieve a single connector by ID
+* <<get-connector-api, Get connector API>> to retrieve a single connector by ID
 
-* <<actions-and-connectors-api-get-all, Get all connectors API>> to retrieve all connectors
+* <<get-all-connectors-api, Get all connectors API>> to retrieve all connectors
 
-* <<actions-and-connectors-api-list, List all connector types API>> to retrieve a list of all connector types
+* <<list-connector-types-api, List all connector types API>> to retrieve a list of all connector types
 
-* <<actions-and-connectors-api-create, Create connector API>> to create connectors
+* <<create-connector-api, Create connector API>> to create connectors
 
-* <<actions-and-connectors-api-update, Update connector API>> to update the attributes for an existing connector
+* <<update-connector-api, Update connector API>> to update the attributes for an existing connector
 
-* <<actions-and-connectors-api-execute, Execute connector API>> to execute a connector by ID
+* <<execute-connector-api, Execute connector API>> to execute a connector by ID
 
-* <<actions-and-connectors-api-delete, Delete connector API>> to delete a connector by ID
+* <<delete-connector-api, Delete connector API>> to delete a connector by ID
 
 For deprecated APIs, refer to <<actions-and-connectors-legacy-apis>>.
 
