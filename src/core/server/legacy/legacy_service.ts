@@ -102,9 +102,9 @@ export class LegacyService implements CoreService {
       )
       .toPromise();
 
-    //this.legacyRawConfig = LegacyConfigClass.withDefaultSchema(this.settings);
+    // this.legacyRawConfig = LegacyConfigClass.withDefaultSchema(this.settings);
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
-    //this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
+    // this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
 
     this.setupDeps = setupDeps;
     await this.setupLegacyLogging(setupDeps.core.http.server);

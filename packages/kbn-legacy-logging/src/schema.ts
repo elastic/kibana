@@ -61,9 +61,9 @@ export const legacyLoggingConfigSchema = schema.object({
     }),
     schema.boolean({ defaultValue: false })
   ),
-  events: schema.recordOf(schema.string(), schema.any()),
+  events: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   dest: schema.string({ defaultValue: 'stdout' }),
-  filter: schema.recordOf(schema.string(), schema.any()),
+  filter: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   json: schema.conditional(
     schema.siblingRef('dest'),
     'stdout',
