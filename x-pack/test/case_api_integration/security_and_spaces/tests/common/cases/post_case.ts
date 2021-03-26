@@ -13,8 +13,15 @@ import {
   postCaseResp,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../../common/lib/mock';
-import { deleteCases } from '../../../../common/lib/utils';
-import { secOnly, secOnlyRead } from '../../../../common/lib/authentication/users';
+import { deleteCases, getSpaceUrlPrefix } from '../../../../common/lib/utils';
+import {
+  secOnly,
+  secOnlyRead,
+  globalRead,
+  obsOnlyRead,
+  obsSecRead,
+  noKibanaPrivileges,
+} from '../../../../common/lib/authentication/users';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -85,37 +92,46 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('rbac', () => {
-      describe('Permissions: all', () => {
-        it('User: security solution only - should create a case', async () => {
-          const { body: theCase } = await supertestWithoutAuth
-            .post(CASES_URL)
-            .auth(secOnly.username, secOnly.password)
-            .set('kbn-xsrf', 'true')
-            .send(postCaseReq)
-            .expect(200);
+      it('User: security solution only - should create a case', async () => {
+        const { body: theCase } = await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
+          .auth(secOnly.username, secOnly.password)
+          .set('kbn-xsrf', 'true')
+          .send(postCaseReq)
+          .expect(200);
 
-          expect(theCase.class).to.eql('securitySolution');
-        });
-
-        it('User: security solution only - should NOT create a case of different class', async () => {
-          await supertestWithoutAuth
-            .post(CASES_URL)
-            .auth(secOnly.username, secOnly.password)
-            .set('kbn-xsrf', 'true')
-            .send({ ...postCaseReq, class: 'observability' })
-            .expect(403);
-        });
+        expect(theCase.scope).to.eql('securitySolution');
       });
 
-      describe('Permissions: read', () => {
-        it('User: security solution only - should NOT create a case', async () => {
+      it('User: security solution only - should NOT create a case of different scope', async () => {
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
+          .auth(secOnly.username, secOnly.password)
+          .set('kbn-xsrf', 'true')
+          .send({ ...postCaseReq, scope: 'observability' })
+          .expect(403);
+      });
+
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should NOT create a case`, async () => {
           await supertestWithoutAuth
-            .post(CASES_URL)
-            .auth(secOnlyRead.username, secOnlyRead.password)
+            .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
+            .auth(user.username, user.password)
             .set('kbn-xsrf', 'true')
             .send(postCaseReq)
             .expect(403);
         });
+      }
+
+      it('should NOT create a case in a space with no permissions', async () => {
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space2')}${CASES_URL}`)
+          .auth(secOnly.username, secOnly.password)
+          .set('kbn-xsrf', 'true')
+          .send(postCaseReq)
+          .expect(403);
       });
     });
   });

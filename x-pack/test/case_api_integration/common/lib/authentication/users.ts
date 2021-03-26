@@ -10,6 +10,8 @@ import {
   observabilityOnlyAll,
   securitySolutionOnlyRead,
   observabilityOnlyRead,
+  globalRead as globalReadRole,
+  noKibanaPrivileges as noKibanaPrivilegesRole,
 } from './roles';
 import { User } from './types';
 
@@ -55,4 +57,26 @@ export const obsSecRead: User = {
   roles: [securitySolutionOnlyRead.name, observabilityOnlyRead.name],
 };
 
-export const users = [superUser, secOnly, secOnlyRead, obsOnly, obsOnlyRead, obsSec, obsSecRead];
+export const globalRead: User = {
+  username: 'global_read',
+  password: 'global_read',
+  roles: [globalReadRole.name],
+};
+
+export const noKibanaPrivileges: User = {
+  username: 'no_kibana_privileges',
+  password: 'no_kibana_privileges',
+  roles: [noKibanaPrivilegesRole.name],
+};
+
+export const users = [
+  superUser,
+  secOnly,
+  secOnlyRead,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  obsSecRead,
+  globalRead,
+  noKibanaPrivileges,
+];

@@ -66,7 +66,7 @@ export const securitySolutionOnlyAll: Role = {
 };
 
 export const securitySolutionOnlyRead: Role = {
-  name: 'sec_only_all',
+  name: 'sec_only_read',
   privileges: {
     elasticsearch: {
       indices: [
@@ -88,7 +88,7 @@ export const securitySolutionOnlyRead: Role = {
 };
 
 export const observabilityOnlyAll: Role = {
-  name: 'sec_only_all',
+  name: 'obs_only_all',
   privileges: {
     elasticsearch: {
       indices: [
@@ -113,7 +113,7 @@ export const observabilityOnlyAll: Role = {
 };
 
 export const observabilityOnlyRead: Role = {
-  name: 'sec_only_all',
+  name: 'obs_only_read',
   privileges: {
     elasticsearch: {
       indices: [

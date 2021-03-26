@@ -407,3 +407,7 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
     body: {},
   });
 };
+
+export const getSpaceUrlPrefix = (spaceId: string) => {
+  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+};
