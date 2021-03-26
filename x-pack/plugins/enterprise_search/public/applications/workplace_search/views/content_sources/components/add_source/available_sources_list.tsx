@@ -43,7 +43,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
     const disabled = !hasPlatinumLicense && accountContextOnly;
     const item = (
       <EuiPanel color="subdued" hasShadow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <SourceIcon serviceType={serviceType} name={name} size="l" />
           </EuiFlexItem>
@@ -78,7 +78,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   };
 
   const visibleSources = (
-    <EuiFlexGrid columns={2} gutterSize="l" responsive={false}>
+    <EuiFlexGrid columns={2} gutterSize="m">
       {sources.map((source, i) => (
         <EuiFlexItem key={i} data-test-subj="AvailableSourceCard">
           {getSourceCard(source)}
