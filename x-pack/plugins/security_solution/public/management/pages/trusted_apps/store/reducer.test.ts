@@ -31,7 +31,7 @@ describe('reducer', () => {
         initialState,
         createUserChangedUrlAction(
           '/trusted_apps',
-          '?page_index=5&page_size=50&show=create&view_type=list'
+          '?page_index=5&page_size=50&show=create&view_type=list&filter=test'
         )
       );
 
@@ -43,6 +43,7 @@ describe('reducer', () => {
           show: 'create',
           view_type: 'list',
           id: undefined,
+          filter: 'test',
         },
         active: true,
       });

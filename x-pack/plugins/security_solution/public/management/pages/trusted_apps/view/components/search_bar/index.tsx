@@ -31,9 +31,14 @@ export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch }) 
           onSearch={onSearch}
           isClearable
           fullWidth
+          data-test-subj="trustedAppSearchField"
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} onClick={() => onSearch(query)}>
+      <EuiFlexItem
+        grow={false}
+        onClick={() => onSearch(query)}
+        data-test-subj="trustedAppSearchButton"
+      >
         <EuiButton iconType="refresh">
           {i18n.translate('xpack.securitySolution.trustedapps.list.search.button', {
             defaultMessage: 'Refresh',

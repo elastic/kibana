@@ -93,11 +93,17 @@ const refreshListIfNeeded = async (
       const pageSize = getCurrentLocationPageSize(store.getState());
       const filter = getCurrentLocationFilter(store.getState());
 
-      const kqlQuert = `exception-list-agnostic.attributes.name:${filter} OR exception-list-agnostic.attributes.description:${filter} OR exception-list-agnostic.attributes.entries.value:${filter}`;
+      const kuery = [
+        `exception-list-agnostic.attributes.name:${filter}`,
+        `exception-list-agnostic.attributes.description:${filter}`,
+        `exception-list-agnostic.attributes.entries.value:${filter}`,
+        `exception-list-agnostic.attributes.entries.entries.value:${filter}`,
+      ].join(' OR ');
+
       const response = await trustedAppsService.getTrustedAppsList({
         page: pageIndex + 1,
         per_page: pageSize,
-        filter: filter ? kqlQuert : undefined,
+        kuery: filter ? kuery : undefined,
       });
 
       store.dispatch(
