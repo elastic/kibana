@@ -44,7 +44,7 @@ export async function reassignAgent(
   await createAgentAction(soClient, esClient, {
     agent_id: agentId,
     created_at: new Date().toISOString(),
-    type: 'INTERNAL_POLICY_REASSIGN',
+    type: 'POLICY_REASSIGN',
   });
 }
 
@@ -164,7 +164,7 @@ export async function reassignAgents(
     agentsToUpdate.map((agent) => ({
       agent_id: agent.id,
       created_at: now,
-      type: 'INTERNAL_POLICY_REASSIGN',
+      type: 'POLICY_REASSIGN',
     }))
   );
 
