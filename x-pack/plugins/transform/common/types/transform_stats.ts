@@ -6,8 +6,8 @@
  */
 
 import { TransformState, TRANSFORM_STATE } from '../constants';
-import { isPopulatedObject } from '../utils/object_utils';
 import { TransformId } from './transform';
+import { isPopulatedObject } from '../shared_imports';
 
 export interface TransformStats {
   id: TransformId;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from './object_utils';
+import { isPopulatedObject } from '../shared_imports';
 
 export interface ErrorResponse {
   body: {

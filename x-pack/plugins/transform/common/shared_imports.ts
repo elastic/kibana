@@ -11,4 +11,8 @@ export {
   patternValidator,
   ChartData,
   HITS_TOTAL_RELATION,
+  isPopulatedObject,
+  isRuntimeMappings,
+  isRuntimeField,
+  RuntimeMappings,
 } from '../../ml/common';

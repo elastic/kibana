@@ -11,5 +11,6 @@ export { ANOMALY_SEVERITY, ANOMALY_THRESHOLD, SEVERITY_COLORS } from './constant
 export { getSeverityColor, getSeverityType } from './util/anomaly_utils';
 export { composeValidators, patternValidator } from './util/validators';
 export { isRuntimeMappings, isRuntimeField } from './util/runtime_field_utils';
+export { isPopulatedObject } from './util/object_utils';
 export { extractErrorMessage } from './util/errors';
 export type { RuntimeMappings } from './types/fields';

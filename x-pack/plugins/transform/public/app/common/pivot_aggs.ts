@@ -14,10 +14,10 @@ import type { Dictionary } from '../../../common/types/common';
 import type { EsFieldName } from '../../../common/types/fields';
 import type { PivotAgg, PivotSupportedAggs } from '../../../common/types/pivot_aggs';
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
-import { isPopulatedObject } from '../../../common/utils/object_utils';
 
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
+import { isPopulatedObject } from '../../../common/shared_imports';
 
 export function isPivotSupportedAggs(arg: unknown): arg is PivotSupportedAggs {
   return (

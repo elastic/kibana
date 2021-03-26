@@ -26,7 +26,7 @@ import {
 import { getDefaultAggregationConfig } from './get_default_aggregation_config';
 import { getDefaultGroupByConfig } from './get_default_group_by_config';
 import type { Field, StepDefineExposedState } from './types';
-import { isRuntimeMappings } from './types';
+import { isRuntimeMappings } from '../../../../../../../common/shared_imports';
 
 const illegalEsAggNameChars = /[[\]>]/g;
 

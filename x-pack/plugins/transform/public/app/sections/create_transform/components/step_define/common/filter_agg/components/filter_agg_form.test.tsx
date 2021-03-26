@@ -10,12 +10,10 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { FilterAggForm } from './filter_agg_form';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
-import {
-  KBN_FIELD_TYPES,
-  RuntimeField,
-} from '../../../../../../../../../../../../src/plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../../../../../../../../src/plugins/data/common';
 import { IndexPattern } from '../../../../../../../../../../../../src/plugins/data/public';
 import { FilterTermForm } from './filter_term_form';
+import { estypes } from '@elastic/elasticsearch';
 
 describe('FilterAggForm', () => {
   const runtimeMappings = {
@@ -24,7 +22,7 @@ describe('FilterAggForm', () => {
       script: {
         source: "emit(doc['bytes'].value * 2.0)",
       },
-    } as RuntimeField,
+    } as estypes.RuntimeField,
   };
 
   const indexPattern = ({

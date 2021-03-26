@@ -32,7 +32,7 @@ import {
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import type { RuntimeMappings } from '../step_define/common/types';
+import { RuntimeMappings } from '../../../../../../common/shared_imports';
 
 enum KBN_MANAGEMENT_PAGE_CLASSNAME {
   DEFAULT_BODY = 'mgtPage__body',

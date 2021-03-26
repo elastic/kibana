@@ -47,8 +47,8 @@ import {
   PutTransformsPivotRequestSchema,
 } from '../../../../../../common/api_schemas/transforms';
 import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
-import { isPopulatedObject } from '../../../../../../common/utils/object_utils';
 import { isLatestTransform } from '../../../../../../common/types/transform';
+import { isPopulatedObject } from '../../../../../../common/shared_imports';
 
 export interface StepDetailsExposedState {
   created: boolean;

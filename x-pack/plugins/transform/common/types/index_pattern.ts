@@ -6,8 +6,7 @@
  */
 
 import type { IndexPattern } from '../../../../../src/plugins/data/common';
-
-import { isPopulatedObject } from '../utils/object_utils';
+import { isPopulatedObject } from '../shared_imports';
 
 // Custom minimal type guard for IndexPattern to check against the attributes used in transforms code.
 export function isIndexPattern(arg: any): arg is IndexPattern {
