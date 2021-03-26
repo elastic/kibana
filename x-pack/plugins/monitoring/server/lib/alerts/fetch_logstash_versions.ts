@@ -70,7 +70,7 @@ export async function fetchLogstashVersions(
                     field: 'logstash_stats.logstash.version',
                     size: 1,
                     order: {
-                      latest_report: 'desc',
+                      latest_report: 'desc' as const,
                     },
                   },
                   aggs: {

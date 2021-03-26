@@ -791,7 +791,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         body: datafeedPreviewSchema,
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canPreviewDatafeed'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {

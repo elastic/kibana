@@ -79,11 +79,11 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       return wrap(await driver.switchTo().activeElement());
     }
 
-    public async setValue(selector: string, text: string): Promise<void> {
+    public async setValue(selector: string, text: string, topOffset?: number): Promise<void> {
       log.debug(`Find.setValue('${selector}', '${text}')`);
       return await retry.try(async () => {
         const element = await this.byCssSelector(selector);
-        await element.click();
+        await element.click(topOffset);
 
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
@@ -413,14 +413,15 @@ export async function FindProvider({ getService }: FtrProviderContext) {
 
     public async clickByCssSelector(
       selector: string,
-      timeout: number = defaultFindTimeout
+      timeout: number = defaultFindTimeout,
+      topOffset?: number
     ): Promise<void> {
       log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
       await retry.try(async () => {
         const element = await this.byCssSelector(selector, timeout);
         if (element) {
           // await element.moveMouseTo();
-          await element.click();
+          await element.click(topOffset);
         } else {
           throw new Error(`Element with css='${selector}' is not found`);
         }

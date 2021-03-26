@@ -11,6 +11,8 @@ import { useLocation } from 'react-router-dom';
 import { Location } from 'history';
 import { useActions } from 'kea';
 
+import { EuiPage, EuiPageBody } from '@elastic/eui';
+
 import { Loading } from '../../../../shared/loading';
 
 import { AddSourceLogic } from './add_source/add_source_logic';
@@ -28,5 +30,11 @@ export const SourceAdded: React.FC = () => {
     saveSourceParams(search);
   }, []);
 
-  return <Loading />;
+  return (
+    <EuiPage>
+      <EuiPageBody>
+        <Loading />
+      </EuiPageBody>
+    </EuiPage>
+  );
 };

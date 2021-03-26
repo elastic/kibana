@@ -114,6 +114,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         .loadFieldExampleValues(
           splitField,
           jobCreator.runtimeMappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         )
         .then(setFieldValues)
@@ -145,6 +146,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
           fieldValues.length > 0 ? fieldValues[0] : null,
           cs.intervalMs,
           jobCreator.runtimeMappings,
+          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         );
         setLineChartsData(resp);
