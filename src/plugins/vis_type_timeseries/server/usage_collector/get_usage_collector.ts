@@ -61,7 +61,7 @@ export const getStats = async (
 
   if (esResponse?.hits?.hits?.length) {
     for (const hit of esResponse.hits.hits) {
-      const visualization = hit._source?.visualization;
+      const { visualization } = hit._source;
       let visState: VisState = {};
       try {
         visState = JSON.parse(visualization?.visState ?? '{}');
