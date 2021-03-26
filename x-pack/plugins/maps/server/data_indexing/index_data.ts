@@ -28,7 +28,7 @@ export async function writeDataToIndex(
     }
     const settings: WriteSettings = { index, body: data };
     const { body: resp } = await asCurrentUser.index(settings);
-    if (resp.errors) {
+    if (resp.result === 'Error') {
       throw resp;
     } else {
       return {
