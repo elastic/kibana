@@ -191,8 +191,7 @@ export function registerAccountSourceReauthPrepareRoute({
     {
       path: '/api/workplace_search/account/sources/{id}/reauth_prepare',
       validate: {
-        params: schema.object({
-          id: schema.string(),
+        query: schema.object({
           kibana_host: schema.string(),
         }),
       },
@@ -539,9 +538,9 @@ export function registerOrgSourceReauthPrepareRoute({
       validate: {
         params: schema.object({
           id: schema.string(),
-          query: schema.object({
-            kibana_host: schema.string(),
-          }),
+        }),
+        query: schema.object({
+          kibana_host: schema.string(),
         }),
       },
     },
