@@ -46,6 +46,7 @@ describe('update', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "class": "securitySolution",
             "closed_at": "2019-11-25T21:54:48.952Z",
             "closed_by": Object {
               "email": "d00d@awesome.com",
@@ -146,6 +147,7 @@ describe('update', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "class": "securitySolution",
             "closed_at": null,
             "closed_by": null,
             "comments": Array [],
@@ -210,6 +212,7 @@ describe('update', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "class": "securitySolution",
             "closed_at": null,
             "closed_by": null,
             "comments": Array [],
@@ -350,6 +353,7 @@ describe('update', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
+            "class": "securitySolution",
             "closed_at": null,
             "closed_by": null,
             "comments": Array [],

@@ -18,11 +18,11 @@ import {
   SavedObjectsFindResult,
 } from 'kibana/server';
 
+import { KueryNode, nodeBuilder } from 'src/plugins/data/common';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import {
   ESCaseAttributes,
   CommentAttributes,
-  SavedObjectFindOptions,
   User,
   CommentPatchAttributes,
   SubCaseAttributes,
@@ -34,12 +34,7 @@ import {
   caseTypeField,
   CasesFindRequest,
 } from '../../common/api';
-import {
-  combineFilters,
-  defaultSortField,
-  groupTotalAlertsByID,
-  SavedObjectFindOptionsKueryNode,
-} from '../common';
+import { defaultSortField, groupTotalAlertsByID, SavedObjectFindOptionsKueryNode } from '../common';
 import { defaultPage, defaultPerPage } from '../routes/api';
 import {
   flattenCaseSavedObject,
@@ -83,20 +78,20 @@ interface GetSubCasesArgs extends ClientArgs {
 interface FindCommentsArgs {
   client: SavedObjectsClientContract;
   id: string | string[];
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface FindCaseCommentsArgs {
   client: SavedObjectsClientContract;
   id: string | string[];
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
   includeSubCaseComments?: boolean;
 }
 
 interface FindSubCaseCommentsArgs {
   client: SavedObjectsClientContract;
   id: string | string[];
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface FindCasesArgs extends ClientArgs {
@@ -186,7 +181,7 @@ interface FindCommentsByAssociationArgs {
   client: SavedObjectsClientContract;
   id: string | string[];
   associationType: AssociationType;
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface Collection {
@@ -489,7 +484,13 @@ export class CaseService implements CaseServiceSetup {
       associationType,
       id: ids,
       options: {
-        filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert})`,
+        filter: nodeBuilder.or([
+          nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+          nodeBuilder.is(
+            `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+            CommentType.generatedAlert
+          ),
+        ]),
       },
     });
 
@@ -921,16 +922,16 @@ export class CaseService implements CaseServiceSetup {
         };
       }
 
-      let filter: string | undefined;
+      let filter: KueryNode | undefined;
       if (!includeSubCaseComments) {
         // if other filters were passed in then combine them to filter out sub case comments
-        filter = combineFilters(
-          [
-            options?.filter ?? '',
-            `${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType: ${AssociationType.case}`,
-          ],
-          'AND'
-        );
+        filter = nodeBuilder.and([
+          ...(options?.filter != null ? [options.filter] : []),
+          nodeBuilder.is(
+            `${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType`,
+            AssociationType.case
+          ),
+        ]);
       }
 
       this.log.debug(`Attempting to GET all comments for case caseID ${JSON.stringify(id)}`);

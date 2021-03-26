@@ -20,12 +20,11 @@ import {
   CaseUserActionService,
 } from '../../../services';
 import { authenticationMock } from '../__fixtures__';
-import type { CasesRequestHandlerContext } from '../../../types';
 import { createActionsClient } from './mock_actions_client';
 import { featuresPluginMock } from '../../../../../features/server/mocks';
-import { securityMock } from '../../../../../security/server/mocks';
 import { CasesClientFactory } from '../../../client/factory';
 import { xpackMocks } from '../../../../../../mocks';
+import { KibanaFeature } from '../../../../../features/common';
 
 export const createRouteContext = async (client: any, badAuth = false) => {
   const actionsMock = createActionsClient();
@@ -56,6 +55,13 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   contextMock.core.savedObjects.getClient = jest.fn(() => client);
   contextMock.core.savedObjects.client = client;
 
+  // create a fake feature
+  const featureStart = featuresPluginMock.createStart();
+  featureStart.getKibanaFeatures.mockReturnValue([
+    // all the authorization class cares about is the `cases` field in the kibana feature so just cast it to that
+    ({ cases: ['securitySolution'] } as unknown) as KibanaFeature,
+  ]);
+
   const factory = new CasesClientFactory(log);
   factory.initialize({
     alertsService,
@@ -63,11 +69,9 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     caseService,
     connectorMappingsService,
     userActionService,
-    featuresPluginStart: featuresPluginMock.createStart(),
+    featuresPluginStart: featureStart,
     getSpace: async (req: KibanaRequest) => undefined,
-    isAuthEnabled: false,
-    securityPluginSetup: securityMock.createSetup(),
-    securityPluginStart: securityMock.createStart(),
+    // intentionally not passing the security plugin so that security will be disabled
   });
 
   // create a single reference to the caseClient so we can mock its methods
@@ -79,13 +83,13 @@ export const createRouteContext = async (client: any, badAuth = false) => {
     scopedClusterClient: esClient,
   });
 
-  const context = ({
+  const context = {
     ...contextMock,
     actions: { getActionsClient: () => actionsMock },
     cases: {
       getCasesClient: async () => caseClient,
     },
-  } as unknown) as CasesRequestHandlerContext;
+  };
 
   return { context, services: { userActionService } };
 };

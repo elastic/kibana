@@ -383,6 +383,8 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
     const data = {
+      // TODO: remove this
+      class: 'securitySolution',
       description: 'description',
       tags: ['tag'],
       title: 'title',

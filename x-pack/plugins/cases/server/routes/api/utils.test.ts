@@ -58,6 +58,7 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -114,6 +115,7 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -173,6 +175,7 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -379,6 +382,7 @@ describe('Utils', () => {
         Object {
           "cases": Array [
             Object {
+              "class": "securitySolution",
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -419,6 +423,7 @@ describe('Utils', () => {
               "version": "WzAsMV0=",
             },
             Object {
+              "class": "securitySolution",
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -459,6 +464,7 @@ describe('Utils', () => {
               "version": "WzQsMV0=",
             },
             Object {
+              "class": "securitySolution",
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -503,6 +509,7 @@ describe('Utils', () => {
               "version": "WzUsMV0=",
             },
             Object {
+              "class": "securitySolution",
               "closed_at": "2019-11-25T22:32:17.947Z",
               "closed_by": Object {
                 "email": "testemail@elastic.co",
@@ -572,6 +579,7 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -628,6 +636,7 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -685,6 +694,7 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [

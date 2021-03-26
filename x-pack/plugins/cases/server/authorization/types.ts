@@ -43,4 +43,5 @@ export interface OperationDetails {
   action: string;
   verbs: Verbs;
   docType: string;
+  savedObjectType: string;
 }

@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsFindResult, SavedObjectsFindResponse } from 'kibana/server';
+import { AuditEvent, EventCategory, EventOutcome } from '../../../security/server';
 import {
   CaseStatuses,
   CommentAttributes,
@@ -13,6 +14,7 @@ import {
   CommentType,
   User,
 } from '../../common/api';
+import { OperationDetails } from '../authorization';
 import { UpdateAlertRequest } from '../client/types';
 import { getAlertInfoFromComments } from '../routes/api/utils';
 
@@ -99,6 +101,45 @@ export const countAlertsForID = ({
 };
 
 /**
- * Creates a message to be used for an audit logger indicating the status of a request.
+ * Creates an AuditEvent to be used for an audit logger describing a request.
  */
-export function createAuditMsg({}: {}): void {}
+export function createAuditMsg({
+  operation,
+  outcome,
+  error,
+  savedObjectID,
+}: {
+  operation: OperationDetails;
+  savedObjectID: string;
+  outcome?: EventOutcome;
+  error?: Error;
+}): AuditEvent {
+  const doc = `${operation.savedObjectType} [id=${savedObjectID}]`;
+  const message = error
+    ? `Failed attempt to ${operation.verbs.present} ${doc}`
+    : outcome === EventOutcome.UNKNOWN
+    ? `User is ${operation.verbs.progressive} ${doc}`
+    : `User has ${operation.verbs.past} ${doc}`;
+
+  return {
+    message,
+    event: {
+      action: operation.action,
+      category: EventCategory.DATABASE,
+      type: operation.type,
+      outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
+    },
+    kibana: {
+      saved_object: {
+        type: operation.savedObjectType,
+        id: savedObjectID,
+      },
+    },
+    ...(error != null && {
+      error: {
+        code: error.name,
+        message: error.message,
+      },
+    }),
+  };
+}

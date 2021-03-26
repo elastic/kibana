@@ -55,6 +55,7 @@ describe('PATCH cases', () => {
     expect(response.payload).toMatchInlineSnapshot(`
       Array [
         Object {
+          "class": "securitySolution",
           "closed_at": "2019-11-25T21:54:48.952Z",
           "closed_by": Object {
             "email": "d00d@awesome.com",
@@ -129,6 +130,7 @@ describe('PATCH cases', () => {
     expect(response.payload).toMatchInlineSnapshot(`
       Array [
         Object {
+          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -202,6 +204,7 @@ describe('PATCH cases', () => {
     expect(response.payload).toMatchInlineSnapshot(`
       Array [
         Object {
+          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],

@@ -6,6 +6,7 @@
  */
 
 import { EventType } from '../../../security/server';
+import { CASE_SAVED_OBJECT } from '../../common/constants';
 import { Verbs, ReadOperations, WriteOperations, OperationDetails } from './types';
 
 export * from './authorization';
@@ -33,7 +34,7 @@ const updateVerbs: Verbs = {
 const deleteVerbs: Verbs = {
   present: 'delete',
   progressive: 'deleting',
-  past: 'delated',
+  past: 'deleted',
 };
 
 export const Operations: Record<ReadOperations | WriteOperations, OperationDetails> = {
@@ -44,6 +45,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     action: 'create-case',
     verbs: createVerbs,
     docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
   },
   [WriteOperations.DeleteCase]: {
     type: EventType.DELETION,
@@ -51,6 +53,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     action: 'delete-case',
     verbs: deleteVerbs,
     docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
   },
   [WriteOperations.UpdateCase]: {
     type: EventType.CHANGE,
@@ -58,6 +61,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     action: 'update-case',
     verbs: updateVerbs,
     docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.GetCase]: {
     type: EventType.ACCESS,
@@ -65,6 +69,7 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     action: 'get-case',
     verbs: accessVerbs,
     docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
   },
   [ReadOperations.FindCases]: {
     type: EventType.ACCESS,
@@ -72,5 +77,6 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     action: 'find-cases',
     verbs: accessVerbs,
     docType: 'cases',
+    savedObjectType: CASE_SAVED_OBJECT,
   },
 };

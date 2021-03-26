@@ -17,6 +17,7 @@ import {
   SavedObjectsFindResult,
   Logger,
 } from 'kibana/server';
+import { nodeBuilder } from 'src/plugins/data/common';
 import {
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
@@ -117,7 +118,13 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
       options: {
         fields: [],
         // there should never be generated alerts attached to an individual case but we'll check anyway
-        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+        filter: nodeBuilder.or([
+          nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+          nodeBuilder.is(
+            `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+            CommentType.generatedAlert
+          ),
+        ]),
         page: 1,
         perPage: 1,
       },
@@ -174,7 +181,10 @@ async function getAlertComments({
     id: idsOfCasesToSync,
     includeSubCaseComments: true,
     options: {
-      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+      filter: nodeBuilder.or([
+        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.generatedAlert),
+      ]),
     },
   });
 }

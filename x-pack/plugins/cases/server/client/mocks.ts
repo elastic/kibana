@@ -22,8 +22,8 @@ import {
 import { CasesClient } from './types';
 import { authenticationMock } from '../routes/api/__fixtures__';
 import { featuresPluginMock } from '../../../features/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
 import { CasesClientFactory } from './factory';
+import { KibanaFeature } from '../../../features/common';
 
 export type CasesClientPluginContractMock = jest.Mocked<CasesClient>;
 export const createExternalCasesClientMock = (): CasesClientPluginContractMock => ({
@@ -83,6 +83,13 @@ export const createCasesClientWithMockSavedObjectsClient = async ({
   const savedObjectsService = savedObjectsServiceMock.createStartContract();
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
 
+  // create a fake feature
+  const featureStart = featuresPluginMock.createStart();
+  featureStart.getKibanaFeatures.mockReturnValue([
+    // all the authorization class cares about is the `cases` field in the kibana feature so just cast it to that
+    ({ cases: ['securitySolution'] } as unknown) as KibanaFeature,
+  ]);
+
   const factory = new CasesClientFactory(log);
   factory.initialize({
     alertsService,
@@ -90,11 +97,9 @@ export const createCasesClientWithMockSavedObjectsClient = async ({
     caseService,
     connectorMappingsService,
     userActionService,
-    featuresPluginStart: featuresPluginMock.createStart(),
+    featuresPluginStart: featureStart,
     getSpace: async (req: KibanaRequest) => undefined,
-    isAuthEnabled: false,
-    securityPluginSetup: securityMock.createSetup(),
-    securityPluginStart: securityMock.createStart(),
+    // intentionally not passing the security plugin so that security will be disabled
   });
 
   // create a single reference to the caseClient so we can mock its methods
