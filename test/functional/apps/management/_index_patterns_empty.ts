@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings']);
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('index pattern empty view', () => {
     before(async () => {

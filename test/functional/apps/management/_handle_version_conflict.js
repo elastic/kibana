@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const scriptedFiledName = 'versionConflictScript';
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'header']);

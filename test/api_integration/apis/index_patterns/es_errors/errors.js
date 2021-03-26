@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { errors as esErrors } from 'elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import {
