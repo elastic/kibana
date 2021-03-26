@@ -16,6 +16,8 @@ import { ReportDefinitionCol } from './columns/report_definition_col';
 import { ReportFilters } from './columns/report_filters';
 import { ReportBreakdowns } from './columns/report_breakdowns';
 import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
+import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
+import { getDefaultConfigs } from '../configurations/default_configs';
 
 export const ReportTypes: Record<AppDataType, Array<{ id: ReportViewTypeId; label: string }>> = {
   synthetics: [
@@ -50,6 +52,16 @@ export function SeriesBuilder() {
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(!!series.dataType);
 
+  const { indexPattern } = useIndexPatternContext();
+
+  const getDataViewSeries = () => {
+    return getDefaultConfigs({
+      indexPattern,
+      reportType: reportType!,
+      seriesId: NEW_SERIES_KEY,
+    });
+  };
+
   const columns = [
     {
       name: 'DataType',
@@ -66,18 +78,25 @@ export function SeriesBuilder() {
     {
       name: 'Definition',
       width: '30%',
-      render: (val: string) => (reportType ? <ReportDefinitionCol /> : null),
+      render: (val: string) =>
+        reportType && indexPattern ? (
+          <ReportDefinitionCol dataViewSeries={getDataViewSeries()} />
+        ) : null,
     },
     {
       name: 'Filters',
       width: '25%',
-      render: (val: string) => (reportType ? <ReportFilters reportType={reportType} /> : null),
+      render: (val: string) =>
+        reportType && indexPattern ? <ReportFilters dataViewSeries={getDataViewSeries()} /> : null,
     },
     {
       name: 'Breakdowns',
       width: '25%',
       field: 'id',
-      render: (val: string) => (reportType ? <ReportBreakdowns /> : null),
+      render: (val: string) =>
+        reportType && indexPattern ? (
+          <ReportBreakdowns dataViewSeries={getDataViewSeries()} />
+        ) : null,
     },
   ];
 

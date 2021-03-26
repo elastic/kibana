@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
-import { DataSeries } from '../types';
+import { ConfigProps, DataSeries } from '../types';
 import { FieldLabels } from './constants';
+import { buildPhraseFilter } from './utils';
 
-interface Props {
-  seriesId: string;
-}
-
-export function getServiceLatencyLensConfig({ seriesId }: Props): DataSeries {
+export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
     id: seriesId,
     reportType: 'service-latency',
@@ -40,7 +36,7 @@ export function getServiceLatencyLensConfig({ seriesId }: Props): DataSeries {
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: [{ query: { match_phrase: { 'transaction.type': 'request' } } } as QueryContainer],
+    filters: [buildPhraseFilter('transaction.type', 'request', indexPattern)],
     labels: { ...FieldLabels },
     reportDefinitions: [
       {

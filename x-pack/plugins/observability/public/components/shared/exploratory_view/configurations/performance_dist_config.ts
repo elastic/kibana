@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
-import { DataSeries } from '../types';
+import { ConfigProps, DataSeries } from '../types';
 import { FieldLabels } from './constants';
+import { buildPhraseFilter } from './utils';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';
@@ -16,11 +16,7 @@ export const TBT_FIELD = 'transaction.experience.tbt';
 export const FID_FIELD = 'transaction.experience.fid';
 export const CLS_FIELD = 'transaction.experience.cls';
 
-interface Props {
-  seriesId: string;
-}
-
-export function getPerformanceDistLensConfig({ seriesId }: Props): DataSeries {
+export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
     id: seriesId ?? 'unique-key',
     reportType: 'page-load-dist',
@@ -72,8 +68,8 @@ export function getPerformanceDistLensConfig({ seriesId }: Props): DataSeries {
       },
     ],
     filters: [
-      { query: { match_phrase: { 'transaction.type': 'page-load' } } } as QueryContainer,
-      { query: { match_phrase: { 'processor.event': 'transaction' } } } as QueryContainer,
+      buildPhraseFilter('transaction.type', 'page-load', indexPattern),
+      buildPhraseFilter('processor.event', 'transaction', indexPattern),
     ],
     labels: {
       ...FieldLabels,

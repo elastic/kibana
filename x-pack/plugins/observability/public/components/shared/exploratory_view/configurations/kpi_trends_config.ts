@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
-import { DataSeries } from '../types';
+import { ConfigProps, DataSeries } from '../types';
 import { FieldLabels } from './constants';
+import { buildPhraseFilter } from './utils';
 
-interface Props {
-  seriesId: string;
-}
-
-export function getKPITrendsLensConfig({ seriesId }: Props): DataSeries {
+export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
     id: seriesId,
     defaultSeriesType: 'bar_stacked',
@@ -42,11 +38,7 @@ export function getKPITrendsLensConfig({ seriesId }: Props): DataSeries {
       'client.geo.country_name',
       'user_agent.device.name',
     ],
-    filters: [
-      {
-        query: { match_phrase: { 'transaction.type': 'page-load' } },
-      } as QueryContainer,
-    ],
+    filters: [buildPhraseFilter('transaction.type', 'page-load', indexPattern)],
     labels: { ...FieldLabels, 'service.name': 'Web Application' },
     reportDefinitions: [
       {

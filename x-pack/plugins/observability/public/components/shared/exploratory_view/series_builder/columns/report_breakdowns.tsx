@@ -7,17 +7,9 @@
 
 import React from 'react';
 import { Breakdowns } from '../../series_editor/columns/breakdowns';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
-import { getDefaultConfigs } from '../../configurations/default_configs';
+import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
+import { DataSeries } from '../../types';
 
-export function ReportBreakdowns() {
-  const {
-    series: { reportType },
-  } = useUrlStorage(NEW_SERIES_KEY);
-
-  const dataSeries = getDefaultConfigs({
-    reportType: reportType!,
-    seriesId: NEW_SERIES_KEY,
-  });
-  return <Breakdowns breakdowns={dataSeries.breakdowns ?? []} seriesId={NEW_SERIES_KEY} />;
+export function ReportBreakdowns({ dataViewSeries }: { dataViewSeries: DataSeries }) {
+  return <Breakdowns breakdowns={dataViewSeries.breakdowns ?? []} seriesId={NEW_SERIES_KEY} />;
 }

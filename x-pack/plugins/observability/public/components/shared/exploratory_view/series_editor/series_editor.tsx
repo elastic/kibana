@@ -16,6 +16,7 @@ import { NEW_SERIES_KEY, useUrlStorage } from '../hooks/use_url_strorage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { DatePickerCol } from './columns/date_picker_col';
 import { RemoveSeries } from './columns/remove_series';
+import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
 
 export function SeriesEditor() {
   const { allSeries, firstSeriesId } = useUrlStorage();
@@ -83,11 +84,15 @@ export function SeriesEditor() {
   const allSeriesKeys = Object.keys(allSeries);
 
   const items: DataSeries[] = [];
+
+  const { indexPattern } = useIndexPatternContext();
+
   allSeriesKeys.forEach((seriesKey) => {
     const series = allSeries[seriesKey];
-    if (series.reportType) {
+    if (series.reportType && indexPattern) {
       items.push(
         getDefaultConfigs({
+          indexPattern,
           reportType: series.reportType,
           seriesId: seriesKey,
         })

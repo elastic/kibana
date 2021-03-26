@@ -6,7 +6,13 @@
  */
 
 import {
+  CountIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  LastValueIndexPatternColumn,
+  OperationType,
   PersistedIndexPatternLayer,
+  RangeIndexPatternColumn,
+  SeriesType,
   TypedLensByValueInput,
   XYState,
 } from '../../../../../../lens/public';
@@ -17,23 +23,26 @@ import {
 } from '../../../../../../../../src/plugins/data/common';
 import { FieldLabels } from './constants';
 import { DataSeries, UrlFilter } from '../types';
-import { ESFilter } from '../../../../../../../../typings/elasticsearch';
+
+function getLayerReferenceName(layerId: string) {
+  return `indexpattern-datasource-layer-${layerId}`;
+}
 
 export class LensAttributes {
   indexPattern: IIndexPattern;
   layers: Record<string, PersistedIndexPatternLayer>;
   visualization: XYState;
   filters: UrlFilter[];
-  seriesType: string;
+  seriesType: SeriesType;
   reportViewConfig: DataSeries;
   reportDefinitions: Record<string, string>;
 
   constructor(
     indexPattern: IIndexPattern,
     reportViewConfig: DataSeries,
-    seriesType: string,
-    filters: UrlFilter[],
-    metricType?: string,
+    seriesType?: SeriesType,
+    filters?: UrlFilter[],
+    metricType?: OperationType,
     reportDefinitions?: Record<string, string>
   ) {
     this.indexPattern = indexPattern;
@@ -73,14 +82,14 @@ export class LensAttributes {
   }
 
   removeBreakdown() {
-    this.layers.layer1.columns['break-down-column'] = undefined;
+    delete this.layers.layer1.columns['break-down-column'];
 
     this.layers.layer1.columnOrder = ['x-axis-column', 'y-axis-column'];
 
     this.visualization.layers[0].splitAccessor = undefined;
   }
 
-  getNumberColumn(sourceField: string) {
+  getNumberColumn(sourceField: string): RangeIndexPatternColumn {
     return {
       sourceField,
       label: this.reportViewConfig.labels[sourceField],
@@ -96,7 +105,7 @@ export class LensAttributes {
     };
   }
 
-  getDateHistogramColumn(sourceField: string) {
+  getDateHistogramColumn(sourceField: string): DateHistogramIndexPatternColumn {
     return {
       sourceField,
       dataType: 'date',
@@ -108,7 +117,28 @@ export class LensAttributes {
     };
   }
 
-  getXAxis() {
+  getXAxis():
+    | LastValueIndexPatternColumn
+    | DateHistogramIndexPatternColumn
+    | RangeIndexPatternColumn {
+    const { xAxisColumn } = this.reportViewConfig;
+
+    const xAxisField = xAxisColumn.sourceField!;
+
+    const fieldType = this.getFieldType();
+
+    if (fieldType === 'date') {
+      return this.getDateHistogramColumn(xAxisField);
+    }
+    if (fieldType === 'number') {
+      return this.getNumberColumn(xAxisField);
+    }
+
+    // FIXME review my approach again
+    return this.getDateHistogramColumn(xAxisField);
+  }
+
+  getFieldType() {
     const { xAxisColumn } = this.reportViewConfig;
 
     let xAxisField = xAxisColumn.sourceField;
@@ -124,28 +154,8 @@ export class LensAttributes {
 
       const fieldMeta = this.indexPattern.fields.find((field) => field.name === xAxisField);
 
-      if (fieldMeta?.type === 'date') {
-        return this.getDateHistogramColumn(xAxisField);
-      }
-      if (fieldMeta?.type === 'number') {
-        return this.getNumberColumn(xAxisField);
-      }
+      return fieldMeta?.type;
     }
-
-    if (xAxisColumn)
-      return {
-        label: 'Page load duration (Seconds)',
-        dataType: 'number',
-        operationType: 'range',
-        sourceField: 'transaction.duration.us',
-        isBucketed: true,
-        scale: 'interval',
-        params: {
-          type: 'histogram',
-          ranges: [{ from: 0, to: 1000, label: '' }],
-          maxBars: 'auto',
-        },
-      };
   }
 
   getMainYAxis() {
@@ -153,11 +163,11 @@ export class LensAttributes {
       dataType: 'number',
       isBucketed: false,
       label: 'Count of records',
-      operationType: 'count',
+      operationType: 'count' as any,
       scale: 'ratio',
       sourceField: 'Records',
       ...this.reportViewConfig.yAxisColumn,
-    };
+    } as CountIndexPatternColumn;
   }
 
   addLayer() {
@@ -187,7 +197,7 @@ export class LensAttributes {
           accessors: ['y-axis-column'],
           layerId: 'layer1',
           seriesType: this.seriesType ?? 'line',
-          palette: this.reportViewConfig.palette ?? undefined,
+          palette: this.reportViewConfig.palette,
           yConfig: [{ forAccessor: 'y-axis-column', color: 'green' }],
           xAccessor: 'x-axis-column',
         },
@@ -205,10 +215,10 @@ export class LensAttributes {
       if (values?.length > 0) {
         if (values?.length > 1) {
           const multiFilter = buildPhrasesFilter(fieldMeta, values, this.indexPattern);
-          parsedFilters.push(multiFilter as ESFilter);
+          parsedFilters.push(multiFilter);
         } else {
           const filter = buildPhraseFilter(fieldMeta, values[0], this.indexPattern);
-          parsedFilters.push(filter as ESFilter);
+          parsedFilters.push(filter);
         }
       }
 
@@ -216,11 +226,11 @@ export class LensAttributes {
         if (notValues?.length > 1) {
           const multiFilter = buildPhrasesFilter(fieldMeta, notValues, this.indexPattern);
           multiFilter.meta.negate = true;
-          parsedFilters.push(multiFilter as ESFilter);
+          parsedFilters.push(multiFilter);
         } else {
           const filter = buildPhraseFilter(fieldMeta, notValues[0], this.indexPattern);
           filter.meta.negate = true;
-          parsedFilters.push(filter as ESFilter);
+          parsedFilters.push(filter);
         }
       }
     });
@@ -230,18 +240,18 @@ export class LensAttributes {
 
   getJSON(): TypedLensByValueInput['attributes'] {
     return {
-      title: 'Prefilled from example app',
+      title: 'Prefilled from exploratory view app',
       description: '',
       visualizationType: 'lnsXY',
       references: [
         {
-          id: this.indexPattern.id,
+          id: this.indexPattern.id!,
           name: 'indexpattern-datasource-current-indexpattern',
           type: 'index-pattern',
         },
         {
-          id: this.indexPattern.id,
-          name: 'indexpattern-datasource-layer-layer1',
+          id: this.indexPattern.id!,
+          name: getLayerReferenceName('layer1'),
           type: 'index-pattern',
         },
       ],

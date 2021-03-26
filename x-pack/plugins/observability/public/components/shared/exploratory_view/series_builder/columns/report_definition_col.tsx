@@ -8,22 +8,19 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
-import { getDefaultConfigs } from '../../configurations/default_configs';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 import { CustomReportField } from '../custom_report_field';
 import FieldValueSuggestions from '../../../field_value_suggestions';
+import { DataSeries } from '../../types';
 
-export function ReportDefinitionCol() {
+export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSeries }) {
   const { indexPattern } = useIndexPatternContext();
 
   const { series, setSeries } = useUrlStorage(NEW_SERIES_KEY);
 
-  const { reportType, reportDefinitions: rtd = {} } = series;
+  const { reportDefinitions: rtd = {} } = series;
 
-  const { reportDefinitions, labels, filters } = getDefaultConfigs({
-    reportType: reportType!,
-    seriesId: 'newSeries',
-  });
+  const { reportDefinitions, labels, filters } = dataViewSeries;
 
   const onChange = (field: string, value?: string) => {
     if (!value) {
@@ -60,7 +57,7 @@ export function ReportDefinitionCol() {
                     label={labels[field]}
                     sourceField={field}
                     indexPattern={indexPattern}
-                    value={reportDefinitions?.[field]}
+                    value={rtd?.[field]}
                     onChange={(val?: string) => onChange(field, val)}
                     filters={(filters ?? []).map(({ query }) => query)}
                     time={series.time}
@@ -73,6 +70,9 @@ export function ReportDefinitionCol() {
                       iconType="cross"
                       color="hollow"
                       onClick={() => onRemove(field)}
+                      iconOnClick={() => onRemove(field)}
+                      iconOnClickAriaLabel={''}
+                      onClickAriaLabel={''}
                     >
                       {rtd?.[field]}
                     </EuiBadge>

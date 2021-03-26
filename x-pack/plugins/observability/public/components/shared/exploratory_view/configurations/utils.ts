@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import rison from 'rison-node';
+import rison, { RisonValue } from 'rison-node';
 import type { AllSeries, AllShortSeries } from '../hooks/use_url_strorage';
 import type { SeriesUrl } from '../types';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
 const METRIC_TYPE = 'mt';
 const REPORT_TYPE = 'rt';
@@ -46,5 +48,13 @@ export function createExploratoryViewUrl(allSeries: AllSeries, baseHref = '') {
     allShortSeries[seriesKey] = convertToShortUrl(allSeries[seriesKey]);
   });
 
-  return baseHref + `/app/observability/exploratory-view#?sr=${rison.encode(allShortSeries)}`;
+  return (
+    baseHref +
+    `/app/observability/exploratory-view#?sr=${rison.encode(allShortSeries as RisonValue)}`
+  );
+}
+
+export function buildPhraseFilter(field: string, value: any, indexPattern: IIndexPattern) {
+  const fieldMeta = indexPattern.fields.find((fieldT) => fieldT.name === field)!;
+  return esFilters.buildPhraseFilter(fieldMeta, value, indexPattern);
 }

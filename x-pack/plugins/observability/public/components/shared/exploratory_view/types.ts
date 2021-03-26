@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { PaletteOutput } from 'src/plugins/charts/public';
 import {
-  AvgIndexPatternColumn,
-  CountIndexPatternColumn,
-  DateHistogramIndexPatternColumn,
   LastValueIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  SeriesType,
+  OperationType,
+  IndexPatternColumn,
 } from '../../../../../lens/public';
 
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { PersistableFilter } from '../../../../../lens/common';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 
 export const ReportViewTypes = {
   pld: 'page-load-dist',
@@ -45,19 +48,17 @@ export interface DataSeries {
   reportType: ReportViewType;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
-  yAxisColumn:
-    | Partial<LastValueIndexPatternColumn>
-    | Partial<CountIndexPatternColumn>
-    | Partial<AvgIndexPatternColumn>;
+  yAxisColumn: Partial<IndexPatternColumn>;
+
   breakdowns: string[];
-  defaultSeriesType: string;
+  defaultSeriesType: SeriesType;
   defaultFilters: Array<string | { field: string; nested: string }>;
-  seriesTypes: string[];
-  filters?: ESFilter[];
+  seriesTypes: SeriesType[];
+  filters?: PersistableFilter[];
   reportDefinitions: ReportDefinition[];
   labels: Record<string, string>;
   metricType: boolean;
-  palette?: Record<string, string>;
+  palette?: PaletteOutput;
 }
 
 export interface SeriesUrl {
@@ -67,9 +68,9 @@ export interface SeriesUrl {
   };
   breakdown?: string;
   filters?: UrlFilter[];
-  seriesType?: string;
+  seriesType?: SeriesType;
   reportType: ReportViewTypeId;
-  metric?: string;
+  metric?: OperationType;
   dataType?: AppDataType;
   reportDefinitions?: Record<string, string>;
 }
@@ -78,6 +79,11 @@ export interface UrlFilter {
   field: string;
   values?: string[];
   notValues?: string[];
+}
+
+export interface ConfigProps {
+  seriesId: string;
+  indexPattern: IIndexPattern;
 }
 
 export type AppDataType = 'synthetics' | 'rum' | 'logs' | 'metrics' | 'apm';

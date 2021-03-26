@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { ReportViewTypeId } from '../../types';
+import { ReportViewTypeId, SeriesUrl } from '../../types';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 
 interface Props {
@@ -34,8 +34,7 @@ export function ReportTypesCol({ reportTypes }: Props) {
               if (reportType === selectedReportType) {
                 setSeries(NEW_SERIES_KEY, {
                   dataType: restSeries.dataType,
-                  reportType: undefined,
-                });
+                } as SeriesUrl);
               } else {
                 setSeries(NEW_SERIES_KEY, {
                   ...restSeries,

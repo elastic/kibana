@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiButtonGroup, EuiPopover } from '@elastic/eui';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { OperationType } from '../../../../../../../lens/public';
 
 const toggleButtons = [
   {
@@ -41,7 +42,7 @@ export function MetricSelection({
 
   const [toggleIdSelected, setToggleIdSelected] = useState(series?.metric ?? 'avg');
 
-  const onChange = (optionId: string) => {
+  const onChange = (optionId: OperationType) => {
     setToggleIdSelected(optionId);
 
     Object.keys(allSeries).forEach((seriesKey) => {
@@ -69,7 +70,7 @@ export function MetricSelection({
         legend="Chart metric group"
         options={toggleButtons}
         idSelected={toggleIdSelected}
-        onChange={(id) => onChange(id)}
+        onChange={(id) => onChange(id as OperationType)}
       />
     </EuiPopover>
   );

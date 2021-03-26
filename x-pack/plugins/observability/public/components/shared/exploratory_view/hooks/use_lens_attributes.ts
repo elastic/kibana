@@ -46,24 +46,25 @@ export const useLensAttributes = ({
   const { breakdown, seriesType, metric: metricType, reportType, reportDefinitions = {} } =
     series ?? {};
 
-  const dataViewConfig = getDefaultConfigs({
-    seriesId,
-    reportType,
-  });
-
-  const filters: UrlFilter[] = useMemo(() => {
-    return (series.filters ?? []).concat(getFiltersFromDefs(reportDefinitions, dataViewConfig));
-  }, [series.filters, reportDefinitions, dataViewConfig]);
-
   return useMemo(() => {
     if (!indexPattern || !reportType) {
       return null;
     }
 
+    const dataViewConfig = getDefaultConfigs({
+      seriesId,
+      reportType,
+      indexPattern,
+    });
+
+    const filters: UrlFilter[] = (series.filters ?? []).concat(
+      getFiltersFromDefs(reportDefinitions, dataViewConfig)
+    );
+
     const lensAttributes = new LensAttributes(
       indexPattern,
       dataViewConfig,
-      seriesType!,
+      seriesType,
       filters,
       metricType,
       reportDefinitions
@@ -78,10 +79,10 @@ export const useLensAttributes = ({
     indexPattern,
     breakdown,
     seriesType,
-    filters,
     metricType,
     reportType,
     reportDefinitions,
-    dataViewConfig,
+    seriesId,
+    series.filters,
   ]);
 };

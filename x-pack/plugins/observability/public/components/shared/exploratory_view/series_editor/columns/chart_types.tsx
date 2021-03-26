@@ -11,22 +11,23 @@ import { EuiButton, EuiButtonGroup, EuiButtonIcon, EuiPopover } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityClientPluginsStart } from '../../../../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
 import { useFetcher } from '../../../../..';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
+import { SeriesType } from '../../../../../../../lens/public';
 
 export function SeriesChartTypes({
   seriesId,
   defaultChartType,
 }: {
   seriesId: string;
-  defaultChartType: string;
+  defaultChartType: SeriesType;
 }) {
   const { series, setSeries, allSeries } = useUrlStorage(seriesId);
 
   const seriesType = series?.seriesType ?? defaultChartType;
 
-  const onChange = (value: string) => {
+  const onChange = (value: SeriesType) => {
     Object.keys(allSeries).forEach((seriesKey) => {
       const seriesN = allSeries[seriesKey];
 
@@ -45,8 +46,8 @@ export function SeriesChartTypes({
 }
 
 export interface XYChartTypesProps {
-  onChange: (value: string) => void;
-  value: string;
+  onChange: (value: SeriesType) => void;
+  value: SeriesType;
   label?: string;
   includeChartTypes?: string[];
   excludeChartTypes?: string[];
@@ -63,7 +64,7 @@ function XYChartTypes({
 
   const {
     services: { lens },
-  } = useKibana<ObservabilityClientPluginsStart>();
+  } = useKibana<ObservabilityPublicPluginsStart>();
 
   const { data = [] } = useFetcher(() => lens.getXyVisTypes(), [lens]);
 
@@ -121,7 +122,7 @@ function XYChartTypes({
         }))}
         idSelected={value}
         onChange={(valueN: string) => {
-          onChange(valueN);
+          onChange(valueN as SeriesType);
         }}
       />
     </EuiPopover>

@@ -30,13 +30,13 @@ interface Props {
 export interface Field {
   label: string;
   field: string;
-  nested: string;
+  nested?: string;
 }
 
 export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: Props) {
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
 
-  const [selectedField, setSelectedField] = useState<Field | null>(null);
+  const [selectedField, setSelectedField] = useState<Field | undefined>();
 
   const options = defaultFilters.map((field) => {
     if (typeof field === 'string') {
@@ -90,14 +90,14 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       label={selectedField.label}
       nestedField={selectedField.nested}
       goBack={() => {
-        setSelectedField(null);
+        setSelectedField(undefined);
       }}
     />
   ) : null;
 
   const closePopover = () => {
     setIsPopoverVisible(false);
-    setSelectedField(null);
+    setSelectedField(undefined);
   };
 
   return (

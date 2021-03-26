@@ -8,22 +8,13 @@
 import React from 'react';
 import { SeriesFilter } from '../../series_editor/columns/series_filter';
 import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
-import { getDefaultConfigs } from '../../configurations/default_configs';
-import { ReportViewTypeId } from '../../types';
+import { DataSeries } from '../../types';
 
-interface Props {
-  reportType: ReportViewTypeId;
-}
-export function ReportFilters({ reportType }: Props) {
-  const dataSeries = getDefaultConfigs({
-    reportType: reportType!,
-    seriesId: NEW_SERIES_KEY,
-  });
-
+export function ReportFilters({ dataViewSeries }: { dataViewSeries: DataSeries }) {
   return (
     <SeriesFilter
-      series={dataSeries}
-      defaultFilters={dataSeries.defaultFilters}
+      series={dataViewSeries}
+      defaultFilters={dataViewSeries.defaultFilters}
       seriesId={NEW_SERIES_KEY}
       isNew={true}
     />
