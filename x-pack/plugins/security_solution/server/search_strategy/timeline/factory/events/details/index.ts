@@ -44,6 +44,7 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
     }
     const sourceData = await getDataSafety<EventSource, TimelineEventsDetailsItem[]>(
       getDataFromSourceHits,
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       _source
     );
     const fieldsData = await getDataSafety<EventHit['fields'], TimelineEventsDetailsItem[]>(

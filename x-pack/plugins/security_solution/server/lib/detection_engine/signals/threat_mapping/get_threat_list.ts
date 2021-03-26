@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import {
   GetSortWithTieBreakerOptions,
   GetThreatListOptions,
   SortWithTieBreaker,
   ThreatListCountOptions,
-  ThreatListItem,
+  ThreatListDoc,
 } from './types';
 
 /**
@@ -35,7 +34,7 @@ export const getThreatList = async ({
   listClient,
   buildRuleMessage,
   logger,
-}: GetThreatListOptions): Promise<SearchResponse<ThreatListItem>> => {
+}: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
@@ -53,8 +52,9 @@ export const getThreatList = async ({
       `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
-  const { body: response } = await esClient.search<SearchResponse<ThreatListItem>>({
+  const { body: response } = await esClient.search<ThreatListDoc>({
     body: {
+      // @ts-expect-error ESBoolQuery is not assignale to QueryContainer
       query: queryFilter,
       fields: [
         {
@@ -123,12 +123,9 @@ export const getThreatListCount = async ({
     index,
     exceptionItems
   );
-  const {
-    body: response,
-  }: ApiResponse<{
-    count: number;
-  }> = await esClient.count({
+  const { body: response } = await esClient.count({
     body: {
+      // @ts-expect-error ESBoolQuery is not assignale to QueryContainer
       query: queryFilter,
     },
     ignore_unavailable: true,
