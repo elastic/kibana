@@ -212,7 +212,7 @@ Object {
           class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow c4"
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow c4"
         >
           <div
             data-eui="EuiFocusTrap"
@@ -225,7 +225,7 @@ Object {
             >
               <button
                 aria-label="Close this dialog"
-                class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
                 type="button"
               >
@@ -586,7 +586,7 @@ Object {
                                           >
                                             <button
                                               aria-label="Remove Entry"
-                                              class="euiButtonIcon euiButtonIcon--danger"
+                                              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                                               data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-remove"
                                               disabled=""
                                               id="mockId"
@@ -997,7 +997,7 @@ Object {
                       class="euiFlexItem euiFlexItem--flexGrowZero"
                     >
                       <div
-                        class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                        class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                       >
                         <div
                           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1365,7 +1365,7 @@ Object {
                         >
                           <button
                             aria-label="Previous page"
-                            class="euiButtonIcon euiButtonIcon--text"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="pagination-button-previous"
                             disabled=""
                             type="button"
@@ -1484,7 +1484,7 @@ Object {
                           </ul>
                           <button
                             aria-label="Next page, 2"
-                            class="euiButtonIcon euiButtonIcon--text"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="pagination-button-next"
                             type="button"
                           >
@@ -1599,7 +1599,7 @@ Object {
         class="euiSpacer euiSpacer--l"
       />
       <div
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow sc-oUqyN jIrDlk"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow sc-oUqyN jIrDlk"
       >
         <div
           data-eui="EuiFocusTrap"
@@ -1612,7 +1612,7 @@ Object {
           >
             <button
               aria-label="Close this dialog"
-              class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
               data-test-subj="euiFlyoutCloseButton"
               type="button"
             >
@@ -1973,7 +1973,7 @@ Object {
                                         >
                                           <button
                                             aria-label="Remove Entry"
-                                            class="euiButtonIcon euiButtonIcon--danger"
+                                            class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                                             data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-remove"
                                             disabled=""
                                             id="mockId"
@@ -2384,7 +2384,7 @@ Object {
                     class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <div
-                      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2752,7 +2752,7 @@ Object {
                       >
                         <button
                           aria-label="Previous page"
-                          class="euiButtonIcon euiButtonIcon--text"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="pagination-button-previous"
                           disabled=""
                           type="button"
@@ -2871,7 +2871,7 @@ Object {
                         </ul>
                         <button
                           aria-label="Next page, 2"
-                          class="euiButtonIcon euiButtonIcon--text"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="pagination-button-next"
                           type="button"
                         >
@@ -3152,7 +3152,7 @@ Object {
           class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow c4"
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow c4"
         >
           <div
             data-eui="EuiFocusTrap"
@@ -3165,7 +3165,7 @@ Object {
             >
               <button
                 aria-label="Close this dialog"
-                class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
                 type="button"
               >
@@ -3526,7 +3526,7 @@ Object {
                                           >
                                             <button
                                               aria-label="Remove Entry"
-                                              class="euiButtonIcon euiButtonIcon--danger"
+                                              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                                               data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-remove"
                                               disabled=""
                                               id="mockId"
@@ -3780,7 +3780,7 @@ Object {
                       class="euiFlexItem euiFlexItem--flexGrowZero"
                     >
                       <div
-                        class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                        class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                       >
                         <div
                           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4148,7 +4148,7 @@ Object {
                         >
                           <button
                             aria-label="Previous page"
-                            class="euiButtonIcon euiButtonIcon--text"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="pagination-button-previous"
                             disabled=""
                             type="button"
@@ -4267,7 +4267,7 @@ Object {
                           </ul>
                           <button
                             aria-label="Next page, 2"
-                            class="euiButtonIcon euiButtonIcon--text"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="pagination-button-next"
                             type="button"
                           >
@@ -4382,7 +4382,7 @@ Object {
         class="euiSpacer euiSpacer--l"
       />
       <div
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow sc-oUqyN jIrDlk"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow sc-oUqyN jIrDlk"
       >
         <div
           data-eui="EuiFocusTrap"
@@ -4395,7 +4395,7 @@ Object {
           >
             <button
               aria-label="Close this dialog"
-              class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
               data-test-subj="euiFlyoutCloseButton"
               type="button"
             >
@@ -4756,7 +4756,7 @@ Object {
                                         >
                                           <button
                                             aria-label="Remove Entry"
-                                            class="euiButtonIcon euiButtonIcon--danger"
+                                            class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                                             data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-remove"
                                             disabled=""
                                             id="mockId"
@@ -5010,7 +5010,7 @@ Object {
                     class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <div
-                      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5378,7 +5378,7 @@ Object {
                       >
                         <button
                           aria-label="Previous page"
-                          class="euiButtonIcon euiButtonIcon--text"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="pagination-button-previous"
                           disabled=""
                           type="button"
@@ -5497,7 +5497,7 @@ Object {
                         </ul>
                         <button
                           aria-label="Next page, 2"
-                          class="euiButtonIcon euiButtonIcon--text"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="pagination-button-next"
                           type="button"
                         >
