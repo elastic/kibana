@@ -139,7 +139,7 @@ export const MetaEngineCreation: React.FC = () => {
               }}
             />
           </EuiFormRow>
-          {selectedIndexedEngineNames.length > 1 && (
+          {selectedIndexedEngineNames.length > maxEnginesPerMetaEngine && (
             <>
               <EuiSpacer />
               <EuiCallOut
