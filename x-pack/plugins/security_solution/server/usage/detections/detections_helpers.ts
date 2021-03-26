@@ -9,7 +9,6 @@ import {
   ElasticsearchClient,
   SavedObjectsClientContract,
   KibanaRequest,
-  SearchResponse,
 } from '../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
@@ -167,14 +166,13 @@ export const getRulesUsage = async (
   };
 
   try {
-    const { body: ruleResults } = await esClient.search<SearchResponse<RuleSearchResult>>(
-      ruleSearchOptions
-    );
+    const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
 
     if (ruleResults.hits?.hits?.length > 0) {
       rulesUsage = ruleResults.hits.hits.reduce((usage, hit) => {
-        const isElastic = isElasticRule(hit._source.alert.tags);
-        const isEnabled = hit._source.alert.enabled;
+        // @ts-expect-error _source is optional
+        const isElastic = isElasticRule(hit._source?.alert.tags);
+        const isEnabled = Boolean(hit._source?.alert.enabled);
 
         return updateRulesUsage({ isElastic, isEnabled }, usage);
       }, initialRulesUsage);

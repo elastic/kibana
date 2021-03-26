@@ -68,6 +68,10 @@ export interface DiscoverGridProps {
    */
   indexPattern: IndexPattern;
   /**
+   * Determines if data is currently loaded
+   */
+  isLoading: boolean;
+  /**
    * Function used to add a column in the document flyout
    */
   onAddColumn: (column: string) => void;
@@ -142,6 +146,7 @@ export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
   indexPattern,
+  isLoading,
   expandedDoc,
   onAddColumn,
   onFilter,
@@ -363,7 +368,13 @@ export const DiscoverGrid = ({
         setSelectedDocs,
       }}
     >
-      <>
+      <span
+        data-test-subj="discoverDocTable"
+        data-render-complete={isLoading ? 'false' : 'true'}
+        data-shared-item=""
+        data-title={searchTitle}
+        data-description={searchDescription}
+      >
         <KibanaContextProvider services={{ uiSettings: services.uiSettings }}>
           <EuiDataGridMemoized
             aria-describedby={randomId}
@@ -444,7 +455,7 @@ export const DiscoverGrid = ({
             services={services}
           />
         )}
-      </>
+      </span>
     </DiscoverGridContext.Provider>
   );
 };
