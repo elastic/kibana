@@ -575,13 +575,10 @@ export async function initRoutes(
       }
 
       try {
-        const resp = await context.core.elasticsearch.legacy.client.callAsCurrentUser(
-          'indices.getSettings',
-          {
-            index: query.indexPatternTitle,
-          }
-        );
-        const indexPatternSettings = getIndexPatternSettings(resp);
+        const resp = await context.core.elasticsearch.client.asCurrentUser.indices.getSettings({
+          index: query.indexPatternTitle,
+        });
+        const indexPatternSettings = getIndexPatternSettings(resp.body);
         return response.ok({
           body: indexPatternSettings,
         });
