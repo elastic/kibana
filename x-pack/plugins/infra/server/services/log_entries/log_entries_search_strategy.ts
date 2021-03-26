@@ -98,6 +98,7 @@ export const logEntriesSearchStrategyProvider = ({
               map(
                 ([{ configuration }, messageFormattingRules]): IEsSearchRequest => {
                   return {
+                    // @ts-expect-error @elastic/elasticsearch declares indices_boost as Record<string, number>
                     params: createGetLogEntriesQuery(
                       configuration.logAlias,
                       params.startTimestamp,

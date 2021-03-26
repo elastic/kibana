@@ -635,6 +635,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -772,6 +773,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
               >
                 <div
                   class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                  data-test-subj="trustedAppCard"
                 >
                   <div
                     class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -993,6 +995,27 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
                             >
                               <div>
                                 <button
+                                  class="euiButton euiButton--primary euiButton--small euiButton--fill eui-fullWidth "
+                                  data-test-subj="trustedAppEditButton"
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButton__content"
+                                  >
+                                    <span
+                                      class="euiButton__text"
+                                    >
+                                      Edit
+                                    </span>
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
+                            <div
+                              class="euiFlexItem euiFlexItem--flexGrowZero"
+                            >
+                              <div>
+                                <button
                                   class="euiButton euiButton--danger euiButton--small eui-fullWidth "
                                   data-test-subj="trustedAppDeleteButton"
                                   type="button"
@@ -1023,6 +1046,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1152,6 +1176,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1281,6 +1306,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1410,6 +1436,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1539,6 +1566,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1668,6 +1696,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1797,6 +1826,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -1926,6 +1956,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2055,6 +2086,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2184,6 +2216,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2313,6 +2346,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2442,6 +2476,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2571,6 +2606,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2700,6 +2736,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2829,6 +2866,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -2958,6 +2996,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3087,6 +3126,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3216,6 +3256,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3345,6 +3386,7 @@ exports[`TrustedAppsList renders correctly when item details expanded 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3834,6 +3876,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -3963,6 +4006,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4092,6 +4136,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4221,6 +4266,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4350,6 +4396,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4479,6 +4526,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4608,6 +4656,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4737,6 +4786,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4866,6 +4916,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -4995,6 +5046,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5124,6 +5176,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5253,6 +5306,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5382,6 +5436,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5511,6 +5566,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5640,6 +5696,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5769,6 +5826,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -5898,6 +5956,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -6027,6 +6086,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -6156,6 +6216,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -6285,6 +6346,7 @@ exports[`TrustedAppsList renders correctly when loaded data 1`] = `
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -6932,6 +6994,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7061,6 +7124,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7190,6 +7254,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7319,6 +7384,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7448,6 +7514,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7577,6 +7644,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7706,6 +7774,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7835,6 +7904,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -7964,6 +8034,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8093,6 +8164,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8222,6 +8294,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8351,6 +8424,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8480,6 +8554,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8609,6 +8684,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8738,6 +8814,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8867,6 +8944,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -8996,6 +9074,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -9125,6 +9204,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -9254,6 +9334,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -9383,6 +9464,7 @@ exports[`TrustedAppsList renders correctly when loading data for the second time
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -9872,6 +9954,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10001,6 +10084,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10130,6 +10214,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10259,6 +10344,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10388,6 +10474,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10517,6 +10604,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10646,6 +10734,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10775,6 +10864,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -10904,6 +10994,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11033,6 +11124,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11162,6 +11254,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11291,6 +11384,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11420,6 +11514,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11549,6 +11644,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11678,6 +11774,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11807,6 +11904,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -11936,6 +12034,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -12065,6 +12164,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -12194,6 +12294,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -12323,6 +12424,7 @@ exports[`TrustedAppsList renders correctly when new page and page size set (not 
           >
             <td
               class="euiTableRowCell"
+              data-test-subj="trustedAppNameTableCell"
             >
               <div
                 class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"

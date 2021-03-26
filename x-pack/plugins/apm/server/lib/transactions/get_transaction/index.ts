@@ -12,6 +12,7 @@ import {
 import { rangeQuery } from '../../../../server/utils/queries';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
+import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
 export function getTransaction({
@@ -34,11 +35,11 @@ export function getTransaction({
         size: 1,
         query: {
           bool: {
-            filter: [
+            filter: asMutableArray([
               { term: { [TRANSACTION_ID]: transactionId } },
               { term: { [TRACE_ID]: traceId } },
               ...rangeQuery(start, end),
-            ],
+            ]),
           },
         },
       },
