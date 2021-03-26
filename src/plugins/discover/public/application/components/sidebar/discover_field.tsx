@@ -72,7 +72,7 @@ export interface DiscoverFieldProps {
 
   multiFields?: Array<{ field: IndexPatternField; isSelected: boolean }>;
 
-  editField?: (fieldName: string) => void;
+  onEditField?: (fieldName: string) => void;
 }
 
 export function DiscoverField({
@@ -86,7 +86,7 @@ export function DiscoverField({
   selected,
   trackUiMetric,
   multiFields,
-  editField,
+  onEditField,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -287,16 +287,16 @@ export function DiscoverField({
     );
   };
 
-  const displayNameGrow = editField ? 9 : 10;
+  const displayNameGrow = onEditField ? 9 : 10;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
       <EuiFlexGroup>
         <EuiFlexItem grow={displayNameGrow}>{field.displayName}</EuiFlexItem>
-        {editField && (
-          <EuiFlexItem grow={1}>
+        {onEditField && (
+          <EuiFlexItem grow={1} data-test-subj="discoverFieldListPanelEditItem">
             <EuiButtonIcon
               onClick={() => {
-                editField(field.name);
+                onEditField(field.name);
               }}
               iconType="pencil"
               data-test-subj="discoverFieldListPanelEdit"

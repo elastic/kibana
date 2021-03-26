@@ -28,11 +28,13 @@ export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) 
   const highlights = hit?.highlight ?? {};
   // Keys are sorted in the hits object
   const formatted = indexPattern.formatHit(hit);
+  const fields = indexPattern.fields;
   const highlightPairs: Array<[string, unknown]> = [];
   const sourcePairs: Array<[string, unknown]> = [];
   Object.entries(formatted).forEach(([key, val]) => {
+    const displayKey = fields.getByName(key)?.displayName;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    pairs.push([key, val]);
+    pairs.push([displayKey ? displayKey : key, val]);
   });
   return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs] });
 };
@@ -48,9 +50,11 @@ export const formatTopLevelObject = (
   const sorted = Object.entries(fields).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
   sorted.forEach(([key, values]) => {
     const field = indexPattern.getFieldByName(key);
+    const displayKey = fields.getByName(key)?.displayName;
     const formatter = field
       ? indexPattern.getFormatterForField(field)
       : { convert: (v: string, ...rest: unknown[]) => String(v) };
+    if (!values.map) return;
     const formatted = values
       .map((val: unknown) =>
         formatter.convert(val, 'html', {
@@ -61,7 +65,7 @@ export const formatTopLevelObject = (
       )
       .join(', ');
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    pairs.push([key, formatted]);
+    pairs.push([displayKey ? displayKey : key, formatted]);
   });
   return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs] });
 };

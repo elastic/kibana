@@ -50,6 +50,9 @@ const mockServices = ({
   },
   indexPatternFieldEditor: {
     openEditor: jest.fn(),
+    userPermissions: {
+      editIndexPattern: jest.fn(),
+    },
   },
 } as unknown) as DiscoverServices;
 
@@ -105,6 +108,7 @@ function getCompProps(): DiscoverSidebarProps {
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),
     setAppState: jest.fn(),
+    onEditRuntimeField: jest.fn(),
   };
 }
 
@@ -128,9 +132,5 @@ describe('discover sidebar', function () {
   it('should allow selecting fields', function () {
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
-  });
-  it('should allow deselecting fields', function () {
-    findTestSubject(comp, 'fieldToggle-extension').simulate('click');
-    expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
 });
