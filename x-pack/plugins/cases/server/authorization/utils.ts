@@ -9,11 +9,11 @@ import { remove, uniq } from 'lodash';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 
-export const getClassFilter = (savedObjectType: string, classNames: string[]): KueryNode => {
+export const getScopesFilter = (savedObjectType: string, scopes: string[]): KueryNode => {
   return nodeBuilder.or(
-    classNames.reduce<KueryNode[]>((query, className) => {
-      ensureFieldIsSafeForQuery('class', className);
-      query.push(nodeBuilder.is(`${savedObjectType}.attributes.class`, className));
+    scopes.reduce<KueryNode[]>((query, scope) => {
+      ensureFieldIsSafeForQuery('scope', scope);
+      query.push(nodeBuilder.is(`${savedObjectType}.attributes.scope`, scope));
       return query;
     }, [])
   );
@@ -43,4 +43,4 @@ export const ensureFieldIsSafeForQuery = (field: string, value: string): boolean
 };
 
 export const includeFieldsRequiredForAuthentication = (fields: string[]): string[] =>
-  uniq([...fields, 'class']);
+  uniq([...fields, 'scope']);

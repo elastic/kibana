@@ -14,15 +14,15 @@ export class CasesActions {
     this.prefix = `cases:${versionNumber}:`;
   }
 
-  public get(className: string, operation: string): string {
+  public get(scope: string, operation: string): string {
     if (!operation || !isString(operation)) {
       throw new Error('operation is required and must be a string');
     }
 
-    if (!className || !isString(className)) {
-      throw new Error('class is required and must be a string');
+    if (!scope || !isString(scope)) {
+      throw new Error('scope is required and must be a string');
     }
 
-    return `${this.prefix}${className}/${operation}`;
+    return `${this.prefix}${scope}/${operation}`;
   }
 }

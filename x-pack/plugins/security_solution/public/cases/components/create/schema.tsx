@@ -19,8 +19,8 @@ export const schemaTags = {
   labelAppend: OptionalFieldLabel,
 };
 
-// TODO: remove class from here?
-export type FormProps = Omit<CasePostRequest, 'connector' | 'settings' | 'class'> & {
+// TODO: remove scope from here?
+export type FormProps = Omit<CasePostRequest, 'connector' | 'settings' | 'scope'> & {
   connectorId: string;
   fields: ConnectorTypeFields['fields'];
   syncAlerts: boolean;

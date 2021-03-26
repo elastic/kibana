@@ -15,7 +15,7 @@ import {
   AssociationType,
   ESConnectorFields,
 } from '../../common/api';
-import { SECURITY_SOLUTION_CONSUMER } from '../../common/constants';
+import { SECURITY_SOLUTION_SCOPE } from '../../common/constants';
 
 interface UnsanitizedCaseConnector {
   connector_id: string;
@@ -61,16 +61,16 @@ interface SanitizedCaseType {
 }
 
 interface SanitizedCaseClass {
-  class: string;
+  scope: string;
 }
 
-const addClassToSO = <T = Record<string, unknown>>(
+const addScopeToSO = <T = Record<string, unknown>>(
   doc: SavedObjectUnsanitizedDoc<T>
 ): SavedObjectSanitizedDoc<SanitizedCaseClass> => ({
   ...doc,
   attributes: {
     ...doc.attributes,
-    class: SECURITY_SOLUTION_CONSUMER,
+    scope: SECURITY_SOLUTION_SCOPE,
   },
   references: doc.references || [],
 });
@@ -132,7 +132,7 @@ export const caseMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
-    return addClassToSO(doc);
+    return addScopeToSO(doc);
   },
 };
 
@@ -159,7 +159,7 @@ export const configureMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
-    return addClassToSO(doc);
+    return addScopeToSO(doc);
   },
 };
 
@@ -205,7 +205,7 @@ export const userActionsMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
-    return addClassToSO(doc);
+    return addScopeToSO(doc);
   },
 };
 
@@ -260,7 +260,7 @@ export const commentsMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
-    return addClassToSO(doc);
+    return addScopeToSO(doc);
   },
 };
 
@@ -268,7 +268,7 @@ export const connectorMappingsMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
-    return addClassToSO(doc);
+    return addScopeToSO(doc);
   },
 };
 
@@ -276,6 +276,6 @@ export const subCasesMigrations = {
   '7.13.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseClass> => {
-    return addClassToSO(doc);
+    return addScopeToSO(doc);
   },
 };

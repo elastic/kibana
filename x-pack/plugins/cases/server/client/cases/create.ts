@@ -75,7 +75,7 @@ export const create = async ({
 
   try {
     try {
-      await auth.ensureAuthorized(query.class, Operations.createCase);
+      await auth.ensureAuthorized(query.scope, Operations.createCase);
     } catch (error) {
       // TODO: log error using audit logger
       throw error;

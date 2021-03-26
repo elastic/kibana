@@ -31,9 +31,6 @@ export const subCaseSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      class: {
-        type: 'keyword',
-      },
       created_at: {
         type: 'date',
       },
@@ -49,6 +46,9 @@ export const subCaseSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
         },
+      },
+      scope: {
+        type: 'keyword',
       },
       status: {
         type: 'keyword',

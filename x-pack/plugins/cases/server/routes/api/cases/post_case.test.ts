@@ -46,7 +46,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       },
     });
 
@@ -86,7 +86,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       },
     });
 
@@ -120,7 +120,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       },
     });
 
@@ -146,7 +146,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       },
     });
 
@@ -180,7 +180,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       },
     });
 
@@ -196,7 +196,6 @@ describe('POST cases', () => {
     expect(response.status).toEqual(200);
     expect(response.payload).toMatchInlineSnapshot(`
       Object {
-        "class": "securitySolution",
         "closed_at": null,
         "closed_by": null,
         "comments": Array [],
@@ -215,6 +214,7 @@ describe('POST cases', () => {
         "description": "This is a brand new case of a bad meanie defacing data",
         "external_service": null,
         "id": "mock-it",
+        "scope": "securitySolution",
         "settings": Object {
           "syncAlerts": true,
         },

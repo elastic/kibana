@@ -31,9 +31,6 @@ export const caseSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      class: {
-        type: 'keyword',
-      },
       created_at: {
         type: 'date',
       },
@@ -112,6 +109,9 @@ export const caseSavedObjectType: SavedObjectsType = {
         },
       },
       title: {
+        type: 'keyword',
+      },
+      scope: {
         type: 'keyword',
       },
       status: {

@@ -22,15 +22,15 @@ export class AuthorizationAuditLogger {
 
   private createMessage({
     result,
-    className,
+    scope,
     operation,
   }: {
     result: AuthorizationResult;
-    className?: string;
+    scope?: string;
     operation: OperationDetails;
   }): string {
     // class: determine what we're calling this (don't use class)
-    const classMsg = className == null ? 'of any class' : `of class "${className}"`;
+    const classMsg = scope == null ? 'of any class' : `of class "${scope}"`;
     /**
      * This will take the form:
      * `Unauthorized to create case of class "securitySolution"`
@@ -66,16 +66,16 @@ export class AuthorizationAuditLogger {
 
   public failure({
     username,
-    className,
+    scope,
     operation,
   }: {
     username?: string;
-    className?: string;
+    scope?: string;
     operation: OperationDetails;
   }): string {
     const message = this.createMessage({
       result: AuthorizationResult.Unauthorized,
-      className,
+      scope,
       operation,
     });
     this.auditLogger?.log({
@@ -99,15 +99,15 @@ export class AuthorizationAuditLogger {
   public success({
     username,
     operation,
-    className,
+    scope,
   }: {
     username: string;
-    className: string;
+    scope: string;
     operation: OperationDetails;
   }): string {
     const message = this.createMessage({
       result: AuthorizationResult.Authorized,
-      className,
+      scope,
       operation,
     });
     this.logSuccessEvent({ message, operation, username });
@@ -117,15 +117,15 @@ export class AuthorizationAuditLogger {
   public bulkSuccess({
     username,
     operation,
-    classNames,
+    scopes,
   }: {
     username?: string;
-    classNames: string[];
+    scopes: string[];
     operation: OperationDetails;
   }): string {
     const message = `${AuthorizationResult.Authorized} to ${operation.verbs.present} ${
       operation.docType
-    } of class: ${classNames.join(', ')}`;
+    } of class: ${scopes.join(', ')}`;
     this.logSuccessEvent({ message, operation, username });
     return message;
   }

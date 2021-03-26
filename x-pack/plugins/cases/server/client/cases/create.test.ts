@@ -45,7 +45,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -57,7 +57,6 @@ describe('create', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -80,6 +79,7 @@ describe('create', () => {
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
           "id": "mock-it",
+          "scope": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -121,7 +121,7 @@ describe('create', () => {
                 "connector",
                 "settings",
               ],
-              "new_value": "{\\"type\\":\\"individual\\",\\"description\\":\\"This is a brand new case of a bad meanie defacing data\\",\\"title\\":\\"Super Bad Security Issue\\",\\"tags\\":[\\"defacement\\"],\\"connector\\":{\\"id\\":\\"123\\",\\"name\\":\\"Jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"Task\\",\\"priority\\":\\"High\\",\\"parent\\":null}},\\"settings\\":{\\"syncAlerts\\":true},\\"class\\":\\"securitySolution\\"}",
+              "new_value": "{\\"type\\":\\"individual\\",\\"description\\":\\"This is a brand new case of a bad meanie defacing data\\",\\"title\\":\\"Super Bad Security Issue\\",\\"tags\\":[\\"defacement\\"],\\"connector\\":{\\"id\\":\\"123\\",\\"name\\":\\"Jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"Task\\",\\"priority\\":\\"High\\",\\"parent\\":null}},\\"settings\\":{\\"syncAlerts\\":true},\\"scope\\":\\"securitySolution\\"}",
               "old_value": null,
             },
             "references": Array [
@@ -151,7 +151,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -162,7 +162,6 @@ describe('create', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -181,6 +180,7 @@ describe('create', () => {
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
           "id": "mock-it",
+          "scope": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -216,7 +216,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -230,7 +230,6 @@ describe('create', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -249,6 +248,7 @@ describe('create', () => {
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
           "id": "mock-it",
+          "scope": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -429,7 +429,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -458,7 +458,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        class: 'securitySolution',
+        scope: 'securitySolution',
       };
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
