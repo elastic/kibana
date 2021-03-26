@@ -46,13 +46,19 @@ export const TrustedAppsPage = memo(() => {
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
   const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
-  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({ show: 'create' }));
-  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
+  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
+    show: 'create',
+    id: undefined,
+  }));
+  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({
+    show: undefined,
+    id: undefined,
+  }));
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
     view_type: viewType,
   }));
 
-  const showCreateFlyout = location.show === 'create';
+  const showCreateFlyout = !!location.show;
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {

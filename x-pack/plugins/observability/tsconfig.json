@@ -18,6 +18,7 @@
     { "path": "../alerting/tsconfig.json" },
     { "path": "../rule_registry/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
+    { "path": "../lens/tsconfig.json" },
     { "path": "../translations/tsconfig.json" }
   ]
 }

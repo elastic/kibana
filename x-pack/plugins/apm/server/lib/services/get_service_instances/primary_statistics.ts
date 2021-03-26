@@ -9,10 +9,10 @@ import { LatencyAggregationType } from '../../../../common/latency_aggregation_t
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { getServiceInstanceSystemMetricStats } from './get_service_instance_system_metric_stats';
-import { getServiceInstanceTransactionStats } from './get_service_instance_transaction_stats';
+import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
+import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
 
-export interface ServiceInstanceParams {
+interface ServiceInstancePrimaryStatisticsParams {
   environment?: string;
   kuery?: string;
   latencyAggregationType: LatencyAggregationType;
@@ -21,21 +21,37 @@ export interface ServiceInstanceParams {
   transactionType: string;
   searchAggregatedTransactions: boolean;
   size: number;
-  numBuckets: number;
+  start: number;
+  end: number;
 }
 
-export async function getServiceInstances(
-  params: Omit<ServiceInstanceParams, 'size'>
-) {
-  return withApmSpan('get_service_instances', async () => {
+export async function getServiceInstancesPrimaryStatistics(
+  params: Omit<ServiceInstancePrimaryStatisticsParams, 'size'>
+): Promise<
+  Array<{
+    serviceNodeName: string;
+    errorRate?: number;
+    latency?: number;
+    throughput?: number;
+    cpuUsage?: number | null;
+    memoryUsage?: number | null;
+  }>
+> {
+  return withApmSpan('get_service_instances_primary_statistics', async () => {
     const paramsForSubQueries = {
       ...params,
       size: 50,
     };
 
     const [transactionStats, systemMetricStats] = await Promise.all([
-      getServiceInstanceTransactionStats(paramsForSubQueries),
-      getServiceInstanceSystemMetricStats(paramsForSubQueries),
+      getServiceInstancesTransactionStatistics({
+        ...paramsForSubQueries,
+        isComparisonSearch: false,
+      }),
+      getServiceInstancesSystemMetricStatistics({
+        ...paramsForSubQueries,
+        isComparisonSearch: false,
+      }),
     ]);
 
     const stats = joinByKey(
