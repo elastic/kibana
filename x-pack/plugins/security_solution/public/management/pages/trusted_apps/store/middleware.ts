@@ -64,6 +64,7 @@ import {
   getListItems,
   editItemState,
 } from './selectors';
+import { parseQueryFilterToKQL } from './utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
 
 const createTrustedAppsListResourceStateChangedAction = (
@@ -93,17 +94,10 @@ const refreshListIfNeeded = async (
       const pageSize = getCurrentLocationPageSize(store.getState());
       const filter = getCurrentLocationFilter(store.getState());
 
-      const kuery = [
-        `exception-list-agnostic.attributes.name:${filter}`,
-        `exception-list-agnostic.attributes.description:${filter}`,
-        `exception-list-agnostic.attributes.entries.value:${filter}`,
-        `exception-list-agnostic.attributes.entries.entries.value:${filter}`,
-      ].join(' OR ');
-
       const response = await trustedAppsService.getTrustedAppsList({
         page: pageIndex + 1,
         per_page: pageSize,
-        kuery: filter ? kuery : undefined,
+        kuery: parseQueryFilterToKQL(filter) || undefined,
       });
 
       store.dispatch(
