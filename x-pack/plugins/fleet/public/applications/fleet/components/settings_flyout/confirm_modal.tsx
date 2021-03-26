@@ -65,25 +65,25 @@ const TABLE_COLUMNS: EuiBasicTableProps<Change>['columns'] = [
 function getLabel(change: Change) {
   if (change.type === 'elasticsearch' && change.direction === 'removed') {
     return i18n.translate('xpack.fleet.settingsConfirmModal.elasticsearchRemovedLabel', {
-      defaultMessage: 'Elasticsearch URL (old)',
+      defaultMessage: 'Elasticsearch hosts (old)',
     });
   }
 
   if (change.type === 'elasticsearch' && change.direction === 'added') {
     return i18n.translate('xpack.fleet.settingsConfirmModal.elasticsearchAddedLabel', {
-      defaultMessage: 'Elasticsearch URL (new)',
+      defaultMessage: 'Elasticsearch hosts (new)',
     });
   }
 
   if (change.type === 'fleet_server' && change.direction === 'removed') {
     return i18n.translate('xpack.fleet.settingsConfirmModal.fleetServerRemovedLabel', {
-      defaultMessage: 'Fleet Server URL (old)',
+      defaultMessage: 'Fleet Server hosts (old)',
     });
   }
 
   if (change.type === 'fleet_server' && change.direction === 'added') {
     return i18n.translate('xpack.fleet.settingsConfirmModal.fleetServerAddedLabel', {
-      defaultMessage: 'Fleet Server URL (new)',
+      defaultMessage: 'Fleet Server hosts (new)',
     });
   }
 

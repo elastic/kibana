@@ -13,7 +13,7 @@ export const GetSettingsRequestSchema = {};
 
 export const PutSettingsRequestSchema = {
   body: schema.object({
-    fleet_server_urls: schema.maybe(
+    fleet_server_hosts: schema.maybe(
       schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
         validate: (value) => {
           if (value.length && isDiffPathProtocol(value)) {

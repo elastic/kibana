@@ -706,9 +706,9 @@ class AgentPolicyService {
       } catch (error) {
         throw new Error('Default settings is not setup');
       }
-      if (settings.fleet_server_urls && settings.fleet_server_urls.length) {
+      if (settings.fleet_server_hosts && settings.fleet_server_hosts.length) {
         fullAgentPolicy.fleet = {
-          hosts: settings.fleet_server_urls,
+          hosts: settings.fleet_server_hosts,
         };
       } // TODO remove as part of https://github.com/elastic/kibana/issues/94303
       else {

@@ -58,7 +58,7 @@ const getSavedObjectTypes = (
     },
     mappings: {
       properties: {
-        fleet_server_urls: { type: 'keyword' },
+        fleet_server_hosts: { type: 'keyword' },
         has_seen_add_data_notice: { type: 'boolean', index: false },
         // TODO remove as part of https://github.com/elastic/kibana/issues/94303
         kibana_urls: { type: 'keyword' },

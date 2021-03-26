@@ -78,25 +78,25 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
       ];
     }
   });
-  const fleetServerUrlsInput = useComboInput([], (value) => {
+  const fleetServerHostsInput = useComboInput([], (value) => {
     // TODO enable as part of https://github.com/elastic/kibana/issues/94303
     // if (value.length === 0) {
     //   return [
-    //     i18n.translate('xpack.fleet.settings.fleetServerUrlsEmptyError', {
+    //     i18n.translate('xpack.fleet.settings.fleetServerHostsEmptyError', {
     //       defaultMessage: 'At least one URL is required',
     //     }),
     //   ];
     // }
     if (value.some((v) => !v.match(URL_REGEX))) {
       return [
-        i18n.translate('xpack.fleet.settings.fleetServerUrlsError', {
+        i18n.translate('xpack.fleet.settings.fleetServerHostsError', {
           defaultMessage: 'Invalid URL',
         }),
       ];
     }
     if (value.length && isDiffPathProtocol(value)) {
       return [
-        i18n.translate('xpack.fleet.settings.fleetServerUrlsDifferentPathOrProtocolError', {
+        i18n.translate('xpack.fleet.settings.fleetServerHostsDifferentPathOrProtocolError', {
           defaultMessage: 'Protocol and path must be the same for each URL',
         }),
       ];
@@ -130,7 +130,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
   const validate = useCallback(() => {
     if (
       !kibanaUrlsInput.validate() ||
-      !fleetServerUrlsInput.validate() ||
+      !fleetServerHostsInput.validate() ||
       !elasticsearchUrlInput.validate() ||
       !additionalYamlConfigInput.validate()
     ) {
@@ -138,7 +138,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
     }
 
     return true;
-  }, [kibanaUrlsInput, fleetServerUrlsInput, elasticsearchUrlInput, additionalYamlConfigInput]);
+  }, [kibanaUrlsInput, fleetServerHostsInput, elasticsearchUrlInput, additionalYamlConfigInput]);
 
   return {
     isLoading,
@@ -158,7 +158,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
         }
         const settingsResponse = await sendPutSettings({
           kibana_urls: kibanaUrlsInput.value,
-          fleet_server_urls: fleetServerUrlsInput.value,
+          fleet_server_hosts: fleetServerHostsInput.value,
         });
         if (settingsResponse.error) {
           throw settingsResponse.error;
@@ -178,7 +178,7 @@ function useSettingsForm(outputId: string | undefined, onSuccess: () => void) {
       }
     },
     inputs: {
-      fleetServerUrls: fleetServerUrlsInput,
+      fleetServerHosts: fleetServerHostsInput,
       kibanaUrls: kibanaUrlsInput,
       elasticsearchUrl: elasticsearchUrlInput,
       additionalYamlConfig: additionalYamlConfigInput,
@@ -221,7 +221,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
   useEffect(() => {
     if (settings) {
       inputs.kibanaUrls.setValue([...settings.kibana_urls]);
-      inputs.fleetServerUrls.setValue([...settings.fleet_server_urls]);
+      inputs.fleetServerHosts.setValue([...settings.fleet_server_hosts]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
@@ -232,7 +232,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
     }
     return (
       !isSameArrayValue(settings.kibana_urls, inputs.kibanaUrls.value) ||
-      !isSameArrayValue(settings.fleet_server_urls, inputs.fleetServerUrls.value) ||
+      !isSameArrayValue(settings.fleet_server_hosts, inputs.fleetServerHosts.value) ||
       !isSameArrayValue(output.hosts, inputs.elasticsearchUrl.value) ||
       (output.config_yaml || '') !== inputs.additionalYamlConfig.value
     );
@@ -259,17 +259,17 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       );
     }
 
-    if (!isSameArrayValue(settings.fleet_server_urls, inputs.fleetServerUrls.value)) {
+    if (!isSameArrayValue(settings.fleet_server_hosts, inputs.fleetServerHosts.value)) {
       tmpChanges.push(
         {
           type: 'fleet_server',
           direction: 'removed',
-          urls: settings.fleet_server_urls,
+          urls: settings.fleet_server_hosts,
         },
         {
           type: 'fleet_server',
           direction: 'added',
-          urls: inputs.fleetServerUrls.value,
+          urls: inputs.fleetServerHosts.value,
         }
       );
     }
@@ -301,12 +301,12 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
 
       <EuiFormRow
         fullWidth
-        label={i18n.translate('xpack.fleet.settings.fleetServerUrlsLabel', {
-          defaultMessage: 'Fleet Server URL',
+        label={i18n.translate('xpack.fleet.settings.fleetServerHostsLabel', {
+          defaultMessage: 'Fleet Server hosts',
         })}
         helpText={
           <FormattedMessage
-            id="xpack.fleet.settings.fleetServerUrlsHelpTect"
+            id="xpack.fleet.settings.fleetServerHostsHelpTect"
             defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet will show the first provided URL for enrollment purposes. For more information, see the {link}.'"
             values={{
               link: (
@@ -324,9 +324,9 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
             }}
           />
         }
-        {...inputs.fleetServerUrls.formRowProps}
+        {...inputs.fleetServerHosts.formRowProps}
       >
-        <EuiComboBox fullWidth noSuggestions {...inputs.fleetServerUrls.props} />
+        <EuiComboBox fullWidth noSuggestions {...inputs.fleetServerHosts.props} />
       </EuiFormRow>
 
       <EuiSpacer size="m" />
@@ -334,7 +334,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.fleet.settings.kibanaUrlLabel', {
-          defaultMessage: 'Kibana URL',
+          defaultMessage: 'Kibana hosts',
         })}
         {...inputs.kibanaUrls.formRowProps}
       >
@@ -344,7 +344,7 @@ export const SettingFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiFormRow
         fullWidth
         label={i18n.translate('xpack.fleet.settings.elasticsearchUrlLabel', {
-          defaultMessage: 'Elasticsearch URL',
+          defaultMessage: 'Elasticsearch hosts',
         })}
         helpText={i18n.translate('xpack.fleet.settings.elasticsearchUrlsHelpTect', {
           defaultMessage: 'Specify the Elasticsearch URLs where agents will send data.',

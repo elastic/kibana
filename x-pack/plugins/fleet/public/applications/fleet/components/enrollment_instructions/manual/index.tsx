@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import type { EnrollmentAPIKey } from '../../../types';
 
 interface Props {
-  fleetServerUrls: string[];
+  fleetServerHosts: string[];
   kibanaUrl: string;
   apiKey: EnrollmentAPIKey;
   kibanaCASha256?: string;
@@ -24,8 +24,8 @@ const CommandCode = styled.pre({
   overflow: 'scroll',
 });
 
-function getFleetServerUrlsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerUrls: string[]) {
-  return `--url=${fleetServerUrls[0]} --enrollment-token=${apiKey.api_key}`;
+function getfleetServerHostsEnrollArgs(apiKey: EnrollmentAPIKey, fleetServerHosts: string[]) {
+  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey.api_key}`;
 }
 
 function getKibanaUrlEnrollArgs(
@@ -42,12 +42,12 @@ export const ManualInstructions: React.FunctionComponent<Props> = ({
   kibanaUrl,
   apiKey,
   kibanaCASha256,
-  fleetServerUrls,
+  fleetServerHosts,
 }) => {
-  const fleetServerUrlsNotEmpty = fleetServerUrls.length > 0;
+  const fleetServerHostsNotEmpty = fleetServerHosts.length > 0;
 
-  const enrollArgs = fleetServerUrlsNotEmpty
-    ? getFleetServerUrlsEnrollArgs(apiKey, fleetServerUrls)
+  const enrollArgs = fleetServerHostsNotEmpty
+    ? getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts)
     : // TODO remove as part of https://github.com/elastic/kibana/issues/94303
       getKibanaUrlEnrollArgs(apiKey, kibanaUrl, kibanaCASha256);
 
