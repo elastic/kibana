@@ -31,7 +31,6 @@ export const experimentsServiceFactory: ExperimentsServiceFactory = () => {
       browser: isEnabledByStorageValue(experiment, 'browser', localStorage.getItem(id)),
       kibana: isActive,
     };
-
     return applyExperimentStatus(experiment, status);
   };
 

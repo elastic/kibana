@@ -17,20 +17,24 @@ export const solutionNames = ['canvas', 'dashboard', 'presentation'] as const;
 
 export type ExperimentID = typeof experimentIDs[number];
 export type ExperimentEnvironment = typeof environmentNames[number];
-export type PresentationSolution = typeof solutionNames[number];
+export type ExperimentSolution = typeof solutionNames[number];
 
 export type EnvironmentStatus = {
   [env in ExperimentEnvironment]?: boolean;
 };
 
-export type ExperimentStatus = { defaultValue: boolean; isEnabled: boolean } & EnvironmentStatus;
+export type ExperimentStatus = {
+  defaultValue: boolean;
+  isEnabled: boolean;
+  isOverride: boolean;
+} & EnvironmentStatus;
 export interface ExperimentConfig {
   id: ExperimentID;
   name: string;
   isActive: boolean;
   environments: ExperimentEnvironment[];
   description: string;
-  solutions: PresentationSolution[];
+  solutions: ExperimentSolution[];
 }
 
 export type Experiment = ExperimentConfig & { status: ExperimentStatus };

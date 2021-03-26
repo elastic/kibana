@@ -12,7 +12,7 @@ import { ExperimentsButton } from './experiments_button';
 export default {
   component: ExperimentsButton,
   title: 'Experiments Button',
-  description: '',
+  description: 'A button which fires a Popover containing options for enabling experiments.',
   argTypes: {},
 };
 

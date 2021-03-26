@@ -67,12 +67,16 @@ export const applyExperimentStatus = (
     }
   });
 
+  const isEnabled = isExperimentEnabledByStatus(isActive, status);
+  const isOverride = isEnabled !== isActive;
+
   return {
     ...experiment,
     status: {
       ...status,
       defaultValue: isActive,
-      isEnabled: isExperimentEnabledByStatus(isActive, status),
+      isEnabled,
+      isOverride,
     },
   };
 };

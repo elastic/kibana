@@ -8,7 +8,7 @@
 
 import { PluginServices, PluginServiceProviders, PluginServiceProvider } from '../create';
 import { dashboardsServiceFactory } from '../stub/dashboards';
-import { experimentsServiceFactory } from '../stub/experiments';
+import { experimentsServiceFactory } from './experiments';
 import { capabilitiesServiceFactory } from './capabilities';
 import { PresentationUtilServices } from '..';
 

@@ -7,17 +7,40 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiNotificationBadge, EuiButtonProps } from '@elastic/eui';
 
-import { ExperimentsPopover } from './experiments_popover';
+import { pluginServices } from '../../services';
+import { ExperimentsPopover, Props as PopoverProps } from './experiments_popover';
 
-export const ExperimentsButton = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+export type Props = EuiButtonProps & Pick<PopoverProps, 'solutions'>;
 
-  const onButtonClick = () => setIsPopoverOpen((open) => !open);
-  const closePopover = () => setIsPopoverOpen(false);
+export const ExperimentsButton = ({ solutions, ...props }: Props) => {
+  const { experiments: experimentsService } = pluginServices.getHooks();
+  const { getExperiments } = experimentsService.useService();
+  const [isOpen, setIsOpen] = useState(false);
 
-  const button = <EuiButtonIcon iconType="beaker" onClick={onButtonClick} />;
+  const experiments = getExperiments();
+  const overrideCount = Object.values(experiments).filter(
+    (experiment) => experiment.status.isOverride
+  ).length;
 
-  return <ExperimentsPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover} />;
+  const onButtonClick = () => setIsOpen((open) => !open);
+  const closePopover = () => setIsOpen(false);
+
+  const button = (
+    <EuiButton {...props} onClick={onButtonClick} minWidth={0}>
+      <EuiIcon type="beaker" />
+      {overrideCount > 0 ? (
+        <EuiNotificationBadge color="subdued" style={{ marginLeft: 2 }}>
+          {overrideCount}
+        </EuiNotificationBadge>
+      ) : null}
+    </EuiButton>
+  );
+
+  return <ExperimentsPopover {...{ button, isOpen, closePopover, solutions }} />;
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default ExperimentsButton;

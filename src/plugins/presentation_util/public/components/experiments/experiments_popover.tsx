@@ -17,6 +17,7 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 
+import { ExperimentSolution } from '../../../common';
 import { pluginServices } from '../../services';
 import { ExperimentsStrings } from '../../i18n';
 import { ExperimentPanel } from './experiment_panel';
@@ -25,7 +26,12 @@ import './experiments_popover.scss';
 
 const { Popover: strings } = ExperimentsStrings.Components;
 
-export const ExperimentsPopover = (props: Omit<EuiPopoverProps, 'children'>) => {
+export interface Props extends Omit<EuiPopoverProps, 'children'> {
+  solutions?: ExperimentSolution[];
+}
+
+export const ExperimentsPopover = (props: Props) => {
+  const { solutions, ...rest } = props;
   const { experiments: experimentsService } = pluginServices.getHooks();
   const { getExperiments, setExperimentStatus, reset } = experimentsService.useService();
 
@@ -33,18 +39,24 @@ export const ExperimentsPopover = (props: Omit<EuiPopoverProps, 'children'>) => 
   const initialStatus = useRef(getExperiments());
 
   return (
-    <EuiPopover {...{ ...props }}>
+    <EuiPopover {...{ ...rest }}>
       <EuiPopoverTitle>Available Experiments</EuiPopoverTitle>
-      {Object.values(experiments).map((experiment) => (
-        <ExperimentPanel
-          experiment={experiment}
-          key={experiment.id}
-          onStatusChange={(id, env, enabled) => {
-            setExperimentStatus(id, env, enabled);
-            setExperiments(getExperiments());
-          }}
-        />
-      ))}
+      {Object.values(experiments).map((experiment) => {
+        if (solutions && !solutions.some((solution) => experiment.solutions.includes(solution))) {
+          return null;
+        }
+
+        return (
+          <ExperimentPanel
+            experiment={experiment}
+            key={experiment.id}
+            onStatusChange={(id, env, enabled) => {
+              setExperimentStatus(id, env, enabled);
+              setExperiments(getExperiments());
+            }}
+          />
+        );
+      })}
       <EuiPopoverFooter className="experimentsPopover__footer">
         {!isEqual(initialStatus.current, experiments) ? (
           <EuiCallOut

@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { ExperimentsButton } from './experiments_button';
+import React from 'react';
+
+export const ExperimentsButton = React.lazy(() => import('./experiments_button'));

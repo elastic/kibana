@@ -28,15 +28,14 @@ export interface Props {
 
 export const ExperimentPanel = ({ experiment, onStatusChange }: Props) => {
   const { id, status, isActive, name, description, solutions } = experiment;
-  const { isEnabled } = status;
-  const isOverridden = isEnabled !== isActive;
+  const { isEnabled, isOverride } = status;
 
   return (
     <EuiPanel
       className={classnames({
         experimentListItem: true,
-        'experimentListItem--isOverridden': isOverridden,
-        'experimentListItem--isOverriddenEnabled': isOverridden && isEnabled,
+        'experimentListItem--isOverridden': isOverride,
+        'experimentListItem--isOverriddenEnabled': isOverride && isEnabled,
       })}
     >
       <EuiFlexGroup gutterSize="m">
