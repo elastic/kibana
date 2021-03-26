@@ -12,7 +12,7 @@ import {
   IndexSourceMappings,
   BodySettings,
 } from '../../common';
-import { IndexPatternsCommonService } from '../../../../../target/types/plugins/data/server';
+import { IndexPatternsCommonService } from '../../../../../src/plugins/data/server';
 
 const DEFAULT_SETTINGS = { number_of_shards: 1 };
 const DEFAULT_MAPPINGS = {
