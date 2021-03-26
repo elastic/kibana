@@ -35,7 +35,7 @@ export interface Args {
   columns: Array<
     Exclude<ColumnState, 'palette'> & {
       type: 'lens_datatable_column';
-      palette: PaletteOutput<CustomPaletteState>;
+      palette?: PaletteOutput<CustomPaletteState>;
     }
   >;
   sortingColumnId: string | undefined;

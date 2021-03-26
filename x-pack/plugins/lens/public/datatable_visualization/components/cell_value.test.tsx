@@ -11,6 +11,7 @@ import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
 import { FieldFormat } from 'src/plugins/data/public';
 import { Datatable } from 'src/plugins/expressions/public';
+import { IUiSettingsClient } from 'kibana/public';
 
 describe('datatable cell renderer', () => {
   const table: Datatable = {
@@ -30,7 +31,9 @@ describe('datatable cell renderer', () => {
     {
       a: { convert: (x) => `formatted ${x}` } as FieldFormat,
     },
-    DataContext
+    { columns: [], sortingColumnId: '', sortingDirection: 'none' },
+    DataContext,
+    ({ get: jest.fn() } as unknown) as IUiSettingsClient
   );
 
   it('renders formatted value', () => {

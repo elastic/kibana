@@ -60,7 +60,7 @@ export function TableDimensionEditor(
       (col) => col.id === accessor || getOriginalId(col.id) === accessor
     )?.meta.type === 'number';
 
-  const currentAlignment = column?.alignment || isNumericField ? 'right' : 'left';
+  const currentAlignment = column?.alignment || (isNumericField ? 'right' : 'left');
   const currentColorMode = column?.colorMode || 'none';
   const hasDynamicColoring = currentColorMode !== 'none';
 

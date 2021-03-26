@@ -15,6 +15,8 @@ import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
 import { LensMultiTable } from '../../types';
 import { DatatableProps } from '../expression';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { IUiSettingsClient } from 'kibana/public';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
@@ -99,6 +101,8 @@ describe('DatatableComponent', () => {
           formatFactory={(x) => x as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
           renderMode="edit"
         />
       )
@@ -118,6 +122,8 @@ describe('DatatableComponent', () => {
           getType={jest.fn()}
           rowHasRowClickTriggerActions={[true, true, true]}
           renderMode="edit"
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
         />
       )
     ).toMatchSnapshot();
@@ -136,6 +142,8 @@ describe('DatatableComponent', () => {
           getType={jest.fn()}
           rowHasRowClickTriggerActions={[false, false, false]}
           renderMode="display"
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
         />
       )
     ).toMatchSnapshot();
@@ -158,6 +166,8 @@ describe('DatatableComponent', () => {
         dispatchEvent={onDispatchEvent}
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
 
@@ -199,6 +209,8 @@ describe('DatatableComponent', () => {
         dispatchEvent={onDispatchEvent}
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
 
@@ -279,6 +291,8 @@ describe('DatatableComponent', () => {
         dispatchEvent={onDispatchEvent}
         getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         renderMode="edit"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
 
@@ -325,6 +339,8 @@ describe('DatatableComponent', () => {
           type === 'count' ? ({ type: 'metrics' } as IAggType) : ({ type: 'buckets' } as IAggType)
         )}
         renderMode="edit"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
     expect(component.find(EmptyPlaceholder).prop('icon')).toEqual(LensIconChartDatatable);
@@ -345,6 +361,8 @@ describe('DatatableComponent', () => {
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="edit"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
 
@@ -393,6 +411,8 @@ describe('DatatableComponent', () => {
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="display"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
 
@@ -421,6 +441,8 @@ describe('DatatableComponent', () => {
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="display"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
 
@@ -447,6 +469,8 @@ describe('DatatableComponent', () => {
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="display"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
 
@@ -471,6 +495,8 @@ describe('DatatableComponent', () => {
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="edit"
+        paletteService={chartPluginMock.createPaletteRegistry()}
+        uiSettings={({ get: jest.fn() } as unknown) as IUiSettingsClient}
       />
     );
     // mnake a copy of the data, changing only the name of the first column

@@ -12,12 +12,16 @@ import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../editor_frame_service/mocks';
 import { mountWithIntl } from '@kbn/test/jest';
 import { TableDimensionEditor } from './dimension_editor';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 
 describe('data table dimension editor', () => {
   let frame: FramePublicAPI;
   let state: DatatableVisualizationState;
   let setState: (newState: DatatableVisualizationState) => void;
-  let props: VisualizationDimensionEditorProps<DatatableVisualizationState>;
+  let props: VisualizationDimensionEditorProps<DatatableVisualizationState> & {
+    paletteService: PaletteRegistry;
+  };
 
   function testState(): DatatableVisualizationState {
     return {
@@ -59,6 +63,7 @@ describe('data table dimension editor', () => {
       layerId: 'first',
       state,
       setState,
+      paletteService: chartPluginMock.createPaletteRegistry(),
     };
   });
 
@@ -72,17 +77,23 @@ describe('data table dimension editor', () => {
   it('should render default alignment for number', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(instance.find(EuiButtonGroup).prop('idSelected')).toEqual(
-      expect.stringContaining('right')
-    );
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_alignment_groups"]')
+        .find(EuiButtonGroup)
+        .prop('idSelected')
+    ).toEqual(expect.stringContaining('right'));
   });
 
   it('should render specific alignment', () => {
     state.columns[0].alignment = 'center';
     const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    expect(instance.find(EuiButtonGroup).prop('idSelected')).toEqual(
-      expect.stringContaining('center')
-    );
+    expect(
+      instance
+        .find('[data-test-subj="lnsDatatable_alignment_groups"]')
+        .find(EuiButtonGroup)
+        .prop('idSelected')
+    ).toEqual(expect.stringContaining('center'));
   });
 
   it('should set state for the right column', () => {
@@ -95,7 +106,10 @@ describe('data table dimension editor', () => {
       },
     ];
     const instance = mountWithIntl(<TableDimensionEditor {...props} />);
-    instance.find(EuiButtonGroup).prop('onChange')('center');
+    instance
+      .find('[data-test-subj="lnsDatatable_alignment_groups"]')
+      .find(EuiButtonGroup)
+      .prop('onChange')('center');
     expect(setState).toHaveBeenCalledWith({
       ...state,
       columns: [
