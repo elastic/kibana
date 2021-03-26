@@ -109,7 +109,6 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         resultFields,
         schema,
         schemaConflicts,
-        ...splitResultFields(resultFields, schema),
       };
     },
     clearAllFields: () => true,
@@ -149,30 +148,6 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
         openConfirmResetModal: () => OpenModal.ConfirmResetModal,
         openConfirmSaveModal: () => OpenModal.ConfirmSaveModal,
         saving: () => OpenModal.None,
-      },
-    ],
-    nonTextResultFields: [
-      {},
-      {
-        initializeResultFields: (_, { nonTextResultFields }) => nonTextResultFields,
-        clearAllFields: (nonTextResultFields) => clearAllFields(nonTextResultFields),
-        resetAllFields: (nonTextResultFields) => resetAllFields(nonTextResultFields),
-        updateField: (nonTextResultFields, { fieldName, settings }) =>
-          nonTextResultFields.hasOwnProperty(fieldName)
-            ? { ...nonTextResultFields, [fieldName]: settings }
-            : nonTextResultFields,
-      },
-    ],
-    textResultFields: [
-      {},
-      {
-        initializeResultFields: (_, { textResultFields }) => textResultFields,
-        clearAllFields: (textResultFields) => clearAllFields(textResultFields),
-        resetAllFields: (textResultFields) => resetAllFields(textResultFields),
-        updateField: (textResultFields, { fieldName, settings }) =>
-          textResultFields.hasOwnProperty(fieldName)
-            ? { ...textResultFields, [fieldName]: settings }
-            : textResultFields,
       },
     ],
     resultFields: [
@@ -223,6 +198,20 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
   }),
   selectors: ({ selectors }) => ({
+    textResultFields: [
+      () => [selectors.resultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: Schema) => {
+        const { textResultFields } = splitResultFields(resultFields, schema);
+        return textResultFields;
+      },
+    ],
+    nonTextResultFields: [
+      () => [selectors.resultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: Schema) => {
+        const { nonTextResultFields } = splitResultFields(resultFields, schema);
+        return nonTextResultFields;
+      },
+    ],
     resultFieldsAtDefaultSettings: [
       () => [selectors.resultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
