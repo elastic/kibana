@@ -67,6 +67,8 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     const isMovingOtherProcessor = editor.mode.id === 'movingProcessor' && !isMovingThisProcessor;
     const isDimmed = isEditingOtherProcessor || isMovingOtherProcessor;
 
+    const processorDescriptor = getProcessorDescriptor(processor.type);
+
     const { testPipelineData } = useTestPipelineContext();
     const {
       config: { selectedDocumentIndex },
@@ -193,7 +195,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                     }}
                     data-test-subj="manageItemButton"
                   >
-                    <b>{getProcessorDescriptor(processor.type)?.label ?? processor.type}</b>
+                    <b>{processorDescriptor?.label ?? processor.type}</b>
                   </EuiLink>
                 </EuiText>
               </EuiFlexItem>
@@ -202,7 +204,9 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   disabled={isEditorNotInIdleMode}
                   onChange={onDescriptionChange}
                   ariaLabel={i18nTexts.processorTypeLabel({ type: processor.type })}
-                  text={description}
+                  text={
+                    description ?? processorDescriptor?.getDefaultDescription(processor.options)
+                  }
                   placeholder={i18nTexts.descriptionPlaceholder}
                 />
               </EuiFlexItem>
