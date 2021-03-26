@@ -43,6 +43,10 @@ export interface DiscoverProps {
    */
   fieldCounts: Record<string, number>;
   /**
+   * Current state of data fetching
+   */
+  fetchStatus: string;
+  /**
    * Histogram aggregation data
    */
   histogramData?: Chart;
@@ -154,10 +158,6 @@ export interface DiscoverProps {
    * Current app state of URL
    */
   state: AppState;
-  /**
-   * Currently selected time range
-   */
-  timeRange?: { from: string; to: string };
   /**
    * An object containing properties for unmapped fields behavior
    */
