@@ -1360,6 +1360,136 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-public.ObservabilityPublicPluginsSetup",
+        "type": "Interface",
+        "label": "ObservabilityPublicPluginsSetup",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsSetup.data",
+            "type": "Object",
+            "label": "data",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 30
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginSetup",
+                "text": "DataPublicPluginSetup"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsSetup.home",
+            "type": "Object",
+            "label": "home",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 31
+            },
+            "signature": [
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.HomePublicPluginSetup",
+                "text": "HomePublicPluginSetup"
+              },
+              " | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/plugin.ts",
+          "lineNumber": 29
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ObservabilityPublicPluginsStart",
+        "type": "Interface",
+        "label": "ObservabilityPublicPluginsStart",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsStart.home",
+            "type": "Object",
+            "label": "home",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 35
+            },
+            "signature": [
+              {
+                "pluginId": "home",
+                "scope": "public",
+                "docId": "kibHomePluginApi",
+                "section": "def-public.HomePublicPluginStart",
+                "text": "HomePublicPluginStart"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsStart.data",
+            "type": "Object",
+            "label": "data",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 36
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.ObservabilityPublicPluginsStart.lens",
+            "type": "Object",
+            "label": "lens",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/observability/public/plugin.ts",
+              "lineNumber": 37
+            },
+            "signature": [
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensPublicStart",
+                "text": "LensPublicStart"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/observability/public/plugin.ts",
+          "lineNumber": 34
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.Series",
         "type": "Interface",
         "label": "Series",
@@ -1951,21 +2081,21 @@
     ],
     "objects": [],
     "setup": {
-      "id": "def-public.ObservabilityPluginSetup",
+      "id": "def-public.ObservabilityPublicSetup",
       "type": "Interface",
-      "label": "ObservabilityPluginSetup",
+      "label": "ObservabilityPublicSetup",
       "description": [],
       "tags": [],
       "children": [
         {
           "tags": [],
-          "id": "def-public.ObservabilityPluginSetup.dashboard",
+          "id": "def-public.ObservabilityPublicSetup.dashboard",
           "type": "Object",
           "label": "dashboard",
           "description": [],
           "source": {
             "path": "x-pack/plugins/observability/public/plugin.ts",
-            "lineNumber": 25
+            "lineNumber": 26
           },
           "signature": [
             "{ register: typeof ",
@@ -1982,20 +2112,20 @@
       ],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 24
+        "lineNumber": 25
       },
       "lifecycle": "setup",
       "initialIsOpen": true
     },
     "start": {
-      "id": "def-public.ObservabilityPluginStart",
+      "id": "def-public.ObservabilityPublicStart",
       "type": "Type",
-      "label": "ObservabilityPluginStart",
+      "label": "ObservabilityPublicStart",
       "tags": [],
       "description": [],
       "source": {
         "path": "x-pack/plugins/observability/public/plugin.ts",
-        "lineNumber": 33
+        "lineNumber": 40
       },
       "signature": [
         "void"

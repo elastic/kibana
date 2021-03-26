@@ -953,7 +953,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-              "lineNumber": 59
+              "lineNumber": 57
             },
             "signature": [
               "\"terms\""
@@ -967,7 +967,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-              "lineNumber": 60
+              "lineNumber": 58
             },
             "signature": [
               "{ size: number; orderBy: { type: \"alphabetical\"; } | { type: \"column\"; columnId: string; }; orderDirection: \"asc\" | \"desc\"; otherBucket?: boolean | undefined; missingBucket?: boolean | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }"
@@ -976,7 +976,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/indexpattern_datasource/operations/definitions/terms/index.tsx",
-          "lineNumber": 58
+          "lineNumber": 56
         },
         "initialIsOpen": false
       },
@@ -1138,7 +1138,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 420
+              "lineNumber": 423
             },
             "signature": [
               {
@@ -1158,7 +1158,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 421
+              "lineNumber": 424
             },
             "signature": [
               {
@@ -1178,7 +1178,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 422
+              "lineNumber": 425
             },
             "signature": [
               "\"hide\" | \"inside\" | \"outside\" | undefined"
@@ -1192,7 +1192,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 423
+              "lineNumber": 426
             },
             "signature": [
               "\"None\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
@@ -1206,7 +1206,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 424
+              "lineNumber": 427
             },
             "signature": [
               {
@@ -1227,7 +1227,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 425
+              "lineNumber": 428
             },
             "signature": [
               "string | undefined"
@@ -1241,7 +1241,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 426
+              "lineNumber": 429
             },
             "signature": [
               "string | undefined"
@@ -1255,7 +1255,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 427
+              "lineNumber": 430
             },
             "signature": [
               "string | undefined"
@@ -1269,7 +1269,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 428
+              "lineNumber": 431
             },
             "signature": [
               {
@@ -1290,7 +1290,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 429
+              "lineNumber": 432
             },
             "signature": [
               {
@@ -1311,7 +1311,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-              "lineNumber": 430
+              "lineNumber": 433
             },
             "signature": [
               {
@@ -1323,11 +1323,25 @@
               },
               " | undefined"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.XYState.curveType",
+            "type": "CompoundType",
+            "label": "curveType",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
+              "lineNumber": 434
+            },
+            "signature": [
+              "\"LINEAR\" | \"CURVE_MONOTONE_X\" | undefined"
+            ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/lens/public/xy_visualization/types.ts",
-          "lineNumber": 419
+          "lineNumber": 422
         },
         "initialIsOpen": false
       }

@@ -5111,7 +5111,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 194
+              "lineNumber": 200
             },
             "signature": [
               "{ agentId: string; }"
@@ -5120,7 +5120,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 193
+          "lineNumber": 199
         },
         "initialIsOpen": false
       },
@@ -6968,7 +6968,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 209
+              "lineNumber": 215
             },
             "signature": [
               "{ kuery?: string | undefined; policyId?: string | undefined; }"
@@ -6977,7 +6977,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 208
+          "lineNumber": 214
         },
         "initialIsOpen": false
       },
@@ -6996,7 +6996,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 216
+              "lineNumber": 222
             },
             "signature": [
               "{ events: number; total: number; online: number; error: number; offline: number; other: number; updating: number; }"
@@ -7005,7 +7005,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 215
+          "lineNumber": 221
         },
         "initialIsOpen": false
       },
@@ -7436,7 +7436,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 176
+              "lineNumber": 182
             },
             "signature": [
               "{ agentId: string; }"
@@ -7450,7 +7450,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 179
+              "lineNumber": 185
             },
             "signature": [
               "{ page: number; perPage: number; kuery?: string | undefined; }"
@@ -7459,7 +7459,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 175
+          "lineNumber": 181
         },
         "initialIsOpen": false
       },
@@ -7478,7 +7478,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 187
+              "lineNumber": 193
             },
             "signature": [
               {
@@ -7499,7 +7499,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 188
+              "lineNumber": 194
             }
           },
           {
@@ -7510,7 +7510,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 189
+              "lineNumber": 195
             }
           },
           {
@@ -7521,13 +7521,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 190
+              "lineNumber": 196
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 186
+          "lineNumber": 192
         },
         "initialIsOpen": false
       },
@@ -10708,7 +10708,7 @@
         "children": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 148
+          "lineNumber": 154
         },
         "initialIsOpen": false
       },
@@ -10727,7 +10727,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 161
+              "lineNumber": 167
             },
             "signature": [
               "{ policy_id: string; agents: string | string[]; }"
@@ -10736,7 +10736,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 160
+          "lineNumber": 166
         },
         "initialIsOpen": false
       },
@@ -10806,19 +10806,6 @@
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
           "lineNumber": 137
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.PostBulkAgentUpgradeResponse",
-        "type": "Interface",
-        "label": "PostBulkAgentUpgradeResponse",
-        "description": [],
-        "tags": [],
-        "children": [],
-        "source": {
-          "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 145
         },
         "initialIsOpen": false
       },
@@ -11019,7 +11006,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 151
+              "lineNumber": 157
             },
             "signature": [
               "{ agentId: string; }"
@@ -11033,7 +11020,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 154
+              "lineNumber": 160
             },
             "signature": [
               "{ policy_id: string; }"
@@ -11042,7 +11029,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 150
+          "lineNumber": 156
         },
         "initialIsOpen": false
       },
@@ -11055,7 +11042,7 @@
         "children": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 158
+          "lineNumber": 164
         },
         "initialIsOpen": false
       },
@@ -12110,7 +12097,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 200
+              "lineNumber": 206
             },
             "signature": [
               "{ agentId: string; }"
@@ -12124,7 +12111,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-              "lineNumber": 203
+              "lineNumber": 209
             },
             "signature": [
               "{ user_provided_metadata: Record<string, any>; }"
@@ -12133,7 +12120,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 199
+          "lineNumber": 205
         },
         "initialIsOpen": false
       },
@@ -13802,7 +13789,22 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
-          "lineNumber": 167
+          "lineNumber": 173
+        },
+        "signature": [
+          "{ [x: string]: { success: boolean; error?: string | undefined; }; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.PostBulkAgentUpgradeResponse",
+        "type": "Type",
+        "label": "PostBulkAgentUpgradeResponse",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/fleet/common/types/rest_spec/agent.ts",
+          "lineNumber": 145
         },
         "signature": [
           "{ [x: string]: { success: boolean; error?: string | undefined; }; }"

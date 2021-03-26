@@ -2922,7 +2922,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/common/index.ts",
-          "lineNumber": 29
+          "lineNumber": 30
         },
         "signature": [
           "\"alerts\""
@@ -3031,6 +3031,21 @@
         },
         "signature": [
           "\"default\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.INTERNAL_BASE_ALERTING_API_PATH",
+        "type": "string",
+        "label": "INTERNAL_BASE_ALERTING_API_PATH",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/alerting/common/index.ts",
+          "lineNumber": 29
+        },
+        "signature": [
+          "\"/internal/alerting\""
         ],
         "initialIsOpen": false
       },

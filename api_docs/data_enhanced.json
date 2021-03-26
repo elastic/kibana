@@ -46,7 +46,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/data_enhanced/public/plugin.ts",
-        "lineNumber": 40
+        "lineNumber": 38
       },
       "signature": [
         "void"
