@@ -119,6 +119,8 @@ export function esdocs(): ExpressionFunctionDefinition<
         filter: input.and,
       };
 
+      // We're requesting the data using the ESSQL strategy because
+      // the SQL routes return type information with the result set
       return search
         .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, { strategy: 'essql' })
         .toPromise()
