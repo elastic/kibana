@@ -44,6 +44,8 @@ const byTypeSchema: MakeSchemaFrom<AlertsUsage>['count_by_type'] = {
   xpack__uptime__alerts__durationAnomaly: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   // Maps
   '__geo-containment': { type: 'long' },
+  // ML
+  xpack_ml_anomaly_detection_alert: { type: 'long' },
 };
 
 export function createAlertsUsageCollector(

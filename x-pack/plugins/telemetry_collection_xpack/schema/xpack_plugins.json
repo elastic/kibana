@@ -207,6 +207,9 @@
             },
             "__geo-containment": {
               "type": "long"
+            },
+            "xpack_ml_anomaly_detection_alert": {
+              "type": "long"
             }
           }
         },
@@ -282,6 +285,9 @@
               "type": "long"
             },
             "__geo-containment": {
+              "type": "long"
+            },
+            "xpack_ml_anomaly_detection_alert": {
               "type": "long"
             }
           }
