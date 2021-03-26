@@ -6,7 +6,7 @@
 
 deprecated::[7.13.0]
 
-Please use the <<actions-and-connectors-api-create>> instead.
+Use the <<create-connector-api>> instead.
 
 Creates a connector.
 

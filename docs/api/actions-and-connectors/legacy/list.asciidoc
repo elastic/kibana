@@ -6,7 +6,7 @@
 
 deprecated::[7.13.0]
 
-Please use the <<actions-and-connectors-api-list>> instead.
+Use the <<list-connector-types-api>> instead.
 
 Retrieves a list of all connector types.
 

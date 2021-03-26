@@ -6,7 +6,7 @@
 
 deprecated::[7.13.0]
 
-Please use the <<actions-and-connectors-api-update>> instead.
+Use the <<update-connector-api>> instead.
 
 Updates the attributes for an existing connector.
 

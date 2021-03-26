@@ -6,7 +6,7 @@
 
 deprecated::[7.13.0]
 
-Please use the <<actions-and-connectors-api-execute>> instead.
+Use the <<execute-connector-api>> instead.
 
 Executes a connector by ID.
 

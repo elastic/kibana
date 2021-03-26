@@ -6,7 +6,7 @@
 
 deprecated::[7.13.0]
 
-Please use the <<actions-and-connectors-api-delete>> instead.
+Use the <<delete-connector-api>> instead.
 
 Deletes a connector by ID.
 
