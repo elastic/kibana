@@ -39,11 +39,13 @@ const deepLink: string = myGenerator.createUrl({ /* ... */ });
 
 The proposal is to unify both of these services (Short URL Service and URL
 Generator Service) into a single new *URL Service*. The new unified service
-will still provide all the functionality the above mentioned services provide and
-in addition will implement the following improvements:
+will still provide all the functionality the above mentioned services provide
+and in addition will implement the following improvements:
 
-1. It will expose a consistent client (with the same interface) through plugin
-   contract mechanism on the server-side and the browser-side.
+1. It will provide all public APIs through plugin contracts and HTTP endpoints.
+1. It will expose a consistent client interface, the same interface on the
+   server-side as on the browser-side, so it is easier to write isomorphic
+   plugins, which rely on URL services.
 1. Improve the HTTP endpoints for use by external users, Cloud, and Support.
 1. Expose a "redirect" endpoint, which given URL generator ID and parameters,
    redirects the user to a deep link inside Kibana.
@@ -57,32 +59,34 @@ in addition will implement the following improvements:
 
 The URL Service will have a client (`UrlServiceClient`) which will have the same
 interface, both, on the server-side and the client-side. It will also have a
-documented public set of HTTP API endpoints for use by: (1) the client-side client;
-(2) external users, Elastic Cloud, and Support.
+documented public set of HTTP API endpoints for use by: (1) the client-side
+client; (2) external users, Elastic Cloud, and Support.
 
-The following code examples will work, both, on the server-side and the client-side, as
-the base `UrlServiceClient` interface will be the same for both environments.
+The following code examples will work, both, on the server-side and the
+client-side, as the base `UrlServiceClient` interface will be the same for both
+environments.
 
-In this example let's consider a case where Discover app registers a URL generator, then
-another plugin uses that to create a short URL, and let's say Elastic Cloud uses
-that URL generator to navigate deeply within the Discover app.
+In this example let's consider a case where Discover app registers a URL
+generator, then another plugin uses that to create a short URL, and let's say
+Elastic Cloud uses that URL generator to navigate deeply within the Discover
+app.
 
-First, the Discover app registers a URL generator (which it already does using the old
-URL Generator Service, it will just use the new URL Service):
+First, the Discover app registers a URL generator (which it already does using
+the old URL Generator Service, it will just use the new URL Service):
 
 ```ts
-share.urlService.generators.create({
+share.url.generators.create({
   id: 'DISCOVER_DEEP_LINKS',
   createUrl: ({indexPattern}) => `/app/discover/${indexPattern}`,
 });
 ```
 
-Now, let's consider some alert that sends an e-mail or a user from the UI wants to
-generate a short URL for some deep link inside Discover, the developer would be
-able to generate a short URL as follows:
+Now, let's consider some alert that sends an e-mail or a user from the UI wants
+to generate a short URL for some deep link inside Discover, the developer would
+be able to generate a short URL as follows:
 
 ```ts
-share.urlService.shortUrls.create({
+share.url.shortUrls.create({
   slug: 'my-discover-query', // Human-readable URL slug.
   generator: 'DISCOVER_DEEP_LINKS',
   state: {
@@ -94,11 +98,12 @@ share.urlService.shortUrls.create({
 Both of the code snippets above would look the same and work on the server and
 browser, wherever the developer needs those.
 
-Finally, the Elastic Cloud would be able to use the redirect endpoint to navigate
-deeply within the Discover app. It could use the server-side HTTP endpoint:
+Finally, the Elastic Cloud would be able to use the redirect endpoint to
+navigate deeply within the Discover app. It could use the server-side HTTP
+endpoint:
 
 ```
-POST /api/url_service/redirect/DISCOVER_DEEP_LINKS
+POST /api/share/url/_redirect/DISCOVER_DEEP_LINKS
 {
   "state": {
     "indexPattern": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx"
@@ -118,6 +123,7 @@ GET /app/goto/_redirect/DISCOVER_DEEP_LINKS?state=(indexPattern: "xxxxxxxx-xxxx-
 Our motivation to improve the URL services comes from us intending to use them
 more, for example, for panel sharing to Slack or e-mail; and we believe that the
 current state of the URL services needs an upgrade.
+
 
 ## Limitations of the Short URL Service
 
@@ -143,8 +149,8 @@ the Short URL Service:
 1. There is no way to delete short URLs once they are created.
    1. __Will do:__ The new service will provide CRUD API to manage short URLs,
       including deletion.
-1. Short URL service uses MD5 algorithm to hash long URLs. Security team requested
-   to stop using that algorithm.
+1. Short URL service uses MD5 algorithm to hash long URLs. Security team
+   requested to stop using that algorithm.
    1. __Will do:__ The new URL Service will not use MD5 algorithm.
 1. Short URLs store only the URL of the destination page. However, the
    destination page might have other state which affects the display of the page
@@ -155,11 +161,12 @@ the Short URL Service:
       store addition non-URL state with each short URL. That state would be
       provided to a Kibana app once user first navigates to that app using a
       short URL. (This non-URL state might also need migration support.)
-1. Short URLs are not automatically deleted when the target (say dashboard) is deleted. (#10450)
-   1. __Could do:__ The URL Service will not provide such feature. Though the short
-      URLs will keep track of saved object references used in the params to
-      generate a short URL. Maybe those saved references could somehow be used
-      in the future to provide such facility.
+1. Short URLs are not automatically deleted when the target (say dashboard) is
+   deleted. (#10450)
+   1. __Could do:__ The URL Service will not provide such feature. Though the
+      short URLs will keep track of saved object references used in the params
+      to generate a short URL. Maybe those saved references could somehow be
+      used in the future to provide such facility.
       
       Currently, there are two possible avenues for deleting a short URL when
       the underlying dashboard is deleted:
@@ -168,17 +175,18 @@ the Short URL Service:
          dashboard. Once a dashboard is deleted, the Dashboard app also
          deletes all short URLs associated with that dashboard.
       1. Saved Objects Service could implement *cascading deletes*. Once a saved
-         object is deleted, the associated saved objects are also deleted (#71453).
+         object is deleted, the associated saved objects are also deleted
+         (#71453).
 1. Add additional metadata to each short URL.
    1. __Could do:__ Each short URL already keeps a counter of how often it was
-      resolved, we could also keep track of a timestamp when it was last resolved,
-      and have an ability for users to give a title to each short URL.
+      resolved, we could also keep track of a timestamp when it was last
+      resolved, and have an ability for users to give a title to each short URL.
 1. Short URLs don't have a management UI.
-   1. __Won't do:__ We will not create a dedicated UI for managing short URLs.
-      We could improve how short URLs saved objects are presented in saved object
-      management UI.
+   1. __Will NOT do:__ We will not create a dedicated UI for managing short
+      URLs. We could improve how short URLs saved objects are presented in saved
+      object management UI.
 1. Short URLs can't be created by read-only users (#18006).
-   1. __Won't do:__ Currently short URLs are stored as saved objects of type
+   1. __Will NOT do:__ Currently short URLs are stored as saved objects of type
       `url`, we would like to keep it that way and benefit from saved object
       facilities like references, migrations, authorization etc.. The consensus
       is that we will not allow anonymous users to create short URLs. We want to
@@ -205,24 +213,24 @@ the URL Generator Service:
 
 ## Limitations of the architecture
 
-One major reason we want to "refresh" the Short URL Service and the URL Generator
-Service is their architecture.
+One major reason we want to "refresh" the Short URL Service and the URL
+Generator Service is their architecture.
 
 Currently, the Short URL Service is implemented on
 top of `url` type saved object on the server-side. However, it only exposes the
-HTTP endpoints, it does not expose any API on the server for the server-side plugins
-to consume; on the client-side there is no plugin API either, developers need
-to manually execute HTTP requests. 
+HTTP endpoints, it does not expose any API on the server for the server-side
+plugins to consume; on the client-side there is no plugin API either, developers
+need to manually execute HTTP requests. 
 
 The URL Generator Service is only available on the client-side, there is no way
-to use it on the server-side, yet we already have use cases (for example ML team)
-where a server-side plugin wants to use a URL generator.
+to use it on the server-side, yet we already have use cases (for example ML
+team) where a server-side plugin wants to use a URL generator.
 
 ![Currenct Short URL Service and URL Generator Service architecture](../images/url_service/old_architecture.png)
 
-The current architecture does not allow both service to be conveniently used, also
-as they are implemented in different locations, they are disjointed&mdash;we cannot
-create a short URL using an URL generator.
+The current architecture does not allow both service to be conveniently used,
+also as they are implemented in different locations, they are disjointed&mdash;
+we cannot create a short URL using an URL generator.
 
 
 # Detailed design
@@ -264,6 +272,7 @@ interface IUrlGeneratorClient {
   register<S>(urlGenerator: UrlGeneratorDefinition<S>): UrlGenerator;
   get<S>(id: string): UrlGenerator<S>;
 }
+
 interface UrlGeneratorDefinition<State> {
   id: string;
   createUrl: (state: State) => Promise<string>;
@@ -307,31 +316,87 @@ interface IShortUrlClient {
    * Fetch short URL.
    */
   get(slug: string): Promise<{ slug: string; shortUrl: object; url: URL }>;
+
+  /**
+   * Same as `get()` but it also increments the "view" counter and the
+   * "last view" timestamp of this short URL.
+   */
+  resolve(slug: string): Promise<{ slug: string; shortUrl: object; url: URL }>;
 }
 ```
 
+The above `IShortUrlClient` interface is a common interface which will be the
+same on the server and browser. However, the server and browser might add extra
+utility methods for convenience.
+
+
+## HTTP endpoints
+
+
+### Short URL CRUD+ HTTP endpoints
+
+- `POST /api/short_url` &mdash; endpoint for creating new short URLs.
+- `GET /api/short_url/<slug>` &mdash; endpoint for retrieving information about
+  an existing short URL.
+- `DELETE /api/short_url/<slug>` &mdash; endpoint for deleting an existing short
+  URL.
+- `POST /api/short_url/<slug>` &mdash; endpoint for updating information about
+  an existing short URL.
+- `GET|POST /api/short_url/<slug>/_resolve`
+- `GET|POST /api/short_url/<slug>/_redirect`
+
+
+### Other URL Service HTTP endpoints
+
+- `POST /api/url/_redirect`
+- `GET|POST /go/<slug>` &mdash; a very short alias for redirecting short URLs.
+  Internally it will work similar to `POST /api/share/url/<slug>/_redirect`
+  endpoint.
+
+
+### Legacy endpoints
+
+- `GET|POST /goto/<slug>` &mdash; legacy endpoint for redirecting short URLs to
+  long URLs. We will keep this endpoint, it will be just an alias for
+  `GET|POST /go/<slug>`.
+- `GET /api/short_url/<slug>` &mdash; ...................... legacy endpoint for retrieving information
+  about a single short URL. We will remove this endpoint. Alternatively, we can
+  deprecate this endpoint and maintain it until 8.0 major release.
+- `POST /api/shorten_url` &mdash; legacy endpoints for creating a new short URL.
+  We will remove this endpoints. Alternatively, we can deprecate this endpoint
+  and maintain it until 8.0 major release.
+
+
+### The "redirect" endpoint
+
+
+--- HOW will URL generator state will be serialized to short URL?..??????
 
 # Drawbacks
 
 Why should we *not* do this?
 
-- Implementation cost will be few weeks, but the code complexity and quality will improve.
-- Cost of migrating existing Kibana plugins to use the new API.
+- Implementation cost will be few weeks, but the code complexity and quality
+  will improve.
+- There is cost of migrating existing Kibana plugins to use the new API.
 
 
 # Alternatives
 
-[What other designs have been considered? What is the impact of not doing this?]
+We haven't considered other design alternatives.
+
+The impact of not doing this change is essentially extending technical debt. 
 
 
 # Adoption strategy
 
-Is this a breaking change? It is a breaking change in the sense that the API will
-change. However, all the existing use cases will be supported. When implementing
-this we will also adjust all Kibana code to use the new API. From the perspective
-of the developers using the existing URL services nothing will change, they will
-simply need to review a PR which stops using the URL Generator Service and uses
-the combined URL Service instead, which will provide a superset of features.
+Is this a breaking change? It is a breaking change in the sense that the API
+will change. However, all the existing use cases will be supported. When
+implementing this we will also adjust all Kibana code to use the new API. From
+the perspective of the developers when using the existing URL services nothing
+will change, they will simply need to review a PR which stops using the URL
+Generator Service and uses the combined URL Service instead, which will provide
+a superset of features.
 
 Alternatively, we can deprecate the URL Generator Service and maintain it for
 few minor releases.
@@ -339,8 +404,8 @@ few minor releases.
 
 # How we teach this
 
-For the existing short URL and URL generator functionality there is not much to
+For the existing short URL and URL generator functionality there is nothing to
 teach, as they will continue working with a largely similar API.
 
-Everything in the new URL Service will have JSDoc comments and good documentation
-on or website.
+Everything else in the new URL Service will have JSDoc comments and good
+documentation on or website.
