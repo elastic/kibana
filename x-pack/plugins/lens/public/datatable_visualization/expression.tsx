@@ -18,7 +18,8 @@ import {
   ExpressionRenderDefinition,
 } from 'src/plugins/expressions';
 import { CustomPaletteState, PaletteOutput } from 'src/plugins/charts/common';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { getSortingCriteria } from './sorting';
 
 import { DatatableComponent } from './components/table_basic';
@@ -195,6 +196,8 @@ export interface CustomPaletteParams {
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;
   getType: Promise<(name: string) => IAggType>;
+  paletteService: PaletteRegistry;
+  uiSettings: IUiSettingsClient;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -245,8 +248,10 @@ export const getDatatableRenderer = (dependencies: {
           formatFactory={dependencies.formatFactory}
           dispatchEvent={handlers.event}
           renderMode={handlers.getRenderMode()}
+          paletteService={dependencies.paletteService}
           getType={resolvedGetType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+          uiSettings={dependencies.uiSettings}
         />
       </I18nProvider>,
       domNode,

@@ -46,6 +46,8 @@ export class DatatableVisualization {
           getType: core
             .getStartServices()
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
+          paletteService: palettes,
+          uiSettings: core.uiSettings,
         })
       );
       return getDatatableVisualization({ paletteService: palettes });

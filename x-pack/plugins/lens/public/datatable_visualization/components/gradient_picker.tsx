@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import {
   EuiFormRow,
@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from '../../shared_components';
 import { CustomPaletteParams } from '../expression';
+import { useDebounceWithOptions } from '../../indexpattern_datasource/operations/definitions/helpers';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -35,7 +36,7 @@ export const defaultParams: RequiredParamTypes = {
   rangeType: 'auto',
   rangeMin: DEFAULT_MIN_STOP,
   rangeMax: DEFAULT_MAX_STOP,
-  progression: 'stepped',
+  progression: 'fixed',
   stops: [],
   steps: DEFAULT_COLOR_STEPS,
 };
@@ -116,12 +117,36 @@ export function CustomizablePalette({
   activePalette: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
 }) {
+  const [minLocalValue, setMinLocalValue] = useState<string>(
+    '' + (activePalette.params?.rangeMin ?? DEFAULT_MIN_STOP)
+  );
+
+  const [maxLocalValue, setMaxLocalValue] = useState<string>(
+    '' + (activePalette.params?.rangeMax ?? DEFAULT_MAX_STOP)
+  );
+
   const { colorStops } = applyPaletteParams(palettes, activePalette);
   const rangeType = activePalette.params?.rangeType ?? defaultParams.rangeType;
   const isAutoRange = rangeType === 'auto';
-  const minValueStop = activePalette.params?.rangeMin ?? DEFAULT_MIN_STOP;
-  const maxValueStop = activePalette.params?.rangeMax ?? DEFAULT_MAX_STOP;
-  const isMaxMinValid = !isAutoRange && minValueStop < maxValueStop;
+  const isMaxMinValid = Number(minLocalValue) < Number(maxLocalValue);
+  const progressionType = activePalette.params?.progression ?? defaultParams.progression;
+
+  useDebounceWithOptions(
+    () => {
+      if (!isAutoRange) {
+        setPalette(
+          mergePaletteParams(activePalette, {
+            rangeMin: Number(minLocalValue),
+            rangeMax: Number(maxLocalValue),
+          })
+        );
+      }
+    },
+    { skipFirstRender: true },
+    256,
+    [minLocalValue, maxLocalValue]
+  );
+
   return (
     <>
       <PalettePicker
@@ -138,6 +163,10 @@ export function CustomizablePalette({
             ...newPalette,
             params: {
               ...newParams,
+              progression:
+                newPalette.name !== 'custom' && newParams.progression === 'stepped'
+                  ? 'fixed'
+                  : newParams.progression,
               stops: getPaletteColors(
                 palettes,
                 newParams,
@@ -237,16 +266,9 @@ export function CustomizablePalette({
             }
           >
             <EuiFieldNumber
-              value={minValueStop}
+              value={minLocalValue}
               onChange={({ target }) => {
-                if (isAutoRange) {
-                  return;
-                }
-                setPalette(
-                  mergePaletteParams(activePalette, {
-                    rangeMin: Number(target.value),
-                  })
-                );
+                setMinLocalValue(target.value);
               }}
               append={rangeType === 'percent' ? '%' : undefined}
               isInvalid={!isMaxMinValid}
@@ -267,16 +289,9 @@ export function CustomizablePalette({
             }
           >
             <EuiFieldNumber
-              value={maxValueStop}
+              value={maxLocalValue}
               onChange={({ target }) => {
-                if (isAutoRange) {
-                  return;
-                }
-                setPalette(
-                  mergePaletteParams(activePalette, {
-                    rangeMax: Number(target.value),
-                  })
-                );
+                setMaxLocalValue(target.value);
               }}
               append={rangeType === 'percent' ? '%' : undefined}
               isInvalid={!isMaxMinValid}
@@ -306,9 +321,67 @@ export function CustomizablePalette({
             colorStops={colorStops || []}
             min={0}
             max={100}
+            stopType={progressionType === 'stepped' ? 'gradient' : progressionType}
           />
         </EuiFormRow>
-      ) : (
+      ) : null}
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
+          defaultMessage: 'Color progression',
+        })}
+        display="columnCompressed"
+      >
+        <EuiButtonGroup
+          isFullWidth
+          legend={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
+            defaultMessage: 'Color progression',
+          })}
+          data-test-subj="lnsDatatable_dynamicColoring_progression_groups"
+          name="dynamicColoringProgressionValue"
+          buttonSize="compressed"
+          options={[
+            {
+              id: `${idPrefix}gradient`,
+              label: i18n.translate('xpack.lens.table.dynamicColoring.progression.gradient', {
+                defaultMessage: 'Gradient',
+              }),
+              'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_gradient',
+            },
+            {
+              id: `${idPrefix}fixed`,
+              label: i18n.translate('xpack.lens.table.dynamicColoring.progression.fixed', {
+                defaultMessage: 'Fixed',
+              }),
+              'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_fixed',
+            },
+          ].concat(
+            activePalette?.params?.name === 'custom'
+              ? [
+                  {
+                    id: `${idPrefix}stepped`,
+                    label: i18n.translate('xpack.lens.table.dynamicColoring.progression.stepped', {
+                      defaultMessage: 'Stepped',
+                    }),
+                    'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_stepped',
+                  },
+                ]
+              : []
+          )}
+          idSelected={`${idPrefix}${progressionType}`}
+          onChange={(id) => {
+            const newProgressionType = id.replace(
+              idPrefix,
+              ''
+            ) as RequiredParamTypes['progression'];
+            setPalette(
+              mergePaletteParams(activePalette, {
+                progression: newProgressionType,
+              })
+            );
+          }}
+        />
+      </EuiFormRow>
+      {activePalette?.params?.name !== 'custom' && progressionType !== 'gradient' && (
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
             defaultMessage: 'Color stops',
@@ -340,59 +413,6 @@ export function CustomizablePalette({
           />
         </EuiFormRow>
       )}
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
-          defaultMessage: 'Color progression',
-        })}
-        display="columnCompressed"
-      >
-        <EuiButtonGroup
-          isFullWidth
-          legend={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
-            defaultMessage: 'Color progression',
-          })}
-          data-test-subj="lnsDatatable_dynamicColoring_progression_groups"
-          name="dynamicColoringProgressionValue"
-          buttonSize="compressed"
-          options={[
-            {
-              id: `${idPrefix}gradient`,
-              label: i18n.translate('xpack.lens.table.dynamicColoring.progression.gradient', {
-                defaultMessage: 'Gradient',
-              }),
-              'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_gradient',
-            },
-            {
-              id: `${idPrefix}stepped`,
-              label: i18n.translate('xpack.lens.table.dynamicColoring.progression.stepped', {
-                defaultMessage: 'Stepped',
-              }),
-              'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_stepped',
-            },
-            {
-              id: `${idPrefix}fixed`,
-              label: i18n.translate('xpack.lens.table.dynamicColoring.progression.fixed', {
-                defaultMessage: 'Fixed',
-              }),
-              'data-test-subj': 'lnsDatatable_dynamicColoring_progression_groups_fixed',
-            },
-          ]}
-          idSelected={`${idPrefix}${
-            activePalette.params?.progression ?? defaultParams.progression
-          }`}
-          onChange={(id) => {
-            const newProgressionType = id.replace(
-              idPrefix,
-              ''
-            ) as RequiredParamTypes['progression'];
-            setPalette(
-              mergePaletteParams(activePalette, {
-                progression: newProgressionType,
-              })
-            );
-          }}
-        />
-      </EuiFormRow>
       <EuiFormRow label="Reverse colors" display="columnCompressedSwitch">
         <EuiSwitch
           checked={Boolean(activePalette.params?.reverse ?? defaultParams.reverse)}

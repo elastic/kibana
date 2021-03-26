@@ -69,6 +69,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     sortingDirection: props.args.sortingDirection,
   });
   const [firstLocalTable, updateTable] = useState(firstTable);
+  const [currentPalette] = useState(props.paletteService.get('custom'));
 
   useDeepCompareEffect(() => {
     setColumnConfig({
@@ -248,6 +249,24 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     return minMax;
   }, [firstLocalTable, isNumericMap, columnConfig]);
 
+  const gradientHelpers: Record<string, (value: number) => string> = useMemo(() => {
+    const fnsMap: Record<string, (value: number) => string> = {};
+    columnConfig.columns
+      .filter(({ columnId, colorMode }) => minMaxByColumnId[columnId] && colorMode !== 'none')
+      .forEach(({ columnId, palette }) => {
+        const minValue = palette?.params?.rangeMin ?? minMaxByColumnId[columnId].min;
+        const maxValue = palette?.params?.rangeMax ?? minMaxByColumnId[columnId].max;
+        const fn = currentPalette.getGradientColorHelper?.(minMaxByColumnId[columnId], {
+          colors: palette?.params?.colors,
+          stops: palette?.params?.stops.length ? palette?.params?.stops : [minValue, maxValue],
+        });
+        if (fn) {
+          fnsMap[columnId] = fn;
+        }
+      });
+    return fnsMap;
+  }, [minMaxByColumnId, columnConfig, currentPalette]);
+
   const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {
       return [];
@@ -284,10 +303,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     ];
   }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
 
-  const renderCellValue = useMemo(() => createGridCell(formatters, columnConfig, DataContext), [
-    formatters,
-    columnConfig,
-  ]);
+  const renderCellValue = useMemo(
+    () => createGridCell(formatters, columnConfig, DataContext, props.uiSettings),
+    [formatters, columnConfig, props.uiSettings]
+  );
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns: () => {} }), [
     visibleColumns,
@@ -320,6 +339,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
           alignments,
           minMaxByColumnId,
+          gradientHelpers,
         }}
       >
         <EuiDataGrid
