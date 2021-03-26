@@ -15,9 +15,6 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
   namespaceType: 'single',
   mappings: {
     properties: {
-      class: {
-        type: 'keyword',
-      },
       created_at: {
         type: 'date',
       },
@@ -58,6 +55,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
         },
       },
       closure_type: {
+        type: 'keyword',
+      },
+      scope: {
         type: 'keyword',
       },
       updated_at: {

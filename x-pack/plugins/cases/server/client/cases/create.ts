@@ -72,7 +72,7 @@ export const create = async ({
 
   try {
     try {
-      await auth.ensureAuthorized(query.class, WriteOperations.Create);
+      await auth.ensureAuthorized(query.scope, WriteOperations.Create);
     } catch (error) {
       // TODO: log error using audit logger
       throw error;

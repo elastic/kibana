@@ -11,7 +11,7 @@ import { KueryNode } from '../../../../../src/plugins/data/server';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { GetSpaceFn, ReadOperations, WriteOperations } from './types';
-import { getClassFilter } from './utils';
+import { getScopesFilter } from './utils';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -20,7 +20,7 @@ import { getClassFilter } from './utils';
 export class Authorization {
   private readonly request: KibanaRequest;
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
-  private readonly featureCaseClasses: Set<string>;
+  private readonly featureCaseScopes: Set<string>;
   private readonly isAuthEnabled: boolean;
   // TODO: create this
   // private readonly auditLogger: AuthorizationAuditLogger;
@@ -28,17 +28,17 @@ export class Authorization {
   private constructor({
     request,
     securityAuth,
-    caseClasses,
+    caseScopes,
     isAuthEnabled,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
-    caseClasses: Set<string>;
+    caseScopes: Set<string>;
     isAuthEnabled: boolean;
   }) {
     this.request = request;
     this.securityAuth = securityAuth;
-    this.featureCaseClasses = caseClasses;
+    this.featureCaseScopes = caseScopes;
     this.isAuthEnabled = isAuthEnabled;
   }
 
@@ -59,58 +59,58 @@ export class Authorization {
     isAuthEnabled: boolean;
   }): Promise<Authorization> {
     // Since we need to do async operations, this static method handles that before creating the Auth class
-    let caseClasses: Set<string>;
+    let caseScopes: Set<string>;
     try {
       const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
 
-      caseClasses = new Set(
+      caseScopes = new Set(
         features
           .getKibanaFeatures()
-          // get all the features' cases classes that aren't disabled
+          // get all the features' cases scopes that aren't disabled
           .filter(({ id }) => !disabledFeatures.has(id))
           .flatMap((feature) => feature.cases ?? [])
       );
     } catch (error) {
-      caseClasses = new Set<string>();
+      caseScopes = new Set<string>();
     }
 
-    return new Authorization({ request, securityAuth, caseClasses, isAuthEnabled });
+    return new Authorization({ request, securityAuth, caseScopes, isAuthEnabled });
   }
 
   private shouldCheckAuthorization(): boolean {
     return this.securityAuth?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async ensureAuthorized(className: string, operation: ReadOperations | WriteOperations) {
+  public async ensureAuthorized(scope: string, operation: ReadOperations | WriteOperations) {
     // TODO: remove
     if (!this.isAuthEnabled) {
       return;
     }
 
     const { securityAuth } = this;
-    const isAvailableClass = this.featureCaseClasses.has(className);
+    const isScopeAvailable = this.featureCaseScopes.has(scope);
 
     // TODO: throw if the request is not authorized
     if (securityAuth && this.shouldCheckAuthorization()) {
       // TODO: implement ensure logic
-      const requiredPrivileges: string[] = [securityAuth.actions.cases.get(className, operation)];
+      const requiredPrivileges: string[] = [securityAuth.actions.cases.get(scope, operation)];
 
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username, privileges } = await checkPrivileges({
         kibana: requiredPrivileges,
       });
 
-      if (!isAvailableClass) {
-        // TODO: throw if any of the class are not available
+      if (!isScopeAvailable) {
+        // TODO: throw if any of the scope are not available
         /**
          * Under most circumstances this would have been caught by `checkPrivileges` as
-         * a user can't have Privileges to an unknown class, but super users
-         * don't actually get "privilege checked" so the made up class *will* return
+         * a user can't have Privileges to an unknown scope, but super users
+         * don't actually get "privilege checked" so the made up scope *will* return
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
         // TODO: audit log using `username`
-        throw Boom.forbidden('User does not have permissions for this class');
+        throw Boom.forbidden('User does not have permissions for this scope');
       }
 
       if (hasAllRequested) {
@@ -129,11 +129,11 @@ export class Authorization {
 
         // TODO: audit log
         // TODO: User unauthorized. throw an error. authorizedPrivileges & unauthorizedPrivilages are needed for logging.
-        throw Boom.forbidden('Not authorized for this class');
+        throw Boom.forbidden('Not authorized for this scope');
       }
-    } else if (!isAvailableClass) {
+    } else if (!isScopeAvailable) {
       // TODO: throw an error
-      throw Boom.forbidden('Security is disabled but no class was found');
+      throw Boom.forbidden('Security is disabled but no scope was found');
     }
 
     // else security is disabled so let the operation proceed
@@ -143,46 +143,46 @@ export class Authorization {
     savedObjectType: string
   ): Promise<{
     filter?: KueryNode;
-    ensureSavedObjectIsAuthorized: (className: string) => void;
+    ensureSavedObjectIsAuthorized: (scope: string) => void;
   }> {
     const { securityAuth } = this;
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const { authorizedClassNames } = await this.getAuthorizedClassNames([ReadOperations.Find]);
+      const { authorizedScopes } = await this.getAuthorizedScopes([ReadOperations.Find]);
 
-      if (!authorizedClassNames.length) {
+      if (!authorizedScopes.length) {
         // TODO: Better error message, log error
-        throw Boom.forbidden('Not authorized for this class');
+        throw Boom.forbidden('Not authorized for this scope');
       }
 
       return {
-        filter: getClassFilter(savedObjectType, authorizedClassNames),
-        ensureSavedObjectIsAuthorized: (className: string) => {
-          if (!authorizedClassNames.includes(className)) {
+        filter: getScopesFilter(savedObjectType, authorizedScopes),
+        ensureSavedObjectIsAuthorized: (scope: string) => {
+          if (!authorizedScopes.includes(scope)) {
             // TODO: log error
-            throw Boom.forbidden('Not authorized for this class');
+            throw Boom.forbidden('Not authorized for this scope');
           }
         },
       };
     }
 
-    return { ensureSavedObjectIsAuthorized: (className: string) => {} };
+    return { ensureSavedObjectIsAuthorized: (scope: string) => {} };
   }
 
-  private async getAuthorizedClassNames(
+  private async getAuthorizedScopes(
     operations: Array<ReadOperations | WriteOperations>
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
-    authorizedClassNames: string[];
+    authorizedScopes: string[];
   }> {
-    const { securityAuth, featureCaseClasses } = this;
+    const { securityAuth, featureCaseScopes } = this;
     if (securityAuth && this.shouldCheckAuthorization()) {
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
       const requiredPrivileges = new Map<string, [string]>();
 
-      for (const className of featureCaseClasses) {
+      for (const scope of featureCaseScopes) {
         for (const operation of operations) {
-          requiredPrivileges.set(securityAuth.actions.cases.get(className, operation), [className]);
+          requiredPrivileges.set(securityAuth.actions.cases.get(scope, operation), [scope]);
         }
       }
 
@@ -193,24 +193,21 @@ export class Authorization {
       return {
         hasAllRequested,
         username,
-        authorizedClassNames: hasAllRequested
-          ? Array.from(featureCaseClasses)
-          : privileges.kibana.reduce<string[]>(
-              (authorizedClassNames, { authorized, privilege }) => {
-                if (authorized && requiredPrivileges.has(privilege)) {
-                  const [className] = requiredPrivileges.get(privilege)!;
-                  authorizedClassNames.push(className);
-                }
+        authorizedScopes: hasAllRequested
+          ? Array.from(featureCaseScopes)
+          : privileges.kibana.reduce<string[]>((authorizedScopes, { authorized, privilege }) => {
+              if (authorized && requiredPrivileges.has(privilege)) {
+                const [scope] = requiredPrivileges.get(privilege)!;
+                authorizedScopes.push(scope);
+              }
 
-                return authorizedClassNames;
-              },
-              []
-            ),
+              return authorizedScopes;
+            }, []),
       };
     } else {
       return {
         hasAllRequested: true,
-        authorizedClassNames: Array.from(featureCaseClasses),
+        authorizedScopes: Array.from(featureCaseScopes),
       };
     }
   }

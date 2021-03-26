@@ -76,4 +76,4 @@ export const MAX_GENERATED_ALERTS_PER_SUB_CASE = MAX_ALERTS_PER_SUB_CASE / DEFAU
  * This must be the same value that the security solution plugin uses to define the case kind when it registers the
  * feature for the 7.13 migration only.
  */
-export const SECURITY_SOLUTION_CONSUMER = 'securitySolution';
+export const SECURITY_SOLUTION_SCOPE = 'securitySolution';
