@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { EuiButtonTo, EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
