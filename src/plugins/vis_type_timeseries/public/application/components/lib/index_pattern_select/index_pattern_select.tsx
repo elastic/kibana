@@ -8,9 +8,10 @@
 
 import React, { useState, useContext, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, htmlIdGenerator } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { getDataStart } from '../../../../services';
+import { EuiFormRow, EuiText, EuiLink, htmlIdGenerator } from '@elastic/eui';
+import { getCoreStart, getDataStart } from '../../../../services';
 import { PanelModelContext } from '../../../contexts/panel_model_context';
 
 import {
@@ -20,7 +21,6 @@ import {
 
 import { FieldTextSelect } from './field_text_select';
 import { ComboBoxSelect } from './combo_box_select';
-import { MigrationPopover } from './migrate_popover';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
 
@@ -88,6 +88,14 @@ export const IndexPatternSelect = ({
     [onChange, indexPatternName]
   );
 
+  const navigateToCreateIndexPatternPage = useCallback(() => {
+    const coreStart = getCoreStart();
+
+    coreStart.application.navigateToApp('management', {
+      path: `/kibana/indexPatterns/create?name=${fetchedIndex!.indexPatternString ?? ''}`,
+    });
+  }, [fetchedIndex]);
+
   useEffect(() => {
     async function fetchIndex() {
       const { indexPatterns } = getDataStart();
@@ -119,13 +127,17 @@ export const IndexPatternSelect = ({
       labelAppend={
         value &&
         allowIndexSwitchingMode &&
-        isStringTypeIndexPattern(value) && (
-          <MigrationPopover
-            onModeChange={onModeChange}
-            fetchedIndex={fetchedIndex}
-            useKibanaIndices={useKibanaIndices}
-          />
-        )
+        isStringTypeIndexPattern(value) &&
+        !fetchedIndex.indexPattern ? (
+          <EuiLink onClick={navigateToCreateIndexPatternPage}>
+            <EuiText size="xs">
+              <FormattedMessage
+                id="visTypeTimeseries.indexPatternSelect.createIndexPatternText"
+                defaultMessage="Create index pattern"
+              />
+            </EuiText>
+          </EuiLink>
+        ) : null
       }
     >
       <Component
