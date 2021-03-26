@@ -17,8 +17,8 @@ import { ColumnarPage } from '../../../components/page';
 
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
-import { Source } from '../../../containers/source';
+import { ViewSourceConfigurationButton } from '../../../components/source_configuration/view_source_configuration_button';
+import { Source } from '../../../containers/metrics_source';
 import { useTrackPageview } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { Layout } from './components/layout';
