@@ -55,6 +55,7 @@ import {
   getSuggestion,
   getPossibleFunctions,
   getSignatureHelp,
+  getHover,
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 
@@ -389,6 +390,30 @@ function FormulaEditor({
     [operationDefinitionMap]
   );
 
+  const provideHover = useCallback(
+    async (
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+      token: monaco.CancellationToken
+    ) => {
+      const innerText = model.getValue();
+      const textRange = model.getFullModelRange();
+
+      const lengthAfterPosition = model.getValueLengthInRange({
+        startLineNumber: position.lineNumber,
+        startColumn: position.column,
+        endLineNumber: textRange.endLineNumber,
+        endColumn: textRange.endColumn,
+      });
+      return getHover(
+        model.getValue(),
+        innerText.length - lengthAfterPosition,
+        operationDefinitionMap
+      );
+    },
+    [operationDefinitionMap]
+  );
+
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
     value: text ?? '',
@@ -412,18 +437,22 @@ function FormulaEditor({
   useEffect(() => {
     // Because the monaco model is owned by Lens, we need to manually attach and remove handlers
     const { dispose: dispose1 } = monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
-      triggerCharacters: ['.', ',', '(', '='],
+      triggerCharacters: ['.', ',', '(', '=', ' '],
       provideCompletionItems,
     });
     const { dispose: dispose2 } = monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {
       signatureHelpTriggerCharacters: ['(', ',', '='],
       provideSignatureHelp,
     });
+    const { dispose: dispose3 } = monaco.languages.registerHoverProvider(LANGUAGE_ID, {
+      provideHover,
+    });
     return () => {
       dispose1();
       dispose2();
+      dispose3();
     };
-  }, [provideCompletionItems, provideSignatureHelp]);
+  }, [provideCompletionItems, provideSignatureHelp, provideHover]);
 
   // The Monaco editor will lazily load Monaco, which takes a render cycle to trigger. This can cause differences
   // in the behavior of Monaco when it's first loaded and then reloaded.

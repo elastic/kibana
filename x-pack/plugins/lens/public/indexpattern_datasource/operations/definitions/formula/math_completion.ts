@@ -10,7 +10,7 @@ import { monaco } from '@kbn/monaco';
 
 import { parse, TinymathLocation, TinymathAST, TinymathFunction } from '@kbn/tinymath';
 import { IndexPattern } from '../../../types';
-import { getAvailableOperationsByMetadata } from '../../operations';
+import { memoizedGetAvailableOperationsByMetadata } from '../../operations';
 import { tinymathFunctions } from './util';
 import type { GenericOperationDefinition } from '..';
 
@@ -86,7 +86,7 @@ export async function suggest(
       );
     }
     if (tokenInfo && word) {
-      return getFunctionSuggestions(word, indexPattern);
+      return getFunctionSuggestions(word, indexPattern, operationDefinitionMap);
     }
   } catch (e) {
     // Fail silently
@@ -94,8 +94,11 @@ export async function suggest(
   return { list: [], type: SUGGESTION_TYPE.FIELD };
 }
 
-export function getPossibleFunctions(indexPattern: IndexPattern) {
-  const available = getAvailableOperationsByMetadata(indexPattern);
+export function getPossibleFunctions(
+  indexPattern: IndexPattern,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
+  const available = memoizedGetAvailableOperationsByMetadata(indexPattern, operationDefinitionMap);
   const possibleOperationNames: string[] = [];
   available.forEach((a) => {
     if (a.operationMetaData.dataType === 'number' && !a.operationMetaData.isBucketed) {
@@ -108,10 +111,16 @@ export function getPossibleFunctions(indexPattern: IndexPattern) {
   return [...uniq(possibleOperationNames), ...Object.keys(tinymathFunctions)];
 }
 
-function getFunctionSuggestions(word: monaco.editor.IWordAtPosition, indexPattern: IndexPattern) {
+function getFunctionSuggestions(
+  word: monaco.editor.IWordAtPosition,
+  indexPattern: IndexPattern,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+) {
   return {
     list: uniq(
-      getPossibleFunctions(indexPattern).filter((func) => startsWith(func, word.word))
+      getPossibleFunctions(indexPattern, operationDefinitionMap).filter((func) =>
+        startsWith(func, word.word)
+      )
     ).map((func) => ({ label: func, type: 'operation' as const })),
     type: SUGGESTION_TYPE.FUNCTIONS,
   };
@@ -132,7 +141,7 @@ function getArgumentSuggestions(
   if (tinymathFunction) {
     if (tinymathFunction.positionalArguments[position]) {
       return {
-        list: uniq(getPossibleFunctions(indexPattern)).map((f) => ({
+        list: uniq(getPossibleFunctions(indexPattern, operationDefinitionMap)).map((f) => ({
           type: 'math' as const,
           label: f,
         })),
@@ -153,15 +162,32 @@ function getArgumentSuggestions(
     return { list: [], type: SUGGESTION_TYPE.FIELD };
   }
 
+  // TODO: Expand to all valid fields for the function
   if (operation.input === 'field' && position === 0) {
-    const fields = indexPattern.fields
-      .filter((field) => field.type === 'number')
-      .map((field) => field.name);
-    return { list: fields, type: SUGGESTION_TYPE.FIELD };
+    const available = memoizedGetAvailableOperationsByMetadata(
+      indexPattern,
+      operationDefinitionMap
+    );
+    const validOperation = available.find(
+      ({ operationMetaData }) =>
+        operationMetaData.dataType === 'number' && !operationMetaData.isBucketed
+    );
+    if (validOperation) {
+      const fields = validOperation.operations
+        .filter((op) => op.operationType === operation.type)
+        .map((op) => ('field' in op ? op.field : undefined))
+        .filter((field) => field);
+      return { list: fields, type: SUGGESTION_TYPE.FIELD };
+    } else {
+      return { list: [], type: SUGGESTION_TYPE.FIELD };
+    }
   }
 
   if (operation.input === 'fullReference') {
-    const available = getAvailableOperationsByMetadata(indexPattern);
+    const available = memoizedGetAvailableOperationsByMetadata(
+      indexPattern,
+      operationDefinitionMap
+    );
     const possibleOperationNames: string[] = [];
     available.forEach((a) => {
       if (
@@ -230,6 +256,8 @@ export function getSuggestion(
             label = `${label}(expression, ${def
               .operationParams!.map((p) => `${p.name}=${p.type}`)
               .join(', ')}`;
+          } else if (suggestion.label === 'count') {
+            label = `${label}()`;
           } else {
             label = `${label}(expression)`;
           }
@@ -244,7 +272,6 @@ export function getSuggestion(
       };
       kind = monaco.languages.CompletionItemKind.Field;
       label = `${label}=`;
-      insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
       detail = '';
 
       break;
@@ -301,7 +328,7 @@ export function getSignatureHelp(
         const def = operationDefinitionMap[name];
 
         const firstParam: monaco.languages.ParameterInformation | null =
-          def.type !== 'count'
+          name !== 'count'
             ? {
                 label:
                   def.input === 'field' ? 'field' : def.input === 'fullReference' ? 'function' : '',
@@ -314,7 +341,7 @@ export function getSignatureHelp(
                 {
                   label: `${name}(${
                     firstParam ? firstParam.label + ', ' : ''
-                  }${def.operationParams!.map((arg) => `${arg.name}=${arg.type}`)}`,
+                  }${def.operationParams!.map((arg) => `${arg.name}=${arg.type}`)})`,
                   parameters: [
                     ...(firstParam ? [firstParam] : []),
                     ...def.operationParams!.map((arg) => ({
@@ -350,4 +377,57 @@ export function getSignatureHelp(
     // do nothing
   }
   return { value: { signatures: [], activeParameter: 0, activeSignature: 0 }, dispose: () => {} };
+}
+
+export function getHover(
+  expression: string,
+  position: number,
+  operationDefinitionMap: Record<string, GenericOperationDefinition>
+): monaco.languages.Hover {
+  try {
+    const ast = parse(expression);
+
+    const tokenInfo = getInfoAtPosition(ast, position);
+
+    if (!tokenInfo || typeof tokenInfo.ast === 'number' || !('name' in tokenInfo.ast)) {
+      return { contents: [] };
+    }
+
+    const name = tokenInfo.ast.name;
+
+    if (tinymathFunctions[name]) {
+      const stringify = `${name}(${tinymathFunctions[name].positionalArguments
+        .map((arg) => arg.name)
+        .join(', ')})`;
+      return { contents: [{ value: stringify }] };
+    } else if (operationDefinitionMap[name]) {
+      const def = operationDefinitionMap[name];
+
+      const firstParam: monaco.languages.ParameterInformation | null =
+        name !== 'count'
+          ? {
+              label:
+                def.input === 'field' ? 'field' : def.input === 'fullReference' ? 'function' : '',
+            }
+          : null;
+      if ('operationParams' in def) {
+        return {
+          contents: [
+            {
+              value: `${name}(${
+                firstParam ? firstParam.label + ', ' : ''
+              }${def.operationParams!.map((arg) => `${arg.name}=${arg.type}`)})`,
+            },
+          ],
+        };
+      } else {
+        return {
+          contents: [{ value: `${name}(${firstParam ? firstParam.label : ''})` }],
+        };
+      }
+    }
+  } catch (e) {
+    // do nothing
+  }
+  return { contents: [] };
 }
