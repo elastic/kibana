@@ -8,7 +8,7 @@
 import { ActionVariable } from '../../../../alerting/common';
 import { AlertExecutorOptions } from '../../../../alerting/server';
 import { AlertSeverityLevel } from '../../../common';
-import { AlertCheck, AlertContext } from '../../types';
+import { AlertCheck } from '../../types';
 import { DefaultFieldMap } from '../defaults/field_map';
 
 type AlertInstanceFactory = AlertExecutorOptions<

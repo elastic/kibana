@@ -6,6 +6,7 @@
  */
 
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import { pickWithPatterns } from '../../rule_registry/server/rule_registry/field_map/pick_with_patterns';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -14,6 +15,7 @@ import {
 } from './lib/annotations/bootstrap_annotations';
 import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { uiSettings } from './ui_settings';
+import { ecsFieldMap } from '../../rule_registry/server/generated/ecs_field_map';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -54,14 +56,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       registry: plugins.ruleRegistry.create({
         namespace: 'observability',
         fieldMap: {
-          'host.hostname': {
-            type: 'keyword',
-            required: false,
-          },
-          'service.name': {
-            type: 'keyword',
-            required: false,
-          },
+          ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
         },
       }),
     };

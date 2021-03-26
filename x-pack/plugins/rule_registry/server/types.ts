@@ -9,7 +9,7 @@ import { ActionVariable, AlertTypeState } from '../../alerting/common';
 import { ActionGroup, AlertExecutorOptions } from '../../alerting/server';
 import { AlertSeverityLevel } from '../common';
 import { DefaultFieldMap } from './rule_registry/defaults/field_map';
-import { SchemaOf } from './rule_registry/field_map/schema_from_field_map';
+import { TypeOfFieldMap } from './rule_registry/field_map/runtime_type_from_fieldmap';
 import { FieldMap } from './rule_registry/types';
 
 enum ESFieldType {
@@ -47,7 +47,7 @@ export interface AlertCheck<TFieldMap extends FieldMap, TActionVariable extends 
   context: {
     [key in TActionVariable['name']]: any;
   };
-  fields: Omit<Partial<TypeOf<SchemaOf<TFieldMap>>>, keyof DefaultFieldMap>;
+  fields: Omit<Partial<TypeOfFieldMap<TFieldMap>>, keyof DefaultFieldMap>;
 }
 
 type TypeOfRuleParams<TRuleParams extends RuleParams> = TypeOf<TRuleParams>;
@@ -69,10 +69,10 @@ type RuleExecutorFunction<
   TRuleParams extends RuleParams,
   TActionVariable extends ActionVariable
 > = (
-  options: (PassthroughAlertExecutorOptions & {
+  options: PassthroughAlertExecutorOptions & {
     services: RuleExecutorServices<TFieldMap, TActionVariable>;
-  }) &
-    (TRuleParams extends RuleParams ? { params: TypeOfRuleParams<TRuleParams> } : {})
+    params: TypeOfRuleParams<TRuleParams>;
+  }
 ) => Promise<Record<string, any>>;
 
 export interface RuleType {

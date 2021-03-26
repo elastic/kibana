@@ -9,3 +9,12 @@ export enum AlertSeverityLevel {
   warning = 'warning',
   critical = 'critical',
 }
+
+const alertSeverityLevelValues = {
+  [AlertSeverityLevel.warning]: 70,
+  [AlertSeverityLevel.critical]: 90,
+};
+
+export function getAlertSeverityLevelValue(level: AlertSeverityLevel) {
+  return alertSeverityLevelValues[level];
+}

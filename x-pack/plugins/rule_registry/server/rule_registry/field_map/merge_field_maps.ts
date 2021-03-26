@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { isEqual } from 'lodash';
+import util from 'util';
 import { FieldMap } from '../types';
 
 export function mergeFieldMaps<T1 extends FieldMap, T2 extends FieldMap>(
@@ -30,16 +31,16 @@ export function mergeFieldMaps<T1 extends FieldMap, T2 extends FieldMap>(
         });
       });
 
-    if (first[name] && !isEqual(first[name], field)) {
+    if (first[name]) {
       conflicts.push({
-        fields: [field, first[name]],
+        [name]: [field, first[name]],
       });
     }
   });
 
   if (conflicts.length) {
     const err = new Error(`Could not merge mapping due to conflicts`);
-    Object.assign(err, { conflicts });
+    Object.assign(err, { conflicts: util.inspect(conflicts, { depth: null }) });
     throw err;
   }
 

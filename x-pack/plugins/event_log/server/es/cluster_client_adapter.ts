@@ -10,6 +10,7 @@ import { bufferTime, filter as rxFilter, switchMap } from 'rxjs/operators';
 import { reject, isUndefined } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from 'src/core/server';
+import util from 'util';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { FindOptionsType } from '../event_log_client';
 import { esKuery } from '../../../../../src/plugins/data/server';
@@ -87,8 +88,11 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     // Also, don't log here, we log the failure case in plugin startup
     // instead, otherwise we'd be spamming the log (if done here)
     if (!(await this.wait())) {
+      this.logger.debug(`Initialization failed, not indexing ${docs.length} documents`);
       return;
     }
+
+    this.logger.debug(`Indexing ${docs.length} documents`);
 
     const bulkBody: Array<Record<string, unknown>> = [];
 
@@ -101,7 +105,13 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
     try {
       const esClient = await this.elasticsearchClientPromise;
-      await esClient.bulk({ body: bulkBody });
+      const response = await esClient.bulk({ body: bulkBody });
+
+      if (response.body.errors) {
+        const error = new Error('Error writing some bulk events');
+        error.stack += '\n' + util.inspect(response.body.items, { depth: null });
+        this.logger.error(error);
+      }
     } catch (err) {
       this.logger.error(
         `error writing bulk events: "${err.message}"; docs: ${JSON.stringify(bulkBody)}`

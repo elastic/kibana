@@ -6,21 +6,26 @@
  */
 
 import { CoreSetup, Logger } from 'kibana/server';
-import { mapValues, omitBy, compact } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { omitBy, compact } from 'lodash';
 import { inspect } from 'util';
 import uuid from 'uuid';
-import { ESSearchRequest, ESSearchResponse } from '../../../../typings/elasticsearch';
-import { createReadySignal } from '../../../event_log/server/lib/ready_signal';
-import { ClusterClientAdapter } from '../../../event_log/server/es/cluster_client_adapter';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isLeft } from 'fp-ts/lib/Either';
+import { ESSearchRequest, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import { createReadySignal, ClusterClientAdapter } from '../../../event_log/server';
 import { FieldMap, ILMPolicy } from './types';
 import { RegisterRuleType, RuleState, RuleAlertState } from '../types';
 import { mergeFieldMaps } from './field_map/merge_field_maps';
-import { schemaFromFieldMap, SchemaOf } from './field_map/schema_from_field_map';
+import {
+  FieldMapType,
+  runtimeTypeFromFieldMap,
+  TypeOfFieldMap,
+} from './field_map/runtime_type_from_fieldmap';
 import { mappingFromFieldMap } from './field_map/mapping_from_field_map';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../alerting/server';
 import { createCheckService } from './check_service';
-import { AlertSeverityLevel } from '../../common';
+import { AlertSeverityLevel, getAlertSeverityLevelValue } from '../../common';
+import { DefaultFieldMap } from './defaults/field_map';
 
 interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   kibanaIndex: string;
@@ -31,31 +36,38 @@ interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   fieldMap: TFieldMap;
   ilmPolicy: ILMPolicy;
   alertingPluginSetupContract: AlertingPluginSetupContract;
-  parent?: RuleRegistry<FieldMap>;
+  parent?: RuleRegistry<DefaultFieldMap>;
 }
 
 export class RuleRegistry<TFieldMap extends FieldMap> {
-  private readonly esAdapter: ClusterClientAdapter;
-  private readonly docSchema: SchemaOf<TFieldMap>;
-  private readonly children: Array<RuleRegistry<TFieldMap>> = [];
+  private readonly esAdapter: ClusterClientAdapter<{
+    body: TypeOfFieldMap<DefaultFieldMap>;
+    index: string;
+  }>;
+  private readonly docRt: FieldMapType<DefaultFieldMap>;
+  private readonly children: Array<RuleRegistry<DefaultFieldMap>> = [];
 
-  constructor(private readonly options: RuleRegistryOptions<TFieldMap>) {
+  constructor(private readonly options: RuleRegistryOptions<DefaultFieldMap>) {
     const { logger, core } = options;
 
     const { wait, signal } = createReadySignal<boolean>();
 
-    this.esAdapter = new ClusterClientAdapter({
+    this.esAdapter = new ClusterClientAdapter<{
+      body: TypeOfFieldMap<DefaultFieldMap>;
+      index: string;
+    }>({
       wait,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
-      logger,
+      logger: logger.get('esAdapter'),
     });
 
-    this.docSchema = schemaFromFieldMap(options.fieldMap);
+    this.docRt = runtimeTypeFromFieldMap(options.fieldMap);
 
     this.initialize()
       .then(() => {
+        this.options.logger.debug('Bootstrapped alerts index');
         signal(true);
       })
       .catch((err) => {
@@ -97,6 +109,8 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
           auto_expand_replicas: '0-1',
           'index.lifecycle.name': policyName,
           'index.lifecycle.rollover_alias': indexAliasName,
+          'sort.field': '@timestamp',
+          'sort.order': 'desc',
         },
         mappings: mappingFromFieldMap(this.options.fieldMap),
       });
@@ -126,7 +140,7 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
         filter: [
           {
             terms: {
-              'rule.id': ruleIds,
+              'rule.uuid': ruleIds,
             },
           },
           ...compact([request.body?.query]),
@@ -145,12 +159,12 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
     return response.body as ESSearchResponse<unknown, TSearchRequest>;
   }
 
-  registerType: RegisterRuleType<TFieldMap> = (type) => {
+  registerType: RegisterRuleType<DefaultFieldMap> = (type) => {
     this.options.alertingPluginSetupContract.registerType<
-      Record<string, unknown>,
+      Record<string, any>,
       RuleState,
-      Record<string, unknown>,
-      Record<string, unknown>,
+      Record<string, any>,
+      Record<string, any>,
       string,
       string
     >({
@@ -164,7 +178,7 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
           alertId: ruleId,
           name: ruleName,
           params,
-          namespace,
+          // namespace,
         } = options;
 
         const prevAlertState =
@@ -182,7 +196,7 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
         const executorOptions = {
           previousStartedAt,
           startedAt,
-          params: params as any,
+          params,
           services: {
             ...passthroughServices,
             check: checkService.check as any,
@@ -212,96 +226,110 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
           }, {} as Record<string, RuleAlertState>),
         };
 
-        const common = {
-          'event.kind': 'alert',
-          '@timestamp': startedAt.toISOString(),
-          'rule.id': ruleId,
-          'rule.name': ruleName,
-          'rule.namespace': namespace,
-          'rule_type.id': type.id,
-          'rule_type.name': type.name,
-          'rule_type.producer': type.producer,
-          // 'rule.interval.ms': prev
-        };
+        // const idsOfLastAlertEventsToFetch = Object.values(mergedAlertStates).map(
+        //   (state) => state.alertId
+        // );
 
-        const idsOfLastAlertEventsToFetch = Object.values(mergedAlertStates).map(
-          (state) => state.alertId
-        );
+        // const start = new Date().getTime() - 60 * 60 * 1000;
 
-        const start = new Date().getTime() - 60 * 60 * 1000;
+        // const response = await this.search([ruleId], {
+        //   body: {
+        //     size: idsOfLastAlertEventsToFetch.length,
+        //     query: {
+        //       bool: {
+        //         filter: [
+        //           {
+        //             terms: {
+        //               'alert.id': idsOfLastAlertEventsToFetch,
+        //             },
+        //           },
+        //           {
+        //             range: {
+        //               '@timestamp': {
+        //                 gte: start,
+        //                 format: 'epoch_millis',
+        //               },
+        //             },
+        //           },
+        //         ],
+        //       },
+        //     },
+        //     collapse: {
+        //       field: 'alert.id',
+        //     },
+        //     sort: {
+        //       '@timestamp': 'desc',
+        //     },
+        //     _source: false,
+        //     fields: Object.keys(this.options.fieldMap),
+        //   },
+        // });
 
-        const response = await this.search([ruleId], {
-          body: {
-            size: idsOfLastAlertEventsToFetch.length,
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      'alert.id': idsOfLastAlertEventsToFetch,
-                    },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: start,
-                        format: 'epoch_millis',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            collapse: {
-              field: 'alert.id',
-            },
-            sort: {
-              '@timestamp': 'desc',
-            },
-            _source: false,
-            fields: Object.keys(this.options.fieldMap),
-          },
-        });
-
-        const lastEventByAlertId = response.hits.hits.reduce((prev, hit) => {
-          const alertId = hit.fields['alert.id']![0] as string;
-          prev[alertId] = hit.fields as Record<string, unknown[]>;
-          return prev;
-        }, {} as Record<string, Record<string, unknown[]>>);
+        // const lastEventByAlertId = response.hits.hits.reduce((prev, hit) => {
+        //   const alertId = hit.fields['alert.id']![0] as string;
+        //   prev[alertId] = hit.fields as Record<string, unknown[]>;
+        //   return prev;
+        // }, {} as Record<string, Record<string, unknown[]>>);
 
         const index = this.getEsNames().indexAliasName;
 
         const updates = Object.entries(mergedAlertStates).map(([alertName, state]) => {
           const active = activeAlertNames.includes(alertName);
 
-          const lastEvent = lastEventByAlertId[state.alertId] ?? {};
           const nextState = active ? activeAlerts[alertName] : undefined;
+
+          const createdAt = new Date(state.created);
+
+          const body: TypeOfFieldMap<DefaultFieldMap> = {
+            ...(nextState
+              ? {
+                  ...nextState.fields,
+                  'event.severity': getAlertSeverityLevelValue(nextState.level),
+                  'alert.check.value': nextState.value,
+                  'alert.check.threshold': nextState.threshold,
+                  'event.action': 'active-alert',
+                }
+              : {
+                  'event.end': startedAt.toISOString(),
+                  'event.action': 'recovered-alert',
+                }),
+            'event.kind': 'alert',
+            '@timestamp': startedAt.toISOString(),
+            'rule.uuid': ruleId,
+            'rule.id': type.id,
+            'rule.category': type.name,
+            'rule.name': ruleName,
+            // 'rule.namespace': namespace,
+            'rule_type.producer': type.producer,
+            'alert.id': state.alertId,
+            'event.start': createdAt.toISOString(),
+            'event.duration': (startedAt.getTime() - createdAt.getTime()) * 1000,
+            'alert.name': alertName,
+            'alert.series_id': [ruleId, alertName].join('|'),
+          };
 
           return {
             index,
-            body: {
-              ...lastEvent,
-              ...(nextState
-                ? {
-                    ...nextState.fields,
-                    'alert.check.severity': nextState.level,
-                    'alert.check.value': nextState.value,
-                    'alert.check.threshold': nextState.threshold,
-                  }
-                : {}),
-              ...common,
-              'alert.active': active,
-              'alert.id': state.alertId,
-              'alert.created': state.created,
-              'alert.type': 'threshold', // or, log
-              'alert.name': alertName,
-              'alert.series_id': [ruleId, alertName].join('|'),
-            },
+            body,
           };
         });
 
-        if (updates.length) {
-          await this.esAdapter.indexDocuments(updates);
+        let indexedCount = 0;
+
+        updates.forEach((update) => {
+          const decode = this.docRt.decode(update.body);
+          if (isLeft(decode)) {
+            const error = new Error(`Failed to validate alert event`);
+            error.stack += '\n' + PathReporter.report(decode).join('\n');
+            this.options.logger.error(error);
+          } else {
+            this.esAdapter.indexDocument(update);
+            indexedCount++;
+          }
+        });
+
+        if (indexedCount > 0) {
+          this.options.logger.debug(`Indexed ${indexedCount} events`);
         }
 
         const nextState = omitBy(mergedAlertStates, (_, alertName) => {
@@ -329,7 +357,7 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
       ? mergeFieldMaps(this.options.fieldMap, fieldMap)
       : this.options.fieldMap;
 
-    const child = new RuleRegistry({
+    const child = new RuleRegistry<TFieldMap & TNextFieldMap>({
       ...this.options,
       logger: this.options.logger.get(namespace),
       namespace: [this.options.namespace, namespace].filter(Boolean).join('-'),
