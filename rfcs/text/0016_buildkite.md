@@ -89,7 +89,7 @@
 
 # Summary
 
-Implement a CI system for Kibana teams that is highly scalable, is stable, surfaces information in an intuitive way, and supports pipelines that are easy to understand and change.
+Implement a CI system for Kibana teams that is highly scalable and stable, surfaces information in an intuitive way, and supports pipelines that are easy to understand and change.
 
 This table provides an overview of the conclusions made throughout the rest of this document. A lot of this is subjective, but we've tried to take an honest look at each system and feature, based on a large amount of research on and/or experience with each system, our requirements, and our preferences as a team. Your team would likely come to different conclusions based on your preferences and requirements.
 
