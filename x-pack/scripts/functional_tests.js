@@ -73,7 +73,7 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/fleet_api_integration/config.ts'),
   require.resolve('../test/functional_enterprise_search/without_host_configured.config.ts'),
   require.resolve('../test/functional_vis_wizard/config.ts'),
-  require.resolve('../test/send_search_to_background_integration/config.ts'),
+  require.resolve('../test/search_sessions_integration/config.ts'),
   require.resolve('../test/saved_object_tagging/functional/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
