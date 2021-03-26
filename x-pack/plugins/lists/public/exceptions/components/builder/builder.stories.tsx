@@ -15,6 +15,7 @@ import { Story, addDecorator } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { HttpStart } from 'kibana/public';
 
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import {
@@ -38,6 +39,27 @@ const mockTheme = getMockTheme({
   darkMode: false,
   eui: euiLightVars,
 });
+const mockHttpService: HttpStart = ({
+  addLoadingCountSource: (): void => {},
+  anonymousPaths: {
+    isAnonymous: (): void => {},
+    register: (): void => {},
+  },
+  basePath: {},
+  delete: (): void => {},
+  externalUrl: {
+    validateUrl: (): void => {},
+  },
+  fetch: (): void => {},
+  get: (): void => {},
+  getLoadingCount$: (): void => {},
+  head: (): void => {},
+  intercept: (): void => {},
+  options: (): void => {},
+  patch: (): void => {},
+  post: (): void => {},
+  put: (): void => {},
+} as unknown) as HttpStart;
 const mockAutocompleteService = ({
   getValueSuggestions: () =>
     new Promise((resolve) => {
@@ -214,11 +236,11 @@ const BuilderTemplate: Story<ExceptionBuilderProps> = (args) => (
 
 export const Default = BuilderTemplate.bind({});
 Default.args = {
-  allowLargeValueLIsts: true,
+  allowLargeValueLists: true,
   autocompleteService: mockAutocompleteService,
   exceptionListItems: [],
-  httpService: {},
-  indexPatterns: { fields },
+  httpService: mockHttpService,
+  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
   isAndDisabled: false,
   isNestedDisabled: false,
   isOrDisabled: false,
@@ -226,7 +248,7 @@ Default.args = {
   listNamespaceType: 'single',
   listType: 'detection',
   onChange: (): OnChangeProps => ({
-    errorExists: 0,
+    errorExists: false,
     exceptionItems: [],
     exceptionsToDelete: [],
   }),
@@ -266,11 +288,11 @@ const BuilderSingleExceptionItem: Story<ExceptionBuilderProps> = (args) => (
 
 export const SingleExceptionItem = BuilderSingleExceptionItem.bind({});
 SingleExceptionItem.args = {
-  allowLargeValueLIsts: true,
+  allowLargeValueLists: true,
   autocompleteService: mockAutocompleteService,
   exceptionListItems: [sampleExceptionItem],
-  httpService: {},
-  indexPatterns: { fields },
+  httpService: mockHttpService,
+  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
   isAndDisabled: false,
   isNestedDisabled: false,
   isOrDisabled: false,
@@ -278,7 +300,7 @@ SingleExceptionItem.args = {
   listNamespaceType: 'single',
   listType: 'detection',
   onChange: (): OnChangeProps => ({
-    errorExists: 0,
+    errorExists: false,
     exceptionItems: [sampleExceptionItem],
     exceptionsToDelete: [],
   }),
@@ -291,11 +313,11 @@ const BuilderMultiExceptionItems: Story<ExceptionBuilderProps> = (args) => (
 
 export const MultiExceptionItems = BuilderMultiExceptionItems.bind({});
 MultiExceptionItems.args = {
-  allowLargeValueLIsts: true,
+  allowLargeValueLists: true,
   autocompleteService: mockAutocompleteService,
   exceptionListItems: [sampleExceptionItem, sampleExceptionItem],
-  httpService: {},
-  indexPatterns: { fields },
+  httpService: mockHttpService,
+  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
   isAndDisabled: false,
   isNestedDisabled: false,
   isOrDisabled: false,
@@ -303,7 +325,7 @@ MultiExceptionItems.args = {
   listNamespaceType: 'single',
   listType: 'detection',
   onChange: (): OnChangeProps => ({
-    errorExists: 0,
+    errorExists: false,
     exceptionItems: [sampleExceptionItem, sampleExceptionItem],
     exceptionsToDelete: [],
   }),
@@ -316,11 +338,11 @@ const BuilderWithNested: Story<ExceptionBuilderProps> = (args) => (
 
 export const WithNestedExceptionItem = BuilderWithNested.bind({});
 WithNestedExceptionItem.args = {
-  allowLargeValueLIsts: true,
+  allowLargeValueLists: true,
   autocompleteService: mockAutocompleteService,
   exceptionListItems: [sampleNestedExceptionItem, sampleExceptionItem],
-  httpService: {},
-  indexPatterns: { fields },
+  httpService: mockHttpService,
+  indexPatterns: { fields, id: '1234', title: 'logstash-*' },
   isAndDisabled: false,
   isNestedDisabled: false,
   isOrDisabled: false,
@@ -328,7 +350,7 @@ WithNestedExceptionItem.args = {
   listNamespaceType: 'single',
   listType: 'detection',
   onChange: (): OnChangeProps => ({
-    errorExists: 0,
+    errorExists: false,
     exceptionItems: [sampleNestedExceptionItem, sampleExceptionItem],
     exceptionsToDelete: [],
   }),
