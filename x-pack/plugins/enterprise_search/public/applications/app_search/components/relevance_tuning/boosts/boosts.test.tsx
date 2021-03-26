@@ -108,6 +108,7 @@ describe('Boosts', () => {
     const boost1 = {
       factor: 2,
       type: 'value' as BoostType,
+      value: [''],
     };
     const boost2 = {
       factor: 10,
