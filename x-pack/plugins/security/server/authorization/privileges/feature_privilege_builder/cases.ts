@@ -19,9 +19,9 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
     privilegeDefinition: FeatureKibanaPrivileges,
     feature: KibanaFeature
   ): string[] {
-    const getCasesPrivilege = (operations: string[], classes: readonly string[]) => {
-      return classes.flatMap((className) =>
-        operations.map((operation) => this.actions.cases.get(className, operation))
+    const getCasesPrivilege = (operations: string[], scopes: readonly string[]) => {
+      return scopes.flatMap((scope) =>
+        operations.map((operation) => this.actions.cases.get(scope, operation))
       );
     };
 

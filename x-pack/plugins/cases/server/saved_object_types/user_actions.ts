@@ -37,14 +37,14 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      class: {
-        type: 'keyword',
-      },
       new_value: {
         type: 'text',
       },
       old_value: {
         type: 'text',
+      },
+      scope: {
+        type: 'keyword',
       },
     },
   },

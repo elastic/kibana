@@ -38,8 +38,8 @@ const CaseBasicRt = rt.type({
   [caseTypeField]: CaseTypeRt,
   connector: CaseConnectorRt,
   settings: SettingsRt,
-  // TODO: should a user be able to update the class?
-  class: rt.string,
+  // TODO: should a user be able to update the scope?
+  scope: rt.string,
 });
 
 const CaseExternalServiceBasicRt = rt.type({
@@ -80,7 +80,7 @@ const CasePostRequestNoTypeRt = rt.type({
   title: rt.string,
   connector: CaseConnectorRt,
   settings: SettingsRt,
-  class: rt.string,
+  scope: rt.string,
 });
 
 /**

@@ -39,7 +39,7 @@ export const SubCasesFindRequestRt = rt.partial({
   searchFields: rt.array(rt.string),
   sortField: rt.string,
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-  class: rt.string,
+  scope: rt.string,
 });
 
 export const SubCaseResponseRt = rt.intersection([
