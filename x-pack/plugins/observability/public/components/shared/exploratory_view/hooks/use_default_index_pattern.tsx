@@ -9,7 +9,7 @@ import React, { createContext, useContext, Context, useState, useEffect } from '
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AppDataType } from '../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityClientPluginsStart } from '../../../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../../../../utils/observability_index_patterns';
 
 export interface IIndexPatternContext {
@@ -36,7 +36,7 @@ export function IndexPatternContextProvider({
 
   const {
     services: { data },
-  } = useKibana<ObservabilityClientPluginsStart>();
+  } = useKibana<ObservabilityPublicPluginsStart>();
 
   const loadIndexPattern = async (dataType: AppDataType) => {
     const obsvIndexP = new ObservabilityIndexPatterns(data);

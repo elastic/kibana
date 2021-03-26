@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityClientPluginsStart } from '../../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
 import { SeriesEditor } from './series_editor/series_editor';
 import { useUrlStorage } from './hooks/use_url_strorage';
@@ -21,7 +21,7 @@ import { TypedLensByValueInput } from '../../../../../lens/public';
 export function ExploratoryView() {
   const {
     services: { lens },
-  } = useKibana<ObservabilityClientPluginsStart>();
+  } = useKibana<ObservabilityPublicPluginsStart>();
 
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null

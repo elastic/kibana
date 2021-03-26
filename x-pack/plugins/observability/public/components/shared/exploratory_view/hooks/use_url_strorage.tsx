@@ -22,7 +22,10 @@ const BREAK_DOWN = 'bd';
 const FILTERS = 'ft';
 const REPORT_DEFINITIONS = 'rdf';
 
-export function UrlStorageContextProvider({ children, storage }: React.FC<ProviderProps>) {
+export function UrlStorageContextProvider({
+  children,
+  storage,
+}: ProviderProps & { children: JSX.Element }) {
   return <UrlStorageContext.Provider value={storage}>{children}</UrlStorageContext.Provider>;
 }
 

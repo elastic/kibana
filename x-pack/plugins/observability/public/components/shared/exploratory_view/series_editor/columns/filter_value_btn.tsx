@@ -68,7 +68,7 @@ export function FilterValueButton({
   );
 
   const onNestedChange = (val?: string) => {
-    setFilter({ field: nestedField!, value: val });
+    setFilter({ field: nestedField!, value: val! });
     setIsOpen({ value: '', negate });
   };
 

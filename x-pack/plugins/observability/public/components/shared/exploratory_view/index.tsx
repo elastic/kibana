@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
 import { ExploratoryView } from './exploratory_view';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityClientPluginsStart } from '../../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { IndexPatternContextProvider } from './hooks/use_default_index_pattern';
 import {
@@ -35,7 +35,7 @@ export function ExploratoryViewPage() {
 
   const {
     services: { uiSettings, notifications },
-  } = useKibana<ObservabilityClientPluginsStart>();
+  } = useKibana<ObservabilityPublicPluginsStart>();
 
   const history = useHistory();
 

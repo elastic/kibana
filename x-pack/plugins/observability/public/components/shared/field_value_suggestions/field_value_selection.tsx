@@ -20,7 +20,7 @@ import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popov
 export interface FieldValueSelectionProps {
   value?: string;
   label: string;
-  loading: boolean;
+  loading?: boolean;
   onChange: (val?: string) => void;
   values?: string[];
   setQuery: Dispatch<SetStateAction<string>>;

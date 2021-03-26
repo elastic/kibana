@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { DataSeries } from '../types';
 import { FieldLabels } from './constants';
 
@@ -71,8 +72,8 @@ export function getPerformanceDistLensConfig({ seriesId }: Props): DataSeries {
       },
     ],
     filters: [
-      { query: { match_phrase: { 'transaction.type': 'page-load' } } },
-      { query: { match_phrase: { 'processor.event': 'transaction' } } },
+      { query: { match_phrase: { 'transaction.type': 'page-load' } } } as QueryContainer,
+      { query: { match_phrase: { 'processor.event': 'transaction' } } } as QueryContainer,
     ],
     labels: {
       ...FieldLabels,

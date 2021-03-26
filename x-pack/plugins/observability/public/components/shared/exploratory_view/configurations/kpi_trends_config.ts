@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { DataSeries } from '../types';
 import { FieldLabels } from './constants';
 
@@ -44,7 +45,7 @@ export function getKPITrendsLensConfig({ seriesId }: Props): DataSeries {
     filters: [
       {
         query: { match_phrase: { 'transaction.type': 'page-load' } },
-      },
+      } as QueryContainer,
     ],
     labels: { ...FieldLabels, 'service.name': 'Web Application' },
     reportDefinitions: [

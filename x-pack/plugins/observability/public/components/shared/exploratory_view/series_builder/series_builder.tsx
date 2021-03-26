@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { EuiButton, EuiBasicTable, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { AppDataType, ReportViewTypeId, ReportViewTypes, SeriesUrl, UrlFilter } from '../types';
+import { AppDataType, ReportViewTypeId, ReportViewTypes, SeriesUrl } from '../types';
 import { DataTypesCol } from './columns/data_types_col';
 import { ReportTypesCol } from './columns/report_types_col';
 import { ReportDefinitionCol } from './columns/report_definition_col';

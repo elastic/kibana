@@ -7,7 +7,7 @@
 import { useFetcher } from '../../../..';
 import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityClientPluginsStart } from '../../../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { AllShortSeries } from './use_url_strorage';
 import { ReportToDataTypeMap } from '../configurations/constants';
 import {
@@ -18,7 +18,7 @@ import {
 export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
   const {
     services: { data },
-  } = useKibana<ObservabilityClientPluginsStart>();
+  } = useKibana<ObservabilityPublicPluginsStart>();
 
   const allSeriesKey = 'sr';
 

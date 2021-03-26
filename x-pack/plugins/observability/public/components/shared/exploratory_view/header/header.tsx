@@ -9,8 +9,8 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ObservabilityClientPluginsStart } from '../../../../plugin';
-import { DataViewLabels, REPORT_TYPE } from '../configurations/constants';
+import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import { DataViewLabels } from '../configurations/constants';
 import { useUrlStorage } from '../hooks/use_url_strorage';
 
 interface Props {
@@ -21,7 +21,7 @@ interface Props {
 export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
   const {
     services: { lens },
-  } = useKibana<ObservabilityClientPluginsStart>();
+  } = useKibana<ObservabilityPublicPluginsStart>();
 
   const { series } = useUrlStorage(seriesId);
 
