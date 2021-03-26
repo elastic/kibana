@@ -4,9 +4,7 @@
 <titleabbrev>Legacy get Alerting framework health</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Use the <<get-alerting-framework-health-api>> instead.
+WARNING: Deprecated in 7.13.0. Use <<get-alerting-framework-health-api>> instead.
 
 Retrieve the health status of the Alerting framework.
 

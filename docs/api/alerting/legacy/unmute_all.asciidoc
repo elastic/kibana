@@ -4,9 +4,7 @@
 <titleabbrev>Legacy unmute all alert instances</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Use the <<unmute-all-alerts-api>> instead.
+WARNING: Deprecated in 7.13.0. Use <<unmute-all-alerts-api>> instead.
 
 Unmute all alert instances.
 

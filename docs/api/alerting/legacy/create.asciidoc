@@ -4,9 +4,7 @@
 <titleabbrev>Legacy create alert</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Use the <<create-rule-api>> instead.
+WARNING: Deprecated in 7.13.0. Use <<create-rule-api>> instead.
 
 Create {kib} alerts.
 

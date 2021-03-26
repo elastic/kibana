@@ -4,9 +4,7 @@
 <titleabbrev>Legacy find alerts</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Use the <<find-rules-api>> instead.
+WARNING: Deprecated in 7.13.0. Use <<find-rules-api>> instead.
 
 Retrieve a paginated set of alerts based on condition.
 
