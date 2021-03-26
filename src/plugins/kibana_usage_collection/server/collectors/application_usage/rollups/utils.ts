@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { registerApplicationUsageCollector } from './telemetry_application_usage_collector';
-export { rollDailyData as migrateTransactionalDocs } from './rollups';
+export function serializeKey(appId: string, viewId: string) {
+  return `${appId}___${viewId}`;
+}

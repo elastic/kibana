@@ -6,5 +6,18 @@
  * Side Public License, v 1.
  */
 
-export { registerApplicationUsageCollector } from './telemetry_application_usage_collector';
-export { rollDailyData as migrateTransactionalDocs } from './rollups';
+import { MAIN_APP_DEFAULT_VIEW_ID } from './constants';
+
+export const getDailyId = ({
+  appId,
+  dayId,
+  viewId,
+}: {
+  viewId: string;
+  appId: string;
+  dayId: string;
+}) => {
+  return !viewId || viewId === MAIN_APP_DEFAULT_VIEW_ID
+    ? `${appId}:${dayId}`
+    : `${appId}:${dayId}:${viewId}`;
+};
