@@ -13,6 +13,7 @@ describe('alerts telemetry', () => {
   test('getTotalCountInUse should replace first "." symbol to "__" in alert types names', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           byAlertTypeId: {

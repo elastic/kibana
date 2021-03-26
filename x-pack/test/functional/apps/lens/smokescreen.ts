@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -208,13 +208,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'cardinality',
+        operation: 'unique_count',
         field: 'bytes',
         keepOpen: true,
       });
@@ -282,7 +282,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -300,7 +300,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension(
         {
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'avg',
+          operation: 'average',
           field: 'bytes',
         },
         1
@@ -391,7 +391,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -527,7 +527,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
       await PageObjects.lens.configureDimension({
@@ -540,7 +540,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
-        operation: 'derivative',
+        operation: 'differences',
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
@@ -559,7 +559,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'cardinality',
+        operation: 'unique_count',
         field: 'ip',
       });
       await PageObjects.lens.configureDimension({
@@ -594,7 +594,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsPie_sizeByDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
       expect(await testSubjects.isEnabled('lnsApp_downloadCSVButton')).to.eql(true);
