@@ -376,13 +376,13 @@ Below are all the other HTTP endpoints that URL Service will provide:
 
 | HTTP method           | Path                                | Description                                                                                                                              |
 |-----------------------|-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| __POST__              | `/api/url/_redirect`                | Redirects the user using HTTP 302 (temporary) redirect. Receives URL generator ID and parameters in the POST body payload.               |
+| __GET__ or __POST__   | `/api/url/_redirect`                | Redirects the user using HTTP 302 (temporary) redirect. Receives URL generator ID and parameters in the POST body payload.               |
 | __GET__ or __POST__   | `/go/<slug>`                        | A very short alias for `POST /api/share/url/<slug>/_redirect` endpoint.                                                                  |
 
 
 #### The URL generator "redirect" endpoint
 
-The `POST /api/url/_redirect` endpoint will receive the necessary payload to
+The `/api/url/_redirect` endpoint will receive the necessary payload to
 redirect the user to some destination using a URL generator, for example:
 
 ```
@@ -393,6 +393,12 @@ POST /api/url/_redirect
     "indexPattern": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx"
   }
 }
+```
+
+or
+
+```
+GET /api/url/_redirect/DISCOVER_DEEP_LINKS?state={"indexPattern":"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx"}
 ```
 
 
