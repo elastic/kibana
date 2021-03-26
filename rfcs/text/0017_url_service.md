@@ -87,7 +87,7 @@ be able to generate a short URL as follows:
 
 ```ts
 share.url.shortUrls.create({
-  slug: 'my-discover-query', // Human-readable URL slug.
+  slug: 'my-discover-query', // Optional human-readable URL slug.
   generator: 'DISCOVER_DEEP_LINKS',
   state: {
     indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx',
@@ -103,8 +103,9 @@ navigate deeply within the Discover app. It could use the server-side HTTP
 endpoint:
 
 ```
-POST /api/share/url/_redirect/DISCOVER_DEEP_LINKS
+POST /api/url/_redirect
 {
+  "generator": "DISCOVER_DEEP_LINKS",
   "state": {
     "indexPattern": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx"
   }
@@ -238,7 +239,7 @@ we cannot create a short URL using an URL generator.
 
 ## High level architecture
 
-Below diagramed shows the proposed architecture of the URL Service.
+Below diagram shows the proposed architecture of the URL Service.
 
 ![URL Service architecture](../images/url_service/new_architecture.png)
 
@@ -262,7 +263,7 @@ interface IUrlService {
 }
 ```
 
-The URL generator client will be 
+The URL generator client will basically be a registry of URL generators:
 
 ```ts
 /**
@@ -287,7 +288,10 @@ interface UrlGenerator<State> {
 }
 ```
 
-asdf...
+The short URL client `IShortUrlClient` which will be the same on the server and
+browser. However, the server and browser might add extra utility methods for
+convenience.
+
 
 ```ts
 /**
@@ -332,9 +336,20 @@ interface IShortUrlClient {
 }
 ```
 
-The above `IShortUrlClient` interface is a common interface which will be the
-same on the server and browser. However, the server and browser might add extra
-utility methods for convenience.
+Note, that in the new service to generate a short URL the developer will have to
+use a URL generator.
+
+```ts
+const shortUrl = await share.url.shortUrls.create({
+  generator: 'DISCOVER_DEEP_LINKS',
+  state: {
+    indexPattern: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx',
+  },
+});
+```
+
+These short URL will be stored in saved objects of type `url` and will be
+automatically migrated once a URL generator becomes deprecated.
 
 
 ## HTTP endpoints
@@ -354,6 +369,7 @@ Below HTTP endpoints are designed to work specifically with short URLs:
 | __GET__ or __POST__   | `/api/short_url/<slug>/_redirect`   | Redirects the user using HTTP 301 (permanent) redirect to the destination long URL.                                                      |
 
 
+
 ### Other URL Service HTTP endpoints
 
 Below are all the other HTTP endpoints that URL Service will provide:
@@ -366,7 +382,18 @@ Below are all the other HTTP endpoints that URL Service will provide:
 
 #### The URL generator "redirect" endpoint
 
+The `POST /api/url/_redirect` endpoint will receive the necessary payload to
+redirect the user to some destination using a URL generator, for example:
 
+```
+POST /api/url/_redirect
+{
+  "generator": "DISCOVER_DEEP_LINKS",
+  "state": {
+    "indexPattern": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxxx"
+  }
+}
+```
 
 
 ### Legacy endpoints
@@ -380,9 +407,6 @@ of action for each endpoint:
 | __GET__               | `/api/short_url/<slug>`             | The new `GET /api/short_url/<slug>` endpoint will return a superset of the payload that the legacy endpoint now returns.                 |
 | __POST__              | `/api/shorten_url`                  | The legacy endpoints for creating short URLs. We will remove it or deprecate this endpoint and maintain it until 8.0 major release.      |
 
-
-
---- HOW will URL generator state will be serialized to short URL?..??????
 
 # Drawbacks
 
