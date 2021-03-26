@@ -10,9 +10,10 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiCard,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiText,
@@ -23,14 +24,12 @@ import { i18n } from '@kbn/i18n';
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
-import { ADD_CUSTOM_PATH, getSourcesPath } from '../../../../routes';
+import { getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
 import {
   AVAILABLE_SOURCE_EMPTY_STATE,
   AVAILABLE_SOURCE_TITLE,
-  AVAILABLE_SOURCE_BODY,
-  AVAILABLE_SOURCE_CUSTOM_SOURCE_BUTTON,
 } from './constants';
 
 interface AvailableSourcesListProps {
@@ -42,14 +41,20 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
 
   const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }: SourceDataItem) => {
     const disabled = !hasPlatinumLicense && accountContextOnly;
-    const card = (
-      <EuiCard
-        titleSize="xs"
-        title={name}
-        description={<></>}
-        isDisabled={disabled}
-        icon={<SourceIcon serviceType={serviceType} name={name} size="xxl" />}
-      />
+    const item = (
+      <EuiPanel color="subdued" hasShadow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <SourceIcon serviceType={serviceType} name={name} size="l" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s"><p>{name}</p></EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiLinkTo to={getSourcesPath(addPath, true)}>Configure</EuiLinkTo>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     );
 
     if (disabled) {
@@ -65,15 +70,15 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             }
           )}
         >
-          {card}
+          {item}
         </EuiToolTip>
       );
     }
-    return <EuiLinkTo to={getSourcesPath(addPath, true)}>{card}</EuiLinkTo>;
+    return item;
   };
 
   const visibleSources = (
-    <EuiFlexGrid columns={3} gutterSize="m" responsive={false}>
+    <EuiFlexGrid columns={2} gutterSize="l" responsive={false}>
       {sources.map((source, i) => (
         <EuiFlexItem key={i} data-test-subj="AvailableSourceCard">
           {getSourceCard(source)}
@@ -89,21 +94,9 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   return (
     <>
       <EuiTitle size="s">
-        <h2>{AVAILABLE_SOURCE_TITLE}</h2>
+        <h3>{AVAILABLE_SOURCE_TITLE}</h3>
       </EuiTitle>
-      <EuiText>
-        <p>
-          {AVAILABLE_SOURCE_BODY}
-          <EuiLinkTo
-            to={getSourcesPath(ADD_CUSTOM_PATH, true)}
-            data-test-subj="CustomAPISourceLink"
-          >
-            {AVAILABLE_SOURCE_CUSTOM_SOURCE_BUTTON}
-          </EuiLinkTo>
-          .
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {sources.length > 0 ? visibleSources : emptyState}
     </>
   );

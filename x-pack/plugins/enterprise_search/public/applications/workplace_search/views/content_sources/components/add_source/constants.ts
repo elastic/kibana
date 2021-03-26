@@ -87,20 +87,6 @@ export const AVAILABLE_SOURCE_TITLE = i18n.translate(
   }
 );
 
-export const AVAILABLE_SOURCE_BODY = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.body',
-  {
-    defaultMessage: 'Configure an available source or build your own with the ',
-  }
-);
-
-export const AVAILABLE_SOURCE_CUSTOM_SOURCE_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.customSource.button',
-  {
-    defaultMessage: 'Custom API Source',
-  }
-);
-
 export const CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configCompleted.privateDisabled.button',
   {
