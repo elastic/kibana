@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { TopNodesRequest } from '../../../../common/http_api/overview_api';
 
-export const createTopNodesQuery = (options: TopNodesRequest, source: InfraSource) => {
+export const createTopNodesQuery = (
+  options: TopNodesRequest,
+  source: MetricsSourceConfiguration
+) => {
   const sortByHost = options.sort && options.sort === 'name';
   const sortField = sortByHost ? '_key' : options.sort ?? 'uptime';
   const sortDirection = options.sortDirection ?? 'asc';
