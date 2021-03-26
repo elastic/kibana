@@ -11,6 +11,8 @@ import { shallow } from 'enzyme';
 
 import { EuiFieldNumber } from '@elastic/eui';
 
+import { FieldResultSetting } from '../types';
+
 import { ResultSettingsFieldNumber } from './result_settings_field_number';
 
 describe('ResultSettingsFieldNumber', () => {
@@ -25,8 +27,8 @@ describe('ResultSettingsFieldNumber', () => {
   const props = {
     fieldSettings,
     fieldName: 'foo',
-    fieldEnabledProperty: 'raw',
-    fieldSizeProperty: 'rawSize',
+    fieldEnabledProperty: 'raw' as keyof FieldResultSetting,
+    fieldSizeProperty: 'rawSize' as keyof FieldResultSetting,
     updateAction: jest.fn(),
     clearAction: jest.fn(),
   };

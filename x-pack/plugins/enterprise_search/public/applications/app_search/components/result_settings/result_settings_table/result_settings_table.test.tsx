@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues } from '../../../../__mocks__/kea.mock';
 
 import React from 'react';
 

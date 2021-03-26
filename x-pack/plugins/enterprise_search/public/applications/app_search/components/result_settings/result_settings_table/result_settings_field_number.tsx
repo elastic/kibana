@@ -11,7 +11,7 @@ import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SIZE_FIELD_MAXIMUM, SIZE_FIELD_MINIMUM } from '../constants';
-import { FieldResultSettingObject } from '../types';
+import { FieldResultSetting } from '../types';
 
 const updateOrClearSizeForField = (
   fieldName: string,
@@ -53,10 +53,10 @@ const handleFieldNumberBlur = (
 };
 
 interface Props {
-  fieldSettings: FieldResultSettingObject;
+  fieldSettings: Partial<FieldResultSetting>;
   fieldName: string;
-  fieldEnabledProperty: string;
-  fieldSizeProperty: string;
+  fieldEnabledProperty: keyof FieldResultSetting;
+  fieldSizeProperty: keyof FieldResultSetting;
   updateAction: (fieldName: string, size: number) => void;
   clearAction: (fieldName: string) => void;
 }
