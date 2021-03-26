@@ -43,7 +43,14 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   const params = {
     query: {
       bool: {
-        filter,
+        filter: [
+          ...filter,
+          {
+            exists: {
+              field: 'summary',
+            },
+          },
+        ],
       },
     },
     size: 0,
@@ -56,30 +63,26 @@ export const getPingHistogram: UMElasticsearchQueryFn<
         },
         aggs: {
           down: {
-            filter: {
-              term: {
-                'monitor.status': 'down',
-              },
+            sum: {
+              field: 'summary.down',
             },
           },
           up: {
-            filter: {
-              term: {
-                'monitor.status': 'up',
+              sum: {
+                field: 'summary.up',
               },
             },
           },
         },
       },
-    },
   };
 
   const { body: result } = await uptimeEsClient.search({ body: params });
   const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
   const histogram = buckets.map((bucket) => {
     const x: number = bucket.key;
-    const downCount: number = bucket.down.doc_count;
-    const upCount: number = bucket.up.doc_count;
+    const downCount = bucket.down.value || 0;
+    const upCount = bucket.up.value || 0;
     return {
       x,
       downCount,
