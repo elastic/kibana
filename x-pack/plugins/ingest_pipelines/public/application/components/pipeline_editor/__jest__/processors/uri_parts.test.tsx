@@ -79,7 +79,7 @@ describe('Processor: URI parts', () => {
     // Save the field
     await saveNewProcessor();
 
-    const processors =  getProcessorValue(onUpdate, URI_PARTS_TYPE);
+    const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
     expect(processors[0].uri_parts).toEqual({
       field: 'field_1',
       ...defaultUriPartsParameters,
@@ -107,7 +107,7 @@ describe('Processor: URI parts', () => {
     // Save the field with new changes
     await saveNewProcessor();
 
-    const processors =  getProcessorValue(onUpdate, URI_PARTS_TYPE);
+    const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
     expect(processors[0].uri_parts).toEqual({
       description: undefined,
       field: 'field_1',

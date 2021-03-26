@@ -82,7 +82,7 @@ describe('Processor: Bytes', () => {
     // Save the field
     await saveNewProcessor();
 
-    const processors =  getProcessorValue(onUpdate, BYTES_TYPE);
+    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
       ...defaultBytesParameters,
@@ -108,7 +108,7 @@ describe('Processor: Bytes', () => {
     // Save the field with new changes
     await saveNewProcessor();
 
-    const processors =  getProcessorValue(onUpdate, BYTES_TYPE);
+    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
     expect(processors[0].bytes).toEqual({
       description: undefined,
       field: 'field_1',
