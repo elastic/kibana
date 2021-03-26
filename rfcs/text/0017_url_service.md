@@ -427,6 +427,15 @@ Why should we *not* do this?
 
 We haven't considered other design alternatives.
 
+One alternative is still do the short URL improvements outlined above. But
+reconsider URL generators:
+
+- Do we need URL generators at all?
+- Do we want to put migration support in URL generators?
+- Should Kibana URLs be stable and break only during major releases?
+- Should the Kibana application interface be extended such that some version of
+  URL generators is built in?
+
 The impact of not doing this change is essentially extending technical debt. 
 
 
