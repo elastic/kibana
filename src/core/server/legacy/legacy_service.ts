@@ -18,8 +18,6 @@ import {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PathConfigType } from '@kbn/utils';
 
-// @ts-expect-error legacy config class
-import { Config as LegacyConfigClass } from '../../../legacy/server/config';
 import { CoreService } from '../../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
@@ -104,10 +102,9 @@ export class LegacyService implements CoreService {
       )
       .toPromise();
 
-    this.legacyRawConfig = LegacyConfigClass.withDefaultSchema(this.settings);
-
+    //this.legacyRawConfig = LegacyConfigClass.withDefaultSchema(this.settings);
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.
-    this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
+    //this.legacyRawConfig!.set('server.uuid', setupDeps.core.environment.instanceUuid);
 
     this.setupDeps = setupDeps;
     await this.setupLegacyLogging(setupDeps.core.http.server);
@@ -124,7 +121,7 @@ export class LegacyService implements CoreService {
 
     // Receive initial config and create kbnServer/ClusterManager.
     if (this.coreContext.env.isDevCliParent) {
-      await this.setupCliDevMode(this.legacyRawConfig!);
+      // await this.setupCliDevMode(this.legacyRawConfig!);
     }
   }
 
